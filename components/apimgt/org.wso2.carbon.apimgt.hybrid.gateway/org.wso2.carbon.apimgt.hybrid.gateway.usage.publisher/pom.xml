@@ -54,10 +54,6 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>${orbit.httpmime.version}</version>
@@ -165,7 +161,6 @@
                             com.lmax.disruptor.*;version="${lmax.disruptor.version.range}",
                             org.wso2.carbon.apimgt.api;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.usage.publisher.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.hybrid.gateway.common.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.base.*;version="${imp.pkg.version.org.wso2.carbon.base}",
                             org.wso2.carbon.databridge.agent.*;version="${databridge.agent.range}",

@@ -532,13 +532,6 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.api</artifactId>
