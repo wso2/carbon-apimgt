@@ -740,6 +740,30 @@ public class PublisherCommonUtils {
         return isValid;
     }
 
+    public static String constructEndpointConfigForService(ServiceEntry service) {
+        StringBuilder sb = new StringBuilder();
+        String endpoint_type = APIDTO.TypeEnum.HTTP.value();
+        switch (service.getDefinitionType()) {
+            case GRAPHQL_SDL:
+                endpoint_type = APIDTO.TypeEnum.GRAPHQL.value();
+            case WSDL1:
+                endpoint_type = APIDTO.TypeEnum.SOAP.value();
+            case WSDL2:
+                endpoint_type = APIDTO.TypeEnum.SOAP.value();
+            case ASYNC_API:
+                // TODO Need to update the endpoint_type for ASYNC_API
+        }
+        if (StringUtils.isNotEmpty(service.getServiceUrl())) {
+            sb.append("{\"endpoint_type\": \"")
+                    .append(endpoint_type)
+                    .append("\",")
+                    .append("\"production_endpoints\": {\"url\": \"")
+                    .append(service.getServiceUrl())
+                    .append("\"}}");
+        } // TODO Need to check on the endpoint security
+        return sb.toString();
+    }
+
     /**
      * Prepares the API Model object to be created using the DTO object
      *
@@ -896,7 +920,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI)
             throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -904,7 +928,11 @@ public class PublisherCommonUtils {
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
-        apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        if (isServiceAPI) {
+            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
+        } else {
+            apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        }
         Set<URITemplate> uriTemplates = null;
         uriTemplates = oasParser.getURITemplates(apiDefinition);
 

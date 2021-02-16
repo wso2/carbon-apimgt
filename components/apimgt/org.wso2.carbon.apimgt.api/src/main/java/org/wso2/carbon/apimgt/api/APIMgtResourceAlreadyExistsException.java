@@ -32,6 +32,10 @@ public class APIMgtResourceAlreadyExistsException extends APIManagementException
         super(msg, e);
     }
 
+    public APIMgtResourceAlreadyExistsException(String msg, ErrorHandler errorHandler) {
+        super(msg, errorHandler);
+    }
+
     public APIMgtResourceAlreadyExistsException(Throwable throwable) {
         super(throwable);
     }

@@ -218,6 +218,16 @@ public abstract class APIDefinition {
             throws APIManagementException;
 
     /**
+     * This method copy the vendor extensions from Existing OAS to the updated OAS
+     *
+     * @param existingOASContent Current OAS Content
+     * @param updatedOASContent Updated OAS Content
+     * @return OAS content
+     * @throws APIManagementException
+     */
+    public abstract String copyVendorExtensions(String existingOASContent, String updatedOASContent)
+            throws APIManagementException;
+    /**
      * This method will extractX-WSO2-disable-security extension provided in API level
      * by mgw and inject that extension to all resources in OAS file
      *
