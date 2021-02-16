@@ -43,6 +43,7 @@ public class EnvironmentMappingUtil {
     public static EnvironmentDTO fromEnvironmentToDTO(Environment environment) {
         EnvironmentDTO environmentDTO = new EnvironmentDTO();
         environmentDTO.setName(environment.getName());
+        environmentDTO.setDisplayName(environment.getDisplayName());
         environmentDTO.setType(environment.getType());
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());

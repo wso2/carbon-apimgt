@@ -8664,7 +8664,10 @@ components:
       properties:
         name:
           type: string
-          example: Production and Sandbox
+          example: default
+        displayName:
+          type: string
+          example: Default
         type:
           type: string
           example: hybrid

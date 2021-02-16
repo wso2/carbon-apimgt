@@ -25,6 +25,7 @@ import javax.validation.Valid;
 public class EnvironmentDTO   {
   
     private String name = null;
+    private String displayName = null;
     private String type = null;
     private String serverUrl = null;
     private Boolean showInApiConsole = null;
@@ -39,7 +40,7 @@ public class EnvironmentDTO   {
   }
 
   
-  @ApiModelProperty(example = "Production and Sandbox", required = true, value = "")
+  @ApiModelProperty(example = "default", required = true, value = "")
   @JsonProperty("name")
   @NotNull
   public String getName() {
@@ -47,6 +48,23 @@ public class EnvironmentDTO   {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public EnvironmentDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Default", value = "")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -151,6 +169,7 @@ public class EnvironmentDTO   {
     }
     EnvironmentDTO environment = (EnvironmentDTO) o;
     return Objects.equals(name, environment.name) &&
+        Objects.equals(displayName, environment.displayName) &&
         Objects.equals(type, environment.type) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
@@ -160,7 +179,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, type, serverUrl, showInApiConsole, endpoints, vhosts);
+    return Objects.hash(name, displayName, type, serverUrl, showInApiConsole, endpoints, vhosts);
   }
 
   @Override
@@ -169,6 +188,7 @@ public class EnvironmentDTO   {
     sb.append("class EnvironmentDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");
