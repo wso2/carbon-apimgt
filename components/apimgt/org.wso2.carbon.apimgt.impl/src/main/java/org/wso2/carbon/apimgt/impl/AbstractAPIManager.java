@@ -1767,7 +1767,15 @@ public abstract class AbstractAPIManager implements APIManager {
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         defaultApp.setUUID(UUID.randomUUID().toString());
         defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
-        apiMgtDAO.addApplication(defaultApp, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName());
+
+        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(), tenantId,
+                tenantDomain, applicationId, defaultApp.getUUID(), defaultApp.getName(),
+                defaultApp.getTokenType(),
+                defaultApp.getTier(), defaultApp.getGroupId(), defaultApp.getApplicationAttributes(),
+                subscriber.getName());
+        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
     }
 
     public void updateSubscriber(Subscriber subscriber)
