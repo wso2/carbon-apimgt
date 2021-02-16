@@ -544,12 +544,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(message, log);
             }
             APIDTO api = getAPIByAPIId(apiId, organizationId, xWSO2Tenant);
+            String swaggerDefinition = api.getApiDefinition();
             APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
             Map<String, String> sdkArtifacts;
             if (api != null) {
                 String apiProvider = api.getProvider();
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(),
-                        api.getVersion(), apiProvider, RestApiCommonUtil.getLoggedInUsername());
+                        api.getVersion(), apiProvider, RestApiCommonUtil.getLoggedInUsername(), swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
