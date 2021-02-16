@@ -28,7 +28,7 @@ describe('PublisherRootErrorBoundary test', () => {
         expect(shallowRendered.contains(Child)).toBeTruthy();
     });
 
-    test('should return error boundary HTML without any Material UI stylings', () => {
+    test.skip('should return error boundary HTML without any Material UI stylings', () => {
         const message = 'Error boundary test error';
         const TestError = () => {
             throw new Error(message);
