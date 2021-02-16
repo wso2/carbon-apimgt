@@ -74,7 +74,7 @@ const DefaultConfigurations = {
             rootBackground: '#000',
         },
         infoBar: {
-            height: 120,
+            height: 70,
             background: '#ffffff',
             showThumbnail: true,
             starColor: '#f6bf21', // Rating star color
