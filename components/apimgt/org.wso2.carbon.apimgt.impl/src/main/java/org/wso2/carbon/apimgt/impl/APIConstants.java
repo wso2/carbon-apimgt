@@ -1699,8 +1699,9 @@ public final class APIConstants {
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
     public static final String TIME_UNIT_MINUTE = "min";
-    public static final String TIME_UNIT_HOUR = "hour";
-    public static final String TIME_UNIT_DAY = "day";
+    public static final String TIME_UNIT_HOUR = "hours";
+    public static final String TIME_UNIT_DAY = "days";
+    public static final String TIME_UNIT_MONTH = "months";
 
     public static final String SUBSCRIPTION_TIERS = "availableTiers";
 
@@ -1720,11 +1721,35 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
 
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "Async_Gold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "Async_Silver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "Async_Bronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "Async_Unlimited";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "Async_WH_Gold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "Async_WH_Silver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "Async_WH_Bronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "Async_WH_Unlimited";
+
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC = "Allows 50000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC = "Allows 25000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC = "Allows 5000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC = "Allows unlimited events";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC = "Allows 10000 events per month and " +
+            "1000 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC = "Allows 5000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC = "Allows 1000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC = "Allows unlimited events and " +
+            "unlimited active subscriptions";
 
     public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
