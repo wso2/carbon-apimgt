@@ -8261,49 +8261,6 @@ public final class APIUtil {
         }
     }
 
-//    private static void addAsyncAPISpecificSubscriptionPolicies(boolean isWebHooksApiPolicy, ApiMgtDAO apiMgtDAO) {
-//
-//        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, Integer.MAX_VALUE};
-//        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
-//                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
-//        String[] eventCountSubPolicyDescriptions = new String[]{
-//                APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
-//                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
-//        int[] subscriptionCountValues = new int[]{1000, 500, 100, Integer.MAX_VALUE};
-//
-//        if (isWebHooksApiPolicy) {
-//            eventCountSubPolicyValues = new long[]{10000, 5000, 1000, Integer.MAX_VALUE};
-//
-//            eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
-//                    APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
-//            eventCountSubPolicyDescriptions = new String[]{
-//                    APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC,
-//                    APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC};
-//        }
-//        for (int i = 0; i < eventCountSubPolicyNames.length; i++) {
-//            policyName = eventCountSubPolicyNames[i];
-//            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
-//                SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
-//                subscriptionPolicy.setDisplayName(policyName);
-//                subscriptionPolicy.setDescription(eventCountSubPolicyDescriptions[i]);
-//                subscriptionPolicy.setTenantId(tenantId);
-//                subscriptionPolicy.setDeployed(true);
-//                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
-//                EventCountLimit eventCountLimit = new EventCountLimit();
-//                eventCountLimit.setEventCount(eventCountSubPolicyValues[i]);
-//                eventCountLimit.setUnitTime(1);
-//                eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_DAY);
-//                defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
-//                defaultQuotaPolicy.setLimit(eventCountLimit);
-//                subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
-//                subscriptionPolicy.setStopOnQuotaReach(true);
-//                subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
-//                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
-//            }
-//        }
-//
-//
-//    }
     public static void addDefaultTenantAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
 
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();

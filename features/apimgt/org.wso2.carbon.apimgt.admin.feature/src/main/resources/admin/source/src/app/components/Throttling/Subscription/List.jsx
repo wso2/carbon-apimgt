@@ -198,17 +198,6 @@ export default function ListSubscriptionThrottlingPolicies() {
                 sort: false,
             },
         },
-        {
-            name: 'subscriberCount',
-            label: intl.formatMessage({
-                id: 'Admin.Throttling.Subscription.Throttling.policy.table.header.subscriber.count',
-                defaultMessage: 'Subscribers',
-            }),
-            options: {
-                filter: true,
-                sort: false,
-            },
-        },
         { // Id column has to be always the last.
             name: 'policyId',
             options: {
@@ -264,7 +253,6 @@ export default function ListSubscriptionThrottlingPolicies() {
                         + obj.defaultLimit.requestCount.timeUnit,
                         rateLimit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitCount,
                         timeUnit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitTimeUnit,
-                        subscriberCount: (obj.subscriberCount === 0) ? 'NA' : obj.subscriberCount,
                         policyId: obj.policyId,
                     };
                 } else if (obj.defaultLimit.bandwidth !== null) {
@@ -277,7 +265,6 @@ export default function ListSubscriptionThrottlingPolicies() {
                         + obj.defaultLimit.bandwidth.timeUnit,
                         rateLimit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitCount,
                         timeUnit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitTimeUnit,
-                        subscriberCount: (obj.subscriberCount === 0) ? 'NA' : obj.subscriberCount,
                         policyId: obj.policyId,
                     };
                 } else {
@@ -289,7 +276,6 @@ export default function ListSubscriptionThrottlingPolicies() {
                         + obj.defaultLimit.eventCount.timeUnit,
                         rateLimit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitCount,
                         timeUnit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitTimeUnit,
-                        subscriberCount: (obj.subscriberCount === 0) ? 'NA' : obj.subscriberCount,
                         policyId: obj.policyId,
                     };
                 }

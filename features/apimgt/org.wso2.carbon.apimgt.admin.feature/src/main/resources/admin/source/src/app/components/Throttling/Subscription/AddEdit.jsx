@@ -171,7 +171,6 @@ function AddEdit(props) {
             dataAmount: '',
             dataUnit: 'KB',
             eventCount: '',
-           // subscriberCount: '',
         },
         rateLimitCount: '',
         rateLimitTimeUnit: 'sec',
@@ -211,7 +210,6 @@ function AddEdit(props) {
                 let typeEdit = 'REQUESTCOUNTLIMIT';
                 let dataUnitEdit = 'KB';
                 let eventCountEdit = '';
-               // let subscriberCountEdit = '';
                 if (result.body.defaultLimit.requestCount !== null) {
                     requestCountEdit = result.body.defaultLimit.requestCount.requestCount;
                     timeUnitEdit = result.body.defaultLimit.requestCount.timeUnit;
@@ -223,9 +221,9 @@ function AddEdit(props) {
                     timeUnitEdit = result.body.defaultLimit.bandwidth.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.bandwidth.unitTime;
                     typeEdit = result.body.defaultLimit.type;
-                } else if (result.result.body.defaultLimit.eventCount != null) {
+                } else {
                     eventCountEdit = result.body.defaultLimit.eventCount.eventCount;
-                    dataUnitEdit = result.body.defaultLimit.eventCount.dataUnit;
+                    unitTimeEdit = result.body.defaultLimit.eventCount.unitTime;
                     timeUnitEdit = result.body.defaultLimit.eventCount.timeUnit;
                     typeEdit = result.body.defaultLimit.type;
                 }
@@ -240,7 +238,6 @@ function AddEdit(props) {
                         dataAmount: dataAmountEdit,
                         dataUnit: dataUnitEdit,
                         eventCount: eventCountEdit,
-                        //subscriberCount: subscriberCountEdit
                     },
                     subscriberCount: (result.body.subscriberCount === 0) ? '' : result.body.subscriberCount,
                     rateLimitCount: (result.body.rateLimitCount === 0) ? '' : result.body.rateLimitCount,
@@ -281,7 +278,6 @@ function AddEdit(props) {
                 dataAmount: '',
                 dataUnit: 'KB',
                 eventCount: '',
-                //subscriberCount: '',
             },
             rateLimitCount: '',
             rateLimitTimeUnit: 'sec',
@@ -348,7 +344,7 @@ function AddEdit(props) {
                 break;
             case 'eventCount':
                 error = value === '' ? intl.formatMessage({
-                    id: 'Throttling.Subscription.Policy.policy.request.count.empty.error.msg',
+                    id: 'Throttling.Subscription.Policy.policy.event.count.empty.error.msg',
                     defaultMessage: 'Event Count is Empty',
                 }) : '';
                 setValidationError({ eventCount: error });
@@ -384,7 +380,6 @@ function AddEdit(props) {
             dataAmount,
             dataUnit,
             eventCount,
-         //   subscriberCount,
         },
         rateLimitCount,
         rateLimitTimeUnit,
@@ -453,8 +448,6 @@ function AddEdit(props) {
         }
         let subscriptionThrottlingPolicy;
         let promisedAddSubscriptionPolicy;
-        console.log('subscriber count ' + state.subscriberCount);
-        console.log('rate limit ' + state.rateLimitCount);
         if (type === 'REQUESTCOUNTLIMIT') {
             subscriptionThrottlingPolicy = {
                 policyName: state.policyName,
@@ -532,7 +525,6 @@ function AddEdit(props) {
                     type: state.defaultLimit.type,
                     eventCount: {
                         eventCount: state.defaultLimit.eventCount,
-                        //subscriberCount: state.defaultLimit.subscriberCount,
                         timeUnit: state.defaultLimit.timeUnit,
                         unitTime: state.defaultLimit.unitTime,
                     },
@@ -563,7 +555,6 @@ function AddEdit(props) {
 
         if (isEdit) {
             const policyId = params.id;
-            console.log(subscriptionThrottlingPolicy);
             promisedAddSubscriptionPolicy = restApi.updateSubscriptionThrottlingPolicy(policyId,
                 subscriptionThrottlingPolicy);
             if (promisedAddSubscriptionPolicy) {
@@ -588,7 +579,6 @@ function AddEdit(props) {
                     setSaving(false);
                 });
         } else {
-            console.log(subscriptionThrottlingPolicy);
             promisedAddSubscriptionPolicy = restApi.addSubscriptionThrottlingPolicy(
                 subscriptionThrottlingPolicy,
             );
@@ -857,7 +847,7 @@ function AddEdit(props) {
                                         }}
                                         label={(
                                             <FormattedMessage
-                                                id='Throttling.Subscription.AddEdit.form.requestCount.count'
+                                                id='Throttling.Subscription.AddEdit.form.eventCount.count'
                                                 defaultMessage='Event Count'
                                             />
                                         )}
@@ -1057,14 +1047,14 @@ function AddEdit(props) {
                                 <Typography color='inherit' variant='subtitle2' component='div'>
                                     <FormattedMessage
                                         id='Throttling.Subscription.Subscriber.Count'
-                                        defaultMessage='Subscription Count (Connections)'
+                                        defaultMessage='WebHooks'
                                     />
                                 </Typography>
                                 <Typography color='inherit' variant='caption' component='p'>
                                     <FormattedMessage
                                         id='Throttling.Subscription.AddEdit.subscription.count.add.description'
-                                        defaultMessage={'Maximum number of subscriber connections allowed for a web hook API ' +
-                                        'using this policy.'}
+                                        defaultMessage={'Maximum number of subscriber connections'
+                                        + ' allowed for a Webhooks API using this policy.'}
                                     />
                                 </Typography>
                             </Box>
@@ -1083,7 +1073,7 @@ function AddEdit(props) {
                                         label={(
                                             <span>
                                                 <FormattedMessage
-                                                    id='Throttling.Subscription.AddEdit.form.max.complexity'
+                                                    id='Throttling.Subscription.AddEdit.form.max.webhooks.connections'
                                                     defaultMessage='Max Subscriptions'
                                                 />
                                             </span>
