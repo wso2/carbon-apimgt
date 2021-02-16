@@ -83,6 +83,7 @@ public interface APIMapper {
     @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "context", target = "contextTemplate")
+    @Mapping(source = "availableTierNames", target = "availableTiers")
     API toApi(DevPortalAPIInfo api);
     
     @Mapping(source = "providerName", target = "id.providerName")
@@ -94,6 +95,7 @@ public interface APIMapper {
     //@Mapping(source = "visibleOrganizations", target = "visibleTenants")
     @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
     //@Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
+    //@Mapping(source = "environments", target = "environmentList")
     API toApi(DevPortalAPI api);
     
     @Mapping(source = "id.providerName", target = "providerName")
@@ -104,8 +106,21 @@ public interface APIMapper {
     @Mapping(source = "uuid", target = "id")
     //@Mapping(source = "visibleTenants", target = "visibleOrganizations")
     @Mapping(source = "subscriptionAvailableTenants", target = "subscriptionAvailableOrgs")
+    //@Mapping(source = "environmentList", target = "environments")
     DevPortalAPI toDevPortalApi(API api);
     
+    //@Mapping(source = "providerName", target = "id.providerName")
+    //@Mapping(source = "apiName", target = "id.apiName")
+    //@Mapping(source = "version", target = "id.version")
+    @Mapping(source = "id", target = "uuid")
+    //@Mapping(source = "thumbnail", target = "thumbnailUrl")
+    @Mapping(source = "availableTierNames", target = "availableTiers")
+    //@Mapping(source = "visibleOrganizations", target = "visibleTenants")
+    @Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
+    //@Mapping(source = "subscriptionAvailableOrgs", target = "subscriptionAvailableTenants")
+    //@Mapping(source = "environments", target = "environmentList")
+    @Mapping(source = "status", target = "state")
+    @Mapping(source = "swaggerDefinition", target = "definition")
     APIProduct toApiProduct(DevPortalAPI api);
 
     default JSONObject mapJSONMapToJSONObject(Map<String,String> jsonMap) throws ParseException {

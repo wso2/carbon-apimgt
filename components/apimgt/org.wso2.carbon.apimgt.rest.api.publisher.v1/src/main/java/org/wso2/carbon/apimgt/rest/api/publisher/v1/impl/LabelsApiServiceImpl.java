@@ -39,7 +39,7 @@ public class LabelsApiServiceImpl implements LabelsApiService {
 
     private static final Log log = LogFactory.getLog(LabelsApiServiceImpl.class);
 
-    public Response labelsGet(MessageContext messageContext) {
+    public Response getLabels(MessageContext messageContext) {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {

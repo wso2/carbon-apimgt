@@ -1,8 +1,9 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
@@ -106,7 +107,15 @@ public class APIDTOData {
     public String getApiDefinition(String Id) throws OASPersistenceException {
 
 
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
+//        apiPersistenceInstance = PersistenceManager.getPersistenceInstance("wso2.anonymous.user");
+//        String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
+//        Organization org = new Organization(TenantDomain);
+//        String apiDefinition = apiPersistenceInstance.getOASDefinition(org, Id); //
+//
+//        return apiDefinition;
+        Properties properties = new Properties();
+        properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(properties);
         String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
         Organization org = new Organization(TenantDomain);
         String apiDefinition = apiPersistenceInstance.getOASDefinition(org, Id); //

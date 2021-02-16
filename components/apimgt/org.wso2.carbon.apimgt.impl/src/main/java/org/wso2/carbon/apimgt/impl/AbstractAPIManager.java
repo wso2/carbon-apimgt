@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -87,9 +88,13 @@ import org.wso2.carbon.apimgt.persistence.dto.DocumentContent;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
@@ -132,9 +137,9 @@ import org.wso2.carbon.registry.indexing.indexer.IndexerException;
 import org.wso2.carbon.registry.indexing.service.ContentBasedSearchService;
 import org.wso2.carbon.registry.indexing.service.SearchResultsBean;
 import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -146,9 +151,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -237,7 +245,9 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Error while getting user registry for user:" + username;
             throw new APIManagementException(msg, e);
         }
-        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(username);
+        Properties properties = new Properties();
+        properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
+        apiPersistenceInstance = PersistenceManager.getPersistenceInstance(properties);
 
     }
 
@@ -373,46 +383,24 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<API> getAllAPIs() throws APIManagementException {
         List<API> apiSortedList = new ArrayList<API>();
-        boolean isTenantFlowStarted = false;
+
+        Organization org = new Organization(tenantDomain);
+        String[] roles = APIUtil.getFilteredUserRoles(username);
+        Map<String, Object> properties = APIUtil.getUserProperties(username);
+        UserContext userCtx = new UserContext(username, org, properties, roles);
         try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                startTenantFlow(tenantDomain);
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
-            for (GenericArtifact artifact : artifacts) {
-                API api = null;
-                try {
-                    api = APIUtil.getAPI(artifact);
-                    if (api != null) {
-                        try {
-                            checkAccessControlPermission(api.getId());
-                        } catch (APIManagementException e) {
-                            // This is a second level of filter to get apis based on access control and visibility.
-                            // Hence log is set as debug and continued.
-                            if(log.isDebugEnabled()) {
-                                log.debug("User is not authorized to view the api " + api.getId().getApiName(), e);
-                            }
-                            continue;
-                        }
-                    }
-                } catch (APIManagementException e) {
-                    //log and continue since we want to load the rest of the APIs.
-                    log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
-                }
-                if (api != null) {
-                    apiSortedList.add(api);
+            PublisherAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForPublisher(org, "", 0,
+                    Integer.MAX_VALUE, userCtx);
+
+            if (searchAPIs != null) {
+                List<PublisherAPIInfo> list = searchAPIs.getPublisherAPIInfoList();
+                for (PublisherAPIInfo publisherAPIInfo : list) {
+                    API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    apiSortedList.add(mappedAPI);
                 }
             }
-        } catch (RegistryException e) {
-            String msg = "Failed to get APIs from the registry";
-            throw new APIManagementException(msg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while searching the api ", e);
         }
 
         Collections.sort(apiSortedList, new APINameComparator());
@@ -463,7 +451,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
             API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
             APIUtil.updateAPIProductDependencies(api, registry);
-
+            api.setSwaggerDefinition(getOpenAPIDefinition(identifier, tenantDomain));
+            if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
+                api.setGraphQLSchema(getGraphqlSchema(api.getId()));
+            }
             //check for API visibility
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
                 return api;
@@ -765,26 +756,20 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-        try {
-            return registry.resourceExists(path);
-        } catch (RegistryException e) {
-            String msg = "Failed to check availability of api :" + path;
-            throw new APIManagementException(msg, e);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+        if (uuid == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 
     public boolean isAPIProductAvailable(APIProductIdentifier identifier) throws APIManagementException {
-        String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-        try {
-            return registry.resourceExists(path);
-        } catch (RegistryException e) {
-            String msg = "Failed to check availability of API Product :" + path;
-            throw new APIManagementException(msg, e);
+        String uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+        if (uuid == null) {
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -1048,7 +1033,12 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public ResourceFile getWSDL(APIIdentifier apiId) throws APIManagementException {
-        String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION +
+        String apiPath = APIUtil.getAPIPath(apiId);
+        int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+        String apiSourcePath = apiPath.substring(0, prependIndex );
+        String wsdlResourcePath = apiSourcePath + RegistryConstants.PATH_SEPARATOR +
+                APIUtil.createWsdlFileName(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
+        String wsdlResourcePathOld = APIConstants.API_WSDL_RESOURCE_LOCATION +
                 APIUtil.createWsdlFileName(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
         String tenantDomain = getTenantDomain(apiId);
         boolean isTenantFlowStarted = false;
@@ -1070,13 +1060,23 @@ public abstract class AbstractAPIManager implements APIManager {
             if (registry.resourceExists(wsdlResourcePath)) {
                 Resource resource = registry.get(wsdlResourcePath);
                 return new ResourceFile(resource.getContentStream(), resource.getMediaType());
+            } else if (registry.resourceExists(wsdlResourcePathOld)) {
+                Resource resource = registry.get(wsdlResourcePathOld);
+                return new ResourceFile(resource.getContentStream(), resource.getMediaType());
             } else {
                 wsdlResourcePath =
+                        apiSourcePath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiId
+                                .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + apiId.getApiName() +
+                                apiId.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
+                wsdlResourcePathOld =
                         APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION + apiId
                                 .getProviderName() + APIConstants.WSDL_PROVIDER_SEPERATOR + apiId.getApiName() +
                                 apiId.getVersion() + APIConstants.ZIP_FILE_EXTENSION;
                 if (registry.resourceExists(wsdlResourcePath)) {
                     Resource resource = registry.get(wsdlResourcePath);
+                    return new ResourceFile(resource.getContentStream(), resource.getMediaType());
+                } else if (registry.resourceExists(wsdlResourcePathOld)) {
+                    Resource resource = registry.get(wsdlResourcePathOld);
                     return new ResourceFile(resource.getContentStream(), resource.getMediaType());
                 } else {
                     throw new APIManagementException("No WSDL found for the API: " + apiId,
@@ -1097,8 +1097,8 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public ResourceFile getWSDL(String apiId, String tenantDomain) throws APIManagementException {
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
-                    .getWSDL(new Organization(tenantDomain), apiId);
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource =
+                    apiPersistenceInstance.getWSDL(new Organization(tenantDomain), apiId);
             if (resource != null) {
                 return new ResourceFile(resource.getContent(), resource.getContentType());
             } else {
@@ -1175,6 +1175,17 @@ public abstract class AbstractAPIManager implements APIManager {
         return schema;
     }
 
+    @Override
+    public String getGraphqlSchemaDefinition(String apiId, String tenantDomain) throws APIManagementException {
+        String definition;
+        try {
+                definition = apiPersistenceInstance.getGraphQLSchema(new Organization(tenantDomain), apiId);
+        } catch (GraphQLPersistenceException e) {
+            throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
+                    e);
+        }
+        return definition;
+    }
     /**
      * Returns the swagger 2.0 definition of the given API
      *
@@ -1183,7 +1194,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String definition = null;
         String id;
@@ -1191,10 +1202,9 @@ public abstract class AbstractAPIManager implements APIManager {
             id = apiId.getUUID();
         } else {
             id = apiMgtDAO.getUUIDFromIdentifier(apiId.getProviderName(), apiId.getName(), apiId.getVersion());
-            log.info("++++++templog+++++ OSA Def GET: uuid not set ");
         }
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(apiTenantDomain), id);
+                definition = apiPersistenceInstance.getOASDefinition(new Organization(orgId), id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1205,9 +1215,20 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getOpenAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
         String definition = null;
         try {
-            definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
+                definition = apiPersistenceInstance.getOASDefinition(new Organization(tenantDomain), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
+        }
+        return definition;
+    }
+
+    @Override
+    public String getAsyncAPIDefinition(String apiId, String tenantDomain) throws APIManagementException {
+        String definition = null;
+        try {
+            definition = apiPersistenceInstance.getAsyncDefinition(new Organization(tenantDomain), apiId);
+        } catch (AsyncSpecPersistenceException e) {
+            throw new APIManagementException("Error while retrieving Async definition from the persistance location", e);
         }
         return definition;
     }
@@ -1267,7 +1288,8 @@ public abstract class AbstractAPIManager implements APIManager {
         UserContext ctx = new UserContext(username, org, null, null);
         List<Documentation> convertedList = null;
         try {
-            DocumentSearchResult list = apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
+            DocumentSearchResult list =
+                    apiPersistenceInstance.searchDocumentation(org, uuid, 0, 0, null, ctx);
             if (list != null) {
                 convertedList = new ArrayList<Documentation>();
                 List<org.wso2.carbon.apimgt.persistence.dto.Documentation> docList = list.getDocumentationList();
@@ -1290,16 +1312,22 @@ public abstract class AbstractAPIManager implements APIManager {
         List<Documentation> documentationList = new ArrayList<Documentation>();
         String docArtifactKeyType = StringUtils.EMPTY;
         docArtifactKeyType = APIConstants.DOCUMENTATION_KEY;
-
-        String apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(id);
+        String apiOrAPIProductDocPath;
+        APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(id.getUUID());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductRevisionDocPath(apiRevision.getApiUUID(), apiRevision.getId());
+        } else {
+            apiOrAPIProductDocPath = APIUtil.getAPIOrAPIProductDocPath(id);
+        }
         String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
         String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
         try {
             if (registry.resourceExists(apiOrAPIProductDocPath)) {
                 Resource resource = registry.get(apiOrAPIProductDocPath);
                 if (resource instanceof org.wso2.carbon.registry.core.Collection) {
-                    String[] docsPaths = ((org.wso2.carbon.registry.core.Collection) resource).getChildren();
-                    for (String docPath : docsPaths) {
+                    List<String> docPaths = getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
+                            apiOrAPIProductDocPath);
+                    for (String docPath : docPaths) {
                         if (!(docPath.equalsIgnoreCase(pathToContent) || docPath.equalsIgnoreCase(pathToDocFile))) {
                             Resource docResource = registry.get(docPath);
                             GenericArtifactManager artifactManager = getAPIGenericArtifactManager(registry,
@@ -1332,6 +1360,40 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(msg, e);
         }
         return documentationList;
+    }
+
+    /**
+     * Get API Documents within the provided registry collection
+     * In case the document names contained '/' character, need to get only leaf node documents within them
+     *
+     * @param docCollection registry collection
+     * @param apiOrAPIProductDocPath base api/api product document path
+     * @return
+     * @throws APIManagementException
+     */
+    private List<String> getDocPaths(org.wso2.carbon.registry.core.Collection docCollection,
+            String apiOrAPIProductDocPath) throws APIManagementException {
+        List<String> docPaths = new ArrayList<>();
+        String pathToContent = apiOrAPIProductDocPath + APIConstants.INLINE_DOCUMENT_CONTENT_DIR;
+        String pathToDocFile = apiOrAPIProductDocPath + APIConstants.DOCUMENT_FILE_DIR;
+        try {
+            String[] resourcePaths = docCollection.getChildren();
+            for (String resourcePath : resourcePaths) {
+                if (!(resourcePath.equals(pathToContent) || resourcePath.equals(pathToDocFile))) {
+                    Resource resource = registry.get(resourcePath);
+                    if (resource instanceof org.wso2.carbon.registry.core.Collection) {
+                        docPaths.addAll(getDocPaths((org.wso2.carbon.registry.core.Collection) resource,
+                                apiOrAPIProductDocPath));
+                    } else {
+                        docPaths.add(resourcePath);
+                    }
+                }
+            }
+        } catch (RegistryException e) {
+            String msg = "Failed to get documents for api/product";
+            throw new APIManagementException(msg, e);
+        }
+        return docPaths;
     }
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws APIManagementException {
@@ -2684,17 +2746,19 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 } else {
                     API resultAPI;
-                    if (limitAttributes) {
-                        resultAPI = APIUtil.getAPI(artifact);
-                    } else {
-                        if(reducedPublisherAPIInfo) {
-                            resultAPI = APIUtil.getReducedPublisherAPIForListing(artifact, registry);
+                    if (APIUtil.getAPIIdentifierFromUUID(artifact.getId()) != null) {
+                        if (limitAttributes) {
+                            resultAPI = APIUtil.getAPI(artifact);
                         } else {
-                            resultAPI = APIUtil.getAPI(artifact, registry);
+                            if (reducedPublisherAPIInfo) {
+                                resultAPI = APIUtil.getReducedPublisherAPIForListing(artifact, registry);
+                            } else {
+                                resultAPI = APIUtil.getAPI(artifact, registry);
+                            }
                         }
-                    }
-                    if (resultAPI != null) {
-                        apiList.add(resultAPI);
+                        if (resultAPI != null) {
+                            apiList.add(resultAPI);
+                        }
                     }
                 }
 
@@ -3664,7 +3728,7 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         // TODO try to use a single query to get info from db
         // Ratings
-        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId, null);
+        int internalId = ApiMgtDAO.getInstance().getAPIID(apiId);
         api.setRating(APIUtil.getAverageRating(internalId));
         // api level tier
         String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);
@@ -3682,15 +3746,25 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
         Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, api.getId().getApiName());
-        api.addAvailableTiers(availableTier);
+        api.setAvailableTiers(availableTier);
         
         //Scopes 
         Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
         api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
-        
+
         //templates
-        String resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+        String resourceConfigsString = null;
+        if (api.getSwaggerDefinition() != null) {
+            resourceConfigsString = api.getSwaggerDefinition();
+        } else {
+            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+        }
         api.setSwaggerDefinition(resourceConfigsString);
+
+        if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
+                api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, requestedTenantDomain));
+        }
+
         JSONParser jsonParser = new JSONParser();
         JSONObject paths = null;
         if (resourceConfigsString != null) {
@@ -3771,12 +3845,123 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
     
+    protected void populateAPIProductInformation(String uuid, String requestedTenantDomain, Organization org,
+            APIProduct apiProduct) throws APIManagementException, OASPersistenceException, ParseException {
+        ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
+        apiProduct.setRating(Float.toString(APIUtil.getAverageRating(apiProduct.getProductId())));
+        
+        List<APIProductResource> resources = ApiMgtDAO.getInstance().
+                getAPIProductResourceMappings(apiProduct.getId());
+
+        Map<String, Scope> uniqueAPIProductScopeKeyMappings = new LinkedHashMap<>();
+        for (APIProductResource resource : resources) {
+            List<Scope> resourceScopes = resource.getUriTemplate().retrieveAllScopes();
+            ListIterator it = resourceScopes.listIterator();
+            while (it.hasNext()) {
+                Scope resourceScope = (Scope) it.next();
+                String scopeKey = resourceScope.getKey();
+                if (!uniqueAPIProductScopeKeyMappings.containsKey(scopeKey)) {
+                    resourceScope = APIUtil.getScopeByName(scopeKey, requestedTenantDomain);
+                    uniqueAPIProductScopeKeyMappings.put(scopeKey, resourceScope);
+                } else {
+                    resourceScope = uniqueAPIProductScopeKeyMappings.get(scopeKey);
+                }
+                it.set(resourceScope);
+            }
+        }
+
+        for (APIProductResource resource : resources) {
+            String resourceAPIUUID = resource.getApiIdentifier().getUUID();
+            resource.setApiId(resourceAPIUUID);
+            try {
+                PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, resourceAPIUUID);
+                API api = APIMapper.INSTANCE.toApi(publisherAPI);
+                resource.setEndpointConfig(api.getEndpointConfig());
+                resource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
+            } catch (APIPersistenceException e) {
+                throw new APIManagementException("Error while retrieving the api for api product " + e);
+            }
+
+        }
+        apiProduct.setProductResources(resources);
+
+        //UUID
+        if(apiProduct.getUuid() == null) {
+            apiProduct.setUuid(uuid);
+        }
+        // environment
+        String environmentString = null;
+        if (apiProduct.getEnvironments() != null) {
+            environmentString = String.join(",", apiProduct.getEnvironments());
+        }
+        apiProduct.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString));
+
+
+        // available tier
+        String tiers = null;
+        Set<Tier> tiersSet = apiProduct.getAvailableTiers();
+        Set<String> tierNameSet = new HashSet<String>();
+        for (Tier t : tiersSet) {
+            tierNameSet.add(t.getName());
+        }
+        if (apiProduct.getAvailableTiers() != null) {
+            tiers = String.join("||", tierNameSet);
+        }
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Set<Tier> availableTier = APIUtil.getAvailableTiers(definedTiers, tiers, apiProduct.getId().getName());
+        apiProduct.setAvailableTiers(availableTier);
+        
+        //Scopes 
+        /*
+        Map<String, Scope> scopeToKeyMapping = APIUtil.getAPIScopes(api.getId(), requestedTenantDomain);
+        apiProduct.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
+        */
+        //templates
+        String resourceConfigsString = null;
+        if (apiProduct.getDefinition() != null) {
+            resourceConfigsString = apiProduct.getDefinition();
+        } else {
+            resourceConfigsString = apiPersistenceInstance.getOASDefinition(org, uuid);
+            apiProduct.setDefinition(resourceConfigsString);
+        }
+        //CORS . if null is returned, set default config from the configuration
+        if (apiProduct.getCorsConfiguration() == null) {
+            apiProduct.setCorsConfiguration(APIUtil.getDefaultCorsConfiguration());
+        }
+        
+        // set category
+        List<APICategory> categories = apiProduct.getApiCategories();
+        if (categories != null) {
+            List<String> categoriesOfAPI = new ArrayList<String>();
+            for(APICategory apiCategory: categories) {
+                categoriesOfAPI.add(apiCategory.getName());
+            }
+            List<APICategory> categoryList = new ArrayList<>();
+
+            if (!categoriesOfAPI.isEmpty()) {
+                // category array retrieved from artifact has only the category name, therefore we need to fetch
+                // categories
+                // and fill out missing attributes before attaching the list to the api
+                List<APICategory> allCategories = APIUtil.getAllAPICategoriesOfTenant(requestedTenantDomain);
+
+                // todo-category: optimize this loop with breaks
+                for (String categoryName : categoriesOfAPI) {
+                    for (APICategory category : allCategories) {
+                        if (categoryName.equals(category.getName())) {
+                            categoryList.add(category);
+                            break;
+                        }
+                    }
+                }
+            }
+            apiProduct.setApiCategories(categoryList);
+        }
+    }
+    
     @Override
     public ResourceFile getIcon(String apiId, String tenantDomain) throws APIManagementException {
         try {
-            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance
-                    .getThumbnail(new Organization(tenantDomain), apiId);
-
+            org.wso2.carbon.apimgt.persistence.dto.ResourceFile resource = apiPersistenceInstance.getThumbnail(new Organization(tenantDomain), apiId);
             if (resource != null) {
                 ResourceFile thumbnail = new ResourceFile(resource.getContent(), resource.getContentType());
                 return thumbnail;

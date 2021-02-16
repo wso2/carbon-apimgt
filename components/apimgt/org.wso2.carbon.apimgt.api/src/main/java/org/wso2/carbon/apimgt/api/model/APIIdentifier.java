@@ -62,6 +62,13 @@ public class APIIdentifier implements Serializable, Identifier {
         this.version = version;
     }
 
+    public APIIdentifier(String providerName, String apiName, String version, String uuid) {
+        this.providerName = providerName;
+        this.apiName = apiName;
+        this.version = version;
+        this.uuid = uuid;
+    }
+
     public APIIdentifier(String apiId) throws APIManagementException {
         //eg: apiId = "P1_API1_v1.0.0"
         String[] split = apiId.split("_");

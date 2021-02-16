@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -25,16 +26,20 @@ import org.wso2.carbon.apimgt.persistence.dto.Mediation;
 import org.wso2.carbon.apimgt.persistence.dto.MediationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProduct;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPIProductSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.dto.Documentation;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.GraphQLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
@@ -63,6 +68,37 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException;
+
+    /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiUUID API UUID
+     * @param revisionId API Revision ID
+     * @return ID of Added API
+     * @throws APIPersistenceException
+     */
+    String addAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+
+    /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiUUID API UUID
+     * @param revisionId API Revision ID
+     * @throws APIPersistenceException
+     */
+    void restoreAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
+
+    /**
+     * Add API Revision to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param apiUUID API UUID
+     * @param revisionId API Revision ID
+     * @throws APIPersistenceException
+     */
+    void deleteAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException;
 
     /**
      * Update API in the persistence layer
@@ -188,7 +224,6 @@ public interface APIPersistence {
      */
     ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException;
 
-
     /* ==== OAS API Schema Definition ====
      ================================== */
 
@@ -201,7 +236,6 @@ public interface APIPersistence {
      * @throws OASPersistenceException
      */
     void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException;
-
     /**
      * Get OAS Schema definition of the API
      *
@@ -212,6 +246,18 @@ public interface APIPersistence {
      */
     String getOASDefinition(Organization org, String apiId) throws OASPersistenceException;
 
+    /* ==== Async API Definition ==========
+    ============================================= */
+
+    /**
+     * Get Async API definition
+     *
+     * @param org   Organization the definition is owned by
+     * @param apiId API ID
+     * @return Async definition
+     * @throws AsyncSpecPersistenceException
+     */
+    String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException;
 
     /* ==== GraphQL API Schema Definition ==========
     ============================================= */
@@ -236,7 +282,6 @@ public interface APIPersistence {
      * @throws GraphQLPersistenceException
      */
     String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException;
-
 
     /* ======= Documentation  =======
     ================================ */
@@ -310,7 +355,6 @@ public interface APIPersistence {
      */
     DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset, String searchQuery,
                                     UserContext ctx) throws DocumentationPersistenceException;
-
     /**
      * Delete API documentation
      *
@@ -357,7 +401,6 @@ public interface APIPersistence {
      */
     Mediation getMediationPolicy(Organization org, String apiId, String mediationPolicyId)
                                     throws MediationPolicyPersistenceException;
-
     /**
      * Get a list of all the mediation policies of the API
      *
@@ -367,7 +410,6 @@ public interface APIPersistence {
      * @throws MediationPolicyPersistenceException
      */
     List<MediationInfo> getAllMediationPolicies(Organization org, String apiId) throws MediationPolicyPersistenceException;
-
     /**
      * Delete a mediation policy of the API
      *
@@ -401,7 +443,6 @@ public interface APIPersistence {
      * @throws ThumbnailPersistenceException
      */
     ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
-
     /**
      * Delete thumbnail icon of the API
      *
@@ -410,4 +451,61 @@ public interface APIPersistence {
      * @throws ThumbnailPersistenceException
      */
     void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
+    
+    
+    /**
+     * Add API product to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param publisherAPIProduct API product to add
+     * @return ID of Added API Product
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException;
+    
+
+    /**
+     * Update API product to the persistence layer
+     *
+     * @param org          Organization the API is owned by
+     * @param publisherAPIProduct API product to add
+     * @return ID of Added API Product
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException;
+    
+    /**
+     * Get the API product information stored in persistence layer, that is used for publisher operations
+     *
+     * @param org   Organization the API is owned by
+     * @param apiProductId API product ID
+     * @return API information
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId) throws APIPersistenceException;
+    
+    /**
+     * Search API Products to be displayed on Publisher API product listing
+     *
+     * @param org         Organization the APIs are owned by
+     * @param searchQuery search query
+     * @param start       starting index
+     * @param offset      offset to search
+     * @return Publisher API product Search Result
+     * @throws APIPersistenceException
+     */
+    PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery, int start,
+            int offset, UserContext ctx) throws APIPersistenceException;
+    
+    /**
+     * Delete API Product
+     *
+     * @param org   Organization the API product is owned by
+     * @param apiId API ID
+     * @throws APIPersistenceException
+     */
+    void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException;
+
 }

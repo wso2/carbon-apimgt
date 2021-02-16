@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.xml.stream.XMLStreamException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_URI;
@@ -50,7 +52,7 @@ import static org.wso2.carbon.apimgt.impl.token.ClaimsRetriever.DEFAULT_DIALECT_
 public class APIRealmUtilTest {
 
     @Test
-    public void testLoggedInUserClaims() throws APIManagementException, UserStoreException {
+    public void testLoggedInUserClaims() throws APIManagementException, UserStoreException, XMLStreamException {
         String configuredClaims = "http://wso2.org/claim1,http://wso2.org/claim2,http://wso2.org/claim3";
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(APIUtil.class);

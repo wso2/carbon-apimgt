@@ -43,7 +43,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
     private String authorizationHeader;
     private List<String> securityScheme = new ArrayList<>();
-    private Set<String> availableTierNames;
     private Set<String> environments;
     private Set<String> gatewayLabels;
     private Set<String> apiCategories;
@@ -57,16 +56,19 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private Boolean advertisedOnly;
     private String swaggerDefinition;
     private String contextTemplate;
+    private String apiSecurity;
+    private String visibility;
+    private String visibleRoles;
 
 
     //new for apiSecurity
-    private String apiSecurity;
-    public void setApiSecurity(String apiSecurity){
-        this.apiSecurity = apiSecurity;
-    }
-    public String getApiSecurity(){
-        return apiSecurity;
-    }
+//    private String apiSecurity;
+//    public void setApiSecurity(String apiSecurity){
+//        this.apiSecurity = apiSecurity;
+//    }
+//    public String getApiSecurity(){
+//        return apiSecurity;
+//    }
     //
 
     public String getContextTemplate() {
@@ -213,14 +215,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.securityScheme = securityScheme;
     }
 
-    public Set<String> getAvailableTierNames() {
-        return availableTierNames;
-    }
-
-    public void setAvailableTierNames(Set<String> availableTierNames) {
-        this.availableTierNames = availableTierNames;
-    }
-
     public Set<String> getEnvironments() {
         return environments;
     }
@@ -318,6 +312,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.swaggerDefinition = swaggerDefinition;
     }
 
+
+
     @Override
     public String toString() {
         return "DevPortalAPI [status=" + status + ", isDefaultVersion=" + isDefaultVersion + ", description="
@@ -327,12 +323,37 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", availableTierNames=" + availableTierNames + ", environments=" + environments + ", gatewayLabels="
-                + gatewayLabels + ", apiCategories=" + apiCategories + ", isMonetizationEnabled="
-                + isMonetizationEnabled + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
-                + deploymentEnvironments + ", tags=" + tags + ", additionalProperties=" + additionalProperties
-                + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly=" + advertisedOnly
-                + ", swaggerDefinition=" + swaggerDefinition + ", toString()=" + super.toString() + "]";
+                + ", environments=" + environments + ", gatewayLabels=" + gatewayLabels + ", apiCategories="
+                + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
+                + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
+                + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
+                + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate
+                + ", apiSecurity=" + apiSecurity + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
+                + "]";
+    }
+
+    public String getApiSecurity() {
+        return apiSecurity;
+    }
+
+    public void setApiSecurity(String apiSecurity) {
+        this.apiSecurity = apiSecurity;
+    }
+
+    public String getVisibleRoles() {
+        return visibleRoles;
+    }
+
+    public void setVisibleRoles(String visibleRoles) {
+        this.visibleRoles = visibleRoles;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
     }
     
 

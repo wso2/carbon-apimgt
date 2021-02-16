@@ -27,7 +27,7 @@ public class ApiDetails {
 
 
 
-    public List<Api> getAllApis(int start, int offset) throws APIPersistenceException {
+    public List<Api> getAllApis(int start, int offset) throws APIPersistenceException, APIManagementException {
         SubscribeAvailableData subscribeAvailableData = new SubscribeAvailableData();
         ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
 
@@ -199,7 +199,7 @@ public class ApiDetails {
         String wsdUrl = devPortalAPI.getWsdlUrl();
         String status = devPortalAPI.getStatus();
 
-        boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(id);////
+        boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(Id);////
 
         Set<String> tiers = devPortalAPI.getAvailableTierNames();
 

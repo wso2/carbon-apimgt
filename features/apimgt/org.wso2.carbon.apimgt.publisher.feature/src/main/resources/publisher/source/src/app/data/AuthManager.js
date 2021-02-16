@@ -145,7 +145,6 @@ class AuthManager {
         return !AuthManager.getUser().scopes.includes('apim:api_create');
     }
 
-
     /**
      *
      * Check whether the current user has Internal/publisher role or not
@@ -169,7 +168,7 @@ class AuthManager {
      */
     static isRestricted(scopesAllowedToEdit, api = {}) {
         // determines whether the apiType is API PRODUCT and user has publisher role, then allow access.
-        if (api.apiType === 'APIProduct') {
+        if (api.apiType === 'APIPRODUCT') {
             if (AuthManager.getUser().scopes.includes('apim:api_publish')) {
                 return false;
             } else {

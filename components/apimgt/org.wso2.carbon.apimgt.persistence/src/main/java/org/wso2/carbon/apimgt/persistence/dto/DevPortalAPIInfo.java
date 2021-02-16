@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import java.util.Set;
+
 /**
  * A subset of org.wso2.carbon.apimgt.persistence.models.DevPortalAPI. Minimal API information required only for
  * listing
@@ -30,6 +32,7 @@ public class DevPortalAPIInfo {
     private String thumbnail;
     private String businessOwner;
     private String status;
+    private Set<String> availableTierNames;
     
     //monetizationCategory which is returned to UI as 'monetizationLabel' is not required. it is derived from the
     // attached tiers.
@@ -92,6 +95,12 @@ public class DevPortalAPIInfo {
         return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
                 + providerName + ", context=" + context + ", type=" + type + ", thumbnail=" + thumbnail
                 + ", businessOwner=" + businessOwner + ", status=" + status + "]";
+    }
+    public Set<String> getAvailableTierNames() {
+        return availableTierNames;
+    }
+    public void setAvailableTierNames(Set<String> availableTierNames) {
+        this.availableTierNames = availableTierNames;
     }
 
 }

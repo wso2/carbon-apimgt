@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
@@ -37,10 +37,15 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
-    return {
-        ...state,
-        [field]: value,
-    };
+    switch (field) {
+        case 'name':
+        case 'description':
+            return { ...state, [field]: value };
+        case 'editDetails':
+            return value;
+        default:
+            return state;
+    }
 }
 
 /**
@@ -49,33 +54,28 @@ function reducer(state, { field, value }) {
  * @returns {JSX}.
  */
 function AddEdit(props) {
+    const classes = useStyles();
     const {
         updateList, dataRow, icon, triggerButtonText, title,
     } = props;
-    const classes = useStyles();
 
-    let id = null;
-    let initialState = {
+    const [initialState, setInitialState] = useState({
         description: '',
-    };
-
-    // If the dataRow is there, assign data to initialState
-    if (dataRow) {
-        const { name: originalName, description: originalDescription } = dataRow;
-        id = dataRow.id;
-
-        initialState = {
-            name: originalName,
-            description: originalDescription,
-        };
-    }
-
+    });
+    const [editMode, setIsEditMode] = useState(false);
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, description } = state;
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
+
+    useEffect(() => {
+        setInitialState({
+            description: '',
+        });
+    }, []);
+
     const hasErrors = (fieldName, value) => {
         let error;
         switch (fieldName) {
@@ -123,9 +123,9 @@ function AddEdit(props) {
         }
         const restApi = new API();
         let promiseAPICall;
-        if (id) {
+        if (dataRow) {
             // assign the update promise to the promiseAPICall
-            promiseAPICall = restApi.updateAPICategory(id, name, description);
+            promiseAPICall = restApi.updateAPICategory(dataRow.id, name, description);
         } else {
             // assign the create promise to the promiseAPICall
             promiseAPICall = restApi.createAPICategory(name, description);
@@ -133,7 +133,7 @@ function AddEdit(props) {
 
         return promiseAPICall
             .then(() => {
-                if (id) {
+                if (dataRow) {
                     return (
                         <FormattedMessage
                             id='AdminPages.ApiCategories.AddEdit.form.edit.successful'
@@ -159,7 +159,13 @@ function AddEdit(props) {
                 updateList();
             });
     };
-
+    const dialogOpenCallback = () => {
+        if (dataRow) {
+            const { name: originalName, description: originalDescription } = dataRow;
+            setIsEditMode(true);
+            dispatch({ field: 'editDetails', value: { name: originalName, description: originalDescription } });
+        }
+    };
     return (
         <FormDialogBase
             title={title}
@@ -167,6 +173,7 @@ function AddEdit(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <TextField
                 autoFocus
@@ -184,7 +191,7 @@ function AddEdit(props) {
                 error={hasErrors('name', name)}
                 helperText={hasErrors('name', name) || 'Name of the API category'}
                 variant='outlined'
-                disabled={id}
+                disabled={editMode}
             />
             <TextField
                 margin='dense'

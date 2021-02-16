@@ -58,6 +58,9 @@ public class CustomAPIIndexer extends RXTIndexer {
                 .getGovernanceSystemRegistry(IndexingManager.getInstance().getRegistry(fileData.tenantId));
         String resourcePath = fileData.path.substring(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH.length());
         Resource resource = null;
+        if (resourcePath.contains("/apimgt/applicationdata/apis/")) {
+            return null;
+        }
 
         if (registry.resourceExists(resourcePath)) {
             resource = registry.get(resourcePath);

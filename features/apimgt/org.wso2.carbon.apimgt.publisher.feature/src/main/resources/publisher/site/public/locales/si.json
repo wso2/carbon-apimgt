@@ -73,6 +73,8 @@
     "Apis.Details.Configuration.Configuration.visibility.public": "පොදු",
     "Apis.Details.Configuration.Configuration.visibility.restricted.by.roles": "භූමිකාවන් මගින් සීමා කර ඇත",
     "Apis.Details.Configuration.Configuration.workflow.status": "කාර්ය ප්‍රවාහ තත්වය",
+    "Apis.Details.Configuration.components.MarkdownEditor.add.description.button": "විස්තරය එක් කරන්න",
+    "Apis.Details.Configuration.components.MarkdownEditor.edit.description.button": "විස්තරය සංස්කරණය කරන්න",
     "Apis.Details.Documents.Create.markdown.editor.add.document.button": "ලේඛනය එක් කරන්න",
     "Apis.Details.Documents.Create.markdown.editor.add.document.cancel.button": "අවලංගු කරන්න",
     "Apis.Details.Documents.Create.markdown.editor.add.error": "ලේඛනය එකතු කිරීමේදී දෝෂයකි",

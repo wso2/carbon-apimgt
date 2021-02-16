@@ -41,6 +41,10 @@ public final class ImportExportConstants {
     public static final String GRAPHQL_SCHEMA_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "schema.graphql";
 
+    // Location of the graphql schema definition file
+    public static final String GRAPHQL_COMPLEXITY_INFO_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "graphql-complexity";
+
     // Location of the wsdl file
     public static final String WSDL_LOCATION = File.separator + "WSDL" + File.separator;
 
@@ -71,13 +75,7 @@ public final class ImportExportConstants {
 
     public static final Map<String, String> fileExtensionMapping = new HashMap<>();
 
-    public static final String UPLOAD_FILE_NAME = "APIArchive.zip";
-
-    // Location of the API YAML file
-    public static final String YAML_API_FILE_LOCATION = File.separator + "api.yaml";
-
-    // Location of the API JSON file
-    public static final String JSON_API_FILE_LOCATION = File.separator + "api.json";
+    public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
 
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
@@ -162,6 +160,8 @@ public final class ImportExportConstants {
 
     public static final String TYPE_API_PRODUCT = "api_product";
 
+    public static final String TYPE_APPLICATION = "application";
+
     public static final String TYPE_DOCUMENTS = "document";
 
     public static final String TYPE_ENDPOINT_CERTIFICATES = "endpoint_certificates";
@@ -174,6 +174,16 @@ public final class ImportExportConstants {
 
     public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
 
+    public static final String GRAPHQL_COMPLEXITY = "graphql-complexity";
+
+    public static final String UPLOAD_APPLICATION_FILE_NAME = "ApplicationArchive.zip";
+
+    // Location of the Application YAML file
+    public static final String YAML_APPLICATION_FILE_LOCATION = File.separator + "application.yaml";
+
+    // Location of the Application JSON file
+    public static final String JSON_APPLICATION_FILE_LOCATION = File.separator + "application.json";
+
     //Api controller Env Params related constants
     public static final String YAML_API_PARAMS_FILE_LOCATION = File.separator + "api_params.yaml";
     public static final String JSON_API_PARAMS_FILE_LOCATION = File.separator + "api_params.json";
@@ -184,6 +194,7 @@ public final class ImportExportConstants {
     public static final String MUTUAL_SSL_CERTIFICATES_FIELD = "mutualSslCerts";
     public static final String ENDPOINT_CERTIFICATES_FIELD = "certs";
     public static final String ENDPOINT_SECURITY_FIELD = "security";
+    public static final String POLICIES_FIELD = "policies";
     public static final String ROUTING_POLICY_FIELD = "endpointRoutingPolicy";
     public static final String ENDPOINTS_FIELD = "endpoints";
     public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "loadBalanceEndpoints";
@@ -267,4 +278,11 @@ public final class ImportExportConstants {
     public static final String DEPLOYMENT_DIRECTORY= File.separator + DEPLOYMENT_DIRECTORY_NAME;
     public static final String SOURCE_ZIP_DIRECTORY_NAME = "SourceArchive.zip";
     public static final String API_PARAMS_FILE_NAME = "api_params.yaml";
+
+    // Location of the deployments file
+    public static final String DEPLOYMENT_INFO_LOCATION = File.separator + "deployment_environments";
+    public static final String DEPLOYMENT_ENVIRONMENTS = "deploymentEnvironments";
+    public static final String DEPLOYMENT_NAME = "deploymentEnvironment";
+    public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
+
 }

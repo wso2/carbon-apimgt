@@ -1,5 +1,6 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
 import org.wso2.carbon.graphql.api.devportal.modules.Api;
@@ -10,7 +11,7 @@ import java.util.List;
 
 public class ApiListingData {
 
-    public ApiListing getApiListing(int start, int offset) throws APIPersistenceException {
+    public ApiListing getApiListing(int start, int offset) throws APIPersistenceException, APIManagementException {
         PaginationData paginationData = new PaginationData();
         ApiDetails apiDetails = new ApiDetails();
         ArtifactData artifactData = new ArtifactData();

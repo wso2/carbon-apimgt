@@ -1,5 +1,6 @@
 package org.wso2.carbon.graphql.api.devportal.data;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class PaginationData {
 
 
-    public Pagination getPaginationData(int offset, int limit) throws  APIPersistenceException {
+    public Pagination getPaginationData(int offset, int limit) throws APIPersistenceException, APIManagementException {
         ArtifactData artifactData = new ArtifactData();
         int size = artifactData.apiCount(offset, limit);
         String paginatedPrevious = "";

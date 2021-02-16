@@ -23,7 +23,7 @@ import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-
+import API from 'AppData/api';
 import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     DEFAULT_API_SECURITY_OAUTH2,
@@ -34,7 +34,6 @@ import {
 } from './components/apiSecurityConstants';
 import ApplicationLevel from './components/ApplicationLevel';
 import TransportLevel from './components/TransportLevel';
-
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -59,7 +58,7 @@ export default function APISecurity(props) {
         api,
     } = props;
     const apiContext = useContext(ApiContext);
-    const isAPIProduct = apiContext.api.apiType === 'APIProduct';
+    const isAPIProduct = apiContext.api.apiType === API.CONSTS.APIProduct;
     let isEndpointAvailable;
     let isPrototyped;
     if (isAPIProduct) {
@@ -70,7 +69,6 @@ export default function APISecurity(props) {
         isPrototyped = apiContext.api.endpointConfig !== null
              && apiContext.api.endpointConfig.implementation_status === 'prototyped';
     }
-
 
     const haveMultiLevelSecurity = securityScheme.includes(API_SECURITY_MUTUAL_SSL)
         && (securityScheme.includes(API_SECURITY_BASIC_AUTH)
@@ -83,7 +81,7 @@ export default function APISecurity(props) {
     // Check the validation conditions and return an error message
     const Validate = () => {
         let resourcesWithSecurity;
-        if (apiFromContext.apiType === 'APIProduct') {
+        if (apiFromContext.apiType === API.CONSTS.APIProduct) {
             const apiList = apiFromContext.apis;
             for (const apiInProduct in apiList) {
                 if (Object.prototype.hasOwnProperty.call(apiList, apiInProduct)) {

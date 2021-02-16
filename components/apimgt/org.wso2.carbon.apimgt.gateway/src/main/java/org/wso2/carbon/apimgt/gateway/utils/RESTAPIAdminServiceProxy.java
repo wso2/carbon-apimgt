@@ -16,8 +16,12 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.MessageContext;
+import org.apache.synapse.api.API;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -66,6 +70,16 @@ public class RESTAPIAdminServiceProxy {
             throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
         }
     }
+    public OMElement getApiContent(String apiName) throws AxisFault {
+
+        try {
+            return restApiAdmin.getAPIContent(apiName, tenantDomain);
+
+        } catch (Exception e) {
+            throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
+        }
+    }
+
 
     public boolean updateApi(String apiName, String apiConfig) throws AxisFault {
 
@@ -96,5 +110,22 @@ public class RESTAPIAdminServiceProxy {
     public void setTenantDomain(String tenantDomain) {
 
         this.tenantDomain = tenantDomain;
+    }
+
+    public String[] getapis() {
+
+        boolean tenantFlowStarted = false;
+        try {
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantFlowStarted = true;
+            }
+            return restApiAdmin.getApiNames();
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 }

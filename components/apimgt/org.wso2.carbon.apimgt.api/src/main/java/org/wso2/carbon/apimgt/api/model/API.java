@@ -97,6 +97,10 @@ public class API implements Serializable {
     private String inSequence;
     private String outSequence;
     private String faultSequence;
+    
+    private Mediation inSequenceMediation;
+    private Mediation outSequenceMediation;
+    private Mediation faultSequenceMediation;
 
     private String oldInSequence;
     private String oldOutSequence;
@@ -117,6 +121,16 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
+    
+    private List<SOAPToRestSequence> soapToRestSequences;
+
+    public List<SOAPToRestSequence> getSoapToRestSequences() {
+        return soapToRestSequences;
+    }
+
+    public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
+        this.soapToRestSequences = soapToRestSequences;
+    }
 
     //Custom authorization header specific to the API
     private String authorizationHeader;
@@ -177,6 +191,20 @@ public class API implements Serializable {
 
     private String testKey;
 
+    /**
+     * Property to indicate whether this is a revision.
+     */
+    private boolean isRevision = false;
+
+    /**
+     * Property to hold api id of a revision.
+     */
+    private String revisionedApiId;
+
+    /**
+     * Property to hold revision id
+     */
+    private int revisionId;
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -1112,6 +1140,54 @@ public class API implements Serializable {
     public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
         this.deploymentEnvironments = deploymentEnvironments;
     }
+    
+    public Mediation getInSequenceMediation() {
+        return inSequenceMediation;
+    }
+
+    public void setInSequenceMediation(Mediation inSequenceMediation) {
+        this.inSequenceMediation = inSequenceMediation;
+    }
+
+    public Mediation getOutSequenceMediation() {
+        return outSequenceMediation;
+    }
+
+    public void setOutSequenceMediation(Mediation outSequenceMediation) {
+        this.outSequenceMediation = outSequenceMediation;
+    }
+
+    public Mediation getFaultSequenceMediation() {
+        return faultSequenceMediation;
+    }
+
+    public void setFaultSequenceMediation(Mediation faultSequenceMediation) {
+        this.faultSequenceMediation = faultSequenceMediation;
+    }
+
+    public boolean isRevision() {
+        return isRevision;
+    }
+
+    public void setRevision(boolean revision) {
+        isRevision = revision;
+    }
+
+    public String getRevisionedApiId() {
+        return revisionedApiId;
+    }
+
+    public void setRevisionedApiId(String revisionedApiId) {
+        this.revisionedApiId = revisionedApiId;
+    }
+
+    public int getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(int revisionId) {
+        this.revisionId = revisionId;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -1127,5 +1203,12 @@ public class API implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public boolean isAsync() {
+        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
+            return true;
+        }
+        return false;
     }
 }

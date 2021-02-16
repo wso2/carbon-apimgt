@@ -36,9 +36,11 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
@@ -378,7 +380,13 @@ public class GraphQLSchemaDefinition {
         String apiName = apiId.getApiName();
         String apiVersion = apiId.getVersion();
         String apiProviderName = apiId.getProviderName();
-        String resourcePath = APIUtil.getGraphqlDefinitionFilePath(apiName, apiVersion, apiProviderName);
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId.getUUID());
+        String resourcePath;
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
+        } else {
+            resourcePath = APIUtil.getGraphqlDefinitionFilePath(apiName, apiVersion, apiProviderName);
+        }
 
         String schemaDoc = null;
         String schemaName = apiId.getProviderName() + APIConstants.GRAPHQL_SCHEMA_PROVIDER_SEPERATOR +

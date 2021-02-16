@@ -34,7 +34,7 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.api</artifactId>
 			<scope>provided</scope>
-			<version>6.8.125-SNAPSHOT</version>
+			<version>6.8.217-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.apimgt</groupId>
@@ -67,15 +67,13 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.impl</artifactId>
 			<scope>provided</scope>
-			<version>6.8.125-SNAPSHOT</version>
-
+			<version>6.8.217-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
 			<scope>provided</scope>
-			<version>6.8.125-SNAPSHOT</version>
-
+			<version>6.8.217-SNAPSHOT</version>
 		</dependency>
 
 
@@ -100,6 +98,12 @@
 			<groupId>com.graphql-java</groupId>
 			<artifactId>graphql-java</artifactId>
 			<version>15.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.reactivestreams</groupId>
+					<artifactId>reactive-streams</artifactId>
+				</exclusion>
+			</exclusions>
 
 		</dependency>
 

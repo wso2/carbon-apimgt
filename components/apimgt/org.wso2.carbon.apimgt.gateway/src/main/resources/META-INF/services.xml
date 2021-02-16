@@ -16,13 +16,6 @@
  ~ under the License.
  -->
 <serviceGroup>
-    <service name="APIAuthenticationService" scope="transportsession">
-        <transports><transport>https</transport></transports>
-        <description>Admin service to manage API authentication related functionality at the API Gateway</description>
-        <parameter name="ServiceClass">org.wso2.carbon.apimgt.gateway.handlers.security.service.APIAuthenticationService</parameter>
-        <parameter name="DoAuthentication" locked="true">true</parameter>
-        <parameter name="AuthorizationAction" locked="true">/permission/admin/login</parameter>
-    </service>
     <service name="APIGatewayAdmin" scope="transportsession">
         <transports><transport>https</transport></transports>
         <description>Admin service to manage API publisher and store related functionality at the API Gateway</description>

@@ -158,13 +158,11 @@ public class APIExportUtil {
             exportAPIMetaInformation(archivePath, apiToReturn, registry, exportFormat, provider);
             
             //export mTLS authentication related certificates
-            if(provider.isClientCertificateBasedAuthenticationConfigured()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Exporting client certificates.");
-                }
-                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
-                APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Exporting client certificates.");
             }
+            ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
+            APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve API Documentation for API: " + apiIDToReturn.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + " : " + apiIDToReturn.getVersion();
@@ -529,7 +527,8 @@ public class APIExportUtil {
                     apiToReturn.setUriTemplates(new LinkedHashSet<>());
                 }
                 APIIdentifier apiIdentifier = apiToReturn.getId();
-                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                String tenantDomain = MultitenantUtils.getTenantDomain(apiIdentifier.getProviderName());
+                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
                 APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
                 String formattedSwaggerJson = parser.getOASDefinitionForPublisher(apiToReturn, apiSwagger);
 

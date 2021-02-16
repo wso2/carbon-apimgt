@@ -85,6 +85,14 @@ const styles = (theme) => ({
     progressLoader: {
         marginLeft: theme.spacing(1),
     },
+    updateApiWarning: {
+        marginLeft: theme.spacing(5),
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+        borderColor: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
+    warningIconStyle: {
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
 });
 /**
  * This component holds the functionality of viewing the api definition content of an api. The initial view is a
@@ -168,6 +176,20 @@ class APIDefinition extends React.Component {
             });
     }
 
+    /**
+     * Handles the yes button action of the save api definition confirmation dialog box.
+     */
+    handleOk() {
+        const { swaggerModified } = this.state;
+        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+    }
+
+    /**
+     * Handles the No button action of the save api definition confirmation dialog box.
+     */
+    handleNo() {
+        this.setState({ openDialog: false });
+    }
 
     /**
       * Set isAuditApiClicked to true when Audit API is clicked
@@ -243,6 +265,15 @@ class APIDefinition extends React.Component {
     }
 
     /**
+     * Method to set the state for opening the swagger editor drawer.
+     * Swagger editor loads the definition content from the local storage. Hence we set the swagger content to the
+     * local storage.
+     * */
+    openEditor() {
+        this.setState({ openEditor: true });
+    }
+
+    /**
      * Checks whether the swagger content is json type.
      * @param {string} definition The swagger string.
      * @return {boolean} Whether the content is a json or not.
@@ -255,30 +286,6 @@ class APIDefinition extends React.Component {
         } catch (err) {
             return false;
         }
-    }
-
-    /**
-     * Handles the yes button action of the save api definition confirmation dialog box.
-     */
-    handleOk() {
-        const { swaggerModified } = this.state;
-        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
-    }
-
-    /**
-     * Handles the No button action of the save api definition confirmation dialog box.
-     */
-    handleNo() {
-        this.setState({ openDialog: false });
-    }
-
-    /**
-     * Method to set the state for opening the swagger editor drawer.
-     * Swagger editor loads the definition content from the local storage. Hence we set the swagger content to the
-     * local storage.
-     * */
-    openEditor() {
-        this.setState({ openEditor: true });
     }
 
     /**
@@ -387,7 +394,10 @@ class APIDefinition extends React.Component {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
             securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating,
         } = this.state;
-        const { classes, resourceNotFountMessage, api } = this.props;
+        const {
+            classes, resourceNotFountMessage, api,
+        } = this.props;
+
         let downloadLink;
         let fileName;
         let isGraphQL = 0;
@@ -436,7 +446,7 @@ class APIDefinition extends React.Component {
                                 size='small'
                                 className={classes.button}
                                 onClick={this.openEditor}
-                                disabled={isRestricted(['apim:api_create'], api)}
+                                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                             >
                                 <EditRounded className={classes.buttonIcon} />
                                 <FormattedMessage
@@ -617,10 +627,10 @@ APIDefinition.propTypes = {
         apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     history: PropTypes.shape({
-        push: PropTypes.object,
+        push: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
-        pathname: PropTypes.object,
+        pathname: PropTypes.shape({}),
     }).isRequired,
     resourceNotFountMessage: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,

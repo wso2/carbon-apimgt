@@ -70,7 +70,7 @@ public class SettingsMappingUtil {
                     break;
                 }
             }
-            settingsDTO.setStoreUrl(storeUrl);
+            settingsDTO.setDevportalUrl(storeUrl);
             settingsDTO.setMonetizationAttributes(getMonetizationAttributes());
             settingsDTO.setSecurityAuditProperties(getSecurityAuditProperties());
             settingsDTO.setExternalStoresEnabled(
