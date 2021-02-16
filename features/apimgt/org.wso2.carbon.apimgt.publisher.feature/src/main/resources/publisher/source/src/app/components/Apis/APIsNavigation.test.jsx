@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import APIsNavigation from './Apis';
+import APIsNavigation from './APIsNavigation';
 
 describe('APIs', () => {
     test('should ', () => {
