@@ -27,7 +27,6 @@ import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
@@ -58,7 +57,6 @@ import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({CertificateMgtUtils.class, CertificateMgtDAO.class, CarbonContext.class,PrivilegedCarbonContext.class})
-@SuppressStaticInitializationFor("org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils")
 public class CertificateManagerImplTest {
 
     private static CertificateManagerImpl certificateManager;
