@@ -167,11 +167,11 @@ public class RestApiAdminUtils {
                 validateThrottlePolicyProperties(null,
                         String.valueOf(conditionalGroup.getLimit().getRequestCount().getUnitTime()),
                         String.valueOf(conditionalGroup.getLimit().getRequestCount().getRequestCount()),
-                        null);
+                        null, null);
             } else {
                 validateThrottlePolicyProperties(null,
                         String.valueOf(conditionalGroup.getLimit().getBandwidth().getUnitTime()), null,
-                        String.valueOf(conditionalGroup.getLimit().getBandwidth().getDataAmount()));
+                        String.valueOf(conditionalGroup.getLimit().getBandwidth().getDataAmount()), null);
             }
             if (conditionalGroup.getConditions() != null) {
                 List<ThrottleConditionDTO> throttleConditionDTOList = conditionalGroup.getConditions();
@@ -269,14 +269,16 @@ public class RestApiAdminUtils {
      * @param  dataAmount         dataAmount property of Throttle Policy
      */
     public static void  validateThrottlePolicyProperties(String policyName, String unitTime,  String requestCount,
-                                                         String dataAmount) throws APIManagementException {
+                                                         String dataAmount, String eventCount) throws APIManagementException {
         if (policyName != null) {
           validateThrottlePolicyNameProperty(policyName, "Policy Name");
         }
         if (requestCount != null) {
             validateThrottlePolicyCountProperties(requestCount, "Request Count");
-        } else {
+        } else if (dataAmount != null){
             validateThrottlePolicyCountProperties(dataAmount, "Data Bandwidth");
+        } else {
+            validateThrottlePolicyCountProperties(eventCount, "Event Count");
         }
         validateThrottlePolicyCountProperties(unitTime, "Unit Time");
     }

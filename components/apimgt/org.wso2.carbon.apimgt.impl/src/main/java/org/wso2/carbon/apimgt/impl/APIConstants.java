@@ -1721,15 +1721,15 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
 
-    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "Async_Gold";
-    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "Async_Silver";
-    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "Async_Bronze";
-    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "Async_Unlimited";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
 
-    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "Async_WH_Gold";
-    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "Async_WH_Silver";
-    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "Async_WH_Bronze";
-    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "Async_WH_Unlimited";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "AsyncWHBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "AsyncWHUnlimited";
 
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
