@@ -23,16 +23,18 @@ package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 public class Constants {
     public static final String REQUEST_START_TIME_PROPERTY = "apim.analytics.request.start.time";
     public static final String BACKEND_START_TIME_PROPERTY = "apim.analytics.backend.start.time";
-    public static final String BACKEND_LATENCY_PROPERTY = "api.analytics.backend.latency";
+    public static final String BACKEND_END_TIME_PROPERTY = "apim.analytics.backend.end.time";
     public static final String BACKEND_RESPONSE_CODE = "api.analytics.backend.response_code";
     public static final String USER_AGENT_PROPERTY = "api.analytics.user.agent";
     public static final String CACHED_RESPONSE_KEY = "CachableResponse";
+    public static final String SKIP_DEFAULT_METRICS_PUBLISHING = "skip_default_metrics_publishing";
 
     public static final String REGION_ID = "asia";
     public static final String DEPLOYMENT_ID = "prod";
     public static final String SUCCESS_EVENT_TYPE = "response";
     public static final String FAULTY_EVENT_TYPE = "fault";
     public static final String UNKNOWN_VALUE = "UNKNOWN";
+    public static final int UNKNOWN_INT_VALUE = -1;
     public static final String ANONYMOUS_VALUE = "anonymous";
 
     public static final class ERROR_CODE_RANGES {
@@ -48,4 +50,5 @@ public class Constants {
 
     public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
     public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
+    public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
 }

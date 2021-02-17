@@ -222,8 +222,8 @@ class APICardView extends React.Component {
             {
                 name: 'throttlingPolicies',
                 label: intl.formatMessage({
-                    id: 'Apis.Listing.APIList.policy',
-                    defaultMessage: 'Policy',
+                    id: 'Apis.Listing.APIList.subscription.status',
+                    defaultMessage: 'Subscription Status',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {

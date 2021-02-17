@@ -514,7 +514,7 @@ public class APIKeyValidationService {
      * authorized, tier information will be <pre>null</pre>
      */
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
-                                                        String tenantDomain,String keyManager)
+                                                        String tenantDomain, String keyManager)
             throws APIKeyMgtException, APIManagementException {
 
         KeyValidationHandler keyValidationHandler =

@@ -98,8 +98,6 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
-        boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS.toString()
-                .equals(originalAPI.getType());
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
         boolean isAsyncAPI = originalAPI.getType() != null
@@ -308,7 +306,7 @@ public class PublisherCommonUtils {
             }
         }
         // Validate if resources are empty
-        if (!isWSAPI && (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty())) {
+        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
@@ -359,7 +357,7 @@ public class PublisherCommonUtils {
         }
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
-        
+
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
                 CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
     }
@@ -670,8 +668,8 @@ public class PublisherCommonUtils {
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
-        boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
-        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB == apiDto.getType() || APIDTO.TypeEnum.SSE == apiDto.getType();
+        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
+        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) || APIDTO.TypeEnum.SSE.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -695,12 +693,12 @@ public class PublisherCommonUtils {
             }
         }
 
-        if (isWSAPI) {
+       /* if (isWSAPI) {
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDto.setTransport(websocketTransports);
-        }
+        }*/
 
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
         validateScopes(apiToAdd);
@@ -724,6 +722,10 @@ public class PublisherCommonUtils {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
+        } else {
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
 
         if (isAsyncAPI) {
@@ -761,6 +763,30 @@ public class PublisherCommonUtils {
         }
 
         return isValid;
+    }
+
+    public static String constructEndpointConfigForService(ServiceEntry service) {
+        StringBuilder sb = new StringBuilder();
+        String endpoint_type = APIDTO.TypeEnum.HTTP.value();
+        switch (service.getDefinitionType()) {
+            case GRAPHQL_SDL:
+                endpoint_type = APIDTO.TypeEnum.GRAPHQL.value();
+            case WSDL1:
+                endpoint_type = APIDTO.TypeEnum.SOAP.value();
+            case WSDL2:
+                endpoint_type = APIDTO.TypeEnum.SOAP.value();
+            case ASYNC_API:
+                // TODO Need to update the endpoint_type for ASYNC_API
+        }
+        if (StringUtils.isNotEmpty(service.getServiceUrl())) {
+            sb.append("{\"endpoint_type\": \"")
+                    .append(endpoint_type)
+                    .append("\",")
+                    .append("\"production_endpoints\": {\"url\": \"")
+                    .append(service.getServiceUrl())
+                    .append("\"}}");
+        } // TODO Need to check on the endpoint security
+        return sb.toString();
     }
 
     /**
@@ -919,7 +945,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI)
             throws APIManagementException, FaultGatewaysException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -927,7 +953,11 @@ public class PublisherCommonUtils {
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
-        apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        if (isServiceAPI) {
+            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
+        } else {
+            apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        }
         Set<URITemplate> uriTemplates = null;
         uriTemplates = oasParser.getURITemplates(apiDefinition);
 
@@ -967,7 +997,7 @@ public class PublisherCommonUtils {
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, tenantDomain);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         existingAPI.setStatus(unModifiedAPI.getStatus());
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
@@ -1293,7 +1323,12 @@ public class PublisherCommonUtils {
         APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
 
-        apiProvider.saveToGateway(createdProduct);
+        //apiProvider.saveToGateway(createdProduct);
         return createdProduct;
+    }
+
+    public static boolean isStreamingAPI(APIDTO apidto) {
+        return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
+                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
     }
 }

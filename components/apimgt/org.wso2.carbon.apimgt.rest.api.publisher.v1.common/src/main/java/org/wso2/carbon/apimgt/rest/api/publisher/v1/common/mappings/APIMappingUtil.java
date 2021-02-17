@@ -64,16 +64,32 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO.StateEnum;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionAPIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusDTO;
@@ -101,6 +117,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -248,6 +265,15 @@ public class APIMappingUtil {
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
         model.setUriTemplates(uriTemplates);
+
+        // wsUriMapping
+        if (dto.getType().toString().equals(APIConstants.API_TYPE_WS)) {
+            Map<String, String> wsUriMapping = new HashMap<>();
+            for (APIOperationsDTO operationsDTO : dto.getOperations()) {
+                wsUriMapping.put(operationsDTO.getVerb() + "_" + operationsDTO.getTarget(), operationsDTO.getUriMapping());
+            }
+            model.setWsUriMapping(wsUriMapping);
+        }
 
         if (dto.getTags() != null) {
             Set<String> apiTags = new HashSet<>(dto.getTags());
@@ -893,7 +919,13 @@ public class APIMappingUtil {
         } else {
             dto.setResponseCachingEnabled(Boolean.FALSE);
         }
-
+        String serviceKey = model.getServiceInfo("key");
+        if (StringUtils.isNotEmpty(serviceKey)) {
+            APIServiceInfoDTO apiServiceInfoDTO = new APIServiceInfoDTO();
+            apiServiceInfoDTO.setKey(serviceKey);
+            apiServiceInfoDTO.setOutdated(Boolean.parseBoolean(model.getServiceInfo("outdated")));
+            dto.setServiceInfo(apiServiceInfoDTO);
+        }
         dto.setCacheTimeout(model.getCacheTimeout());
         String endpointConfig = model.getEndpointConfig();
         if (!StringUtils.isBlank(endpointConfig)) {
@@ -1469,9 +1501,11 @@ public class APIMappingUtil {
                 template.setAmznResourceName(amznResourceName);
             }
             //Only continue for supported operations
-            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase()) ||
-                    (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) ||
-                    (APIConstants.WEBSUB_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase())) || (APIConstants.SSE_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
+            if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())
+                    || (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
+                    || (APIConstants.WEBSUB_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
+                    || (APIConstants.SSE_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
+                    || (APIConstants.WS_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -1503,6 +1537,9 @@ public class APIMappingUtil {
                             + "' is invalid");
                 } else if (APIConstants.API_TYPE_SSE.equals(model.getType())) {
                     handleException("The SSE operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
+                            + "' is invalid");
+                } else if (APIConstants.API_TYPE_WS.equals(model.getType())) {
+                    handleException("The WEBSOCKET operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
                             + "' is invalid");
                 } else {
                     handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
@@ -1975,6 +2012,11 @@ public class APIMappingUtil {
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
             APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
+
+            if (api.getType().equals(APIConstants.API_TYPE_WS)) {
+                String uriMapping = api.getWsUriMapping().get(operationsDTO.getVerb() + "_" + operationsDTO.getTarget());
+                operationsDTO.setUriMapping(uriMapping);
+            }
             operationsDTOList.add(operationsDTO);
         }
 
@@ -2039,6 +2081,8 @@ public class APIMappingUtil {
             supportedMethods = APIConstants.WEBSUB_SUPPORTED_METHODS;
         } else if (apiType.equals(APIConstants.API_TYPE_SSE)) {
             supportedMethods = APIConstants.SSE_SUPPORTED_METHODS;
+        } else if (apiType.equals(APIConstants.API_TYPE_WS)) {
+            supportedMethods = APIConstants.WS_SUPPORTED_METHODS;
         } else {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
@@ -2046,7 +2090,7 @@ public class APIMappingUtil {
         for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
-                operationsDTO.setTarget("*");
+                operationsDTO.setTarget(APIConstants.WEBSUB_DEFAULT_TOPIC_NAME);
             } else {
                 operationsDTO.setTarget("/*");
             }
@@ -2100,6 +2144,10 @@ public class APIMappingUtil {
         productDto.setEnableSchemaValidation(product.isEnabledSchemaValidation());
         productDto.setEnableStore(product.isEnableStore());
         productDto.setTestKey(product.getTestKey());
+
+        productDto.setIsRevision(product.isRevision());
+        productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
+        productDto.setRevisionId(product.getRevisionId());
 
         if (APIConstants.ENABLED.equals(product.getResponseCache())) {
             productDto.setResponseCachingEnabled(Boolean.TRUE);

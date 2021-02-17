@@ -144,7 +144,6 @@ export default function Transports(props) {
     );
 }
 
-
 Transports.propTypes = {
     api: PropTypes.shape({}).isRequired,
     configDispatcher: PropTypes.func.isRequired,

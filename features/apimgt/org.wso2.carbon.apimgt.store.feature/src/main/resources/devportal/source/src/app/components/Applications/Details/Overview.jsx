@@ -150,8 +150,8 @@ function Overview(props) {
                                             <span className={classes.iconTextWrapper}>
                                                 <Typography variant='caption' gutterBottom align='left'>
                                                     <FormattedMessage
-                                                        id='Applications.Details.InfoBar.throttling.tier'
-                                                        defaultMessage='Throttling Tier'
+                                                        id='Applications.Details.InfoBar.business.plan'
+                                                        defaultMessage='Business Plan'
                                                     />
                                                 </Typography>
                                             </span>

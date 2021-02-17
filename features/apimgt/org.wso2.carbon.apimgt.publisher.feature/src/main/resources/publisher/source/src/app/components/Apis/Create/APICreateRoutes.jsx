@@ -29,13 +29,13 @@ import ApiCreateWSDL from './WSDL/ApiCreateWSDL';
 import ApiCreateGraphQL from './GraphQL/ApiCreateGraphQL';
 import ApiCreateWebSocket from './WebSocket/ApiCreateWebSocket';
 import APICreateStreamingAPI from './StreamingAPI/APICreateStreamingAPI';
+import APICreateAsyncAPI from './AsyncAPI/ApiCreateAsyncAPI';
 
 const styles = {
     content: {
         flexGrow: 1,
     },
 };
-
 
 /**
  *
@@ -56,6 +56,7 @@ function APICreateRoutes(props) {
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
                 <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
                 <Route path='/apis/create/streamingapi' component={APICreateStreamingAPI} />
+                <Route path='/apis/create/asyncapi' component={APICreateAsyncAPI} />
                 <Route component={ResourceNotFound} />
             </Switch>
         </main>

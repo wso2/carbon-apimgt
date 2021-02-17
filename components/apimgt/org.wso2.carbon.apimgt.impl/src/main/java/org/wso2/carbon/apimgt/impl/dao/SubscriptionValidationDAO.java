@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
@@ -961,11 +962,22 @@ public class SubscriptionValidationDAO {
             ps.setString(2, keymanager);
             try (ResultSet resultSet = ps.executeQuery()) {
                 while (resultSet.next()) {
+                    String keyManagerName = resultSet.getString("KEY_MANAGER");
+                    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+                    try {
+                        KeyManagerConfigurationDTO keyManager = apiMgtDAO.
+                                getKeyManagerConfigurationByUUID(keyManagerName);
+                        if (keyManager != null) {
+                            keyManagerName = keyManager.getName();
+                        }
+                    } catch (APIManagementException e) {
+                        log.error("Error in fetching Key manager: " + keyManagerName);
+                    }
                     ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
                     keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                     keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                     keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
-                    keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    keyMapping.setKeyManager(keyManagerName);
                     return keyMapping;
                 }
             }

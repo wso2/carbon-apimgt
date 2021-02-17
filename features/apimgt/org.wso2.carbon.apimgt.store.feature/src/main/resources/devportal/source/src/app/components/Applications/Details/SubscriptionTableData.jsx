@@ -264,8 +264,8 @@ class SubscriptionTableData extends React.Component {
                             <DialogContent>
                                 <DialogContentText>
                                     <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.update.throttling.policy'
-                                        defaultMessage='Current Subscription Tier : '
+                                        id='Applications.Details.SubscriptionTableData.update.business.plan'
+                                        defaultMessage='Current Business Plan : '
                                     />
                                         {throttlingPolicy}
                                     <div>
@@ -299,8 +299,8 @@ class SubscriptionTableData extends React.Component {
                                                         select
                                                         label={(
                                                             <FormattedMessage
-                                                                defaultMessage='Throttling Tier'
-                                                                id='Applications.Details.SubscriptionTableData.update.throttling.policy.name'
+                                                                defaultMessage='Business Plan'
+                                                                id='Applications.Details.SubscriptionTableData.update.business.plan.name'
                                                             />
                                                         )}
                                                         value={selectedTier}
@@ -308,7 +308,7 @@ class SubscriptionTableData extends React.Component {
                                                         onChange={e => this.setSelectedTier(e.target.value)}
                                                         helperText={(
                                                             <FormattedMessage
-                                                                defaultMessage={`Assign a new Throttling policy tier to the existing subscription`}
+                                                                defaultMessage={`Assign a new Business plan to the existing subscription`}
                                                                 id='Applications.Details.SubscriptionTableData.update.throttling.policy.helper'
                                                             />
                                                         )}

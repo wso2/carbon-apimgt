@@ -206,7 +206,7 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getOpenAPIDefinition(String apiId, String orgId) throws APIManagementException;
-  
+
     /**
      * Returns the async-api v2.0 definition as a string
      *
@@ -419,6 +419,15 @@ public interface APIManager {
      * @throws APIManagementException
      */
     Application getApplicationByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Returns the corresponding application given the uuid. It will also contain keys of the application
+     *
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid, String tenantDomain) throws APIManagementException;
 
     /**
      * Returns the corresponding application given the uuid. The returned application will not contain key information

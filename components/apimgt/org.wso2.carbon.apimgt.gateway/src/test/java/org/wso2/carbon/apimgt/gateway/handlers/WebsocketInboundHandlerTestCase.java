@@ -40,7 +40,7 @@ import org.powermock.reflect.Whitebox;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.websocket.WebSocketApiException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
@@ -75,7 +75,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 
 import static org.junit.Assert.fail;
-import static org.wso2.carbon.apimgt.gateway.handlers.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
 
 /**
@@ -513,7 +513,7 @@ public class WebsocketInboundHandlerTestCase {
             }
 
             @Override
-            protected void setApiPropertiesToChannel(ChannelHandlerContext ctx){
+            protected void setApiPropertiesToChannel(ChannelHandlerContext ctx) {
                 // do nothing
             }
 

@@ -62,6 +62,7 @@ export default class API extends Resource {
      */
     getAPIById(id, callback = null) {
         const promiseGet = this.client.then((client) => {
+            console.log(client);
             return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
@@ -548,14 +549,14 @@ export default class API extends Resource {
     }
 
     /**
-     * Get topic subscriptions for a web hook Api.
+     * Get webhook subscriptions for a web hook Api.
      * @param apiId of the web hook api which holds the topics
      * @param applicationId of the application making the subscription
      * @returns promise
      */
-    getTopicSubscriptions(apiId, applicationId) {
+    getWebhookubScriptions(apiId, applicationId) {
         var promisedTopicSubscriptionGet = this.client.then((client) => {
-                return client.apis["Topics"].get_topics_subscriptions(
+                return client.apis["Webhooks"].get_webhooks_subscriptions(
                     { apiId: apiId, applicationId: applicationId });
             }
         );
@@ -570,7 +571,7 @@ export default class API extends Resource {
     getAllTopics(apiId) {
         const payload = { apiId };
         const promisedTopicGet = this.client.then((client) => {
-             return client.apis.Topics.get_topics__apiId_(payload);
+             return client.apis.Topics.get_apis__apiId__topics(payload);
         });
         return promisedTopicGet;
     }

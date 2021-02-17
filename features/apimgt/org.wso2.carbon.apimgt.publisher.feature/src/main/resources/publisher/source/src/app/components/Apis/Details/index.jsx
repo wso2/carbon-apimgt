@@ -332,7 +332,33 @@ class Details extends Component {
                     </>
                 );
             case 'WS':
-                return '';
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.asyncApi.definition',
+                                defaultMessage: 'AsyncAPI Definition',
+                            })}
+                            route='asyncApi definition'
+                            to={pathPrefix + 'asyncApi definition'}
+                            Icon={<CodeIcon />}
+                        />
+                    </>
+                );
+            case 'WEBSUB':
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.asyncApi.definition',
+                                defaultMessage: 'AsyncAPI Definition',
+                            })}
+                            route='asyncApi definition'
+                            to={pathPrefix + 'asyncApi definition'}
+                            Icon={<CodeIcon />}
+                        />
+                    </>
+                );
             case 'SOAP':
                 return (
                     <>
@@ -433,11 +459,13 @@ class Details extends Component {
         if (!isEmpty(updatedProperties)) {
             // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
-        } else {
+        } else if (!isAPIProduct) {
             // Just like calling noArg `setState()` will just trigger a re-render without modifying the state,
             // Calling `updateAPI()` without args wil return the API without any update.
             // Just sync-up the api state with backend
             promisedUpdate = API.get(api.id);
+        } else if (isAPIProduct) {
+            promisedUpdate = APIProduct.get(api.id);
         }
         return promisedUpdate
             .then((updatedAPI) => {
@@ -489,6 +517,7 @@ class Details extends Component {
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
         const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
         const redirectUrl = pathPrefix;
+        const isAsyncAPI = api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFoundMessageText = defineMessages({
@@ -550,8 +579,8 @@ class Details extends Component {
                         <Divider />
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.Design.Time.Overview',
-                                defaultMessage: 'Design configuration',
+                                id: 'Apis.Details.index.portal.configuration',
+                                defaultMessage: 'Portal Configuration',
                             })}
                             head='valueOnly'
 
@@ -587,8 +616,8 @@ class Details extends Component {
                         <Divider />
                         <LeftMenuItem
                             text={intl.formatMessage({
-                                id: 'Apis.Details.index.Gateway.Config',
-                                defaultMessage: 'Gateway configuration',
+                                id: 'Apis.Details.index.api.Config',
+                                defaultMessage: 'API configuration',
                             })}
                             head='valueOnly'
 
@@ -618,7 +647,7 @@ class Details extends Component {
                             )}
                             {this.getLeftMenuItemForResourcesByType(api.type)}
                             {this.getLeftMenuItemForDefinitionByType(api.type)}
-                            {!isAPIProduct && (
+                            {!isAPIProduct && api.type !== 'WEBSUB' && (
                                 <LeftMenuItem
                                     text={intl.formatMessage({
                                         id: 'Apis.Details.index.endpoints',
@@ -636,7 +665,6 @@ class Details extends Component {
                                 to={pathPrefix + 'subscriptions'}
                                 Icon={<SubscriptionsIcon />}
                             />
-
 
                             {!api.isWebSocket() && !isAPIProduct && (
                                 <LeftMenuItem
@@ -681,20 +709,18 @@ class Details extends Component {
                             />
                         )}
                         {!isAPIProduct && <Divider />}
-                        {!isAPIProduct && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.environments',
-                                    defaultMessage: 'Deployments',
-                                })}
-                                route='deployments'
-                                to={pathPrefix + 'deployments'}
-                                Icon={<PersonPinCircleOutlinedIcon />}
-                            />
-                        )}
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.environments',
+                                defaultMessage: 'Deployments',
+                            })}
+                            route='deployments'
+                            to={pathPrefix + 'deployments'}
+                            Icon={<PersonPinCircleOutlinedIcon />}
+                        />
                         {!isAPIProduct && <Divider />}
-                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
-                            api) && api.lifeCycleStatus !== 'PUBLISHED' && (
+                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
+                            && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'PUBLISHED' && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.Tryout',
@@ -744,6 +770,10 @@ class Details extends Component {
                                     path={Details.subPaths.SCHEMA_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.ASYNCAPI_DEFINITION}
+                                    component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -772,6 +802,10 @@ class Details extends Component {
                                 <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
                                 <Route
                                     path={Details.subPaths.ENVIRONMENTS}
+                                    component={() => <Environments api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.ENVIRONMENTS_PRODUCT}
                                     component={() => <Environments api={api} />}
                                 />
                                 <Route
@@ -868,6 +902,7 @@ Details.subPaths = {
     RUNTIME_CONFIGURATION_WEBSOCKET: '/apis/:api_uuid/runtime-configuration-websocket',
     ENDPOINTS: '/apis/:api_uuid/endpoints',
     ENVIRONMENTS: '/apis/:api_uuid/deployments',
+    ENVIRONMENTS_PRODUCT: '/api-products/:apiprod_uuid/deployments',
     OPERATIONS: '/apis/:api_uuid/operations',
     RESOURCES: '/apis/:api_uuid/resources',
     RESOURCES_PRODUCT: '/api-products/:apiprod_uuid/resources',
@@ -890,6 +925,7 @@ Details.subPaths = {
     TRYOUT: '/apis/:api_uuid/test-console',
     QUERYANALYSIS: '/apis/:api_uuid/queryanalysis',
     TOPICS: '/apis/:api_uuid/topics',
+    ASYNCAPI_DEFINITION: '/apis/:api_uuid/asyncApi definition',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum
@@ -904,13 +940,13 @@ Details.propTypes = {
         footeremaillink: PropTypes.string,
     }).isRequired,
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
-        pathname: PropTypes.object,
+        pathname: PropTypes.shape({}),
     }).isRequired,
     history: PropTypes.shape({
-        push: PropTypes.object,
+        push: PropTypes.shape({}),
     }).isRequired,
     theme: PropTypes.shape({
         custom: PropTypes.shape({

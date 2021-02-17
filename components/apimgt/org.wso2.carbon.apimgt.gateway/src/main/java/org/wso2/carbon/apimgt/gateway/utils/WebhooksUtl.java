@@ -28,7 +28,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
@@ -112,8 +112,8 @@ public class WebhooksUtl {
      * @return the generated API Key.
      */
     public static String generateAPIKey(MessageContext messageContext, String tenantDomain) {
-        String context = (String) messageContext.getProperty(APIMgtGatewayConstants.CONTEXT);
-        String apiVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.VERSION);
+        String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain).
                 getApiByContextAndVersion(context, apiVersion );
         return api.getUuid();
@@ -135,7 +135,7 @@ public class WebhooksUtl {
                 StandardCharsets.UTF_8.name());
         String topicName = null;
         for (NameValuePair nvPair : queryParameter) {
-            if (nvPair.getName().equals(APIConstants.Webhooks.TOPIC_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
                 topicName = nvPair.getValue();
             }
         }

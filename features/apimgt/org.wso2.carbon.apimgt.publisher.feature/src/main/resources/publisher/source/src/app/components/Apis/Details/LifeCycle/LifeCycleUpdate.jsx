@@ -101,8 +101,7 @@ class LifeCycleUpdate extends Component {
         }
         promisedUpdate
             .then((response) => {
-            /* TODO: Handle IO erros ~tmkb */
-                this.props.handleUpdate(true);
+                /* TODO: Handle IO erros ~tmkb */
                 const newState = response.body.lifecycleState.state;
                 const { workflowStatus } = response.body;
                 this.context.updateAPI({ enableStore: true });
@@ -319,7 +318,6 @@ LifeCycleUpdate.propTypes = {
     checkList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     lcState: PropTypes.shape({}).isRequired,
     handleChangeCheckList: PropTypes.func.isRequired,
-    handleUpdate: PropTypes.func.isRequired,
     theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,

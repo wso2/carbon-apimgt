@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -139,7 +140,6 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH)).thenReturn("abc");
         Mockito.when(synCtx.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("");
         Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
-        Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("abc");
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
@@ -239,7 +239,6 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH)).thenReturn("abc");
         Mockito.when(synCtx.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("");
         Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
-        Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("abc");
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
@@ -295,7 +294,6 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH)).thenReturn("");
         Mockito.when(synCtx.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("");
         Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
-        Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("abc");
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
@@ -521,7 +519,6 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH)).thenReturn("abc");
         Mockito.when(synCtx.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("");
         Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
-        Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("abc");
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
                 .class);
         Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("https");

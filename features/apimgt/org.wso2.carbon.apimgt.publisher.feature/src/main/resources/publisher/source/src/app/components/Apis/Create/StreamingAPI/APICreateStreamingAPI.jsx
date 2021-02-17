@@ -40,8 +40,8 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const APICreateStreamingAPI = () => {
-    // parameter: props
+const APICreateStreamingAPI = (props) => {
+    const { history } = props;
     const { settings } = useAppContext();
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
@@ -65,7 +65,7 @@ const APICreateStreamingAPI = () => {
     const protocolKeys = {
         WebSocket: 'WS',
         SSE: 'SSE',
-        WebSub: 'WEBSUB'
+        WebSub: 'WEBSUB',
     };
 
     /**
@@ -83,9 +83,8 @@ const APICreateStreamingAPI = () => {
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'protocol':
-                const key = protocolKeys[value];
-                setHideEndpoint(key === protocolKeys.WebSub);
-                return { ...currentState, [action]: key, };
+                setHideEndpoint(protocolKeys[value] === protocolKeys.WebSub);
+                return { ...currentState, [action]: protocolKeys[value] };
             default:
                 return currentState;
         }
@@ -134,7 +133,7 @@ const APICreateStreamingAPI = () => {
 
         if (endpoint) {
             apiData.endpointConfig = {
-                endpoint_type: 'http',
+                endpoint_type: protocol === 'WS' ? 'ws' : 'http',
                 sandbox_endpoints: {
                     url: endpoint,
                 },
@@ -147,33 +146,23 @@ const APICreateStreamingAPI = () => {
         apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
 
         const newAPI = new API(apiData);
-        const promisedCreatedAPI = newAPI
+        newAPI
             .saveStreamingAPI()
             .then((api) => {
                 Alert.info('API created successfully');
-                return api;
+                history.push(`/apis/${api.id}/overview`);
             })
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
-                    setPageError(error.response.body);
                 } else {
-                    const message = 'Something went wrong while adding the API';
-                    Alert.error(message);
-                    setPageError(message);
+                    Alert.error('Something went wrong while adding the API');
                 }
                 console.error(error);
             })
             .finally(() => {
                 setIsCreating(false);
             });
-        return promisedCreatedAPI.finally(() => setIsCreating(false));
-    }
-
-    function createAPIOnly() {
-        createAPI().then((api) => {
-            window.history.push(`/apis/${api.id}/overview`);
-        });
     }
 
     const pageTitle = (
@@ -269,7 +258,7 @@ const APICreateStreamingAPI = () => {
                                 variant='contained'
                                 color='primary'
                                 disabled={!(isAPICreatable && apiInputs.isFormValid)}
-                                onClick={createAPIOnly}
+                                onClick={createAPI}
                             >
                                 Create
                                 {' '}

@@ -177,10 +177,14 @@ public class SubscriptionDataStore {
      * @return the subscription list.
      */
     public List<WebhooksDTO> getSubscribers(String api) {
-        List<WebhooksDTO> subscriberList = new ArrayList<WebhooksDTO>(subscribersMap.get(api).values());
-        long now = Instant.now().toEpochMilli();
-        subscriberList.removeIf(existingSubscriber -> existingSubscriber.getExpiryTime() != 0 &&
+        Map<String, WebhooksDTO> subscribers = subscribersMap.get(api);
+        if (subscribers != null) {
+            List<WebhooksDTO> subscriberList = new ArrayList<WebhooksDTO>(subscribersMap.get(api).values());
+            long now = Instant.now().toEpochMilli();
+            subscriberList.removeIf(existingSubscriber -> existingSubscriber.getExpiryTime() != 0 &&
                     existingSubscriber.getExpiryTime() < now);
-        return subscriberList;
+            return subscriberList;
+        }
+        return null;
     }
 }

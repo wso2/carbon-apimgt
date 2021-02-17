@@ -25,8 +25,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,6 +54,7 @@ public class API implements Serializable {
     private String wadlUrl;
     private String swaggerDefinition;
     private String graphQLSchema;
+    private String asyncApiDefinition;
     private String type;
     private String context;
     private String contextTemplate;
@@ -115,6 +118,9 @@ public class API implements Serializable {
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+    private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
+
+    private Map<String, String> wsUriMapping;
 
     private String responseCache;
     private int cacheTimeout;
@@ -140,6 +146,7 @@ public class API implements Serializable {
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
     private List<String> keyManagers = new ArrayList<>();
+    private JSONObject serviceInfo = new JSONObject();
     /**
      * Used to set the workflow status in lifecycle state change workflow
      */
@@ -233,6 +240,19 @@ public class API implements Serializable {
         this.additionalProperties = properties;
     }
 
+    public JSONObject getServiceInfoObject() { return serviceInfo; }
+
+    public void setServiceInfo(String key, String value) { this.serviceInfo.put(key, value); }
+
+    public void setServiceInfo(JSONObject serviceInfo) { this.serviceInfo = serviceInfo; }
+
+    public String getServiceInfo(String key) {
+        if (serviceInfo != null && serviceInfo.get(key) != null) {
+            return serviceInfo.get(key).toString();
+        } else {
+            return null;
+        }
+    }
     /**
      * This method is used to get the properties related to monetization
      *
@@ -341,6 +361,14 @@ public class API implements Serializable {
 
     public String getGraphQLSchema() {
         return graphQLSchema;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
     }
 
     public Set<String> getEnvironments() {
@@ -944,6 +972,22 @@ public class API implements Serializable {
         this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
     }
 
+    public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
+        return webSocketTopicMappingConfiguration;
+    }
+
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
+    }
+
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
@@ -1215,9 +1259,6 @@ public class API implements Serializable {
     }
 
     public boolean isAsync() {
-        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
-            return true;
-        }
-        return false;
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
     }
 }
