@@ -65,19 +65,25 @@ public class ServiceEntryMappingUtil {
      * @throws IOException
      */
     static ServiceEntry fromFileToServiceEntry(File file, ServiceEntry service) throws IOException {
+        ServiceEntry generatedServiceInfo = new ServiceEntry();
         if (service == null) {
             service = new ServiceEntry();
         }
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            service = mapper.readValue(file, ServiceEntry.class);
+            generatedServiceInfo = mapper.readValue(file, ServiceEntry.class);
             if (StringUtils.isBlank(service.getKey())) {
-                service.setKey(generateServiceKey(service));
+                generatedServiceInfo.setKey(generateServiceKey(generatedServiceInfo));
+            } else {
+                generatedServiceInfo.setKey(service.getKey());
+            }
+            if (service.getEndpointDef() != null) {
+                generatedServiceInfo.setEndpointDef(service.getEndpointDef());
             }
         } catch (InvalidFormatException e) {
             RestApiUtil.handleBadRequest("One or more parameters contain disallowed values", e, log);
         }
-        return service;
+        return generatedServiceInfo;
     }
 
     /**
