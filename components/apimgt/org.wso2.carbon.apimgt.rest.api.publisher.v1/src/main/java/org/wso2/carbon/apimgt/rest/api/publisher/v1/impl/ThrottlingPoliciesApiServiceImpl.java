@@ -63,7 +63,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      */
     @Override
     public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset,
-                                             String ifNoneMatch, String tierQuotaType, MessageContext messageContext) {
+                                             String ifNoneMatch, MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -84,18 +84,18 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         SubscriptionPolicy[] subscriptionPolicies = (SubscriptionPolicy[]) apiProvider.getPolicies(userName,
                 PolicyConstants.POLICY_LEVEL_SUB);
         List<SubscriptionPolicy> subscriptionPolicyList = new ArrayList<>();
-        if (Objects.nonNull(tierQuotaTypes) && !tierQuotaTypes.isEmpty()){
-            if (tierQuotaTypes.contains(",")){
+        if (Objects.nonNull(tierQuotaTypes) && !tierQuotaTypes.isEmpty()) {
+            if (tierQuotaTypes.contains(",")) {
                 String[] tierQuotaTypeArray = tierQuotaTypes.split(",");
-                for (String tierQuotaType:tierQuotaTypeArray) {
-                    for (SubscriptionPolicy subscriptionPolicy:subscriptionPolicies) {
-                        if (tierQuotaTypes.equals(subscriptionPolicy.getTierQuotaType())) {
+                for (String tierQuotaType : tierQuotaTypeArray) {
+                    for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
+                        if (tierQuotaType.equals(subscriptionPolicy.getDefaultQuotaPolicy().getType())) {
                             subscriptionPolicyList.add(subscriptionPolicy);
                         }
                     }
                 }
             } else {
-                for (SubscriptionPolicy subscriptionPolicy:subscriptionPolicies) {
+                for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
                     if (tierQuotaTypes.equals(subscriptionPolicy.getDefaultQuotaPolicy().getType())) {
                         subscriptionPolicyList.add(subscriptionPolicy);
                     }
