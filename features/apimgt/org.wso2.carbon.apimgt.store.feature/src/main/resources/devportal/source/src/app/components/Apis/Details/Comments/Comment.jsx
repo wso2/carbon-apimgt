@@ -216,38 +216,38 @@ class Comment extends React.Component {
             apiId, allComments, commentsUpdate, intl,
         } = this.props;
         const commentIdOfCommentToDelete = deleteComment.id;
-        // const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
+        const parentCommentIdOfCommentToDelete = deleteComment.replyTo;
         this.handleClose();
 
         apiClient
             .deleteComment(apiId, commentIdOfCommentToDelete)
             .then(() => {
-                // if (parentCommentIdOfCommentToDelete === undefined) {
+                if (parentCommentIdOfCommentToDelete === undefined) {
                 const remainingComments = allComments.filter(this.filterRemainingComments);
                 commentsUpdate(remainingComments);
                 Alert.message('Comment' + commentIdOfCommentToDelete + 'has been successfully deleted');
-                // } else {
-                //     const index = allComments.findIndex(this.filterCommentToDelete);
-                //     const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
-                //     allComments[index].replies = remainingReplies;
-                //     commentsUpdate(allComments);
-                // }
+                } else {
+                    const index = allComments.findIndex(this.filterCommentToDelete);
+                    const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
+                    allComments[index].replies = remainingReplies;
+                    commentsUpdate(allComments);
+                }
             })
             .catch((error) => {
                 console.error(error);
                 if (error.response) {
                     Alert.error(error.response.body.message);
                 }
-                // else {
-                //     Alert.error(
-                //         intl.formatMessage({
-                //             defaultMessage: 'Something went wrong while deleting comment',
-                //             id: 'Apis.Details.Comments.Comment.something.went.wrong',
-                //         })
-                //         + ' - '
-                //         + commentIdOfCommentToDelete,
-                //     );
-                // }
+                else {
+                    Alert.error(
+                        intl.formatMessage({
+                            defaultMessage: 'Something went wrong while deleting comment',
+                            id: 'Apis.Details.Comments.Comment.something.went.wrong',
+                        })
+                        + ' - '
+                        + commentIdOfCommentToDelete,
+                    );
+                }
             });
     }
 
