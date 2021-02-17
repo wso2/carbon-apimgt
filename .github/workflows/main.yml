@@ -19,7 +19,7 @@ jobs:
     - name: Build carbon-apimgt with Test.
       run: mvn clean install --file pom.xml
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.2.1
       with:
         flags: unittests
         verbose: true
