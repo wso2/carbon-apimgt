@@ -591,11 +591,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO api = getAPIByAPIId(apiId, tenant);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
+        String swaggerDefinition = api.getApiDefinition();
         if (api != null) {
             String apiProvider = api.getProvider();
             try {
                 sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(),
-                        api.getVersion(), apiProvider, RestApiCommonUtil.getLoggedInUsername());
+                        api.getVersion(), apiProvider, RestApiCommonUtil.getLoggedInUsername(), swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
