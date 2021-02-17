@@ -295,8 +295,8 @@ export default function Environments() {
     const [allDeployments, setAllDeployments] = useState([]);
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
-    const [selectedRevision, setRevision] = useState(null);
-    const [selectedVhost, setVhost] = useState(null);
+    const [selectedRevision, setRevision] = useState([]);
+    const [selectedVhost, setVhost] = useState([]);
     const [extraRevisionToDelete, setExtraRevisionToDelete] = useState(null);
     const [description, setDescription] = useState('');
     const [mgLabels, setMgLabels] = useState([]);
@@ -387,11 +387,15 @@ export default function Environments() {
     };
 
     const handleSelect = (event) => {
-        setRevision(event.target.value);
+        let revisions = selectedRevision.filter(r => r.env !== event.target.name);
+        revisions.push({env: event.target.name, revision: event.target.value});
+        setRevision(revisions);
     };
 
     const handleVhostSelect = (event) => {
-        setVhost(event.target.value);
+        let vhosts = selectedVhost.filter(v => v.env !== event.target.name);
+        vhosts.push({env: event.target.name, vhost: event.target.value});
+        setVhost(vhosts);
     };
 
     const handleClose = () => {
@@ -1240,6 +1244,12 @@ export default function Environments() {
 
     })
 
+    /**
+     * Get gateway access URL from vhost
+     * @param vhost VHost object
+     * @param type URL type WS or HTTP
+     * @returns {{secondary: string, primary: string}}
+     */
     function getGatewayAccessUrl(vhost, type) {
         let endpoints = { "primary": "", "secondary": ""};
         if (vhost == null) {
@@ -1257,7 +1267,7 @@ export default function Environments() {
         endpoints.primary = "http://" + vhost.host +
             (vhost.httpPort === 80 ? "" : ":" + vhost.httpPort) + httpContext;
         endpoints.secondary = "https://" + vhost.host +
-            (vhost.httpPort === 443 ? "" : ":" + vhost.httpPort) + httpContext;
+            (vhost.httpsPort === 443 ? "" : ":" + vhost.httpsPort) + httpContext;
         return endpoints;
     }
 
@@ -1911,8 +1921,7 @@ export default function Environments() {
                                                             getContentAnchorEl: null,
                                                         },
                                                     }}
-                                                    name='selectVhost'
-                                                    value={row.vhosts[0].host}
+                                                    name={row.name}
                                                     onChange={handleVhostSelect}
                                                     margin='dense'
                                                     variant='outlined'
@@ -1977,7 +1986,7 @@ export default function Environments() {
                                                                 getContentAnchorEl: null,
                                                             },
                                                         }}
-                                                        name='selectRevision'
+                                                        name={row.name}
                                                         onChange={handleSelect}
                                                         margin='dense'
                                                         variant='outlined'
@@ -1995,10 +2004,18 @@ export default function Environments() {
                                                     </TextField>
                                                     <Button
                                                         className={classes.button2}
-                                                        disabled={api.isRevision || !selectedRevision || !selectedVhost}
+                                                        disabled={api.isRevision || !selectedRevision.some(
+                                                            r => r.env === row.name && r.revision
+                                                        ) || !selectedVhost.some(
+                                                            v => v.env === row.name && v.vhost
+                                                        )}
                                                         variant='outlined'
                                                         onClick={() =>
-                                                            deployRevision(selectedRevision, row.name, selectedVhost)}
+                                                            deployRevision(selectedRevision.find(
+                                                                r => r.env === row.name
+                                                            ).revision, row.name, selectedVhost.find(
+                                                                v => v.env === row.name
+                                                            ).vhost)}
 
                                                     >
                                                         <FormattedMessage
