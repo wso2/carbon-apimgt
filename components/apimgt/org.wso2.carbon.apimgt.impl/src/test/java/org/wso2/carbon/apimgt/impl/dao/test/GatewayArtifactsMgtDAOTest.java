@@ -136,7 +136,7 @@ public class GatewayArtifactsMgtDAOTest {
         Assert.assertEquals(gatewayAPIId, uuid);
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"));
         List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
-                "label1", "carbon.super");
+                new String[]{"label1"}, "carbon.super");
         Assert.assertEquals(artifacts.size(), 1);
         RuntimeArtifactDto artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);
@@ -145,9 +145,10 @@ public class GatewayArtifactsMgtDAOTest {
         apiRevisionDeployment.setDeployment("label1");
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label2"),
                 Collections.asSet(apiRevisionDeployment));
-        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, "label1", "carbon.super");
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label1"}, "carbon.super");
         Assert.assertEquals(artifacts.size(), 0);
-        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, "label2", "carbon.super");
+        artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label2"},
+                "carbon.super");
         Assert.assertEquals(artifacts.size(), 1);
         artifact = artifacts.get(0);
         Assert.assertNotNull(artifact);

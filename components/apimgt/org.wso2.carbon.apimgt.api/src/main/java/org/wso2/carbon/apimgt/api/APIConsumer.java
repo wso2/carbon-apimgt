@@ -39,6 +39,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 
 import java.util.List;
 import java.util.Map;
@@ -529,7 +531,8 @@ public interface APIConsumer extends APIManager {
                                                                  String callbackUrl, String[] allowedDomains,
                                                                  String validityTime,
                                                                  String tokenScope, String groupingId,
-                                                                 String jsonString, String keyManagerName)
+                                                                 String jsonString, String keyManagerName,
+                                                                 String tenantDomain)
             throws APIManagementException;
 
     /**
@@ -933,6 +936,8 @@ public interface APIConsumer extends APIManager {
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
 
+    Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
+
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
 
     /**
@@ -984,8 +989,62 @@ public interface APIConsumer extends APIManager {
      */
     boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
 
+    /**
+     *
+     * @param apiId API UUID
+     * @return Set of Topics defined in a specified Async API
+     * @throws APIManagementException if an error occurs while retrieving data
+     */
+    Set<Topic> getTopics(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves webhook subscriptions for a webhook API
+     *
+     * @param applicationId Application UUID
+     * @param apiId         API UUID
+     * @return Set of Subscriptions of application to a API
+     * @throws APIManagementException if an error occurs while retrieving data
+     */
+    Set<Subscription> getTopicSubscriptions(String applicationId, String apiId) throws APIManagementException;
+
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
 
+    APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
+            throws APIManagementException;
+
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given gateway environment as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param environmentName API Gateway environment name
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
+            throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given microgateway gateway label as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param labelName name of the microgateway label
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName)
+            throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given container managed cluster name as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param clusterName name of the container managed cluster
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName)
+            throws APIManagementException;
 }

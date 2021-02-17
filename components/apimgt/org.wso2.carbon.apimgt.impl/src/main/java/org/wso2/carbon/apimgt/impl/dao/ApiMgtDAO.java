@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -69,6 +70,8 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -138,6 +141,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1298,6 +1302,124 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, result);
         }
         return subscriber;
+    }
+
+    /**
+     * Retrieves the Topic for a specified async API.
+     *
+     * @param apiId API UUID
+     * @return Set of Topic objects
+     * @throws APIManagementException if failed to retrieve topics of the web hook API
+     */
+    public Set<Topic> getAPITopics(String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicsQuery = SQLConstants.GET_ALL_TOPICS_BY_API_ID;
+        Set<Topic> topicSet = new HashSet();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicsQuery);
+            ps.setString(1, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Topic topic = new Topic();
+                topic.setName(resultSet.getString("URL_PATTERN"));
+                topic.setApiId(resultSet.getString("API_ID"));
+                topic.setType(resultSet.getString("HTTP_METHOD"));
+                topicSet.add(topic);
+            }
+            return topicSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topics available in api " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves set of web hook topic subscriptions for a application.
+     *
+     * @param applicationId application UUID
+     * @return set of web hook subscriptions.
+     * @throws APIManagementException if failed to retrieve web hook topc subscriptions
+     */
+    public Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsQuery);
+            ps.setString(1, applicationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the web hook topc subscriptions from an application to a given api.
+     *
+     * @param applicationId application uuid
+     * @param apiId         api uuid
+     * @return set of web hook topic subscriptions
+     * @throws APIManagementException
+     */
+    public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsByApiIdQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS_BY_API_KEY;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsByApiIdQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+            return subscriptionSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
     }
 
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
@@ -2994,8 +3116,8 @@ public class ApiMgtDAO {
      * @param keyManagerName
      */
     public void updateApplicationKeyTypeMapping(Application application, String keyType,
-                                                String keyManagerName) throws APIManagementException {
-        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerName);
+                                                String keyManagerId) throws APIManagementException {
+        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerId);
         String consumerKey = null;
         if (app != null) {
             consumerKey = app.getClientId();
@@ -3011,12 +3133,12 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, consumerKey);
-                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerName);
+                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerId);
                 String content = new Gson().toJson(oAuthApp);
                 ps.setBinaryStream(2, new ByteArrayInputStream(content.getBytes()));
                 ps.setInt(3, application.getId());
                 ps.setString(4, keyType);
-                ps.setString(5, keyManagerName);
+                ps.setString(5, keyManagerId);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -5494,40 +5616,44 @@ public class ApiMgtDAO {
         return subscriber;
     }
 
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, APIStatus oldStatus, APIStatus newStatus,
-                                        String userId, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus.toString(), newStatus.toString(), userId, tenantId, conn);
-        } catch (SQLException e) {
-            handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
-        }
-    }
-
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
+    public void recordAPILifeCycleEvent(APIIdentifier apiIdentifier, String oldStatus, String newStatus, String userId,
                                         int tenantId) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, tenantId, conn);
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            int apiId = getAPIID(apiIdentifier, conn);
+            conn.setAutoCommit(false);
+            try {
+                recordAPILifeCycleEvent(apiId, oldStatus, newStatus, userId, tenantId, conn);
+                changeAPILifeCycleStatus(conn, apiId, newStatus);
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
     }
 
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
-                                        int tenantId, Connection conn) throws APIManagementException {
-        //Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        PreparedStatement selectQuerySt = null;
 
-        int apiId = -1;
+
+    public void recordAPILifeCycleEvent(int apiId, String oldStatus, String newStatus, String userId,
+                                        int tenantId) throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                recordAPILifeCycleEvent(apiId, oldStatus, newStatus, userId, tenantId, conn);
+                changeAPILifeCycleStatus(conn, apiId, newStatus);
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to record API state change", e);
+        }
+    }
+    private void recordAPILifeCycleEvent(int apiId, String oldStatus, String newStatus, String userId,
+                                         int tenantId, Connection conn) throws APIManagementException, SQLException {
 
         if (oldStatus == null && !newStatus.equals(APIConstants.CREATED)) {
             String msg = "Invalid old and new state combination";
@@ -5539,27 +5665,9 @@ public class ApiMgtDAO {
             throw new APIManagementException(msg);
         }
 
-        String getAPIQuery = SQLConstants.GET_API_ID_SQL;
         String sqlQuery = SQLConstants.ADD_API_LIFECYCLE_EVENT_SQL;
-        try {
-            conn.setAutoCommit(false);
 
-            selectQuerySt = conn.prepareStatement(getAPIQuery);
-            selectQuerySt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            selectQuerySt.setString(2, identifier.getApiName());
-            selectQuerySt.setString(3, identifier.getVersion());
-            resultSet = selectQuerySt.executeQuery();
-            if (resultSet.next()) {
-                apiId = resultSet.getInt("API_ID");
-            }
-
-            if (apiId == -1) {
-                String msg = "Unable to find the API: " + identifier + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-
-            ps = conn.prepareStatement(sqlQuery);
+        try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setInt(1, apiId);
             if (oldStatus != null) {
                 ps.setString(2, oldStatus);
@@ -5570,23 +5678,18 @@ public class ApiMgtDAO {
             ps.setString(4, userId);
             ps.setInt(5, tenantId);
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-
             ps.executeUpdate();
-
-            // finally commit transaction
             conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the API state change record", e1);
-                }
-            }
-            handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectQuerySt, null, null);
-            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+        }
+        // finally commit transaction
+    }
+
+    private void changeAPILifeCycleStatus(Connection connection, int apiId, String updatedStatus) throws SQLException {
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.UPDATE_API_STATUS)) {
+            preparedStatement.setString(1, updatedStatus);
+            preparedStatement.setInt(2, apiId);
+            connection.commit();
         }
     }
 
@@ -5834,6 +5937,7 @@ public class ApiMgtDAO {
             prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.setString(9, api.getType());
             prepStmt.setString(10, api.getUUID());
+            prepStmt.setString(11,APIConstants.CREATED);
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -5845,11 +5949,15 @@ public class ApiMgtDAO {
 
             String tenantUserName = MultitenantUtils
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
+            recordAPILifeCycleEvent(apiId,null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
                     connection);
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
+            }
+            String serviceKey = api.getServiceInfo("serviceKey");
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -7176,6 +7284,10 @@ public class ApiMgtDAO {
                     removeAPIFromDefaultVersion(api.getId(), connection);
                 }
             }
+            String serviceKey = api.getServiceInfo("serviceKey");
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                updateAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), connection);
+            }
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -7192,8 +7304,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public int getAPIID(Identifier apiId, Connection connection) throws APIManagementException {
-        boolean created = false;
+    public int getAPIID(Identifier apiId) throws APIManagementException {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
@@ -7205,33 +7316,37 @@ public class ApiMgtDAO {
         }
 
         try {
-            if (connection == null) {
-
-                // If connection is not provided a new one will be created.
-                connection = APIMgtDBUtil.getConnection();
-                created = true;
-            }
-
-            prepStmt = connection.prepareStatement(getAPIQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmt.setString(2, apiId.getName());
-            prepStmt.setString(3, apiId.getVersion());
-            rs = prepStmt.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt("API_ID");
-            }
-            if (id == -1) {
-                String msg = "Unable to find the API: " + apiId + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                return getAPIID(apiId,connection);
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
-        } finally {
-            if (created) {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-            } else {
-                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+        }
+        return id;
+    }
+
+    public int getAPIID(Identifier apiId, Connection connection) throws APIManagementException, SQLException {
+
+        int id = -1;
+        String getAPIQuery = SQLConstants.GET_API_ID_SQL;
+
+        if (apiId instanceof APIProductIdentifier) {
+            getAPIQuery = SQLConstants.GET_API_PRODUCT_ID_SQL;
+        }
+
+        try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            prepStmt.setString(2, apiId.getName());
+            prepStmt.setString(3, apiId.getVersion());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    id = rs.getInt("API_ID");
+                }
+                if (id == -1) {
+                    String msg = "Unable to find the API: " + apiId + " in the database";
+                    log.error(msg);
+                    throw new APIManagementException(msg);
+                }
             }
         }
         return id;
@@ -7308,7 +7423,6 @@ public class ApiMgtDAO {
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
-
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -8462,45 +8576,39 @@ public class ApiMgtDAO {
      */
     public String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID)
             throws APIManagementException {
+
         String workflowExtRef = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         int id = -1;
         int subscriptionID = -1;
 
         String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL;
         String postgreSQL = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL;
-        try {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
             if (identifier instanceof APIIdentifier) {
                 id = getAPIID((APIIdentifier) identifier, conn);
 
             } else if (identifier instanceof APIProductIdentifier) {
                 id = ((APIProductIdentifier) identifier).getProductId();
             }
-
-            conn = APIMgtDBUtil.getConnection();
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 sqlQuery = postgreSQL;
             }
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, id);
-            ps.setInt(2, appID);
-            ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            rs = ps.executeQuery();
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setInt(1, id);
+                ps.setInt(2, appID);
+                ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                try (ResultSet rs = ps.executeQuery()) {
+                    // returns only one row
+                    if (rs.next()) {
+                        workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+                    }
+                }
 
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
             }
-
         } catch (SQLException e) {
             handleException("Error occurred while getting workflow entry for " +
                     "Subscription : " + subscriptionID, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
-
         return workflowExtRef;
     }
 
@@ -8853,6 +8961,43 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        }
+        return null;
+    }
+
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid)
+            throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return  getKeyManagerConfigurationByUUID(conn, uuid);
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for key manager uuid: " + uuid, e);
+        }
+    }
+
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection ,String uuid)
+            throws SQLException, IOException {
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    keyManagerConfigurationDTO.setUuid(resultSet.getString("UUID"));
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -14914,10 +15059,10 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addAuditApiMapping(APIIdentifier apiIdentifier, String uuid) throws APIManagementException {
-        Connection connection = null;
+
         String query = SQLConstants.ADD_SECURITY_AUDIT_MAP_SQL;
-        int apiId = getAPIID(apiIdentifier, connection);
         try (Connection conn = APIMgtDBUtil.getConnection()) {
+            int apiId = getAPIID(apiIdentifier, conn);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setInt(1, apiId);
                 ps.setString(2, uuid);
@@ -14935,11 +15080,10 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getAuditApiId(APIIdentifier apiIdentifier) throws APIManagementException {
-        Connection connection = null;
         String query = SQLConstants.GET_AUDIT_UUID_SQL;
-        int apiId = getAPIID(apiIdentifier, connection);
         String auditUuid = null;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
+            int apiId = getAPIID(apiIdentifier, conn);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setInt(1, apiId);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -16149,6 +16293,30 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get the latest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID       UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getLatestRevisionUUID(String apiUUID) throws APIManagementException {
+        String revisionUUID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the latest revision for api ID: " + apiUUID, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
      * Adds an API revision record to the database
      *
      * @param apiRevision content of the revision
@@ -17350,5 +17518,90 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Retrieve Service Info and Set it to API
+     *
+     * @param api API Object
+     * @param apiId Internal Unique API Id
+     * @throws APIManagementException
+     */
+    public void setServiceStatusInfoToAPI(API api, int apiId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                     .GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL)) {
+            preparedStatement.setInt(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    JSONObject serviceInfo = new JSONObject();
+                    serviceInfo.put("key", resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+                    if (resultSet.getString("SERVICE_MD5").equals(resultSet
+                            .getString("API_SERVICE_MD5"))) {
+                        serviceInfo.put("outdated", false);
+                    } else {
+                        serviceInfo.put("outdated", true);
+                    }
+                    api.setServiceInfo(serviceInfo);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the service status associated with the API - "
+                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
+        }
+    }
 
+    private void addAPIServiceMapping(int apiId, String serviceKey, String md5sum, int tenantId,
+                                      Connection connection) throws SQLException {
+        String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setString(2, serviceKey);
+            preparedStatement.setString(3, md5sum);
+            preparedStatement.setInt(4, tenantId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Retrieve the Unique Identifier of the Service used in API
+     *
+     * @param apiId Unique Identifier of API
+     * @param tenantId Tenant ID
+     * @return Service Key
+     * @throws APIManagementException
+     */
+    public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
+        String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL;
+        String serviceKey = StringUtils.EMPTY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceKey = resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+        }
+        return serviceKey;
+    }
+
+    /**
+     * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
+     *
+     * @param apiId      Unique Identifier of API
+     * @param serviceKey Unique key of the Service
+     * @param md5        MD5 value of the Service
+     * @throws SQLException
+     */
+    public void updateAPIServiceMapping(String apiId, String serviceKey, String md5, Connection connection)
+            throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
+            statement.setString(1, serviceKey);
+            statement.setString(2, md5);
+            statement.setString(3, apiId);
+            statement.executeUpdate();
+        }
+    }
 }

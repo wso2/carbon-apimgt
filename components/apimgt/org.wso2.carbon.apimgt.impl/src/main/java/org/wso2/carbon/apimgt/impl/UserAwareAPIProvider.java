@@ -112,15 +112,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway,
-            boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
-            throws APIManagementException, FaultGatewaysException {
-        checkAccessControlPermission(identifier);
-        return super
-                .updateAPIStatus(identifier, status, publishToGateway, deprecateOldVersions, makeKeysForwardCompatible);
-    }
-
-    @Override
     public void manageAPI(API api) throws APIManagementException,FaultGatewaysException {
         boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
                 APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
@@ -160,22 +151,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public List<String> getCustomFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.getCustomFaultSequences(apiIdentifier);
-    }
-
-    @Override
-    public void changeAPIStatus(API api, String status, String userId,
-                                boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
-        checkPublishPermission();
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
-        super.changeAPIStatus(api, status, userId, updateGatewayConfig);
-    }
-
-    @Override
-    public void changeAPIStatus(API api, APIStatus status, String userId,
-            boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
-        changeAPIStatus(api, status.getStatus(), userId, updateGatewayConfig);
     }
 
     @Override
@@ -607,5 +582,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
         checkPublishPermission();
         super.deleteWorkflowTask(apiIdentifier);
+    }
+
+    @Override
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getAsyncAPIDefinition(apiId);
     }
 }

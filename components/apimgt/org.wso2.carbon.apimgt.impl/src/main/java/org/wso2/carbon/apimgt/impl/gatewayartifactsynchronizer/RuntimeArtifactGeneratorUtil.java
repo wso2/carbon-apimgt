@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import com.nimbusds.jose.util.Base64URL;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -24,15 +25,17 @@ import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.apache.commons.codec.binary.Base64;
 
 import java.util.List;
+import java.util.Set;
 
 public class RuntimeArtifactGeneratorUtil {
 
     private static final GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
 
-    public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String gatewayLabel, String type,
-                                                             String tenantDomain)
+    public static RuntimeArtifactDto generateRuntimeArtifact(String apiId, String name, String version,
+                                                             String gatewayLabel, String type, String tenantDomain)
             throws APIManagementException {
 
         GatewayArtifactGenerator gatewayArtifactGenerator =
@@ -40,12 +43,14 @@ public class RuntimeArtifactGeneratorUtil {
         if (gatewayArtifactGenerator != null) {
             List<APIRuntimeArtifactDto> gatewayArtifacts;
             if (StringUtils.isNotEmpty(gatewayLabel)) {
+                byte[] decodedValue = Base64.decodeBase64(gatewayLabel.getBytes());
+                String[] gatewayLabels = new String(decodedValue).split("\\|");
                 if (StringUtils.isNotEmpty(apiId)) {
                     gatewayArtifacts = gatewayArtifactsMgtDAO
-                            .retrieveGatewayArtifactsByAPIIDAndLabel(apiId, gatewayLabel, tenantDomain);
+                            .retrieveGatewayArtifactsByAPIIDAndLabel(apiId, gatewayLabels, tenantDomain);
                 } else {
                     gatewayArtifacts =
-                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabel, tenantDomain);
+                            gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByLabel(gatewayLabels, tenantDomain);
                 }
             } else {
                 gatewayArtifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifacts(tenantDomain);
@@ -56,8 +61,13 @@ public class RuntimeArtifactGeneratorUtil {
                 }
             }
             return gatewayArtifactGenerator.generateGatewayArtifact(gatewayArtifacts);
+        } else {
+            Set<String> gatewayArtifactGeneratorTypes =
+                    ServiceReferenceHolder.getInstance().getGatewayArtifactGeneratorTypes();
+            throw new APIManagementException("Couldn't find gateway Type",
+                    ExceptionCodes.from(ExceptionCodes.GATEWAY_TYPE_NOT_FOUND, String.join(",",
+                            gatewayArtifactGeneratorTypes)));
         }
-        return null;
     }
 
 }

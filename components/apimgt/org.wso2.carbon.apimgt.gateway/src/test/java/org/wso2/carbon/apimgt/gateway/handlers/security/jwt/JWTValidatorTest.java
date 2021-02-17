@@ -37,11 +37,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
@@ -58,10 +59,12 @@ import java.util.UUID;
 import javax.cache.Cache;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({JWTValidator.class, GatewayUtils.class, MultitenantUtils.class, PrivilegedCarbonContext.class})
+@PrepareForTest({JWTValidator.class, GatewayUtils.class, MultitenantUtils.class, PrivilegedCarbonContext.class,
+        ServiceReferenceHolder.class})
 public class JWTValidatorTest {
 
     PrivilegedCarbonContext privilegedCarbonContext;
+    ServiceReferenceHolder serviceReferenceHolder;
 
     @Before
     public void setup() {
@@ -69,8 +72,11 @@ public class JWTValidatorTest {
         System.setProperty("carbon.home", "");
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
         privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
     }
 
     @Test

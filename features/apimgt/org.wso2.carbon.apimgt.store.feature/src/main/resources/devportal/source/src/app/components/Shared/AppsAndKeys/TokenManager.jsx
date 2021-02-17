@@ -379,7 +379,7 @@ class TokenManager extends React.Component {
                 return application.generateKeys(
                     keyType, keyRequest.selectedGrantTypes,
                     keyRequest.callbackUrl,
-                    keyRequest.additionalProperties, selectedTab,
+                    keyRequest.additionalProperties, this.getKeyManagerIdentifier(),
                 );
             })
             .then((response) => {
@@ -551,6 +551,14 @@ class TokenManager extends React.Component {
             return selectedKMObject[0].description;
         }
         return '';
+    }
+    getKeyManagerIdentifier() {
+        const { keyManagers, selectedTab } = this.state;
+        const selectedKMObject = keyManagers.filter(item => item.name === selectedTab);
+        if (selectedKMObject && selectedKMObject.length === 1) {
+            return selectedKMObject[0].id;
+        }
+        return selectedTab;
     }
     setValidating(validatingState) {
         this.setState({ validating: validatingState });
