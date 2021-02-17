@@ -29,6 +29,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -65,6 +67,8 @@ public class SubscribersPersistMediator extends AbstractMediator {
                     UNSUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()))) {
                 handleException("Invalid Entry for hub.mode", messageContext);
             }
+            //todo add authentication context to the payload data for throttling
+            AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
             String tenantDomain = (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY);
             String apiKey = WebhooksUtl.generateAPIKey(messageContext, tenantDomain);
             String applicationID = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_ID);
@@ -92,11 +96,13 @@ public class SubscribersPersistMediator extends AbstractMediator {
                 log.debug("Successfully submitted the request for persist subscription with status code: "
                         + statusCode);
             }
+            //dataCollector.collectData(messageContext);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Failed to submit the request for persist subscription with status code: " + statusCode);
             }
             String response = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+            //dataCollector.collectData(messageContext);
             handleException(response, messageContext);
         }
     }
@@ -115,19 +121,19 @@ public class SubscribersPersistMediator extends AbstractMediator {
         List<NameValuePair> queryParameter = URLEncodedUtils.parse(new URI(urlQueryParams),
                 StandardCharsets.UTF_8.name());
         for (NameValuePair nvPair : queryParameter) {
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
                 topicName = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM.equals(nvPair.getName())) {
                 callback = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM.equals(nvPair.getName())) {
                 secret = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_MODE_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_MODE_QUERY_PARAM.equals(nvPair.getName())) {
                 mode = nvPair.getValue();
             }
-            if (nvPair.getName().equals(APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM.equals(nvPair.getName())) {
                 leaseSeconds = nvPair.getValue();
             }
         }
@@ -151,8 +157,8 @@ public class SubscribersPersistMediator extends AbstractMediator {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
         node.put(APIConstants.Webhooks.API_KEY_PROPERTY, apiKey);
-        node.put(APIConstants.Webhooks.APP_ID_PROPERTY,applicationID);
-        node.put(APIConstants.Webhooks.TENANT_DOMAIN_PROPERTY,tenantDomain);
+        node.put(APIConstants.Webhooks.APP_ID_PROPERTY, applicationID);
+        node.put(APIConstants.Webhooks.TENANT_DOMAIN_PROPERTY, tenantDomain);
         node.put(APIConstants.Webhooks.CALLBACK_PROPERTY, callback);
         node.put(APIConstants.Webhooks.TOPIC_PROPERTY, topicName);
         node.put(APIConstants.Webhooks.MODE_PROPERTY, mode);

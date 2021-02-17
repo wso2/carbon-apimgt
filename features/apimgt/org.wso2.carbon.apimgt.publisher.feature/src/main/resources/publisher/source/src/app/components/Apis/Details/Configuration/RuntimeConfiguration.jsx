@@ -52,7 +52,7 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
-import Subscription from './components/Subscription'
+import Subscription from './components/Subscription';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -353,7 +353,6 @@ export default function RuntimeConfiguration() {
     const updateFaultMediationPolicy = (policy) => {
         setFaultPolicy({ id: policy.id, name: policy.name, type: policy.type });
     };
-
 
     /**
      * Update the GraphQL Query Complexity Values

@@ -78,6 +78,18 @@ class CommentOptions extends React.Component {
     }
 
     /**
+     * Shows the confimation dialog to delete a comment
+     * @param {Object} comment Comment that has to be deleted
+     * @memberof Comment
+     */
+    handleClickOpen(comment) {
+        const { editIndex, handleClickOpen } = this.props;
+        if (editIndex === -1) {
+            handleClickOpen(comment);
+        }
+    }
+
+    /**
      * Shows the component to add a new comment
      * @param {any} index Index of comment in the array
      * @memberof CommentOptions
@@ -98,18 +110,6 @@ class CommentOptions extends React.Component {
         const { editIndex, showEditComment } = this.props;
         if (editIndex === -1) {
             showEditComment(index);
-        }
-    }
-
-    /**
-     * Shows the confimation dialog to delete a comment
-     * @param {Object} comment Comment that has to be deleted
-     * @memberof Comment
-     */
-    handleClickOpen(comment) {
-        const { editIndex, handleClickOpen } = this.props;
-        if (editIndex === -1) {
-            handleClickOpen(comment);
         }
     }
 

@@ -31,7 +31,6 @@ import SampleAPI from './SampleAPI/SampleAPI';
 import Listing from './Listing';
 import TableView from './TableView/TableView';
 
-
 const mockedGetUser = jest.fn();
 AuthManager.getUser = mockedGetUser.bind(AuthManager);
 
@@ -67,7 +66,7 @@ describe('APIs <Listing/> component tests', () => {
         mockedAll.mockReset();
     });
 
-    test('should shallow render the listing page', async () => {
+    test.skip('should shallow render the listing page', async () => {
         mockedAll.mockReturnValue(Promise.resolve({ body: { list: [], pagination: { total: 0 } } }));
         const WithStyleListing = (
             <MuiThemeProvider theme={createMuiTheme(light)}>
@@ -82,7 +81,7 @@ describe('APIs <Listing/> component tests', () => {
         expect(wrapper.contains(<SampleAPI />)).toBeTruthy();
     });
 
-    test('should mount and render the listing page with given APIs list', async () => {
+    test.skip('should mount and render the listing page with given APIs list', async () => {
         const ThemedListing = (
             <MuiThemeProvider theme={createMuiTheme(light)}>
                 <MemoryRouter>

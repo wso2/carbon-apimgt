@@ -26,6 +26,9 @@ import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 
@@ -132,27 +135,32 @@ const styles = (theme) => ({
  */
 function Topics(props) {
     function configReducer(currentState, configAction) {
-        const { action, value, } = configAction;
-        switch(action) {
+        const { action, value } = configAction;
+        switch (action) {
             case 'name':
             case 'isSubscribe':
+            case 'isPublish':
+                // eslint-disable-next-line no-param-reassign
                 currentState[action] = value;
+                break;
+            default:
                 break;
         }
         return currentState;
     }
 
     const { classes, handleAddTopic, handleCancelAddTopic } = props;
+    // eslint-disable-next-line no-unused-vars
     const { api, updateAPI } = useContext(APIContext);
     const [topic, inputsDispatcher] = useReducer(configReducer, {
         name: '',
-        isSubscribe: (api.type === 'WEBSUB' || (api.type === 'SSE')),
+        isSubscribe: api.type !== 'WS',
         isPublish: false,
     });
 
     function handleOnChange(event) {
         const { name: action, value } = event;
-        inputsDispatcher({ action, value, });
+        inputsDispatcher({ action, value });
     }
 
     return (
@@ -179,12 +187,6 @@ function Topics(props) {
                         )}
                         helperText='Provide a name for the topic'
                         name='name'
-                        InputProps={{
-                            id: 'itest-id-apitopic-createtopic-name',
-                            onBlur: ({ target: { value } }) => {
-                                // TODO: validate
-                            },
-                        }}
                         margin='normal'
                         variant='outlined'
                         onChange={(e) => handleOnChange({
@@ -193,7 +195,7 @@ function Topics(props) {
                         })}
                     />
                 </Grid>
-                { api.type !== 'WEBSUB' && api.type !== 'SSE' && (
+                { api.type === 'WS' && (
                     <Grid item xs={12}>
                         <FormGroup row>
                             <FormControlLabel
@@ -201,14 +203,15 @@ function Topics(props) {
                                     <Checkbox
                                         name='checkPublish'
                                         color='primary'
-                                        onChange={(e) => handleOnChange({
-                                            name: 'isPublish',
-                                            value: e.target.checked,
-                                        })}
-
+                                        onChange={(e) => {
+                                            handleOnChange({
+                                                name: 'isPublish',
+                                                value: e.target.checked,
+                                            });
+                                        }}
                                     />
                                 )}
-                                label='Subscribe'
+                                label='Publish'
                             />
                             <FormControlLabel
                                 control={(
@@ -219,7 +222,6 @@ function Topics(props) {
                                             name: 'isSubscribe',
                                             value: e.target.checked,
                                         })}
-
                                     />
                                 )}
                                 label='Subscribe'

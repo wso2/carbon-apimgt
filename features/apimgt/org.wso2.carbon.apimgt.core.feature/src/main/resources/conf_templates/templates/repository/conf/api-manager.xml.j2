@@ -335,6 +335,8 @@
         org.wso2.carbon.identity.oauth.tokenprocessor.HashingPersistenceProcessor and change the value of
         <EnableClientSecretHash> to true in the identity.xml -->
         <EnableTokenHashMode>{{apim.oauth_config.enable_token_hashing}}</EnableTokenHashMode>
+        <!-- Whether to validate certificate bound access tokens-->
+        <EnableCertificateBoundAccessToken>{{apim.oauth_config.enable_certificate_bound_access_token}}</EnableCertificateBoundAccessToken>
 
     </OAuthConfigurations>
 
@@ -411,7 +413,9 @@
         <MapExistingAuthApps>{{apim.devportal.enable_key_provisioning}}</MapExistingAuthApps>
 
         <!--This parameter specifies the alias value of the Api Key which will be used for Api Key Authentication-->
+        <APIKeyKeystore>{{apim.devportal.api_key_keystore}}</APIKeyKeystore>
         <ApiKeyAlias>{{apim.devportal.api_key_alias}}</ApiKeyAlias>
+        <ApiKeyGeneratorImpl>{{apim.devportal.api_key_generator_impl}}</ApiKeyGeneratorImpl>
 
         <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
@@ -643,6 +647,10 @@
             </AllowedURI>
             <AllowedURI>
                 <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-policies/complexity/types</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/service-catalog/{serviceCatalogVersion}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>

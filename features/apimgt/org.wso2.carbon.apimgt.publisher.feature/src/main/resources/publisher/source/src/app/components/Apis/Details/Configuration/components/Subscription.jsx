@@ -18,11 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ChipInput from 'material-ui-chip-input';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
-import Checkbox from '@material-ui/core/Checkbox';
-import HelpOutline from '@material-ui/icons/HelpOutline';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import WrappedExpansionPanel from 'AppComponents/Shared/WrappedExpansionPanel';
@@ -30,10 +26,6 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { makeStyles } from '@material-ui/core/styles';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import { isRestricted } from 'AppData/AuthManager';
-import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
@@ -68,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
  * @returns
  */
 export default function Subscription(props) {
-    const [apiFromContext] = useAPI();
     const {
         configDispatcher,
         api: { websubSubscriptionConfiguration },
@@ -76,10 +67,13 @@ export default function Subscription(props) {
     const classes = useStyles();
 
     function generateSecret() {
-        return 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'.replace(/[x]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'.replace(/[x]/g, (c) => {
+            // eslint-disable-next-line no-bitwise
+            const r = Math.random() * 16 | 0;
+            // eslint-disable-next-line no-bitwise, no-mixed-operators
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
-          });
+        });
     }
 
     function getAlgorithms() {
@@ -118,12 +112,6 @@ export default function Subscription(props) {
                                             value={websubSubscriptionConfiguration.secret}
                                             helperText='Use the above secret key while registering at the provider'
                                             name='secret'
-                                            InputProps={{
-                                                id: 'itest-id-runtime-subscription-secret',
-                                                onBlur: ({ target: { value } }) => {
-                                                    // TODO: validate
-                                                },
-                                            }}
                                             margin='normal'
                                             variant='outlined'
                                         />
@@ -136,7 +124,7 @@ export default function Subscription(props) {
                                                 action: 'secret',
                                                 value: generateSecret(),
                                             })}
-                                            style={{marginLeft: 10, marginTop: 25}}
+                                            style={{ marginLeft: 10, marginTop: 25 }}
                                         >
                                             Generate
                                         </Button>
@@ -160,12 +148,6 @@ export default function Subscription(props) {
                                     value={websubSubscriptionConfiguration.signingAlgorithm}
                                     helperText='Select an algorithm to sign the message'
                                     name='secret'
-                                    InputProps={{
-                                        id: 'itest-id-runtime-subscription-signing-algorithm',
-                                        onBlur: ({ target: { value } }) => {
-                                            // TODO: validate
-                                        },
-                                    }}
                                     margin='normal'
                                     variant='outlined'
                                     onChange={({ target: { value } }) => configDispatcher({
@@ -207,12 +189,6 @@ export default function Subscription(props) {
                                     value={websubSubscriptionConfiguration.signatureHeader}
                                     helperText='Set the HTTP header use by the provider to send the signature'
                                     name='secret'
-                                    InputProps={{
-                                        id: 'itest-id-runtime-subscription-signature-header',
-                                        onBlur: ({ target: { value } }) => {
-                                            // TODO: validate
-                                        },
-                                    }}
                                     margin='normal'
                                     variant='outlined'
                                     onChange={({ target: { value } }) => configDispatcher({

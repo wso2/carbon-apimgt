@@ -328,29 +328,6 @@ public class APIMgtDAOTest {
         this.checkSubscribersEqual(subscriber1, subscriber2);
     }
     @Test
-    public void testLifeCycleEvents() throws Exception {
-        APIIdentifier apiId = new APIIdentifier("hiranya", "WSO2Earth", "1.0.0");
-        API api = new API(apiId);
-        api.setContext("/wso2earth");
-        api.setContextTemplate("/wso2earth/{version}");
-        api.setUUID(UUID.randomUUID().toString());
-
-        apiMgtDAO.addAPI(api, -1234);
-
-        List<LifeCycleEvent> events = apiMgtDAO.getLifeCycleEvents(apiId);
-        assertEquals(1, events.size());
-        LifeCycleEvent event = events.get(0);
-        assertEquals(apiId, event.getApi());
-        assertNull(event.getOldStatus());
-        assertEquals(APIConstants.CREATED, event.getNewStatus());
-        assertEquals("hiranya", event.getUserId());
-
-        apiMgtDAO.recordAPILifeCycleEvent(apiId, APIStatus.CREATED, APIStatus.PUBLISHED, "admin", -1234);
-        apiMgtDAO.recordAPILifeCycleEvent(apiId, APIStatus.PUBLISHED, APIStatus.DEPRECATED, "admin", -1234);
-        events = apiMgtDAO.getLifeCycleEvents(apiId);
-        assertEquals(3, events.size());
-    }
-    @Test
     public void testAddGetApplicationByNameGroupIdNull() throws Exception {
         Subscriber subscriber = new Subscriber("LA_F_GROUP_ID_NULL");
         subscriber.setEmail("laf@wso2.com");
@@ -949,7 +926,7 @@ public class APIMgtDAOTest {
                 PolicyConstants.POLICY_LEVEL_APP));
         assertTrue(apiMgtDAO.hasSubscription(apiPolicy.getPolicyName(), subscriber.getName(),
                 PolicyConstants.POLICY_LEVEL_API));
-        assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId, null))));
+        assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);
         apiMgtDAO.updateDefaultAPIPublishedVersion(apiId, APIConstants.PUBLISHED, APIConstants.CREATED);

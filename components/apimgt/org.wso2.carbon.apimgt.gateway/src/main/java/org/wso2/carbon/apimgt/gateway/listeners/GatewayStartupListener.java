@@ -91,7 +91,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         } catch (CertificateManagementException e) {
             log.error("Error while Backup Truststore", e);
         }
-        cleanDeployment(CarbonUtils.getAxis2Repo());
+        cleanDeployment(CarbonUtils.getCarbonRepository());
     }
 
     private boolean deployArtifactsAtStartup(String tenantDomain) throws ArtifactSynchronizerException {
@@ -244,7 +244,6 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             RevokedJWTTokensRetriever webServiceRevokedJWTTokensRetriever = new RevokedJWTTokensRetriever();
             webServiceRevokedJWTTokensRetriever.startRevokedJWTTokensRetriever();
         }
-
     }
 
     @Override

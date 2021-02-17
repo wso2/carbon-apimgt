@@ -513,7 +513,7 @@ public class WebsocketInboundHandlerTestCase {
             }
 
             @Override
-            protected void setApiPropertiesToChannel(ChannelHandlerContext ctx){
+            protected void setApiPropertiesToChannel(ChannelHandlerContext ctx) {
                 // do nothing
             }
 

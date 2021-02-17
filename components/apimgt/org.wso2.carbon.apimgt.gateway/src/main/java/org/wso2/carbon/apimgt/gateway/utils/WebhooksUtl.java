@@ -135,7 +135,7 @@ public class WebhooksUtl {
                 StandardCharsets.UTF_8.name());
         String topicName = null;
         for (NameValuePair nvPair : queryParameter) {
-            if (nvPair.getName().equals(APIConstants.Webhooks.TOPIC_QUERY_PARAM)) {
+            if (APIConstants.Webhooks.TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
                 topicName = nvPair.getValue();
             }
         }

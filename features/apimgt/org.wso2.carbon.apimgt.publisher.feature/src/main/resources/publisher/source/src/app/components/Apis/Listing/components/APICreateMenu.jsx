@@ -59,7 +59,6 @@ const APICreateMenu = (props) => {
         soapApiIcon,
         // eslint-disable-next-line no-unused-vars
         streamingApiIcon,
-        websocketApiIcon,
     } = theme.custom.landingPageIcons;
     const classes = useStyles();
     const { handleDeploySample, deploying } = props;
@@ -179,7 +178,6 @@ const APICreateMenu = (props) => {
                                         </Typography>
                                     </Box>
                                 )}
-
 
                             </Box>
 
@@ -359,7 +357,7 @@ APICreateMenu.defaultProps = {
     deploying: null,
 };
 APICreateMenu.propTypes = {
-    children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]).isRequired,
+    children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.shape({}))]).isRequired,
     handleDeploySample: PropTypes.func,
     deploying: PropTypes.bool,
 };

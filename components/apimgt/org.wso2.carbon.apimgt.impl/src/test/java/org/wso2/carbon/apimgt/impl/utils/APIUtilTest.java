@@ -132,23 +132,7 @@ public class APIUtilTest {
         Assert.assertEquals(apiName, "map");
     }
 
-    @Test
-    public void testGetAPIProviderFromRESTAPI() throws Exception {
 
-        String restAPI = "admin--map";
-        String providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, null);
-
-        Assert.assertEquals(providerName, "admin@carbon.super");
-
-        restAPI = "user@test.com--map";
-        providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, "test.com");
-        Assert.assertEquals(providerName, "user@test.com");
-
-        restAPI = "user-AT-test.com--map";
-        providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, "test.com");
-        Assert.assertEquals(providerName, "user@test.com");
-
-    }
 
     @Test
     public void testIsValidURL() throws Exception {
@@ -1357,7 +1341,7 @@ public class APIUtilTest {
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
+        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class))).thenReturn(123);
         Mockito.when(artifact.getId()).thenReturn("");
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
         Mockito.when(MultitenantUtils.getTenantDomain(provider)).
@@ -1434,7 +1418,7 @@ public class APIUtilTest {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
 
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
+        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class) )).thenReturn(123);
         Mockito.when(artifact.getId()).thenReturn("");
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
         Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT)).thenReturn("15");
@@ -1540,7 +1524,7 @@ public class APIUtilTest {
             PowerMockito.mockStatic(ServiceReferenceHolder.class);
 
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
+            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class))).thenReturn(123);
             Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new
                     String[]{"Unlimited"});
             Mockito.when(artifact.getId()).thenReturn("");
@@ -1642,7 +1626,7 @@ public class APIUtilTest {
             PowerMockito.mockStatic(MultitenantUtils.class);
             PowerMockito.mockStatic(ServiceReferenceHolder.class);
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
+            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class))).thenReturn(123);
             Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new
                     String[]{"Unlimited"});
             Mockito.when(artifact.getId()).thenReturn("");
