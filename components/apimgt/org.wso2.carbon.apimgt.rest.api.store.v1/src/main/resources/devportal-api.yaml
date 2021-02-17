@@ -1252,7 +1252,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/applicationId'
         - $ref: '#/components/parameters/If-None-Match'
-        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -1404,7 +1403,6 @@ paths:
         Generate keys (Consumer key/secret) for application
       parameters:
         - $ref: '#/components/parameters/applicationId'
-        - $ref: '#/components/parameters/requestedTenant'
       requestBody:
         description: |
           Application key generation request object
@@ -1732,7 +1730,6 @@ paths:
         Retrieve keys (Consumer key/secret) of application
       parameters:
         - $ref: '#/components/parameters/applicationId'
-        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
