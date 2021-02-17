@@ -272,7 +272,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start,
                                                            int offset, UserContext ctx) throws APIPersistenceException {
-        searchQuery = "";
         int skip = start;
         int limit = offset;
         MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(ctx.getOrganization().getName());
@@ -293,6 +292,21 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return publisherAPISearchResult;
     }
 
+
+    @Override
+    public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start,
+                                                                  int offset, UserContext ctx) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
+                                                                  int offset, UserContext ctx) throws APIPersistenceException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     private String getSearchQuery(String query) {
 
         if (!query.contains(":")) {
@@ -305,28 +319,67 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     }
 
     private List<Document> getPublisherSearchAggregate(String query, int skip, int limit) {
-        String searchQuery = getSearchQuery(query);
-        List<String> paths = new ArrayList<>();
-        paths.add("apiName");
-        paths.add("providerName");
-        paths.add("version");
-        paths.add("context");
-//        paths.add("status");
-//        paths.add("description");
-//        paths.add("tags");
-//        paths.add("gatewayLabels");
-//        paths.add("additionalProperties");
+        String searchQuery;
+
+        List<Document> mustArray = new ArrayList();
+
+        if (query.contains(" ")) {
+            String[] searchAreas = query.split(" ");
+
+            for (String area : searchAreas) {
+                List<String> paths = new ArrayList<>();
+                if (area.contains(":")) {
+                    String[] queryArray = area.split(":");
+                    String searchField = getSearchField(queryArray[0]);
+                    paths.add(searchField);
+                    searchQuery = "*" + queryArray[1] + "*";
+                } else {
+                    searchQuery = "*" + query + "*";
+                    paths.add("apiName");
+                }
+                Document wildCard = new Document();
+                Document wildCardBody = new Document();
+                wildCardBody.put("path", paths);
+                wildCardBody.put("query", searchQuery);
+                wildCardBody.put("allowAnalyzedField", true);
+                wildCard.put("wildcard", wildCardBody);
+                mustArray.add(wildCard);
+            }
+        } else {
+            List<String> paths = new ArrayList<>();
+            if (query.contains(":")) {
+                String[] queryArray = query.split(":");
+                String searchField = getSearchField(queryArray[0]);
+                paths.add(searchField);
+                searchQuery = "*" + queryArray[1] + "*";
+            } else {
+                searchQuery = "*" + query + "*";
+                if (query == "") {
+                    searchQuery = "*";
+                }
+                paths.add("apiName");
+            }
+            Document wildCard = new Document();
+            Document wildCardBody = new Document();
+            wildCardBody.put("path", paths);
+            wildCardBody.put("query", searchQuery);
+            wildCardBody.put("allowAnalyzedField", true);
+            wildCard.put("wildcard", wildCardBody);
+            mustArray.add(wildCard);
+        }
 
         Document search = new Document();
-        Document wildCard = new Document();
-        Document wildCardBody = new Document();
+
         Document skipDoc = new Document();
         Document limitDoc = new Document();
-        wildCardBody.put("path", "apiName");
-        wildCardBody.put("query", "*");
-        wildCardBody.put("allowAnalyzedField", true);
-        wildCard.put("wildcard", wildCardBody);
-        search.put("$search", wildCard);
+        Document must = new Document();
+        Document compound = new Document();
+
+
+
+        must.put("must", mustArray);
+        compound.put("compound", must);
+        search.put("$search", compound);
         skipDoc.put("$skip", skip);
         limitDoc.put("$limit", limit);
 
@@ -349,6 +402,29 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         list.add(skipDoc);
         list.add(limitDoc);
         return list;
+    }
+
+    private String getSearchField(String queryCriteria){
+        if (queryCriteria.equalsIgnoreCase("name")) {
+            return "apiName";
+        }
+        if (queryCriteria.equalsIgnoreCase("provider")) {
+            return "providerName";
+        }
+        if (queryCriteria.equalsIgnoreCase("context")) {
+            return "context";
+        }
+        if (queryCriteria.equalsIgnoreCase("status")) {
+            return "status";
+        }
+        if (queryCriteria.equalsIgnoreCase("version")) {
+            return "version";
+        }
+        if (queryCriteria.equalsIgnoreCase("description")) {
+            return "description";
+        }
+
+        return "apiName";
     }
 
     private List<Document> getDevportalSearchAggregate(String query, int skip, int limit) {
@@ -839,19 +915,5 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             orgName = MONGODB_COLLECTION_DEFAULT_ORG;
         }
         return database.getCollection(orgName + MONGODB_COLLECTION_SUR_FIX, Document.class);
-    }
-
-    @Override
-    public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start,
-                                                                  int offset, UserContext ctx) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
-                                                                  int offset, UserContext ctx) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
     }
 }
