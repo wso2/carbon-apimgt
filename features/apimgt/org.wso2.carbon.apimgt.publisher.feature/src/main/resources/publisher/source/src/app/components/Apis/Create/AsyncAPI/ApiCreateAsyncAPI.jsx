@@ -261,7 +261,7 @@ export default function ApiCreateAsyncAPI(props) {
                                 label={(
                                     <>
                                         <FormattedMessage
-                                            id='Apis.Create.Components.SelectPolicies.business.plans'
+                                            id='Apis.Create.asyncAPI.Components.SelectPolicies.business.plans'
                                             defaultMessage='Protocol'
                                         />
                                         <sup className={classes.mandatoryStar}>*</sup>

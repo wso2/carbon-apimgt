@@ -4,13 +4,13 @@
     "description": "WSO2 API Manager Publisher Web App Note: `eslint-plugin-react` have a fixed version due to implementing prop-types does mark nested destructed props from `eslint-plugin-react` next version onwards\n --max_old_space_size: This is max size of the old space( managed heap) in Mbytes make sure not to increase it more than the memory size of builder machines(Prod build)",
     "main": "app.jsx",
     "scripts": {
-        "test": "jest --silent",
+        "test": "npm run i18n;jest --silent",
         "test:coverage": "jest --coverage ; python3 -m http.server -d coverage/",
-        "build:prod": "rimraf site/public/dist/ && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
+        "build:prod": "npm run i18n;rimraf site/public/dist/ && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
         "build:dev": "rimraf site/public/dist/ && cross-env NODE_ENV=development webpack -d --watch ",
         "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
         "lint": "eslint --ignore-pattern '*.test.js' --ignore-pattern '*.test.jsx' --quiet -c .eslintrc.js --ext .jsx,.js source",
-        "i18n": "formatjs extract 'source/src/app/**/*.jsx' --out-file site/public/locales/testing/en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]'"
+        "i18n": "formatjs extract 'source/src/app/**/*.jsx' --out-file site/public/locales/en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]'"
     },
     "repository": {
         "type": "git",

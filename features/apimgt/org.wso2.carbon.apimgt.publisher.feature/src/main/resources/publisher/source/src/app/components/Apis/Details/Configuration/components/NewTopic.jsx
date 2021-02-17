@@ -179,7 +179,6 @@ function Topics(props) {
                         label={(
                             <>
                                 <FormattedMessage
-                                    id='Apis.Create.Components.DefaultAPIForm.name'
                                     defaultMessage='Topic Name'
                                 />
                                 <sup>*</sup>
