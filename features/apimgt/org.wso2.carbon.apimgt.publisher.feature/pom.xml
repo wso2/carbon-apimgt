@@ -67,6 +67,20 @@
                 <version>1.5.0</version>
                 <executions>
                     <execution>
+                        <id>install lerna dependencies</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <workingDirectory>../</workingDirectory>
+                            <executable>${npm.executable}</executable>
+                            <arguments>
+                                <argument>ci</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>lerna clean</id>
                         <goals>
                             <goal>exec</goal>
