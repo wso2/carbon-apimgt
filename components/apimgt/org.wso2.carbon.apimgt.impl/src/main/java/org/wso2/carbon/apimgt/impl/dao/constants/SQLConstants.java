@@ -3139,6 +3139,8 @@ public class SQLConstants {
             "AM_GW_VHOST (GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT, WSS_PORT) " +
             "VALUES (?,?,?,?,?,?,?)";
 
+    public static final String DELETE_GATEWAY_VHOSTS_SQL = "DELETE FROM AM_GW_VHOST WHERE GATEWAY_ENV_ID = ?";
+
     public static final String GET_ENVIRONMENT_VHOSTS_BY_ID_SQL = "SELECT * FROM AM_GW_VHOST WHERE GATEWAY_ENV_ID = ?";
 
     public static final String DELETE_ENVIRONMENT_SQL = "DELETE FROM AM_GATEWAY_ENVIRONMENT WHERE UUID = ?";

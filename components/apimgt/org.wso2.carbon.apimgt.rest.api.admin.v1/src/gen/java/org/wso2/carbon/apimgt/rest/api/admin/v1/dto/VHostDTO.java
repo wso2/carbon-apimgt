@@ -104,7 +104,7 @@ public class VHostDTO   {
   }
 
   
-  @ApiModelProperty(example = "80", value = "")
+  @ApiModelProperty(example = "9099", value = "")
   @JsonProperty("wsPort")
   public Integer getWsPort() {
     return wsPort;
@@ -121,7 +121,7 @@ public class VHostDTO   {
   }
 
   
-  @ApiModelProperty(example = "443", value = "")
+  @ApiModelProperty(example = "8099", value = "")
   @JsonProperty("wssPort")
   public Integer getWssPort() {
     return wssPort;

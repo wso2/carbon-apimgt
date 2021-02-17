@@ -14047,6 +14047,23 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Delete all VHosts assigned to gateway environment
+     *
+     * @param connection connection
+     * @param id Environment ID in the databse
+     * @throws APIManagementException if falied to delete VHosts
+     */
+    private void deleteGatewayVhosts(Connection connection, int id) throws
+            APIManagementException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_GATEWAY_VHOSTS_SQL)) {
+            prepStmt.setInt(1, id);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete VHosts for environment ID: " + id, e);
+        }
+    }
+
+    /**
      * Whether an Environment exists in the tenant domain with the given name
      *
      * @param tenantDomain tenant domain
@@ -14146,6 +14163,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, environment.getDescription());
                 prepStmt.setString(3, environment.getUuid());
                 prepStmt.executeUpdate();
+                deleteGatewayVhosts(connection, environment.getId());
+                addGatewayVhosts(connection, environment.getId(), environment.getVhosts());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();

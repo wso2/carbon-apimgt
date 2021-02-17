@@ -31,11 +31,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
     private static final Log log = LogFactory.getLog(EnvironmentsApiServiceImpl.class);
 
     /**
+     * Delete gateway envirionment
      *
-     * @param environmentId
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * @param environmentId environment ID
+     * @param messageContext message context
+     * @return 200 with empty response body
+     * @throws APIManagementException if failed to delete
      */
     public Response environmentsEnvironmentIdDelete(String environmentId, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
@@ -44,6 +45,15 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         return Response.ok().build();
     }
 
+    /**
+     * Update gateway environment
+     *
+     * @param environmentId environment ID
+     * @param body environment to be updated
+     * @param messageContext message context
+     * @return updated environment
+     * @throws APIManagementException if failed to update
+     */
     public Response environmentsEnvironmentIdPut(String environmentId, EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         body.setId(environmentId);
@@ -60,6 +70,13 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         return Response.ok(location).entity(body).build();
     }
 
+    /**
+     * Get list of gateway environments from config api-manager.xml and dynamic environments (from DB)
+     *
+     * @param messageContext message context
+     * @return created environment
+     * @throws APIManagementException if failed to get list
+     */
     public Response environmentsGet(MessageContext messageContext) throws APIManagementException {
         APIAdmin apiAdmin = new APIAdminImpl();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -68,6 +85,13 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         return Response.ok().entity(envListDTO).build();
     }
 
+    /**
+     * Create a dynamic gateway environment
+     * @param body environment to be created
+     * @param messageContext message context
+     * @return created environment
+     * @throws APIManagementException if failed to create
+     */
     public Response environmentsPost(EnvironmentDTO body, MessageContext messageContext) throws APIManagementException {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();

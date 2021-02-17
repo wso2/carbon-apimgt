@@ -138,9 +138,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "A Gateway Environment with %s is read only"),
     GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND(900509, "Gateway Environment with duplicate virtual hosts",
             400, "A Gateway Environment can not exists with duplicate virtual hosts"),
-    READONLY_GATEWAY_ENVIRONMENT_VHOST(900510, "Virtual Hosts of Gateway Environment is can not be changed",
-            400, "Existing Virtual Hosts of the gateway is read only"),
-    READONLY_GATEWAY_ENVIRONMENT_NAME(900511, "Names of Gateway Environment is can not be changed",
+    READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment is can not be changed",
             400, "Name of the gateway is read only"),
 
     // Workflow related codes

@@ -286,14 +286,7 @@ public class APIAdminImpl implements APIAdmin {
                     ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT_NAME));
         }
 
-        if (!existingEnv.getVhosts().equals(environment.getVhosts())) {
-            String errorMessage = String.format("Failed to update Environment with UUID '%s'. Virtual Hosts of the " +
-                            "Environment is read only",
-                    environment.getUuid());
-            throw new APIMgtResourceNotFoundException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT_VHOST));
-        }
-
+        environment.setId(existingEnv.getId());
         return apiMgtDAO.updateEnvironment(environment);
     }
 
