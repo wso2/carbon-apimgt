@@ -24,7 +24,7 @@
   "Apis.Create.Components.DefaultAPIForm.api.product.context": "Context",
   "Apis.Create.Components.DefaultAPIForm.callbackUrl": "Callback URL",
   "Apis.Create.Components.DefaultAPIForm.description": "Description",
-  "Apis.Create.Components.DefaultAPIForm.name": "Topic Name",
+  "Apis.Create.Components.DefaultAPIForm.name": "Name",
   "Apis.Create.Components.DefaultAPIForm.version": "Version",
   "Apis.Create.Components.SelectPolicies.business.plans": "Protocol",
   "Apis.Create.Default.APICreateDefault.api.heading": "Create an API",
