@@ -21,7 +21,9 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.agent.DataPublisher;
@@ -94,5 +96,20 @@ public class SseUtils {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher "
                               + "has not been initialised");
         }
+    }
+
+    public static boolean isRequestBlocked(AuthenticationContext authContext, String apiContext, String apiVersion,
+                                           String authorizedUser, String clientIp, String apiTenantDomain) {
+
+        ThrottleDataHolder throttleDataHolder = ServiceReferenceHolder.getInstance().getThrottleDataHolder();
+        if (throttleDataHolder.isBlockingConditionsPresent()) {
+            String appLevelBlockingKey = authContext.getSubscriber() + ":" + authContext.getApplicationName();
+            String subscriptionLevelBlockingKey =
+                    apiContext + ":" + apiVersion + ":" + authContext.getSubscriber() + "-" + authContext
+                            .getApplicationName() + ":" + authContext.getKeyType();
+            return throttleDataHolder.isRequestBlocked(apiContext, appLevelBlockingKey, authorizedUser, clientIp,
+                                                       apiTenantDomain, subscriptionLevelBlockingKey);
+        }
+        return false;
     }
 }
