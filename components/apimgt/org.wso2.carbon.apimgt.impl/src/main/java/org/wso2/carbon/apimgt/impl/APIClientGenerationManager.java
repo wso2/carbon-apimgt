@@ -86,20 +86,13 @@ public class APIClientGenerationManager {
      * @param sdkLanguage preferred language to generate the SDK
      * @param apiName     name of the API
      * @param apiVersion  version of the API
-     * @param apiProvider provider of the API
      * @param swaggerAPIDefinition Swagger Definition of the API
      * @return a map containing the zip file name and its' temporary location until it is downloaded
      * @throws APIClientGenerationException if failed to generate the SDK
      */
-    public Map<String, String> generateSDK(String sdkLanguage, String apiName, String apiVersion, String apiProvider,
+    public Map<String, String> generateSDK(String sdkLanguage, String apiName, String apiVersion,
                                            String swaggerAPIDefinition)
             throws APIClientGenerationException {
-
-        if (StringUtils.isBlank(sdkLanguage) || StringUtils.isBlank(apiName) || StringUtils.isBlank(apiVersion) ||
-                StringUtils.isBlank(apiProvider)) {
-            handleSDKGenException("SDK Language, API Name, API Version, API Provider or Logged In Username " +
-                    "should not be null.");
-        }
 
         if (StringUtils.isEmpty(swaggerAPIDefinition)) {
             handleSDKGenException("Error loading the Swagger definition. Swagger file is empty.");
