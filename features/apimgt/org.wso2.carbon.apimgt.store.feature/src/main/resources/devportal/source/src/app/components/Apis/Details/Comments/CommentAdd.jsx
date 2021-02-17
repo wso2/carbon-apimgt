@@ -128,7 +128,7 @@ class CommentAdd extends React.Component {
 
         // to check whether a string does not contain only white spaces
         if (comment.content.replace(/\s/g, '').length) {
-            Api.addComment(apiId, comment)
+            Api.addComment(apiId, comment, replyTo)
                 .then((newComment) => {
                     this.setState({ content: '' });
                     const addedComment = newComment.body;
@@ -137,7 +137,6 @@ class CommentAdd extends React.Component {
                     } else {
                         const index = allComments.findIndex(this.filterCommentToAddReply)
                         allComments[index].replies.list.push(addedComment);
-                        this.setState({ replyIndex: -1 });
                     }
                     commentsUpdate(allComments);
                 })

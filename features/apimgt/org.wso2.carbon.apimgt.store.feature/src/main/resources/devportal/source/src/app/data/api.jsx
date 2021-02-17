@@ -339,14 +339,39 @@ export default class API extends Resource {
      * @param comment comment text
      */
     addComment(apiId, comment, replyTo) {
-        return this.client.then((client) => {
-            const payload = { apiId };
-            return client.apis.Comments.addCommentToAPI(
-                payload,
-                { requestBody: comment, replyTo },
-                this._requestMetaData()
-            );
-        });
+        // return this.client.then((client) => {
+        //     const payload = { apiId };
+        //     return client.apis.Comments.addCommentToAPI(
+        //         payload,
+        //         { requestBody: comment, replyTo },
+        //         this._requestMetaData()
+        //     );
+        // });
+        const response = {
+            id: '01234567-0123-0123-0123-012345678901',
+            commenterInfo: {
+                firstName: "John",
+                lastName: "David",
+                fullName: "John David"
+            },
+            content: comment.content,
+            createdBy: 'admin',
+            createdTime: '2020-02-20T13:57:16.229Z',
+            replyTo: replyTo,
+            replies: {
+                count: 1,
+                list: [
+                ],
+                pagination: {
+                    offset: 0,
+                    limit: 1,
+                    total: 10,
+                    next: "string",
+                    previous: "string"
+                }
+            }
+        };
+        return Promise.resolve({ body: response });
     }
 
     /**
