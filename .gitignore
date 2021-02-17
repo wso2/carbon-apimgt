@@ -15,19 +15,8 @@ target
 components/apimgt/org.wso2.carbon.apimgt.internal.service/.swagger-codegen/VERSION
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/libs/Saxon-HE-9.5.1-8.jar
 features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/workflowextensions/default-workflow-extensions.xml
-features/apimgt/org.wso2.carbon.apimgt.keymanager.feature/src/main/resources/internal#data#v1.war
-features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api#am#endpoint-registry.war
-features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api#am#publisher.war
 node_modules
 wso2carbon.log
-features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#calculator#*.war
-features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sample#pizzashack#*.war
-features/apimgt/org.wso2.carbon.apimgt.rest.api.dcr.feature/src/main/resources/client-registration#*.war
-features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api#am#publisher#*.war
-features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api#am#store#*.war
-features/apimgt/org.wso2.carbon.apimgt.rest.api.admin.feature/src/main/resources/api#am#admin#*.war
-features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/throttle#data#*.war
-features/apimgt/org.wso2.carbon.apimgt.micro.gateway.default.feature/src/main/resources/micro-gateway#*.war
 features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api-docs/main.js
 features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api-docs/package.json
 features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/main.js
@@ -42,6 +31,3 @@ components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/admin-
 components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/swagger.json
 components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/swagger.json
-components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1/.openapi-generator/publisher-api.yaml.sha256
-components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/.openapi-generator/store-api.yaml.sha256
-components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/.openapi-generator/admin-api.yaml.sha256
