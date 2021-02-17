@@ -1251,7 +1251,7 @@ export default function Environments() {
      * @returns {{secondary: string, primary: string}}
      */
     function getGatewayAccessUrl(vhost, type) {
-        let endpoints = { "primary": "", "secondary": ""};
+        let endpoints = { "primary": "", "secondary": "", "combined": ""};
         if (vhost == null) {
             return endpoints;
         }
@@ -1259,6 +1259,7 @@ export default function Environments() {
         if (type === 'WS') {
             endpoints.primary = "ws://" + vhost.host + ":" + vhost.wsPort;
             endpoints.secondary = "wss://" + vhost.host + ":" + vhost.wssPort;
+            endpoints.combined = endpoints.secondary + " " + endpoints.primary;
             return endpoints;
         }
 
@@ -1268,7 +1269,17 @@ export default function Environments() {
             (vhost.httpPort === 80 ? "" : ":" + vhost.httpPort) + httpContext;
         endpoints.secondary = "https://" + vhost.host +
             (vhost.httpsPort === 443 ? "" : ":" + vhost.httpsPort) + httpContext;
+        endpoints.combined = endpoints.secondary + " " + endpoints.primary;
         return endpoints;
+    }
+
+    function getVhostHelperText(env) {
+        const selected = selectedVhost.find(v => v.env === env);
+        if (selected) {
+            const vhost = settings.environment.find(e => e.name === env).vhosts.find(v => v.host === selected.vhost);
+            return getGatewayAccessUrl(vhost, api.isWebSocket() ? 'WS' : 'HTTP').combined;
+        }
+        return "";
     }
 
     return (
@@ -1903,42 +1914,43 @@ export default function Environments() {
                                     ) : (
                                         <>
                                             <TableCell align='left'>
-                                                <TextField
-                                                    id='vhost-selector'
-                                                    select
-                                                    label={(
-                                                        <FormattedMessage
-                                                            id='Apis.Details.Environments.Environments.select.vhost'
-                                                            defaultMessage='Select Access URL'
-                                                        />
-                                                    )}
-                                                    SelectProps={{
-                                                        MenuProps: {
-                                                            anchorOrigin: {
-                                                                vertical: 'bottom',
-                                                                horizontal: 'left',
+                                                <Tooltip title={getVhostHelperText(row.name)} placement="bottom">
+                                                    <TextField
+                                                        id='vhost-selector'
+                                                        select
+                                                        label={(
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.Environments.select.vhost'
+                                                                defaultMessage='Select Access URL'
+                                                            />
+                                                        )}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                anchorOrigin: {
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                },
+                                                                getContentAnchorEl: null,
                                                             },
-                                                            getContentAnchorEl: null,
-                                                        },
-                                                    }}
-                                                    name={row.name}
-                                                    onChange={handleVhostSelect}
-                                                    margin='dense'
-                                                    variant='outlined'
-                                                    style={{ width: '50%' }}
-                                                    disabled={api.isRevision
-                                                    || !allRevisions || allRevisions.length === 0}
-                                                    helperText={"line 1 \
-                                                    line2"}
-                                                >
-                                                    {row.vhosts.map(
-                                                        (vhost) => (
-                                                            <MenuItem value={vhost.host}>
-                                                                {vhost.host}
-                                                            </MenuItem>
-                                                        ),
-                                                    )}
-                                                </TextField>
+                                                        }}
+                                                        name={row.name}
+                                                        onChange={handleVhostSelect}
+                                                        margin='dense'
+                                                        variant='outlined'
+                                                        style={{ width: '50%' }}
+                                                        disabled={api.isRevision
+                                                        || !allRevisions || allRevisions.length === 0}
+                                                        helperText={getVhostHelperText(row.name)}
+                                                    >
+                                                        {row.vhosts.map(
+                                                            (vhost) => (
+                                                                <MenuItem value={vhost.host}>
+                                                                    {vhost.host}
+                                                                </MenuItem>
+                                                            ),
+                                                        )}
+                                                    </TextField>
+                                                </Tooltip>
                                             </TableCell>
                                         </>
                                     )}
