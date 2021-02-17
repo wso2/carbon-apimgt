@@ -30,27 +30,29 @@ import Typography from '@material-ui/core/Typography';
 import Api from 'AppData/api';
 
 function RenderMethodBase(props) {
-    const { theme, method } = props;
-    let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
-    let chipTextColor = '#000000';
-    if (!chipColor) {
-        console.log('Check the theme settings. The resourceChipColors is not populated properly');
-        chipColor = '#cccccc';
-    } else {
-        chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
-    }
-    return (
-        <Chip
-            label={method.toUpperCase()}
-            style={{
-                backgroundColor: chipColor, color: chipTextColor, height: 20, marginRight: 5,
-            }}
-        />
-    );
+    const { theme, methods } = props;
+    return methods.map((method) => {
+        let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
+        let chipTextColor = '#000000';
+        if (!chipColor) {
+            console.log('Check the theme settings. The resourceChipColors is not populated properly');
+            chipColor = '#cccccc';
+        } else {
+            chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
+        }
+        return (
+            <Chip
+                label={method.toUpperCase()}
+                style={{
+                    backgroundColor: chipColor, color: chipTextColor, height: 20, marginRight: 5,
+                }}
+            />
+        );
+    });
 }
 
 RenderMethodBase.propTypes = {
-    method: PropTypes.string.isRequired,
+    methods: PropTypes.arrayOf(PropTypes.string).isRequired,
     theme: PropTypes.shape({}).isRequired,
     classes: PropTypes.shape({}).isRequired,
 };
@@ -99,7 +101,7 @@ class Topics extends React.Component {
         const topics = operations.map((op) => {
             return {
                 name: op.target,
-                type: op.verb.toUpperCase(),
+                // type: op.verb.toUpperCase(),
             };
         });
         this.setState({ topics });
@@ -135,6 +137,10 @@ class Topics extends React.Component {
                         {
                             // /className={classes.contentWrapper}
                             this.state.topics.map((topic) => {
+                                const methods = ['subscribe'];
+                                if (api.type === 'WS') {
+                                    methods.push('publish');
+                                }
                                 return (
                                     <div className={classes.root}>
                                         <Grid container spacing={1}>
@@ -146,7 +152,7 @@ class Topics extends React.Component {
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item>
-                                                        <RenderMethod method={topic.type} />
+                                                        <RenderMethod methods={methods} />
                                                     </Grid>
                                                 </Grid>
                                             </Grid>
