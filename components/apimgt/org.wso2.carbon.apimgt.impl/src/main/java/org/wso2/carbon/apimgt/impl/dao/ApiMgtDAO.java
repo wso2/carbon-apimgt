@@ -7776,7 +7776,6 @@ public class ApiMgtDAO {
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("CREATED_BY"));
                 comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
-                comment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
                 comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
                 comment.setApiId(resultSet.getString("API_ID"));
                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
@@ -7849,7 +7848,6 @@ public class ApiMgtDAO {
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("CREATED_BY"));
                 comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
-                comment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
                 comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
                 comment.setApiId(resultSet.getString("API_ID"));
                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
@@ -7915,7 +7913,6 @@ public class ApiMgtDAO {
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
                 comment.setUser(resultSet.getString("CREATED_BY"));
                 comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
-                comment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
                 comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
                 comment.setApiId(resultSet.getString("API_ID"));
                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));

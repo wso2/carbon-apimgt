@@ -4349,10 +4349,6 @@ components:
           type: string
           readOnly: true
           example : 2021-02-12-19:57:25
-        updatedBy:
-          type: string
-          readOnly: true
-          example: admin
         category:
           type: string
           default: general

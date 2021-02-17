@@ -18,12 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
@@ -36,7 +30,6 @@ public class Comment {
     private String text;
     private String user;
     private Date createdTime;
-    private String updatedBy;
     private Date updatedTime;
     private String apiId;
     private String parentCommentID;
@@ -65,10 +58,6 @@ public class Comment {
     public Date getCreatedTime() {return createdTime; }
 
     public void setCreatedTime(Date createdTime) {this.createdTime = createdTime; }
-
-    public String getUpdatedBy() {return updatedBy; }
-
-    public void setUpdatedBy(String updatedBy) {this.updatedBy = updatedBy; }
 
     public Date getUpdatedTime() {return updatedTime; }
 
