@@ -16,19 +16,16 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.utils;
 
-import com.google.common.net.HttpHeaders;
 import org.apache.axiom.om.OMElement;
-import org.apache.commons.io.IOUtils;
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,76 +34,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.xml.stream.XMLStreamException;
-
 public class SchemaValidationUtils {
 
-    public static final String XML_CONTENT_TYPE = "application/xml";
-    public static final String XML_DECLARATION =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
-
-    /**
-     * Method to build message payload ( only when payload is exists).
-     *
-     * @param axis2MC Axis2 Message context.
-     * @param headers Map of headers
-     * @return Optional String of payload
-     * @throws APIManagementException When failed to decode the payload.
-     */
-    public static Optional<String> buildMessagePayload(org.apache.axis2.context.MessageContext axis2MC, Map headers)
-            throws APIManagementException {
-
-        String requestPayload = null;
-        boolean isMessageContextBuilt = isMessageBuilt(axis2MC);
-        if (!isMessageContextBuilt) {
-            // Build Axis2 Message.
-            try {
-                RelayUtils.buildMessage(axis2MC);
-            } catch (IOException | XMLStreamException e) {
-                throw new APIManagementException("Unable to build axis2 message", e);
-            }
-        }
-
-        if (headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
-            if (headers.get(HttpHeaders.CONTENT_TYPE).toString().contains(XML_CONTENT_TYPE)) {
-
-                OMElement xmlPayload = axis2MC.getEnvelope().getBody().getFirstElement();
-                if (xmlPayload != null) {
-                    requestPayload = XML_DECLARATION + xmlPayload.toString();
-                }
-            } else {
-                // Get JSON Stream and cast to string
-                try {
-                    InputStream jsonPayload = JsonUtil.getJsonPayload(axis2MC);
-                    if (jsonPayload != null) {
-                        requestPayload = IOUtils.toString(JsonUtil.getJsonPayload(axis2MC),
-                                StandardCharsets.UTF_8.name());
-                    }
-
-                } catch (IOException e) {
-                    throw new APIManagementException("Unable to read payload stream", e);
-                }
-            }
-        }
-        return Optional.ofNullable(requestPayload);
-    }
-
-    /**
-     * Method to check message payload built or not.
-     *
-     * @param axis2MC Axis2 Message context.
-     * @return boolean indicated message built or not.
-     */
-    public static boolean isMessageBuilt(org.apache.axis2.context.MessageContext axis2MC) {
-
-        boolean isMessageContextBuilt = false;
-        Object messageContextBuilt = axis2MC.getProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED);
-        if (messageContextBuilt != null) {
-            isMessageContextBuilt = (Boolean) messageContextBuilt;
-        }
-
-        return isMessageContextBuilt;
-    }
+    private static final Log logger = LogFactory.getLog(SchemaValidationUtils.class);
 
     /**
      * Utility function to extract collection of String from Map when the key is given.
@@ -171,6 +101,33 @@ public class SchemaValidationUtils {
                 .stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));
+    }
+
+    /**
+     * Get the Request/Response messageContent as a JsonObject.
+     *
+     * @param messageContext Message context
+     * @return JsonElement which contains the request/response message content
+     */
+    public static Optional<String> getMessageContent(MessageContext messageContext) {
+
+        Optional<String> payloadObject = Optional.empty();
+        org.apache.axis2.context.MessageContext axis2Context = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        if (JsonUtil.hasAJsonPayload(axis2Context)) {
+            payloadObject = Optional.of(JsonUtil.jsonPayloadToString(axis2Context));
+        } else if (messageContext.getEnvelope().getBody() != null) {
+            Object objFirstElement = messageContext.getEnvelope().getBody().getFirstElement();
+            if (objFirstElement != null) {
+                OMElement xmlResponse = messageContext.getEnvelope().getBody().getFirstElement();
+                try {
+                    payloadObject = Optional.of(JsonUtil.toJsonString(xmlResponse).toString());
+                } catch (AxisFault axisFault) {
+                    logger.error(" Error occurred while converting the String payload to Json");
+                }
+            }
+        }
+        return payloadObject;
     }
 
 }

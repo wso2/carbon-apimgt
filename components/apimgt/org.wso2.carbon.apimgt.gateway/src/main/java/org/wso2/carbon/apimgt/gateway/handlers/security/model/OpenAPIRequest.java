@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.utils.SchemaValidationUtils;
 
@@ -70,12 +69,7 @@ public class OpenAPIRequest implements Request {
         Map<String, String> transportHeaders = (Map<String, String>)
                 (axis2MessageContext.getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS));
         //Set Request body
-        try {
-            openAPIRequest.requestBody =
-                    SchemaValidationUtils.buildMessagePayload(axis2MessageContext, transportHeaders);
-        } catch (APIManagementException e) {
-            logger.error("Failed to build the message payload");
-        }
+        openAPIRequest.requestBody = SchemaValidationUtils.getMessageContent(messageContext);
         Map<String, Collection<String>> headerMap = transportHeaders.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));

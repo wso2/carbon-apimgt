@@ -22,12 +22,9 @@ import com.atlassian.oai.validator.model.Response;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.jetbrains.annotations.NotNull;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.utils.SchemaValidationUtils;
 
@@ -42,7 +39,6 @@ import java.util.stream.Collectors;
  */
 public class OpenAPIResponse implements Response {
 
-    private static final Log logger = LogFactory.getLog(OpenAPIResponse.class);
     private static final String REST_SUB_REQUEST_PATH = "REST_SUB_REQUEST_PATH";
     private int status;
     private Optional<String> responseBody;
@@ -80,19 +76,11 @@ public class OpenAPIResponse implements Response {
                 (axis2MessageContext.getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS));
 
         //Setting response body
-        try {
-            openAPIResponse.responseBody =
-                    SchemaValidationUtils.buildMessagePayload(axis2MessageContext, transportHeaders);
-        } catch (APIManagementException e) {
-            logger.error("Failed to build the message payload");
-        }
+        openAPIResponse.responseBody = SchemaValidationUtils.getMessageContent(messageContext);
 
         Map<String, Collection<String>> headerMap = transportHeaders.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        entry -> ((String) (entry.getKey())),
-                        entry -> Collections.singleton((String) (entry.getValue()))
-                                         ));
+                .stream().collect(Collectors
+                        .toMap(Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));
 
         //Setting response headers
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
