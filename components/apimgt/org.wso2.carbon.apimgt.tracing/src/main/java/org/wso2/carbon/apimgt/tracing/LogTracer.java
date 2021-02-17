@@ -28,7 +28,10 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
-public class LogTracer implements OpenTracer{
+/**
+ * This class used to log tracing activities.
+ */
+public class LogTracer implements OpenTracer {
 
     private static final String NAME = "log";
     private static APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
@@ -36,8 +39,9 @@ public class LogTracer implements OpenTracer{
 
     @Override
     public Tracer getTracer(String serviceName) {
-        boolean LogEnabled = Boolean.valueOf(configuration.getFirstProperty(TracingConstants.LOG_ENABLED));
-        if (LogEnabled) {
+
+        boolean logEnabled = Boolean.valueOf(configuration.getFirstProperty(TracingConstants.LOG_ENABLED));
+        if (logEnabled) {
             Tracer tracer = NoopTracerFactory.create();
             Reporter reporter = new TracingReporter(LogFactory.getLog(TracingConstants.TRACER));
             Tracer tracerR = new TracerR(tracer, reporter, new ThreadLocalScopeManager());
@@ -49,6 +53,7 @@ public class LogTracer implements OpenTracer{
 
     @Override
     public String getName() {
+
         return NAME;
     }
 }
