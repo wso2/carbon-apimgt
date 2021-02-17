@@ -24,7 +24,6 @@ public class MetaInfo {
     private String correlationId;
     private String regionId;
     private String gatewayType;
-    private String deploymentId;
 
     public String getCorrelationId() {
         return correlationId;
@@ -48,14 +47,6 @@ public class MetaInfo {
 
     public void setGatewayType(String gatewayType) {
         this.gatewayType = gatewayType;
-    }
-
-    public String getDeploymentId() {
-        return deploymentId;
-    }
-
-    public void setDeploymentId(String deploymentId) {
-        this.deploymentId = deploymentId;
     }
 
 }

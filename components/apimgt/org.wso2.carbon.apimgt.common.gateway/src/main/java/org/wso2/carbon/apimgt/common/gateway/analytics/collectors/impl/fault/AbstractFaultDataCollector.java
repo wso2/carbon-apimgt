@@ -20,26 +20,51 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.FaultDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.CommonRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.InvalidCategoryException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.RequestDataPublisher;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultEventType;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategories;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 
 /**
  * Abstract faulty request data collector
  */
 public abstract class AbstractFaultDataCollector extends CommonRequestDataCollector implements FaultDataCollector {
-    private FaultEventType subType;
+    protected FaultCategory subType;
     private RequestDataPublisher processor;
+    private AnalyticsDataProvider provider;
 
-    public AbstractFaultDataCollector(AnalyticsDataProvider provider, FaultEventType subType,
+    public AbstractFaultDataCollector(AnalyticsDataProvider provider, FaultCategory subType,
             RequestDataPublisher processor) {
         super(provider);
+        this.provider = provider;
         this.subType = subType;
         this.processor = processor;
     }
 
-    protected final void processRequest(Event faultyEvent) {
+    protected final void processRequest(Event faultyEvent) throws InvalidCategoryException {
+        Error error = provider.getError(this.subType);
+        if (!isValidSubCategory(error.getSubCategory())) {
+            throw new InvalidCategoryException(this.subType, faultyEvent.getError().getSubCategory().toString());
+        }
         faultyEvent.setErrorType(this.subType.name());
+        faultyEvent.setError(error);
         this.processor.publish(faultyEvent);
+    }
+
+    private boolean isValidSubCategory(FaultSubCategory subCategory) {
+        if (FaultCategory.AUTH == this.subType) {
+            return subCategory instanceof FaultSubCategories.Authentication;
+        } else if (FaultCategory.THROTTLED == this.subType) {
+            return subCategory instanceof FaultSubCategories.Throttling;
+        } else if (FaultCategory.TARGET_CONNECTIVITY == this.subType) {
+            return subCategory instanceof FaultSubCategories.TargetConnectivity;
+        } else if (FaultCategory.OTHER == this.subType) {
+            return subCategory instanceof FaultSubCategories.Other;
+        }
+
+        return false;
     }
 }

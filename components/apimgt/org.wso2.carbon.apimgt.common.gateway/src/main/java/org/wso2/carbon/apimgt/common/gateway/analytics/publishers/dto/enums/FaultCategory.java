@@ -15,13 +15,14 @@
  *
  */
 
-package org.wso2.carbon.apimgt.common.gateway.analytics.collectors;
-
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums;
 
 /**
- * interface to request handlers
+ * Enum to denote faulty event types
  */
-public interface RequestDataCollector {
-    void collectData() throws AnalyticsException;
+public enum FaultCategory {
+    AUTH,
+    TARGET_CONNECTIVITY,
+    THROTTLED,
+    OTHER
 }

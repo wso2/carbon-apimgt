@@ -15,13 +15,10 @@
  *
  */
 
-package org.wso2.carbon.apimgt.common.gateway.analytics.collectors;
-
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums;
 
 /**
- * interface to request handlers
+ * SubCategories for fault sub categories enums
  */
-public interface RequestDataCollector {
-    void collectData() throws AnalyticsException;
+public interface FaultSubCategory {
 }
