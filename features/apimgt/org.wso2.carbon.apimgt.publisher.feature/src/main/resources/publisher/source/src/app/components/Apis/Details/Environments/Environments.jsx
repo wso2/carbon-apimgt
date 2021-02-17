@@ -387,14 +387,14 @@ export default function Environments() {
     };
 
     const handleSelect = (event) => {
-        let revisions = selectedRevision.filter(r => r.env !== event.target.name);
-        revisions.push({env: event.target.name, revision: event.target.value});
+        const revisions = selectedRevision.filter((r) => r.env !== event.target.name);
+        revisions.push({ env: event.target.name, revision: event.target.value });
         setRevision(revisions);
     };
 
     const handleVhostSelect = (event) => {
-        let vhosts = selectedVhost.filter(v => v.env !== event.target.name);
-        vhosts.push({env: event.target.name, vhost: event.target.value});
+        const vhosts = selectedVhost.filter((v) => v.env !== event.target.name);
+        vhosts.push({ env: event.target.name, vhost: event.target.value });
         setVhost(vhosts);
     };
 
@@ -1233,15 +1233,14 @@ export default function Environments() {
     }
 
     const allEnvDeployments = [];
-    settings.environment.forEach(env => {
+    settings.environment.forEach((env) => {
         const revision = allEnvRevision && allEnvRevision.find(
-            r => r.deploymentInfo.some(e => e.name === env.name)
+            (r) => r.deploymentInfo.some((e) => e.name === env.name),
         );
-        const envDetails = revision && revision.deploymentInfo.find(e => e.name === env.name);
-        const vhost = envDetails && env.vhosts && env.vhosts.find(e => e.host === envDetails.vhost);
+        const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
+        const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
         allEnvDeployments[env.name] = { revision, vhost };
-
-    })
+    });
 
     /**
      * Get gateway access URL from vhost
@@ -1250,35 +1249,37 @@ export default function Environments() {
      * @returns {{secondary: string, primary: string}}
      */
     function getGatewayAccessUrl(vhost, type) {
-        let endpoints = { "primary": "", "secondary": "", "combined": ""};
+        const endpoints = { primary: '', secondary: '', combined: '' };
         if (vhost == null) {
             return endpoints;
         }
 
         if (type === 'WS') {
-            endpoints.primary = "ws://" + vhost.host + ":" + vhost.wsPort;
-            endpoints.secondary = "wss://" + vhost.host + ":" + vhost.wssPort;
-            endpoints.combined = endpoints.secondary + " " + endpoints.primary;
+            endpoints.primary = 'ws://' + vhost.host + ':' + vhost.wsPort;
+            endpoints.secondary = 'wss://' + vhost.host + ':' + vhost.wssPort;
+            endpoints.combined = endpoints.secondary + ' ' + endpoints.primary;
             return endpoints;
         }
 
-        let httpContext = vhost.httpContext == null || vhost.httpContext === "" ? "" :
-            "/" + vhost.httpContext.replace(/^\//g, '');
-        endpoints.primary = "http://" + vhost.host +
-            (vhost.httpPort === 80 ? "" : ":" + vhost.httpPort) + httpContext;
-        endpoints.secondary = "https://" + vhost.host +
-            (vhost.httpsPort === 443 ? "" : ":" + vhost.httpsPort) + httpContext;
-        endpoints.combined = endpoints.secondary + " " + endpoints.primary;
+        const httpContext = vhost.httpContext == null || vhost.httpContext === '' ? ''
+            : '/' + vhost.httpContext.replace(/^\//g, '');
+        endpoints.primary = 'http://' + vhost.host
+            + (vhost.httpPort === 80 ? '' : ':' + vhost.httpPort) + httpContext;
+        endpoints.secondary = 'https://' + vhost.host
+            + (vhost.httpsPort === 443 ? '' : ':' + vhost.httpsPort) + httpContext;
+        endpoints.combined = endpoints.secondary + ' ' + endpoints.primary;
         return endpoints;
     }
 
     function getVhostHelperText(env) {
-        const selected = selectedVhost.find(v => v.env === env);
+        const selected = selectedVhost.find((v) => v.env === env);
         if (selected) {
-            const vhost = settings.environment.find(e => e.name === env).vhosts.find(v => v.host === selected.vhost);
+            const vhost = settings.environment.find((e) => e.name === env).vhosts.find(
+                (v) => v.host === selected.vhost,
+            );
             return getGatewayAccessUrl(vhost, api.isWebSocket() ? 'WS' : 'HTTP').combined;
         }
-        return "";
+        return '';
     }
 
     return (
@@ -1891,29 +1892,25 @@ export default function Environments() {
                                         <>
                                             <TableCell align='left'>
                                                 <div className={classes.primaryEndpoint}>
-                                                    {api.isWebSocket() ?
-                                                        getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'WS')
-                                                            .primary
-                                                        :
-                                                        getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'HTTP')
-                                                            .primary
-                                                    }
+                                                    {api.isWebSocket()
+                                                        ? getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'WS')
+                                                            .primary : getGatewayAccessUrl(
+                                                            allEnvDeployments[row.name].vhost, 'HTTP',
+                                                        ).primary}
                                                 </div>
                                                 <div className={classes.secondaryEndpoint}>
-                                                    {api.isWebSocket() ?
-                                                        getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'WS')
-                                                            .secondary
-                                                        :
-                                                        getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'HTTP')
-                                                            .secondary
-                                                    }
+                                                    {api.isWebSocket()
+                                                        ? getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'WS')
+                                                            .secondary : getGatewayAccessUrl(
+                                                            allEnvDeployments[row.name].vhost, 'HTTP',
+                                                        ).secondary}
                                                 </div>
                                             </TableCell>
                                         </>
                                     ) : (
                                         <>
                                             <TableCell align='left'>
-                                                <Tooltip title={getVhostHelperText(row.name)} placement="bottom">
+                                                <Tooltip title={getVhostHelperText(row.name)} placement='bottom'>
                                                     <TextField
                                                         id='vhost-selector'
                                                         select
@@ -1954,8 +1951,8 @@ export default function Environments() {
                                         </>
                                     )}
                                     <TableCell align='left'>
-                                        {
-                                            allEnvDeployments[row.name].revision != null ?
+                                        {allEnvDeployments[row.name].revision != null
+                                            ? (
                                                 <div>
                                                     <Chip
                                                         label={allEnvDeployments[row.name].revision.displayName}
@@ -1966,7 +1963,7 @@ export default function Environments() {
                                                         variant='outlined'
                                                         disabled={api.isRevision}
                                                         onClick={() => undeployRevision(
-                                                            allEnvDeployments[row.name].revision.id, row.name
+                                                            allEnvDeployments[row.name].revision.id, row.name,
                                                         )}
                                                         size='small'
                                                     >
@@ -1976,8 +1973,7 @@ export default function Environments() {
                                                         />
                                                     </Button>
                                                 </div>
-                                                : (
-                                                // eslint-disable-next-line react/jsx-indent
+                                            ) : (
                                                 <div>
                                                     <TextField
                                                         id='revision-selector'
@@ -2016,17 +2012,16 @@ export default function Environments() {
                                                     <Button
                                                         className={classes.button2}
                                                         disabled={api.isRevision || !selectedRevision.some(
-                                                            r => r.env === row.name && r.revision
+                                                            (r) => r.env === row.name && r.revision,
                                                         ) || !selectedVhost.some(
-                                                            v => v.env === row.name && v.vhost
+                                                            (v) => v.env === row.name && v.vhost,
                                                         )}
                                                         variant='outlined'
-                                                        onClick={() =>
-                                                            deployRevision(selectedRevision.find(
-                                                                r => r.env === row.name
-                                                            ).revision, row.name, selectedVhost.find(
-                                                                v => v.env === row.name
-                                                            ).vhost)}
+                                                        onClick={() => deployRevision(selectedRevision.find(
+                                                            (r) => r.env === row.name,
+                                                        ).revision, row.name, selectedVhost.find(
+                                                            (v) => v.env === row.name,
+                                                        ).vhost)}
 
                                                     >
                                                         <FormattedMessage
