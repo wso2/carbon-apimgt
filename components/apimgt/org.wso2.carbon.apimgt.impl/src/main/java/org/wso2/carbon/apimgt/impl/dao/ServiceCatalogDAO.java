@@ -419,28 +419,91 @@ public class ServiceCatalogDAO {
     public List<ServiceEntry> getServices(ServiceFilterParams filterParams, int tenantId, boolean shrink)
             throws APIManagementException {
         List<ServiceEntry> serviceEntryList = new ArrayList<>();
-        String query = SQLConstantManagerFactory.getSQlString("GET_ALL_SERVICES_BY_TENANT_ID");
-        query = query.replace("$1", filterParams.getSortBy());
-        query = query.replace("$2", filterParams.getSortOrder());
+        String query;
+        boolean searchByKey = false;
+        boolean searchByDefinitionType = false;
+        boolean exactNameSearch = false;
+        boolean exactVersionSearch = false;
+        StringBuilder querySb = new StringBuilder();
+        querySb.append("SELECT UUID, SERVICE_KEY, MD5, SERVICE_NAME, DISPLAY_NAME, SERVICE_VERSION," +
+                "   SERVICE_URL, DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, SECURITY_TYPE, MUTUAL_SSL_ENABLED," +
+                "   CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, SERVICE_DEFINITION, METADATA FROM " +
+                "   AM_SERVICE_CATALOG WHERE TENANT_ID = ? ");
+        String whereClauseForExactNameSearch = "AND SERVICE_NAME = ? ";
+        String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
+        String whereClauseForExactVersionSearch = "AND SERVICE_VERSION = ? ";
+        String whereClauseForVersionSearch = "SERVICE_VERSION LIKE ? ";
+        String whereClauseWithDefinitionType = " AND DEFINITION_TYPE = ? ";
+        String whereClauseWithServiceKey = " AND SERVICE_KEY = ? ";
+        if (filterParams.getName().startsWith("\"") && filterParams.getName().endsWith("\"")) {
+            exactNameSearch = true;
+            querySb.append(whereClauseForExactNameSearch);
+        } else {
+            querySb.append(whereClauseForNameSearch);
+        }
+        if (filterParams.getVersion().startsWith("\"") && filterParams.getVersion().endsWith("\"")) {
+            exactVersionSearch = true;
+            querySb.append(whereClauseForExactVersionSearch);
+        } else {
+            querySb.append(whereClauseForVersionSearch);
+        }
+        if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) && StringUtils.isEmpty(filterParams.getKey())) {
+            searchByDefinitionType = true;
+            querySb.append(whereClauseWithDefinitionType);
+        } else if (StringUtils.isNotEmpty(filterParams.getKey()) &&
+                StringUtils.isEmpty(filterParams.getDefinitionType())) {
+            searchByKey = true;
+            querySb.append(whereClauseWithServiceKey);
+        } else if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) &&
+                StringUtils.isNotEmpty(filterParams.getKey())) {
+            searchByKey = true;
+            searchByDefinitionType = true;
+            querySb.append(whereClauseWithDefinitionType)
+                    .append(whereClauseWithServiceKey);
+        }
+        querySb.append("ORDER BY ")
+                .append(filterParams.getSortBy())
+                .append(" " + filterParams.getSortOrder())
+                .append("LIMIT ?, ?");
+        query = querySb.toString();
         String[] keyArray = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection.prepareStatement(query)) {
-            if (filterParams.getKey().contains(",")) {
-                keyArray = filterParams.getKey().split(",");
-                for (String key: keyArray) {
-                    ps.setInt(1, tenantId);
+            keyArray = filterParams.getKey().split(",");
+            for (String key: keyArray) {
+                ps.setInt(1, tenantId);
+                if (exactNameSearch) {
+                    ps.setString(2, filterParams.getName());
+                } else {
                     ps.setString(2, "%" + filterParams.getName() + "%");
+                }
+                if (exactVersionSearch) {
+                    ps.setString(3, filterParams.getVersion());
+                } else {
                     ps.setString(3, "%" + filterParams.getVersion() + "%");
-                    ps.setString(4, "%" + filterParams.getDefinitionType() + "%");
-                    ps.setString(5, "%" + filterParams.getDisplayName() + "%");
-                    ps.setString(6, "%" + key + "%");
+                }
+                ps.setString(4, "%" + filterParams.getDisplayName() + "%");
+                if (searchByKey && searchByDefinitionType) {
+                    ps.setString(5, filterParams.getDefinitionType());
+                    ps.setString(6, key);
                     ps.setInt(7, filterParams.getOffset());
                     ps.setInt(8, filterParams.getLimit());
-                    try (ResultSet resultSet = ps.executeQuery()) {
-                        while (resultSet.next()) {
-                            ServiceEntry service = getServiceParams(resultSet, shrink);
-                            serviceEntryList.add(service);
-                        }
+                } else if (searchByKey) {
+                    ps.setString(5, key);
+                    ps.setInt(6, filterParams.getOffset());
+                    ps.setInt(7, filterParams.getLimit());
+                } else if (searchByDefinitionType) {
+                    ps.setString(5, filterParams.getDefinitionType());
+                    ps.setInt(6, filterParams.getOffset());
+                    ps.setInt(7, filterParams.getLimit());
+                } else {
+                    ps.setInt(5, filterParams.getOffset());
+                    ps.setInt(6, filterParams.getLimit());
+                }
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    while (resultSet.next()) {
+                        ServiceEntry service = getServiceParams(resultSet, shrink);
+                        serviceEntryList.add(service);
                     }
                 }
             }
