@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.DefaultJWTTransformer;
 import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 
 import java.io.IOException;
@@ -59,19 +60,27 @@ public class JWTValidatorImpl implements JWTValidator {
             state = validateSignature(signedJWTInfo.getSignedJWT());
             if (state) {
                 JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-                state = validateTokenExpiry(jwtClaimsSet);
+                state = signedJWTInfo.isValidCertificateBoundAccessToken();
                 if (state) {
-                    jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
-                    jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
-                    jwtValidationInfo.setAppToken(getIsAppToken(jwtClaimsSet));
-                    JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
-                    createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
-                    jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
-                    return jwtValidationInfo;
+                    state = validateTokenExpiry(jwtClaimsSet);
+                    if (state) {
+                        jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
+                        jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
+                        jwtValidationInfo.setAppToken(getIsAppToken(jwtClaimsSet));
+                        JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
+                        createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
+                        jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
+                        return jwtValidationInfo;
+                    } else {
+                        jwtValidationInfo.setValid(false);
+                        jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                        return jwtValidationInfo;
+                    }
                 } else {
                     jwtValidationInfo.setValid(false);
                     jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                     return jwtValidationInfo;
+
                 }
             } else {
                 jwtValidationInfo.setValid(false);

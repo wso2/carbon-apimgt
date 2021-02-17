@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUt
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -127,9 +128,15 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                             .retrieveGatewayAPIDto(api, environment, tenantDomain, apidto,
                                                     extractedFolderPath, apiDefinitionValidationResponse);
                                 } else if (api.getType() != null &&
-                                        APIConstants.APITransportType.WS.toString().equals(api.getType())) {
-                                    gatewayAPIDTO =
-                                            TemplateBuilderUtil.retrieveGatewayAPIDtoForWebSocket(api);
+                                        (APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
+                                                APIConstants.APITransportType.SSE.toString().equals(api.getType()) ||
+                                                APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
+                                    String asyncApiDefinition =
+                                            ImportUtils.retrieveValidatedAsyncApiDefinitionFromArchive(extractedFolderPath);
+                                    api.setAsyncApiDefinition(asyncApiDefinition);
+                                    gatewayAPIDTO = TemplateBuilderUtil
+                                            .retrieveGatewayAPIDtoForStreamingAPI(api, environment, tenantDomain,
+                                                    apidto, extractedFolderPath);
                                 }
                             }
                             if (gatewayAPIDTO != null) {

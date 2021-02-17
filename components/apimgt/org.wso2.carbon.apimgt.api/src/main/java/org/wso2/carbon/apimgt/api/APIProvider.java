@@ -392,6 +392,15 @@ public interface APIProvider extends APIManager {
             throws DuplicateAPIException, APIManagementException;
 
     /**
+     * Retrieve the Key of the Service used in the API
+     * @param apiId Unique Identifier of the API
+     * @param tenantId Logged-in tenant domain
+     * @return Unique key of the service
+     * @throws APIManagementException
+     */
+    String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException;
+
+    /**
      * Removes a given documentation
      *
      * @param apiId   APIIdentifier
@@ -1787,7 +1796,16 @@ public interface APIProvider extends APIManager {
     void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
     /**
-     * Adds a new APIRevision to an existing API Product
+<<<<<<<<< Temporary merge branch 1
+     * This method updates the AsyncApi definition in registry
+     *
+     * @param api   API
+     * @param jsonText    AsyncApi definition
+     * @throws APIManagementException
+     */
+    void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException;
+    /**
+    * Adds a new APIRevision to an existing API Product
      *
      * @param apiRevision APIRevision
      * @throws APIManagementException if failed to add APIRevision
@@ -1833,5 +1851,4 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to delete APIRevision
      */
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
-
 }

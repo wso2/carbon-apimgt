@@ -360,11 +360,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return response containing the required application object
      */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant,
+                                                 MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            Application application = apiConsumer.getApplicationByUUID(applicationId, xWSO2Tenant);
             if (application != null) {
                 // Remove hidden attributes and set the rest of the attributes from config
                 JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
@@ -700,7 +701,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO
-            body, MessageContext messageContext) throws APIManagementException {
+            body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -743,7 +744,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams, keyManagerName);
+                            jsonParams, keyManagerName, xWSO2Tenant);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -815,7 +816,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param applicationUUID Id of the application
      * @return List of application keys
      */
-    private Set<APIKey> getApplicationKeys(String applicationUUID) {
+    private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain) {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -823,7 +824,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationUUID);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    return apiConsumer.getApplicationKeysOfApplication(application.getId());
+                    return apiConsumer.getApplicationKeysOfApplication(application.getId(), tenantDomain);
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
                 }
@@ -834,6 +835,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationUUID, e, log);
         }
         return null;
+    }
+
+    /**
+     * Used to get all keys of an application
+     *
+     * @param applicationUUID Id of the application
+     * @return List of application keys
+     */
+    private Set<APIKey> getApplicationKeys(String applicationUUID) {
+
+        return getApplicationKeys(applicationUUID, null);
     }
 
     @Override
@@ -936,13 +948,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Application Key Information
      */
     private ApplicationKeyDTO getApplicationKeyByAppIDAndKeyMapping(String applicationId, String keyMappingId) {
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
-        if (applicationKeys != null) {
-            for (APIKey apiKey : applicationKeys) {
-                if (keyMappingId != null && keyMappingId.equals(apiKey.getMappingId())) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            if (application != null) {
+                APIKey apiKey = apiConsumer.getApplicationKeyByAppIDAndKeyMapping(application.getId(), keyMappingId);
+                if (apiKey != null) {
                     return ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
                 }
+            } else {
+                log.error("Application not found with ID: " + applicationId);
             }
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -1090,10 +1109,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysGet(String applicationId, MessageContext messageContext)
+    public Response applicationsApplicationIdOauthKeysGet(String applicationId,
+                                                          String xWso2Tenant, MessageContext messageContext)
             throws APIManagementException {
 
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, xWso2Tenant);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
         applicationKeyListDTO.setCount(0);

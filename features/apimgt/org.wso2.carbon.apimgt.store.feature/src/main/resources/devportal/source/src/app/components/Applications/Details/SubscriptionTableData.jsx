@@ -37,6 +37,9 @@ import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import Subscription from 'AppData/Subscription';
 import Invoice from './Invoice';
+import { mdiOpenInNew } from '@mdi/js';
+import {Icon as MDIcon} from '@mdi/react';
+import AddToHomeScreenIcon from '@material-ui/icons/AddToHomeScreen';
 
 /**
  *
@@ -224,12 +227,16 @@ class SubscriptionTableData extends React.Component {
     render() {
         const {
             subscription: {
-                apiInfo, status, throttlingPolicy, subscriptionId, apiId, requestedThrottlingPolicy
+                apiInfo, status, throttlingPolicy, subscriptionId, apiId, requestedThrottlingPolicy, applicationId
             },
         } = this.props;
-        const { openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier } = this.state;
-        const link = <Link to={'/apis/' + apiId}>{apiInfo.name + ' - ' + apiInfo.version}</Link>;
-
+        const {openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier} = this.state;
+        let link = <Link to={'/apis/' + apiId} external>{apiInfo.name + ' - ' + apiInfo.version + ' '}
+            <MDIcon path={mdiOpenInNew} size='12px'/></Link>;
+        if (apiInfo.type === 'WEBSUB') {
+            link = <Link
+                to={'/applications/' + applicationId + '/webhooks/' + apiId}>{apiInfo.name + ' - ' + apiInfo.version}</Link>;
+        }
         return (
             <TableRow hover>
                 <TableCell>

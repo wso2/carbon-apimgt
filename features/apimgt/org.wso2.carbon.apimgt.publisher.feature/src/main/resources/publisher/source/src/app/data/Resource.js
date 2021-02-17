@@ -71,4 +71,8 @@ export default class Resource {
     isSOAP() {
         return this.type === 'SOAP';
     }
+
+    isWebSub() {
+        return this.type === 'WEBSUB';
+    }
 }

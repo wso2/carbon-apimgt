@@ -114,6 +114,7 @@ public class APIManagerConfiguration {
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static String tokenRevocationClassName;
+    private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
