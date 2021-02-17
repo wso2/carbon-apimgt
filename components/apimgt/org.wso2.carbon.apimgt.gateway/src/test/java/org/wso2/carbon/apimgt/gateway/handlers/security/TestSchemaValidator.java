@@ -16,13 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import com.google.gson.GsonBuilder;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.spi.json.GsonJsonProvider;
-import com.jayway.jsonpath.spi.json.JsonProvider;
-import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
-import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -44,46 +37,29 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+
+import javax.xml.stream.XMLStreamException;
 
 public class TestSchemaValidator {
     private static final Log log = LogFactory.getLog(TestSchemaValidator.class);
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
+    private static final String RESOURCE_TAG = "api.ut.resource";
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgContext;
     private Handler schemaValidator = new SchemaValidator();
-    private String uuid;
     SynapseConfiguration synapseConfiguration = Mockito.mock(SynapseConfiguration.class);
     Map map = Mockito.mock(Map.class);
     Entry entry = Mockito.mock(Entry.class);
 
     @BeforeClass
     public static void init() {
-        // Set GsonJsonProvider as the default Jayway JSON path default configuration
-        // Which is set by synapse-core at runtime of the server
-        Configuration.setDefaults(new Configuration.Defaults() {
-            private final JsonProvider jsonProvider = new GsonJsonProvider(new GsonBuilder().serializeNulls().create());
-            private final MappingProvider mappingProvider = new GsonMappingProvider();
 
-            public JsonProvider jsonProvider() {
-                return jsonProvider;
-            }
-
-            public MappingProvider mappingProvider() {
-                return mappingProvider;
-            }
-
-            public Set<Option> options() {
-                return EnumSet.noneOf(Option.class);
-            }
-        });
     }
-
 
     @Before
     public void before() {
@@ -192,8 +168,8 @@ public class TestSchemaValidator {
 
     private void assertValidRequest() {
         Assert.assertTrue(schemaValidator.handleRequest(messageContext));
-//        Mockito.verify(messageContext, Mockito.times(0))
-//                .setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
+        Mockito.verify(messageContext, Mockito.times(0))
+                .setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
     }
 
     private void assertBadRequest() {
@@ -224,7 +200,6 @@ public class TestSchemaValidator {
                 thenReturn(httpMethod);
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when(synapseConfiguration.getLocalRegistry()).thenReturn(map);
-        Mockito.when(map.get(uuid)).thenReturn(entry);
 
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when((String) messageContext.getProperty((APIMgtGatewayConstants.API_ELECTED_RESOURCE))).
@@ -240,7 +215,9 @@ public class TestSchemaValidator {
                 thenReturn(httpMethod);
         Mockito.when((String) messageContext.getProperty(APIMgtGatewayConstants.OPEN_API_STRING))
                 .thenReturn(swaggerValue);
-        Mockito.when(axis2MsgContext.getProperty("TRANSPORT_HEADERS")).thenReturn(new HashMap<>());
-        Mockito.when(messageContext.getProperty("api.ut.resource")).thenReturn(resourcePath);
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE_HEADER, contentType);
+        Mockito.when(axis2MsgContext.getProperty(TRANSPORT_HEADERS)).thenReturn(headers);
+        Mockito.when(messageContext.getProperty(RESOURCE_TAG)).thenReturn(resourcePath);
     }
 }
