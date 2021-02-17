@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -238,7 +239,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext messageContext) {
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo,
+                                    MessageContext messageContext) throws APIManagementException{
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -272,15 +274,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comment content location for API " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+//            String errorMessage = "Error while retrieving comment content location for API " + apiId;
+//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
         }
         return null;
     }
 
     @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
-                                        Boolean includeCommenterInfo, MessageContext messageContext) {
+                                        Boolean includeCommenterInfo, MessageContext messageContext)
+            throws APIManagementException{
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -309,7 +313,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer limit, Integer offset, MessageContext messageContext) {
+    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
+                                    Boolean includeCommenterInfo, Integer limit, Integer offset,
+                                    MessageContext messageContext) throws APIManagementException{
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -350,7 +356,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException{
+    public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
+                                        Integer offset, String ifNoneMatch, Boolean includeCommenterInfo,
+                                        MessageContext messageContext) throws APIManagementException{
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -378,7 +386,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException{
+    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
+                                     MessageContext messageContext) throws APIManagementException{
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -428,7 +437,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
 
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -440,7 +450,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 if ( username.equals("admin") || comment.getUser().equals(username)) {
                     if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
-                        return Response.ok("The comment has been deleted").build();
+                        JSONObject obj = new JSONObject();
+                        obj.put("id", commentId);
+                        obj.put("message", "The comment has been deleted");
+                        return Response.ok(obj, MediaType.APPLICATION_JSON).build();
                     } else {
                         // Proper error responses should be added
                         return null;

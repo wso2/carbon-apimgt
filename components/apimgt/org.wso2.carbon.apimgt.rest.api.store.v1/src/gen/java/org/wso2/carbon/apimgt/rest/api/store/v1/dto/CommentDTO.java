@@ -27,7 +27,6 @@ public class CommentDTO   {
     private String createdTime = null;
     private String createdBy = null;
     private String updatedTime = null;
-    private String updatedBy = null;
     private String category = "general";
     private String parentCommentId = null;
 
@@ -153,23 +152,6 @@ return null;
 
   /**
    **/
-  public CommentDTO updatedBy(String updatedBy) {
-    this.updatedBy = updatedBy;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "admin", value = "")
-  @JsonProperty("updatedBy")
-  public String getUpdatedBy() {
-    return updatedBy;
-  }
-  public void setUpdatedBy(String updatedBy) {
-    this.updatedBy = updatedBy;
-  }
-
-  /**
-   **/
   public CommentDTO category(String category) {
     this.category = category;
     return this;
@@ -270,7 +252,6 @@ return null;
         Objects.equals(createdTime, comment.createdTime) &&
         Objects.equals(createdBy, comment.createdBy) &&
         Objects.equals(updatedTime, comment.updatedTime) &&
-        Objects.equals(updatedBy, comment.updatedBy) &&
         Objects.equals(category, comment.category) &&
         Objects.equals(parentCommentId, comment.parentCommentId) &&
         Objects.equals(entryPoint, comment.entryPoint) &&
@@ -280,7 +261,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, content, createdTime, createdBy, updatedTime, updatedBy, category, parentCommentId, entryPoint, commenterInfo, replies);
+    return Objects.hash(id, content, createdTime, createdBy, updatedTime, category, parentCommentId, entryPoint, commenterInfo, replies);
   }
 
   @Override
@@ -293,7 +274,6 @@ return null;
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
-    sb.append("    updatedBy: ").append(toIndentedString(updatedBy)).append("\n");
     sb.append("    category: ").append(toIndentedString(category)).append("\n");
     sb.append("    parentCommentId: ").append(toIndentedString(parentCommentId)).append("\n");
     sb.append("    entryPoint: ").append(toIndentedString(entryPoint)).append("\n");
