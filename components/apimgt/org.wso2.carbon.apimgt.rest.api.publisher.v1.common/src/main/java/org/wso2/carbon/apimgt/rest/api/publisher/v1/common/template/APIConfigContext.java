@@ -80,11 +80,6 @@ public class APIConfigContext extends ConfigContext {
         // customise how the synapse config is generated.
         context.put("apiObj", api);
 
-        if (APIConstants.BLOCKED.equals(api.getStatus())) {
-            context.put("apiIsBlocked", Boolean.TRUE);
-        } else {
-            context.put("apiIsBlocked", Boolean.FALSE);
-        }
         String apiSecurity = api.getApiSecurity();
         if (apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
             context.put("apiIsOauthProtected", Boolean.TRUE);

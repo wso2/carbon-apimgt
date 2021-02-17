@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsExcep
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
@@ -46,6 +47,10 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
+
+        if (GatewayUtils.isAPIStatusProtoType(messageContext)) {
+            return true;
+        }
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
         String userAgent = getUserAgent(messageContext);

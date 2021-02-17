@@ -37,6 +37,7 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.stream.XMLStreamException;
@@ -69,6 +70,9 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     @Override
     public boolean handleRequest(MessageContext synCtx) {
 
+        if (GatewayUtils.isAPIStatusProtoType(synCtx)) {
+            return true;
+        }
         String requestSubPath = getRequestSubPath(synCtx);
         // all other requests are assumed to be for subscription as there will be only 2 resources for web hook api
         if (!requestSubPath.startsWith(eventReceiverResourcePath)) {

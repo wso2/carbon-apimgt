@@ -29,6 +29,7 @@ public class APIMgtGatewayConstants {
     public static final String VERSION = "api.ut.version";
     public static final String API_TYPE = "api.ut.api_type";
     public static final String RESOURCE = "api.ut.resource";
+    public static final String API_STATUS = "api.ut.status";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
@@ -218,6 +219,7 @@ public class APIMgtGatewayConstants {
     public static final String AUTHENTICATION_ENDPOINT_CONTEXT = "/authenticationendpoint";
     public static final String LOGIN_CONTEXT = "/logincontext";
     public static final String OAUTH2_CONTEXT = "/oauth2";
+    public static final String API_OBJECT = "API";
 
     public static final String CUSTOM_PROPERTY = "customProperty";
 }

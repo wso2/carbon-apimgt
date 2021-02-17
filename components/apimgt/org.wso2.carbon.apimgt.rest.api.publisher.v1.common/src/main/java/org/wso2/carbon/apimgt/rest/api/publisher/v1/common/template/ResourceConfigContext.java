@@ -66,7 +66,6 @@ public class ResourceConfigContext extends ConfigContextDecorator {
 
         if (api != null) {
             context.put("resources", api.getUriTemplates());
-            context.put("apiStatus", api.getStatus());
             context.put("apiType", api.getType());
             context.put("faultSequence", faultSeqExt != null ? faultSeqExt : api.getFaultSequence());
         } else if (apiProduct != null) {

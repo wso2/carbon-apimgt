@@ -29,6 +29,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
 import org.apache.synapse.rest.RESTConstants;
 import org.eclipse.core.runtime.Path;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
@@ -62,6 +63,7 @@ public class TestUtils {
                 new Axis2SynapseEnvironment(cfgCtx, synCfg));
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         Map map = new TreeMap();
         map.put(X_FORWARDED_FOR, "127.0.0.1,1.10.0.4");
         ((Axis2MessageContext) synCtx).getAxis2MessageContext()
@@ -80,6 +82,7 @@ public class TestUtils {
                 new Axis2SynapseEnvironment(cfgCtx, synCfg));
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         AuthenticationContext authenticationContext = new AuthenticationContext();
         authenticationContext.setUsername("sanjeewa");
         authenticationContext.setApiKey("123456789");
@@ -112,6 +115,7 @@ public class TestUtils {
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
         synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, "resource");
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         Map map = new TreeMap();
         map.put("host","127.0.0.1");
         map.put("X-FORWARDED-FOR", "127.0.0.1");

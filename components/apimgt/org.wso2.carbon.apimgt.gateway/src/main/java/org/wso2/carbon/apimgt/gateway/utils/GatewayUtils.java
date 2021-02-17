@@ -38,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -1162,40 +1163,59 @@ public class GatewayUtils {
         return axis2MsgCtx;
     }
 
-    public static String getAPINameFromContextAndVersion(String apiContext, String apiVersion, String tenantDomain) {
-
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        if (tenantSubscriptionStore != null) {
-            API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
-            if (api != null) {
-                return api.getApiName();
-            }
-        }
-        return null;
-    }
-
-    public static String getApiProviderFromContextAndVersion(String context, String apiVersion, String tenantDomain) {
-
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        if (tenantSubscriptionStore != null) {
-            API api = tenantSubscriptionStore.getApiByContextAndVersion(context, apiVersion);
-            if (api != null) {
-                return api.getApiProvider();
-            }
-        }
-        return null;
-    }
-
     public static API getAPI(org.apache.synapse.MessageContext messageContext) {
 
-        String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
-        if (tenantSubscriptionStore != null) {
-            return tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+        synchronized (messageContext) {
+            Object api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+            if (api != null) {
+                return (API) api;
+            }
+            String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+            String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+            SubscriptionDataStore tenantSubscriptionStore =
+                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+            if (tenantSubscriptionStore != null) {
+                API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+                messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
+                return api1;
+            }
+            return null;
+        }
+    }
+
+    public static String getStatus(org.apache.synapse.MessageContext messageContext) {
+
+        Object status = messageContext.getProperty(APIMgtGatewayConstants.API_STATUS);
+        if (status != null) {
+            return (String) status;
+        }
+        API api = getAPI(messageContext);
+        if (api != null) {
+            String apiStatus = api.getStatus();
+            messageContext.setProperty(APIMgtGatewayConstants.API_STATUS, status);
+            return apiStatus;
+        }
+        return null;
+    }
+
+    public static boolean isAPIStatusProtoType(org.apache.synapse.MessageContext messageContext) {
+
+        return APIConstants.PROTOTYPED.equals(getStatus(messageContext));
+    }
+
+    public static String getAPINameFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
+
+        API api = getAPI(messageContext);
+        if (api != null){
+            return api.getApiName();
+        }
+        return null;
+    }
+
+    public static String getApiProviderFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
+        API api = getAPI(messageContext);
+        if (api != null){
+            return api.getApiProvider();
         }
         return null;
     }

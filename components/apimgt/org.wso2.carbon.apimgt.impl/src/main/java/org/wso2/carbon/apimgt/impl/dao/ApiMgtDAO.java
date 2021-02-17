@@ -5690,6 +5690,7 @@ public class ApiMgtDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.UPDATE_API_STATUS)) {
             preparedStatement.setString(1, updatedStatus);
             preparedStatement.setInt(2, apiId);
+            preparedStatement.executeUpdate();
             connection.commit();
         }
     }

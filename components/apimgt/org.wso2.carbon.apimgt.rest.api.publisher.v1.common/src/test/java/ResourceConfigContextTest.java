@@ -43,7 +43,6 @@ public class ResourceConfigContextTest {
         ResourceConfigContext resourceConfigContext = new ResourceConfigContext(configcontext, api);
         resourceConfigContext.validate();
         Assert.assertNotNull(resourceConfigContext.getContext().get("resources"));
-        Assert.assertNotNull(resourceConfigContext.getContext().get("apiStatus"));
         //assign an empty URITemplate set and check the result
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
         api.setUriTemplates(uriTemplates);

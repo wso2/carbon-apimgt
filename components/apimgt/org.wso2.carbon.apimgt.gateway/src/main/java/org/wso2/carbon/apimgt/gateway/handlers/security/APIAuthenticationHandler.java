@@ -314,6 +314,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
 
+        if (GatewayUtils.isAPIStatusProtoType(messageContext)) {
+            return true;
+        }
+
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
@@ -669,11 +673,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
         //if publisher is null,extract the publisher from the api_version
         if (apiPublisher == null) {
-            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(context, version,
-                    GatewayUtils.getTenantDomain());
+            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(messageContext);
         }
 
-        String api = GatewayUtils.getAPINameFromContextAndVersion(context,version,GatewayUtils.getTenantDomain());
+        String api = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         String resource = extractResource(messageContext);
         String method = (String) (axis2MsgContext.getProperty(
                 Constants.Configuration.HTTP_METHOD));

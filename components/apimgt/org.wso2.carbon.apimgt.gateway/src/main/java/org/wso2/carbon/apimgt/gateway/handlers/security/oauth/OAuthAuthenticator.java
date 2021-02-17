@@ -291,8 +291,8 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setApplicationUUID(clientIP); //Set clientIp as application ID in unauthenticated scenario
             authContext.setConsumerKey(null);
-            synCtx.setProperty("API_NAME", GatewayUtils.getAPINameFromContextAndVersion(apiContext, apiVersion,
-                    GatewayUtils.getTenantDomain()));
+            String apiNameFromContextAndVersion = GatewayUtils.getAPINameFromContextAndVersion(synCtx);
+            synCtx.setProperty("API_NAME", apiNameFromContextAndVersion);
             APISecurityUtils.setAuthenticationContext(synCtx, authContext, securityContextHeader);
             return new AuthenticationResponse(true, isMandatory, false, 0, null);
         } else if (APIConstants.NO_MATCHING_AUTH_SCHEME.equals(authenticationScheme)) {
@@ -305,7 +305,7 @@ public class OAuthAuthenticator implements Authenticator {
                     log.debug("OAuth headers not found");
                 } else if (apiContext == null) {
                     log.debug("Couldn't find API Context");
-                } else if (apiVersion == null) {
+                } else {
                     log.debug("Could not find api version");
                 }
             }

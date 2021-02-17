@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -71,6 +72,9 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
     @MethodStats
     @Override
 	public boolean handleRequest(MessageContext msgCtx) {
+        if (GatewayUtils.isAPIStatusProtoType(msgCtx)) {
+            return true;
+        }
         TracingSpan span = null;
         TracingTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
