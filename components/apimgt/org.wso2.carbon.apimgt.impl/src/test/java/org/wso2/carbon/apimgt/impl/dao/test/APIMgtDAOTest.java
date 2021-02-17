@@ -358,7 +358,7 @@ public class APIMgtDAOTest {
         subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         apiMgtDAO.addSubscriber(subscriber, null);
         Application application = new Application("testApplication", subscriber);
-        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
         application.setId(applicationId);
         assertTrue(applicationId > 0);
         this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication", subscriber.getName
@@ -374,7 +374,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscriber(subscriber, "org1");
         Application application = new Application("testApplication3", subscriber);
         application.setGroupId("org1");
-        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
         application.setId(applicationId);
         assertTrue(applicationId > 0);
         this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication3", subscriber
@@ -390,7 +390,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscriber(subscriber, "org2");
         Application application = new Application("testApplication3", subscriber);
         application.setGroupId("org2");
-        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
         application.setId(applicationId);
         assertTrue(applicationId > 0);
         this.checkApplicationsEqual(application, apiMgtDAO.getApplicationByName("testApplication3", null, "org2"));
@@ -406,7 +406,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscriber(subscriber, null);
         Application application = new Application("testApplication2", subscriber);
         application.setUUID(UUID.randomUUID().toString());
-        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "testOrg");
         application.setId(applicationId);
         assertTrue(applicationId > 0);
         assertNotNull(apiMgtDAO.getApplicationByUUID(apiMgtDAO.getApplicationById(applicationId).getUUID()));
@@ -805,7 +805,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
         Application application = new Application("testCreateApplicationRegistrationEntry", subscriber);
         application.setTier("testCreateApplicationRegistrationEntry");
-        application.setId(apiMgtDAO.addApplication(application, "testCreateApplicationRegistrationEntry"));
+        application.setId(apiMgtDAO.addApplication(application, "testCreateApplicationRegistrationEntry", "testOrg"));
 
         ApplicationRegistrationWorkflowDTO applicationRegistrationWorkflowDTO = new
                 ApplicationRegistrationWorkflowDTO();
@@ -892,7 +892,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
         Application application = new Application("testCreateApplicationRegistrationEntry", subscriber);
         application.setTier("testCreateApplicationRegistrationEntry");
-        application.setId(apiMgtDAO.addApplication(application, "testCreateApplicationRegistrationEntry"));
+        application.setId(apiMgtDAO.addApplication(application, "testCreateApplicationRegistrationEntry", "testOrg"));
         application.setDescription("updated description");
         apiMgtDAO.updateApplication(application);
         assertEquals(apiMgtDAO.getApplicationById(application.getId()).getDescription(), "updated description");
@@ -1086,7 +1086,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addApplicationPolicy((ApplicationPolicy) applicationPolicy);
         Application application = new Application("testAddUpdateDeleteBlockCondition", subscriber);
         application.setTier("testAddUpdateDeleteBlockCondition");
-        application.setId(apiMgtDAO.addApplication(application, "blockuser1"));
+        application.setId(apiMgtDAO.addApplication(application, "blockuser1", "testOrg"));
         APIIdentifier apiId = new APIIdentifier("testAddUpdateDeleteBlockCondition",
                 "testAddUpdateDeleteBlockCondition", "1.0.0");
         API api = new API(apiId);

@@ -120,7 +120,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Response object containing resulted applications
      */
     @Override
-    public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder,
+    public Response applicationsGet(String groupId, String organizationId, String query, String sortBy, String sortOrder,
                                     Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -144,7 +144,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application[] applications;
             applications = apiConsumer
                     .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
-                            sortOrder);
+                            sortOrder, organizationId);
             ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
@@ -180,7 +180,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param update              update if existing application found or import
      * @return imported Application
      */
-    @Override public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail,
+    @Override
+    public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, String organizationId,
                                                      Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys,
                                                      Boolean update, MessageContext messageContext) throws APIManagementException {
         String ownerId;
@@ -225,7 +226,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
                         oldApplication.getUUID());
             } else {
-                application = preProcessAndAddApplication(ownerId, applicationDTO);
+                application = preProcessAndAddApplication(ownerId, applicationDTO, organizationId);
             }
 
             // Get keys to import
@@ -281,10 +282,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return 201 response if successful
      */
     @Override
-    public Response applicationsPost(ApplicationDTO body, MessageContext messageContext){
+    public Response applicationsPost(ApplicationDTO body, String organizationId, MessageContext messageContext){
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
-            Application createdApplication = preProcessAndAddApplication(username, body);
+            Application createdApplication = preProcessAndAddApplication(username, body, organizationId);
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
             //to be set as the Location header
@@ -311,11 +312,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Preprocess and add the application
      *
-     * @param username       Username
-     * @param applicationDto Application DTO
+     * @param username           Username
+     * @param applicationDto     Application DTO
+     * @param organizationId     Identifier of an organization
      * @return Created application
      */
-    private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto)
+    private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto, String organizationId)
             throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -345,7 +347,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
 
-        int applicationId = apiConsumer.addApplication(application, username);
+        int applicationId = apiConsumer.addApplication(application, username, organizationId);
 
         //retrieves the created application and send as the response
         return apiConsumer.getApplicationById(applicationId);
@@ -359,7 +361,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return response containing the required application object
      */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdGet(String applicationId, String organizationId, String ifNoneMatch,
+                                                 MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -414,7 +417,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return response containing the updated application object
      */
     @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String organizationId, String ifMatch, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -667,7 +670,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return 200 Response if successfully deleted the application
      */
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdDelete(String applicationId, String organizationId, String ifMatch, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -1183,8 +1186,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String organizationId,
-                                                                      String keyMappingId, String groupId, MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdOauthKeysKeyMappingIdGet(String applicationId, String keyMappingId, String organizationId, String groupId, MessageContext messageContext) throws APIManagementException {
 
         return Response.ok().entity(getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId)).build();
     }

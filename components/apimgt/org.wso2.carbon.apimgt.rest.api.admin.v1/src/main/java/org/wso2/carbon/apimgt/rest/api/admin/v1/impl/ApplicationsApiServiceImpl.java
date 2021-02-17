@@ -121,7 +121,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     allMatchedApps = apiConsumer.getApplicationsByOwner(user);
                 } else {
                     allMatchedApps = apiConsumer.getApplicationsWithPagination(new Subscriber(user), "",
-                            offset, limit, name, APIConstants.APPLICATION_NAME, RestApiConstants.DEFAULT_SORT_ORDER);
+                            offset, limit, name, APIConstants.APPLICATION_NAME, RestApiConstants.DEFAULT_SORT_ORDER, null);
                 }
             } else { // flow at migration process
                 if (StringUtils.isEmpty(appTenantDomain)) {

@@ -49,6 +49,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID COLLATE Latin1_General_CS_AS =?))" +
+                    " AND " +
+                    "   APP.ORGANIZATION_ID = ? " +
             " And " +
             "    NAME like ?" +
             " ) a " +
@@ -116,6 +118,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "           OR " +
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
+                    " AND " +
+                    "   APP.ORGANIZATION_ID = ? " +
                     " And "+
                     "    NAME like ? ) a " +
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
@@ -153,6 +157,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "           OR " +
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
+                    " AND " +
+                    "   APP.ORGANIZATION_ID = ? " +
                     " And " +
                     "    NAME like ?"+
                     " ) a " +
@@ -183,6 +189,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "    SUB.USER_ID COLLATE Latin1_General_CS_AS =?"+
+            " AND " +
+            "   APP.ORGANIZATION_ID = ? " +
             " And "+
             "    NAME like ?"+
             " )a " +
@@ -213,6 +221,8 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
             "    LOWER(SUB.USER_ID) = LOWER(?)" +
+            " AND " +
+            "    APP.ORGANIZATION_ID = ? " +
             " And "+
             "    NAME like ?"+
             " ) a " +

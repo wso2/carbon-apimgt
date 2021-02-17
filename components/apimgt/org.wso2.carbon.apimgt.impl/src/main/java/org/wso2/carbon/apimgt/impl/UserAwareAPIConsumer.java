@@ -81,9 +81,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public int addApplication(Application application, String userId) throws APIManagementException {
+    public int addApplication(Application application, String userId, String organizationId) throws APIManagementException {
         checkSubscribePermission();
-        return super.addApplication(application, userId);
+        return super.addApplication(application, userId, organizationId);
     }
 
     @Override

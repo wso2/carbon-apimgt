@@ -3389,14 +3389,14 @@ public class ApiMgtDAO {
         return isDuplicateConsumer;
     }
 
-    public int addApplication(Application application, String userId) throws APIManagementException {
+    public int addApplication(Application application, String userId, String organizationId) throws APIManagementException {
         Connection conn = null;
         int applicationId = 0;
         String loginUserName = getLoginUserName(userId);
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            applicationId = addApplication(application, loginUserName, conn);
+            applicationId = addApplication(application, loginUserName, conn, organizationId);
             Subscriber subscriber = getSubscriber(userId);
             String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
 
@@ -3996,11 +3996,12 @@ public class ApiMgtDAO {
     }
 
     /**
-     * @param application Application
-     * @param userId      User Id
+     * @param application        Application
+     * @param userId             User Id
+     * @param organizationId     Identifier of an organization
      * @throws APIManagementException if failed to add Application
      */
-    public int addApplication(Application application, String userId, Connection conn)
+    public int addApplication(Application application, String userId, Connection conn, String organizationId)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         conn.setAutoCommit(false);
@@ -4051,6 +4052,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(10, timestamp);
             ps.setString(11, application.getUUID());
             ps.setString(12, String.valueOf(application.getTokenType()));
+            ps.setString(13, organizationId);
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -4625,11 +4627,12 @@ public class ApiMgtDAO {
      * @param search     The search string.
      * @param sortOrder  The sort order.
      * @param sortColumn The sort column.
+     * @param organizationId Identifier of an organization
      * @return Application[] The array of applications.
      * @throws APIManagementException
      */
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start,
-                                                       int offset, String search, String sortColumn, String sortOrder)
+                               int offset, String search, String sortColumn, String sortOrder, String organizationId)
             throws APIManagementException {
 
         Connection connection = null;
@@ -4693,6 +4696,7 @@ public class ApiMgtDAO {
                     prepStmt.setString(++noOfParams, tenantDomain);
                     prepStmt.setString(++noOfParams, subscriber.getName());
                     prepStmt.setString(++noOfParams, tenantDomain + '/' + groupingId);
+                    prepStmt.setString(++noOfParams, organizationId);
                     prepStmt.setString(++noOfParams, "%" + search + "%");
                     prepStmt.setInt(++noOfParams, start);
                     prepStmt.setInt(++noOfParams, offset);
@@ -4700,16 +4704,18 @@ public class ApiMgtDAO {
                     prepStmt = connection.prepareStatement(sqlQuery);
                     prepStmt.setString(1, groupingId);
                     prepStmt.setString(2, subscriber.getName());
-                    prepStmt.setString(3, "%" + search + "%");
-                    prepStmt.setInt(4, start);
-                    prepStmt.setInt(5, offset);
+                    prepStmt.setString(3, organizationId);
+                    prepStmt.setString(4, "%" + search + "%");
+                    prepStmt.setInt(5, start);
+                    prepStmt.setInt(6, offset);
                 }
             } else {
                 prepStmt = connection.prepareStatement(sqlQuery);
                 prepStmt.setString(1, subscriber.getName());
-                prepStmt.setString(2, "%" + search + "%");
-                prepStmt.setInt(3, start);
-                prepStmt.setInt(4, offset);
+                prepStmt.setString(2, organizationId);
+                prepStmt.setString(3, "%" + search + "%");
+                prepStmt.setInt(4, start);
+                prepStmt.setInt(5, offset);
             }
             if (log.isDebugEnabled()) {
                 log.debug("Query: " + sqlQuery);
