@@ -18,21 +18,22 @@
 
 import React from 'react';
 import { mountWithIntl } from 'AppTests/Utils/IntlHelper';
-import { MemoryRouter, Link } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 
-import APICreateTopMenu from './APICreateTopMenu';
+import DefaultAPIForm from './DefaultAPIForm';
 
-describe('<APICreateTopMenu/> tests', () => {
-    test('should render APICreateTopMenu without errors', () => {
+describe('<DefaultAPIForm/> tests', () => {
+    test('Should have default input fields', () => {
         const wrappedComponent = (
             <MemoryRouter>
-                <APICreateTopMenu />
+                <DefaultAPIForm />
             </MemoryRouter>
         );
         const wrapper = mountWithIntl(wrappedComponent);
-        // Show have a back link to home page
-        const backLink = wrapper.find(Link);
-        expect(backLink).toHaveLength(1);
-        expect(backLink.props().to).toEqual('/apis');
+        // Should have 2 default input fields
+        const formLabels = wrapper.find('label');
+        expect(formLabels).toHaveLength(4); // 4 inputs
+        const name = formLabels.at(0).find('FormattedMessage').text();
+        expect(name).toEqual('Name');
     });
 });

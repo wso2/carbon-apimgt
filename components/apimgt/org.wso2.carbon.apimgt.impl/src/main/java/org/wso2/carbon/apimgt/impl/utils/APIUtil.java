@@ -123,6 +123,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Limit;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -8168,6 +8169,68 @@ public final class APIUtil {
             }
         }
 
+        //Adding Event based subscription level policies for async policies (WS & SSE)
+        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, Integer.MAX_VALUE};
+        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+        String[] eventCountSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
+
+        for (int i = 0; i < eventCountSubPolicyNames.length; i++) {
+            policyName = eventCountSubPolicyNames[i];
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+                subscriptionPolicy.setDisplayName(policyName);
+                subscriptionPolicy.setDescription(eventCountSubPolicyDescriptions[i]);
+                subscriptionPolicy.setTenantId(tenantId);
+                subscriptionPolicy.setDeployed(true);
+                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+                EventCountLimit eventCountLimit = new EventCountLimit();
+                eventCountLimit.setEventCount(eventCountSubPolicyValues[i]);
+                eventCountLimit.setUnitTime(1);
+                eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_DAY);
+                defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
+                defaultQuotaPolicy.setLimit(eventCountLimit);
+                subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                subscriptionPolicy.setStopOnQuotaReach(true);
+                subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+            }
+        }
+
+        //Adding Event based Webhooks API specific policies (WEBSUB)
+        long[] eventCountWHSubPolicyValues = new long[]{10000, 5000, 1000, Integer.MAX_VALUE};
+        int[] subscriptionCountValues = new int[]{1000, 500, 100, Integer.MAX_VALUE};
+        String[] eventCountWHSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
+        String[] eventCountWHSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC};
+
+        for (int i = 0; i < eventCountWHSubPolicyNames.length; i++) {
+            policyName = eventCountWHSubPolicyNames[i];
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+                subscriptionPolicy.setDisplayName(policyName);
+                subscriptionPolicy.setDescription(eventCountWHSubPolicyDescriptions[i]);
+                subscriptionPolicy.setTenantId(tenantId);
+                subscriptionPolicy.setDeployed(true);
+                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+                EventCountLimit eventCountLimit = new EventCountLimit();
+                eventCountLimit.setEventCount(eventCountWHSubPolicyValues[i]);
+                eventCountLimit.setUnitTime(1);
+                eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MONTH);
+                defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
+                defaultQuotaPolicy.setLimit(eventCountLimit);
+                subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                subscriptionPolicy.setStopOnQuotaReach(true);
+                subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+                subscriptionPolicy.setSubscriberCount(subscriptionCountValues[i]);
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+            }
+        }
+
         //Adding Resource level policies
         String[] apiPolicies = new String[]{
                 APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
@@ -8454,10 +8517,13 @@ public final class APIUtil {
                 Limit limit = policy.getDefaultQuotaPolicy().getLimit();
                 tier.setTimeUnit(limit.getTimeUnit());
                 tier.setUnitTime(limit.getUnitTime());
+                tier.setQuotaPolicyType(policy.getDefaultQuotaPolicy().getType());
 
                 //If the policy is a subscription policy
                 if (policy instanceof SubscriptionPolicy) {
                     SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) policy;
+                    tier.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
+                    tier.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
                     setBillingPlanAndCustomAttributesToTier(subscriptionPolicy, tier);
                     if (StringUtils.equals(subscriptionPolicy.getBillingPlan(), APIConstants.COMMERCIAL_TIER_PLAN)) {
                         tier.setMonetizationAttributes(subscriptionPolicy.getMonetizationPlanProperties());
@@ -8469,10 +8535,15 @@ public final class APIUtil {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
                     tier.setRequestCount(countLimit.getRequestCount());
-                } else {
+                } else if (limit instanceof BandwidthLimit){
                     BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
+                    tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else {
+                    EventCountLimit eventCountLimit = (EventCountLimit) limit;
+                    tier.setRequestCount(eventCountLimit.getEventCount());
+                    tier.setRequestsPerMin(eventCountLimit.getEventCount());
                 }
                 if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
                     tier.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
@@ -11656,13 +11727,11 @@ public final class APIUtil {
                     break;
                 }
             }
-
             if (!isOriginalRoleAlreadyInRoles) {
                 String newRoles = entry.getKey() + "," + entry.getValue();
                 newRoleMappingJson.replace(entry.getKey(), entry.getValue(), newRoles);
             }
         }
-
         existingTenantConfObject.remove(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG);
         JsonElement jsonElement = new JsonParser().parse(String.valueOf(newRoleMappingJson));
         existingTenantConfObject.add(APIConstants.REST_API_ROLE_MAPPINGS_CONFIG, jsonElement);

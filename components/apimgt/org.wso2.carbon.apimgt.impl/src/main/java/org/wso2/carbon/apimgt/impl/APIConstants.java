@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 
 /**
@@ -487,6 +488,9 @@ public final class APIConstants {
     public static final String OVERVIEW_ELEMENT = "overview";
     public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
     public static final String FEDERATED_USER = "FEDERATED";
+    public static final String ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN = OAUTH_CONFIGS + "EnableCertificateBoundAccessToken";
+    public static final String DIGEST = "x5t#S256";
+    public static final String CNF = "cnf";
 
     //documentation rxt
 
@@ -587,6 +591,9 @@ public final class APIConstants {
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
 
+    public static final String DEFAULT_RESERVED_USERNAME = "apim_reserved_user";
+
+    public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
     public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
@@ -1692,8 +1699,9 @@ public final class APIConstants {
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
     public static final String TIME_UNIT_MINUTE = "min";
-    public static final String TIME_UNIT_HOUR = "hour";
-    public static final String TIME_UNIT_DAY = "day";
+    public static final String TIME_UNIT_HOUR = "hours";
+    public static final String TIME_UNIT_DAY = "days";
+    public static final String TIME_UNIT_MONTH = "months";
 
     public static final String SUBSCRIPTION_TIERS = "availableTiers";
 
@@ -1713,11 +1721,35 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
 
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "AsyncWHBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "AsyncWHUnlimited";
+
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC = "Allows 50000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC = "Allows 25000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC = "Allows 5000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC = "Allows unlimited events";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC = "Allows 10000 events per month and " +
+            "1000 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC = "Allows 5000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC = "Allows 1000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC = "Allows unlimited events and " +
+            "unlimited active subscriptions";
 
     public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
@@ -1787,7 +1819,6 @@ public final class APIConstants {
     public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "WEBSUB",
             "SSE"};
     public static final String API_PRODUCT_REVISION = "Current";
-
     public static class AdvancedThrottleConstants {
 
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -2308,7 +2339,7 @@ public final class APIConstants {
         public static final String CLAIM_MAPPINGS = "ClaimMappings";
         public static final String CLAIM_MAPPING = "ClaimMapping";
         public static final String CONSUMER_KEY_CLAIM = "ConsumerKeyClaim";
-
+        
 
         public static class JWKSConfiguration {
 
@@ -2582,6 +2613,10 @@ public final class APIConstants {
     public static final String PASSWORD_POLICY_PATTERN_PROPERTY = "passwordPolicy.pattern";
     public static final String PASSWORD_JAVA_REGEX_PROPERTY = "PasswordJavaRegEx";
 
+    public static class APPLICATION {
+        public static final String OVERRIDE_SP_NAME = "override.sp.name";
+    }
+
     public class SkipListConstants {
 
         public static final String SKIP_LIST_CONFIG = "SkipList";
@@ -2601,7 +2636,7 @@ public final class APIConstants {
     // Constants related to Service Catalog
     public static final String METADATA_FILE_NAME = "metadata";
     public static final String METADATA_FILE = "metadata.yaml";
-    public static final String DEFINITION_FILE = "oas.yaml";
+    public static final String DEFINITION_FILE = "definition.yaml";
     public static final String KEY_SEPARATOR = "-";
     public static final String MAP_KEY_ACCEPTED_NEW_SERVICE = "accepted";
     public static final String MAP_KEY_IGNORED_EXISTING_SERVICE = "ignored";

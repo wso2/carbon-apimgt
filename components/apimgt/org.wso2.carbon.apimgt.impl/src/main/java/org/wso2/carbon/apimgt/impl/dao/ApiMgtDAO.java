@@ -61,12 +61,14 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
@@ -3113,8 +3115,8 @@ public class ApiMgtDAO {
      * @param keyManagerName
      */
     public void updateApplicationKeyTypeMapping(Application application, String keyType,
-                                                String keyManagerName) throws APIManagementException {
-        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerName);
+                                                String keyManagerId) throws APIManagementException {
+        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerId);
         String consumerKey = null;
         if (app != null) {
             consumerKey = app.getClientId();
@@ -3130,12 +3132,12 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, consumerKey);
-                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerName);
+                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerId);
                 String content = new Gson().toJson(oAuthApp);
                 ps.setBinaryStream(2, new ByteArrayInputStream(content.getBytes()));
                 ps.setInt(3, application.getId());
                 ps.setString(4, keyType);
-                ps.setString(5, keyManagerName);
+                ps.setString(5, keyManagerId);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -5952,6 +5954,10 @@ public class ApiMgtDAO {
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
             }
+            String serviceKey = api.getServiceInfo("serviceKey");
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
+            }
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -7277,6 +7283,10 @@ public class ApiMgtDAO {
                     removeAPIFromDefaultVersion(api.getId(), connection);
                 }
             }
+            String serviceKey = api.getServiceInfo("serviceKey");
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                updateAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), connection);
+            }
             connection.commit();
         } catch (SQLException e) {
             try {
@@ -7412,7 +7422,6 @@ public class ApiMgtDAO {
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
-
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -8951,6 +8960,43 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        }
+        return null;
+    }
+
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid)
+            throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return  getKeyManagerConfigurationByUUID(conn, uuid);
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for key manager uuid: " + uuid, e);
+        }
+    }
+
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection ,String uuid)
+            throws SQLException, IOException {
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    keyManagerConfigurationDTO.setUuid(resultSet.getString("UUID"));
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -10834,12 +10880,14 @@ public class ApiMgtDAO {
                 policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
                 policyStatement.setString(22, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
                 policyStatement.setString(23, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                policyStatement.setInt(24, policy.getSubscriberCount());
             } else {
                 policyStatement.setString(18, policy.getMonetizationPlan());
                 policyStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
                 policyStatement.setString(20, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
                 policyStatement.setString(21, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
                 policyStatement.setString(22, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
+                policyStatement.setInt(23, policy.getSubscriberCount());
             }
             policyStatement.executeUpdate();
             conn.commit();
@@ -11047,6 +11095,10 @@ public class ApiMgtDAO {
                     BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                     updateStatement.setLong(4, limit.getDataAmount());
                     updateStatement.setString(5, limit.getDataUnit());
+                } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                    EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+                    updateStatement.setLong(4, limit.getEventCount());
+                    updateStatement.setString(5, null);
                 }
                 updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
                 updateStatement.setString(7, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
@@ -11505,6 +11557,7 @@ public class ApiMgtDAO {
                 setCommonPolicyDetails(subPolicy, rs);
                 subPolicy.setRateLimitCount(rs.getInt(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
                 subPolicy.setRateLimitTimeUnit(rs.getString(ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+                subPolicy.setSubscriberCount(rs.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
                 subPolicy.setStopOnQuotaReach(rs.getBoolean(ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setGraphQLMaxDepth(rs.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
@@ -11577,6 +11630,7 @@ public class ApiMgtDAO {
                 subPolicy.setBillingPlan(rs.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 subPolicy.setGraphQLMaxDepth(rs.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
                 subPolicy.setGraphQLMaxComplexity(rs.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+                subPolicy.setSubscriberCount(rs.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
                 subPolicy.setMonetizationPlan(rs.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
                 subPolicy.setTierQuotaType(rs.getString(ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE));
                 Map<String, String> monetizationPlanProperties = subPolicy.getMonetizationPlanProperties();
@@ -11936,6 +11990,7 @@ public class ApiMgtDAO {
                 policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
                 policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+                policy.setSubscriberCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
                 InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -11986,6 +12041,7 @@ public class ApiMgtDAO {
                 policy.setBillingPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
                 policy.setGraphQLMaxDepth(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_DEPTH));
                 policy.setGraphQLMaxComplexity(resultSet.getInt(ThrottlePolicyConstants.COLUMN_MAX_COMPLEXITY));
+                policy.setSubscriberCount(resultSet.getInt(ThrottlePolicyConstants.COLUMN_CONNECTION_COUNT));
                 InputStream binary = resultSet.getBinaryStream(ThrottlePolicyConstants.COLUMN_CUSTOM_ATTRIB);
                 if (binary != null) {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
@@ -12383,6 +12439,10 @@ public class ApiMgtDAO {
                 BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
                 updateStatement.setLong(4, limit.getDataAmount());
                 updateStatement.setString(5, limit.getDataUnit());
+            } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+                EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+                updateStatement.setLong(4, limit.getEventCount());
+                updateStatement.setString(5, null);
             }
 
             updateStatement.setLong(6, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
@@ -12403,15 +12463,17 @@ public class ApiMgtDAO {
                     updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
                     updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
                     updateStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(20, policy.getPolicyName());
-                    updateStatement.setInt(21, policy.getTenantId());
+                    updateStatement.setInt(20, policy.getSubscriberCount());
+                    updateStatement.setString(21, policy.getPolicyName());
+                    updateStatement.setInt(22, policy.getTenantId());
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(15, policy.getMonetizationPlan());
                     updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.FIXED_PRICE));
                     updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
                     updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
                     updateStatement.setString(19, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(20, policy.getUUID());
+                    updateStatement.setInt(20, policy.getSubscriberCount());
+                    updateStatement.setString(21, policy.getUUID());
                 }
             } else {
                 if (!StringUtils.isBlank(policy.getPolicyName()) && policy.getTenantId() != -1) {
@@ -12420,8 +12482,9 @@ public class ApiMgtDAO {
                     updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
                     updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
                     updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(19, policy.getPolicyName());
-                    updateStatement.setInt(20, policy.getTenantId());
+                    updateStatement.setInt(19, policy.getSubscriberCount());
+                    updateStatement.setString(20, policy.getPolicyName());
+                    updateStatement.setInt(21, policy.getTenantId());
 
                 } else if (!StringUtils.isBlank(policy.getUUID())) {
                     updateStatement.setString(14, policy.getMonetizationPlan());
@@ -12429,7 +12492,8 @@ public class ApiMgtDAO {
                     updateStatement.setString(16, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.BILLING_CYCLE));
                     updateStatement.setString(17, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.PRICE_PER_REQUEST));
                     updateStatement.setString(18, policy.getMonetizationPlanProperties().get(APIConstants.Monetization.CURRENCY));
-                    updateStatement.setString(19, policy.getUUID());
+                    updateStatement.setInt(19, policy.getSubscriberCount());
+                    updateStatement.setString(20, policy.getUUID());
                 }
             }
             updateStatement.executeUpdate();
@@ -12633,6 +12697,10 @@ public class ApiMgtDAO {
             BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
             policyStatement.setLong(6, limit.getDataAmount());
             policyStatement.setString(7, limit.getDataUnit());
+        } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+            policyStatement.setLong(6, limit.getEventCount());
+            policyStatement.setString(7, null);
         }
 
         policyStatement.setLong(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
@@ -12678,6 +12746,13 @@ public class ApiMgtDAO {
             bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
             bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
             quotaPolicy.setLimit(bandLimit);
+        } else if (resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_POLICY_TYPE)
+                .equalsIgnoreCase(PolicyConstants.EVENT_COUNT_TYPE)) {
+            EventCountLimit eventCountLimit = new EventCountLimit();
+            eventCountLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+            eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+            eventCountLimit.setEventCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
+            quotaPolicy.setLimit(eventCountLimit);
         }
 
         policy.setUUID(resultSet.getString(ThrottlePolicyConstants.COLUMN_UUID));
@@ -17199,5 +17274,90 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Retrieve Service Info and Set it to API
+     *
+     * @param api API Object
+     * @param apiId Internal Unique API Id
+     * @throws APIManagementException
+     */
+    public void setServiceStatusInfoToAPI(API api, int apiId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                     .GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL)) {
+            preparedStatement.setInt(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    JSONObject serviceInfo = new JSONObject();
+                    serviceInfo.put("key", resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+                    if (resultSet.getString("SERVICE_MD5").equals(resultSet
+                            .getString("API_SERVICE_MD5"))) {
+                        serviceInfo.put("outdated", false);
+                    } else {
+                        serviceInfo.put("outdated", true);
+                    }
+                    api.setServiceInfo(serviceInfo);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the service status associated with the API - "
+                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
+        }
+    }
 
+    private void addAPIServiceMapping(int apiId, String serviceKey, String md5sum, int tenantId,
+                                      Connection connection) throws SQLException {
+        String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setString(2, serviceKey);
+            preparedStatement.setString(3, md5sum);
+            preparedStatement.setInt(4, tenantId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Retrieve the Unique Identifier of the Service used in API
+     *
+     * @param apiId Unique Identifier of API
+     * @param tenantId Tenant ID
+     * @return Service Key
+     * @throws APIManagementException
+     */
+    public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
+        String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL;
+        String serviceKey = StringUtils.EMPTY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceKey = resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+        }
+        return serviceKey;
+    }
+
+    /**
+     * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
+     *
+     * @param apiId      Unique Identifier of API
+     * @param serviceKey Unique key of the Service
+     * @param md5        MD5 value of the Service
+     * @throws SQLException
+     */
+    public void updateAPIServiceMapping(String apiId, String serviceKey, String md5, Connection connection)
+            throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
+            statement.setString(1, serviceKey);
+            statement.setString(2, md5);
+            statement.setString(3, apiId);
+            statement.executeUpdate();
+        }
+    }
 }

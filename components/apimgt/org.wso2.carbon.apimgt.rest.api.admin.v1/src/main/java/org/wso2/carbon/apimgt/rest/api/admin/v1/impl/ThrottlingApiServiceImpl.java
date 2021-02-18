@@ -109,11 +109,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(body.getDefaultLimit().getType())) {
             RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                     String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
-                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null, null);
         } else {
             RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                     String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
-                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()), null);
         }
 
         if (body.getConditionalGroups() != null){
@@ -216,11 +216,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(body.getDefaultLimit().getType())) {
                 RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                         String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
-                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null, null);
             } else {
                 RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                         String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
-                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()), null);
             }
 
             if (body.getConditionalGroups() != null){
@@ -325,13 +325,12 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(body.getDefaultLimit().getType())){
             RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                     String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
-                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null, null);
         } else {
             RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                     String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
-                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()), null);
         }
-
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -430,11 +429,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(body.getDefaultLimit().getType())) {
                 RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                         String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
-                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null, null);
             } else {
                 RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                         String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
-                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()), null);
             }
 
             //update the policy
@@ -537,11 +536,15 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(body.getDefaultLimit().getType())) {
             RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                     String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
-                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
-        } else {
+                    String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null, null);
+        } else if (ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT.equals(body.getDefaultLimit().getType())) {
             RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                     String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
-                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+                    null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()), null);
+        } else {
+            RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                    String.valueOf(body.getDefaultLimit().getEventCount().getUnitTime()),
+                    null, null, String.valueOf(body.getDefaultLimit().getEventCount().getEventCount()));
         }
         RestApiAdminUtils.validateSubscriptionPolicy(body);
 
@@ -715,11 +718,15 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             if (ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT.equals(body.getDefaultLimit().getType())) {
                 RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                         String.valueOf(body.getDefaultLimit().getRequestCount().getUnitTime()),
-                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null);
-            } else {
+                        String.valueOf(body.getDefaultLimit().getRequestCount().getRequestCount()), null, null);
+            } else if (ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT.equals(body.getDefaultLimit().getType())){
                 RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
                         String.valueOf(body.getDefaultLimit().getBandwidth().getUnitTime()),
-                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()));
+                        null, String.valueOf(body.getDefaultLimit().getBandwidth().getDataAmount()), null);
+            } else {
+                RestApiAdminUtils.validateThrottlePolicyProperties(body.getPolicyName(),
+                        String.valueOf(body.getDefaultLimit().getEventCount().getUnitTime()),
+                        null, null, String.valueOf(body.getDefaultLimit().getEventCount().getEventCount()));
             }
             RestApiAdminUtils.validateSubscriptionPolicy(body);
 

@@ -1559,4 +1559,44 @@ public class OASParserUtil {
         return appSecurityState;
     }
 
+    public static void copyOperationVendorExtensions(Map<String, Object> existingExtensions,
+                                                     Map<String, Object> updatedVendorExtensions) {
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AUTH_TYPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_WSO2_SECURITY, existingExtensions
+                    .get(APIConstants.SWAGGER_X_WSO2_SECURITY));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_SCOPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_SCOPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_SCOPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT));
+        }
+        if (existingExtensions.get(APIConstants.X_WSO2_APP_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.X_WSO2_APP_SECURITY, existingExtensions
+                    .get(APIConstants.X_WSO2_APP_SECURITY));
+        }
+    }
+
 }
