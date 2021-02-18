@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.wso2.carbon.apimgt</groupId>
+    <artifactId>apimgt</artifactId>
+    <version>6.8.148-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>report</artifactId>
+  <name>Carbon-Apimgt Aggregated Coverage Report</name>
+
+  <properties>
+    <code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
+    <code.coverage.overall.data.folder>${basedir}/../target</code.coverage.overall.data.folder>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
+      <type>war</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.output.adapter.http</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1</artifactId>
+      <type>war</type>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.throttle.policy.deployer</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.throttling.siddhi.extension</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.wso2.carbon.apimgt</groupId>
+      <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.plugin.version}</version>
+        <configuration>
+          <!-- Jacoco prepare-agent builds some command-line params without -->
+          <!-- which jacoco will not instrument. Hence it is important to add -->
+          <!-- those command-line params here (${argLine} holds those params) -->
+          <argLine>${argLine} -Xms256m -Xmx2048m</argLine>
+          <forkCount>1</forkCount>
+          <runOrder>random</runOrder>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>report-aggregate</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>merge-results</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>merge</goal>
+            </goals>
+            <configuration>
+              <fileSets>
+                <fileSet>
+                  <directory>${basedir}/../</directory>
+                  <includes>
+                    <include>**/target/coverage-reports/aggregate.exec</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+              <destFile>{basedir}/../target/aggregate.exec</destFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>
