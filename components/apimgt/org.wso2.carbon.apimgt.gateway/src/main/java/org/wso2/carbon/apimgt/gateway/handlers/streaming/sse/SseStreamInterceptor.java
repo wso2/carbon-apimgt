@@ -26,7 +26,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.transport.passthru.DefaultStreamInterceptor;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.nio.ByteBuffer;
@@ -100,6 +103,7 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
                 log.warn("Request is throttled out");
                 return false;
             }
+            publishAnalyticsData();
             throttlePublisherService.execute(
                     () -> SseUtils.publishNonThrottledEvent(eventCount, messageId, throttleInfo, propertiesMap));
             return true;
@@ -107,6 +111,19 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
             log.error("Throttle object cannot be null.");
         }
         return true;
+    }
+
+    private void publishAnalyticsData(){
+        boolean somedata = false;
+        AnalyticsDataProvider provider = new SseEventDataProvider(){
+
+            @Override
+            public boolean isFaultRequest() {
+                return somedata;
+            }
+        };
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        dataCollector.collectData();
     }
 
     public void setCharset(String charset) {

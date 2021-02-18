@@ -33,6 +33,9 @@ import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -109,7 +112,14 @@ public class SseApiHandler extends APIAuthenticationHandler {
     }
 
     private void publishSubscriptionEvent(MessageContext synCtx) {
-        //   todo
+
+        org.apache.axis2.context.MessageContext messageContext = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+
+        messageContext.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BACKEND_RESPONSE_CODE,
+                                   200);
+        AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(synCtx);
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        dataCollector.collectData();
     }
 
     private void handleThrottledOut(MessageContext synCtx) {
