@@ -22,7 +22,6 @@ jobs:
       uses: codecov/codecov-action@v1.2.1
       with:
         flags: unittests
-        verbose: true
     - name: Get carbon.apimgt.version
       run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
     - name: Print carbon.apimgt.version
