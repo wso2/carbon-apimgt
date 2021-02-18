@@ -18,12 +18,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Collapse from '@material-ui/core/Collapse';
-import ArrowDropDownCircleOutlined from '@material-ui/icons/ArrowDropDownCircleOutlined';
-import ArrowDropDown from '@material-ui/icons/ArrowDropDown';
 import { Typography } from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid/Grid';
+import Paper from '@material-ui/core/Paper';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
+import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import API from 'AppData/api';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
@@ -35,13 +36,29 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(2),
         paddingBottom: theme.spacing(2),
     },
+    paper: {
+        marginRight: theme.spacing(3),
+        paddingBottom: theme.spacing(3),
+        paddingRight: theme.spacing(2),
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+    },
     contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-        paddingLeft: theme.spacing(2),
-        paddingTop: theme.spacing.unig,
+        paddingLeft: theme.spacing(3),
+        marginTop: theme.spacing(1),
+        '& span, & h5, & label, & td, & li, & div, & input': {
+            color: theme.palette.getContrastText(theme.palette.background.paper),
+        },
+    },
+    contentWrapperOverview: {
+        padding: 0,
+        width: '100%',
+        boxShadow: 'none',
     },
     titleSub: {
         cursor: 'pointer',
+        color: theme.palette.getContrastText(theme.palette.background.default),
     },
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -51,7 +68,20 @@ const styles = (theme) => ({
         marginTop: theme.spacing(0.2),
     },
     loadMoreLink: {
-        textDecoration: 'underline',
+        textDecoration: 'none',
+    },
+    genericMessageWrapper: {
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+        marginRight: theme.spacing(3),
+    },
+    paperProgress: {
+        padding: theme.spacing(3),
+        marginTop: theme.spacing(2),
+    },
+    dialogContainer: {
+        width: 1000,
+        padding: theme.spacing(2),
     },
 });
 
@@ -187,62 +217,82 @@ class Comments extends Component {
     render() {
         const { classes, api } = this.props;
         const {
-            comments, expanded, allComments, startCommentsToDisplay, totalComments,
+            comments, allComments, startCommentsToDisplay, totalComments,
         } = this.state;
         return (
             <div className={classes.contentWrapper}>
                 <div className={classes.root}>
-                    <ArrowDropDownCircleOutlined onClick={this.handleExpandClick} aria-expanded={expanded} />
-                    <Typography onClick={this.handleExpandClick} variant='h4' className={classes.titleSub}>
-                        Comments
+                    <Typography variant='h4' className={classes.titleSub}>
+                        {totalComments + (' ')}
+                        <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                     </Typography>
                 </div>
-                <Collapse in={expanded} timeout='auto' unmountOnExit>
-                    <CommentAdd
-                        api={api}
-                        commentsUpdate={this.updateCommentList}
-                        allComments={allComments}
-                        parentCommentId={null}
-                        cancelButton={false}
-                    />
-                    <Comment
-                        comments={comments}
-                        api={api}
-                        commentsUpdate={this.updateCommentList}
-                        allComments={allComments}
-                    />
-                    {startCommentsToDisplay !== 0 && (
-                        <div className={classes.contentWrapper}>
-                            <Grid container spacing={8} className={classes.root}>
-                                <Grid item>
-                                    <Typography
-                                        className={classes.verticalSpace}
-                                        variant='body1'
+
+                    <div className={classes.paper}>
+                        <CommentAdd
+                            apiId={api.id}
+                            commentsUpdate={this.updateCommentList}
+                            allComments={allComments}
+                            replyTo={null}
+                            cancelButton
+                        />
+                    </div>
+
+                {!allComments && (
+                    <Paper className={classes.paperProgress}>
+                        <CircularProgress size={24} />
+                    </Paper>
+                )}
+                {allComments && totalComments === 0
+                && <div className={classes.genericMessageWrapper}>
+                        <InlineMessage type='info' className={classes.dialogContainer}>
+                            <Typography variant='h5' component='h3'>
+                                <FormattedMessage
+                                    id='Apis.Details.Comments.no.comments'
+                                    defaultMessage='No Comments Yet'
+                                />
+                            </Typography>
+                            <Typography component='p'>
+                                <FormattedMessage
+                                    id='Apis.Details.Comments.no.comments.content'
+                                    defaultMessage='No comments available for this API yet'
+                                />
+                            </Typography>
+                        </InlineMessage>
+                    </div>
+                }
+                <Comment
+                    comments={comments}
+                    apiId={api.id}
+                    commentsUpdate={this.updateCommentList}
+                    allComments={allComments}
+                />
+                {startCommentsToDisplay !== 0 && (
+                    <div className={classes.contentWrapper}>
+                        <Grid container spacing={4} className={classes.root}>
+                            <Grid item>
+                                <Typography className={classes.verticalSpace} variant='body1'>
+                                    <a
+                                        className={classes.link + ' ' + classes.loadMoreLink}
                                         onClick={this.handleLoadMoreComments}
                                     >
-                                        <a className={classes.link + ' ' + classes.loadMoreLink}>
-                                            Load Previous Comments
-                                        </a>
-                                    </Typography>
-                                </Grid>
-                                <Grid>
-                                    <ArrowDropDown
-                                        onClick={this.handleLoadMoreComments}
-                                        className={classes.link + ' ' + classes.verticalSpace}
-                                    />
-                                </Grid>
-                                <Grid item>
-                                    <Typography className={classes.verticalSpace} variant='body1'>
-                                        Showing comments
-                                        {totalComments + -startCommentsToDisplay + ' of ' + totalComments}
-                                    </Typography>
-                                </Grid>
+                                        <FormattedMessage
+                                            id='Apis.Details.Comments.load.previous.comments'
+                                            defaultMessage='Show More'
+                                        />
+                                    </a>
+                                </Typography>
                             </Grid>
-                        </div>
-                    )}
-                </Collapse>
+                            <Grid item>
+                                <Typography className={classes.verticalSpace} variant='body1'>
+                                    { '(' + (totalComments - startCommentsToDisplay) + ' of ' + totalComments + ')'}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </div>
+                )}
             </div>
-        );
+        )
     }
 }
 
@@ -252,4 +302,4 @@ Comments.propTypes = {
     theme: PropTypes.shape({}).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Comments);
+export default injectIntl(withStyles(styles, { withTheme: true })(Comments));

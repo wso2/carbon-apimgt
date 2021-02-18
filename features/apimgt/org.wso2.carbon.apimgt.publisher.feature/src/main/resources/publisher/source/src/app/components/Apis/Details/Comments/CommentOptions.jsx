@@ -18,14 +18,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid/Grid';
-import { Typography } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
+import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
-import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
 const styles = (theme) => ({
     link: {
-        color: theme.palette.getContrastText(theme.palette.background.default),
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+        '& span.MuiButton-label': {
+            color: theme.palette.primary.main,
+            fontWeight: '400',
+        },
         cursor: 'pointer',
     },
     time: {
@@ -33,10 +37,11 @@ const styles = (theme) => ({
         marginTop: theme.spacing(0.3),
     },
     verticalSpace: {
-        marginTop: theme.spacing(0.2),
+        display: 'flex',
+        alignItems: 'center',
     },
     disable: {
-        color: theme.custom.disableColor,
+        color: theme.palette.grey[200],
     },
     commentIcon: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -82,11 +87,9 @@ class CommentOptions extends React.Component {
      * @param {any} index Index of comment in the array
      * @memberof CommentOptions
      */
-    showAddComment(index) {
-        const { editIndex, showAddComment } = this.props;
-        if (editIndex === -1) {
-            showAddComment(index);
-        }
+    showAddComment(replyId) {
+        const { showAddComment } = this.props;
+        showAddComment(replyId);
     }
 
     /**
@@ -146,71 +149,51 @@ class CommentOptions extends React.Component {
             || (AuthManager.getUser().name === theme.custom.adminRole);
         const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
         return (
-            <Grid container spacing={2} className={classes.verticalSpace} key={comment.commentId}>
-                {comment.parentCommentId == null && [
+            <Grid container spacing={2} className={classes.verticalSpace} key={comment.id}>
+                {comment.replyTo == null && [
                     <Grid item key='key-reply'>
-                        <Typography
-                            component='a'
-                            className={editIndex === -1 ? classes.link : classes.disable}
-                            onClick={() => this.showAddComment(index)}
+                        <Button
+                            size='small'
+                            className={classes.link}
+                            onClick={() => this.showAddComment(comment.id)}
+                            color='primary'
                         >
-                            Reply
-                        </Typography>
-                    </Grid>,
-                    <Grid item key='key-reply-vertical-divider'>
-                        <VerticalDivider height={15} />
+                            <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
+                        </Button>
                     </Grid>,
                 ]}
 
                 {/* only the comment owner or admin can delete a comment */}
                 {canDelete && [
                     <Grid item key='key-delete'>
-                        <Typography
-                            component='a'
+                        <Button
+                            size='small'
                             className={editIndex === -1 ? classes.link : classes.disable}
                             onClick={() => this.handleClickOpen(comment)}
+                            color='primary'
                         >
-                            Delete
-                        </Typography>
-                    </Grid>,
-                    <Grid item key='key-delete-vertical-divider'>
-                        <VerticalDivider height={15} />
+                            <FormattedMessage
+                                id='Apis.Details.Comments.CommentOptions.delete'
+                                defaultMessage='Delete'
+                            />
+                        </Button>
                     </Grid>,
                 ]}
 
                 {/* only the comment owner can modify the comment from the exact entry point */}
                 {canModify && [
                     <Grid item key='key-edit'>
-                        <Typography
-                            component='a'
-                            className={editIndex === -1 ? classes.link : classes.disable}
-                            onClick={() => this.showEditComment(index)}
+                        <Button
+                            size='small'
+                            className={classes.link}
+                            onClick={() => this.showAddComment(comment.id)}
+                            color='primary'
                         >
-                            Edit
-                        </Typography>
-                    </Grid>,
-                    <Grid item key='key-edit-verical-divider'>
-                        <VerticalDivider height={15} />
+                            <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
+                        </Button>
                     </Grid>,
                 ]}
-                <Grid item className={classes.time}>
-                    <Typography component='a' variant='caption'>
-                        {this.displayDate(comment.createdTime)}
-                    </Typography>
-                </Grid>
 
-                {editIndex === index
-                    ? null
-                    : [
-                        <Grid item key='key-category-vertical-divider'>
-                            <VerticalDivider height={15} />
-                        </Grid>,
-                        <Grid item className={classes.time} key='key-category'>
-                            <Typography component='a' variant='caption'>
-                                {comment.category}
-                            </Typography>
-                        </Grid>,
-                    ]}
             </Grid>
         );
     }
