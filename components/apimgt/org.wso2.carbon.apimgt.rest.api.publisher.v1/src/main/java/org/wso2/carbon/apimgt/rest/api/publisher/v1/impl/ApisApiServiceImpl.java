@@ -4559,7 +4559,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
             if (service != null) {
-                apiToAdd.setServiceInfo("serviceKey", service.getKey());
+                apiToAdd.setServiceInfo("key", service.getKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());
                 apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service));
             }

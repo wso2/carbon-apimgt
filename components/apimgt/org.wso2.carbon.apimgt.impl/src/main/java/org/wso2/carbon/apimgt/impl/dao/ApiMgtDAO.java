@@ -5953,7 +5953,7 @@ public class ApiMgtDAO {
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
             }
-            String serviceKey = api.getServiceInfo("serviceKey");
+            String serviceKey = api.getServiceInfo("key");
             if (StringUtils.isNotEmpty(serviceKey)) {
                 addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
             }
@@ -7282,7 +7282,7 @@ public class ApiMgtDAO {
                     removeAPIFromDefaultVersion(api.getId(), connection);
                 }
             }
-            String serviceKey = api.getServiceInfo("serviceKey");
+            String serviceKey = api.getServiceInfo("key");
             if (StringUtils.isNotEmpty(serviceKey)) {
                 updateAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), connection);
             }
@@ -17260,6 +17260,7 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     JSONObject serviceInfo = new JSONObject();
                     serviceInfo.put("key", resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+                    serviceInfo.put("md5", resultSet.getString("API_SERVICE_MD5"));
                     if (resultSet.getString("SERVICE_MD5").equals(resultSet
                             .getString("API_SERVICE_MD5"))) {
                         serviceInfo.put("outdated", false);
