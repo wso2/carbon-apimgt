@@ -18,119 +18,40 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
+import org.apache.synapse.MessageContext;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 
-public class SseEventDataProvider implements AnalyticsDataProvider {
+public class SseEventDataProvider extends SynapseAnalyticsDataProvider {
 
-    @Override
-    public boolean isSuccessRequest() {
-        return true;
+    private MessageContext messageContext;
+    private int responseCode;
+
+    public SseEventDataProvider(MessageContext messageContext) {
+        super(messageContext);
+        this.messageContext = messageContext;
     }
 
     @Override
-    public boolean isFaultRequest() {
-        return false;
-    }
-
-    @Override
-    public boolean isAnonymous() {
-        return false;
-    }
-
-    @Override
-    public boolean isAuthenticated() {
-        return true;
-    }
-
-    @Override
-    public boolean isAuthFaultRequest() {
-        return false;
-    }
-
-    @Override
-    public boolean isThrottledFaultRequest() {
-        return false;
-    }
-
-    @Override
-    public boolean isTargetFaultRequest() {
-        return false;
-    }
-
-    @Override
-    public boolean isResourceNotFound() {
-        return false;
-    }
-
-    @Override
-    public boolean isMethodNotAllowed() {
-        return false;
-    }
-
-    @Override
-    public API getApi() {
-        return null;
-    }
-
-    @Override
-    public Application getApplication() {
-        return null;
-    }
-
-    @Override
-    public Latencies getLatency() {
-        return null;
-    }
-
-    @Override
-    public Operation getOperation() {
-        return null;
-    }
-
-    @Override
-    public Target getTarget() {
-        return null;
-    }
-
-    @Override
-    public Latencies getLatencies() {
-        return null;
-    }
-
-    @Override
-    public MetaInfo getMetaInfo() {
-        return null;
-    }
-
-    @Override
-    public int getProxyResponseCode() {
-        return 0;
+    public long getResponseMediationLatency() {
+        return 0L; // always 0 since there is no response mediation
     }
 
     @Override
     public int getTargetResponseCode() {
-        return 0;
+        return responseCode;
     }
 
     @Override
-    public long getRequestTime() {
-        return 0;
+    public int getProxyResponseCode() {
+        return responseCode;
     }
 
-    @Override
-    public Error getError() {
-        return null;
+    public void setBackendEndTime() {
+        messageContext.setProperty(Constants.BACKEND_END_TIME_PROPERTY, System.currentTimeMillis());
     }
 
-    @Override
-    public String getUserAgentHeader() {
-        return null;
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
     }
 }

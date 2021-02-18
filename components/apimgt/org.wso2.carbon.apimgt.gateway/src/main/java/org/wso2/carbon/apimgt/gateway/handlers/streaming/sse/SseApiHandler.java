@@ -34,7 +34,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -49,6 +48,7 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_ANALYTICS_INFO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_CONTENT_TYPE;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.THROTTLED_MESSAGE;
@@ -70,8 +70,6 @@ public class SseApiHandler extends APIAuthenticationHandler {
         axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         boolean isAuthenticated = super.handleRequest(synCtx);
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
-        synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
-                           true);
         if (isAuthenticated) {
             ThrottleInfo throttleInfo = getThrottlingInfo(synCtx);
             boolean isThrottled = SseUtils.isThrottled(throttleInfo.getSubscriberTenantDomain(),
@@ -83,8 +81,15 @@ public class SseApiHandler extends APIAuthenticationHandler {
                 return false;
             }
             axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_SSE);
+            // skipping only if the flow is successful, if some errors it will invoke the  default metrics handler.
+            synCtx.setProperty(
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING, true);
+
+            // analytics
+            AnalyticsDataProvider provider = new SseEventDataProvider(synCtx);
+            axisCtx.setProperty(SSE_ANALYTICS_INFO, provider);
         }
-        publishSubscriptionEvent(synCtx);
+        //  publishFailureEvent(synCtx);
         return isAuthenticated;
     }
 
@@ -111,16 +116,17 @@ public class SseApiHandler extends APIAuthenticationHandler {
         return throttleInfo;
     }
 
-    private void publishSubscriptionEvent(MessageContext synCtx) {
-
-        org.apache.axis2.context.MessageContext messageContext = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-
-        messageContext.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BACKEND_RESPONSE_CODE,
-                                   200);
-        AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(synCtx);
-        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        dataCollector.collectData();
-    }
+    //    private void publishFailureEvent(MessageContext synCtx) {
+    //
+    //        org.apache.axis2.context.MessageContext messageContext =
+    //                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+    //
+    //        messageContext.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BACKEND_RESPONSE_CODE,
+    //                                   200);
+    //        AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(synCtx);
+    //        FaultyRequestDataCollector dataCollector = new FaultyRequestDataCollector(provider);
+    //        dataCollector.collectData();
+    //    }
 
     private void handleThrottledOut(MessageContext synCtx) {
 

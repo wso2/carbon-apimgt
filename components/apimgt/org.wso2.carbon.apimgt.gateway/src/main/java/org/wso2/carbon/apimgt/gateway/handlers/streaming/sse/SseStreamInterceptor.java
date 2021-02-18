@@ -23,14 +23,14 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.passthru.DefaultStreamInterceptor;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_ANALYTICS_INFO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseUtils.isThrottled;
 
@@ -49,12 +50,14 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
     private static final Log log = LogFactory.getLog(SseStreamInterceptor.class);
     private static final String SSE_STREAM_DELIMITER = "\n\n";
     private static final int DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS = 100;
+    boolean isAnalyticsEnbaled;
     private String charset = StandardCharsets.UTF_8.name();
     private ExecutorService throttlePublisherService;
     private int noOfExecutorThreads = DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS;
 
     public SseStreamInterceptor() {
         throttlePublisherService = Executors.newFixedThreadPool(noOfExecutorThreads);
+        isAnalyticsEnbaled = APIUtil.isAnalyticsEnabled();
     }
 
     @Override
@@ -103,9 +106,11 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
                 log.warn("Request is throttled out");
                 return false;
             }
-            publishAnalyticsData();
             throttlePublisherService.execute(
                     () -> SseUtils.publishNonThrottledEvent(eventCount, messageId, throttleInfo, propertiesMap));
+            if (isAnalyticsEnbaled) {
+                publishAnalyticsData(eventCount, axi2Ctx);
+            }
             return true;
         } else {
             log.error("Throttle object cannot be null.");
@@ -113,17 +118,17 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
         return true;
     }
 
-    private void publishAnalyticsData(){
-        boolean somedata = false;
-        AnalyticsDataProvider provider = new SseEventDataProvider(){
+    private void publishAnalyticsData(int eventCount, MessageContext axi2Ctx) {
 
-            @Override
-            public boolean isFaultRequest() {
-                return somedata;
-            }
-        };
-        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        dataCollector.collectData();
+        SseEventDataProvider provider = (SseEventDataProvider) axi2Ctx.getProperty(SSE_ANALYTICS_INFO);
+        provider.setResponseCode((int) axi2Ctx.getProperty(SynapseConstants.HTTP_SC));
+        int count = 1;
+        while (count <= eventCount) {
+            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+            provider.setBackendEndTime();
+            dataCollector.collectData();
+            count++;
+        }
     }
 
     public void setCharset(String charset) {
