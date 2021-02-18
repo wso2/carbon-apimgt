@@ -149,7 +149,7 @@ class CommentOptions extends React.Component {
         return (
             <Grid container className={classes.verticalSpace} key={comment.id}>
                 {/* only the comment owner or admin can delete a comment */}
-                {AuthManager.getUser() && (AuthManager.getUser().name === ('admin' || comment.createdBy)) && [
+                {AuthManager.getUser() && (AuthManager.getUser().name === (theme.custom.adminRole || comment.createdBy)) && [
                         <Grid item key='key-delete'>
                             <Button
                                 size='small'
