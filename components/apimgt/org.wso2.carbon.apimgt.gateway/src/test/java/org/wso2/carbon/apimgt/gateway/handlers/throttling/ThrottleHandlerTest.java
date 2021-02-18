@@ -327,7 +327,7 @@ public class ThrottleHandlerTest {
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
+                .getUsername()+ "@" + throttleHandler.getTenantDomain();
         //Set application level throttled out
         throttleDataHolder.addThrottleData(applicationLevelThrottleKey, System.currentTimeMillis() + 10000);
 
@@ -392,7 +392,7 @@ public class ThrottleHandlerTest {
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
                 + apiVersion;
         String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
+                .getUsername()+ "@" + throttleHandler.getTenantDomain();
         String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
 //        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
 //        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
