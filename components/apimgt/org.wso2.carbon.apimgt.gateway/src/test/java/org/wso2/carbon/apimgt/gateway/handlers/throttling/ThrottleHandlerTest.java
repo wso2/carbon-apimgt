@@ -63,6 +63,9 @@ public class ThrottleHandlerTest {
     private static final String RESPONSE = "RESPONSE";
     private static final String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
     private static final String VERB_INFO_DTO = "VERB_INFO";
+    private static final String blockedUserWithTenantDomain = "blockedUser@carbon.super";
+    private static final String userWithTenantDomain = "user@carbon.super";
+    private static final String blockedUserWithOutTenantDomain = "blockedUser";
 
     @Before
     public void init() {
@@ -533,6 +536,50 @@ public class ThrottleHandlerTest {
         matchingConditions.add(conditionGroupDTO);
         throttleDataHolder.addKeyTemplate("testKeyTemplate", "testKeyTemplateValue");
         throttleDataHolder.addThrottleData("testKeyTemplate", System.currentTimeMillis() - 10000);
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+    }
+
+    @Test
+    public void testMsgThrottleOutWithUserBlockingConditions() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
+        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
+        MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
+        messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
+                .MessageContext.TRANSPORT_HEADERS);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
+        ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
+        // Adding a user blocking condition
+        throttleDataHolder.addUserBlockingCondition(blockedUserWithTenantDomain, blockedUserWithTenantDomain);
+        matchingConditions.add(conditionGroupDTO);
+        authenticationContext.setApiTier("Unlimited");
+
+        // When a blocked user is invoking
+        authenticationContext.setUsername(blockedUserWithTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
+        Assert.assertFalse(throttleHandler.handleRequest(messageContext));
+
+        // When an unblocked user is invoking
+        authenticationContext.setUsername(userWithTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+
+        // When a blocked user without tenant domain in the username is invoking
+        authenticationContext.setUsername(blockedUserWithOutTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
+        Assert.assertFalse(throttleHandler.handleRequest(messageContext));
+
+        // Remove the user block condition and use blocked user to invoke
+        throttleDataHolder.removeUserBlockingCondition(blockedUserWithTenantDomain);
+        authenticationContext.setUsername(blockedUserWithTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
         Assert.assertTrue(throttleHandler.handleRequest(messageContext));
     }
 
