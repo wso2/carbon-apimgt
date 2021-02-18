@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.model;
 
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.ApiPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
@@ -25,6 +26,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.util.Map;
 
@@ -59,6 +61,23 @@ public interface SubscriptionDataStore {
      */
     API getApiByContextAndVersion(String context, String version);
 
+    /**
+     * Get API by Name and Version
+     *
+     * @param name Name of the API
+     * @param version Version of the API
+     * @return {@link API} entry represented by Context and Version.
+     */
+    API getApiByNameAndVersion(String name, String version);
+
+
+    /**
+     * Get API by UUID.
+     *
+     * @param apiUUID UUID of API
+     * @return {@link API} entry represented by Context and Version.
+     */
+    API getAPIByUUID(String apiUUID);
     /**
      * Gets Subscription by ID
      *
@@ -101,6 +120,8 @@ public interface SubscriptionDataStore {
     void addOrUpdateAPI(API api);
     
     void addOrUpdateAPIWithUrlTemplates(API api);
+
+    void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event);
 
     void addOrUpdateApplicationKeyMapping(ApplicationKeyMapping applicationKeyMapping);
     

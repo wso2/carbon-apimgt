@@ -188,13 +188,6 @@ class TableView extends React.Component {
             const { body } = data;
             const { list, pagination, count } = body;
             const { total } = pagination;
-            // When there is a count stored in the localstorage and it's greater than 0
-            // We check if the response in the rest api callls have 0 items.
-            // We remove the local storage and redo the api call
-            if (this.count > 0 && total === 0) {
-                this.page = 0;
-                this.getData();
-            }
             this.count = total;
             this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
         }).catch(() => {

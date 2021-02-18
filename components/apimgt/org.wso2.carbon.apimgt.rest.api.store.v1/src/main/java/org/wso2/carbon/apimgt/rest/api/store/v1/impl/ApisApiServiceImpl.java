@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -64,6 +65,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AsyncAPIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -154,7 +156,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -186,7 +188,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -726,7 +728,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             //this will fail if user does not have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
             ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, requestedTenantDomain);
 
             if (thumbnailResource != null) {
@@ -748,6 +750,36 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(apiId)) {
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+            Set<Topic> topics;
+            try {
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
+                TopicListDTO topicListDTO;
+                if (apiTypeWrapper.isAPIProduct()) {
+                    topics = apiConsumer.getTopics(apiTypeWrapper.getApiProduct().getUuid());
+                } else {
+                    topics = apiConsumer.getTopics(apiTypeWrapper.getApi().getUuid());
+                }
+                topicListDTO = AsyncAPIMappingUtil.fromTopicListToDTO(topics);
+                return Response.ok().entity(topicListDTO).build();
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Failed to get topics of Async API " + apiId, e, log);
+                }
+            }
+        } else {
+            RestApiUtil.handleBadRequest("API Id is missing in request", log);
         }
         return null;
     }

@@ -17,6 +17,9 @@
  */
 package org.wso2.carbon.apimgt.throttle.policy.deployer.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
@@ -35,17 +38,14 @@ import org.wso2.carbon.apimgt.throttle.policy.deployer.dto.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.throttle.policy.deployer.exception.ThrottlePolicyDeployerException;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.jms.JMSException;
-import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 /**
@@ -67,16 +67,13 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                     log.debug("Event received in JMS Event Receiver - " + message);
                 }
                 Topic jmsDestination = (Topic) message.getJMSDestination();
-                if (message instanceof MapMessage) {
-                    MapMessage mapMessage = (MapMessage) message;
-                    Map<String, Object> map = new HashMap<>();
-                    Enumeration enumeration = mapMessage.getMapNames();
-                    while (enumeration.hasMoreElements()) {
-                        String key = (String) enumeration.nextElement();
-                        map.put(key, mapMessage.getObject(key));
-                    }
+                if (message instanceof TextMessage) {
+                    String textMessage = ((TextMessage) message).getText();
+                    JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                            path(APIConstants.EVENT_PAYLOAD_DATA);
+
                     if (APIConstants.TopicNames.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.EVENT_TYPE) != null) {
+                        if (payloadData.get(APIConstants.EVENT_TYPE).asText() != null) {
                             /*
                              * This message contains notification
                              * eventType - type of the event
@@ -86,18 +83,17 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                             if (log.isDebugEnabled()) {
                                 log.debug("Event received from the topic of " + jmsDestination.getTopicName());
                             }
-                            handleNotificationMessage((String) map.get(APIConstants.EVENT_TYPE),
-                                    (String) map.get(APIConstants.EVENT_PAYLOAD));
+                            handleNotificationMessage(payloadData.get(APIConstants.EVENT_TYPE).asText(),
+                                    payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
                         }
                     }
-
                 } else {
                     log.warn("Event dropped due to unsupported message type " + message.getClass());
                 }
             } else {
                 log.warn("Dropping the empty/null event received through jms receiver");
             }
-        } catch (JMSException e) {
+        } catch (JMSException | JsonProcessingException e) {
             log.error("JMSException occurred when processing the received message ", e);
         }
     }

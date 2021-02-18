@@ -1,20 +1,21 @@
+
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.api;
 
@@ -38,6 +39,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 
 import java.util.List;
 import java.util.Map;
@@ -186,7 +189,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get API for subscriber
      */
     Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
-    
+
     /**
      * @param subscriber the subscriber to be subscribed to the API
      * @param groupingId the groupId of the subscriber
@@ -267,7 +270,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex,
-            int endSubIndex, String groupingId) throws APIManagementException;
+                                                  int endSubIndex, String groupingId) throws APIManagementException;
 
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name and in between starting and ending indexes.
@@ -283,7 +286,7 @@ public interface APIConsumer extends APIManager {
     Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, int applicationId, int startSubIndex, int endSubIndex, String groupingId)
             throws APIManagementException;
 
-      /**
+    /**
      * Returns true if a given user has subscribed to the API
      *
      * @param apiIdentifier APIIdentifier
@@ -364,13 +367,13 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * 
+     *
      * @param subscriptionId id of the subscription
      * @return
      * @throws APIManagementException if failed to get subscription detail from database
      */
     String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
- 
+
     /**
      * Unsubscribe the specified user from the specified API in the given application
      *
@@ -394,7 +397,7 @@ public interface APIConsumer extends APIManager {
             APIManagementException;
 
     /** Removes a subscription specified by SubscribedAPI object
-     * 
+     *
      * @param subscription SubscribedAPI object which contains the subscription information
      * @throws APIManagementException
      */
@@ -528,8 +531,9 @@ public interface APIConsumer extends APIManager {
                                                                  String callbackUrl, String[] allowedDomains,
                                                                  String validityTime,
                                                                  String tokenScope, String groupingId,
-                                                                 String jsonString, String keyManagerName)
-        throws APIManagementException;
+                                                                 String jsonString, String keyManagerName,
+                                                                 String tenantDomain)
+            throws APIManagementException;
 
     /**
      * Creates a request for application update.
@@ -594,7 +598,7 @@ public interface APIConsumer extends APIManager {
      */
 
     Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId,int start , int offset ,
-            String search, String sortColumn, String sortOrder)
+                                                String search, String sortColumn, String sortOrder)
             throws APIManagementException;
 
 
@@ -640,11 +644,11 @@ public interface APIConsumer extends APIManager {
     Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
 
     Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
-    
+
     int getUserRating(Identifier apiId, String user) throws APIManagementException;
 
     JSONObject getUserRatingInfo(Identifier id, String user) throws APIManagementException;
-    
+
     float getAverageAPIRating(Identifier apiId) throws APIManagementException;
 
     JSONArray getAPIRatings(Identifier apiId) throws APIManagementException;
@@ -660,9 +664,9 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get set of API
      */
     Set<API> getPublishedAPIsByProvider(String providerId, String loggedUser, int limit, String apiOwner,
-                                               String apiBizOwner) throws APIManagementException;
+                                        String apiBizOwner) throws APIManagementException;
 
-     /** Get a list of published APIs by the given provider.
+    /** Get a list of published APIs by the given provider.
      *
      * @param providerId , provider id
      * @param limit Maximum number of results to return. Pass -1 to get all.
@@ -698,7 +702,7 @@ public interface APIConsumer extends APIManager {
     /**
      * Check whether given Tier is denied for the user
      * @param tierName
-     * @return 
+     * @return
      * @throws APIManagementException if failed to get the tiers
      */
     boolean isTierDeneid(String tierName)throws APIManagementException;
@@ -707,11 +711,12 @@ public interface APIConsumer extends APIManager {
      * Returns details of an API information in low profile
      *
      * @param identifier APIIdentifier
+     * @param orgId  Identifier of an organization
      * @return An API object related to the given identifier or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
-    
+    API getLightweightAPI(APIIdentifier identifier, String orgId) throws APIManagementException;
+
     /**
      * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,
      * only the latest version will be included
@@ -725,8 +730,8 @@ public interface APIConsumer extends APIManager {
      */
 
     Map<String,Object> getAllPaginatedAPIsByStatus(String tenantDomain,int start,int end, String Status,
-                                                          boolean returnAPITags) throws APIManagementException;
-    
+                                                   boolean returnAPITags) throws APIManagementException;
+
     /**
      * Returns a paginated list of all APIs in given Status list. If a given API has multiple APIs,
      * only the latest version will be included in this list.
@@ -752,7 +757,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to API set
      */
     Map<String,Object> getAllPaginatedLightWeightAPIsByStatus(String tenantDomain,int start,int end, String[] Status,
-                                                   boolean returnAPITags) throws APIManagementException;
+                                                              boolean returnAPITags) throws APIManagementException;
 
     /**
      * Returns the swagger definition of the API for the given gateway environment as a string
@@ -767,7 +772,7 @@ public interface APIConsumer extends APIManager {
 
     /**
      * Returns the swagger definition of the API for the given microgateway gateway label as a string
-     * 
+     *
      * @param api api
      * @param labelName name of the microgateway label
      * @return swagger string
@@ -827,14 +832,14 @@ public interface APIConsumer extends APIManager {
      */
     String renewConsumerSecret(String clientId, String keyManagerName) throws APIManagementException;
 
-	/**
-	 * Returns a set of scopes associated with a list of API identifiers.
-	 *
-	 * @param identifiers list of API identifiers
-	 * @return set of scopes.
-	 * @throws APIManagementException
-	 */
-	Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException;
+    /**
+     * Returns a set of scopes associated with a list of API identifiers.
+     *
+     * @param identifiers list of API identifiers
+     * @return set of scopes.
+     * @throws APIManagementException
+     */
+    Set<Scope> getScopesBySubscribedAPIs(List<APIIdentifier> identifiers) throws APIManagementException;
 
     /**
      * Returns a set of scopes associated with an application subscription.
@@ -848,14 +853,14 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-	 * Returns a set of scopes for a given space seperated scope key string
-	 *
-	 * @param scopeKeys a space seperated string of scope keys
-	 * @param tenantId  tenant id
-	 * @return set of scopes
-	 * @throws APIManagementException
-	 */
-	Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
+     * Returns a set of scopes for a given space seperated scope key string
+     *
+     * @param scopeKeys a space seperated string of scope keys
+     * @param tenantId  tenant id
+     * @return set of scopes
+     * @throws APIManagementException
+     */
+    Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
     /**
      * Returns the groupId of a specific Application when the Id is provided
@@ -868,7 +873,7 @@ public interface APIConsumer extends APIManager {
 
     String[] getGroupIds(String response) throws APIManagementException;
 
-	JSONObject resumeWorkflow(Object[] args);
+    JSONObject resumeWorkflow(Object[] args);
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
@@ -892,7 +897,7 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
-            Map apiDetails) throws APIManagementException;
+                           Map apiDetails) throws APIManagementException;
 
     /**
      * Returns the WSDL ResourceFile (Single WSDL or ZIP) for the provided API and environment details
@@ -912,11 +917,11 @@ public interface APIConsumer extends APIManager {
      * @param api API  
      * @param environmentName environment name
      * @param environmentType environment type
-     * @param tenantDomain tenant domain
+     * @param orgId Identifier of an organization
      * @return WSDL of the API
      * @throws APIManagementException when error occurred while getting the WSDL
      */
-    ResourceFile getWSDL(API api, String environmentName, String environmentType, String tenantDomain)
+    ResourceFile getWSDL(API api, String environmentName, String environmentType, String orgId)
             throws APIManagementException;
     /**
      * Returns application attributes defined in configuration
@@ -930,6 +935,8 @@ public interface APIConsumer extends APIManager {
     Set<SubscribedAPI> getLightWeightSubscribedIdentifiers(Subscriber subscriber, APIIdentifier apiIdentifier, String groupingId) throws APIManagementException;
 
     Set<APIKey> getApplicationKeysOfApplication(int applicationId) throws APIManagementException;
+
+    Set<APIKey> getApplicationKeysOfApplication(int applicationId, String xWso2Tenant) throws APIManagementException;
 
     void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException;
 
@@ -982,8 +989,62 @@ public interface APIConsumer extends APIManager {
      */
     boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
 
+    /**
+     *
+     * @param apiId API UUID
+     * @return Set of Topics defined in a specified Async API
+     * @throws APIManagementException if an error occurs while retrieving data
+     */
+    Set<Topic> getTopics(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves webhook subscriptions for a webhook API
+     *
+     * @param applicationId Application UUID
+     * @param apiId         API UUID
+     * @return Set of Subscriptions of application to a API
+     * @throws APIManagementException if an error occurs while retrieving data
+     */
+    Set<Subscription> getTopicSubscriptions(String applicationId, String apiId) throws APIManagementException;
+
     void cleanUpApplicationRegistrationByApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException;
 
+    APIKey getApplicationKeyByAppIDAndKeyMapping(int applicationId, String keyMappingId)
+            throws APIManagementException;
+
     void changeUserPassword(String currentPassword, String newPassword) throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given gateway environment as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param environmentName API Gateway environment name
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName)
+            throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given microgateway gateway label as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param labelName name of the microgateway label
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName)
+            throws APIManagementException;
+
+    /**
+     * Returns the AsyncAPI definition of the API for the given container managed cluster name as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @param clusterName name of the container managed cluster
+     * @return AsyncAPI definition string
+     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
+     */
+    String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName)
+            throws APIManagementException;
 }

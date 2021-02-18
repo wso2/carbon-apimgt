@@ -62,6 +62,7 @@ export default class API extends Resource {
      */
     getAPIById(id, callback = null) {
         const promiseGet = this.client.then((client) => {
+            console.log(client);
             return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
@@ -548,6 +549,34 @@ export default class API extends Resource {
     }
 
     /**
+     * Get webhook subscriptions for a web hook Api.
+     * @param apiId of the web hook api which holds the topics
+     * @param applicationId of the application making the subscription
+     * @returns promise
+     */
+    getWebhookubScriptions(apiId, applicationId) {
+        var promisedTopicSubscriptionGet = this.client.then((client) => {
+                return client.apis["Webhooks"].get_webhooks_subscriptions(
+                    { apiId: apiId, applicationId: applicationId });
+            }
+        );
+        return promisedTopicSubscriptionGet;
+    }
+
+    /**
+     * Get all topics available for a specified webhook API.
+     * @param apiId of the web hook api
+     * @returns promise
+     */
+    getAllTopics(apiId) {
+        const payload = { apiId };
+        const promisedTopicGet = this.client.then((client) => {
+             return client.apis.Topics.get_apis__apiId__topics(payload);
+        });
+        return promisedTopicGet;
+    }
+
+    /**
      * Create a subscription
      * @param {string} apiId id of the API that needs to be subscribed
      * @param {string} applicationId id of the application that needs to be subscribed
@@ -697,7 +726,7 @@ export default class API extends Resource {
     }
 
     /**
-     * method to get store settings such as grant types, scopes, application sharing settings etc
+     * method to get Developer Portal settings such as grant types, scopes, application sharing settings etc
      * Settings API can be invoked with and without access token, When a token is not present it will return the public
      * settings info, when a valid token is present it will return all the settings info.
      * @returns {Promise} promise object return from SwaggerClient-js
@@ -727,7 +756,7 @@ export default class API extends Resource {
      * */
     getSupportedAlertTypes() {
         return this.client.then((client) => {
-            return client.apis.Alerts.getStoreAlertTypes(this._requestMetaData());
+            return client.apis.Alerts.getDevportalAlertTypes(this._requestMetaData());
         });
     }
 

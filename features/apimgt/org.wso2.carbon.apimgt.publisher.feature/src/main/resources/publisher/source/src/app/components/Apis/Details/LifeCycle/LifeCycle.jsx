@@ -26,6 +26,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import { isRestricted } from 'AppData/AuthManager';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
+import Alert from 'AppComponents/Shared/Alert';
 
 import LifeCycleUpdate from './LifeCycleUpdate';
 import LifeCycleHistory from './LifeCycleHistory';
@@ -76,7 +77,24 @@ class LifeCycle extends Component {
      * @memberof LifeCycle
      */
     componentDidMount() {
-        this.updateData();
+        const { api: { id } } = this.props;
+        const promisedClientCerts = Api.getAllClientCertificates(id);
+        const { intl } = this.props;
+        promisedClientCerts.then((certList) => {
+            const clientCerts = certList.body;
+            this.setState({
+                certList: [...clientCerts.certificates],
+            });
+            this.updateData();
+        }).catch((error) => {
+            if (process.env.NODE_ENV !== 'production') {
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.LifeCycle.LifeCycleUpdate.error.certs',
+                    defaultMessage: 'Error while retrieving certificates',
+                }));
+                console.error(error);
+            }
+        });
     }
 
     handleChangeCheckList = (index) => (event, checked) => {
@@ -94,32 +112,13 @@ class LifeCycle extends Component {
         const { api: { id } } = this.props;
         const promisedAPI = Api.get(id);
         const promisedLcState = this.api.getLcState(id);
-        const privateJetModeEnabled = false;
         const promisedLcHistory = this.api.getLcHistory(id);
-        const promisedClientCerts = Api.getAllClientCertificates(id);
-        Promise.all([promisedAPI, promisedLcState, promisedLcHistory, promisedClientCerts])
+        Promise.all([promisedAPI, promisedLcState, promisedLcHistory])
             .then((response) => {
                 const api = response[0];
                 const lcState = response[1].body;
                 const lcHistory = response[2].body.list;
-                const clientCerts = response[3].body;
 
-                if (privateJetModeEnabled) {
-                    if (!api.hasOwnGateway) {
-                        const transitions = lcState.availableTransitionBeanList;
-                        const PUBLISHED = 'Published';
-
-                        for (const transition of transitions) {
-                            if (transition.targetState === PUBLISHED && lcState.state !== PUBLISHED) {
-                                const publishInPrivateJetMode = {
-                                    event: 'Publish In Private Jet Mode',
-                                    targetState: 'Published In Private Jet Mode',
-                                };
-                                lcState.availableTransitionBeanList.push(publishInPrivateJetMode);
-                            }
-                        }
-                    }
-                }
                 // Creating checklist
                 const checkList = [];
                 let index = 0;
@@ -136,9 +135,7 @@ class LifeCycle extends Component {
                     api,
                     lcState,
                     lcHistory,
-                    privateJetModeEnabled,
                     checkList,
-                    certList: [...clientCerts.certificates],
                 });
             })
             .catch((error) => {
@@ -157,7 +154,7 @@ class LifeCycle extends Component {
     render() {
         const { classes } = this.props;
         const {
-            api, lcState, privateJetModeEnabled, checkList, lcHistory, certList,
+            api, lcState, checkList, lcHistory, certList,
         } = this.state;
         const apiFromContext = this.context.api;
         if (apiFromContext && isRestricted(['apim:api_publish'], apiFromContext)) {
@@ -194,7 +191,6 @@ class LifeCycle extends Component {
                                 checkList={checkList}
                                 handleChangeCheckList={this.handleChangeCheckList}
                                 api={api}
-                                privateJetModeEnabled={privateJetModeEnabled}
                                 certList={certList}
                             />
                         </Grid>

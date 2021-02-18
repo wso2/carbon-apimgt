@@ -38,7 +38,6 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.model.entity.APIPolicyConditionGroup;
@@ -112,18 +111,19 @@ public class APIKeyValidationService {
             if (axis2MessageContext != null) {
                 MessageContext responseMessageContext = axis2MessageContext.getOperationContext().
                         getMessageContext(WSDLConstants.MESSAGE_LABEL_OUT_VALUE);
-                if (log.isDebugEnabled()) {
-                    List headersList = new ArrayList();
-                    Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-                    if (headers != null && headers instanceof Map) {
-                        headersMap = (Map) headers;
-                        activityID = (String) headersMap.get("activityID");
+                if (responseMessageContext != null) {
+                    if (log.isDebugEnabled()) {
+                        List headersList = new ArrayList();
+                        Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                        if (headers != null && headers instanceof Map) {
+                            headersMap = (Map) headers;
+                            activityID = (String) headersMap.get("activityID");
+                        }
+                        if(headersMap != null) {
+                            headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
+                        }
+                        responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                     }
-                    if(headersMap != null) {
-                        headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
-                    }
-
-                    responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                 }
             }
         } catch (AxisFault axisFault) {
@@ -458,20 +458,20 @@ public class APIKeyValidationService {
     }
 
     /**
-     * validate access token for websocket handshake
+     * Validate access token for websocket handshake
      *
-     * @param context context of the API
-     * @param version version of the API
-     * @param accessToken access token of the request
-     * @return api information
+     * @param context          context of the API
+     * @param version          version of the API
+     * @param accessToken      access token of the request
+     * @param tenantDomain
+     * @param keyManagers
+     * @return
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
-    public APIKeyValidationInfoDTO validateKeyForHandshake(String context, String version,
-                                                           String accessToken, String tenantDomain,
-                                                           List<String> keyManagers)
+    public APIKeyValidationInfoDTO validateKeyForHandshake(String context, String version, String accessToken,
+                                                           String tenantDomain, List<String> keyManagers)
             throws APIKeyMgtException, APIManagementException {
-        boolean defaultVersionInvoked = false;
         APIKeyValidationInfoDTO info = new APIKeyValidationInfoDTO();
         info.setAuthorized(false);
         TokenValidationContext validationContext = new TokenValidationContext();
@@ -488,13 +488,6 @@ public class APIKeyValidationService {
         if (state) {
             state = keyValidationHandler.validateSubscription(validationContext);
             if (state) {
-                if (APIConstants.DEFAULT_WEBSOCKET_VERSION.equals(version)) {
-                    version = info.getApiVersion();
-                    defaultVersionInvoked = true;
-                }
-                if (defaultVersionInvoked) {
-                    validationContext.getValidationInfoDTO().setApiName(info.getApiName() + "*" + version);
-                }
                 if (APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
                         validationContext.getValidationInfoDTO().getEndUserName() != null
                         && !validationContext.isCacheHit()) {
@@ -521,7 +514,7 @@ public class APIKeyValidationService {
      * authorized, tier information will be <pre>null</pre>
      */
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, String consumerKey,
-                                                        String tenantDomain,String keyManager)
+                                                        String tenantDomain, String keyManager)
             throws APIKeyMgtException, APIManagementException {
 
         KeyValidationHandler keyValidationHandler =

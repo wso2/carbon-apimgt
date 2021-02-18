@@ -34,8 +34,10 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -198,25 +200,9 @@ public class MutualSSLAuthenticator implements Authenticator {
      * @return API Identifier of currently accessed API.
      */
     private APIIdentifier getAPIIdentifier(MessageContext messageContext) {
-        String apiWithversion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-        String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-        String api = null;
-        //if publisher is null,extract the publisher from the api_version
-        if (apiPublisher == null && apiWithversion != null) {
-            int ind = apiWithversion.indexOf("--");
-            apiPublisher = apiWithversion.substring(0, ind);
-        }
 
-        if (apiWithversion != null) {
-            int index = apiWithversion.indexOf("--");
-            if (index != -1) {
-                apiWithversion = apiWithversion.substring(index + 2);
-            }
-            String[] splitParts = apiWithversion.split(":");
-            api = splitParts[0];
-            apiWithversion = splitParts[1].substring(1);
-        }
-        return new APIIdentifier(apiPublisher, api, apiWithversion);
+        API api = GatewayUtils.getAPI(messageContext);
+        return new APIIdentifier(api.getApiProvider(), api.getApiName(), api.getApiVersion());
     }
 
     @Override

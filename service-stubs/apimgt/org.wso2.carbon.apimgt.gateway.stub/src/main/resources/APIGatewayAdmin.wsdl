@@ -1,4 +1,4 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2102="http://dto.gateway.apimgt.carbon.wso2.org/xsd" xmlns:ax2104="http://gateway.api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://service.gateway.apimgt.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.gateway.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax225="http://gateway.api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://service.gateway.apimgt.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax227="http://dto.gateway.apimgt.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.gateway.apimgt.carbon.wso2.org">
     <wsdl:documentation>APIGatewayAdmin</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.gateway.apimgt.carbon.wso2.org/xsd">
@@ -9,7 +9,7 @@
                     <xs:element minOccurs="0" name="host" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="port" type="xs:int"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="resources" nillable="true" type="ax2102:ResourceData"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="resources" nillable="true" type="ax227:ResourceData"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="ResourceData">
@@ -29,9 +29,9 @@
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax2103="http://dto.gateway.apimgt.carbon.wso2.org/xsd" xmlns:ax2105="http://gateway.api.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.gateway.apimgt.carbon.wso2.org">
-            <xs:import namespace="http://dto.gateway.apimgt.carbon.wso2.org/xsd"/>
+        <xs:schema xmlns:ax226="http://gateway.api.apimgt.carbon.wso2.org/xsd" xmlns:ax228="http://dto.gateway.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.gateway.apimgt.carbon.wso2.org">
             <xs:import namespace="http://gateway.api.apimgt.carbon.wso2.org/xsd"/>
+            <xs:import namespace="http://dto.gateway.apimgt.carbon.wso2.org/xsd"/>
             <xs:element name="addEndpoint">
                 <xs:complexType>
                     <xs:sequence>
@@ -75,18 +75,14 @@
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="addPrototypeApiScriptImplForTenant">
+            <xs:element name="cleanDeployment">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
                         <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="addPrototypeApiScriptImplForTenantResponse">
+            <xs:element name="cleanDeploymentResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean"/>
@@ -105,176 +101,6 @@
                 </xs:complexType>
             </xs:element>
             <xs:element name="addApiForTenantResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addApi">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addApiResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addPrototypeApiScriptImpl">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addPrototypeApiScriptImplResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addDefaultAPIForTenant">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addDefaultAPIForTenantResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addDefaultAPI">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="addDefaultAPIResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getApiForTenant">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getApiForTenantResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2102:APIData"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getApi">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getApiResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2102:APIData"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getDefaultApiForTenant">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getDefaultApiForTenantResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2102:APIData"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getDefaultApi">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="getDefaultApiResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2102:APIData"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="updateApiForTenant">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="updateApiForTenantResponse">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="updateApi">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="updateApiResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean"/>
@@ -411,6 +237,23 @@
                 </xs:complexType>
             </xs:element>
             <xs:element name="deleteDefaultApiResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addApi">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addApiResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean"/>
@@ -656,7 +499,7 @@
             <xs:element name="deployAPI">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="gatewayAPIDTO" nillable="true" type="ax2104:GatewayAPIDTO"/>
+                        <xs:element minOccurs="0" name="gatewayAPIDTO" nillable="true" type="ax225:GatewayAPIDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -670,11 +513,182 @@
             <xs:element name="unDeployAPI">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="gatewayAPIDTO" nillable="true" type="ax2104:GatewayAPIDTO"/>
+                        <xs:element minOccurs="0" name="gatewayAPIDTO" nillable="true" type="ax225:GatewayAPIDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="unDeployAPIResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addPrototypeApiScriptImplForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addPrototypeApiScriptImplForTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addPrototypeApiScriptImpl">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addPrototypeApiScriptImplResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addDefaultAPIForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addDefaultAPIForTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addDefaultAPI">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="addDefaultAPIResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getApiForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getApiForTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax227:APIData"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getApi">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getApiResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax227:APIData"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDefaultApiForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDefaultApiForTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax227:APIData"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDefaultApi">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getDefaultApiResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax227:APIData"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="updateApiForTenant">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="updateApiForTenantResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="updateApi">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="updateApiResponse">
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element minOccurs="0" name="return" type="xs:boolean"/>
@@ -701,19 +715,19 @@
                 <xs:sequence>
                     <xs:element minOccurs="0" name="apiDefinition" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="apiId" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="clientCertificatesToBeAdd" nillable="true" type="ax2104:GatewayContentDTO"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="clientCertificatesToBeAdd" nillable="true" type="ax225:GatewayContentDTO"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="clientCertificatesToBeRemove" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="credentialsToBeAdd" nillable="true" type="ax2104:CredentialDto"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="credentialsToBeAdd" nillable="true" type="ax225:CredentialDto"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="credentialsToBeRemove" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="defaultAPIDefinition" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="endpointEntriesToBeAdd" nillable="true" type="ax2104:GatewayContentDTO"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="endpointEntriesToBeAdd" nillable="true" type="ax225:GatewayContentDTO"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="endpointEntriesToBeRemove" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="localEntriesToBeAdd" nillable="true" type="ax2104:GatewayContentDTO"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="localEntriesToBeAdd" nillable="true" type="ax225:GatewayContentDTO"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="localEntriesToBeRemove" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="override" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="provider" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="sequenceToBeAdd" nillable="true" type="ax2104:GatewayContentDTO"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="sequenceToBeAdd" nillable="true" type="ax225:GatewayContentDTO"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="sequencesToBeRemove" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
@@ -739,17 +753,17 @@
     <wsdl:message name="updateApiResponse">
         <wsdl:part name="parameters" element="ns:updateApiResponse"/>
     </wsdl:message>
-    <wsdl:message name="addDefaultAPIForTenantRequest">
-        <wsdl:part name="parameters" element="ns:addDefaultAPIForTenant"/>
-    </wsdl:message>
-    <wsdl:message name="addDefaultAPIForTenantResponse">
-        <wsdl:part name="parameters" element="ns:addDefaultAPIForTenantResponse"/>
-    </wsdl:message>
     <wsdl:message name="undeployPolicyRequest">
         <wsdl:part name="parameters" element="ns:undeployPolicy"/>
     </wsdl:message>
     <wsdl:message name="undeployPolicyResponse">
         <wsdl:part name="parameters" element="ns:undeployPolicyResponse"/>
+    </wsdl:message>
+    <wsdl:message name="addDefaultAPIForTenantRequest">
+        <wsdl:part name="parameters" element="ns:addDefaultAPIForTenant"/>
+    </wsdl:message>
+    <wsdl:message name="addDefaultAPIForTenantResponse">
+        <wsdl:part name="parameters" element="ns:addDefaultAPIForTenantResponse"/>
     </wsdl:message>
     <wsdl:message name="updateDefaultApiForTenantRequest">
         <wsdl:part name="parameters" element="ns:updateDefaultApiForTenant"/>
@@ -859,17 +873,17 @@
     <wsdl:message name="deployPolicyResponse">
         <wsdl:part name="parameters" element="ns:deployPolicyResponse"/>
     </wsdl:message>
-    <wsdl:message name="addPrototypeApiScriptImplRequest">
-        <wsdl:part name="parameters" element="ns:addPrototypeApiScriptImpl"/>
-    </wsdl:message>
-    <wsdl:message name="addPrototypeApiScriptImplResponse">
-        <wsdl:part name="parameters" element="ns:addPrototypeApiScriptImplResponse"/>
-    </wsdl:message>
     <wsdl:message name="deleteSequenceForTenantRequest">
         <wsdl:part name="parameters" element="ns:deleteSequenceForTenant"/>
     </wsdl:message>
     <wsdl:message name="deleteSequenceForTenantResponse">
         <wsdl:part name="parameters" element="ns:deleteSequenceForTenantResponse"/>
+    </wsdl:message>
+    <wsdl:message name="addPrototypeApiScriptImplRequest">
+        <wsdl:part name="parameters" element="ns:addPrototypeApiScriptImpl"/>
+    </wsdl:message>
+    <wsdl:message name="addPrototypeApiScriptImplResponse">
+        <wsdl:part name="parameters" element="ns:addPrototypeApiScriptImplResponse"/>
     </wsdl:message>
     <wsdl:message name="addEndpointRequest">
         <wsdl:part name="parameters" element="ns:addEndpoint"/>
@@ -877,17 +891,17 @@
     <wsdl:message name="addEndpointResponse">
         <wsdl:part name="parameters" element="ns:addEndpointResponse"/>
     </wsdl:message>
-    <wsdl:message name="getApiForTenantRequest">
-        <wsdl:part name="parameters" element="ns:getApiForTenant"/>
-    </wsdl:message>
-    <wsdl:message name="getApiForTenantResponse">
-        <wsdl:part name="parameters" element="ns:getApiForTenantResponse"/>
-    </wsdl:message>
     <wsdl:message name="isExistingSequenceRequest">
         <wsdl:part name="parameters" element="ns:isExistingSequence"/>
     </wsdl:message>
     <wsdl:message name="isExistingSequenceResponse">
         <wsdl:part name="parameters" element="ns:isExistingSequenceResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getApiForTenantRequest">
+        <wsdl:part name="parameters" element="ns:getApiForTenant"/>
+    </wsdl:message>
+    <wsdl:message name="getApiForTenantResponse">
+        <wsdl:part name="parameters" element="ns:getApiForTenantResponse"/>
     </wsdl:message>
     <wsdl:message name="deleteDefaultApiRequest">
         <wsdl:part name="parameters" element="ns:deleteDefaultApi"/>
@@ -913,12 +927,6 @@
     <wsdl:message name="unDeployAPIResponse">
         <wsdl:part name="parameters" element="ns:unDeployAPIResponse"/>
     </wsdl:message>
-    <wsdl:message name="getApiRequest">
-        <wsdl:part name="parameters" element="ns:getApi"/>
-    </wsdl:message>
-    <wsdl:message name="getApiResponse">
-        <wsdl:part name="parameters" element="ns:getApiResponse"/>
-    </wsdl:message>
     <wsdl:message name="addApiForTenantRequest">
         <wsdl:part name="parameters" element="ns:addApiForTenant"/>
     </wsdl:message>
@@ -930,6 +938,12 @@
     </wsdl:message>
     <wsdl:message name="addSequenceForTenantResponse">
         <wsdl:part name="parameters" element="ns:addSequenceForTenantResponse"/>
+    </wsdl:message>
+    <wsdl:message name="getApiRequest">
+        <wsdl:part name="parameters" element="ns:getApi"/>
+    </wsdl:message>
+    <wsdl:message name="getApiResponse">
+        <wsdl:part name="parameters" element="ns:getApiResponse"/>
     </wsdl:message>
     <wsdl:message name="updateDefaultApiRequest">
         <wsdl:part name="parameters" element="ns:updateDefaultApi"/>
@@ -948,6 +962,12 @@
     </wsdl:message>
     <wsdl:message name="deleteApiResponse">
         <wsdl:part name="parameters" element="ns:deleteApiResponse"/>
+    </wsdl:message>
+    <wsdl:message name="cleanDeploymentRequest">
+        <wsdl:part name="parameters" element="ns:cleanDeployment"/>
+    </wsdl:message>
+    <wsdl:message name="cleanDeploymentResponse">
+        <wsdl:part name="parameters" element="ns:cleanDeploymentResponse"/>
     </wsdl:message>
     <wsdl:message name="deleteEndpointForTenantRequest">
         <wsdl:part name="parameters" element="ns:deleteEndpointForTenant"/>
@@ -990,13 +1010,13 @@
             <wsdl:input message="ns:updateApiRequest" wsaw:Action="urn:updateApi"/>
             <wsdl:output message="ns:updateApiResponse" wsaw:Action="urn:updateApiResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="addDefaultAPIForTenant">
-            <wsdl:input message="ns:addDefaultAPIForTenantRequest" wsaw:Action="urn:addDefaultAPIForTenant"/>
-            <wsdl:output message="ns:addDefaultAPIForTenantResponse" wsaw:Action="urn:addDefaultAPIForTenantResponse"/>
-        </wsdl:operation>
         <wsdl:operation name="undeployPolicy">
             <wsdl:input message="ns:undeployPolicyRequest" wsaw:Action="urn:undeployPolicy"/>
             <wsdl:output message="ns:undeployPolicyResponse" wsaw:Action="urn:undeployPolicyResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="addDefaultAPIForTenant">
+            <wsdl:input message="ns:addDefaultAPIForTenantRequest" wsaw:Action="urn:addDefaultAPIForTenant"/>
+            <wsdl:output message="ns:addDefaultAPIForTenantResponse" wsaw:Action="urn:addDefaultAPIForTenantResponse"/>
         </wsdl:operation>
         <wsdl:operation name="updateDefaultApiForTenant">
             <wsdl:input message="ns:updateDefaultApiForTenantRequest" wsaw:Action="urn:updateDefaultApiForTenant"/>
@@ -1070,25 +1090,25 @@
             <wsdl:input message="ns:deployPolicyRequest" wsaw:Action="urn:deployPolicy"/>
             <wsdl:output message="ns:deployPolicyResponse" wsaw:Action="urn:deployPolicyResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="addPrototypeApiScriptImpl">
-            <wsdl:input message="ns:addPrototypeApiScriptImplRequest" wsaw:Action="urn:addPrototypeApiScriptImpl"/>
-            <wsdl:output message="ns:addPrototypeApiScriptImplResponse" wsaw:Action="urn:addPrototypeApiScriptImplResponse"/>
-        </wsdl:operation>
         <wsdl:operation name="deleteSequenceForTenant">
             <wsdl:input message="ns:deleteSequenceForTenantRequest" wsaw:Action="urn:deleteSequenceForTenant"/>
             <wsdl:output message="ns:deleteSequenceForTenantResponse" wsaw:Action="urn:deleteSequenceForTenantResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="addPrototypeApiScriptImpl">
+            <wsdl:input message="ns:addPrototypeApiScriptImplRequest" wsaw:Action="urn:addPrototypeApiScriptImpl"/>
+            <wsdl:output message="ns:addPrototypeApiScriptImplResponse" wsaw:Action="urn:addPrototypeApiScriptImplResponse"/>
         </wsdl:operation>
         <wsdl:operation name="addEndpoint">
             <wsdl:input message="ns:addEndpointRequest" wsaw:Action="urn:addEndpoint"/>
             <wsdl:output message="ns:addEndpointResponse" wsaw:Action="urn:addEndpointResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getApiForTenant">
-            <wsdl:input message="ns:getApiForTenantRequest" wsaw:Action="urn:getApiForTenant"/>
-            <wsdl:output message="ns:getApiForTenantResponse" wsaw:Action="urn:getApiForTenantResponse"/>
-        </wsdl:operation>
         <wsdl:operation name="isExistingSequence">
             <wsdl:input message="ns:isExistingSequenceRequest" wsaw:Action="urn:isExistingSequence"/>
             <wsdl:output message="ns:isExistingSequenceResponse" wsaw:Action="urn:isExistingSequenceResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getApiForTenant">
+            <wsdl:input message="ns:getApiForTenantRequest" wsaw:Action="urn:getApiForTenant"/>
+            <wsdl:output message="ns:getApiForTenantResponse" wsaw:Action="urn:getApiForTenantResponse"/>
         </wsdl:operation>
         <wsdl:operation name="deleteDefaultApi">
             <wsdl:input message="ns:deleteDefaultApiRequest" wsaw:Action="urn:deleteDefaultApi"/>
@@ -1106,10 +1126,6 @@
             <wsdl:input message="ns:unDeployAPIRequest" wsaw:Action="urn:unDeployAPI"/>
             <wsdl:output message="ns:unDeployAPIResponse" wsaw:Action="urn:unDeployAPIResponse"/>
         </wsdl:operation>
-        <wsdl:operation name="getApi">
-            <wsdl:input message="ns:getApiRequest" wsaw:Action="urn:getApi"/>
-            <wsdl:output message="ns:getApiResponse" wsaw:Action="urn:getApiResponse"/>
-        </wsdl:operation>
         <wsdl:operation name="addApiForTenant">
             <wsdl:input message="ns:addApiForTenantRequest" wsaw:Action="urn:addApiForTenant"/>
             <wsdl:output message="ns:addApiForTenantResponse" wsaw:Action="urn:addApiForTenantResponse"/>
@@ -1117,6 +1133,10 @@
         <wsdl:operation name="addSequenceForTenant">
             <wsdl:input message="ns:addSequenceForTenantRequest" wsaw:Action="urn:addSequenceForTenant"/>
             <wsdl:output message="ns:addSequenceForTenantResponse" wsaw:Action="urn:addSequenceForTenantResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="getApi">
+            <wsdl:input message="ns:getApiRequest" wsaw:Action="urn:getApi"/>
+            <wsdl:output message="ns:getApiResponse" wsaw:Action="urn:getApiResponse"/>
         </wsdl:operation>
         <wsdl:operation name="updateDefaultApi">
             <wsdl:input message="ns:updateDefaultApiRequest" wsaw:Action="urn:updateDefaultApi"/>
@@ -1129,6 +1149,10 @@
         <wsdl:operation name="deleteApi">
             <wsdl:input message="ns:deleteApiRequest" wsaw:Action="urn:deleteApi"/>
             <wsdl:output message="ns:deleteApiResponse" wsaw:Action="urn:deleteApiResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="cleanDeployment">
+            <wsdl:input message="ns:cleanDeploymentRequest" wsaw:Action="urn:cleanDeployment"/>
+            <wsdl:output message="ns:cleanDeploymentResponse" wsaw:Action="urn:cleanDeploymentResponse"/>
         </wsdl:operation>
         <wsdl:operation name="deleteEndpointForTenant">
             <wsdl:input message="ns:deleteEndpointForTenantRequest" wsaw:Action="urn:deleteEndpointForTenant"/>
@@ -1166,8 +1190,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addDefaultAPIForTenant">
-            <soap:operation soapAction="urn:addDefaultAPIForTenant" style="document"/>
+        <wsdl:operation name="undeployPolicy">
+            <soap:operation soapAction="urn:undeployPolicy" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1175,8 +1199,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="undeployPolicy">
-            <soap:operation soapAction="urn:undeployPolicy" style="document"/>
+        <wsdl:operation name="addDefaultAPIForTenant">
+            <soap:operation soapAction="urn:addDefaultAPIForTenant" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1346,8 +1370,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addPrototypeApiScriptImpl">
-            <soap:operation soapAction="urn:addPrototypeApiScriptImpl" style="document"/>
+        <wsdl:operation name="deleteSequenceForTenant">
+            <soap:operation soapAction="urn:deleteSequenceForTenant" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1355,8 +1379,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="deleteSequenceForTenant">
-            <soap:operation soapAction="urn:deleteSequenceForTenant" style="document"/>
+        <wsdl:operation name="addPrototypeApiScriptImpl">
+            <soap:operation soapAction="urn:addPrototypeApiScriptImpl" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1373,8 +1397,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getApiForTenant">
-            <soap:operation soapAction="urn:getApiForTenant" style="document"/>
+        <wsdl:operation name="isExistingSequence">
+            <soap:operation soapAction="urn:isExistingSequence" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1382,8 +1406,8 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="isExistingSequence">
-            <soap:operation soapAction="urn:isExistingSequence" style="document"/>
+        <wsdl:operation name="getApiForTenant">
+            <soap:operation soapAction="urn:getApiForTenant" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1427,15 +1451,6 @@
                 <soap:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getApi">
-            <soap:operation soapAction="urn:getApi" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="addApiForTenant">
             <soap:operation soapAction="urn:addApiForTenant" style="document"/>
             <wsdl:input>
@@ -1447,6 +1462,15 @@
         </wsdl:operation>
         <wsdl:operation name="addSequenceForTenant">
             <soap:operation soapAction="urn:addSequenceForTenant" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getApi">
+            <soap:operation soapAction="urn:getApi" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1474,6 +1498,15 @@
         </wsdl:operation>
         <wsdl:operation name="deleteApi">
             <soap:operation soapAction="urn:deleteApi" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="cleanDeployment">
+            <soap:operation soapAction="urn:cleanDeployment" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -1547,8 +1580,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addDefaultAPIForTenant">
-            <soap12:operation soapAction="urn:addDefaultAPIForTenant" style="document"/>
+        <wsdl:operation name="undeployPolicy">
+            <soap12:operation soapAction="urn:undeployPolicy" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1556,8 +1589,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="undeployPolicy">
-            <soap12:operation soapAction="urn:undeployPolicy" style="document"/>
+        <wsdl:operation name="addDefaultAPIForTenant">
+            <soap12:operation soapAction="urn:addDefaultAPIForTenant" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1727,8 +1760,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addPrototypeApiScriptImpl">
-            <soap12:operation soapAction="urn:addPrototypeApiScriptImpl" style="document"/>
+        <wsdl:operation name="deleteSequenceForTenant">
+            <soap12:operation soapAction="urn:deleteSequenceForTenant" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1736,8 +1769,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="deleteSequenceForTenant">
-            <soap12:operation soapAction="urn:deleteSequenceForTenant" style="document"/>
+        <wsdl:operation name="addPrototypeApiScriptImpl">
+            <soap12:operation soapAction="urn:addPrototypeApiScriptImpl" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1754,8 +1787,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getApiForTenant">
-            <soap12:operation soapAction="urn:getApiForTenant" style="document"/>
+        <wsdl:operation name="isExistingSequence">
+            <soap12:operation soapAction="urn:isExistingSequence" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1763,8 +1796,8 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="isExistingSequence">
-            <soap12:operation soapAction="urn:isExistingSequence" style="document"/>
+        <wsdl:operation name="getApiForTenant">
+            <soap12:operation soapAction="urn:getApiForTenant" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1808,15 +1841,6 @@
                 <soap12:body use="literal"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getApi">
-            <soap12:operation soapAction="urn:getApi" style="document"/>
-            <wsdl:input>
-                <soap12:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap12:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="addApiForTenant">
             <soap12:operation soapAction="urn:addApiForTenant" style="document"/>
             <wsdl:input>
@@ -1828,6 +1852,15 @@
         </wsdl:operation>
         <wsdl:operation name="addSequenceForTenant">
             <soap12:operation soapAction="urn:addSequenceForTenant" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getApi">
+            <soap12:operation soapAction="urn:getApi" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1855,6 +1888,15 @@
         </wsdl:operation>
         <wsdl:operation name="deleteApi">
             <soap12:operation soapAction="urn:deleteApi" style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="cleanDeployment">
+            <soap12:operation soapAction="urn:cleanDeployment" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
@@ -1928,8 +1970,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addDefaultAPIForTenant">
-            <http:operation location="addDefaultAPIForTenant"/>
+        <wsdl:operation name="undeployPolicy">
+            <http:operation location="undeployPolicy"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -1937,8 +1979,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="undeployPolicy">
-            <http:operation location="undeployPolicy"/>
+        <wsdl:operation name="addDefaultAPIForTenant">
+            <http:operation location="addDefaultAPIForTenant"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -2108,8 +2150,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="addPrototypeApiScriptImpl">
-            <http:operation location="addPrototypeApiScriptImpl"/>
+        <wsdl:operation name="deleteSequenceForTenant">
+            <http:operation location="deleteSequenceForTenant"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -2117,8 +2159,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="deleteSequenceForTenant">
-            <http:operation location="deleteSequenceForTenant"/>
+        <wsdl:operation name="addPrototypeApiScriptImpl">
+            <http:operation location="addPrototypeApiScriptImpl"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -2135,8 +2177,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getApiForTenant">
-            <http:operation location="getApiForTenant"/>
+        <wsdl:operation name="isExistingSequence">
+            <http:operation location="isExistingSequence"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -2144,8 +2186,8 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="isExistingSequence">
-            <http:operation location="isExistingSequence"/>
+        <wsdl:operation name="getApiForTenant">
+            <http:operation location="getApiForTenant"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -2189,15 +2231,6 @@
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="getApi">
-            <http:operation location="getApi"/>
-            <wsdl:input>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="text/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
         <wsdl:operation name="addApiForTenant">
             <http:operation location="addApiForTenant"/>
             <wsdl:input>
@@ -2209,6 +2242,15 @@
         </wsdl:operation>
         <wsdl:operation name="addSequenceForTenant">
             <http:operation location="addSequenceForTenant"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getApi">
+            <http:operation location="getApi"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>
@@ -2236,6 +2278,15 @@
         </wsdl:operation>
         <wsdl:operation name="deleteApi">
             <http:operation location="deleteApi"/>
+            <wsdl:input>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:input>
+            <wsdl:output>
+                <mime:content type="text/xml" part="parameters"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="cleanDeployment">
+            <http:operation location="cleanDeployment"/>
             <wsdl:input>
                 <mime:content type="text/xml" part="parameters"/>
             </wsdl:input>

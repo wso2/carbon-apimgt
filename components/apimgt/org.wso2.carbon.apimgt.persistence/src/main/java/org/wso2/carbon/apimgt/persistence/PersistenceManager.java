@@ -16,10 +16,16 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
-public class PersistenceManager {
+import java.util.Properties;
 
-    public static APIPersistence getPersistenceInstance(String userName) {
-        // TODO add method to configure
-        return new RegistryPersistenceImpl(userName);
+public class PersistenceManager {
+    
+    private static APIPersistence persistence = null;
+
+    public static APIPersistence getPersistenceInstance(Properties properties) {
+        if (persistence == null) {
+            persistence = new RegistryPersistenceImpl(properties);
+        }
+        return persistence;
     }
 }
