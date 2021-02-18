@@ -272,8 +272,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
             }
         } catch (URISyntaxException e) {
-//            String errorMessage = "Error while retrieving comment content location for API " + apiId;
-//            RestApiUtil.handleInternalServerError(errorMessage, e, log);
             throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
         }
         return null;
@@ -444,7 +442,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-//            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
