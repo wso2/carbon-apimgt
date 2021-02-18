@@ -56,7 +56,8 @@ public class CommentMappingUtil {
         commentDTO.setCategory(comment.getCategory());
         commentDTO.setParentCommentId(comment.getParentCommentID());
         commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.DEVPORTAL);
-        commentDTO.setReplies(fromCommentListToDTO(comment.getReplies().toArray(new Comment[comment.getReplies().size()]), 30, 0, false));
+        commentDTO.setReplies(fromCommentListToDTO(comment.getReplies().toArray(
+                new Comment[comment.getReplies().size()]), 30, 0, false));
         return commentDTO;
     }
 

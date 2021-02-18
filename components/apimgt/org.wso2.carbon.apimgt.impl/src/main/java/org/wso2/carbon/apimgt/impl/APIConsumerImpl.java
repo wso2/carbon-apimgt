@@ -3559,7 +3559,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws APIManagementException {
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException {
         return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
     }
 
@@ -3569,7 +3570,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID);
     }
 
-    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException{
+    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+            APIManagementException{
         return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
     }
 
