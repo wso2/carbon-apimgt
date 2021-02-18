@@ -55,7 +55,7 @@ import java.util.Objects;
  */
 public class ServiceEntryMappingUtil {
 
-    private static final Log log = LogFactory.getLog(Md5HashGenerator.class);
+    private static final Log log = LogFactory.getLog(ServiceEntryMappingUtil.class);
 
     /**
      * Converts a single metadata file content into a ServiceEntry model

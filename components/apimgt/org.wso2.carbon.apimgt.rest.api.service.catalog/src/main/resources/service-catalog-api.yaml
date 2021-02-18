@@ -35,7 +35,18 @@ paths:
     get:
       summary: Retrieve/search services
       description: |
-        Retrieve or search services in the service catalog of the user's organization or tenant.
+        Retrieve or search services in the service catalog of the user's organization or tenant. Search is supported
+        using the name, version, definitionType and key of the service.
+        Search based on the definition type and key of the service will always be an exact search. If you want to
+        execute an exact search for either name or version the parameter should be given inside double quotation.
+
+        `Exact search on name`
+            curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22' -H
+            'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'
+
+        `Matching search on name`
+            curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=Pet%20Service' -H
+            'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'
       operationId: searchServices
       security:
         - OAuth2Security:
@@ -100,6 +111,8 @@ paths:
                 $ref: '#/components/schemas/ServiceList'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalServerError'
 
@@ -133,6 +146,8 @@ paths:
                 $ref: '#/components/schemas/Service'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
         500:
@@ -164,6 +179,8 @@ paths:
                 $ref: '#/components/schemas/Service'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -200,6 +217,8 @@ paths:
                 $ref: '#/components/schemas/Service'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -226,6 +245,8 @@ paths:
             Successfully deleted the catalog entry.
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -234,7 +255,7 @@ paths:
   #-----------------------------------------------------
   # Retrieve definition of a service in the service catalog
   #-----------------------------------------------------
-  /services/{serviceKey}/definition:
+  /services/{serviceId}/definition:
     get:
       summary: Retrieve a service definition
       description: |
@@ -246,9 +267,9 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceKey'
+        - $ref: '#/components/parameters/serviceId'
       responses:
-        "200":
+        200:
           description: |
             Successful response with the definition file as entity in the body.
           content:
@@ -258,8 +279,11 @@ paths:
             application/yaml:
               schema:
                 type: string
+                format: binary
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -318,6 +342,8 @@ paths:
               $ref: '#/components/headers/ETag'
         400:
           $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         500:
           $ref: '#/components/responses/InternalServerError'
                 
@@ -366,6 +392,8 @@ paths:
           headers:
             ETag:
               $ref: '#/components/headers/ETag'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -394,6 +422,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Settings'
+        401:
+          $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         500:
@@ -781,6 +811,19 @@ components:
             code: 404
             message: Not Found
             description: The specified resource does not exist
+            moreInfo: ""
+            error: []
+
+    Unauthorized:
+      description: Unauthorized. The user is not authorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Unauthorized
+            description: The user is not authorized
             moreInfo: ""
             error: []
 

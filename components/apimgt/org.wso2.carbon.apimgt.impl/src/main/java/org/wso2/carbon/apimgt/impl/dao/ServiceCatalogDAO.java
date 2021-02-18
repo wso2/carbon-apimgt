@@ -432,17 +432,19 @@ public class ServiceCatalogDAO {
         String whereClauseForExactNameSearch = "AND SERVICE_NAME = ? ";
         String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
         String whereClauseForExactVersionSearch = "AND SERVICE_VERSION = ? ";
-        String whereClauseForVersionSearch = "SERVICE_VERSION LIKE ? ";
+        String whereClauseForVersionSearch = " AND SERVICE_VERSION LIKE ? ";
         String whereClauseWithDefinitionType = " AND DEFINITION_TYPE = ? ";
         String whereClauseWithServiceKey = " AND SERVICE_KEY = ? ";
         if (filterParams.getName().startsWith("\"") && filterParams.getName().endsWith("\"")) {
             exactNameSearch = true;
+            filterParams.setName(filterParams.getName().replace("\"", "").trim());
             querySb.append(whereClauseForExactNameSearch);
         } else {
             querySb.append(whereClauseForNameSearch);
         }
         if (filterParams.getVersion().startsWith("\"") && filterParams.getVersion().endsWith("\"")) {
             exactVersionSearch = true;
+            filterParams.setVersion(filterParams.getVersion().replace("\"", "").trim());
             querySb.append(whereClauseForExactVersionSearch);
         } else {
             querySb.append(whereClauseForVersionSearch);
@@ -464,7 +466,7 @@ public class ServiceCatalogDAO {
         querySb.append("ORDER BY ")
                 .append(filterParams.getSortBy())
                 .append(" " + filterParams.getSortOrder())
-                .append("LIMIT ?, ?");
+                .append(" LIMIT ?, ?");
         query = querySb.toString();
         String[] keyArray = null;
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -482,23 +484,22 @@ public class ServiceCatalogDAO {
                 } else {
                     ps.setString(3, "%" + filterParams.getVersion() + "%");
                 }
-                ps.setString(4, "%" + filterParams.getDisplayName() + "%");
                 if (searchByKey && searchByDefinitionType) {
-                    ps.setString(5, filterParams.getDefinitionType());
-                    ps.setString(6, key);
-                    ps.setInt(7, filterParams.getOffset());
-                    ps.setInt(8, filterParams.getLimit());
-                } else if (searchByKey) {
+                    ps.setString(4, filterParams.getDefinitionType());
                     ps.setString(5, key);
                     ps.setInt(6, filterParams.getOffset());
                     ps.setInt(7, filterParams.getLimit());
-                } else if (searchByDefinitionType) {
-                    ps.setString(5, filterParams.getDefinitionType());
-                    ps.setInt(6, filterParams.getOffset());
-                    ps.setInt(7, filterParams.getLimit());
-                } else {
+                } else if (searchByKey) {
+                    ps.setString(4, key);
                     ps.setInt(5, filterParams.getOffset());
                     ps.setInt(6, filterParams.getLimit());
+                } else if (searchByDefinitionType) {
+                    ps.setString(4, filterParams.getDefinitionType());
+                    ps.setInt(5, filterParams.getOffset());
+                    ps.setInt(6, filterParams.getLimit());
+                } else {
+                    ps.setInt(4, filterParams.getOffset());
+                    ps.setInt(5, filterParams.getLimit());
                 }
                 try (ResultSet resultSet = ps.executeQuery()) {
                     while (resultSet.next()) {
@@ -602,6 +603,8 @@ public class ServiceCatalogDAO {
                         .LAST_UPDATED_TIME));
                 service.setCreatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.CREATED_BY));
                 service.setUpdatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.UPDATED_BY));
+                service.setEndpointDef(resultSet.getBinaryStream(APIConstants.ServiceCatalogConstants
+                        .SERVICE_DEFINITION));
             }
             return service;
         } catch (SQLException e) {
