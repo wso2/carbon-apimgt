@@ -1364,6 +1364,68 @@ public class OAS2Parser extends APIDefinition {
         return getSwaggerJsonString(swagger);
     }
 
+    @Override
+    public String copyVendorExtensions(String existingSwaggerContent, String updatedSwaggerContent)
+            throws APIManagementException {
+
+        Swagger existingSwagger = getSwagger(existingSwaggerContent);
+        Swagger updatedSwagger = getSwagger(updatedSwaggerContent);
+        Map<String, Path> existingPaths = existingSwagger.getPaths();
+        Map<String, Path> updatedPaths = updatedSwagger.getPaths();
+
+        // Merge Security Definitions
+        if (existingSwagger.getSecurityDefinitions() != null) {
+            updatedSwagger.setSecurityDefinitions(existingSwagger.getSecurityDefinitions());
+        }
+
+        // Merge Operation specific vendor extensions
+        for (String pathKey : updatedPaths.keySet()) {
+            Map<HttpMethod, Operation> operationsMap = updatedPaths.get(pathKey).getOperationMap();
+            for (Map.Entry<HttpMethod, Operation> updatedEntry : operationsMap.entrySet()) {
+                if (existingPaths.keySet().contains(pathKey)) {
+                    for (Map.Entry<HttpMethod, Operation> existingEntry : existingPaths.get(pathKey)
+                            .getOperationMap().entrySet()) {
+                        if (updatedEntry.getKey().equals(existingEntry.getKey())) {
+                            boolean extensionsAreEmpty = false;
+                            Map<String, Object> vendorExtensions = updatedEntry.getValue().getVendorExtensions();
+                            Map<String, Object> existingExtensions = existingEntry.getValue().getVendorExtensions();
+                            if (vendorExtensions == null) {
+                                vendorExtensions = new HashMap<>();
+                                extensionsAreEmpty = true;
+                            }
+                            OASParserUtil.copyOperationVendorExtensions(existingExtensions, vendorExtensions);
+                            if (extensionsAreEmpty) {
+                                updatedEntry.getValue().setVendorExtensions(vendorExtensions);
+                            }
+                            List<Map<String, List<String>>> securityRequirements = existingEntry.getValue()
+                                    .getSecurity();
+                            List<Map<String, List<String>>> updatedRequirements = updatedEntry.getValue()
+                                    .getSecurity();
+                            boolean securityRequirementsAreEmpty = false;
+                            if (updatedRequirements == null) {
+                                updatedRequirements = new ArrayList<>();
+                                securityRequirementsAreEmpty = true;
+                            }
+                            if (securityRequirements != null) {
+                                for (Map<String, List<String>> requirement : securityRequirements) {
+                                    List<String> scopes = requirement.get(SWAGGER_SECURITY_SCHEMA_KEY);
+                                    if (scopes != null) {
+                                        updatedRequirements.add(requirement);
+                                    }
+                                }
+                            }
+                            if (securityRequirementsAreEmpty) {
+                                updatedEntry.getValue().setSecurity(updatedRequirements);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return getSwaggerJsonString(updatedSwagger);
+    }
+
     /**
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param swagger swagger definition

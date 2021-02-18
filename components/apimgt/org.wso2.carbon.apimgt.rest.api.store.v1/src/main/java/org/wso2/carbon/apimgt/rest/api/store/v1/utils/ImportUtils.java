@@ -284,6 +284,6 @@ public class ImportUtils {
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
                 apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager());
+                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null);
     }
 }

@@ -31,6 +31,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router';
 import Fade from '@material-ui/core/Fade';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
 
 // Icon size reference https://github.com/mui-org/material-ui/blob/master/packages/material-ui/src/Icon/Icon.js#L48
 const useStyles = makeStyles((theme) => ({
@@ -46,16 +49,22 @@ const useStyles = makeStyles((theme) => ({
  */
 function Banner(props) {
     const {
-        type, message, dense, history, paperProps, disableActions, open, onClose, disableClose,
+        type, message, dense, history, paperProps, disableActions, open, onClose, disableClose, errors,
     } = props;
     const classes = useStyles();
     const [isOpen, setIsOpen] = useState(open);
+    const [show, setShow] = useState(false);
     const iconProps = {};
     if (dense) {
         iconProps.fontSize = 'large';
     } else {
         iconProps.className = classes.xLarge;
     }
+
+    const handleShowClick = () => {
+        // eslint-disable-next-line no-unused-expressions
+        (show === true) ? setShow(false) : setShow(true);
+    };
 
     let bannerIcon = null;
     let { description } = message;
@@ -89,20 +98,35 @@ function Banner(props) {
             bannerIcon = <InfoIcon color='error' {...iconProps} />;
             break;
     }
+
     return (
         <Fade in={isOpen} unmountOnExit>
-            <Box clone pt={dense ? 1 : 2} pr={dense ? 0 : 1} pb={dense ? 0 : 1} pl={dense ? 1 : 2}>
+            <Box clone pt={dense ? 1 : 2} pr={dense ? 1 : 2} pb={dense ? 0 : 1} pl={dense ? 1 : 2}>
                 <Paper {...paperProps}>
-                    <Grid container spacing={2} alignItems='center' wrap='nowrap'>
-                        <Grid item>{bannerIcon}</Grid>
-                        <Grid item>
-                            <Typography variant='subtitle2' display='block' gutterBottom>
-                                {title}
-                                <Typography variant='body1'>{description}</Typography>
-                            </Typography>
-                        </Grid>
-                    </Grid>
-
+                    <Accordion expanded={show}>
+                        <AccordionSummary>
+                            <Grid container spacing={2} alignItems='center' wrap='nowrap'>
+                                <Grid item>{bannerIcon}</Grid>
+                                <Grid item>
+                                    <Typography variant='subtitle2' display='block' gutterBottom>
+                                        {title}
+                                        <Typography variant='body1'>{description}</Typography>
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Grid container spacing={2} alignItems='center' wrap='nowrap'>
+                                <Grid item style={{ paddingLeft: '8.5%' }}>
+                                    <Typography variant='subtitle2' display='block' gutterBottom>
+                                        Identified Errors
+                                        {/* eslint-disable-next-line max-len */}
+                                        {errors.map((error) => <Typography variant='body1'>{error.message}</Typography>)}
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                        </AccordionDetails>
+                    </Accordion>
                     <Grid container justify='flex-end' spacing={1}>
                         <Grid item>
                             {!disableActions && (
@@ -123,6 +147,9 @@ function Banner(props) {
                                     CLOSE
                                 </Button>
                             )}
+                            <Button color='primary' onClick={handleShowClick}>
+                                {show ? 'HIDE ERRORS' : 'SHOW ERRORS'}
+                            </Button>
                         </Grid>
                     </Grid>
                 </Paper>
