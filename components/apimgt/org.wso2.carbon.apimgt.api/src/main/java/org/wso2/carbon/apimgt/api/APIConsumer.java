@@ -235,7 +235,7 @@ public interface APIConsumer extends APIManager {
      */
     Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                String applicationName, String keyType, String tokenType,
-                                               String keyManagerName) throws APIManagementException;
+                                               String keyManagerName,String tenantDomain) throws APIManagementException;
 
     /**
      *This method will delete from application key mapping table and application registration table.
