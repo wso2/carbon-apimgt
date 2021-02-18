@@ -295,7 +295,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
-            return Response.created(uri).entity(commentDTO).build();
+            return Response.ok(uri).entity(commentDTO).build();
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -368,7 +368,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
-            return Response.created(uri).entity(commentDTO).build();
+            return Response.ok(uri).entity(commentDTO).build();
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -405,17 +405,19 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     if (commentEdited){
                         if (apiConsumer.editComment(apiTypeWrapper, commentId, comment)){
-                            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+                            Comment editedComment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+                            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
                             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                                     RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
                             URI uri = new URI(uriString);
-                            return Response.created(uri).entity(commentDTO).build();
+                            return Response.ok(uri).entity(commentDTO).build();
                         }
+                    } else {
+                        return Response.notModified("Not Modified").type(MediaType.APPLICATION_JSON).build();
                     }
                 } else {
-                    // Proper error responses should be added
-                    return null;
+                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
@@ -451,14 +453,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
                         obj.put("message", "The comment has been deleted");
-                        return Response.ok(obj, MediaType.APPLICATION_JSON).build();
+                        return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
                     } else {
-                        // Proper error responses should be added
-                        return null;
+                        return Response.status(405, "Method Not Allowed").type(MediaType.APPLICATION_JSON).build();
                     }
                 } else {
-                    // Proper error responses should be added
-                    return null;
+                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,

@@ -2221,7 +2221,16 @@ public class SQLConstants {
             "   AND ICA.ID = IAT.CONSUMER_KEY_ID";
 
     public static final String ADD_COMMENT_SQL =
-            " INSERT INTO AM_API_COMMENTS (COMMENT_ID,COMMENT_TEXT,CREATED_BY,CREATED_TIME,API_ID,PARENT_COMMENT_ID,ENTRY_POINT,CATEGORY)" +
+            " INSERT INTO " +
+                    "AM_API_COMMENTS " +
+                    "(COMMENT_ID," +
+                    "COMMENT_TEXT," +
+                    "CREATED_BY," +
+                    "CREATED_TIME," +
+                    "API_ID," +
+                    "PARENT_COMMENT_ID," +
+                    "ENTRY_POINT," +
+                    "CATEGORY)" +
             " VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String GET_COMMENT_SQL =
@@ -2287,9 +2296,26 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL";
 
-    public static final String EDIT_COMMENT = "UPDATE AM_API_COMMENTS SET COMMENT_TEXT = ?, UPDATED_TIME = ?, CATEGORY = ? WHERE AM_API_COMMENTS.API_ID = ? AND AM_API_COMMENTS.COMMENT_ID = ?";
+    public static final String EDIT_COMMENT =
+            "UPDATE " +
+                "AM_API_COMMENTS " +
+            "SET " +
+                "COMMENT_TEXT = ?, " +
+                "UPDATED_TIME = ?, " +
+                "CATEGORY = ? " +
+            "WHERE " +
+                "AM_API_COMMENTS.API_ID = ? " +
+                "AND " +
+                "AM_API_COMMENTS.COMMENT_ID = ?";
 
-    public static final String DELETE_COMMENT_SQL = "DELETE FROM AM_API_COMMENTS WHERE AM_API_COMMENTS.API_ID = ? AND AM_API_COMMENTS.COMMENT_ID = ?";
+    public static final String DELETE_COMMENT_SQL =
+            "DELETE " +
+            "FROM " +
+                "AM_API_COMMENTS " +
+            "WHERE " +
+                "AM_API_COMMENTS.API_ID = ? " +
+            "AND " +
+                "AM_API_COMMENTS.COMMENT_ID = ?";
 
     public static final String GET_API_CONTEXT_SQL =
             "SELECT CONTEXT FROM AM_API " + " WHERE CONTEXT= ?";

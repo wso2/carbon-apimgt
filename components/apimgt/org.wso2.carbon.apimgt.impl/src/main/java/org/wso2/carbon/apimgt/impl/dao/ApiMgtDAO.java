@@ -7737,7 +7737,8 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws APIManagementException {
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException {
 
         Comment comment = new Comment();
         Connection connection = null;
@@ -7831,7 +7832,8 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    private Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Connection connection) throws APIManagementException {
+    private Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Connection connection) throws
+            APIManagementException {
         List<Comment> commentList = new ArrayList<Comment>();
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
@@ -7874,11 +7876,14 @@ public class ApiMgtDAO {
                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                 comment.setCategory(resultSet.getString("CATEGORY"));
-                comment.setReplies(Arrays.asList(getComments(apiTypeWrapper, resultSet.getString("COMMENT_ID"),connection)));
+                comment.setReplies(Arrays.asList(getComments(apiTypeWrapper, resultSet.getString("COMMENT_ID"),
+                        connection)));
                 commentList.add(comment);
             }
         } catch (SQLException e) {
             handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, null, resultSet);
         }
         return commentList.toArray(new Comment[commentList.size()]);
     }
@@ -8035,7 +8040,8 @@ public class ApiMgtDAO {
      * @param comment Comment object
      * @throws APIManagementException
      */
-    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException{
+    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+            APIManagementException{
         Connection connection = null;
         PreparedStatement prepStmt = null;
         int id = -1;
