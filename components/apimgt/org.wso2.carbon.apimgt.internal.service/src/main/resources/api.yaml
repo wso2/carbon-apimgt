@@ -1011,9 +1011,21 @@ definitions:
   #-----------------------------------------------------
   webhooksSubscription:
     properties:
-      apiKey:
+      apiUUID:
         type: string
-        description: The API key
+        description: The API UUID
+      apiContext:
+        type: string
+        description: The API context.
+      apiVersion:
+        type: string
+        description: The API version.
+      tenantDomain:
+        type: string
+        description: The tenant domain.
+      tenantId:
+        type: integer
+        description: The tenant id.
       appID:
         type: string
         description: The application ID of the subscription.
@@ -1030,6 +1042,18 @@ definitions:
         type: integer
         format: int64
         description: the expiry time in millis
+      tier:
+        type: string
+        description: the subscription tier.
+      applicationTier:
+        type: string
+        description: the application tier.
+      apiTier:
+        type: string
+        description: the API tier.
+      subscriberName:
+        type: string
+        description: the subscriber name.
 
 
   #---------------------  --------------------------------

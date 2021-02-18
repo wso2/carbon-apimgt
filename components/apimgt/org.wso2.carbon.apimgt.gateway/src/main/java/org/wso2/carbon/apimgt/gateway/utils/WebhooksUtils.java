@@ -47,9 +47,9 @@ import java.util.List;
 /*
 This is the util class for webhooks related operations
  */
-public class WebhooksUtl {
+public class WebhooksUtils {
 
-    private static final Log log = LogFactory.getLog(WebhooksUtl.class);
+    private static final Log log = LogFactory.getLog(WebhooksUtils.class);
 
     /**
      * This method is used to call the eventhub rest API to persist data .
@@ -128,7 +128,7 @@ public class WebhooksUtl {
     public static List<WebhooksDTO> getSubscribersListFromInMemoryMap(MessageContext messageContext)
             throws URISyntaxException {
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
-        String apiKey = WebhooksUtl.generateAPIKey(messageContext, tenantDomain);
+        String apiKey = WebhooksUtils.generateAPIKey(messageContext, tenantDomain);
         String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(APIConstants.TRANSPORT_URL_IN);
         List<NameValuePair> queryParameter = URLEncodedUtils.parse(new URI(urlQueryParams),
@@ -143,5 +143,24 @@ public class WebhooksUtl {
         messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_TOPIC_PROPERTY, topicName);
         return ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
                 .getSubscriptionsList(subscriptionKey, tenantDomain);
+    }
+
+    /**
+     * check if the request is throttled
+     *
+     * @param resourceLevelThrottleKey
+     * @param subscriptionLevelThrottleKey
+     * @param applicationLevelThrottleKey
+     * @return true if request is throttled out
+     */
+    public static boolean isThrottled(String resourceLevelThrottleKey, String subscriptionLevelThrottleKey,
+                                      String applicationLevelThrottleKey) {
+        boolean isApiLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                .isAPIThrottled(resourceLevelThrottleKey);
+        boolean isSubscriptionLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                .isThrottled(subscriptionLevelThrottleKey);
+        boolean isApplicationLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
+                .isThrottled(applicationLevelThrottleKey);
+        return (isApiLevelThrottled || isApplicationLevelThrottled || isSubscriptionLevelThrottled);
     }
 }

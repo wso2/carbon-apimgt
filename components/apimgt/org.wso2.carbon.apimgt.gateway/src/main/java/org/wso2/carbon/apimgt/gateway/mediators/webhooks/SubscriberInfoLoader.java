@@ -19,11 +19,13 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
-import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;
 
@@ -41,6 +43,9 @@ public class SubscriberInfoLoader extends AbstractMediator {
         int index = (Integer) messageContext.getProperty(APIConstants.CLONED_ITERATION_INDEX_PROPERTY);
         WebhooksDTO subscriber = subscribersList.get(index - 1);
         if (subscriber != null) {
+            if (doThrottle(subscriber, messageContext)) {
+                return false;
+            }
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_CALLBACK_PROPERTY, subscriber.getCallbackURL());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_SECRET_PROPERTY, subscriber.getSecret());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_APPLICATION_ID_PROPERTY, subscriber.getAppID());
@@ -49,27 +54,45 @@ public class SubscriberInfoLoader extends AbstractMediator {
     }
 
     private boolean doThrottle(WebhooksDTO subscriber, MessageContext messageContext) {
-        //todo get authenticationContext from WebhooksDTO
-        boolean isThrottled = WebsocketUtil.isThrottled(null, null,
-                null);
+        String applicationLevelTier = subscriber.getApplicationTier();
+        String apiLevelTier = subscriber.getApiTier();
+        String subscriptionLevelTier = subscriber.getTier();
+        String resourceLevelTier = apiLevelTier;
+        String apiVersion = subscriber.getApiVersion();
+        String apiContext = subscriber.getApiContext();
+        String appTenant = subscriber.getTenantDomain();
+        String apiTenant = subscriber.getTenantDomain();
+        String appId = subscriber.getAppID();
+        String authorizedUser;
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(subscriber.getTenantDomain())) {
+            authorizedUser = subscriber.getSubscriberName() + "@" + subscriber.getTenantDomain();
+        } else {
+            authorizedUser = subscriber.getSubscriberName();
+        }
+        String applicationLevelThrottleKey = appId + ":" + authorizedUser;
+        String apiLevelThrottleKey = apiContext + ":" + apiVersion;
+        String resourceLevelThrottleKey = apiLevelThrottleKey;
+        String subscriptionLevelThrottleKey = appId + ":" + apiContext + ":" + apiVersion;
+        AuthenticationContext authContext = new AuthenticationContext();
+        boolean isThrottled = WebhooksUtils.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
+                applicationLevelThrottleKey);
         if (isThrottled) {
             if (APIUtil.isAnalyticsEnabled()) {
-               //dataCollector.collectData();
+                //dataCollector.collectData();
             }
-            return false;
-        }
-        Object[] objects =
-                new Object[] { null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                        null, null, null};
-        org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(
-                "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null, null, objects);
-        if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
-            log.error("Cannot publish events to traffic manager because ThrottleDataPublisher "
-                    + "has not been initialised");
             return true;
         }
-        ServiceReferenceHolder.getInstance().getThrottleDataPublisher().getDataPublisher().tryPublish(event);
+        ServiceReferenceHolder.getInstance().getThrottleDataPublisher().
+                publishNonThrottledEvent(applicationLevelThrottleKey,
+                        applicationLevelTier, apiLevelThrottleKey, apiLevelTier,
+                        subscriptionLevelThrottleKey, subscriptionLevelTier,
+                        resourceLevelThrottleKey, resourceLevelTier,
+                        authorizedUser, apiContext,
+                        apiVersion, appTenant, apiTenant,
+                        appId,
+                        messageContext, authContext);
         //dataCollector.collectData();
-        return true;
+        return false;
     }
+
 }
