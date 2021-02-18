@@ -3988,7 +3988,8 @@ public class SQLConstants {
                 "   CREATED_TIME," +
                 "   LAST_UPDATED_TIME," +
                 "   CREATED_BY," +
-                "   UPDATED_BY" +
+                "   UPDATED_BY," +
+                "   SERVICE_DEFINITION" +
                 "   FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "   AND TENANT_ID = ?";
     }

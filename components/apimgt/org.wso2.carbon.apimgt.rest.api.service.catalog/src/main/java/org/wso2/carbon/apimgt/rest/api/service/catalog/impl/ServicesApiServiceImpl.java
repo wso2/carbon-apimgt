@@ -142,12 +142,36 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     }
 
     public Response getServiceDefinition(String serviceId, MessageContext messageContext) {
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        String user = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(user);
+        String contentType = StringUtils.EMPTY;
+        try {
+            ServiceEntry service = serviceCatalog.getServiceByUUID(serviceId, tenantId);
+            if (ServiceDTO.DefinitionTypeEnum.OAS3.equals(ServiceDTO.DefinitionTypeEnum.fromValue(service
+                    .getDefinitionType().name())) || ServiceDTO.DefinitionTypeEnum.OAS2.equals(ServiceDTO
+                    .DefinitionTypeEnum.fromValue(service.getDefinitionType().name())) || ServiceDTO.DefinitionTypeEnum
+                    .ASYNC_API.equals(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType().name()))) {
+                contentType = "application/yaml";
+            }
+            InputStream serviceDefinition = service.getEndpointDef();
+            if (serviceDefinition == null) {
+                RestApiUtil.handleResourceNotFoundError("Service definition not found for service with ID: "
+                        + serviceId, log);
+            } else {
+                return Response.ok(serviceDefinition).type(contentType).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the definition" +
+                        " of service with ID: " + serviceId, e, log);
+            } else{
+                RestApiUtil.handleInternalServerError("Error when retrieving the endpoint definition of service " +
+                        "with id " + serviceId, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -264,5 +288,10 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             }
         }
         return validationResults;
+    }
+
+    private boolean isAuthorizationFailure(Exception e) {
+        String errorMessage = e.getMessage();
+        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }
