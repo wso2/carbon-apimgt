@@ -25,6 +25,8 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategories;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 
 /**
  * Classify faulty codes
@@ -52,25 +54,59 @@ public class FaultCodeClassifier {
     }
 
     private FaultSubCategory getAuthFaultSubCategory(int errorCode) {
-        return FaultSubCategories.Authentication.INVALID_TOKEN;
+        switch (errorCode) {
+        case APISecurityConstants.API_AUTH_GENERAL_ERROR:
+        case APISecurityConstants.API_AUTH_INVALID_CREDENTIALS:
+        case APISecurityConstants.API_AUTH_MISSING_CREDENTIALS:
+        case APISecurityConstants.API_AUTH_ACCESS_TOKEN_EXPIRED:
+        case APISecurityConstants.API_AUTH_ACCESS_TOKEN_INACTIVE:
+            return FaultSubCategories.Authentication.AUTHENTICATION_FAILURE;
+        case APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
+        case APISecurityConstants.INVALID_SCOPE:
+            return FaultSubCategories.Authentication.AUTHORIZATION_FAILURE;
+        case APISecurityConstants.API_BLOCKED:
+        case APISecurityConstants.API_AUTH_FORBIDDEN:
+        case APISecurityConstants.SUBSCRIPTION_INACTIVE:
+            return FaultSubCategories.Authentication.SUBSCRIPTION_VALIDATION_FAILURE;
+        default:
+            return FaultSubCategories.TargetConnectivity.OTHER;
+        }
     }
 
     private FaultSubCategory getTargetFaultSubCategory(int errorCode) {
-        if (errorCode == 101504 || errorCode == 101508) {
+        switch (errorCode) {
+        case SynapseConstants.NHTTP_CONNECTION_TIMEOUT:
+        case SynapseConstants.NHTTP_CONNECT_TIMEOUT:
             return FaultSubCategories.TargetConnectivity.CONNECTION_TIMEOUT;
-        } else if (errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE) {
+        case Constants.ENDPOINT_SUSPENDED_ERROR_CODE:
             return FaultSubCategories.TargetConnectivity.CONNECTION_SUSPENDED;
-        } else {
+        default:
             return FaultSubCategories.TargetConnectivity.OTHER;
         }
     }
 
     private FaultSubCategory getThrottledFaultSubCategory(int errorCode) {
         switch (errorCode) {
-        case 900803:
-            return FaultSubCategories.Throttling.APPLICATION;
-        case 900804:
-            return FaultSubCategories.Throttling.SUBSCRIPTION;
+        case APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE:
+            return FaultSubCategories.Throttling.API_LEVEL_LIMIT_EXCEEDED;
+        case APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE:
+            return FaultSubCategories.Throttling.HARD_LIMIT_EXCEEDED;
+        case APIThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE:
+            return FaultSubCategories.Throttling.RESOURCE_LEVEL_LIMIT_EXCEEDED;
+        case APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE:
+            return FaultSubCategories.Throttling.APPLICATION_LEVEL_LIMIT_EXCEEDED;
+        case APIThrottleConstants.SUBSCRIPTION_THROTTLE_OUT_ERROR_CODE:
+            return FaultSubCategories.Throttling.SUBSCRIPTION_LIMIT_EXCEEDED;
+        case APIThrottleConstants.BLOCKED_ERROR_CODE:
+            return FaultSubCategories.Throttling.BLOCKED;
+        case APIThrottleConstants.CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE:
+            return FaultSubCategories.Throttling.CUSTOM_POLICY_LIMIT_EXCEEDED;
+        case APIThrottleConstants.SUBSCRIPTION_BURST_THROTTLE_OUT_ERROR_CODE:
+            return FaultSubCategories.Throttling.BURST_CONTROL_LIMIT_EXCEEDED;
+        case APIThrottleConstants.GRAPHQL_QUERY_TOO_DEEP:
+            return FaultSubCategories.Throttling.QUERY_TOO_DEEP;
+        case APIThrottleConstants.GRAPHQL_QUERY_TOO_COMPLEX:
+            return FaultSubCategories.Throttling.QUERY_TOO_COMPLEX;
         default:
             return FaultSubCategories.Throttling.OTHER;
         }
@@ -82,7 +118,7 @@ public class FaultCodeClassifier {
         } else if (isResourceNotFound()) {
             return FaultSubCategories.Other.RESOURCE_NOT_FOUND;
         } else {
-            return FaultSubCategories.Other.OTHER;
+            return FaultSubCategories.Other.UNCLASSIFIED;
         }
     }
 

@@ -25,27 +25,45 @@ public class FaultSubCategories {
      * Enum for sub categories of other category
      */
     public enum Other implements FaultSubCategory {
-        MEDIATION_ERROR, RESOURCE_NOT_FOUND, METHOD_NOT_ALLOWED, OTHER
+        MEDIATION_ERROR,
+        RESOURCE_NOT_FOUND,
+        METHOD_NOT_ALLOWED,
+        UNCLASSIFIED
     }
 
     /**
      * Enum for sub categories of Throttling category
      */
     public enum Throttling implements FaultSubCategory {
-        API, APPLICATION, BACKEND, SUBSCRIPTION, BLOCKING, QUERY_DEPTH, QUERY_COMPLEXITY, OTHER
+        API_LEVEL_LIMIT_EXCEEDED,
+        HARD_LIMIT_EXCEEDED,
+        RESOURCE_LEVEL_LIMIT_EXCEEDED,
+        APPLICATION_LEVEL_LIMIT_EXCEEDED,
+        SUBSCRIPTION_LIMIT_EXCEEDED,
+        BLOCKED,
+        CUSTOM_POLICY_LIMIT_EXCEEDED,
+        BURST_CONTROL_LIMIT_EXCEEDED,
+        QUERY_TOO_DEEP,
+        QUERY_TOO_COMPLEX,
+        OTHER
     }
 
     /**
      * Enum for sub categories of TargetConnectivity category
      */
     public enum TargetConnectivity implements FaultSubCategory {
-        CONNECTION_TIMEOUT, CONNECTION_SUSPENDED, OTHER
+        CONNECTION_TIMEOUT,
+        CONNECTION_SUSPENDED,
+        OTHER
     }
 
     /**
      * Enum for sub categories of Authentication category
      */
     public enum Authentication implements FaultSubCategory {
-        INVALID_TOKEN
+        AUTHENTICATION_FAILURE,
+        AUTHORIZATION_FAILURE,
+        SUBSCRIPTION_VALIDATION_FAILURE,
+        OTHER
     }
 }

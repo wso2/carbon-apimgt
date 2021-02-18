@@ -25,8 +25,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 public class Error {
 
     private int errorCode;
-    private String errorMessage;
-    private FaultSubCategory subCategory;
+    private FaultSubCategory errorMessage;
 
     public int getErrorCode() {
         return errorCode;
@@ -36,19 +35,11 @@ public class Error {
         this.errorCode = errorCode;
     }
 
-    public String getErrorMessage() {
+    public FaultSubCategory getErrorMessage() {
         return errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage) {
+    public void setErrorMessage(FaultSubCategory errorMessage) {
         this.errorMessage = errorMessage;
-    }
-
-    public FaultSubCategory getSubCategory() {
-        return subCategory;
-    }
-
-    public void setSubCategory(FaultSubCategory subCategory) {
-        this.subCategory = subCategory;
     }
 }

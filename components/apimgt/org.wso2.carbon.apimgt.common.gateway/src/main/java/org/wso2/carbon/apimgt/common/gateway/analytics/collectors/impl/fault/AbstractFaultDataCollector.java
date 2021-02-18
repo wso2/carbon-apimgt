@@ -46,8 +46,8 @@ public abstract class AbstractFaultDataCollector extends CommonRequestDataCollec
 
     protected final void processRequest(Event faultyEvent) throws InvalidCategoryException {
         Error error = provider.getError(this.subType);
-        if (!isValidSubCategory(error.getSubCategory())) {
-            throw new InvalidCategoryException(this.subType, faultyEvent.getError().getSubCategory().toString());
+        if (!isValidSubCategory(error.getErrorMessage())) {
+            throw new InvalidCategoryException(this.subType, faultyEvent.getError().getErrorMessage().toString());
         }
         faultyEvent.setErrorType(this.subType.name());
         faultyEvent.setError(error);

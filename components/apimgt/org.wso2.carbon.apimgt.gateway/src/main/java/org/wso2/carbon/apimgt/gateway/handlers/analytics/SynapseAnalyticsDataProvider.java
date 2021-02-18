@@ -17,14 +17,12 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
@@ -230,13 +228,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public Error getError(FaultCategory faultCategory) {
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-        String errorMessage = (String) messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
         FaultCodeClassifier faultCodeClassifier = new FaultCodeClassifier(messageContext);
         FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory, errorCode);
         Error error = new Error();
         error.setErrorCode(errorCode);
-        error.setErrorMessage(errorMessage);
-        error.setSubCategory(faultSubCategory);
+        error.setErrorMessage(faultSubCategory);
         return error;
     }
 
