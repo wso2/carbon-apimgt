@@ -135,7 +135,7 @@
                             org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.*,
                             org.osgi.framework.*;version="${imp.package.version.osgi.framework}",
-                            org.osgi.service.*;version="${imp.package.version.osgi.service}",					
+                            org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
@@ -147,7 +147,14 @@
                     </instructions>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 </project>
