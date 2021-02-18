@@ -255,7 +255,7 @@ export default function ListSubscriptionThrottlingPolicies() {
                         timeUnit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitTimeUnit,
                         policyId: obj.policyId,
                     };
-                } else {
+                } else if (obj.defaultLimit.bandwidth !== null) {
                     return {
                         policyName: obj.policyName,
                         quotaPolicy: 'Bandwidth Volume',
@@ -263,6 +263,17 @@ export default function ListSubscriptionThrottlingPolicies() {
                         + obj.defaultLimit.bandwidth.dataUnit,
                         unitTime: obj.defaultLimit.bandwidth.unitTime + ' '
                         + obj.defaultLimit.bandwidth.timeUnit,
+                        rateLimit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitCount,
+                        timeUnit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitTimeUnit,
+                        policyId: obj.policyId,
+                    };
+                } else {
+                    return {
+                        policyName: obj.policyName,
+                        quotaPolicy: 'Event Count',
+                        quota: obj.defaultLimit.eventCount.eventCount,
+                        unitTime: obj.defaultLimit.eventCount.unitTime + ' '
+                        + obj.defaultLimit.eventCount.timeUnit,
                         rateLimit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitCount,
                         timeUnit: (obj.rateLimitCount === 0) ? 'NA' : obj.rateLimitTimeUnit,
                         policyId: obj.policyId,
