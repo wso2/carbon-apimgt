@@ -17,11 +17,9 @@
  */
 package org.wso2.carbon.apimgt.keymgt.model.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -108,113 +106,20 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     @Override
     public Application getApplicationById(int appId) {
 
-        String synchronizeKey = "SubscriptionDataStoreImpl-Application-" + appId;
-        Application application = applicationMap.get(appId);
-        if (application == null) {
-            synchronized (synchronizeKey.intern()) {
-                application = applicationMap.get(appId);
-                if (application != null) {
-                    return application;
-                }
-            }
-            try {
-                application = new SubscriptionDataLoaderImpl().getApplicationById(appId);
-            } catch (DataLoadingException e) {
-                log.error("Error while Retrieving Application Metadata From Internal API.", e);
-            }
-            if (application != null && application.getId() != null && application.getId() != 0) {
-                // load to the memory
-                log.debug("Loading Application to the in-memory datastore. applicationId = " + application.getId());
-                addOrUpdateApplication(application);
-            } else {
-                log.debug("Application not found. applicationId = " + application.getId());
-            }
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieving Application information with Application Id : " + appId);
-            if (application != null) {
-                log.debug("Retrieved Application :" + application.toString());
-            } else {
-                log.debug("Retrieved Application information with Application Id : " + appId + " is empty");
-            }
-        }
-        return application;
+        return applicationMap.get(appId);
     }
 
-    @Override public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
-        ApplicationKeyMappingCacheKey applicationKeyMappingCacheKey = new ApplicationKeyMappingCacheKey(key,
-                keyManager);
-        String synchronizeKey = "SubscriptionDataStoreImpl-KeyMapping-" + applicationKeyMappingCacheKey;
+    @Override
+    public ApplicationKeyMapping getKeyMappingByKeyAndKeyManager(String key, String keyManager) {
 
-        ApplicationKeyMapping applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
-        if (applicationKeyMapping == null) {
-            synchronized (synchronizeKey.intern()) {
-                applicationKeyMapping = applicationKeyMappingMap.get(applicationKeyMappingCacheKey);
-                if (applicationKeyMapping != null) {
-                    return applicationKeyMapping;
-                }
-                try {
-                    applicationKeyMapping = new SubscriptionDataLoaderImpl().getKeyMapping(key, keyManager);
-                } catch (DataLoadingException e) {
-                    log.error("Error while Loading KeyMapping Information from Internal API.", e);
-                }
-                if (applicationKeyMapping != null && !StringUtils.isEmpty(applicationKeyMapping.getConsumerKey())) {
-                    // load to the memory
-                    log.debug("Loading Keymapping to the in-memory datastore.");
-                    addOrUpdateApplicationKeyMapping(applicationKeyMapping);
-                }
-            }
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : "
-                    + keyManager);
-            if (applicationKeyMapping != null) {
-                log.debug("Retrieved Application information with Consumer Key : " + key + " and keymanager : "
-                        + keyManager + " is " + applicationKeyMapping.toString());
-            } else {
-                log.debug("Retrieving Application information with Consumer Key : " + key + " and keymanager : "
-                        + keyManager + " is empty");
-            }
-        }
-        return applicationKeyMapping;
+        return applicationKeyMappingMap.get(new ApplicationKeyMappingCacheKey(key, keyManager));
     }
 
     @Override
     public API getApiByContextAndVersion(String context, String version) {
+
         String key = context + DELEM_PERIOD + version;
-        String synchronizeKey = "SubscriptionDataStoreImpl-API-" + key;
-        API api = apiMap.get(key);
-        if (api == null) {
-            synchronized (synchronizeKey.intern()) {
-                api = apiMap.get(key);
-                if (api != null) {
-                    return api;
-                }
-                try {
-                    api = new SubscriptionDataLoaderImpl().getApi(context, version);
-                } catch (DataLoadingException e) {
-                    log.error("Error while Retrieving Data From Internal Rest API", e);
-                }
-                if (api != null && api.getApiId() != 0) {
-                    // load to the memory
-                    log.debug("Loading API to the in-memory datastore.");
-                    addOrUpdateAPI(api);
-                }
-            }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieving API information with Context " + context + " and Version : " + version);
-            if (api != null) {
-                log.debug("Retrieved API information with Context  : " + context + " and Version : " + version + " is"
-                        + " " + api.toString());
-            } else {
-                log.debug("Retrieved API information with Context  : " + context + " and Version : " + version + " is"
-                        + " empty");
-            }
-        }
-        return api;
+        return apiMap.get(key);
     }
 
     @Override
@@ -235,39 +140,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public Subscription getSubscriptionById(int appId, int apiId) {
-        String subscriptionCacheKey = SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId);
-        String synchronizeKey = "SubscriptionDataStoreImpl-Subscription-" + subscriptionCacheKey;
-        Subscription subscription = subscriptionMap.get(subscriptionCacheKey);
-        if (subscription == null) {
-            synchronized (synchronizeKey.intern()) {
-                subscription = subscriptionMap.get(subscriptionCacheKey);
-                if (subscription != null) {
-                    return subscription;
-                }
-                try {
-                    subscription = new SubscriptionDataLoaderImpl()
-                            .getSubscriptionById(Integer.toString(apiId), Integer.toString(appId));
-                } catch (DataLoadingException e) {
-                    log.error("Error while Retrieving Subscription Data From Internal API", e);
-                }
-                if (subscription != null && !StringUtils.isEmpty(subscription.getSubscriptionId())) {
-                    // load to the memory
-                    log.debug("Loading Subscription to the in-memory datastore.");
-                    subscriptionMap.put(subscription.getCacheKey(), subscription);
-                }
-            }
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieving API Subscription with Application " + appId + " and APIId : " + apiId);
-            if (subscription != null) {
-                log.debug("Retrieved API Subscription with Application " + appId + " and APIId : " + apiId + " is "
-                        + subscription.toString());
-            } else {
-                log.debug("Retrieved API Subscription with Application " + appId + " and APIId : " + apiId + " is "
-                        + "empty.");
-            }
-        }
-        return subscription;
+
+        return subscriptionMap.get(SubscriptionDataStoreUtil.getSubscriptionCacheKey(appId, apiId));
     }
 
     @Override
@@ -503,32 +377,19 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
     @Override
     public void addOrUpdateSubscription(Subscription subscription) {
+
         synchronized (subscriptionMap) {
             Subscription retrievedSubscription = subscriptionMap.get(subscription.getCacheKey());
             if (retrievedSubscription == null) {
                 subscriptionMap.put(subscription.getCacheKey(), subscription);
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Retrieved Subscription from Map :" + retrievedSubscription.toString());
-                }
                 if (subscription.getTimeStamp() < retrievedSubscription.getTimeStamp()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Drop the Event " + subscription.toString() + " since the event timestamp was old");
                     }
                 } else {
-                    if (!APIConstants.SubscriptionStatus.ON_HOLD.equals(subscription.getSubscriptionState())) {
-                        subscriptionMap.put(subscription.getCacheKey(), subscription);
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Drop the Event " + subscription.toString() + " since the event was marked as " +
-                                    "ON_HOLD");
-                        }
-                    }
+                    subscriptionMap.put(subscription.getCacheKey(), subscription);
                 }
-            }
-            if (log.isDebugEnabled()) {
-                Subscription updatedSubscription = subscriptionMap.get(subscription.getCacheKey());
-                log.debug("Updated Subscription From map :" + updatedSubscription.toString());
             }
         }
     }
