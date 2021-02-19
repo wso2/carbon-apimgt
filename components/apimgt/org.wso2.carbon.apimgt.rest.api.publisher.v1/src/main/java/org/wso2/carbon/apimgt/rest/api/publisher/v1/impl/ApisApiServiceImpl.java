@@ -319,6 +319,45 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
 
+    @Override
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext
+            messageContext) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws
+            APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
+                                     MessageContext messageContext) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean
+            includeCommenterInfo, MessageContext messageContext) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean
+            includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws
+            APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer
+            offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws
+            APIManagementException{
+        return null;
+    }
+
+
     /**
      * Get complexity details of a given API
      *
