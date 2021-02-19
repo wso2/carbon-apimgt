@@ -127,41 +127,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStor
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CertificateInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -310,6 +276,45 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider);
         return Response.ok().entity(apiToReturn).build();
     }
+
+    @Override
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext
+            messageContext) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws
+            APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
+                                     MessageContext messageContext) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean
+            includeCommenterInfo, MessageContext messageContext) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean
+            includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws
+            APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer
+            offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws
+            APIManagementException{
+        return null;
+    }
+
 
     /**
      * Get complexity details of a given API
