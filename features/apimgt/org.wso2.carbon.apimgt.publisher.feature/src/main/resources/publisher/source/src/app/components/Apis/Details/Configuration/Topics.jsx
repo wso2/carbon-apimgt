@@ -299,7 +299,7 @@ class Topics extends Component {
             asyncAPI.channelNames().forEach((name) => {
                 const channel = asyncAPI.channel(name);
                 if (topic.name === name) {
-                    if (channel.hasPublish() && topic.mode === 'PUBLISH') {
+                    /* if (channel.hasPublish() && topic.mode === 'PUBLISH') {
                         let pubMessage = null;
                         if (!channel.publish().hasMultipleMessages()) {
                             pubMessage = channel.publish().message();
@@ -359,8 +359,8 @@ class Topics extends Component {
                                 }
                             }
                         }
-                    }
-                    if (channel.hasSubscribe() && topic.mode === 'SUBSCRIBE') {
+                    } */
+                    if (channel.hasSubscribe()) {
                         let subMessage = null;
                         if (!channel.subscribe().hasMultipleMessages()) {
                             subMessage = channel.subscribe().message();
@@ -652,7 +652,7 @@ class Topics extends Component {
         asyncAPI.channelNames().forEach((name) => {
             const channel = asyncAPI.channel(name);
             if (name === topic.name) {
-                if (topic.mode === 'SUBSCRIBE') {
+                /* if (topic.mode === 'SUBSCRIBE') {
                     if (channel.hasSubscribe()) {
                         if (!channel.subscribe().hasMultipleMessages()) {
                             if (channel.subscribe().message() !== null) {
@@ -677,6 +677,18 @@ class Topics extends Component {
                             if (channel.publish().messages()[0] !== null) {
                                 schema = channel.publish().messages()[0].payload();
                             }
+                        }
+                    }
+                } */
+                if (channel.hasSubscribe()) {
+                    if (!channel.subscribe().hasMultipleMessages()) {
+                        if (channel.subscribe().message() !== null) {
+                            schema = channel.subscribe().message().payload();
+                        }
+                    } else {
+                        // eslint-disable-next-line no-lonely-if
+                        if (channel.subscribe().messages()[0] !== null) {
+                            schema = channel.subscribe().messages()[0].payload();
                         }
                     }
                 }

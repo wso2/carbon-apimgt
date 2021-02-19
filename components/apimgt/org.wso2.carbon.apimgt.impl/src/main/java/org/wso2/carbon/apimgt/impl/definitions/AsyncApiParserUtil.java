@@ -206,7 +206,7 @@ public class AsyncApiParserUtil {
         AaiDocument definition = (AaiDocument) Library.readDocumentFromJSONString(definitionJSON);
         if (definition.getChannels().size() > 0) {
             for (String topic : definition.channels.keySet()) {
-                if (definition.channels.get(topic).publish != null && definition.channels.get(topic).subscribe != null) {
+                /*if (definition.channels.get(topic).publish != null && definition.channels.get(topic).subscribe != null) {
                     URITemplate uriTemplateSub = new URITemplate();
                     uriTemplateSub.setUriTemplate(topic);
                     uriTemplateSub.setHTTPVerb("SUBSCRIBE");
@@ -227,6 +227,15 @@ public class AsyncApiParserUtil {
                     uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                     uriTemplates.add(uriTemplate);
                 } else if (definition.channels.get(topic).subscribe != null) {
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setUriTemplate(topic);
+                    uriTemplate.setHTTPVerb("SUBSCRIBE");
+                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
+                    uriTemplates.add(uriTemplate);
+                }*/
+
+                if (definition.channels.get(topic).subscribe != null) {
                     URITemplate uriTemplate = new URITemplate();
                     uriTemplate.setUriTemplate(topic);
                     uriTemplate.setHTTPVerb("SUBSCRIBE");
