@@ -72,22 +72,11 @@ import org.wso2.carbon.apimgt.api.ServiceCatalog;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -99,8 +88,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -122,7 +109,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
@@ -167,9 +153,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -322,24 +307,71 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo, MessageContext
             messageContext) throws APIManagementException{
-        return null;
-    }
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            Comment comment = new Comment();
+            comment.setText(postRequestBodyDTO.getContent());
+            comment.setCategory(postRequestBodyDTO.getCategory());
+            comment.setParentCommentID(replyTo);
+            comment.setEntryPoint("publisher");
+            comment.setUser(username);
+            comment.setApiId(apiId);
+            String createdCommentId = apiConsumer.addComment(identifier, comment, username);
+            Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
+            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
-    @Override
-    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws
-            APIManagementException{
-        return null;
-    }
-
-    @Override
-    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
-                                     MessageContext messageContext) throws APIManagementException{
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + createdCommentId;
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(commentDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
+        }
         return null;
     }
 
     @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset, Boolean
             includeCommenterInfo, MessageContext messageContext) throws APIManagementException{
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            String parentCommentID = null;
+            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
+                    includeCommenterInfo);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            URI uri = new URI(uriString);
+            return Response.ok(uri).entity(commentDTO).build();
+
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comments content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
@@ -347,6 +379,42 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean
             includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws
             APIManagementException{
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+
+            if (comment != null) {
+                CommentDTO commentDTO;
+                if (includeCommenterInfo) {
+                    Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil
+                            .retrieveUserClaims(comment.getUser(), new HashMap<>());
+                    commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
+                } else {
+                    commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+                }
+                String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                        RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                URI uri = new URI(uriString);
+                return Response.ok(uri).entity(commentDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving comment for API : " + apiId + "with comment ID " + commentId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
@@ -354,9 +422,124 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer
             offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws
             APIManagementException{
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, commentId);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
+                    includeCommenterInfo);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            URI uri = new URI(uriString);
+            return Response.ok(uri).entity(commentDTO).build();
+
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comments content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
         return null;
     }
 
+    @Override
+    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
+                                     MessageContext messageContext) throws APIManagementException{
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                if ( comment.getUser().equals(username)) {
+                    boolean commentEdited = false;
+                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment.getCategory()))){
+                        comment.setCategory(patchRequestBodyDTO.getCategory());
+                        commentEdited = true;
+                    }
+                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment.getText()))){
+                        comment.setText(patchRequestBodyDTO.getContent());
+                        commentEdited = true;
+                    }
+                    if (commentEdited){
+                        if (apiConsumer.editComment(apiTypeWrapper, commentId, comment)){
+                            Comment editedComment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+                            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
+
+                            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                            URI uri = new URI(uriString);
+                            return Response.ok(uri).entity(commentDTO).build();
+                        }
+                    } else {
+                        return Response.notModified("Not Modified").type(MediaType.APPLICATION_JSON).build();
+                    }
+                } else {
+                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws
+            APIManagementException{
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+                if ( Arrays.asList(tokenScopes).contains("apim:app_import_export")|| comment.getUser().equals(username)) {
+                    if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("id", commentId);
+                        obj.put("message", "The comment has been deleted");
+                        return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
+                    } else {
+                        return Response.status(405, "Method Not Allowed").type(MediaType.APPLICATION_JSON).build();
+                    }
+                } else {
+                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while deleting comment " + commentId + "for API " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
 
     /**
      * Get complexity details of a given API
