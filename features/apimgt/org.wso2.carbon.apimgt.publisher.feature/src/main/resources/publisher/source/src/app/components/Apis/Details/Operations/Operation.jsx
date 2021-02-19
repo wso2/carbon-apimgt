@@ -31,7 +31,6 @@ import TextField from '@material-ui/core/TextField';
 import { Typography } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
 
-
 const styles = (theme) => ({
     root: {
         flexGrow: 1,

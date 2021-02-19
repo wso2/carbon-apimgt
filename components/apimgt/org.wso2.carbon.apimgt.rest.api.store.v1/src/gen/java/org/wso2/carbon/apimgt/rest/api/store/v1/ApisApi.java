@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApisApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -291,6 +292,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
     public Response apisApiIdThumbnailGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
         return delegate.apisApiIdThumbnailGet(apiId, xWSO2Tenant, ifNoneMatch, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/topics")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get a list of available topics for a given async API ", notes = "This operation will provide a list of topics available for a given Async API, based on the provided API ID. ", response = TopicListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Topics",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Topic list returned. ", response = TopicListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response apisApiIdTopicsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.apisApiIdTopicsGet(apiId, xWSO2Tenant, securityContext);
     }
 
     @DELETE

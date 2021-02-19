@@ -37,6 +37,9 @@ import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import Subscription from 'AppData/Subscription';
 import Invoice from './Invoice';
+import { mdiOpenInNew } from '@mdi/js';
+import {Icon as MDIcon} from '@mdi/react';
+import AddToHomeScreenIcon from '@material-ui/icons/AddToHomeScreen';
 
 /**
  *
@@ -224,12 +227,16 @@ class SubscriptionTableData extends React.Component {
     render() {
         const {
             subscription: {
-                apiInfo, status, throttlingPolicy, subscriptionId, apiId, requestedThrottlingPolicy
+                apiInfo, status, throttlingPolicy, subscriptionId, apiId, requestedThrottlingPolicy, applicationId
             },
         } = this.props;
-        const { openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier } = this.state;
-        const link = <Link to={'/apis/' + apiId}>{apiInfo.name + ' - ' + apiInfo.version}</Link>;
-
+        const {openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier} = this.state;
+        let link = <Link to={'/apis/' + apiId} external>{apiInfo.name + ' - ' + apiInfo.version + ' '}
+            <MDIcon path={mdiOpenInNew} size='12px'/></Link>;
+        if (apiInfo.type === 'WEBSUB') {
+            link = <Link
+                to={'/applications/' + applicationId + '/webhooks/' + apiId}>{apiInfo.name + ' - ' + apiInfo.version}</Link>;
+        }
         return (
             <TableRow hover>
                 <TableCell>
@@ -257,8 +264,8 @@ class SubscriptionTableData extends React.Component {
                             <DialogContent>
                                 <DialogContentText>
                                     <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.update.throttling.policy'
-                                        defaultMessage='Current Subscription Tier : '
+                                        id='Applications.Details.SubscriptionTableData.update.business.plan'
+                                        defaultMessage='Current Business Plan : '
                                     />
                                         {throttlingPolicy}
                                     <div>
@@ -292,8 +299,8 @@ class SubscriptionTableData extends React.Component {
                                                         select
                                                         label={(
                                                             <FormattedMessage
-                                                                defaultMessage='Throttling Tier'
-                                                                id='Applications.Details.SubscriptionTableData.update.throttling.policy.name'
+                                                                defaultMessage='Business Plan'
+                                                                id='Applications.Details.SubscriptionTableData.update.business.plan.name'
                                                             />
                                                         )}
                                                         value={selectedTier}
@@ -301,7 +308,7 @@ class SubscriptionTableData extends React.Component {
                                                         onChange={e => this.setSelectedTier(e.target.value)}
                                                         helperText={(
                                                             <FormattedMessage
-                                                                defaultMessage={`Assign a new Throttling policy tier to the existing subscription`}
+                                                                defaultMessage={`Assign a new Business plan to the existing subscription`}
                                                                 id='Applications.Details.SubscriptionTableData.update.throttling.policy.helper'
                                                             />
                                                         )}

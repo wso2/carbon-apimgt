@@ -16,7 +16,6 @@
  *  under the License.
  */
 
-
 /**
  * Capitalize the first letter of a string
  * @param {string} string string to be formatted

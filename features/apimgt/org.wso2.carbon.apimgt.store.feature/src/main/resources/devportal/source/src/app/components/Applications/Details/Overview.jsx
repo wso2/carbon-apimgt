@@ -150,8 +150,8 @@ function Overview(props) {
                                             <span className={classes.iconTextWrapper}>
                                                 <Typography variant='caption' gutterBottom align='left'>
                                                     <FormattedMessage
-                                                        id='Applications.Details.InfoBar.throttling.tier'
-                                                        defaultMessage='Throttling Tier'
+                                                        id='Applications.Details.InfoBar.business.plan'
+                                                        defaultMessage='Business Plan'
                                                     />
                                                 </Typography>
                                             </span>
@@ -167,24 +167,6 @@ function Overview(props) {
                                         )}
                                 </TableRow>
                             )}
-                        <TableRow>
-                            <TableCell component='th' scope='row' className={classes.leftCol}>
-                                <div className={classes.iconAligner}>
-                                    <Icon className={classes.iconEven}>vpn_key</Icon>
-                                    <span className={classes.iconTextWrapper}>
-                                        <Typography variant='caption' gutterBottom align='left'>
-                                            <FormattedMessage
-                                                id='Applications.Details.Overview.token.type'
-                                                defaultMessage='Token Type'
-                                            />
-                                        </Typography>
-                                    </span>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                {Application.TOKEN_TYPES[application.tokenType].displayName}
-                            </TableCell>
-                        </TableRow>
                         <TableRow>
                             <TableCell component='th' scope='row' className={classes.leftCol}>
                                 <div className={classes.iconAligner}>

@@ -86,6 +86,14 @@ const styles = (theme) => ({
     progressLoader: {
         marginLeft: theme.spacing(1),
     },
+    updateApiWarning: {
+        marginLeft: theme.spacing(5),
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+        borderColor: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
+    warningIconStyle: {
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
 });
 /**
  * This component holds the functionality of viewing the api definition content of an api. The initial view is a
@@ -139,7 +147,7 @@ class APIDefinition extends React.Component {
         let promisedApi;
         if (api.type === 'GRAPHQL') {
             promisedApi = api.getSchema(api.id);
-        } else if (api.type === 'WS') {
+        } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
             promisedApi = api.getAsyncAPIDefinition(api.id);
         } else {
             promisedApi = api.getSwagger(api.id);
@@ -154,7 +162,7 @@ class APIDefinition extends React.Component {
                         graphQL: response.obj.schemaDefinition,
                         format: 'txt',
                     });
-                } else if (api.type === 'WS') {
+                } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
                     this.setState({
                         asyncAPI: YAML.safeDump(YAML.safeLoad(response.data)),
                         asyncAPIModified: YAML.safeDump(YAML.safeLoad(response.data)),
@@ -183,12 +191,45 @@ class APIDefinition extends React.Component {
             });
     }
 
+    /**
+     * Handles the No button action of the save api definition confirmation dialog box.
+     */
+    handleNo() {
+        this.setState({ openDialog: false });
+    }
 
     /**
-      * Set isAuditApiClicked to true when Audit API is clicked
-      */
-    onAuditApiClick() {
-        this.setState({ isAuditApiClicked: true });
+     * Handles the yes button action of the save api definition confirmation dialog box.
+     */
+    handleOk() {
+        const { swaggerModified, asyncAPIModified } = this.state;
+        if (asyncAPIModified !== null) {
+            this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
+        } else {
+            this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+        }
+    }
+
+    /**
+     * Method to handle asyncAPI content change
+     *
+     * @param {string} modifiedContent : The modified asyncAPI content.
+     * */
+    onChangeAsyncAPIContent(modifiedContent) {
+        const { format } = this.state;
+        /**
+         * Validate for the basic json/ yaml format.
+         * */
+        try {
+            if (format === 'json') {
+                JSON.parse(modifiedContent, null);
+            } else {
+                YAML.load(modifiedContent);
+            }
+            this.setState({ isAsyncAPIValid: true, asyncAPIModified: modifiedContent });
+        } catch (e) {
+            this.setState({ isAsyncAPIValid: false, asyncAPIModified: modifiedContent });
+        }
     }
 
     /**
@@ -228,25 +269,10 @@ class APIDefinition extends React.Component {
     }
 
     /**
-     * Method to handle asyncAPI content change
-     *
-     * @param {string} modifiedContent : The modified asyncAPI content.
-     * */
-    onChangeAsyncAPIContent(modifiedContent) {
-        const { format } = this.state;
-        /**
-         * Validate for the basic json/ yaml format.
-         * */
-        try {
-            if (format === 'json') {
-                JSON.parse(modifiedContent, null);
-            } else {
-                YAML.load(modifiedContent);
-            }
-            this.setState({ isAsyncAPIValid: true, asyncAPIModified: modifiedContent });
-        } catch (e) {
-            this.setState({ isAsyncAPIValid: false, asyncAPIModified: modifiedContent });
-        }
+      * Set isAuditApiClicked to true when Audit API is clicked
+      */
+    onAuditApiClick() {
+        this.setState({ isAuditApiClicked: true });
     }
 
     /**
@@ -275,9 +301,10 @@ class APIDefinition extends React.Component {
         const { api } = this.props;
         const isGraphql = api.isGraphql();
         const isWebSocket = api.isWebSocket();
+        const isWebSub = api.isWebSub();
         if (isGraphql) {
             this.setState({ graphQL: schemaContent });
-        } else if (isWebSocket) {
+        } else if (isWebSocket || isWebSub) {
             this.setState({
                 asyncAPI: schemaContent,
                 asyncAPIModified: schemaContent,
@@ -316,25 +343,6 @@ class APIDefinition extends React.Component {
         } catch (err) {
             return false;
         }
-    }
-
-    /**
-     * Handles the yes button action of the save api definition confirmation dialog box.
-     */
-    handleOk() {
-        const { swaggerModified, asyncAPIModified } = this.state;
-        if (asyncAPIModified !== null) {
-            this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
-        } else {
-            this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
-        }
-    }
-
-    /**
-     * Handles the No button action of the save api definition confirmation dialog box.
-     */
-    handleNo() {
-        this.setState({ openDialog: false });
     }
 
     /**
@@ -508,7 +516,6 @@ class APIDefinition extends React.Component {
             });
     }
 
-
     /**
      * @inheritdoc
      */
@@ -518,7 +525,11 @@ class APIDefinition extends React.Component {
             securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating,
             asyncAPI, asyncAPIModified, isAsyncAPIValid,
         } = this.state;
-        const { classes, resourceNotFountMessage, api } = this.props;
+
+        const {
+            classes, resourceNotFountMessage, api,
+        } = this.props;
+
         let downloadLink;
         let fileName;
         let isGraphQL = 0;
@@ -590,7 +601,7 @@ class APIDefinition extends React.Component {
                                     size='small'
                                     className={classes.button}
                                     onClick={this.openEditor}
-                                    disabled={isRestricted(['apim:api_create'], api)}
+                                    disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                                 >
                                     <EditRounded className={classes.buttonIcon} />
                                     <FormattedMessage
@@ -600,20 +611,6 @@ class APIDefinition extends React.Component {
                                 </Button>
                             )
                         )}
-                        {/* {!(graphQL || api.type === 'APIProduct') && (
-                            <Button
-                                size='small'
-                                className={classes.button}
-                                onClick={this.openEditor}
-                                disabled={isRestricted(['apim:api_create'], api)}
-                            >
-                                <EditRounded className={classes.buttonIcon} />
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.edit'
-                                    defaultMessage='Edit'
-                                />
-                            </Button>
-                        )} */}
                         {api.type !== 'APIProduct' && (
                             <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
                         )}
@@ -795,10 +792,10 @@ APIDefinition.propTypes = {
         apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     history: PropTypes.shape({
-        push: PropTypes.object,
+        push: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
-        pathname: PropTypes.object,
+        pathname: PropTypes.shape({}),
     }).isRequired,
     resourceNotFountMessage: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,

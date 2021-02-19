@@ -19,7 +19,7 @@ import React from 'react';
 import Enzyme, { shallow, render, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import renderer from 'react-test-renderer';
-import SwaggerParser from 'swagger-parser';
+import SwaggerParser from '@apidevtools/swagger-parser';
 import path from 'path';
 
 const CARBON_APIMGT_ROOT = path.join(__dirname, '../../../../../../../../../');

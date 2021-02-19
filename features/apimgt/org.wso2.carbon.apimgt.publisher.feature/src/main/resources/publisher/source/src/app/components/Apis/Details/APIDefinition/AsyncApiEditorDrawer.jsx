@@ -78,7 +78,9 @@ class AsyncApiEditorDrawer extends React.Component {
                         />
                     </Grid>
                     <Grid item className={classes.editorPane}>
-                        <AsyncApiUI spec={asyncAPI} />
+                        <div style={{ padding: '1%' }}>
+                            <AsyncApiUI spec={asyncAPI} />
+                        </div>
                     </Grid>
                 </Grid>
             </>

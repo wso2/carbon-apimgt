@@ -23,6 +23,7 @@ public class Mediation {
     private String name;
     private String type;
     private String config;
+    private boolean isGlobal; 
 
     public Mediation(){}
 
@@ -42,4 +43,12 @@ public class Mediation {
     public void setConfig(String mConfig){this.config=mConfig;}
 
     public String getConfig(){return config;}
+
+    public boolean isGlobal() {
+        return isGlobal;
+    }
+
+    public void setGlobal(boolean isGlobal) {
+        this.isGlobal = isGlobal;
+    }
 }

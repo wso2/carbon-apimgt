@@ -71,9 +71,9 @@ public class LocalEntryServiceProxy {
      * @return LocalEntry for the given API
      * @throws AxisFault
      */
-    public Object getEntry(String key) throws AxisFault {
+    public OMElement getEntry(String key) throws AxisFault {
 
-        Object localEntryObject;
+        OMElement localEntryObject;
         try {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 localEntryObject = localEntryAdmin.getEntry(key);
@@ -127,6 +127,15 @@ public class LocalEntryServiceProxy {
             } catch (LocalEntryAdminException e) {
                 return false;
             }
+        }
+    }
+
+    public String[] getLocalEntries() throws AxisFault {
+
+        try {
+            return localEntryAdmin.getEntryNames();
+        } catch (LocalEntryAdminException e) {
+            throw new AxisFault("Error while retrieving local entries",e);
         }
     }
 }

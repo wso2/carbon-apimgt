@@ -166,7 +166,6 @@ function Endpoints(props) {
     };
     const [apiObject, apiDispatcher] = useReducer(apiReducer, api.toJSON());
 
-
     /**
      * Method to update the api.
      *
@@ -421,7 +420,7 @@ function Endpoints(props) {
                             >
                                 <Grid item>
                                     <Button
-                                        disabled={isUpdating || !endpointValidity.isValid
+                                        disabled={isUpdating || api.isRevision || !endpointValidity.isValid
                                     || isRestricted(['apim:api_create'], api)}
                                         type='submit'
                                         variant='contained'

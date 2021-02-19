@@ -40,7 +40,6 @@ export default class Resource {
         };
     }
 
-
     /**
      * Check whether current resource is of type APIProduct
      *
@@ -71,5 +70,9 @@ export default class Resource {
 
     isSOAP() {
         return this.type === 'SOAP';
+    }
+
+    isWebSub() {
+        return this.type === 'WEBSUB';
     }
 }

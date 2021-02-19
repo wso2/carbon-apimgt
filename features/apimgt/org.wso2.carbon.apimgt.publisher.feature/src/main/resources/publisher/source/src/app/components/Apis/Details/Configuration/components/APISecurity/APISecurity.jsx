@@ -35,7 +35,6 @@ import {
 import ApplicationLevel from './components/ApplicationLevel';
 import TransportLevel from './components/TransportLevel';
 
-
 const useStyles = makeStyles((theme) => ({
     error: {
         color: theme.palette.error.main,
@@ -70,7 +69,6 @@ export default function APISecurity(props) {
         isPrototyped = apiContext.api.endpointConfig !== null
              && apiContext.api.endpointConfig.implementation_status === 'prototyped';
     }
-
 
     const haveMultiLevelSecurity = securityScheme.includes(API_SECURITY_MUTUAL_SSL)
         && (securityScheme.includes(API_SECURITY_BASIC_AUTH)

@@ -149,7 +149,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             int applicationCount = apiMgtDAO.getAllApplicationCount(subscriber, groupId, query);
 
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications);
-            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset, applicationCount);
+            ApplicationMappingUtil.setPaginationParamsWithSortParams(applicationListDTO, groupId, limit, offset,
+                    applicationCount, sortOrder, sortBy.toLowerCase());
 
             return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
@@ -170,13 +171,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Import an Application which has been exported to a zip file
      *
-     * @param appOwner            target owner of the application
-     * @param preserveOwner       if true, preserve the original owner of the application
-     * @param skipSubscriptions   if true, skip subscriptions of the application
-     * @param fileInputStream     content stream of the zip file which contains exported Application
-     * @param fileDetail          meta information of the zip file
+     * @param fileInputStream     Content stream of the zip file which contains exported Application
+     * @param fileDetail          Meta information of the zip file
+     * @param preserveOwner       If true, preserve the original owner of the application
+     * @param skipSubscriptions   If true, skip subscriptions of the application
+     * @param appOwner            Target owner of the application
      * @param skipApplicationKeys Skip application keys while importing
-     * @param update              update if existing application found or import
+     * @param update              Update if existing application found or import
+     * @param messageContext      Message Context
      * @return imported Application
      */
     @Override public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail,
@@ -358,11 +360,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return response containing the required application object
      */
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, MessageContext messageContext) {
+    public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch, String xWSO2Tenant,
+                                                 MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            Application application = apiConsumer.getApplicationByUUID(applicationId, xWSO2Tenant);
             if (application != null) {
                 // Remove hidden attributes and set the rest of the attributes from config
                 JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
@@ -485,9 +488,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     /**
      * Export an existing Application
      *
-     * @param appName  Search query
-     * @param appOwner Owner of the Application
-     * @param withKeys Export keys with application
+     * @param appName        Search query
+     * @param appOwner       Owner of the Application
+     * @param withKeys       Export keys with application
+     * @param format         Export format
+     * @param messageContext Message Context
      * @return Zip file containing exported Application
      */
     @Override
@@ -563,7 +568,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             restrictedReferer = (String) additionalProperties.get(APIConstants.JwtTokenConstants.PERMITTED_REFERER);
                         }
                     }
-                    String apiKey = apiConsumer.generateApiKey(application, userName, (long) validityPeriod,
+                    String apiKey = apiConsumer.generateApiKey(application, userName, validityPeriod,
                             restrictedIP, restrictedReferer);
                     APIKeyDTO apiKeyDto = ApplicationKeyMappingUtil.formApiKeyToDTO(apiKey, validityPeriod);
                     return Response.ok().entity(apiKeyDto).build();
@@ -582,7 +587,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String apiKey = body.getApikey();
         if (!StringUtils.isEmpty(apiKey) && APIUtil.isValidJWT(apiKey)) {
             try {
-                String splitToken[] = apiKey.split("\\.");
+                String[] splitToken = apiKey.split("\\.");
                 String signatureAlgorithm = APIUtil.getSignatureAlgorithm(splitToken);
                 String certAlias = APIUtil.getSigningAlias(splitToken);
                 Certificate certificate = APIUtil.getCertificateFromTrustStore(certAlias);
@@ -696,7 +701,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO
-            body, MessageContext messageContext) throws APIManagementException {
+            body, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -739,7 +744,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams, keyManagerName);
+                            jsonParams, keyManagerName, xWSO2Tenant);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -811,7 +816,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param applicationUUID Id of the application
      * @return List of application keys
      */
-    private Set<APIKey> getApplicationKeys(String applicationUUID) {
+    private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain) {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -819,7 +824,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationUUID);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    return apiConsumer.getApplicationKeysOfApplication(application.getId());
+                    return apiConsumer.getApplicationKeysOfApplication(application.getId(), tenantDomain);
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
                 }
@@ -830,6 +835,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationUUID, e, log);
         }
         return null;
+    }
+
+    /**
+     * Used to get all keys of an application
+     *
+     * @param applicationUUID Id of the application
+     * @return List of application keys
+     */
+    private Set<APIKey> getApplicationKeys(String applicationUUID) {
+
+        return getApplicationKeys(applicationUUID, null);
     }
 
     @Override
@@ -856,8 +872,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             }
                         } catch (JsonProcessingException | ParseException | ClassCastException e) {
                             RestApiUtil.handleBadRequest("Error while generating " + keyType + " token for " +
-                                    "application " + applicationId + ". Invalid jsonInput \'"
-                                    + body.getAdditionalProperties() + "\' provided.", log);
+                                    "application " + applicationId + ". Invalid jsonInput '"
+                                    + body.getAdditionalProperties() + "' provided.", log);
                         }
                         if (StringUtils.isNotEmpty(body.getConsumerSecret())){
                             appKey.setConsumerSecret(body.getConsumerSecret());
@@ -932,13 +948,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Application Key Information
      */
     private ApplicationKeyDTO getApplicationKeyByAppIDAndKeyMapping(String applicationId, String keyMappingId) {
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
-        if (applicationKeys != null) {
-            for (APIKey apiKey : applicationKeys) {
-                if (keyMappingId != null && keyMappingId.equals(apiKey.getMappingId())) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            if (application != null) {
+                APIKey apiKey = apiConsumer.getApplicationKeyByAppIDAndKeyMapping(application.getId(), keyMappingId);
+                if (apiKey != null) {
                     return ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
                 }
+            } else {
+                log.error("Application not found with ID: " + applicationId);
             }
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -1052,7 +1075,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
-                                                         MessageContext messageContext) throws APIManagementException {
+                                                         String xWSO2Tenant, MessageContext messageContext)
+            throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
@@ -1071,7 +1095,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName);
+                                application.getName(), keyType, tokenType, keyManagerName, xWSO2Tenant);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1086,10 +1110,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysGet(String applicationId, MessageContext messageContext)
+    public Response applicationsApplicationIdOauthKeysGet(String applicationId,
+                                                          String xWso2Tenant, MessageContext messageContext)
             throws APIManagementException {
 
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, xWso2Tenant);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
         applicationKeyListDTO.setCount(0);
@@ -1149,8 +1174,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     } catch (JsonProcessingException | ClassCastException e) {
                         RestApiUtil.handleBadRequest("Error while generating " + appKey.getKeyType() + " token for " +
-                                "application " + applicationId + ". Invalid jsonInput \'"
-                                + body.getAdditionalProperties() + "\' provided.", log);
+                                "application " + applicationId + ". Invalid jsonInput '"
+                                + body.getAdditionalProperties() + "' provided.", log);
                     }
                     if (StringUtils.isNotEmpty(body.getConsumerSecret())) {
                         appKey.setConsumerSecret(body.getConsumerSecret());

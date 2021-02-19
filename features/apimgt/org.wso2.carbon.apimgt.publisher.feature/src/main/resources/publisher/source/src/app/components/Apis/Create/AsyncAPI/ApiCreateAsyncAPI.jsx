@@ -33,6 +33,11 @@ import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm'
 import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
+
 import ProvideAsyncAPI from './Steps/ProvideAsyncAPI';
 
 /**
@@ -46,6 +51,9 @@ export default function ApiCreateAsyncAPI(props) {
     const [wizardStep, setWizardStep] = useState(0);
     const { history } = props;
     const { settings } = useAppContext();
+    // eslint-disable-next-line no-use-before-define
+    const classes = useStyles();
+    const [hideEndpoint, setHideEndpoint] = useState(false);
 
     /**
      *
@@ -62,6 +70,7 @@ export default function ApiCreateAsyncAPI(props) {
             case 'name':
             case 'version':
             case 'endpoint':
+            case 'protocol':
             case 'context':
             case 'policies':
             case 'isFormValid':
@@ -88,6 +97,24 @@ export default function ApiCreateAsyncAPI(props) {
         formValidity: false,
     });
 
+    const protocols = [
+        {
+            name: 'websub',
+            displayName: 'WebSub',
+            description: 'WebSub',
+        },
+        {
+            name: 'ws',
+            displayName: 'WebSocket',
+            description: 'WebSocket',
+        },
+        {
+            name: 'sse',
+            displayName: 'SSE',
+            description: 'Server Sent Events',
+        },
+    ];
+
     /**
      *
      *
@@ -95,6 +122,11 @@ export default function ApiCreateAsyncAPI(props) {
      */
     function handleOnChange(event) {
         const { name: action, value } = event.target;
+        if (value === 'WebSub') {
+            setHideEndpoint(true);
+        } else {
+            setHideEndpoint(false);
+        }
         inputsDispatcher({ action, value });
     }
 
@@ -120,13 +152,14 @@ export default function ApiCreateAsyncAPI(props) {
     function createAPI() {
         setCreating(true);
         const {
-            name, version, context, endpoint, policies, inputValue, inputType,
+            name, version, context, endpoint, policies, inputValue, inputType, protocol,
         } = apiInputs;
         const additionalProperties = {
             name,
             version,
             context,
             policies,
+            type: protocol.toUpperCase() === 'WEBSOCKET' ? 'WS' : protocol.toUpperCase(),
         };
         if (endpoint) {
             additionalProperties.endpointConfig = {
@@ -218,8 +251,48 @@ export default function ApiCreateAsyncAPI(props) {
                             onChange={handleOnChange}
                             api={apiInputs}
                             isAPIProduct={false}
-                            isWebSocket
-                        />
+                            hideEndpoint={hideEndpoint}
+                            endpointPlaceholderText='Streaming Provider'
+                            appendChildrenBeforeEndpoint
+                        >
+                            <TextField
+                                fullWidth
+                                select
+                                label={(
+                                    <>
+                                        <FormattedMessage
+                                            id='Apis.Create.asyncAPI.Components.SelectPolicies.business.plans'
+                                            defaultMessage='Protocol'
+                                        />
+                                        <sup className={classes.mandatoryStar}>*</sup>
+                                    </>
+                                )}
+                                value={apiInputs.protocol}
+                                name='protocol'
+                                SelectProps={{
+                                    multiple: false,
+                                    renderValue: (selected) => (selected),
+                                }}
+                                margin='normal'
+                                variant='outlined'
+                                InputProps={{
+                                    id: 'itest-id-apipolicies-input',
+                                }}
+                                onChange={handleOnChange}
+                            >
+                                {protocols.map((protocol) => (
+                                    <MenuItem
+                                        dense
+                                        disableGutters={false}
+                                        id={protocol.name}
+                                        key={protocol.name}
+                                        value={protocol.displayName}
+                                    >
+                                        <ListItemText primary={protocol.displayName} secondary={protocol.description} />
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </DefaultAPIForm>
                     )}
                 </Grid>
                 <Grid item xs={1} />
@@ -276,3 +349,10 @@ export default function ApiCreateAsyncAPI(props) {
 ApiCreateAsyncAPI.propTypes = {
     history: PropTypes.shape({ push: PropTypes.func }).isRequired,
 };
+
+const useStyles = makeStyles((theme) => ({
+    mandatoryStar: {
+        color: theme.palette.error.main,
+        marginLeft: theme.spacing(0.1),
+    },
+}));

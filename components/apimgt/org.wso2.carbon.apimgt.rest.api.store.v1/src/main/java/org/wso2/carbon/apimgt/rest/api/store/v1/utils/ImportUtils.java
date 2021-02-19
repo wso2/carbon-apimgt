@@ -133,9 +133,11 @@ public class ImportUtils {
      * @param subscribedAPIs Subscribed APIs
      * @param userId         Username of the subscriber
      * @param appId          Application Id
+     * @param update         Whether to update the application or not
      * @param apiConsumer    API Consumer
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
+     * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
             int appId, Boolean update, APIConsumer apiConsumer) throws APIManagementException, UserStoreException {
@@ -282,6 +284,6 @@ public class ImportUtils {
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
                 apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager());
+                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null);
     }
 }

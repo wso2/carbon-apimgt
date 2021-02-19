@@ -322,6 +322,13 @@ class APIThumb extends Component {
                             color='primary'
                         />
                     )}
+                    {(api.type === 'WEBSUB') && (
+                        <Chip
+                            className={classes.thumbRightBy}
+                            label='WEBSUB'
+                            color='primary'
+                        />
+                    )}
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />
                     {loading && <CircularProgress className={classes.deleteProgress} />}
                 </CardActions>

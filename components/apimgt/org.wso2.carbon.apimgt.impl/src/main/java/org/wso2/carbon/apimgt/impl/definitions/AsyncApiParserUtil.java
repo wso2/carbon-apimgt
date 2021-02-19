@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.models.AaiDocument;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -14,18 +16,21 @@ import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Set;
+
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 public class AsyncApiParserUtil {
     
@@ -38,9 +43,9 @@ public class AsyncApiParserUtil {
         APIDefinitionValidationResponse validationResponse = asyncApiParser.validateAPIDefinition(schemaToBeValidated, returnJSONContent);
         final String asyncAPIKeyNotFound = "#: required key [asyncapi] not found";
 
-        if (!validationResponse.isValid()){
-            for (ErrorHandler errorItem : validationResponse.getErrorItems()){
-                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())){    //change it other way
+        if (!validationResponse.isValid()) {
+            for (ErrorHandler errorItem : validationResponse.getErrorItems()) {
+                if (asyncAPIKeyNotFound.equals(errorItem.getErrorMessage())) {    //change it other way
                     addErrorToValidationResponse(validationResponse, "#: attribute [asyncapi] should be present");
                     return validationResponse;
                 }
@@ -62,7 +67,7 @@ public class AsyncApiParserUtil {
 
             HttpResponse response = httpClient.execute(httpGet);
 
-            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()){
+            if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
                 Object obj = yamlReader.readValue(urlObj, Object.class);
                 ObjectMapper jsonWriter = new ObjectMapper();
@@ -93,7 +98,7 @@ public class AsyncApiParserUtil {
             String context,
             String description,
             List<String> endpoints
-    ){
+    ) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -107,8 +112,7 @@ public class AsyncApiParserUtil {
     }
 
     public static ErrorItem addErrorToValidationResponse(
-            APIDefinitionValidationResponse validationResponse, String errMessage
-    ){
+            APIDefinitionValidationResponse validationResponse, String errMessage) {
         ErrorItem errorItem = new ErrorItem();
         errorItem.setMessage(errMessage);
         validationResponse.getErrorItems().add(errorItem);
@@ -133,7 +137,7 @@ public class AsyncApiParserUtil {
             String resourcePath = APIUtil.getAsyncAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
             resourcePath = resourcePath + APIConstants.API_ASYNCAPI_DEFINITION_RESOURCE_NAME;
             Resource resource;
-            if (!registry.resourceExists(resourcePath)){
+            if (!registry.resourceExists(resourcePath)) {
                 resource = registry.newResource();
             } else {
                 resource = registry.get(resourcePath);
@@ -143,14 +147,14 @@ public class AsyncApiParserUtil {
             registry.put(resourcePath, resource);
 
             String[] visibleRoles = null;
-            if (api.getVisibleRoles() != null){
+            if (api.getVisibleRoles() != null) {
                 visibleRoles = api.getVisibleRoles().split(",");
             }
 
             APIUtil.clearResourcePermissions(resourcePath, api.getId(), ((UserRegistry) registry).getTenantId());
             APIUtil.setResourcePermissions(apiProviderName, api.getVisibility(), visibleRoles, resourcePath);
 
-        } catch (RegistryException e){
+        } catch (RegistryException e) {
             handleException("Error while adding AsyncApi Definition for " + apiName + "-" + apiVersion, e);
         }
     }
@@ -163,7 +167,7 @@ public class AsyncApiParserUtil {
      * @return api definition json as json string
      * @throws APIManagementException
      */
-    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException{
+    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException {
         String resourcePath = "";
 
         if (apiIdentifier instanceof APIIdentifier) {
@@ -187,11 +191,45 @@ public class AsyncApiParserUtil {
             handleException(
                     "Error while retrieving AsyncAPI Definition for " + apiIdentifier.getName() + "-"
                             + apiIdentifier.getVersion(), e);
-        } catch (ParseException e){
+        } catch (ParseException e) {
             handleException(
                     "Error while parsing AsyncAPI Definition for " + apiIdentifier.getName() + "-"
                             + apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDocContent;
+    }
+
+    public static API loadTopicsFromAsyncAPIDefinition(API api, String definitionJSON) {
+        Set<URITemplate> uriTemplates = api.getUriTemplates();
+        uriTemplates.clear();
+
+        AaiDocument definition = (AaiDocument) Library.readDocumentFromJSONString(definitionJSON);
+        if (definition.getChannels().size() > 0) {
+            for (String topic : definition.channels.keySet()) {
+                if (definition.channels.get(topic).publish != null && definition.channels.get(topic).subscribe != null) {
+                    URITemplate uriTemplateSub = new URITemplate();
+                    uriTemplateSub.setUriTemplate(topic);
+                    uriTemplateSub.setHTTPVerb("SUBSCRIBE");
+                    uriTemplates.add(uriTemplateSub);
+                    URITemplate uriTemplatePub = new URITemplate();
+                    uriTemplatePub.setUriTemplate(topic);
+                    uriTemplatePub.setHTTPVerb("PUBLISH");
+                    uriTemplates.add(uriTemplatePub);
+                } else if (definition.channels.get(topic).publish != null) {
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setUriTemplate(topic);
+                    uriTemplate.setHTTPVerb("PUBLISH");
+                    uriTemplates.add(uriTemplate);
+                } else if (definition.channels.get(topic).subscribe != null) {
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setUriTemplate(topic);
+                    uriTemplate.setHTTPVerb("SUBSCRIBE");
+                    uriTemplates.add(uriTemplate);
+                }
+            }
+        }
+
+        api.setUriTemplates(uriTemplates);
+        return api;
     }
 }

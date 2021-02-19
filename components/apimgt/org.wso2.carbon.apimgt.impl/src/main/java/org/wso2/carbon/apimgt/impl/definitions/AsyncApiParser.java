@@ -2,18 +2,25 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
+import io.apicurio.datamodels.asyncapi.models.AaiComponents;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
+import io.apicurio.datamodels.asyncapi.models.AaiMessage;
+import io.apicurio.datamodels.asyncapi.models.AaiOperation;
+import io.apicurio.datamodels.asyncapi.models.AaiOperationBase;
 import io.apicurio.datamodels.asyncapi.models.AaiServer;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Components;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Message;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Operation;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Server;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.everit.json.schema.Schema;
-import org.everit.json.schema.loader.SchemaLoader;
 import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
@@ -1432,13 +1439,14 @@ public class AsyncApiParser extends APIDefinition {
 
         boolean validationSuccess = false;
         List<String> validationErrorMessages = null;
+        boolean isWebSocket = false;
 
         JSONObject schemaToBeValidated = new JSONObject(apiDefinition);
 
         //validate AsyncAPI using JSON schema validation
         try {
             schemaValidator.validate(schemaToBeValidated);
-            AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            /*AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             validationErrorMessages = new ArrayList<>();
             if (asyncApiDocument.getServers().size() == 1) {
                 if (!APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
@@ -1454,6 +1462,27 @@ public class AsyncApiParser extends APIDefinition {
             if (validationErrorMessages.size() == 0) {
                 validationSuccess = true;
                 validationErrorMessages = null;
+            }*/
+
+            //Checking whether it is a websocket
+            AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
+            validationErrorMessages = new ArrayList<>();
+            if (asyncApiDocument.getServers().size() == 1) {
+                if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
+                    isWebSocket = true;
+                }
+            }
+
+            //validating channel count for websockets
+            if (isWebSocket) {
+                if (asyncApiDocument.getChannels().size() > 1) {
+                    validationErrorMessages.add("#:The AsyncAPI definition should contain only a single channel for websockets");
+                }
+            }
+
+            if (validationErrorMessages.size() == 0) {
+                validationSuccess = true;
+                validationErrorMessages = null;
             }
 
         } catch (ValidationException e){
@@ -1464,7 +1493,7 @@ public class AsyncApiParser extends APIDefinition {
         if (validationSuccess) {
             AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
-            for (AaiServer x : asyncApiDocument.getServers()){
+            /*for (AaiServer x : asyncApiDocument.getServers()){
                 endpoints.add(x.url);
             }
             AsyncApiParserUtil.updateValidationResponseAsSuccess(
@@ -1473,10 +1502,38 @@ public class AsyncApiParser extends APIDefinition {
                     asyncApiDocument.asyncapi,
                     asyncApiDocument.info.title,
                     asyncApiDocument.info.version,
-                    asyncApiDocument.getChannels().get(0)._name,
+                    null,                           //asyncApiDocument.getChannels().get(0)._name,
                     asyncApiDocument.info.description,
                     endpoints
-            );
+            );*/
+
+            if (isWebSocket) {
+                for (AaiServer x : asyncApiDocument.getServers()){
+                    endpoints.add(x.url);
+                }
+                AsyncApiParserUtil.updateValidationResponseAsSuccess(
+                        validationResponse,
+                        apiDefinition,
+                        asyncApiDocument.asyncapi,
+                        asyncApiDocument.info.title,
+                        asyncApiDocument.info.version,
+                        asyncApiDocument.getChannels().get(0)._name,            //make this null
+                        asyncApiDocument.info.description,
+                        endpoints
+                );
+            } else {
+                AsyncApiParserUtil.updateValidationResponseAsSuccess(
+                        validationResponse,
+                        apiDefinition,
+                        asyncApiDocument.asyncapi,
+                        asyncApiDocument.info.title,
+                        asyncApiDocument.info.version,
+                        null,
+                        asyncApiDocument.info.description,
+                        null
+                );
+            }
+
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 validationResponse.setJsonContent(apiDefinition);
@@ -1533,6 +1590,11 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent) throws APIManagementException {
+        return null;
+    }
+
+    @Override
     public String processDisableSecurityExtension(String swaggerContent) throws APIManagementException{
         return null;
     }
@@ -1547,15 +1609,18 @@ public class AsyncApiParser extends APIDefinition {
         aaiDocument.info = aaiDocument.createInfo();
         aaiDocument.info.title = api.getId().getName();
         aaiDocument.info.version = api.getId().getVersion();
-        aaiDocument.servers = new HashMap<String, AaiServer>();
-        Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
-        JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
-        server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
-        server.protocol = api.getType().toLowerCase();
-        aaiDocument.addServer("production", server);
-        aaiDocument.channels = new HashMap<String, AaiChannelItem>();
-        Aai20ChannelItem channelItem = aaiDocument.createChannelItem(api.getContext());
-        aaiDocument.addChannelItem(channelItem);
+        if (!APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
+            Aai20Server server = (Aai20Server) aaiDocument.createServer("production");
+            JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
+            server.url = endpointConfig.getJSONObject("production_endpoints").getString("url");
+            server.protocol = api.getType().toLowerCase();
+            aaiDocument.addServer("production", server);
+        }
+
+        for (URITemplate uriTemplate : api.getUriTemplates()) {
+            Aai20ChannelItem channelItem = aaiDocument.createChannelItem(uriTemplate.getUriTemplate());
+            aaiDocument.addChannelItem(channelItem);
+        }
         return Library.writeDocumentToJSONString(aaiDocument);
     }
 

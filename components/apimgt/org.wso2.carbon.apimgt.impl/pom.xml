@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.140-SNAPSHOT</version>
+        <version>6.8.230-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -21,23 +21,8 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Management Implementation</name>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
     <dependencies>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.11.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.11.2</version>
-        </dependency>
+
         <dependency>
             <groupId>org.wso2.carbon.analytics-common</groupId>
             <artifactId>org.wso2.carbon.event.output.adapter.core</artifactId>
@@ -161,19 +146,14 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.h2database.wso2</groupId>
-            <artifactId>h2-database-engine</artifactId>
-            <version>1.2.140.wso2v3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.osgi</groupId>
-                    <artifactId>org.eclipse.osgi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.wso2.orbit.com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>58.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -355,10 +335,10 @@
             <artifactId>xml-apis</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
@@ -433,6 +413,19 @@
             <artifactId>org.wso2.carbon.event.stream.core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.synapse</groupId>
+            <artifactId>synapse-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.org.everit.json</groupId>
             <artifactId>org.everit.json.schema</artifactId>
             <scope>compile</scope>
@@ -480,7 +473,7 @@
                                     <classpath>
                                         <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2.sql" />
+                                    <fileset file="${basedir}/../../../features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/sql/h2.sql" />
                                     <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql" />
                                 </sql>
                                 <echo message="##################### END ########################" />
@@ -570,11 +563,8 @@
                             !org.wso2.carbon.apimgt.impl.dto.xsd;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
                             !org.apache.commons.collections4.*,
-                            <!--apicurio-data-models.*;version="1.1.5",-->
                         </Export-Package>
                         <Import-Package>
-                            <!--apicurio-data-models.*;version="1.1.5",-->
-                            org.everit.json.schema.*;version="[1.12.1, 1.12.2)",
                             org.wso2.carbon.governance.api.*,
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,
@@ -582,7 +572,9 @@
                             org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             !org.wso2.carbon.apimgt.api.model.xsd.*,
+                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",

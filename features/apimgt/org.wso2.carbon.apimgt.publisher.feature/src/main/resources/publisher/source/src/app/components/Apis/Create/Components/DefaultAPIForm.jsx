@@ -29,8 +29,6 @@ import green from '@material-ui/core/colors/green';
 import APIValidation from 'AppData/APIValidation';
 import API from 'AppData/api';
 
-import SelectPolicies from './SelectPolicies';
-
 const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
         color: theme.palette.error.main,
@@ -118,7 +116,7 @@ function checkContext(value, result) {
  */
 export default function DefaultAPIForm(props) {
     const {
-        onChange, onValidate, api, isAPIProduct, isWebSocket,
+        onChange, onValidate, api, isAPIProduct, isWebSocket, children, appendChildrenBeforeEndpoint, hideEndpoint,
     } = props;
     const classes = useStyles();
     const [validity, setValidity] = useState({});
@@ -132,8 +130,7 @@ export default function DefaultAPIForm(props) {
     useEffect(() => {
         onValidate(Boolean(api.name)
                 && (isAPIProduct || Boolean(api.version))
-                && Boolean(api.context)
-                && Boolean(api.policies));
+                && Boolean(api.context));
     }, []);
 
     const updateValidity = (newState) => {
@@ -147,8 +144,7 @@ export default function DefaultAPIForm(props) {
         isFormValid = isFormValid
             && Boolean(api.name)
             && (isAPIProduct || Boolean(api.version))
-            && Boolean(api.context)
-            && (!isAPIProduct || newState.policy === null);
+            && Boolean(api.context);
         onValidate(isFormValid, validity);
         setValidity(newState);
     };
@@ -223,17 +219,6 @@ export default function DefaultAPIForm(props) {
                 } else {
                     updateValidity({ ...validity, version: versionValidity });
                 }
-                break;
-            }
-            case 'policies': {
-                const policyValidity = value && value.length > 0;
-                updateValidity({
-                    ...validity,
-                    policy:
-                        policyValidity || !isAPIProduct
-                            ? null
-                            : { message: 'Need to select at least one policy to create an API Product' },
-                });
                 break;
             }
             default: {
@@ -417,7 +402,8 @@ export default function DefaultAPIForm(props) {
                         </>
                     )}
                 </Grid>
-                {!isAPIProduct && (
+                {appendChildrenBeforeEndpoint && !!children && children}
+                {!isAPIProduct && !hideEndpoint && (
                     <TextField
                         fullWidth
                         id='itest-id-apiendpoint-input'
@@ -468,7 +454,7 @@ export default function DefaultAPIForm(props) {
                                                 ? <CircularProgress size={20} />
                                                 : (
                                                     <Icon>
-                                                check_circle
+                                                        check_circle
                                                     </Icon>
                                                 )}
                                         </IconButton>
@@ -479,20 +465,14 @@ export default function DefaultAPIForm(props) {
                     />
                 )}
 
-                <SelectPolicies
-                    policies={api.policies}
-                    isAPIProduct={isAPIProduct}
-                    onChange={onChange}
-                    validate={validate}
-                    isValid={validity.policies}
-                />
+                {!appendChildrenBeforeEndpoint && !!children && children}
             </form>
             <Grid container direction='row' justify='flex-end' alignItems='center'>
                 <Grid item>
                     <Typography variant='caption' display='block' gutterBottom>
                         <sup style={{ color: 'red' }}>*</sup>
                         {' '}
-Mandatory fields
+                        Mandatory fields
                     </Typography>
                 </Grid>
             </Grid>

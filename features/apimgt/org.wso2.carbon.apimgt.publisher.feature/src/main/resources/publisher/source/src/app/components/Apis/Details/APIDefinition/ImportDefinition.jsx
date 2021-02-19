@@ -36,7 +36,6 @@ import ProvideAsyncAPI from 'AppComponents/Apis/Create/AsyncAPI/Steps/ProvideAsy
 import ProvideOpenAPI from '../../Create/OpenAPI/Steps/ProvideOpenAPI';
 import ProvideGraphQL from '../../Create/GraphQL/Steps/ProvideGraphQL';
 
-
 const useStyles = makeStyles(() => ({
     importDefinitionDialogHeader: {
         fontWeight: '600',
@@ -62,17 +61,21 @@ export default function ImportDefinition(props) {
     const intl = useIntl();
     const isGraphQL = api.isGraphql();
     const isSOAP = api.isSOAP();
-    const isWebSocket = api.isWebSocket();
+    // const isWebSocket = api.isWebSocket();
+    // const isWebSub = api.isWebSub();
+    const isAsyncAPI = api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
     const [asyncAPIDefinitionImport, setAsyncAPIDefinitionImport] = useState(false);
 
     const handleAPIDefinitionImportOpen = () => {
         // eslint-disable-next-line no-unused-expressions
-        isWebSocket ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
+        isAsyncAPI ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
+        // isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(true) : setOpenAPIDefinitionImport(true);
     };
 
     const handleAPIDefinitionImportCancel = () => {
         // eslint-disable-next-line no-unused-expressions
-        isWebSocket ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
+        isAsyncAPI ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
+        // isWebSocket || isWebSub ? setAsyncAPIDefinitionImport(false) : setOpenAPIDefinitionImport(false);
     };
 
     function apiInputsReducer(currentState, inputAction) {
@@ -215,7 +218,6 @@ export default function ImportDefinition(props) {
             });
     }
 
-
     /**
      * Updates GraphQL schema definition
      */
@@ -281,7 +283,8 @@ export default function ImportDefinition(props) {
             updateGraphQLSchema();
         } else if (isSOAP) {
             updateWSDL();
-        } else if (isWebSocket) {
+        // } else if (isWebSocket || isWebSub) {
+        } else if (isAsyncAPI) {
             updateAsyncAPIDefinition();
         } else {
             updateOASDefinition();
@@ -355,7 +358,8 @@ export default function ImportDefinition(props) {
             />
         );
     }
-    if (isWebSocket) {
+    // if (isWebSocket || isWebSub) {
+    if (isAsyncAPI) {
         dialogTitle = (
             <FormattedMessage
                 id='Apis.Details.APIDefinition.APIDefinition.import.definition.asyncApi'
@@ -383,14 +387,18 @@ export default function ImportDefinition(props) {
                 size='small'
                 className={classes.button}
                 onClick={handleAPIDefinitionImportOpen}
-                disabled={isRestricted(['apim:api_create'], api)}
+                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
             >
                 <CloudUploadRounded className={classes.buttonIcon} />
                 {btnText}
             </Button>
+            {/* <Dialog
+                onBackdropClick={isWebSocket || isWebSub ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
+                open={isWebSocket || isWebSub ? asyncAPIDefinitionImport : openAPIDefinitionImport}
+            ></Dialog> */}
             <Dialog
-                onBackdropClick={isWebSocket ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
-                open={isWebSocket ? asyncAPIDefinitionImport : openAPIDefinitionImport}
+                onBackdropClick={isAsyncAPI ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
+                open={isAsyncAPI ? asyncAPIDefinitionImport : openAPIDefinitionImport}
             >
                 <DialogTitle>
                     <Typography className={classes.importDefinitionDialogHeader}>
@@ -411,7 +419,7 @@ export default function ImportDefinition(props) {
                         onClick={importDefinition}
                         variant='contained'
                         color='primary'
-                        disabled={!apiInputs.isFormValid || isImporting}
+                        disabled={!apiInputs.isFormValid || isImporting || api.isRevision}
                     >
                         <FormattedMessage
                             id='Apis.Details.APIDefinition.APIDefinition.import.definition.import'
