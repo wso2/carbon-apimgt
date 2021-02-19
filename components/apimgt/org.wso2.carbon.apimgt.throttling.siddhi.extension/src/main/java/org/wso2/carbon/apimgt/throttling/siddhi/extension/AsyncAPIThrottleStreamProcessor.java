@@ -35,6 +35,7 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
     private ExecutionPlanContext executionPlanContext;
     private long expireEventTime = -1;
     private long startTime = -1;
+    private long eventCount = -1;
 
     @Override
     public Scheduler getScheduler() {
@@ -52,24 +53,7 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                                    ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
 
-        if (attributeExpressionExecutors.length == 1) {
-            if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
-                if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
-                    timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
-
-                } else if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.LONG) {
-                    timeInMilliSeconds = (Long) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
-                } else {
-                    throw new ExecutionPlanValidationException("Throttle batch window's 1st parameter attribute should be " +
-                            "either int or long, but found "
-                            + attributeExpressionExecutors[0].getReturnType());
-                }
-            } else {
-                throw new ExecutionPlanValidationException("Throttle batch window 1st parameter needs to be constant " +
-                        "parameter attribute but found a dynamic attribute "
-                        + attributeExpressionExecutors[0].getClass().getCanonicalName());
-            }
-        } else if (attributeExpressionExecutors.length == 2) {
+        if (attributeExpressionExecutors.length == 3) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
                     timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
@@ -97,9 +81,20 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                 throw new ExecutionPlanValidationException("Throttle batch window 2nd parameter needs to be a Long " +
                         "or Int type but found a " + attributeExpressionExecutors[2].getReturnType());
             }
+
+            if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.INT) {
+                eventCount = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
+                        attributeExpressionExecutors[2]).getValue()));
+            } else if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
+                eventCount = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
+                        attributeExpressionExecutors[2]).getValue()));
+            } else {
+                throw new ExecutionPlanValidationException("Async Throttle batch window 3nd parameter needs to be a " +
+                        "Long or Int type but found a " + attributeExpressionExecutors[2].getReturnType());
+            }
         } else {
-            throw new ExecutionPlanValidationException("Throttle batch window should only have one/two parameter " +
-                    "(<int|long|time> windowTime (and <int|long> startTime), but found "
+            throw new ExecutionPlanValidationException("Throttle batch window should have 3 parameters " +
+                    "(<int|long|time> windowTime (and <int|long> startTime) (and <int|long> eventCount), but found "
                     + attributeExpressionExecutors.length + " input attributes");
         }
 
@@ -137,7 +132,7 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                 if (streamEvent.getType() != ComplexEvent.Type.CURRENT) {
                     continue;
                 }
-                StreamEvent streamEvent1 = new StreamEvent(0,0,3);
+                StreamEvent streamEvent1 = new StreamEvent(0, 0, 3);
                 complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime});
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
