@@ -19,7 +19,7 @@
 import React, { Component, lazy } from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, withTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import Paper from '@material-ui/core/Paper';
@@ -49,6 +49,41 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
+
+function RenderMethodBase(props) {
+    // TODO:
+    const { methods } = props;
+    const chipColors = {
+        subscribe: '#61affe',
+        publish: '#49cc90',
+    };
+    return methods.map((method) => {
+        let chipColor = chipColors[method];
+        let chipTextColor = '#000000';
+        if (!chipColor) {
+            console.log('Check the theme settings. The resourceChipColors is not populated properly');
+            chipColor = '#cccccc';
+        } else {
+            chipTextColor = '#fff';
+        }
+        return (
+            <Chip
+                label={method.toUpperCase()}
+                style={{
+                    backgroundColor: chipColor, color: chipTextColor, height: 20, marginRight: 5,
+                }}
+            />
+        );
+    });
+}
+
+RenderMethodBase.propTypes = {
+    methods: PropTypes.arrayOf(PropTypes.string).isRequired,
+    theme: PropTypes.shape({}).isRequired,
+    classes: PropTypes.shape({}).isRequired,
+};
+
+const RenderMethod = withTheme(RenderMethodBase);
 
 const styles = (theme) => ({
     root: {
@@ -164,11 +199,12 @@ class Topics extends Component {
         this.handleCancelSave = this.handleCancelSave.bind(this);
         this.handleAddTopic = this.handleAddTopic.bind(this);
         this.handleDeleteTopic = this.handleDeleteTopic.bind(this);
+
         this.handleAddProperty = this.handleAddProperty.bind(this);
-        this.handleSaveProperty = this.handleSaveProperty.bind(this);
-        this.handleCancelSaveProperty = this.handleCancelSaveProperty.bind(this);
-        this.handleEditProperty = this.handleEditProperty.bind(this);
-        this.handleDeleteProperty = this.handleDeleteProperty.bind(this);
+        // this.handleSaveProperty = this.handleSaveProperty.bind(this);
+        // this.handleCancelSaveProperty = this.handleCancelSaveProperty.bind(this);
+        // this.handleEditProperty = this.handleEditProperty.bind(this);
+        // this.handleDeleteProperty = this.handleDeleteProperty.bind(this);
         this.renderEditableProperty = this.renderEditableProperty.bind(this);
         this.loadTopics = this.loadTopics.bind(this);
         this.getSortedOperations = this.getSortedOperations.bind(this);
@@ -182,27 +218,16 @@ class Topics extends Component {
     }
 
     handleAddTopic(topic) {
-        const modes = [];
-        if (topic.isPublish) {
-            modes.push('publish');
-        }
-        if (topic.isSubscribe) {
-            modes.push('subscribe');
-        }
-
         // eslint-disable-next-line react/no-access-state-in-setstate
         const topicsCopy = [...this.state.topics];
-        modes.forEach((mode) => {
-            topicsCopy.push({
-                name: topic.name,
-                mode,
-                description: '',
-                scopes: [],
-                payload: {
-                    type: 'object',
-                    properties: [],
-                },
-            });
+        topicsCopy.push({
+            name: topic.name,
+            description: '',
+            scopes: [],
+            payload: {
+                type: 'object',
+                properties: [],
+            },
         });
         this.setState({ topics: topicsCopy, showAddTopic: false });
     }
@@ -257,7 +282,6 @@ class Topics extends Component {
         return operations.map((op) => {
             return {
                 name: op.target,
-                mode: op.verb,
                 description: '',
                 scopes: [],
                 uriMapping: op.uriMapping,
@@ -354,7 +378,7 @@ class Topics extends Component {
             return {
                 id: '',
                 target: topic.name,
-                verb: topic.mode,
+                verb: 'subscribe',
                 authType: 'Application & Application User',
                 throttlingPolicy: 'Unlimited',
                 amznResourceName: null,
@@ -570,20 +594,26 @@ class Topics extends Component {
         asyncAPI.channelNames().forEach((name) => {
             const channel = asyncAPI.channel(name);
             if (name === topic.name) {
-                if (topic.mode === 'SUBSCRIBE') {
-                    if (channel.hasSubscribe()) {
-                        if (channel.subscribe().message() !== null) {
-                            schema = channel.subscribe().message().payload();
-                        }
+                if (channel.hasSubscribe()) {
+                    if (channel.subscribe().message() !== null) {
+                        schema = channel.subscribe().message().payload();
                     }
                 }
-                if (topic.mode === 'PUBLISH') {
-                    if (channel.hasPublish()) {
-                        if (channel.publish().message() !== null) {
-                            schema = channel.publish().message().payload();
-                        }
-                    }
-                }
+                // TODO:
+                // if (topic.mode === 'SUBSCRIBE') {
+                //     if (channel.hasSubscribe()) {
+                //         if (channel.subscribe().message() !== null) {
+                //             schema = channel.subscribe().message().payload();
+                //         }
+                //     }
+                // }
+                // if (topic.mode === 'PUBLISH') {
+                //     if (channel.hasPublish()) {
+                //         if (channel.publish().message() !== null) {
+                //             schema = channel.publish().message().payload();
+                //         }
+                //     }
+                // }
             }
         });
         return JSON.stringify(schema, null, '\t');
@@ -595,6 +625,10 @@ class Topics extends Component {
         return (
             <div className={classes.root}>
                 {topics.map((topic, i) => {
+                    const methods = ['subscribe'];
+                    if (api.type === 'WS') {
+                        methods.push('publish');
+                    }
                     return (
                         <Accordion>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -602,10 +636,19 @@ class Topics extends Component {
                                     <Grid item>
                                         <Grid container align-items='flex-start' spacing={2}>
                                             <Grid item>
+                                                {/* {
+                                                    api.type === 'WS' && (
+                                                        <Chip
+                                                            label='PUBLISH'
+                                                            style={{ height: 20, marginRight: 5 }}
+                                                        />
+                                                    )
+                                                }
                                                 <Chip
-                                                    label={topic.mode.toUpperCase()}
+                                                    label='SUBSCRIBE'
                                                     style={{ height: 20, marginRight: 5 }}
-                                                />
+                                                /> */}
+                                                <RenderMethod methods={methods} />
                                             </Grid>
                                             <Grid item>
                                                 <Typography>

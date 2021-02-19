@@ -58,9 +58,12 @@ class SubscriptionPoliciesManage extends Component {
     }
 
     componentDidMount() {
-        API.policies('subscription')
+        const { api } = this.props;
+        const quotaType = (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE')
+            ? 'eventCount' : 'requestCount';
+        API.policiesByQuotaType(quotaType)
             .then((res) => {
-                this.setState({ subscriptionPolicies: res.body.list });
+                this.setState({ subscriptionPolicies: res.body });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -120,17 +123,17 @@ class SubscriptionPoliciesManage extends Component {
                         <FormGroup>
                             { subscriptionPolicies && Object.entries(subscriptionPolicies).map((value) => (
                                 <FormControlLabel
-                                    key={value[1].name}
+                                    key={value[1].displayName}
                                     control={(
                                         <Checkbox
                                             disabled={isRestricted(['apim:api_publish', 'apim:api_create'], api)}
                                             color='primary'
-                                            checked={policies.includes(value[1].name)}
+                                            checked={policies.includes(value[1].displayName)}
                                             onChange={(e) => this.handleChange(e)}
-                                            name={value[1].name}
+                                            name={value[1].displayName}
                                         />
                                     )}
-                                    label={value[1].name + ' : ' + value[1].description}
+                                    label={value[1].displayName + ' : ' + value[1].description}
                                 />
                             ))}
                         </FormGroup>
