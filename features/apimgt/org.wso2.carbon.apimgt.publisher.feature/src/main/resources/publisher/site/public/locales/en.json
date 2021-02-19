@@ -979,7 +979,6 @@
   "Apis.Listing.ApiTableView.name": "Name",
   "Apis.Listing.ApiTableView.provider": "Provider",
   "Apis.Listing.ApiTableView.version": "Version",
-  "Apis.Listing.ApiThumb.channel": "Channel",
   "Apis.Listing.ApiThumb.context": "Context",
   "Apis.Listing.ApiThumb.version": "Version",
   "Apis.Listing.SampleAPI.SampleAPI.create.new": "Create an API",

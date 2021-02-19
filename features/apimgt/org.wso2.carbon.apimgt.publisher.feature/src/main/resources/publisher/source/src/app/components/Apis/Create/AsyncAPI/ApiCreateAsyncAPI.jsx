@@ -53,7 +53,7 @@ export default function ApiCreateAsyncAPI(props) {
     const { settings } = useAppContext();
     // eslint-disable-next-line no-use-before-define
     const classes = useStyles();
-    const [hideEndpoint, setHideEndpoint] = useState(false);
+    const [hideEndpoint, setHideEndpoint] = useState(true);
 
     /**
      *
@@ -99,21 +99,24 @@ export default function ApiCreateAsyncAPI(props) {
 
     const protocols = [
         {
-            name: 'websub',
+            name: 'WEBSUB',
             displayName: 'WebSub',
-            description: 'WebSub',
         },
         {
-            name: 'ws',
+            name: 'WEBSOCKET',
             displayName: 'WebSocket',
-            description: 'WebSocket',
         },
         {
-            name: 'sse',
-            displayName: 'SSE',
-            description: 'Server Sent Events',
+            name: 'SSE',
+            displayName: 'Server Sent Events (SSE)',
         },
     ];
+
+    const protocolKeys = {
+        WebSocket: 'WS',
+        'Server Sent Events (SSE)': 'SSE',
+        WebSub: 'WEBSUB',
+    };
 
     /**
      *
@@ -121,6 +124,16 @@ export default function ApiCreateAsyncAPI(props) {
      * @param {*} event
      */
     function handleOnChange(event) {
+        const { name: action, value } = event.target;
+        inputsDispatcher({ action, value });
+    }
+
+    /**
+     *
+     *
+     * @param {*} event
+     */
+    function handleOnChangeForProtocol(event) {
         const { name: action, value } = event.target;
         if (value === 'WebSub') {
             setHideEndpoint(true);
@@ -159,11 +172,11 @@ export default function ApiCreateAsyncAPI(props) {
             version,
             context,
             policies,
-            type: protocol.toUpperCase() === 'WEBSOCKET' ? 'WS' : protocol.toUpperCase(),
+            type: protocolKeys[protocol],
         };
         if (endpoint) {
             additionalProperties.endpointConfig = {
-                endpoint_type: 'ws',
+                endpoint_type: 'http',
                 sandbox_endpoints: {
                     url: endpoint,
                 },
@@ -278,7 +291,7 @@ export default function ApiCreateAsyncAPI(props) {
                                 InputProps={{
                                     id: 'itest-id-apipolicies-input',
                                 }}
-                                onChange={handleOnChange}
+                                onChange={handleOnChangeForProtocol}
                             >
                                 {protocols.map((protocol) => (
                                     <MenuItem
