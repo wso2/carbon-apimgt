@@ -1446,6 +1446,7 @@ paths:
         Map keys (Consumer key/secret) to an application
       parameters:
         - $ref: '#/components/parameters/applicationId'
+        - $ref: '#/components/parameters/requestedTenant'
       requestBody:
         description: |
           Application key mapping request object
