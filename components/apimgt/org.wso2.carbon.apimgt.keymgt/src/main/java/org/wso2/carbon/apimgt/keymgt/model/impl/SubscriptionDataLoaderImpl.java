@@ -259,7 +259,8 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         return getKeyMapping(consumerKey, null);
     }
 
-    @Override public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager)
+    @Override
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager)
             throws DataLoadingException {
         ApplicationKeyMapping application = null;
         String responseString;
