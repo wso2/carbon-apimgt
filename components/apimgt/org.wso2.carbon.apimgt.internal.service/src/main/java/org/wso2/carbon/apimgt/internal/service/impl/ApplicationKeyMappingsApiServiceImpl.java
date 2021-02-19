@@ -32,16 +32,16 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappingsApiService {
 
-
     @Override
     public Response applicationKeyMappingsGet(String xWSO2Tenant, String consumerKey, String keymanager,
                                               MessageContext messageContext) throws APIManagementException {
+
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
         if (StringUtils.isNotEmpty(consumerKey)) {
             ApplicationKeyMapping keyMapping = subscriptionValidationDAO.getApplicationKeyMapping(consumerKey,
-                    keymanager);
+                    keymanager, xWSO2Tenant);
             List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
             if (keyMapping != null) {
                 applicationKeyMappings.add(keyMapping);
@@ -55,8 +55,6 @@ public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappi
                             getAllApplicationKeyMappings(xWSO2Tenant))).build();
 
         }
-        return Response.ok().entity(SubscriptionValidationDataUtil.
-                fromApplicationKeyMappingToApplicationKeyMappingListDTO(
-                        subscriptionValidationDAO.getAllApplicationKeyMappings())).build();
+        return null;
     }
 }
