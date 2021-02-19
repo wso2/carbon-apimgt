@@ -371,7 +371,7 @@ public class WebhooksDAO {
             }
             preparedStatement.setString(6, encryptedSecret);
             preparedStatement.setString(7, properties.getProperty(APIConstants.Webhooks.LEASE_SECONDS));
-            Timestamp updatedTime = Timestamp.valueOf(properties.getProperty(APIConstants.Webhooks.UPDATED_AT));
+            Timestamp updatedTime = (Timestamp)properties.get(APIConstants.Webhooks.UPDATED_AT);
             preparedStatement.setTimestamp(8, updatedTime);
             preparedStatement.executeUpdate();
         }

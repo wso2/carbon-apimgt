@@ -587,6 +587,10 @@ paths:
           description: 'Event Received success'
           schema:
             type: object
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above

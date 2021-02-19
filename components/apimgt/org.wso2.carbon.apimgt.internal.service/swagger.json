@@ -748,6 +748,12 @@
             "schema" : {
               "type" : "object"
             }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
           }
         }
       }
