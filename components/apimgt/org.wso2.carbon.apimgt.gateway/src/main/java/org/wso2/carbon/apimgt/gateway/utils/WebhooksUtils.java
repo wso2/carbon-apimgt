@@ -15,6 +15,11 @@
  */
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
+import org.apache.axis2.AxisFault;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,9 +31,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
@@ -162,5 +174,65 @@ public class WebhooksUtils {
         boolean isApplicationLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
                 .isThrottled(applicationLevelThrottleKey);
         return (isApiLevelThrottled || isApplicationLevelThrottled || isSubscriptionLevelThrottled);
+    }
+
+    public static void handleThrottleOutMessage(MessageContext messageContext) {
+        String errorMessage = "Message throttled out";
+        String errorDescription = "You have exceeded your quota";
+        int errorCode = APIThrottleConstants.CONNECTIONS_COUNT_THROTTLE_OUT_ERROR_CODE;
+        int httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
+        messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, httpErrorCode);
+
+        Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
+
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+            return;
+        }
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        // This property need to be set to avoid sending the content in pass-through pipe (request message)
+        // as the response.
+        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+        try {
+            RelayUtils.consumeAndDiscardMessage(axis2MC);
+        } catch (AxisFault axisFault) {
+            //In case of an error it is logged and the process is continued because we're setting a fault message
+            // in the payload.
+            log.error("Error occurred while consuming and discarding the message", axisFault);
+        }
+
+        if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
+            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));
+        }
+
+        sendFault(messageContext, httpErrorCode);
+    }
+
+    public static OMElement getFaultPayload(int throttleErrorCode, String message, String description) {
+        OMFactory fac = OMAbstractFactory.getOMFactory();
+        OMNamespace ns = fac.createOMNamespace(APIThrottleConstants.API_THROTTLE_NS,
+                APIThrottleConstants.API_THROTTLE_NS_PREFIX);
+        OMElement payload = fac.createOMElement("fault", ns);
+
+        OMElement errorCode = fac.createOMElement("code", ns);
+        errorCode.setText(String.valueOf(throttleErrorCode));
+        OMElement errorMessage = fac.createOMElement("message", ns);
+        errorMessage.setText(message);
+        OMElement errorDetail = fac.createOMElement("description", ns);
+        errorDetail.setText(description);
+        payload.addChild(errorCode);
+        payload.addChild(errorMessage);
+        payload.addChild(errorDetail);
+        return payload;
+    }
+
+    public static void sendFault(MessageContext messageContext, int httpErrorCode) {
+        Utils.sendFault(messageContext, httpErrorCode);
     }
 }

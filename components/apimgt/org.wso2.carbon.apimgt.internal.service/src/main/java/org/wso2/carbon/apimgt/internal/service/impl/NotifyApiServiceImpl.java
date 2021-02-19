@@ -31,7 +31,7 @@ public class NotifyApiServiceImpl implements NotifyApiService {
         } catch (APIManagementException e) {
             log.error("Error while processing notification", e);
             JSONObject responseObj = new JSONObject();
-            responseObj.put("Message", "Error pushing the notification event for " + xWSO2KEYManager);
+            responseObj.put("Message", e.getMessage());
             String responseStringObj = String.valueOf(responseObj);
             return Response.serverError().entity(responseStringObj).build();
         }
