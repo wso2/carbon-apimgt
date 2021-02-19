@@ -216,6 +216,7 @@
                 <configuration>
                     <excludes>
                         <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/publisher/v1/dto/**/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
