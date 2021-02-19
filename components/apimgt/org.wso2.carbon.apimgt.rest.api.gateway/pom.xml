@@ -224,6 +224,9 @@
                 <configuration>
                     <excludes>
                         <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/gateway/dto/**/*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/gateway/**Api.**</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/gateway/**Service.**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

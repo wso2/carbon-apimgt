@@ -296,6 +296,8 @@
                 <configuration>
                     <excludes>
                         <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/publisher/v1/**Api.**</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/publisher/v1/**Service.**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
