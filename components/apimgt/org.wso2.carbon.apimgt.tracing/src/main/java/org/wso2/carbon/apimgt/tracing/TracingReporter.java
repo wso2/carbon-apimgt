@@ -32,6 +32,9 @@ import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * This class used to generate log tracer related logs.
+ */
 public class TracingReporter implements Reporter {
 
     private final Log log;
@@ -52,15 +55,11 @@ public class TracingReporter implements Reporter {
 
     public void log(Instant timeStamp, SpanData span, Map<String, ?> fields) {
         LogLevel level = LogLevel.INFO;
-        try {
             LogLevel logLevel = (LogLevel) fields.get(LogLevel.FIELD_NAME);
             if (logLevel != null) {
                 level = logLevel;
                 fields.remove(LogLevel.FIELD_NAME);
             }
-        } catch (Exception exc) {
-            log.warn("fail to read value of field {}");
-        }
         switch (level) {
             case TRACE:
                 if (log.isTraceEnabled()) {

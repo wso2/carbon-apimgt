@@ -144,9 +144,10 @@ public class SignedJWTInfo implements Serializable {
     }
 
     public boolean isValidCertificateBoundAccessToken() { //Holder of Key token
-        if (X509ClientCertificate == null || StringUtils.isEmpty(getX509ClientCertificateHash()))
-            return false;
+
         if (isCertificateBoundAccessTokenEnabled()) {
+            if (X509ClientCertificate == null || StringUtils.isEmpty(getX509ClientCertificateHash()))
+                return false;
             if (getX509ClientCertificateHash().equals(getCertificateThumbprint())) {
                 return true;
             }
