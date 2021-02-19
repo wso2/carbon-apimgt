@@ -173,43 +173,9 @@ function AddEdit(props) {
                 }
                 break;
             case 'requestCount':
-                if (fieldValue === '') {
-                    error = `Request Count ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.is.empty.error',
-                        defaultMessage: ' is empty',
-                    })}`;
-                } else if (fieldValue < 1) {
-                    error = `Request Count ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.is.negative.error',
-                        defaultMessage: ' should be greater than 1',
-                    })}`;
-                }
-                break;
             case 'dataAmount':
-                if (fieldValue === '') {
-                    error = `Data Amount ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.is.empty.error',
-                        defaultMessage: ' is empty',
-                    })}`;
-                } else if (fieldValue < 1) {
-                    error = `Data Amount ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.is.negative.error',
-                        defaultMessage: ' should be greater than 1',
-                    })}`;
-                }
-                break;
             case 'unitTime':
-                if (fieldValue === '') {
-                    error = `Unit Time ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.is.empty.error',
-                        defaultMessage: ' is empty',
-                    })}`;
-                } else if (fieldValue < 1) {
-                    error = `Unit Time ${intl.formatMessage({
-                        id: 'Throttling.Advanced.AddEdit.is.negative.error',
-                        defaultMessage: ' should be greater than 1',
-                    })}`;
-                }
+                error = fieldValue === '' ? fieldName + ' is Empty' : false;
                 break;
             default:
                 break;
@@ -224,9 +190,8 @@ function AddEdit(props) {
     } = state;
 
     const formHasErrors = (validatingActive = false) => {
-        if (hasErrors('policyName', description, validatingActive)
-            || hasErrors('dataAmount', description, validatingActive)
-            || hasErrors('unitTime', description, validatingActive)) {
+        if (hasErrors('policyName', policyName, validatingActive)
+        || hasErrors('description', description, validatingActive)) {
             return true;
         } else {
             return false;

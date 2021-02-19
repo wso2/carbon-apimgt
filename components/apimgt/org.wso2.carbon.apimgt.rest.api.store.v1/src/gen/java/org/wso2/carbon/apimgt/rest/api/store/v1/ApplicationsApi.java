@@ -277,8 +277,8 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdMapKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application key mapping request object " ,required=true) ApplicationKeyMappingRequestDTO applicationKeyMappingRequestDTO) throws APIManagementException{
-        return delegate.applicationsApplicationIdMapKeysPost(applicationId, applicationKeyMappingRequestDTO, securityContext);
+    public Response applicationsApplicationIdMapKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application key mapping request object " ,required=true) ApplicationKeyMappingRequestDTO applicationKeyMappingRequestDTO,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.applicationsApplicationIdMapKeysPost(applicationId, applicationKeyMappingRequestDTO, xWSO2Tenant, securityContext);
     }
 
     @GET

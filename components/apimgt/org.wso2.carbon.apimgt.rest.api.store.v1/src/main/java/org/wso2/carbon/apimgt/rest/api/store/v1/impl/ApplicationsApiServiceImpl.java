@@ -1075,7 +1075,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
-                                                         MessageContext messageContext) throws APIManagementException {
+                                                         String xWSO2Tenant, MessageContext messageContext)
+            throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
@@ -1094,7 +1095,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
                 Map<String, Object> keyDetails = apiConsumer
                         .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName);
+                                application.getName(), keyType, tokenType, keyManagerName, xWSO2Tenant);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);
