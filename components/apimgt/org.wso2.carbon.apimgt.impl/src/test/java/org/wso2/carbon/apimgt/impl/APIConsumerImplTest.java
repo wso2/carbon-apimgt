@@ -1275,8 +1275,11 @@ public class APIConsumerImplTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString());
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
+        keyManagerConfigurationsDto.setUuid(UUID.randomUUID().toString());
+        keyManagerConfigurationsDto.setEnabled(true);
         Mockito.when(apiMgtDAO.isKeyManagerConfigurationExistByName( "default","carbon.super"))
                 .thenReturn(true);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName("carbon.super", "default")).thenReturn(keyManagerConfigurationsDto);
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
@@ -1285,13 +1288,14 @@ public class APIConsumerImplTest {
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         try {
-            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT", "default");
+            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT", "default", "carbon" +
+                    ".super");
             Assert.fail("Exception is not thrown when client id is already mapped to an application");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
         Assert.assertEquals(7, apiConsumer.mapExistingOAuthClient("", "admin", "1",
-                "app1", "refresh", "DEFAULT", "default").size());
+                "app1", "refresh", "DEFAULT", "default", "carbon.super").size());
     }
 
     @Test

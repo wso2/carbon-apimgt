@@ -32,7 +32,7 @@ describe('AppErrorBoundary test', () => {
         expect(shallowRendered.contains(Child)).toBeTruthy();
     });
 
-    test.skip('should return error boundary HTML', () => {
+    test('should return error boundary HTML', () => {
         const message = 'Error boundary test error';
         const { light } = Themes;
         const TestError = () => {
