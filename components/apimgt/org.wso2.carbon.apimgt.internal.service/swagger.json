@@ -1553,6 +1553,9 @@
         },
         "bandwidth" : {
           "$ref" : "#/definitions/BandwidthLimit"
+        },
+        "eventCount" : {
+          "$ref" : "#/definitions/EventCountLimit"
         }
       },
       "title" : "Throttle Limit"
@@ -1590,6 +1593,23 @@
             "format" : "int64",
             "example" : 1000,
             "description" : "Maximum number of requests allowed"
+          }
+        }
+      } ]
+    },
+    "EventCountLimit" : {
+      "title" : "Event Count Limit object",
+      "allOf" : [ {
+        "$ref" : "#/components/schemas/ThrottleLimitBase"
+      }, {
+        "type" : "object",
+        "required" : [ "eventCount" ],
+        "properties" : {
+          "eventCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 3000,
+            "description" : "Maximum number of events allowed"
           }
         }
       } ]

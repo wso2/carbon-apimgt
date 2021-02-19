@@ -70,9 +70,180 @@ public class ThrottlePolicyTemplateBuilder {
     private static final String POLICY_VELOCITY_GLOBAL = "throttle_policy_template_global";
     private static final String POLICY_VELOCITY_APP = "throttle_policy_template_app";
     private static final String POLICY_VELOCITY_SUB = "throttle_policy_template_sub";
+    private static final String POLICY_VELOCITY_ASYNC_SUB = "throttle_policy_template_async_sub";
+    private static String velocityLogPath = "not-defined";
     private final String policyTemplateLocation = "repository" + File.separator + "resources" + File.separator
             + "policy_templates" + File.separator;
-    private static String velocityLogPath = "not-defined";
+
+    private static String getVelocityLogger() {
+        if ("not-defined".equalsIgnoreCase(velocityLogPath)) {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIMConfiguration();
+            String logPath = config.getFirstProperty(APIConstants.VELOCITY_LOGGER);
+            if (logPath != null && !logPath.isEmpty()) {
+                velocityLogPath = logPath;
+            }
+        }
+        return velocityLogPath;
+    }
+
+    /**
+     * Produces final condition inside a pipeline
+     *
+     * @param conditions set of conditions
+     * @return combined condition string
+     */
+    private static String getPolicyCondition(Set<Condition> conditions) {
+        StringBuilder conditionString = new StringBuilder();
+        int i = 0;
+        for (Condition condition : conditions) {
+            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
+                    PolicyMappingUtil.mapCondition(condition);
+            if (i == 0) {
+                conditionString.append(mappedCondition.getCondition());
+            } else {
+                conditionString.append(" AND ").append(mappedCondition.getCondition());
+            }
+            i++;
+        }
+        return conditionString.toString();
+    }
+
+    /**
+     * Produces final condition inside a pipeline
+     *
+     * @param conditions set of conditions
+     * @return conditions as a JSON
+     */
+    private static JSONObject getPolicyConditionJson(Set<Condition> conditions) {
+        JSONObject tempCondition = new JSONObject();
+        for (Condition condition : conditions) {
+
+            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
+                    PolicyMappingUtil.mapCondition(condition);
+            JSONObject conditionJson;
+            if (tempCondition.containsKey(mappedCondition.getType().toLowerCase(Locale.ENGLISH))) {
+                conditionJson = (JSONObject) tempCondition.get(mappedCondition.getType().toLowerCase(Locale.ENGLISH));
+            } else {
+                conditionJson = new JSONObject();
+            }
+            tempCondition.put(mappedCondition.getType().toLowerCase(Locale.ENGLISH), conditionJson);
+            if (PolicyConstants.IP_SPECIFIC_TYPE.equals(mappedCondition.getType())) {
+                IPCondition ipCondition = (IPCondition) mappedCondition;
+                if (IPCondition.isIPv6Address(ipCondition.getSpecificIP())) {
+                    conditionJson.put("specificIp",
+                            String.valueOf(APIUtil.ipToBigInteger(ipCondition.getSpecificIP())));
+                } else {
+                    conditionJson.put("specificIp", ipCondition.ipToLong(ipCondition.getSpecificIP()));
+                }
+
+            } else if (PolicyConstants.IP_RANGE_TYPE.equals(mappedCondition.getType())) {
+                IPCondition ipRangeCondition = (IPCondition) mappedCondition;
+                if (IPCondition.isIPv6Address(ipRangeCondition.getStartingIP())
+                        && IPCondition.isIPv6Address(ipRangeCondition.getEndingIP())) {
+                    conditionJson.put("startingIp",
+                            String.valueOf(APIUtil.ipToBigInteger(ipRangeCondition.getStartingIP())));
+                    conditionJson.put("endingIp",
+                            String.valueOf(APIUtil.ipToBigInteger(ipRangeCondition.getEndingIP())));
+                } else {
+                    conditionJson.put("startingIp", ipRangeCondition.ipToLong(ipRangeCondition.getStartingIP()));
+                    conditionJson.put("endingIp", ipRangeCondition.ipToLong(ipRangeCondition.getEndingIP()));
+                }
+
+            } else if (mappedCondition instanceof QueryParameterCondition) {
+                QueryParameterCondition queryParameterCondition = (QueryParameterCondition) mappedCondition;
+                JSONObject values;
+                if (conditionJson.containsKey("values")) {
+                    values = (JSONObject) conditionJson.get("values");
+                } else {
+                    values = new JSONObject();
+                    conditionJson.put("values", values);
+                }
+                values.put(queryParameterCondition.getParameter(), queryParameterCondition.getValue());
+            } else if (mappedCondition instanceof HeaderCondition) {
+                HeaderCondition headerCondition = (HeaderCondition) mappedCondition;
+                JSONObject values;
+                if (conditionJson.containsKey("values")) {
+                    values = (JSONObject) conditionJson.get("values");
+                } else {
+                    values = new JSONObject();
+                    conditionJson.put("values", values);
+                }
+                values.put(headerCondition.getHeaderName(), headerCondition.getValue());
+            } else if (mappedCondition instanceof JWTClaimsCondition) {
+                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) mappedCondition;
+                JSONObject values;
+                if (conditionJson.containsKey("values")) {
+                    values = (JSONObject) conditionJson.get("values");
+                } else {
+                    values = new JSONObject();
+                    conditionJson.put("values", values);
+                }
+                values.put(jwtClaimsCondition.getClaimUrl(), jwtClaimsCondition.getAttribute());
+            }
+            conditionJson.put("invert", mappedCondition.isInvertCondition());
+        }
+        return tempCondition;
+    }
+
+    /**
+     * Produces final condition inside a pipeline for default policy with null string
+     *
+     * @param conditions set of conditions
+     * @return default policy condition string
+     */
+    private static String getPolicyConditionForDefault(Set<Condition> conditions) {
+        StringBuilder conditionString = new StringBuilder();
+        int i = 0;
+        for (Condition condition : conditions) {
+            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
+                    PolicyMappingUtil.mapCondition(condition);
+            String conditionStringComplete = mappedCondition.getCondition();
+            if (i == 0) {
+                conditionString.append(conditionStringComplete);
+            } else {
+                conditionString.append(" AND ").append(conditionStringComplete);
+            }
+            i++;
+        }
+        return conditionString.toString();
+    }
+
+    /**
+     * Generate the condition for the default query. This returns the condition to check thing that are not in
+     * any of the other conditions
+     *
+     * @param conditionsSet set of conditions
+     * @return condition for the default query
+     */
+    private static String getConditionForDefault(Set<String> conditionsSet) {
+        StringBuilder conditionString = new StringBuilder();
+        int i = 0;
+        for (String condition : conditionsSet) {
+            String conditionIsolated = PolicyConstants.OPEN_BRACKET + condition + PolicyConstants.CLOSE_BRACKET;
+            if (i == 0) {
+                conditionString = new StringBuilder(conditionIsolated);
+            } else {
+                conditionString.append(" OR ").append(conditionIsolated);
+            }
+            i++;
+        }
+        if (!StringUtils.isEmpty(conditionString.toString())) {
+            conditionString = new StringBuilder(PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")");
+        }
+        return conditionString.toString();
+    }
+
+    private static void setConstantContext(VelocityContext context) {
+        context.put("ACROSS_ALL", PolicyConstants.ACROSS_ALL);
+        context.put("PER_USER", PolicyConstants.PER_USER);
+        context.put("POLICY_LEVEL_API", PolicyConstants.POLICY_LEVEL_API);
+        context.put("POLICY_LEVEL_APP", PolicyConstants.POLICY_LEVEL_APP);
+        context.put("POLICY_LEVEL_SUB", PolicyConstants.POLICY_LEVEL_SUB);
+        context.put("POLICY_LEVEL_GLOBAL", PolicyConstants.POLICY_LEVEL_GLOBAL);
+        context.put("REQUEST_COUNT_TYPE", PolicyConstants.REQUEST_COUNT_TYPE);
+        context.put("BANDWIDTH_TYPE", PolicyConstants.BANDWIDTH_TYPE);
+    }
 
     /**
      * Generate policy for API level throttling
@@ -320,8 +491,12 @@ public class ThrottlePolicyTemplateBuilder {
             }
             velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
             velocityengine.init();
-            Template template = velocityengine.getTemplate(getTemplatePathForSubscription());
-
+            Template template;
+            if (PolicyConstants.EVENT_COUNT_TYPE.equals(policy.getDefaultLimit().getQuotaType())) {
+                template = velocityengine.getTemplate(getTemplatePathForAsyncSubscription());
+            } else {
+                template = velocityengine.getTemplate(getTemplatePathForSubscription());
+            }
             VelocityContext context = new VelocityContext();
             setConstantContext(context);
             context.put("policy", policy);
@@ -357,174 +532,7 @@ public class ThrottlePolicyTemplateBuilder {
         return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_SUB + ".xml";
     }
 
-    private static String getVelocityLogger() {
-        if ("not-defined".equalsIgnoreCase(velocityLogPath)) {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIMConfiguration();
-            String logPath = config.getFirstProperty(APIConstants.VELOCITY_LOGGER);
-            if (logPath != null && !logPath.isEmpty()) {
-                velocityLogPath = logPath;
-            }
-        }
-        return velocityLogPath;
-    }
-
-    /**
-     * Produces final condition inside a pipeline
-     *
-     * @param conditions set of conditions
-     * @return combined condition string
-     */
-    private static String getPolicyCondition(Set<Condition> conditions) {
-        StringBuilder conditionString = new StringBuilder();
-        int i = 0;
-        for (Condition condition : conditions) {
-            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
-                    PolicyMappingUtil.mapCondition(condition);
-            if (i == 0) {
-                conditionString.append(mappedCondition.getCondition());
-            } else {
-                conditionString.append(" AND ").append(mappedCondition.getCondition());
-            }
-            i++;
-        }
-        return conditionString.toString();
-    }
-
-
-    /**
-     * Produces final condition inside a pipeline
-     *
-     * @param conditions set of conditions
-     * @return conditions as a JSON
-     */
-    private static JSONObject getPolicyConditionJson(Set<Condition> conditions) {
-        JSONObject tempCondition = new JSONObject();
-        for (Condition condition : conditions) {
-
-            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
-                    PolicyMappingUtil.mapCondition(condition);
-            JSONObject conditionJson;
-            if (tempCondition.containsKey(mappedCondition.getType().toLowerCase(Locale.ENGLISH))) {
-                conditionJson = (JSONObject) tempCondition.get(mappedCondition.getType().toLowerCase(Locale.ENGLISH));
-            } else {
-                conditionJson = new JSONObject();
-            }
-            tempCondition.put(mappedCondition.getType().toLowerCase(Locale.ENGLISH), conditionJson);
-            if (PolicyConstants.IP_SPECIFIC_TYPE.equals(mappedCondition.getType())) {
-                IPCondition ipCondition = (IPCondition) mappedCondition;
-                if (IPCondition.isIPv6Address(ipCondition.getSpecificIP())) {
-                    conditionJson.put("specificIp",
-                            String.valueOf(APIUtil.ipToBigInteger(ipCondition.getSpecificIP())));
-                } else {
-                    conditionJson.put("specificIp", ipCondition.ipToLong(ipCondition.getSpecificIP()));
-                }
-
-            } else if (PolicyConstants.IP_RANGE_TYPE.equals(mappedCondition.getType())) {
-                IPCondition ipRangeCondition = (IPCondition) mappedCondition;
-                if (IPCondition.isIPv6Address(ipRangeCondition.getStartingIP())
-                        && IPCondition.isIPv6Address(ipRangeCondition.getEndingIP())) {
-                    conditionJson.put("startingIp",
-                            String.valueOf(APIUtil.ipToBigInteger(ipRangeCondition.getStartingIP())));
-                    conditionJson.put("endingIp",
-                            String.valueOf(APIUtil.ipToBigInteger(ipRangeCondition.getEndingIP())));
-                } else {
-                    conditionJson.put("startingIp", ipRangeCondition.ipToLong(ipRangeCondition.getStartingIP()));
-                    conditionJson.put("endingIp", ipRangeCondition.ipToLong(ipRangeCondition.getEndingIP()));
-                }
-
-            } else if (mappedCondition instanceof QueryParameterCondition) {
-                QueryParameterCondition queryParameterCondition = (QueryParameterCondition) mappedCondition;
-                JSONObject values;
-                if (conditionJson.containsKey("values")) {
-                    values = (JSONObject) conditionJson.get("values");
-                } else {
-                    values = new JSONObject();
-                    conditionJson.put("values", values);
-                }
-                values.put(queryParameterCondition.getParameter(), queryParameterCondition.getValue());
-            } else if (mappedCondition instanceof HeaderCondition) {
-                HeaderCondition headerCondition = (HeaderCondition) mappedCondition;
-                JSONObject values;
-                if (conditionJson.containsKey("values")) {
-                    values = (JSONObject) conditionJson.get("values");
-                } else {
-                    values = new JSONObject();
-                    conditionJson.put("values", values);
-                }
-                values.put(headerCondition.getHeaderName(), headerCondition.getValue());
-            } else if (mappedCondition instanceof JWTClaimsCondition) {
-                JWTClaimsCondition jwtClaimsCondition = (JWTClaimsCondition) mappedCondition;
-                JSONObject values;
-                if (conditionJson.containsKey("values")) {
-                    values = (JSONObject) conditionJson.get("values");
-                } else {
-                    values = new JSONObject();
-                    conditionJson.put("values", values);
-                }
-                values.put(jwtClaimsCondition.getClaimUrl(), jwtClaimsCondition.getAttribute());
-            }
-            conditionJson.put("invert", mappedCondition.isInvertCondition());
-        }
-        return tempCondition;
-    }
-
-    /**
-     * Produces final condition inside a pipeline for default policy with null string
-     *
-     * @param conditions set of conditions
-     * @return default policy condition string
-     */
-    private static String getPolicyConditionForDefault(Set<Condition> conditions) {
-        StringBuilder conditionString = new StringBuilder();
-        int i = 0;
-        for (Condition condition : conditions) {
-            org.wso2.carbon.apimgt.api.model.policy.Condition mappedCondition =
-                    PolicyMappingUtil.mapCondition(condition);
-            String conditionStringComplete = mappedCondition.getCondition();
-            if (i == 0) {
-                conditionString.append(conditionStringComplete);
-            } else {
-                conditionString.append(" AND ").append(conditionStringComplete);
-            }
-            i++;
-        }
-        return conditionString.toString();
-    }
-
-    /**
-     * Generate the condition for the default query. This returns the condition to check thing that are not in
-     * any of the other conditions
-     *
-     * @param conditionsSet set of conditions
-     * @return condition for the default query
-     */
-    private static String getConditionForDefault(Set<String> conditionsSet) {
-        StringBuilder conditionString = new StringBuilder();
-        int i = 0;
-        for (String condition : conditionsSet) {
-            String conditionIsolated = PolicyConstants.OPEN_BRACKET + condition + PolicyConstants.CLOSE_BRACKET;
-            if (i == 0) {
-                conditionString = new StringBuilder(conditionIsolated);
-            } else {
-                conditionString.append(" OR ").append(conditionIsolated);
-            }
-            i++;
-        }
-        if (!StringUtils.isEmpty(conditionString.toString())) {
-            conditionString = new StringBuilder(PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")");
-        }
-        return conditionString.toString();
-    }
-
-    private static void setConstantContext(VelocityContext context) {
-        context.put("ACROSS_ALL", PolicyConstants.ACROSS_ALL);
-        context.put("PER_USER", PolicyConstants.PER_USER);
-        context.put("POLICY_LEVEL_API", PolicyConstants.POLICY_LEVEL_API);
-        context.put("POLICY_LEVEL_APP", PolicyConstants.POLICY_LEVEL_APP);
-        context.put("POLICY_LEVEL_SUB", PolicyConstants.POLICY_LEVEL_SUB);
-        context.put("POLICY_LEVEL_GLOBAL", PolicyConstants.POLICY_LEVEL_GLOBAL);
-        context.put("REQUEST_COUNT_TYPE", PolicyConstants.REQUEST_COUNT_TYPE);
-        context.put("BANDWIDTH_TYPE", PolicyConstants.BANDWIDTH_TYPE);
+    private String getTemplatePathForAsyncSubscription() {
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_ASYNC_SUB + ".xml";
     }
 }
