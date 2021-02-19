@@ -1831,9 +1831,9 @@
                 <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.atlassian.oai</groupId>
+                <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
                 <artifactId>swagger-request-validator-core</artifactId>
-                <version>${atlassian.schema.validator.version}</version>
+                <version>${org.wso2.orbit.atlassian.oai.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -2068,7 +2068,6 @@
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
         <aspectj.version>1.9.5</aspectj.version>
-        <atlassian.schema.validator.version>2.12.1</atlassian.schema.validator.version>
         <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <aspectj.version>1.9.4</aspectj.version>

@@ -313,7 +313,7 @@
             <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.atlassian.oai</groupId>
+            <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
             <artifactId>swagger-request-validator-core</artifactId>
         </dependency>
     </dependencies>
