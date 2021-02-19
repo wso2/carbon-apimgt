@@ -1206,15 +1206,16 @@ public class GatewayUtils {
     public static String getAPINameFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
 
         API api = getAPI(messageContext);
-        if (api != null){
+        if (api != null) {
             return api.getApiName();
         }
         return null;
     }
 
     public static String getApiProviderFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
+
         API api = getAPI(messageContext);
-        if (api != null){
+        if (api != null) {
             return api.getApiProvider();
         }
         return null;
