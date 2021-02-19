@@ -420,7 +420,7 @@ function Overview(props) {
                                                 <FormattedMessage
                                                     id='ServiceCatalog.Listing.Overview.display.name'
                                                     defaultMessage='{serviceDisplayName}'
-                                                    values={{ serviceDisplayName: service.displayName }}
+                                                    values={{ serviceDisplayName: service.name }}
                                                 />
                                             </Typography>
                                         </div>
@@ -436,7 +436,7 @@ function Overview(props) {
                                         </div>
                                         <Usages
                                             usageNumber={service.usage}
-                                            serviceDisplayName={service.displayName}
+                                            serviceDisplayName={service.name}
                                             serviceId={service.id}
                                             isOverview
                                             classes={classes}
@@ -449,7 +449,8 @@ function Overview(props) {
                                     <CreateApi
                                         history={history}
                                         serviceId={service.id}
-                                        serviceDisplayName={service.displayName}
+                                        serviceKey={service.version}
+                                        serviceDisplayName={service.name}
                                         serviceVersion={service.version}
                                         serviceUrl={service.serviceUrl}
                                         isOverview
@@ -526,7 +527,7 @@ function Overview(props) {
                                                         <Button
                                                             onClick={
                                                                 () => downloadServiceDefinition(
-                                                                    service.serviceKey,
+                                                                    service.serviceId,
                                                                 )
                                                             }
                                                             color='primary'

@@ -2196,6 +2196,60 @@ class API extends Resource {
             });
     }
 
+    /**
+     * Create API from service
+     * @returns {promise} Add response.
+     */
+    static createApiFromService(serviceKey, apiMetaData) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        const promisedServiceResponse = apiClient.then(client => {
+            return client.apis['APIs'].importServiceFromCatalog(
+                {
+                    serviceKey: serviceKey,
+                },
+                { requestBody: apiMetaData},
+                this._requestMetaData() 
+            );
+        });
+        return promisedServiceResponse.then(response => response.body);
+    }
+
+     /**
+     * Reimport service.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    static reimportService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {   
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
+    /**
+     * Create new version service.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    static newVersionService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {   
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+    
 
     /**
      * Get details of a given API

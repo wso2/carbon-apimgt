@@ -30,7 +30,7 @@ import APIValidation from 'AppData/APIValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
 import { FormattedMessage, useIntl } from 'react-intl';
-import ServiceCatalog from 'AppData/ServiceCatalog';
+import API from 'AppData/api';
 
 const useStyles = makeStyles((theme) => ({
     buttonStyle: {
@@ -121,16 +121,15 @@ function reducer(state, { field, value }) {
  */
 function CreateApi(props) {
     const {
-        serviceId,
         history,
         isOverview,
         serviceDisplayName,
+        serviceKey,
         serviceVersion,
         serviceUrl,
     } = props;
     const classes = useStyles();
     const intl = useIntl();
-
     const [open, setOpen] = useState(false);
     const [pageError, setPageError] = useState(null);
 
@@ -266,7 +265,7 @@ function CreateApi(props) {
     }
 
     const runAction = () => {
-        const promisedCreateApi = ServiceCatalog.createApiFromService(serviceId, state);
+        const promisedCreateApi = API.createApiFromService(serviceKey, state);
         promisedCreateApi.then((data) => {
             const apiInfo = data;
             Alert.info(intl.formatMessage({
@@ -507,7 +506,7 @@ CreateApi.defaultProps = {
 };
 
 CreateApi.propTypes = {
-    serviceId: PropTypes.string.isRequired,
+    serviceKey: PropTypes.string.isRequired,
     serviceDisplayName: PropTypes.string.isRequired,
     serviceVersion: PropTypes.string.isRequired,
     serviceUrl: PropTypes.string.isRequired,
