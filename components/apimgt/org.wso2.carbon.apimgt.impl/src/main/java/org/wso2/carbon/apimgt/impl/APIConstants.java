@@ -422,6 +422,7 @@ public final class APIConstants {
     public static final String ACCESS_TOKEN_USER_TYPE_APPLICATION = "APPLICATION";
     public static final String USER_TYPE_END_USER = "END_USER";
     public static final String FIELD_API_NAME = "API_NAME";
+    public static final String FIELD_API_VERSION = "API_VERSION";
     public static final String FIELD_CONSUMER_KEY = "CONSUMER_KEY";
     public static final String FIELD_API_PUBLISHER = "API_PROVIDER";
 
