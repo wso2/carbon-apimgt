@@ -19,7 +19,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.8.221-SNAPSHOT</version>
+        <version>6.8.233-SNAPSHOT</version>
     </parent>
     <artifactId>org.wso2.carbon.apimgt.notification</artifactId>
     <modelVersion>4.0.0</modelVersion>
@@ -81,6 +81,15 @@
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>

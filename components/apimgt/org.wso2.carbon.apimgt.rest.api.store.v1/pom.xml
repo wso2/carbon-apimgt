@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.221-SNAPSHOT</version>
+        <version>6.8.233-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -214,6 +214,9 @@
                 <configuration>
                     <excludes>
                         <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/dto/**/*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/**Api.**</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/store/v1/**Service.**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

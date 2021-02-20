@@ -348,7 +348,7 @@ public class GraphQLAPIHandler extends AbstractHandler {
     private void handleFailure(MessageContext messageContext, String errorDescription) {
         OMElement payload = getFaultPayload(errorDescription);
         Utils.setFaultPayload(messageContext, payload);
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
@@ -366,9 +366,9 @@ public class GraphQLAPIHandler extends AbstractHandler {
         OMElement payload = fac.createOMElement("fault", ns);
 
         OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY + "");
+        errorCode.setText(GraphQLConstants.GRAPHQL_INVALID_QUERY + "");
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(APISecurityConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
+        errorMessage.setText(GraphQLConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
         OMElement errorDetail = fac.createOMElement("description", ns);
         errorDetail.setText(description);
 

@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -95,18 +96,14 @@ public class ServiceEntryMappingUtil {
         for (File file : files) {
             if (file.isDirectory()) {
                 ServiceEntry serviceInfo = new ServiceEntry();
-                File[] fList = Objects.requireNonNull(file.listFiles());
+                File metadataFile = getServiceFile(APIConstants.METADATA_FILE, file);
+                File definitionFile = getServiceFile(APIConstants.DEFINITION_FILE, file);
                 String key = null;
                 try {
-                    for (File aFile : fList) {
-                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
-                            serviceInfo = fromFileToServiceEntry(aFile, serviceInfo);
-                            serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
-                            key = serviceInfo.getKey();
-                        } else if (aFile.getName().startsWith(APIConstants.DEFINITION_FILE)) {
-                            serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(aFile)));
-                        }
-                    }
+                    serviceInfo = fromFileToServiceEntry(metadataFile, serviceInfo);
+                    serviceInfo.setMetadata(new ByteArrayInputStream(FileUtils.readFileToByteArray(metadataFile)));
+                    key = serviceInfo.getKey();
+                    serviceInfo.setEndpointDef(new ByteArrayInputStream(FileUtils.readFileToByteArray(definitionFile)));
                 } catch (IOException e) {
                     RestApiUtil.handleInternalServerError("Error while reading service resource files. " +
                             "Zip might not include valid data", e, log);
@@ -115,6 +112,19 @@ public class ServiceEntryMappingUtil {
             }
         }
         return endpointDetails;
+    }
+
+    private static File getServiceFile(String fileName, File files) {
+        FilenameFilter filenameFilter = (file, name) -> name.equals(fileName);
+        File[] retrievedFiles = files.listFiles(filenameFilter);
+        if (retrievedFiles == null || retrievedFiles.length == 0) {
+            RestApiUtil.handleBadRequest("Required file " + fileName + " is not provided", log);
+            return null;
+        } else if (retrievedFiles.length > 1) {
+            RestApiUtil.handleBadRequest("More than one " + fileName + " is provided", log);
+            return null;
+        }
+        return retrievedFiles[0];
     }
 
     public static String generateServiceKey(ServiceEntry serviceEntry) {

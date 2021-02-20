@@ -74,6 +74,16 @@ public class JWTValidatorImplTest {
         SignedJWT signedJWT =
                 Mockito.mock(SignedJWT.class);
         signedJWTInfo.setSignedJWT(signedJWT);
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.HOUR, 1);
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .expirationTime(now.getTime())
+                .claim(APIConstants.CNF, "{\n" +
+                        "         \"x5t#S256\": \"9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1\"\n" +
+                        "       }")
+                .build();
+        signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
+
         JWTValidationInfo jwtValidationInfo = Mockito.mock(JWTValidationInfo.class);
 
         TokenIssuerDto tokenIssuerDto = new TokenIssuerDto("https://localhost:9444/services");
@@ -86,6 +96,20 @@ public class JWTValidatorImplTest {
             log.info("Exception while signature verification. " + e);
             Assert.fail();
         }
+        // Create a mock APIManagerConfiguration Object for retrieving properties from the deployment.toml
+        PowerMockito.mockStatic(GatewayUtils.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(APIManagerConfiguration.class);
+        PowerMockito.mockStatic(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = PowerMockito.mock(APIManagerConfiguration.class);
+        ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = PowerMockito.mock(APIManagerConfigurationService.class);
+        OAuthServerConfiguration oAuthServerConfiguration = Mockito.mock(OAuthServerConfiguration.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(oAuthServerConfiguration.getTimeStampSkewInSeconds()).thenReturn(300L);
+        Mockito.when(serviceReferenceHolder.getOauthServerConfiguration()).thenReturn(oAuthServerConfiguration);
 
         JWTValidatorImpl jwtValidator = new JWTValidatorImpl();
         JWKSConfigurationDTO jwksConfigurationDTO = new JWKSConfigurationDTO();
@@ -95,7 +119,8 @@ public class JWTValidatorImplTest {
 
         try {
             JWTValidationInfo validatedInfo = jwtValidator.validateToken(signedJWTInfo);
-            assertFalse(validatedInfo.isValid(), "JWT certificate bound access token validation failed due certificate is not found.");
+            assertTrue(validatedInfo.isValid(), "JWT certificate bound access token validation failed even when the" +
+                    " configuration is not enabled.");
         } catch (APIManagementException e) {
             Assert.fail();
         }
@@ -118,20 +143,7 @@ public class JWTValidatorImplTest {
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
         signedJWTInfo.setX509ClientCertificate(x509Certificate);
-        PowerMockito.mockStatic(GatewayUtils.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(APIManagerConfiguration.class);
-        PowerMockito.mockStatic(APIManagerConfigurationService.class);
-        // Create a mock APIManagerConfiguration Object for retrieving properties from the deployment.toml
-        APIManagerConfiguration apiManagerConfiguration = PowerMockito.mock(APIManagerConfiguration.class);
-        ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
-        APIManagerConfigurationService apiManagerConfigurationService = PowerMockito.mock(APIManagerConfigurationService.class);
-        OAuthServerConfiguration oAuthServerConfiguration = Mockito.mock(OAuthServerConfiguration.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(oAuthServerConfiguration.getTimeStampSkewInSeconds()).thenReturn(300L);
-        Mockito.when(serviceReferenceHolder.getOauthServerConfiguration()).thenReturn(oAuthServerConfiguration);
+
         // Mock the properties read from the deployment.toml
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN))
                 .thenReturn("true");
@@ -144,30 +156,24 @@ public class JWTValidatorImplTest {
         }
 
         // Test when certificate bound access token validation is enabled and cnf thumbprint validation is successful
-        Calendar now = Calendar.getInstance();
-        now.add(Calendar.HOUR, 1);
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .expirationTime(now.getTime())
-                .claim(APIConstants.CNF, "{\n" +
-                        "         \"x5t#S256\": \"9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1\"\n" +
-                        "       }")
-                .build();
-        signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
-        try {
+        // when client certificate is added in the trust store
+        //todo add cert to trust store
+  /*      try {
             JWTValidationInfo validatedInfo = jwtValidator.validateToken(signedJWTInfo);
             assertTrue(validatedInfo.isValid(),
                     "JWT certificate bound access token validation failed. But it should be successful.");
         } catch (APIManagementException e) {
             Assert.fail();
-        }
-        //Test when certificate is found in the trust store but certificate bound access token is not enabled from the
-        // config
-        // when the config is not enabled validation should be successful.
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN))
-                .thenReturn("false");
+        }*/
+        //Test when certificate bound access token is  enabled from the config
+        // but client certificate is not present in the axis2messagecontext
+      /*  Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN))
+                .thenReturn("false");*/
+        signedJWTInfo.setX509ClientCertificate(null);
+
         try {
             JWTValidationInfo validatedInfo = jwtValidator.validateToken(signedJWTInfo);
-            assertTrue(validatedInfo.isValid(),
+            assertFalse(validatedInfo.isValid(),
                     "JWT certificate bound access token validation failed. But it should be successful" +
                             "when the config is not set.");
         } catch (APIManagementException e) {

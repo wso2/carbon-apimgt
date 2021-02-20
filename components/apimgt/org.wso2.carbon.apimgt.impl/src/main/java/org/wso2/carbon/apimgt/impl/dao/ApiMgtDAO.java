@@ -8393,15 +8393,23 @@ public class ApiMgtDAO {
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                String keyManagerName = rs.getString("KEY_MANAGER");
-                workflowDTO.setKeyManager(keyManagerName);
-                OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
-                        application.getCallbackUrl(), rs
-                                .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"), application.getTokenType(),tenantDomain, keyManagerName);
-                workflowDTO.setAppInfoDTO(request);
+                String keyManagerUUID = rs.getString("KEY_MANAGER");
+                workflowDTO.setKeyManager(keyManagerUUID);
+                KeyManagerConfigurationDTO keyManagerConfigurationByUUID = getKeyManagerConfigurationByUUID(conn,
+                        keyManagerUUID);
+                if (keyManagerConfigurationByUUID != null) {
+                    OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
+                            application.getCallbackUrl(), rs
+                                    .getString("TOKEN_SCOPE"),
+                            rs.getString("INPUTS"), application.getTokenType(),
+                            keyManagerConfigurationByUUID.getTenantDomain(), keyManagerConfigurationByUUID.getName());
+                    workflowDTO.setAppInfoDTO(request);
+                } else {
+                    throw new APIManagementException("Error occured while finding the KeyManager from uuid "
+                            + keyManagerUUID + ".", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error occurred while retrieving an " +
                     "Application Registration Entry for Workflow : " + workflowDTO
                     .getExternalWorkflowReference(), e);
