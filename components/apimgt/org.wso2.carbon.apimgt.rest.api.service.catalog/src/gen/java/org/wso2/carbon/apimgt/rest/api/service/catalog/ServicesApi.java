@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog;
 
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
@@ -72,6 +73,7 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response deleteService(@ApiParam(value = "uuid of the service",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
         return delegate.deleteService(serviceId, securityContext);
@@ -131,6 +133,25 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getServiceDefinition(@ApiParam(value = "uuid of the service",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
         return delegate.getServiceDefinition(serviceId, securityContext);
+    }
+
+    @GET
+    @Path("/{serviceId}/usage")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve the API Info that use the given service", notes = "Retrieve the id, name, context and version of the APIs that used by the service ", response = APIListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
+        })
+    }, tags={ "Services",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "List of APIs that uses the service in the service catalog is returned. ", response = APIListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getServiceUsage(@ApiParam(value = "uuid of the service",required=true) @PathParam("serviceId") String serviceId) throws APIManagementException{
+        return delegate.getServiceUsage(serviceId, securityContext);
     }
 
     @POST

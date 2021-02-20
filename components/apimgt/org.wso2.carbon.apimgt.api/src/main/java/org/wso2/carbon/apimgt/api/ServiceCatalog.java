@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 
@@ -154,4 +155,14 @@ public interface ServiceCatalog {
      */
     List<ServiceEntry> getServices(ServiceFilterParams filterParams, int tenantId, boolean shrink)
             throws APIManagementException;
+
+    /**
+     * Retrieve the Info of APIs that use the Service
+     *
+     * @param serviceId UUID of the service
+     * @param tenantId Logged-In user's tenant Id
+     * @return List of APIs
+     * @throws APIManagementException
+     */
+    List<API> getServiceUsage(String serviceId, int tenantId) throws APIManagementException;
 }

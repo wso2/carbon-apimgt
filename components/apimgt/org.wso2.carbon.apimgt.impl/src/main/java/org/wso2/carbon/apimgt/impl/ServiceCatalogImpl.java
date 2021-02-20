@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ServiceCatalog;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
@@ -62,8 +63,8 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public void deleteService(String serviceKey, int tenantId) throws APIManagementException {
-        catalogDAO.deleteService(serviceKey, tenantId);
+    public void deleteService(String serviceId, int tenantId) throws APIManagementException {
+        catalogDAO.deleteService(serviceId, tenantId);
     }
 
     @Override
@@ -106,5 +107,10 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     public List<ServiceEntry> getServices(ServiceFilterParams filterParams, int tenantId, boolean shrink)
             throws APIManagementException {
         return catalogDAO.getServices(filterParams, tenantId, shrink);
+    }
+
+    @Override
+    public List<API> getServiceUsage(String serviceId, int tenantId) throws APIManagementException {
+        return catalogDAO.getServiceUsage(serviceId, tenantId);
     }
 }

@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -139,35 +141,49 @@ public class ServiceCatalogDAO {
             throws APIManagementException {
         List<ServiceEntry> serviceListToAdd = new ArrayList<>();
         List<ServiceEntry> serviceListToUpdate = new ArrayList<>();
+        List<ServiceEntry> serviceListToIgnore = new ArrayList<>();
         for (int i = 0; i < services.size(); i++) {
             ServiceEntry service = services.get(i);
-            String md5 = getMd5HashByKey(service.getKey(), tenantId);
-            if (StringUtils.isNotEmpty(md5)) {
-                if (!md5.equals(service.getMd5())) {
+            ServiceEntry existingService = getServiceByKey(service.getKey(), tenantId);
+            if (existingService != null && StringUtils.isNotEmpty(existingService.getMd5())) {
+                if (!existingService.getVersion().equals(service.getVersion())) {
+                    serviceListToIgnore.add(service);
+                }
+                if (!existingService.getDefinitionType().equals(service.getDefinitionType())) {
+                    serviceListToIgnore.add(service);
+                }
+                if (!existingService.getKey().equals(service.getKey())) {
+                    serviceListToIgnore.add(service);
+                }
+                if (!existingService.getMd5().equals(service.getMd5())) {
                     serviceListToUpdate.add(service);
                 }
             } else {
                 serviceListToAdd.add(service);
             }
         }
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try {
-                connection.setAutoCommit(false);
-                addServices(serviceListToAdd, tenantId, username, connection);
-                updateServices(serviceListToUpdate, tenantId, username, connection);
-                connection.commit();
+        if (serviceListToIgnore.size() == 0) {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                try {
+                    connection.setAutoCommit(false);
+                    addServices(serviceListToAdd, tenantId, username, connection);
+                    updateServices(serviceListToUpdate, tenantId, username, connection);
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Failed to import services to service catalog of tenant " + tenantId, e);
+                }
             } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to import services to service catalog of tenant " + tenantId, e);
+                handleException("Failed to import services to service catalog of tenant "
+                        + APIUtil.getTenantDomainFromTenantId(tenantId), e);
             }
-        } catch (SQLException e) {
-            handleException("Failed to import services to service catalog of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+            List<ServiceEntry> importedServiceList = new ArrayList<>();
+            importedServiceList.addAll(serviceListToAdd);
+            importedServiceList.addAll(serviceListToUpdate);
+            return importedServiceList;
+        } else {
+            return null;
         }
-        List<ServiceEntry> importedServiceList = new ArrayList<>();
-        importedServiceList.addAll(serviceListToAdd);
-        importedServiceList.addAll(serviceListToUpdate);
-        return importedServiceList;
     }
 
     /**
@@ -504,6 +520,9 @@ public class ServiceCatalogDAO {
                 try (ResultSet resultSet = ps.executeQuery()) {
                     while (resultSet.next()) {
                         ServiceEntry service = getServiceParams(resultSet, shrink);
+                        List<API> usedAPIs = getServiceUsage(service.getUuid(), tenantId, connection);
+                        int usage = usedAPIs != null ? usedAPIs.size() : 0;
+                        service.setUsage(usage);
                         serviceEntryList.add(service);
                     }
                 }
@@ -523,6 +542,9 @@ public class ServiceCatalogDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ServiceEntry service = getServiceParams(rs, false);
+                    int usage = getServiceUsage(serviceId, tenantId, connection) != null ? getServiceUsage(serviceId,
+                            tenantId, connection).size() : 0;
+                    service.setUsage(usage);
                     return service;
                 }
             }
@@ -532,25 +554,73 @@ public class ServiceCatalogDAO {
         return null;
     }
 
+    public List<API> getServiceUsage(String serviceId, int tenantId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            return getServiceUsage(serviceId, tenantId, connection);
+        } catch (SQLException e) {
+            handleException("Error while retrieving the usage of Service with Id: " + serviceId, e);
+            return null;
+        }
+    }
+
+    private List<API> getServiceUsage(String serviceId, int tenantId, Connection connection) throws SQLException {
+        String query = SQLConstants.ServiceCatalogConstants.GET_USAGE_OF_SERVICES_BY_SERVICE_ID;
+        List<API> apis = new ArrayList<>();
+        try(PreparedStatement ps = connection.prepareStatement(query)) {
+            String serviceKey = getServiceKeyByUUID(serviceId, tenantId, connection);
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                ps.setString(1, serviceKey);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    while (resultSet.next()) {
+                        String provider = resultSet.getString(APIConstants.FIELD_API_PUBLISHER);
+                        String apiName = resultSet.getString(APIConstants.FIELD_API_NAME);
+                        String version = resultSet.getString(APIConstants.FIELD_API_VERSION);
+                        APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, version);
+                        API api = new API(apiIdentifier);
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        api.setUuid(resultSet.getString("API_UUID"));
+                        apis.add(api);
+                    }
+                }
+            } else {
+                return null;
+            }
+        }
+        return apis;
+    }
+
+    private String getServiceKeyByUUID(String serviceId, int tenantId, Connection connection) throws SQLException {
+        String query = SQLConstants.ServiceCatalogConstants.GET_SERVICE_KEY_BY_SERVICE_UUID;
+        String serviceKey = StringUtils.EMPTY;
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setString(1, serviceId);
+            ps.setInt(2, tenantId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if(resultSet.next()) {
+                    serviceKey = resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY);
+                }
+            }
+        }
+        return serviceKey;
+    }
+
     private void setUpdateServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
             throws SQLException {
         ps.setString(1, service.getMd5());
         ps.setString(2, service.getName());
         ps.setString(3, service.getDisplayName());
-        ps.setString(4, service.getVersion());
-        ps.setInt(5, tenantId);
-        ps.setString(6, service.getServiceUrl());
-        ps.setString(7, service.getDefinitionType().name());
-        ps.setString(8, service.getDefUrl());
-        ps.setString(9, service.getDescription());
-        ps.setString(10, service.getSecurityType().toString());
-        ps.setBoolean(11, service.isMutualSSLEnabled());
-        ps.setTimestamp(12, new Timestamp(System.currentTimeMillis()));
-        ps.setString(13, username);
-        ps.setBinaryStream(14, service.getEndpointDef());
-        ps.setBinaryStream(15, service.getMetadata());
-        ps.setString(16, service.getKey());
-        ps.setInt(17, tenantId);
+        ps.setInt(4, tenantId);
+        ps.setString(5, service.getServiceUrl());
+        ps.setString(6, service.getDefUrl());
+        ps.setString(7, service.getDescription());
+        ps.setString(8, service.getSecurityType().toString());
+        ps.setBoolean(9, service.isMutualSSLEnabled());
+        ps.setTimestamp(10, new Timestamp(System.currentTimeMillis()));
+        ps.setString(11, username);
+        ps.setBinaryStream(12, service.getEndpointDef());
+        ps.setBinaryStream(13, service.getMetadata());
+        ps.setString(14, service.getKey());
+        ps.setInt(15, tenantId);
     }
 
     private void setServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)

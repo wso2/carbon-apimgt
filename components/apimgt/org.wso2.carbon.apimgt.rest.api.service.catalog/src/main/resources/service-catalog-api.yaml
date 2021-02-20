@@ -240,7 +240,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/serviceId'
       responses:
-        "204":
+        204:
           description: |
             Successfully deleted the catalog entry.
         400:
@@ -249,6 +249,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalServerError'
 
@@ -280,6 +282,39 @@ paths:
               schema:
                 type: string
                 format: binary
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  #-------------------------------------------------------------------
+  # Retrieve the information of APIs that use a given service
+  #-------------------------------------------------------------------
+  /services/{serviceId}/usage:
+    get:
+      summary: Retrieve the API Info that use the given service
+      description: |
+        Retrieve the id, name, context and version of the APIs that used by the service
+      security:
+        - OAuth2Security:
+            - service_catalog:service_view
+      operationId: getServiceUsage
+      tags:
+        - Services
+      parameters:
+        - $ref: '#/components/parameters/serviceId'
+      responses:
+        200:
+          description: |
+            List of APIs that uses the service in the service catalog is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIList'
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -492,6 +527,40 @@ components:
             $ref: '#/components/schemas/Service'
         pagination:
           $ref: '#/components/schemas/Pagination'
+
+    APIList:
+      title: API List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of APIs returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIInfo'
+
+    APIInfo:
+      title: API Info object with basic API details.
+      type: object
+      properties:
+        id:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: CalculatorAPI
+        context:
+          type: string
+          example: CalculatorAPI
+        version:
+          type: string
+          example: 1.0.0
+        provider:
+          type: string
+          example: admin
           
     #-----------------------------------------------------
     # The Service Catalog Entry resource
@@ -811,6 +880,19 @@ components:
             code: 404
             message: Not Found
             description: The specified resource does not exist
+            moreInfo: ""
+            error: []
+
+    Conflict:
+      description: Conflict. Specified resource already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Conflict
+            description: Specified resource already exists
             moreInfo: ""
             error: []
 
