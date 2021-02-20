@@ -74,7 +74,7 @@ public class CertificateMgtUtils {
     private static String TRUST_STORE = System.getProperty("javax.net.ssl.trustStore");
     private static String CERTIFICATE_TYPE = "X.509";
     private static final String KEY_STORE_TYPE = "JKS";
-    private static CertificateMgtUtils instance;
+    private static final CertificateMgtUtils instance = new CertificateMgtUtils();
     private static final String COMMON_CERT_NAME = "client-truststore-temp.jks";
     private static final String LISTER_PROFILE_JKS_NAME = "client-truststore-listener.jks";
     public static final String SENDER_PROFILE_JKS_NAME = "client-truststore-sender.ks";
@@ -90,13 +90,6 @@ public class CertificateMgtUtils {
      */
     public static CertificateMgtUtils getInstance() {
 
-        if (instance == null) {
-            synchronized (CertificateMgtUtils.class) {
-                if (instance == null) {
-                    instance = new CertificateMgtUtils();
-                }
-            }
-        }
         return instance;
     }
 

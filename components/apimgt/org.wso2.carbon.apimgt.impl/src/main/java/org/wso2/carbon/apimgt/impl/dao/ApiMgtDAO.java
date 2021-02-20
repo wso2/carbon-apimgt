@@ -68,6 +68,8 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -137,6 +139,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1297,6 +1300,124 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, result);
         }
         return subscriber;
+    }
+
+    /**
+     * Retrieves the Topic for a specified async API.
+     *
+     * @param apiId API UUID
+     * @return Set of Topic objects
+     * @throws APIManagementException if failed to retrieve topics of the web hook API
+     */
+    public Set<Topic> getAPITopics(String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicsQuery = SQLConstants.GET_ALL_TOPICS_BY_API_ID;
+        Set<Topic> topicSet = new HashSet();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicsQuery);
+            ps.setString(1, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Topic topic = new Topic();
+                topic.setName(resultSet.getString("URL_PATTERN"));
+                topic.setApiId(resultSet.getString("API_ID"));
+                topic.setType(resultSet.getString("HTTP_METHOD"));
+                topicSet.add(topic);
+            }
+            return topicSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topics available in api " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves set of web hook topic subscriptions for a application.
+     *
+     * @param applicationId application UUID
+     * @return set of web hook subscriptions.
+     * @throws APIManagementException if failed to retrieve web hook topc subscriptions
+     */
+    public Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsQuery);
+            ps.setString(1, applicationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the web hook topc subscriptions from an application to a given api.
+     *
+     * @param applicationId application uuid
+     * @param apiId         api uuid
+     * @return set of web hook topic subscriptions
+     * @throws APIManagementException
+     */
+    public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsByApiIdQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS_BY_API_KEY;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsByApiIdQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+            return subscriptionSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
     }
 
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
@@ -2993,8 +3114,8 @@ public class ApiMgtDAO {
      * @param keyManagerName
      */
     public void updateApplicationKeyTypeMapping(Application application, String keyType,
-                                                String keyManagerName) throws APIManagementException {
-        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerName);
+                                                String keyManagerId) throws APIManagementException {
+        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerId);
         String consumerKey = null;
         if (app != null) {
             consumerKey = app.getClientId();
@@ -3010,12 +3131,12 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, consumerKey);
-                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerName);
+                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerId);
                 String content = new Gson().toJson(oAuthApp);
                 ps.setBinaryStream(2, new ByteArrayInputStream(content.getBytes()));
                 ps.setInt(3, application.getId());
                 ps.setString(4, keyType);
-                ps.setString(5, keyManagerName);
+                ps.setString(5, keyManagerId);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -8271,15 +8392,23 @@ public class ApiMgtDAO {
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                String keyManagerName = rs.getString("KEY_MANAGER");
-                workflowDTO.setKeyManager(keyManagerName);
-                OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
-                        application.getCallbackUrl(), rs
-                                .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"), application.getTokenType(),tenantDomain, keyManagerName);
-                workflowDTO.setAppInfoDTO(request);
+                String keyManagerUUID = rs.getString("KEY_MANAGER");
+                workflowDTO.setKeyManager(keyManagerUUID);
+                KeyManagerConfigurationDTO keyManagerConfigurationByUUID = getKeyManagerConfigurationByUUID(conn,
+                        keyManagerUUID);
+                if (keyManagerConfigurationByUUID != null) {
+                    OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
+                            application.getCallbackUrl(), rs
+                                    .getString("TOKEN_SCOPE"),
+                            rs.getString("INPUTS"), application.getTokenType(),
+                            keyManagerConfigurationByUUID.getTenantDomain(), keyManagerConfigurationByUUID.getName());
+                    workflowDTO.setAppInfoDTO(request);
+                } else {
+                    throw new APIManagementException("Error occured while finding the KeyManager from uuid "
+                            + keyManagerUUID + ".", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error occurred while retrieving an " +
                     "Application Registration Entry for Workflow : " + workflowDTO
                     .getExternalWorkflowReference(), e);
@@ -8838,6 +8967,43 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        }
+        return null;
+    }
+
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid)
+            throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return  getKeyManagerConfigurationByUUID(conn, uuid);
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for key manager uuid: " + uuid, e);
+        }
+    }
+
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection ,String uuid)
+            throws SQLException, IOException {
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    keyManagerConfigurationDTO.setUuid(resultSet.getString("UUID"));
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);

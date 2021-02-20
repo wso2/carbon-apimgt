@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.BasicAuthValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException;
 import org.wso2.carbon.apimgt.keymgt.stub.usermanager.APIKeyMgtRemoteUserStoreMgtServiceStub;
@@ -114,7 +115,7 @@ public class BasicAuthCredentialValidator {
         String providedPasswordHash = null;
         String invalidCachedPasswordHash;
         if (gatewayKeyCacheEnabled) {
-            providedPasswordHash = hashString(password);
+            providedPasswordHash = GatewayUtils.hashString(password.getBytes(StandardCharsets.UTF_8));
             BasicAuthValidationInfoDTO cachedValidationInfoObj = (BasicAuthValidationInfoDTO) getGatewayUsernameCache()
                     .get(username);
             if (cachedValidationInfoObj != null) {
@@ -326,34 +327,7 @@ public class BasicAuthCredentialValidator {
         return false;
     }
 
-    /**
-     * Returns the SHA-256 hash of a given string.
-     *
-     * @param str the string input to be hashed
-     * @return hashed string
-     */
-    private String hashString(String str) {
-        String generatedHash = null;
-        try {
-            // Create MessageDigest instance for SHA-256
-            MessageDigest md = MessageDigest.getInstance(APIConstants.SHA_256);
-            //Add str bytes to digest
-            md.update(str.getBytes(StandardCharsets.UTF_8));
-            //Get the hash's bytes
-            byte[] bytes = md.digest();
-            //This bytes[] has bytes in decimal format;
-            //Convert it to hexadecimal format
-            StringBuilder sb = new StringBuilder();
-            for (byte aByte : bytes) {
-                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
-            }
-            //Get complete hashed str in hex format
-            generatedHash = sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            log.error(e.getMessage());
-        }
-        return generatedHash;
-    }
+
 
     /**
      * @return the resource cache

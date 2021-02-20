@@ -164,6 +164,12 @@
         <field type="text-area">
             <name>Cors Configuration</name>
         </field>
+        <field type="text-area">
+            <name>Websub Subscription Configuration</name>
+        </field>
+        <field type="text-area">
+            <name>Ws Uri Mapping</name>
+        </field>
         <field type="options">
             <name label="Response Caching">Response Caching</name>
             <values>

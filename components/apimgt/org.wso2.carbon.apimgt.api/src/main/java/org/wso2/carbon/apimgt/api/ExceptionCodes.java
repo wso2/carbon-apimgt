@@ -229,13 +229,6 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s property value of payload cannot be blank"),
     CONTAIN_SPECIAL_CHARACTERS(900706, "contain invalid characters", 400,
             "%s property value of payload cannot contain invalid characters"),
-    POSITIVE_INTEGER_VALUE(900707, "contain invalid values. It should be positive Integer",
-            400,
-            "%s property value of payload cannot contain invalid values. It should be positive Integer"),
-    POLICY_ATTACHED_TO_RESOURCE(900708, "Policy already attached to API/Resource", 400,
-            " %s already attached to API/Resource"),
-    LENGTH_EXCEEDED(900708, "length exceeded", 400,
-            " %s length exceeded"),
 
     //GraphQL API related codes
     API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
@@ -426,6 +419,11 @@ public enum ExceptionCodes implements ErrorHandler {
             "Error while reading meta information from the api_params.yaml file"),
     NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
+
+    //AsyncApi related error codes
+    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
+
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
             "Gateway type not found available Gateway types : " + "%s");
     private final long errorCode;
