@@ -43,6 +43,10 @@ public class Tier implements Serializable, Comparable<Tier>{
     private boolean stopOnQuotaReached = true;
     private TierPermission tierPermission;
     private Map<String,String> monetizationAttributes;
+    private String quotaPolicyType;
+    private int rateLimitCount;
+    private String rateLimitTimeUnit;
+    private String bandwidthDataUnit;
 
     public Map<String, String> getMonetizationAttributes() {
         return monetizationAttributes;
@@ -145,6 +149,38 @@ public class Tier implements Serializable, Comparable<Tier>{
 
     public void setTierPermission(TierPermission tierPermission) {
         this.tierPermission = tierPermission;
+    }
+
+    public String getQuotaPolicyType() {
+        return quotaPolicyType;
+    }
+
+    public void setQuotaPolicyType(String quotaPolicyType) {
+        this.quotaPolicyType = quotaPolicyType;
+    }
+
+    public int getRateLimitCount() {
+        return rateLimitCount;
+    }
+
+    public void setRateLimitCount(int rateLimitCount) {
+        this.rateLimitCount = rateLimitCount;
+    }
+
+    public String getRateLimitTimeUnit() {
+        return rateLimitTimeUnit;
+    }
+
+    public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
+        this.rateLimitTimeUnit = rateLimitTimeUnit;
+    }
+
+    public String getBandwidthDataUnit() {
+        return bandwidthDataUnit;
+    }
+
+    public void setBandwidthDataUnit(String bandwidthDataUnit) {
+        this.bandwidthDataUnit = bandwidthDataUnit;
     }
 
     @Override
