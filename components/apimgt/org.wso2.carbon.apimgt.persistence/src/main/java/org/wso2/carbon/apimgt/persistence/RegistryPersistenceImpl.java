@@ -305,7 +305,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
                 APIIdentifier apiId = api.getId();
                 String apiPath = RegistryPersistenceUtil.getAPIPath(apiId);
-                int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+                int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex);
                 String revisionTargetPath = RegistryPersistenceUtil.getRevisionPath(apiId.getUUID(),revisionId);
                 if (registry.resourceExists(revisionTargetPath)) {
@@ -375,7 +375,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
                 apiId = api.getId();
                 String apiPath = RegistryPersistenceUtil.getAPIPath(apiId);
-                int prependIndex = apiPath.indexOf(apiId.getVersion()) + apiId.getVersion().length();
+                int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex);
                 String revisionTargetPath = RegistryPersistenceUtil.getRevisionPath(apiId.getUUID(),revisionId);
                 registry.delete(apiSourcePath);

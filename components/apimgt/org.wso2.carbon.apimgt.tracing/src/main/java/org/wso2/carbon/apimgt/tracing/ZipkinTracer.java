@@ -35,7 +35,7 @@ import zipkin2.reporter.okhttp3.OkHttpSender;
 
 /**
  * Class for getting Zipkin tracer from reading configuration file
- * */
+ */
 public class ZipkinTracer implements OpenTracer {
 
     private static final String NAME = "zipkin";
@@ -44,6 +44,7 @@ public class ZipkinTracer implements OpenTracer {
 
     @Override
     public Tracer getTracer(String serviceName) {
+
         String hostname = configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST) != null ?
                 configuration.getFirstProperty(TracingConstants.ZIPKIN_CONFIG_HOST)
                 : TracingConstants.ZIPKIN_DEFAULT_HOST;
@@ -53,15 +54,17 @@ public class ZipkinTracer implements OpenTracer {
                 : TracingConstants.ZIPKIN_DEFAULT_PORT;
 
         boolean tracerLogEnabled =
-                Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null ?
-                configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
-                : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
+                Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null
+                        ? configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
+                        : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
 
-        OkHttpSender sender = OkHttpSender.create("http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT);
+        OkHttpSender sender =
+                OkHttpSender.create("http://" + hostname + ":" + port + TracingConstants.ZIPKIN_API_CONTEXT);
         Tracer tracer = BraveTracer.create(Tracing.newBuilder()
                 .localServiceName(serviceName)
                 .spanReporter(AsyncReporter.builder(sender).build())
-                .propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY, TracingConstants.REQUEST_ID))
+                .propagationFactory(ExtraFieldPropagation.newFactory(B3Propagation.FACTORY,
+                        TracingConstants.REQUEST_ID))
                 .build());
 
         if (tracerLogEnabled) {
@@ -77,6 +80,7 @@ public class ZipkinTracer implements OpenTracer {
 
     @Override
     public String getName() {
+
         return NAME;
     }
 }

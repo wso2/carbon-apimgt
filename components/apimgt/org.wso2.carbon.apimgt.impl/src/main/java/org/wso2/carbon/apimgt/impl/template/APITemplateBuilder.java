@@ -31,4 +31,6 @@ public interface APITemplateBuilder {
 
     String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException;
 
+    String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey, String endpointUrl) throws APITemplateException;
+
 }

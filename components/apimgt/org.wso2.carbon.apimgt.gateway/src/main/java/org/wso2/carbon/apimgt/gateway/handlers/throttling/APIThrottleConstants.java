@@ -29,6 +29,9 @@ public class APIThrottleConstants {
     public static final int BLOCKED_ERROR_CODE = 900805;
     public static final int CUSTOM_POLICY_THROTTLE_OUT_ERROR_CODE = 900806;
 
+    public static final int GRAPHQL_QUERY_TOO_DEEP = 900820;
+    public static final int GRAPHQL_QUERY_TOO_COMPLEX = 900821;
+
     public static final String API_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED;
     public static final String RESOURCE_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED;
     public static final String APPLICATION_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED;

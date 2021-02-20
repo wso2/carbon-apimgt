@@ -150,8 +150,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                         }
                         return true;
                     }
-                    handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
-                            APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
+                    handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
+                            GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
                     log.error(errorList.toString());
                     return false;
                 }
@@ -207,8 +207,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                         errorList.clear();
                         errorList.add("maximum query complexity exceeded");
                     }
-                    handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
-                            APISecurityConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, errorList.toString());
+                    handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
+                            GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, errorList.toString());
                     return false;
                 }
                 return true;
@@ -255,7 +255,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                                String errorMessage, String errorDescription) {
         OMElement payload = getFaultPayload(errorCodeValue, errorMessage, errorDescription);
         Utils.setFaultPayload(messageContext, payload);
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }

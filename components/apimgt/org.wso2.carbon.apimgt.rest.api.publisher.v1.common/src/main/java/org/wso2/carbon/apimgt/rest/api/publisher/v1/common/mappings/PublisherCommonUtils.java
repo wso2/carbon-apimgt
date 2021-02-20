@@ -45,10 +45,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
@@ -61,6 +58,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -100,10 +98,12 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
-        boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS.toString()
-                .equals(originalAPI.getType());
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
+        boolean isAsyncAPI = originalAPI.getType() != null
+                && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType()));
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -306,7 +306,7 @@ public class PublisherCommonUtils {
             }
         }
         // Validate if resources are empty
-        if (!isWSAPI && (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty())) {
+        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
@@ -329,7 +329,8 @@ public class PublisherCommonUtils {
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
         apiIdentifier.setUuid(apiToUpdate.getUuid());
-        if (!isWSAPI) {
+
+        if (!isAsyncAPI) {
             String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
@@ -338,6 +339,11 @@ public class PublisherCommonUtils {
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
+        } else {
+            // TODO: update the asyncapi.yaml
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(originalAPI);
+            apiProvider.saveAsyncApiDefinition(originalAPI, apiDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 
@@ -351,7 +357,7 @@ public class PublisherCommonUtils {
         }
 
         apiProvider.updateAPI(apiToUpdate, originalAPI);
-        
+
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
                 CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
     }
@@ -662,7 +668,8 @@ public class PublisherCommonUtils {
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
-        boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
+        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
+        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) || APIDTO.TypeEnum.SSE.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -686,6 +693,13 @@ public class PublisherCommonUtils {
             }
         }
 
+       /* if (isWSAPI) {
+            ArrayList<String> websocketTransports = new ArrayList<>();
+            websocketTransports.add(APIConstants.WS_PROTOCOL);
+            websocketTransports.add(APIConstants.WSS_PROTOCOL);
+            apiDto.setTransport(websocketTransports);
+        }*/
+
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
         validateScopes(apiToAdd);
         //validate API categories
@@ -696,9 +710,9 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        
 
-        if (!isWSAPI) {
+
+        if (!isAsyncAPI) {
             APIDefinition oasParser;
             if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                 oasParser = new OAS2Parser();
@@ -708,7 +722,18 @@ public class PublisherCommonUtils {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
+        } else {
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
+
+        if (isAsyncAPI) {
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
+        }
+
         //adding the api
         apiProvider.addAPI(apiToAdd);
         return apiToAdd;
@@ -972,7 +997,7 @@ public class PublisherCommonUtils {
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, tenantDomain);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
-        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain); 
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         existingAPI.setStatus(unModifiedAPI.getStatus());
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
@@ -1300,5 +1325,10 @@ public class PublisherCommonUtils {
 
         //apiProvider.saveToGateway(createdProduct);
         return createdProduct;
+    }
+
+    public static boolean isStreamingAPI(APIDTO apidto) {
+        return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
+                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
     }
 }
