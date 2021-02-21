@@ -1,6 +1,6 @@
-name: API Manager Test Coverage Uploader
+name: API Manager Build with Test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
