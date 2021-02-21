@@ -449,7 +449,7 @@ function Overview(props) {
                                     <CreateApi
                                         history={history}
                                         serviceId={service.id}
-                                        serviceKey={service.version}
+                                        serviceKey={service.serviceKey}
                                         serviceDisplayName={service.name}
                                         serviceVersion={service.version}
                                         serviceUrl={service.serviceUrl}
