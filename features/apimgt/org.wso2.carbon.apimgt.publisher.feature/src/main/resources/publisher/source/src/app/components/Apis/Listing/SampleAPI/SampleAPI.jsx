@@ -25,7 +25,7 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import AuthManager from 'AppData/AuthManager';
 import APICreateMenu from 'AppComponents/Apis/Listing/components/APICreateMenu';
-import getSampleSwagger from './SamplePetStore.js';
+import getSampleSwagger from './SamplePizzaShack.js';
 /**
  * Show Initial Welcome card if no APIs are available to list
  * Handle deploying a sample API (Create and Publish)

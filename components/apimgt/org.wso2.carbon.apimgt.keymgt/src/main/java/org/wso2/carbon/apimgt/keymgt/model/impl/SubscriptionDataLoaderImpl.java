@@ -268,7 +268,8 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMapping(String consumerKey,String keymanager) throws DataLoadingException {
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager, String tenantDomain)
+            throws DataLoadingException {
 
         ApplicationKeyMapping application = null;
         String responseString;
@@ -278,7 +279,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
             keymanager = keymanager.replace("\\+", "%20");
             endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
                     + consumerKey + "&keymanager=" + keymanager;
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
@@ -287,7 +288,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         if (responseString != null && !responseString.isEmpty()) {
             ApplicationKeyMappingList list = new Gson().fromJson(responseString, ApplicationKeyMappingList.class);
             if (list.getList() != null && !list.getList().isEmpty()) {
-                application = list.getList().get(0); 
+                application = list.getList().get(0);
             }
         }
         return application;

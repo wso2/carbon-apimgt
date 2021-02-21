@@ -23,9 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.tracing.internal.ServiceReferenceHolder;
 
-import java.util.Iterator;
-import java.util.ServiceLoader;
-
+/**
+ * Osgi Registration for Tracing Service.
+ */
 public class TracingServiceImpl implements TracingService {
 
     private static final Log log = LogFactory.getLog(TracingServiceImpl.class);
