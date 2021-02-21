@@ -116,18 +116,18 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 if (application != null) {
                     return application;
                 }
-            }
-            try {
-                application = new SubscriptionDataLoaderImpl().getApplicationById(appId);
-            } catch (DataLoadingException e) {
-                log.error("Error while Retrieving Application Metadata From Internal API.", e);
-            }
-            if (application != null && application.getId() != null && application.getId() != 0) {
-                // load to the memory
-                log.debug("Loading Application to the in-memory datastore. applicationId = " + application.getId());
-                addOrUpdateApplication(application);
-            } else {
-                log.debug("Application not found. applicationId = " + application.getId());
+                try {
+                    application = new SubscriptionDataLoaderImpl().getApplicationById(appId);
+                } catch (DataLoadingException e) {
+                    log.error("Error while Retrieving Application Metadata From Internal API.", e);
+                }
+                if (application != null && application.getId() != null && application.getId() != 0) {
+                    // load to the memory
+                    log.debug("Loading Application to the in-memory datastore. applicationId = " + application.getId());
+                    addOrUpdateApplication(application);
+                } else {
+                    log.debug("Application not found. applicationId = " + application.getId());
+                }
             }
         }
 
