@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
@@ -25,6 +26,7 @@ import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -66,12 +68,32 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
             allowedResourcePathsMap = RestApiUtil.getAllowedURIsToMethodsMap();
             Enumeration<URITemplate> uriTemplateSet = allowedResourcePathsMap.keys();
 
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             while (uriTemplateSet.hasMoreElements()) {
                 URITemplate uriTemplate = uriTemplateSet.nextElement();
                 if (uriTemplate.matches(path, new HashMap<String, String>())) {
                     List<String> allowedVerbs = allowedResourcePathsMap.get(uriTemplate);
                     if (allowedVerbs.contains(httpMethod)) {
-                        message.put(RestApiConstants.AUTHENTICATION_REQUIRED, false);
+                        if (StringUtils.startsWith((String) message.get(RestApiConstants.MESSAGE_BASE_PATH),
+                                RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL)) {
+                            // Authentication will be skipped for /swagger.yaml, /settings, /tenants resources of
+                            // the store REST API
+                            boolean doSkipAuthentication = StringUtils.equals(path,
+                                    RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL
+                                            + RestApiConstants.RESOURCE_PATH_SWAGGER) || StringUtils.equals(path,
+                                    RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL
+                                            + RestApiConstants.REST_API_STORE_RESOURCE_PATH_SETTINGS) || StringUtils
+                                    .equals(path, RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL
+                                            + RestApiConstants.REST_API_STORE_RESOURCE_PATH_TENANTS);
+                            if (!doSkipAuthentication) {
+                                message.put(RestApiConstants.AUTHENTICATION_REQUIRED,
+                                        !RestApiUtil.isDevPortalAnonymousEnabled(tenantDomain));
+                            } else {
+                                message.put(RestApiConstants.AUTHENTICATION_REQUIRED, false);
+                            }
+                        } else {
+                            message.put(RestApiConstants.AUTHENTICATION_REQUIRED, false);
+                        }
                         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                         carbonContext.setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
                         carbonContext.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
