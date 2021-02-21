@@ -62,6 +62,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,8 +71,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.cache.Caching;
-import javax.security.cert.CertificateException;
-import javax.security.cert.X509Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 
 public class Utils {
@@ -465,7 +466,9 @@ public class Utils {
                             bytes = Base64.decodeBase64(certificate);
                         }
                         try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                            X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
+                            CertificateFactory fact = CertificateFactory.getInstance("X.509");
+                            X509Certificate x509Certificate = (X509Certificate) fact.generateCertificate(inputStream);
+                            //X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
                             if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
                                 return x509Certificate;
                             } else {

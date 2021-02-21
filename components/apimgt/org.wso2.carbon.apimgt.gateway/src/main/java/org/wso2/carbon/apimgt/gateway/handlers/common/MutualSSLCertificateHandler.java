@@ -32,8 +32,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
 
-import javax.security.cert.CertificateEncodingException;
-import javax.security.cert.X509Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 public class MutualSSLCertificateHandler extends AbstractHandler {
 

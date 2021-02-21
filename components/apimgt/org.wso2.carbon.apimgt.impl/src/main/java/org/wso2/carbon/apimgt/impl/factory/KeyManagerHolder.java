@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 
 /**
  * This is a factory class.you have to use this when you need to initiate classes by reading config file.
