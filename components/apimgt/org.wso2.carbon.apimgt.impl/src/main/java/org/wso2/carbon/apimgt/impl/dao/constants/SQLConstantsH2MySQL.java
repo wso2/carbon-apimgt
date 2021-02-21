@@ -223,60 +223,6 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " limit ? , ? "+
                     " )x ";
 
-    public static final String GET_ALL_SERVICES_WITH_SERVICE_KEY_AND_DEFINITION_TYPE = "SELECT " +
-            "   UUID," +
-            "   SERVICE_KEY," +
-            "   MD5," +
-            "   SERVICE_NAME," +
-            "   DISPLAY_NAME," +
-            "   SERVICE_VERSION," +
-            "   SERVICE_URL," +
-            "   DEFINITION_TYPE," +
-            "   DEFINITION_URL," +
-            "   DESCRIPTION," +
-            "   SECURITY_TYPE," +
-            "   MUTUAL_SSL_ENABLED," +
-            "   CREATED_TIME," +
-            "   LAST_UPDATED_TIME," +
-            "   CREATED_BY," +
-            "   UPDATED_BY," +
-            "   SERVICE_DEFINITION," +
-            "   METADATA FROM AM_SERVICE_CATALOG" +
-            "   WHERE TENANT_ID = ? " +
-            "   AND SERVICE_NAME LIKE ? " +
-            "   AND SERVICE_VERSION LIKE ? " +
-            "   AND DISPLAY_NAME LIKE ?" +
-            "   AND DEFINITION_TYPE = ?" +
-            "   AND SERVICE_KEY = ?" +
-            "   ORDER BY $1 $2 " +
-            "   LIMIT ?, ? ";
-
-    public static final String GET_ALL_SERVICES_BY_TENANT_ID = "SELECT " +
-            "   UUID," +
-            "   SERVICE_KEY," +
-            "   MD5," +
-            "   SERVICE_NAME," +
-            "   DISPLAY_NAME," +
-            "   SERVICE_VERSION," +
-            "   SERVICE_URL," +
-            "   DEFINITION_TYPE," +
-            "   DEFINITION_URL," +
-            "   DESCRIPTION," +
-            "   SECURITY_TYPE," +
-            "   MUTUAL_SSL_ENABLED," +
-            "   CREATED_TIME," +
-            "   LAST_UPDATED_TIME," +
-            "   CREATED_BY," +
-            "   UPDATED_BY," +
-            "   SERVICE_DEFINITION," +
-            "   METADATA FROM AM_SERVICE_CATALOG" +
-            "   WHERE TENANT_ID = ? " +
-            "   AND SERVICE_NAME LIKE ? " +
-            "   AND SERVICE_VERSION LIKE ? " +
-            "   AND DISPLAY_NAME LIKE ?" +
-            "   ORDER BY $1 $2 " +
-            "   LIMIT ?, ? ";
-
     public static final String GET_ALL_SERVICES_BY_WITH_SERVICE_KEY = "SELECT " +
             "   UUID," +
             "   SERVICE_KEY," +
@@ -301,33 +247,6 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   AND SERVICE_VERSION LIKE ? " +
             "   AND DISPLAY_NAME LIKE ?" +
             "   AND SERVICE_KEY = ?" +
-            "   ORDER BY $1 $2 " +
-            "   LIMIT ?, ? ";
-
-    public static final String GET_ALL_SERVICES_BY_WITH_SERVICE_DEFINITION_TYPE = "SELECT " +
-            "   UUID," +
-            "   SERVICE_KEY," +
-            "   MD5," +
-            "   SERVICE_NAME," +
-            "   DISPLAY_NAME," +
-            "   SERVICE_VERSION," +
-            "   SERVICE_URL," +
-            "   DEFINITION_TYPE," +
-            "   DEFINITION_URL," +
-            "   DESCRIPTION," +
-            "   SECURITY_TYPE," +
-            "   MUTUAL_SSL_ENABLED," +
-            "   CREATED_TIME," +
-            "   LAST_UPDATED_TIME," +
-            "   CREATED_BY," +
-            "   UPDATED_BY," +
-            "   SERVICE_DEFINITION," +
-            "   METADATA FROM AM_SERVICE_CATALOG" +
-            "   WHERE TENANT_ID = ? " +
-            "   AND SERVICE_NAME LIKE ? " +
-            "   AND SERVICE_VERSION LIKE ? " +
-            "   AND DISPLAY_NAME LIKE ?" +
-            "   AND DEFINITION_TYPE = ?" +
             "   ORDER BY $1 $2 " +
             "   LIMIT ?, ? ";
 

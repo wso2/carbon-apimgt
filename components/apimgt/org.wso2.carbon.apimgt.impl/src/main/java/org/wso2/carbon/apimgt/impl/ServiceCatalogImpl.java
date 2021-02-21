@@ -41,9 +41,9 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public List<ServiceEntry> importServices(List<ServiceEntry> serviceList, int tenantId, String username)
-            throws APIManagementException {
-        return catalogDAO.importServices(serviceList, tenantId, username);
+    public List<ServiceEntry> importServices(List<ServiceEntry> serviceList, int tenantId, String username,
+                                             boolean overwrite) throws APIManagementException {
+        return catalogDAO.importServices(serviceList, tenantId, username, overwrite);
     }
 
     @Override

@@ -22,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -137,23 +139,26 @@ public class ServiceCatalogDAO {
         }
     }
 
-    public List<ServiceEntry> importServices(List<ServiceEntry> services, int tenantId, String username)
-            throws APIManagementException {
+    public List<ServiceEntry> importServices(List<ServiceEntry> services, int tenantId, String username,
+                                             boolean overwrite) throws APIManagementException {
         List<ServiceEntry> serviceListToAdd = new ArrayList<>();
         List<ServiceEntry> serviceListToUpdate = new ArrayList<>();
-        List<ServiceEntry> serviceListToIgnore = new ArrayList<>();
+        boolean isValid = true;
         for (int i = 0; i < services.size(); i++) {
             ServiceEntry service = services.get(i);
             ServiceEntry existingService = getServiceByKey(service.getKey(), tenantId);
             if (existingService != null && StringUtils.isNotEmpty(existingService.getMd5())) {
                 if (!existingService.getVersion().equals(service.getVersion())) {
-                    serviceListToIgnore.add(service);
+                    isValid = false;
+                    break;
                 }
                 if (!existingService.getDefinitionType().equals(service.getDefinitionType())) {
-                    serviceListToIgnore.add(service);
+                    isValid = false;
+                    break;
                 }
                 if (!existingService.getKey().equals(service.getKey())) {
-                    serviceListToIgnore.add(service);
+                    isValid = false;
+                    break;
                 }
                 if (!existingService.getMd5().equals(service.getMd5())) {
                     serviceListToUpdate.add(service);
@@ -162,7 +167,11 @@ public class ServiceCatalogDAO {
                 serviceListToAdd.add(service);
             }
         }
-        if (serviceListToIgnore.size() == 0) {
+        if (isValid && !overwrite && serviceListToUpdate.size() > 0) {
+            throw new APIManagementException("Cannot update the existing services", ExceptionCodes
+                    .from(ExceptionCodes.SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE));
+        }
+        if (isValid) {
             try (Connection connection = APIMgtDBUtil.getConnection()) {
                 try {
                     connection.setAutoCommit(false);

@@ -44,7 +44,8 @@ public interface ServiceCatalog {
      * @param username
      * @throws APIManagementException
      */
-    List<ServiceEntry> importServices(List<ServiceEntry> serviceList, int tenantId, String username) throws APIManagementException;
+    List<ServiceEntry> importServices(List<ServiceEntry> serviceList, int tenantId, String username, boolean overwrite)
+            throws APIManagementException;
 
     /**
      * Update an existing Service Catalog

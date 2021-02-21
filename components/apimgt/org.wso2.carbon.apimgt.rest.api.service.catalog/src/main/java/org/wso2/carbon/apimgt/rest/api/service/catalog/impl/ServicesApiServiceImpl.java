@@ -27,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
@@ -240,8 +241,16 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         } else {
             List<ServiceEntry> importedServiceList = new ArrayList<>();
             List<ServiceEntry> retrievedServiceList = new ArrayList<>();
-            if (serviceListToImport.size() > 0) {
-                importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName);
+            try {
+                if (serviceListToImport.size() > 0) {
+                    importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName,
+                            overwrite);
+                }
+            } catch (APIManagementException e) {
+                if (ExceptionCodes.SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE.getErrorCode() == e.getErrorHandler()
+                        .getErrorCode()) {
+                    RestApiUtil.handleBadRequest("Cannot update existing services when overwrite is false", log);
+                }
             }
             if (importedServiceList == null) {
                 RestApiUtil.handleBadRequest("Cannot update the version or key or definition type of an existing " +
@@ -324,10 +333,12 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         for (int i = 0; i < verifierArray.length() ; i++) {
             JSONObject verifierJson = verifierArray.getJSONObject(i);
             ServiceEntry service = serviceCatalog.getServiceByKey(verifierJson.get("key").toString(), tenantId);
-            if (service.getMd5().equals(verifierJson.get("md5").toString())) {
-                validationResults.put(service.getKey(), true);
-            } else {
-                validationResults.put(service.getKey(), false);
+            if (service != null) {
+                if (service.getMd5().equals(verifierJson.get("md5").toString())) {
+                    validationResults.put(service.getKey(), true);
+                } else {
+                    validationResults.put(service.getKey(), false);
+                }
             }
         }
         return validationResults;
