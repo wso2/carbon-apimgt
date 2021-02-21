@@ -50,6 +50,7 @@ public class APIMgtGatewayConstants {
     public static final String REQUEST_EXECUTION_START_TIME = "request.execution.start.time";
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
+    public static final String CUSTOM_PROPERTY = "customProperty";
 
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 
@@ -205,7 +206,7 @@ public class APIMgtGatewayConstants {
     public static final String SPAN_APPLICATION_CONSUMER_KEY = "span.consumerkey";
     public static final String SPAN_ENDPOINT = "span.endpoint";
 
-    public static final String TEST_KEY = "testkey";
+    public static final String INTERNAL_KEY = "Internal-Key";
 
     /**
      * Synapse Properties related Constants
@@ -220,7 +221,5 @@ public class APIMgtGatewayConstants {
     public static final String LOGIN_CONTEXT = "/logincontext";
     public static final String OAUTH2_CONTEXT = "/oauth2";
     public static final String API_OBJECT = "API";
-
-    public static final String CUSTOM_PROPERTY = "customProperty";
 }
 

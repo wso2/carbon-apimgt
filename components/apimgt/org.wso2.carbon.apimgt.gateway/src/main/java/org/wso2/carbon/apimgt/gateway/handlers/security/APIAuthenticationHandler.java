@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.InternalAPIKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -278,29 +279,30 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         // Set authenticators
-        Authenticator authenticator;
         if (isMutualSSLProtected) {
-            authenticator = new MutualSSLAuthenticator(apiLevelPolicy, isMutualSSLMandatory, certificateInformation);
+            Authenticator  authenticator = new MutualSSLAuthenticator(apiLevelPolicy, isMutualSSLMandatory, certificateInformation);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isOAuthProtected) {
-            authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
+            Authenticator authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
                     removeOAuthHeadersFromOutMessage, keyManagersList);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isBasicAuthProtected) {
-            authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
+            Authenticator authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isApiKeyProtected) {
-            authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
+            Authenticator authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
-
+        Authenticator authenticator = new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY);
+        authenticator.init(synapseEnvironment);
+        authenticators.add(authenticator);
         authenticators.sort(new Comparator<Authenticator>() {
             @Override
             public int compare(Authenticator o1, Authenticator o2) {

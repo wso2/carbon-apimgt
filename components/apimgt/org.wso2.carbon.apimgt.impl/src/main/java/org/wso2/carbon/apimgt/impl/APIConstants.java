@@ -816,6 +816,7 @@ public final class APIConstants {
             + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
+    public static final String API_PUBLISHER_INTERNAL_API_KEY_ALIAS = API_PUBLISHER + "InternalKeyAlias";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -2001,6 +2002,7 @@ public final class APIConstants {
         public static final String AUTHORIZED_USER_TYPE = "aut";
         public static final String ISSUER_IDENTIFIER = "iss";
         public static final String END_USERNAME = "sub";
+        public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

@@ -602,6 +602,31 @@ public class GatewayUtils {
     }
 
     public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
+                                                                      JSONObject api, String apiLevelPolicy)
+            throws java.text.ParseException {
+
+        AuthenticationContext authContext = new AuthenticationContext();
+        authContext.setAuthenticated(true);
+        authContext.setApiKey(tokenSignature);
+        authContext.setUsername(payload.getSubject());
+        if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
+            authContext.setKeyType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
+        } else {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        }
+
+        authContext.setApiTier(apiLevelPolicy);
+        if (api != null) {
+            authContext.setTier(APIConstants.UNLIMITED_TIER);
+            authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
+            authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
+
+        }
+        return authContext;
+    }
+
+
+    public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
                                                                       JSONObject api,
                                                                       String apiLevelPolicy, String endUserToken,
                                                                       org.apache.synapse.MessageContext synCtx)
@@ -766,9 +791,8 @@ public class GatewayUtils {
             // Subscription validation
             JSONArray subscribedAPIs =
                     (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
-            for (int i = 0; i < subscribedAPIs.size(); i++) {
-                JSONObject subscribedAPIsJSONObject =
-                        (JSONObject) subscribedAPIs.get(i);
+            for (Object subscribedAPI : subscribedAPIs) {
+                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
