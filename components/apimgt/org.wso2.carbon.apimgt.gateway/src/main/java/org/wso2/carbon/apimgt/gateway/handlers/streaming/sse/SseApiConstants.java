@@ -24,6 +24,7 @@ public class SseApiConstants {
     public static final String SSE_ANALYTICS_INFO = "sse_analytics_info";
     public static final String THROTTLED_MESSAGE =
             ": request is throttled out by the server, try again at later point of time\n";
+    public static final String THROTTLED_OUT_ERROR_MESSAGE = "Message throttled out";
     public static final String SSE_CONTENT_TYPE = "text/event-stream";
     SseApiConstants() {
         // nothing to implement

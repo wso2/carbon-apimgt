@@ -50,14 +50,12 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
     private static final Log log = LogFactory.getLog(SseStreamInterceptor.class);
     private static final String SSE_STREAM_DELIMITER = "\n\n";
     private static final int DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS = 100;
-    boolean isAnalyticsEnbaled;
     private String charset = StandardCharsets.UTF_8.name();
     private ExecutorService throttlePublisherService;
     private int noOfExecutorThreads = DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS;
 
     public SseStreamInterceptor() {
         throttlePublisherService = Executors.newFixedThreadPool(noOfExecutorThreads);
-        isAnalyticsEnbaled = APIUtil.isAnalyticsEnabled();
     }
 
     @Override
@@ -108,7 +106,7 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
             }
             throttlePublisherService.execute(
                     () -> SseUtils.publishNonThrottledEvent(eventCount, messageId, throttleInfo, propertiesMap));
-            if (isAnalyticsEnbaled) {
+            if (APIUtil.isAnalyticsEnabled()) {
                 publishAnalyticsData(eventCount, axi2Ctx);
             }
             return true;
@@ -120,12 +118,11 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
 
     private void publishAnalyticsData(int eventCount, MessageContext axi2Ctx) {
 
-        SseEventDataProvider provider = (SseEventDataProvider) axi2Ctx.getProperty(SSE_ANALYTICS_INFO);
+        SseResponseEventDataProvider provider = (SseResponseEventDataProvider) axi2Ctx.getProperty(SSE_ANALYTICS_INFO);
         provider.setResponseCode((int) axi2Ctx.getProperty(SynapseConstants.HTTP_SC));
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         int count = 1;
         while (count <= eventCount) {
-            GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-            provider.setBackendEndTime();
             dataCollector.collectData();
             count++;
         }

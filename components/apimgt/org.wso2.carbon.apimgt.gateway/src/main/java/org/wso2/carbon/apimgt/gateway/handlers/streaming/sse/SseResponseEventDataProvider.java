@@ -19,22 +19,37 @@
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 
-public class SseEventDataProvider extends SynapseAnalyticsDataProvider {
+public class SseResponseEventDataProvider extends SseEventDataProvider {
 
-    public SseEventDataProvider(MessageContext messageContext) {
+    private MessageContext messageContext;
+    private int responseCode;
+
+    public SseResponseEventDataProvider(MessageContext messageContext) {
         super(messageContext);
+        this.messageContext = messageContext;
     }
 
     @Override
-    public Latencies getLatencies() {
-        Latencies latencies = new Latencies();
-        latencies.setResponseLatency(0L);
-        latencies.setBackendLatency(0L);
-        latencies.setRequestMediationLatency(0L);
-        latencies.setResponseMediationLatency(0L);
-        return latencies;
+    public int getTargetResponseCode() {
+        return responseCode;
+    }
+
+    @Override
+    public int getProxyResponseCode() {
+        return responseCode;
+    }
+
+    @Override
+    public Operation getOperation() {
+
+        Operation operation = super.getOperation();
+        operation.setApiResourceTemplate("event:" + operation.getApiResourceTemplate());
+        return operation;
+    }
+
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
     }
 }

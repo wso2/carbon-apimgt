@@ -34,7 +34,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -52,6 +51,7 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConsta
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_CONTENT_TYPE;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.THROTTLED_MESSAGE;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.THROTTLED_OUT_ERROR_MESSAGE;
 
 /**
  * Wraps the authentication handler for the purpose of changing the http method before calling it.
@@ -66,9 +66,14 @@ public class SseApiHandler extends APIAuthenticationHandler {
     public boolean handleRequest(MessageContext synCtx) {
 
         org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-        Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
         axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+        axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_SSE);
+        synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
+                           true);
+        GatewayUtils.setRequestDestination(synCtx);
+        Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
         boolean isAuthenticated = super.handleRequest(synCtx);
+        // reset http verb after authentication for mediation
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
         if (isAuthenticated) {
             ThrottleInfo throttleInfo = getThrottlingInfo(synCtx);
@@ -80,18 +85,20 @@ public class SseApiHandler extends APIAuthenticationHandler {
                 handleThrottledOut(synCtx);
                 return false;
             }
-            axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_SSE);
-            // skipping only if the flow is successful, if some errors it will invoke the  default metrics handler.
-            synCtx.setProperty(
-                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING, true);
-
-            // analytics
-            AnalyticsDataProvider provider = new SseEventDataProvider(synCtx);
+            AnalyticsDataProvider provider = new SseResponseEventDataProvider(synCtx);
             axisCtx.setProperty(SSE_ANALYTICS_INFO, provider);
         }
-        //  publishFailureEvent(synCtx);
         return isAuthenticated;
     }
+
+    //    @Override
+    //    public boolean handleResponse(MessageContext synCtx) {
+    //        if (APIUtil.isAnalyticsEnabled()) {
+    //            GatewayUtils.setRequestDestination(synCtx);
+    //            publishSubscriptionEvent(synCtx);
+    //        }
+    //        return true;
+    //    }
 
     private ThrottleInfo getThrottlingInfo(MessageContext synCtx) {
 
@@ -116,15 +123,9 @@ public class SseApiHandler extends APIAuthenticationHandler {
         return throttleInfo;
     }
 
-    //    private void publishFailureEvent(MessageContext synCtx) {
-    //
-    //        org.apache.axis2.context.MessageContext messageContext =
-    //                ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-    //
-    //        messageContext.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.BACKEND_RESPONSE_CODE,
-    //                                   200);
-    //        AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(synCtx);
-    //        FaultyRequestDataCollector dataCollector = new FaultyRequestDataCollector(provider);
+    //    private void publishSubscriptionEvent(MessageContext synCtx) {
+    //        AnalyticsDataProvider provider = new SseSubscriptionEventDataProvider(synCtx);
+    //        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
     //        dataCollector.collectData();
     //    }
 
@@ -135,6 +136,8 @@ public class SseApiHandler extends APIAuthenticationHandler {
         OMElement payload = factory.createOMElement(TEXT_ELEMENT);
         payload.setText(THROTTLED_MESSAGE);
         synCtx.getEnvelope().getBody().addChild(payload);
+        synCtx.setProperty(SynapseConstants.ERROR_CODE, APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE);
+        synCtx.setProperty(SynapseConstants.ERROR_MESSAGE, THROTTLED_OUT_ERROR_MESSAGE);
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, SSE_CONTENT_TYPE);
         axis2MC.setProperty(Constants.Configuration.CONTENT_TYPE, SSE_CONTENT_TYPE);
