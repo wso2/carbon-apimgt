@@ -129,9 +129,9 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
-    public File exportAPIProduct(String apiId, String name, String version, String providerName,
+    public File exportAPIProduct(String apiId, String name, String version, String providerName, String revisionNum,
                                  ExportFormat format, boolean preserveStatus, boolean preserveDocs,
-                                 boolean preserveCredentials)
+                                 boolean preserveCredentials, boolean exportLatestRevision)
             throws APIManagementException, APIImportExportException {
 
         APIProductIdentifier apiProductIdentifier;
@@ -140,17 +140,31 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
+        String exportAPIProductUUID;
 
         if (apiId != null) {
             apiProductIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiId, tenantDomain);
-            apiProduct = apiProvider.getAPIProductbyUUID(apiId, tenantDomain);
         } else {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiProductIdentifier = new APIProductIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiProduct = apiProvider.getAPIProduct(apiProductIdentifier);
-
+            apiId = APIUtil.getUUIDFromIdentifier(apiProductIdentifier);
         }
+
+        if (exportLatestRevision) {
+            //if a latest revision flag used, latest revision's api product object is used
+            exportAPIProductUUID = apiProvider.getLatestRevisionUUID(apiId);
+        } else if (revisionNum != null) {
+            //if a revision number provided, revision api product object is used
+            exportAPIProductUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+        } else {
+            //if a revision number is not provided, working copy's id is used
+            exportAPIProductUUID = apiId;
+        }
+
+        exportAPIProductUUID = (exportAPIProductUUID == null) ? apiId : exportAPIProductUUID;
+        apiProduct = apiProvider.getAPIProductbyUUID(exportAPIProductUUID, tenantDomain);
+        apiProductIdentifier.setUUID(exportAPIProductUUID);
         if (apiProduct != null) {
             apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(apiProduct);
             return ExportUtils
@@ -164,7 +178,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     @Override
     public API importAPI(InputStream fileInputStream, Boolean preserveProvider,
                          Boolean rotateRevision, Boolean overwrite,
-            String[] tokenScopes) throws APIManagementException {
+                         String[] tokenScopes) throws APIManagementException {
+
         String extractedFolderPath;
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
@@ -172,19 +187,22 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
-                tokenScopes);
+                false, tokenScopes);
     }
 
-    @Override public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
-            Boolean overwriteAPIProduct, Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
+    @Override
+    public APIProduct importAPIProduct(InputStream fileInputStream, Boolean preserveProvider,
+                                       Boolean rotateRevision, Boolean overwriteAPIProduct,
+                                       Boolean overwriteAPIs, Boolean importAPIs, String[] tokenScopes)
             throws APIManagementException {
+
         String extractedFolderPath;
         try {
             extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
-        return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, overwriteAPIProduct, overwriteAPIs,
-                importAPIs, tokenScopes);
+        return ImportUtils.importApiProduct(extractedFolderPath, preserveProvider, rotateRevision, overwriteAPIProduct,
+                overwriteAPIs, importAPIs, tokenScopes);
     }
 }

@@ -17,15 +17,21 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class GatewayUtils {
+    private static final Log log = LogFactory.getLog(GatewayUtils.class);
 
     public static void setCustomSequencesToBeRemoved(API api, GatewayAPIDTO gatewayAPIDTO) {
 
@@ -58,4 +64,35 @@ public class GatewayUtils {
                         "Endpoint", gatewayAPIDTO.getEndpointEntriesToBeRemove()));
     }
 
+    /**
+     * Returns the SHA-256 hash of a given string.
+     *
+     * @param str the byte[] input to be hashed
+     * @return hashed string
+     */
+    public static String hashString(byte[] str) {
+        if (str == null) {
+            return "";
+        }
+        String generatedHash = null;
+        try {
+            // Create MessageDigest instance for SHA-256
+            MessageDigest md = MessageDigest.getInstance(APIConstants.SHA_256);
+            //Add str bytes to digest
+            md.update(str);
+            //Get the hash's bytes
+            byte[] bytes = md.digest();
+            //This bytes[] has bytes in decimal format;
+            //Convert it to hexadecimal format
+            StringBuilder sb = new StringBuilder();
+            for (byte aByte : bytes) {
+                sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+            }
+            //Get complete hashed str in hex format
+            generatedHash = sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+        }
+        return generatedHash;
+    }
 }
