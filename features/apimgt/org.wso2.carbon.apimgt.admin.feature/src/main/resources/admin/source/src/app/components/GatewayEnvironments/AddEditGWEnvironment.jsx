@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,17 +16,16 @@
  * under the License.
  */
 
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
-import Joi from '@hapi/joi';
 import TextField from '@material-ui/core/TextField';
 import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
 import Alert from 'AppComponents/Shared/Alert';
-import ListInput from 'AppComponents/AdminPages/Addons/InputListBase';
+import AddEditVhost from 'AppComponents/GatewayEnvironments/AddEditVhost';
 
 const useStyles = makeStyles((theme) => ({
     error: {
@@ -34,21 +33,28 @@ const useStyles = makeStyles((theme) => ({
     },
     addEditFormControl: {
         minHeight: theme.spacing(40),
-        maxHeight: theme.spacing(40),
+        maxHeight: theme.spacing(100),
         minWidth: theme.spacing(55),
+    },
+    vhostPaper: {
+        padding: theme.spacing(1),
+        marginBottom: theme.spacing(1),
     },
 }));
 
 /**
  * Reducer
  * @param {JSON} state State
+ * @param field form field
+ * @param value value of field
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
     switch (field) {
         case 'name':
+        case 'displayName':
         case 'description':
-        case 'hosts':
+        case 'vhosts':
             return { ...state, [field]: value };
         case 'editDetails':
             return value;
@@ -58,48 +64,73 @@ function reducer(state, { field, value }) {
 }
 
 /**
- * Render a pop-up dialog to add/edit an Gateway label
+ * Render a pop-up dialog to add/edit a Gateway Environment
  * @param {JSON} props .
  * @returns {JSX}.
  */
-function AddEditMGLabel(props) {
+function AddEditGWEnvironment(props) {
     const {
         updateList, dataRow, icon, triggerButtonText, title,
     } = props;
     const classes = useStyles();
 
+    const defaultVhost = {
+        host: '', httpContext: '', httpsPort: 443, httpPort: 80, wssPort: 8099, wsPort: 9099, isNew: true,
+    };
     const [initialState, setInitialState] = useState({
+        displayName: '',
         description: '',
-        hosts: [],
+        vhosts: [defaultVhost],
     });
     const [editMode, setIsEditMode] = useState(false);
 
     const [state, dispatch] = useReducer(reducer, initialState);
-    const { name, description, hosts } = state;
+    const {
+        name, displayName, description, vhosts,
+    } = state;
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
     useEffect(() => {
         setInitialState({
+            displayName: '',
             description: '',
-            hosts: [],
+            vhosts: [defaultVhost],
         });
     }, []);
 
-    const handleHostValidation = (hostName) => {
-        if (hostName === undefined) {
+    const handleHostValidation = (vhost) => {
+        if (vhost === undefined) {
             return false;
         }
-        const schema = Joi.string().uri().empty();
-        const validationError = schema.validate(hostName).error;
+        if (!vhost.host) {
+            return 'Host of Vhost is empty';
+        }
+        // same pattern used in admin Rest API
+        const hostPattern = '^(((\\*[\\.-])?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*'
+            + '([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))|((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*'
+            + '[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))([\\.-]\\*)?|\\*)$';
+        const hostRegex = new RegExp(hostPattern, 'g');
+        const validHost = vhost.host && vhost.host.match(hostRegex);
+        if (!validHost) {
+            return 'Invalid Host';
+        }
 
-        if (validationError) {
-            const errorType = validationError.details[0].type;
-            if (errorType === 'any.empty') {
-                return 'Host is empty';
-            } else if (errorType === 'string.uri') {
-                return 'Invalid Host';
+        // same pattern used in admin Rest API
+        const httpContextRegex = /^\/?([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])*$/g;
+        // empty http context are valid
+        const validHttpContext = !vhost.httpContext || vhost.httpContext.match(httpContextRegex);
+        if (!validHttpContext) {
+            return 'Invalid Http context';
+        }
+
+        let portError;
+        const ports = ['httpPort', 'httpsPort', 'wsPort', 'wssPort'];
+        for (const port of ports) {
+            portError = vhost[port] >= 1 && vhost[port] <= 65535 ? '' : 'Invalid Port';
+            if (portError) {
+                return portError;
             }
         }
         return false;
@@ -115,30 +146,41 @@ function AddEditMGLabel(props) {
                 }
                 if (value === '') {
                     error = 'Name is Empty';
-                } else if (/\s/.test(value)) {
-                    error = 'Name contains spaces';
                 } else if (/[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
                     error = 'Name field contains special characters';
                 } else {
                     error = false;
                 }
                 break;
-            case 'hosts':
-                if (hosts === undefined) {
+            case 'displayName':
+                if (value === '') {
+                    error = 'Display Name is Empty';
+                } else {
+                    error = false;
+                }
+                break;
+            case 'vhosts': {
+                if (value === undefined) {
                     error = false;
                     break;
                 }
                 if (value.length === 0) {
-                    error = 'Host is empty';
+                    error = 'VHost is empty';
                     break;
                 }
-                for (const h in value) {
-                    if (handleHostValidation(value[h])) {
-                        error = handleHostValidation(value[h]);
+                const hosts = value.map((vhost) => vhost.host);
+                if (hosts.length !== new Set(hosts).size) {
+                    error = 'VHosts are duplicated';
+                    break;
+                }
+                for (const h of value) {
+                    error = handleHostValidation(h);
+                    if (error) {
                         break;
                     }
                 }
                 break;
+            }
             default:
                 break;
         }
@@ -149,13 +191,17 @@ function AddEditMGLabel(props) {
         if (name === undefined) {
             dispatch({ field: 'name', value: '' });
         }
-        const NameErrors = hasErrors('name', name);
-        const hostErrors = hasErrors('hosts', hosts);
-        if (NameErrors) {
-            errorText += NameErrors + '\n';
+        const nameErrors = hasErrors('name', name);
+        const displayNameErrors = hasErrors('displayName', displayName);
+        const vhostErrors = hasErrors('vhosts', vhosts);
+        if (nameErrors) {
+            errorText += nameErrors + '\n';
         }
-        if (hostErrors) {
-            errorText += hostErrors + '\n';
+        if (displayNameErrors) {
+            errorText += displayNameErrors + '\n';
+        }
+        if (vhostErrors) {
+            errorText += vhostErrors + '\n';
         }
         return errorText;
     };
@@ -165,14 +211,28 @@ function AddEditMGLabel(props) {
             Alert.error(formErrors);
             return false;
         }
+        const vhostDto = [];
+        vhosts.forEach((vhost) => {
+            vhostDto.push({
+                host: vhost.host,
+                httpContext: vhost.httpContext,
+                httpPort: vhost.httpPort,
+                httpsPort: vhost.httpsPort,
+                wsPort: vhost.wsPort,
+                wssPort: vhost.wssPort,
+            });
+        });
+
         const restApi = new API();
         let promiseAPICall;
         if (dataRow) {
             // assign the update promise to the promiseAPICall
-            promiseAPICall = restApi.updateMicrogatewayLabel(dataRow.id, name.trim(), description, hosts);
+            promiseAPICall = restApi.updateGatewayEnvironment(
+                dataRow.id, name.trim(), displayName, description, vhostDto,
+            );
         } else {
             // assign the create promise to the promiseAPICall
-            promiseAPICall = restApi.addMicrogatewayLabel(name.trim(), description, hosts);
+            promiseAPICall = restApi.addGatewayEnvironment(name.trim(), displayName, description, vhostDto);
         }
 
         return promiseAPICall.then(() => {
@@ -202,20 +262,22 @@ function AddEditMGLabel(props) {
         });
     };
 
-    const handleHostChange = (userHosts) => {
-        dispatch({ field: 'hosts', value: userHosts });
-    };
-
     const dialogOpenCallback = () => {
         if (dataRow) {
-            const { name: originalName, description: originalDescription, accessUrls: originalHosts } = dataRow;
+            const {
+                name: originalName,
+                displayName: originalDisplayName,
+                description: originalDescription,
+                vhosts: originalVhosts,
+            } = dataRow;
             setIsEditMode(true);
             dispatch({
                 field: 'editDetails',
                 value: {
                     name: originalName,
+                    displayName: originalDisplayName,
                     description: originalDescription,
-                    hosts: originalHosts,
+                    vhosts: originalVhosts,
                 },
             });
         }
@@ -231,6 +293,7 @@ function AddEditMGLabel(props) {
                 />
             )}
             icon={icon}
+            triggerIconProps={{ disabled: dataRow && dataRow.isReadOnly }}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
             dialogOpenCallback={dialogOpenCallback}
@@ -250,9 +313,27 @@ function AddEditMGLabel(props) {
                     )}
                     fullWidth
                     error={hasErrors('name', name)}
-                    helperText={hasErrors('name', name) || 'Name of the Gateway label'}
+                    helperText={hasErrors('name', name) || 'Name of the Gateway Environment'}
                     variant='outlined'
                     disabled={editMode}
+                />
+                <TextField
+                    margin='dense'
+                    name='displayName'
+                    value={displayName}
+                    onChange={onChange}
+                    label={(
+                        <span>
+                            <FormattedMessage
+                                id='AdminPages.Gateways.AddEdit.form.displayName'
+                                defaultMessage='Display Name'
+                            />
+                            <span className={classes.error}>*</span>
+                        </span>
+                    )}
+                    fullWidth
+                    helperText='Display name of the Gateway Environment'
+                    variant='outlined'
                 />
                 <TextField
                     margin='dense'
@@ -265,47 +346,33 @@ function AddEditMGLabel(props) {
                     helperText='Description of the Gateway label'
                     variant='outlined'
                 />
-                {(editMode)
-                    ? (
-                        <ListInput
-                            onInputListChange={handleHostChange}
-                            initialList={hosts}
-                            inputLabelPrefix='Host'
-                            helperText='Enter Host'
-                            addButtonLabel='Add Host'
-                            onValidation={handleHostValidation}
-                        />
-                    )
-                    : (
-                        <ListInput
-                            onInputListChange={handleHostChange}
-                            inputLabelPrefix='Host'
-                            helperText='Name of the Host'
-                            addButtonLabel='Add Host'
-                            onValidation={handleHostValidation}
-                        />
-                    )}
+                <AddEditVhost
+                    initialVhosts={vhosts}
+                    onVhostChange={onChange}
+                />
             </FormControl>
         </FormDialogBase>
     );
 }
 
-AddEditMGLabel.defaultProps = {
+AddEditGWEnvironment.defaultProps = {
     icon: null,
     dataRow: null,
 };
 
-AddEditMGLabel.propTypes = {
+AddEditGWEnvironment.propTypes = {
     updateList: PropTypes.func.isRequired,
     dataRow: PropTypes.shape({
         id: PropTypes.string.isRequired,
-        description: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
-        accessUrls: PropTypes.shape([]),
+        displayName: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+        isReadOnly: PropTypes.bool.isRequired,
+        vhosts: PropTypes.shape([]),
     }),
     icon: PropTypes.element,
     triggerButtonText: PropTypes.shape({}).isRequired,
     title: PropTypes.shape({}).isRequired,
 };
 
-export default AddEditMGLabel;
+export default AddEditGWEnvironment;

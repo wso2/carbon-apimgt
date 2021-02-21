@@ -1261,8 +1261,7 @@ export default function Environments() {
             return endpoints;
         }
 
-        const httpContext = vhost.httpContext == null || vhost.httpContext === '' ? ''
-            : '/' + vhost.httpContext.replace(/^\//g, '');
+        const httpContext = vhost.httpContext ? '/' + vhost.httpContext.replace(/^\//g, '') : '';
         endpoints.primary = 'http://' + vhost.host
             + (vhost.httpPort === 80 ? '' : ':' + vhost.httpPort) + httpContext;
         endpoints.secondary = 'https://' + vhost.host
