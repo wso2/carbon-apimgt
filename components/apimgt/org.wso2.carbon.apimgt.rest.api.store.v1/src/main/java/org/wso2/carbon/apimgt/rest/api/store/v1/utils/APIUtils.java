@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
@@ -51,10 +52,7 @@ public class APIUtils {
     public static List<APIEndpointURLsDTO> extractEndpointURLs(API api, String tenantDomain)
             throws APIManagementException {
         List<APIEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        Map<String, Environment> environments = APIUtil.getEnvironments();
 
         Set<String> environmentsPublishedByAPI = new HashSet<>(api.getEnvironments());
         environmentsPublishedByAPI.remove("none");
@@ -146,10 +144,7 @@ public class APIUtils {
     public static List<APIEndpointURLsDTO> extractEndpointURLs(APIProduct apiProduct, String tenantDomain)
             throws APIManagementException {
         List<APIEndpointURLsDTO> apiEndpointsList = new ArrayList<>();
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        Map<String, Environment> environments = APIUtil.getEnvironments();
 
         Set<String> environmentsPublishedByAPI = new HashSet<>(apiProduct.getEnvironments());
         environmentsPublishedByAPI.remove("none");

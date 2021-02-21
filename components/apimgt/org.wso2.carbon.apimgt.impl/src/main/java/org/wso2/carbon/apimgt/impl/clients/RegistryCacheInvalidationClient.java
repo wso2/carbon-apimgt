@@ -56,10 +56,7 @@ public class RegistryCacheInvalidationClient {
     
 
     public RegistryCacheInvalidationClient() throws APIManagementException {
-        APIManagerConfiguration config =
-                                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                                               .getAPIManagerConfiguration();
-        environments = config.getApiGatewayEnvironments();
+        environments = APIUtil.getEnvironments();
     }
 
     

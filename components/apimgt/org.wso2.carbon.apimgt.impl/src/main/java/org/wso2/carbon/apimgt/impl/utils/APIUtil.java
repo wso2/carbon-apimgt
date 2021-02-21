@@ -2379,14 +2379,11 @@ public final class APIUtil {
      * @return {@link String} - Gateway URL
      */
 
-    public static String getGatewayendpoint(String transports) {
+    public static String getGatewayendpoint(String transports) throws APIManagementException {
 
         String gatewayURLs;
 
-        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()
-                .getApiGatewayEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments();
         if (gatewayEnvironments.size() > 1) {
             for (Environment environment : gatewayEnvironments.values()) {
                 if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
@@ -2432,8 +2429,7 @@ public final class APIUtil {
         String gatewayURLs;
         String gatewayEndpoint = "";
 
-        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments();
         Environment environment = gatewayEnvironments.get(environmentName);
         if (environment.getType().equals(environmentType)) {
             gatewayURLs = environment.getApiGatewayEndpoint();
@@ -5400,11 +5396,7 @@ public final class APIUtil {
     public static String createSwaggerJSONContent(API api) throws APIManagementException {
 
         APIIdentifier identifier = api.getId();
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-
-        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
+        Environment environment = (Environment) getEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
@@ -6845,13 +6837,11 @@ public final class APIUtil {
      * @param environments environments values in json format
      * @return set of environments that Published
      */
-    public static Set<String> extractEnvironmentsForAPI(String environments) {
+    public static Set<String> extractEnvironmentsForAPI(String environments) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet = new HashSet<String>(
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            environmentStringSet = new HashSet<>(getEnvironments().keySet());
         } else {
             //handle not to publish to any of the gateways
             if (APIConstants.API_GATEWAY_NONE.equals(environments)) {
@@ -6865,9 +6855,7 @@ public final class APIUtil {
             }
             //handle to publish to any of the gateways when api creating stage
             else if ("".equals(environments)) {
-                environmentStringSet = new HashSet<String>(
-                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                environmentStringSet = new HashSet<>(getEnvironments().keySet());
             }
         }
 
@@ -6946,12 +6934,9 @@ public final class APIUtil {
      *
      * @param api API object with the attributes value
      */
-    public static List<Environment> getEnvironmentsOfAPI(API api) {
+    public static List<Environment> getEnvironmentsOfAPI(API api) throws APIManagementException {
 
-        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()
-                .getApiGatewayEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments();
         Set<String> apiEnvironments = api.getEnvironments();
         List<Environment> returnEnvironments = new ArrayList<Environment>();
 
@@ -9824,13 +9809,11 @@ public final class APIUtil {
      * @param environments environments values in json format
      * @return set of environments that need to Publish
      */
-    public static Set<String> extractEnvironmentsForAPI(List<String> environments) {
+    public static Set<String> extractEnvironmentsForAPI(List<String> environments) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet = new HashSet<String>(
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            environmentStringSet = new HashSet<>(getEnvironments().keySet());
         } else {
             //handle not to publish to any of the gateways
             if (environments.size() == 1 && APIConstants.API_GATEWAY_NONE.equals(environments.get(0))) {
@@ -9843,9 +9826,7 @@ public final class APIUtil {
             }
             //handle to publish to any of the gateways when api creating stage
             else if (environments.size() == 0) {
-                environmentStringSet = new HashSet<String>(
-                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                environmentStringSet = new HashSet<>(getEnvironments().keySet());
             }
         }
         return environmentStringSet;
@@ -11299,11 +11280,9 @@ public final class APIUtil {
         return keyManagerConfigurationDTO;
     }
 
-    public static String getTokenEndpointsByType(String type) {
+    public static String getTokenEndpointsByType(String type) throws APIManagementException {
 
-        APIManagerConfiguration config =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        Map<String, Environment> environments = getEnvironments();
         Map<String, String> map = new HashMap<>();
 
         String productionUrl = "";
