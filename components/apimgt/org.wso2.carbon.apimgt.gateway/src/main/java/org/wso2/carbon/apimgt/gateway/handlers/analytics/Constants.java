@@ -51,4 +51,8 @@ public class Constants {
     public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
     public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
     public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
+
+    public static final String API_GOOGLE_ANALYTICS_TRACKING_ENABLED = "Enabled";
+    public static final String API_GOOGLE_ANALYTICS_TRACKING_ID = "TrackingID";
+    public static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 }
