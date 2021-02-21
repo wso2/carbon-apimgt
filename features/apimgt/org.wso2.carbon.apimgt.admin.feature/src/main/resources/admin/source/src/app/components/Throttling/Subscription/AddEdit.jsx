@@ -1047,13 +1047,13 @@ function AddEdit(props) {
                                 <Typography color='inherit' variant='subtitle2' component='div'>
                                     <FormattedMessage
                                         id='Throttling.Subscription.Subscriber.Count'
-                                        defaultMessage='WebHooks'
+                                        defaultMessage='Webhooks'
                                     />
                                 </Typography>
                                 <Typography color='inherit' variant='caption' component='p'>
                                     <FormattedMessage
                                         id='Throttling.Subscription.AddEdit.subscription.count.add.description'
-                                        defaultMessage={'Maximum number of subscriber connections'
+                                        defaultMessage={'Maximum number of webhooks'
                                         + ' allowed for a Webhooks API using this policy.'}
                                     />
                                 </Typography>
