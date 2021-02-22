@@ -43,21 +43,20 @@ import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
 import org.wso2.siddhi.query.api.expression.Expression;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements SchedulingProcessor, FindableProcessor {
     private long timeInMilliSeconds;
-    private ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
+    private final ComplexEventChunk<StreamEvent> expiredEventChunk = new ComplexEventChunk<StreamEvent>(true);
     private Scheduler scheduler;
     private ExecutionPlanContext executionPlanContext;
     private long expireEventTime = -1;
     private long startTime = -1;
-    private long eventCount = -1;
-    private AtomicLong currentEventCount = new AtomicLong(0);
-    private long eventFlushTime = -1;
-    private long evetFlushTimeIntervel = -1;
+    private long maxEventCount = -1;
+    private final Map<String, AtomicLong> throttledStateMap = new HashMap<>();
 
 
     @Override
@@ -105,22 +104,14 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
             }
 
             if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.INT) {
-                eventCount = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
+                maxEventCount = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
                         attributeExpressionExecutors[2]).getValue()));
             } else if (attributeExpressionExecutors[2].getReturnType() == Attribute.Type.LONG) {
-                eventCount = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
+                maxEventCount = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
                         attributeExpressionExecutors[2]).getValue()));
             } else {
                 throw new ExecutionPlanValidationException("Async Throttle batch window 3nd parameter needs to be a " +
                         "Long or Int type but found a " + attributeExpressionExecutors[2].getReturnType());
-            }
-
-            if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.INT) {
-                evetFlushTimeIntervel = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
-                        attributeExpressionExecutors[3]).getValue()));
-            } else if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
-                evetFlushTimeIntervel = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
-                        attributeExpressionExecutors[3]).getValue()));
             }
         } else {
             throw new ExecutionPlanValidationException("Throttle batch window should have 3 parameters " +
@@ -130,6 +121,7 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
 
         List<Attribute> attributeList = new ArrayList<Attribute>();
         attributeList.add(new Attribute("expiryTimeStamp", Attribute.Type.LONG));
+        attributeList.add(new Attribute("isThrottled", Attribute.Type.BOOL));
         return attributeList;
     }
 
@@ -145,43 +137,49 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                 } else {
                     expireEventTime = executionPlanContext.getTimestampGenerator().currentTime() + timeInMilliSeconds;
                 }
-            }
-            if (eventFlushTime == -1) {
-                eventFlushTime = executionPlanContext.getTimestampGenerator().currentTime() + evetFlushTimeIntervel;
-                scheduler.notifyAt(eventFlushTime);
+                scheduler.notifyAt(expireEventTime);
+
             }
 
-            boolean sendEvents = false;
             if (currentTime >= expireEventTime) {
                 expireEventTime += timeInMilliSeconds;
-                sendEvents = true;
-                currentEventCount = new AtomicLong(0);
-            } else if (currentEventCount.get() == eventCount) {
-                sendEvents = true;
-            } else if (currentTime >= eventFlushTime) {
-                sendEvents = true;
-                eventFlushTime += evetFlushTimeIntervel;
-                scheduler.notifyAt(eventFlushTime);
+                scheduler.notifyAt(expireEventTime);
+                throttledStateMap.clear();
             }
 
             while (streamEventChunk.hasNext()) {
+                String throttleKey;
+                long eventCount;
                 StreamEvent streamEvent = streamEventChunk.next();
                 if (streamEvent.getType() != ComplexEvent.Type.CURRENT) {
                     continue;
                 }
-                complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{eventFlushTime});
+                if (streamEvent.getOutputData()[0] != null) {
+                    throttleKey = streamEvent.getOutputData()[0].toString();
+                    if (throttledStateMap.containsKey(throttleKey)) {
+                        eventCount = throttledStateMap.get(throttleKey).incrementAndGet();
+                        if (eventCount >= maxEventCount) {
+                            complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime, true});
+                        } else {
+                            complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime, false});
+                        }
+                    } else {
+                        throttledStateMap.put(throttleKey, new AtomicLong(1));
+                        complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime, false});
+                    }
+                } else {
+                    complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime, false});
+                }
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                clonedStreamEvent.setTimestamp(eventFlushTime);
+                clonedStreamEvent.setTimestamp(expireEventTime);
                 expiredEventChunk.add(clonedStreamEvent);
             }
-            if (sendEvents) {
-                expiredEventChunk.reset();
-                if (expiredEventChunk.getFirst() != null) {
-                    streamEventChunk.add(expiredEventChunk.getFirst());
-                }
-                expiredEventChunk.clear();
+            expiredEventChunk.reset();
+            if (expiredEventChunk.getFirst() != null) {
+                streamEventChunk.add(expiredEventChunk.getFirst());
             }
+            expiredEventChunk.clear();
         }
         if (streamEventChunk.getFirst() != null) {
             streamEventChunk.setBatch(true);
@@ -202,13 +200,15 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
 
     @Override
     public Object[] currentState() {
-        return new Object[]{expiredEventChunk.getFirst()};
+        return new Object[]{new Object[]{expiredEventChunk.getFirst(),throttledStateMap}};
     }
 
     @Override
     public void restoreState(Object[] state) {
         expiredEventChunk.clear();
         expiredEventChunk.add((StreamEvent) state[0]);
+        throttledStateMap.clear();
+        throttledStateMap.putAll((Map<? extends String, ? extends AtomicLong>) state[1]);
     }
 
     @Override
