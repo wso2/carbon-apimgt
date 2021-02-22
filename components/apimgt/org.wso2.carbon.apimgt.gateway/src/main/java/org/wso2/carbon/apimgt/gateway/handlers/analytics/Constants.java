@@ -26,11 +26,12 @@ public class Constants {
     public static final String BACKEND_END_TIME_PROPERTY = "apim.analytics.backend.end.time";
     public static final String BACKEND_RESPONSE_CODE = "api.analytics.backend.response_code";
     public static final String USER_AGENT_PROPERTY = "api.analytics.user.agent";
+    public static final String USER_IP_PROPERTY = "api.analytics.user.ip";
     public static final String CACHED_RESPONSE_KEY = "CachableResponse";
     public static final String SKIP_DEFAULT_METRICS_PUBLISHING = "skip_default_metrics_publishing";
 
-    public static final String REGION_ID = "asia";
-    public static final String DEPLOYMENT_ID = "prod";
+    public static final String REGION_ID_PROP = "apim.gw.region";
+    public static final String DEFAULT_REGION_ID = "default";
     public static final String SUCCESS_EVENT_TYPE = "response";
     public static final String FAULTY_EVENT_TYPE = "fault";
     public static final String UNKNOWN_VALUE = "UNKNOWN";
@@ -51,4 +52,6 @@ public class Constants {
     public static final int RESOURCE_NOT_FOUND_ERROR_CODE = 404;
     public static final int METHOD_NOT_ALLOWED_ERROR_CODE = 405;
     public static final int ENDPOINT_SUSPENDED_ERROR_CODE = 303001;
+
+    public static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
 }
