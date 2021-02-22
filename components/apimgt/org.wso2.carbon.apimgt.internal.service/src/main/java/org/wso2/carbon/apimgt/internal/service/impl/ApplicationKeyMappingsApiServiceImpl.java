@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.internal.service.ApplicationKeyMappingsApiService;
@@ -32,13 +33,15 @@ import javax.ws.rs.core.Response;
 public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappingsApiService {
 
     @Override
-    public Response applicationKeyMappingsGet(String xWSO2Tenant, String consumerKey, MessageContext messageContext) {
+    public Response applicationKeyMappingsGet(String xWSO2Tenant, String consumerKey, String keymanager,
+            MessageContext messageContext) throws APIManagementException {
 
         SubscriptionValidationDAO subscriptionValidationDAO = new SubscriptionValidationDAO();
         xWSO2Tenant = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
 
         if (StringUtils.isNotEmpty(consumerKey)) {
-            ApplicationKeyMapping keyMapping = subscriptionValidationDAO.getApplicationKeyMapping(consumerKey);
+            ApplicationKeyMapping keyMapping = subscriptionValidationDAO.getApplicationKeyMapping(consumerKey,
+                    keymanager, xWSO2Tenant);
             List<ApplicationKeyMapping> applicationKeyMappings = new ArrayList<>();
             if (keyMapping != null) {
                 applicationKeyMappings.add(keyMapping);
@@ -52,8 +55,6 @@ public class ApplicationKeyMappingsApiServiceImpl implements ApplicationKeyMappi
                             getAllApplicationKeyMappings(xWSO2Tenant))).build();
 
         }
-        return Response.ok().entity(SubscriptionValidationDataUtil.
-                fromApplicationKeyMappingToApplicationKeyMappingListDTO(
-                        subscriptionValidationDAO.getAllApplicationKeyMappings())).build();
+        return null;
     }
 }

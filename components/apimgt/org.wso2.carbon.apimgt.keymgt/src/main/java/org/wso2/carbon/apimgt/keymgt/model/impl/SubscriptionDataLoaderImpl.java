@@ -51,6 +51,8 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.io.IOException;
 import java.net.URL;
+
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -212,7 +214,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         String endPoint =
                 APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS + "?apiId=" + apiId + "&appId=" + appId;
-        Subscription subscription = new Subscription();
+        Subscription subscription = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);
@@ -234,7 +236,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public Application getApplicationById(int appId) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APPLICATIONS + "?appId=" + appId;
-        Application application = new Application();
+        Application application = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);
@@ -254,12 +256,25 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     @Override
     public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException {
+        return getKeyMapping(consumerKey, null);
+    }
 
-        String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
-                + consumerKey;
+    @Override
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager)
+            throws DataLoadingException {
         ApplicationKeyMapping application = null;
         String responseString;
+        String endPoint = null;
         try {
+            if (keymanager != null) {
+                keymanager = URLEncoder.encode(keymanager, APIConstants.DigestAuthConstants.CHARSET);
+                keymanager = keymanager.replace("\\+", "%20");
+                endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
+                        + consumerKey + "&keymanager=" + keymanager;
+            } else {
+                endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
+                        + consumerKey;
+            }
             responseString = invokeService(endPoint, null);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
