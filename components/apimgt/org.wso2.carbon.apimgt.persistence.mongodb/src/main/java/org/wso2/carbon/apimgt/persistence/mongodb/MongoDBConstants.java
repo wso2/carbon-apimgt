@@ -21,4 +21,13 @@ public class MongoDBConstants {
     public static final String MONGODB_DEFAULT_DATABASE = "APIM_DB";
     public static final String MONGODB_COLLECTION_SUR_FIX = "_apis";
     public static final String MONGODB_COLLECTION_DEFAULT_ORG = "carbon.super";
+
+    /**
+     * Constants for correlation logging
+     * */
+    public static final String CORRELATION_ID = "Correlation-ID";
+    public static final String ENABLE_CORRELATION_LOGS = "enableCorrelationLogs";
+    public static final String CORRELATION_LOGGER = "correlation";
+    public static final String LOG_ALL_METHODS = "logAllMethods";
+    public static final String AM_ACTIVITY_ID = "activityid";
 }

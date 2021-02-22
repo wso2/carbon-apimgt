@@ -29,9 +29,11 @@ import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.InsertOneResult;
-import org.bson.BsonString;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
@@ -104,6 +106,7 @@ import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.REGISTRY_C
 import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_DEFAULT_ORG;
 import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_SUR_FIX;
 
+@MethodStats
 public class MongoDBPersistenceImpl implements APIPersistence {
 
     private static final Log log = LogFactory.getLog(MongoDBPersistenceImpl.class);
@@ -292,37 +295,55 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return publisherAPISearchResult;
     }
 
-
     @Override
     public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start,
                                                                   int offset, UserContext ctx) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
+        int skip = start;
+        int limit = offset;
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(ctx.getOrganization().getName());
+        long totalCount = collection.countDocuments();
+        MongoCursor<MongoDBPublisherAPI> aggregate = collection
+                .aggregate(getPublisherSearchAggregate(searchQuery, skip, limit)).cursor();
+        PublisherContentSearchResult contentSearchResult = new PublisherContentSearchResult();
+        List<SearchContent> content = new ArrayList<>();
+        while (aggregate.hasNext()) {
+            MongoDBPublisherAPI mongoDBAPIDocument = aggregate.next();
+            PublisherSearchContent api = MongoAPIMapper.INSTANCE.toPublisherContentApi(mongoDBAPIDocument);
+            api.setType("API");
+            content.add(api);
+        }
+        contentSearchResult.setResults(content);
+        contentSearchResult.setReturnedCount(content.size());
+        contentSearchResult.setTotalCount((int) totalCount);
+        return contentSearchResult;
     }
 
     @Override
     public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start,
                                                                   int offset, UserContext ctx) throws APIPersistenceException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private String getSearchQuery(String query) {
-
-        if (!query.contains(":")) {
-            return "*" + query + "*";
+        int skip = start;
+        int limit = offset;
+        MongoCollection<MongoDBDevPortalAPI> collection = getDevPortalCollection(ctx.getOrganization().getName());
+        long totalCount = collection.countDocuments();
+        MongoCursor<MongoDBDevPortalAPI> aggregate = collection
+                .aggregate(getDevportalSearchAggregate(searchQuery, skip, limit)).cursor();
+        DevPortalContentSearchResult contentSearchResult = new DevPortalContentSearchResult();
+        List<SearchContent> content = new ArrayList<>();
+        while (aggregate.hasNext()) {
+            MongoDBDevPortalAPI mongoDBAPIDocument = aggregate.next();
+            DevPortalSearchContent api = MongoAPIMapper.INSTANCE.toDevportalContentApi(mongoDBAPIDocument);
+            api.setType("API");
+            content.add(api);
         }
-        String[] queryArray = query.split(":");
-        String searchCriteria = queryArray[0];
-        String searchQuery = queryArray[1];
-        return "*" + searchQuery + "*";
+        contentSearchResult.setResults(content);
+        contentSearchResult.setReturnedCount(content.size());
+        contentSearchResult.setTotalCount((int) totalCount);
+        return contentSearchResult;
     }
 
-    private List<Document> getPublisherSearchAggregate(String query, int skip, int limit) {
+    private Document buildSearchAggregate(String query) {
         String searchQuery;
-
         List<Document> mustArray = new ArrayList();
-
         if (query.contains(" ")) {
             String[] searchAreas = query.split(" ");
 
@@ -348,16 +369,44 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         } else {
             List<String> paths = new ArrayList<>();
             if (query.contains(":")) {
+
                 String[] queryArray = query.split(":");
-                String searchField = getSearchField(queryArray[0]);
-                paths.add(searchField);
-                searchQuery = "*" + queryArray[1] + "*";
+
+                if (queryArray[0].equalsIgnoreCase("content")) {
+                    searchQuery = "*" + queryArray[1] + "*";
+                    paths.add("apiName");
+                    paths.add("providerName");
+                    paths.add("version");
+                    paths.add("context");
+                    paths.add("status");
+                    paths.add("description");
+                    paths.add("swaggerDefinition");
+                    paths.add("tags");
+                    paths.add("gatewayLabels");
+                    paths.add("additionalProperties");
+                    paths.add("apiCategories");
+                } else {
+                    String searchField = getSearchField(queryArray[0]);
+                    paths.add(searchField);
+                    searchQuery = "*" + queryArray[1] + "*";
+                }
+
             } else {
                 searchQuery = "*" + query + "*";
                 if (query == "") {
                     searchQuery = "*";
                 }
                 paths.add("apiName");
+                paths.add("providerName");
+                paths.add("version");
+                paths.add("context");
+                paths.add("status");
+                paths.add("description");
+                paths.add("swaggerDefinition");
+                paths.add("tags");
+                paths.add("gatewayLabels");
+                paths.add("additionalProperties");
+                paths.add("apiCategories");
             }
             Document wildCard = new Document();
             Document wildCardBody = new Document();
@@ -367,19 +416,22 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             wildCard.put("wildcard", wildCardBody);
             mustArray.add(wildCard);
         }
-
         Document search = new Document();
-
-        Document skipDoc = new Document();
-        Document limitDoc = new Document();
         Document must = new Document();
         Document compound = new Document();
-
-
 
         must.put("must", mustArray);
         compound.put("compound", must);
         search.put("$search", compound);
+
+        return search;
+    }
+
+    private List<Document> getPublisherSearchAggregate(String query, int skip, int limit) {
+        Document searchDoc = buildSearchAggregate(query);
+        Document skipDoc = new Document();
+        Document limitDoc = new Document();
+
         skipDoc.put("$skip", skip);
         limitDoc.put("$limit", limit);
 
@@ -397,14 +449,14 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         matchDoc.put("$match", orDoc);
 
         List<Document> list = new ArrayList<>();
-        list.add(search);
+        list.add(searchDoc);
         list.add(matchDoc);
         list.add(skipDoc);
         list.add(limitDoc);
         return list;
     }
 
-    private String getSearchField(String queryCriteria){
+    private String getSearchField(String queryCriteria) {
         if (queryCriteria.equalsIgnoreCase("name")) {
             return "apiName";
         }
@@ -423,33 +475,29 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         if (queryCriteria.equalsIgnoreCase("description")) {
             return "description";
         }
-
-        return "apiName";
+        if (queryCriteria.equalsIgnoreCase("tags")) {
+            return "tags";
+        }
+        if (queryCriteria.equalsIgnoreCase("api-category")) {
+            return "apiCategories";
+        }
+        if (queryCriteria.equalsIgnoreCase("subcontext")) {
+            return "context";
+        }
+        if (queryCriteria.equalsIgnoreCase("doc")) {
+            return "documentationList";
+        }
+        if (queryCriteria.equalsIgnoreCase("label")) {
+            return "gatewayLabels";
+        }
+        return "";
     }
 
     private List<Document> getDevportalSearchAggregate(String query, int skip, int limit) {
-        String searchQuery = getSearchQuery(query);
-        List<String> paths = new ArrayList<>();
-        paths.add("apiName");
-        paths.add("providerName");
-        paths.add("version");
-        paths.add("context");
-//        paths.add("status");
-//        paths.add("description");
-//        paths.add("tags");
-//        paths.add("gatewayLabels");
-//        paths.add("additionalProperties");
-
-        Document search = new Document();
-        Document wildCard = new Document();
-        Document wildCardBody = new Document();
+        Document searchDoc = buildSearchAggregate(query);
         Document skipDoc = new Document();
         Document limitDoc = new Document();
-        wildCardBody.put("path", "apiName");
-        wildCardBody.put("query", "*");
-        wildCardBody.put("allowAnalyzedField", true);
-        wildCard.put("wildcard", wildCardBody);
-        search.put("$search", wildCard);
+
         skipDoc.put("$skip", skip);
         limitDoc.put("$limit", limit);
 
@@ -480,7 +528,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         matchDoc.put("$match", andDoc);
 
         List<Document> list = new ArrayList<>();
-        list.add(search);
+        list.add(searchDoc);
         list.add(matchDoc);
         list.add(skipDoc);
         list.add(limitDoc);

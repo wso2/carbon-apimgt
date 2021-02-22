@@ -15,6 +15,26 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.9</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <complianceLevel>1.8</complianceLevel>
+                    <excludes>
+                    <exclude>**/mappers/*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -28,7 +48,7 @@
                         <Export-Package>
                             org.wso2.carbon.apimgt.persistence.mongodb.*; version="${carbon.apimgt.version}"
                         </Export-Package>
-                           <Import-Package>
+                        <Import-Package>
                             org.apache.commons.logging.*; version="${import.package.version.commons.logging}",
                             org.wso2.carbon.apimgt.persistence.*; version="${carbon.apimgt.version}",
                         </Import-Package>
@@ -56,9 +76,14 @@
     </build>
     <dependencies>
         <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>${apache.httpcomponents.version}</version>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${apache.httpcomponents.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
