@@ -35,16 +35,6 @@ public class SseSubscriptionEventDataProvider extends SseEventDataProvider {
     }
 
     @Override
-    public int getTargetResponseCode() {
-        return 0;
-    }
-
-    @Override
-    public int getProxyResponseCode() {
-        return 0;
-    }
-
-    @Override
     public Operation getOperation() {
 
         Operation operation = super.getOperation();
