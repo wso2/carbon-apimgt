@@ -45,6 +45,7 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements SchedulingProcessor, FindableProcessor {
     private long timeInMilliSeconds;
@@ -54,6 +55,10 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
     private long expireEventTime = -1;
     private long startTime = -1;
     private long eventCount = -1;
+    private AtomicLong currentEventCount = new AtomicLong(0);
+    private long eventFlushTime = -1;
+    private long evetFlushTimeIntervel = -1;
+
 
     @Override
     public Scheduler getScheduler() {
@@ -70,8 +75,7 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                                    ExpressionExecutor[] attributeExpressionExecutors,
                                    ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
-
-        if (attributeExpressionExecutors.length == 3) {
+        if (attributeExpressionExecutors.length == 4) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
                     timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
@@ -110,6 +114,14 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                 throw new ExecutionPlanValidationException("Async Throttle batch window 3nd parameter needs to be a " +
                         "Long or Int type but found a " + attributeExpressionExecutors[2].getReturnType());
             }
+
+            if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.INT) {
+                evetFlushTimeIntervel = Integer.parseInt(String.valueOf(((ConstantExpressionExecutor)
+                        attributeExpressionExecutors[3]).getValue()));
+            } else if (attributeExpressionExecutors[3].getReturnType() == Attribute.Type.LONG) {
+                evetFlushTimeIntervel = Long.parseLong(String.valueOf(((ConstantExpressionExecutor)
+                        attributeExpressionExecutors[3]).getValue()));
+            }
         } else {
             throw new ExecutionPlanValidationException("Throttle batch window should have 3 parameters " +
                     "(<int|long|time> windowTime (and <int|long> startTime) (and <int|long> eventCount), but found "
@@ -126,23 +138,30 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
         synchronized (this) {
+            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
             if (expireEventTime == -1) {
-                long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
                 if (startTime != -1) {
                     expireEventTime = addTimeShift(currentTime);
                 } else {
                     expireEventTime = executionPlanContext.getTimestampGenerator().currentTime() + timeInMilliSeconds;
                 }
-                scheduler.notifyAt(expireEventTime);
             }
-            long currentTime = executionPlanContext.getTimestampGenerator().currentTime();
-            boolean sendEvents;
+            if (eventFlushTime == -1) {
+                eventFlushTime = executionPlanContext.getTimestampGenerator().currentTime() + evetFlushTimeIntervel;
+                scheduler.notifyAt(eventFlushTime);
+            }
+
+            boolean sendEvents = false;
             if (currentTime >= expireEventTime) {
                 expireEventTime += timeInMilliSeconds;
-                scheduler.notifyAt(expireEventTime);
                 sendEvents = true;
-            } else {
-                sendEvents = false;
+                currentEventCount = new AtomicLong(0);
+            } else if (currentEventCount.get() == eventCount) {
+                sendEvents = true;
+            } else if (currentTime >= eventFlushTime) {
+                sendEvents = true;
+                eventFlushTime += evetFlushTimeIntervel;
+                scheduler.notifyAt(eventFlushTime);
             }
 
             while (streamEventChunk.hasNext()) {
@@ -150,11 +169,10 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                 if (streamEvent.getType() != ComplexEvent.Type.CURRENT) {
                     continue;
                 }
-                StreamEvent streamEvent1 = new StreamEvent(0, 0, 3);
-                complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime});
+                complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{eventFlushTime});
                 StreamEvent clonedStreamEvent = streamEventCloner.copyStreamEvent(streamEvent);
                 clonedStreamEvent.setType(StreamEvent.Type.EXPIRED);
-                clonedStreamEvent.setTimestamp(expireEventTime);
+                clonedStreamEvent.setTimestamp(eventFlushTime);
                 expiredEventChunk.add(clonedStreamEvent);
             }
             if (sendEvents) {
