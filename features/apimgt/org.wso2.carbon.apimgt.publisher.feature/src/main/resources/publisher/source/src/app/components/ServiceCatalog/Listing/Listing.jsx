@@ -173,7 +173,7 @@ function Listing(props) {
             },
         },
         {
-            name: 'displayName',
+            name: 'name',
             label: intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Listing.name',
                 defaultMessage: 'Service',
@@ -189,7 +189,7 @@ function Listing(props) {
                                     className={classes.serviceNameLink}
                                     to={'/service-catalog/' + serviceId + '/overview'}
                                 >
-                                    <span>{dataRow.displayName}</span>
+                                    <span>{dataRow.name}</span>
                                 </Link>
                             );
                         }
@@ -310,10 +310,10 @@ function Listing(props) {
                 customBodyRender: (value, tableMeta) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        const { usage, id, displayName } = dataRow;
+                        const { usage, id, name } = dataRow;
                         if (dataRow) {
                             return (
-                                <Usages usageNumber={usage} serviceDisplayName={displayName} serviceId={id} />
+                                <Usages usageNumber={usage} serviceDisplayName={name} serviceId={id} />
                             );
                         }
                     }
@@ -329,7 +329,7 @@ function Listing(props) {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
                         const {
-                            id, displayName, version, serviceUrl,
+                            id, serviceKey, name, version, serviceUrl,
                         } = dataRow;
                         return (
                             <>
@@ -337,12 +337,13 @@ function Listing(props) {
                                     <CreateApi
                                         history={history}
                                         serviceId={id}
-                                        serviceDisplayName={displayName}
+                                        serviceKey={serviceKey}
+                                        serviceDisplayName={name}
                                         serviceVersion={version}
                                         serviceUrl={serviceUrl}
                                     />
                                     <Delete
-                                        serviceDisplayName={displayName}
+                                        serviceDisplayName={name}
                                         serviceId={id}
                                         onDelete={onDelete}
                                     />
