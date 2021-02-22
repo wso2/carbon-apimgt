@@ -10231,8 +10231,8 @@ public final class APIUtil {
             digestValue.update(der);
             byte[] digestInBytes = digestValue.digest();
             String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint = new String(new Base64(0, null, true).encode(
-                    publicCertThumbprint.getBytes(Charsets.UTF_8)), Charsets.UTF_8);
+            String base64UrlEncodedThumbPrint = Base64.encodeBase64URLSafeString(publicCertThumbprint.
+                    getBytes(Charsets.UTF_8));
             StringBuilder jwtHeader = new StringBuilder();
             /*
              * Sample header
