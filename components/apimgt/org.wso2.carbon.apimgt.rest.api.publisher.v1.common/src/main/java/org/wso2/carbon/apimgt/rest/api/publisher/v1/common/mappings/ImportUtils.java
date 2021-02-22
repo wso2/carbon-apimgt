@@ -32,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,6 +57,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -114,6 +114,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -144,6 +145,7 @@ public class ImportUtils {
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
                                 Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct,
                                 String[] tokenScopes) throws APIManagementException {
+
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
         String graphQLSchema = null;
@@ -260,11 +262,11 @@ public class ImportUtils {
             addEndpointCertificates(extractedFolderPath, importedApi, apiProvider, tenantId);
             addSOAPToREST(extractedFolderPath, importedApi, registry);
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Importing client certificates.");
-                }
-                addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                        importedApi.getId().getProviderName());
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Importing client certificates.");
+            }
+            addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
+                    importedApi.getId().getProviderName());
 
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
@@ -277,19 +279,26 @@ public class ImportUtils {
                 apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
             }
             importedApi.setStatus(targetStatus);
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (deploymentInfoArray == null) {
-                //If the params have overwritten the deployment environments, yaml file will not be read
+                //If the params have not overwritten the deployment environments, yaml file will be read
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
             }
-            if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
+            List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
+                    tenantDomain, apiProvider);
+            if (apiRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApi.getUuid();
                 String revisionId;
                 APIRevision apiRevision = new APIRevision();
                 apiRevision.setApiUUID(importedAPIUuid);
                 apiRevision.setDescription("Revision created after importing the API");
-                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+
                 try {
                     revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+                    if (log.isDebugEnabled()) {
+                        log.debug("A new revision has been created for API " + importedApi.getId().getApiName() + "_"
+                                + importedApi.getId().getVersion());
+                    }
                 } catch (APIManagementException e) {
                     //if the revision count is more than 5, addAPIRevision will throw an exception. If rotateRevision
                     //enabled, earliest revision will be deleted before creating a revision again
@@ -305,30 +314,28 @@ public class ImportUtils {
                                 .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList);
                         apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
                         revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Revision ID: " + earliestRevisionUuid + " has been undeployed from " +
+                                    deploymentsList.size() + " gateway environments and created a new revision ID: " +
+                                    revisionId + " for API " + importedApi.getId().getApiName() + "_" +
+                                    importedApi.getId().getVersion());
+                        }
                     } else {
-                        throw new APIManagementException(e);
+                        throw new APIManagementException("Error occurred while creating a new revision for the API: " +
+                                importedApi.getId().getApiName(), e);
                     }
                 }
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-                for (int i = 0; i < deploymentInfoArray.size(); i++) {
-                    JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
-                    JsonElement deploymentNameElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_NAME);
-                    if (deploymentNameElement != null) {
-                        String deploymentName = deploymentNameElement.getAsString();
-                        JsonElement displayOnDevportalElement =
-                                deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
-                        boolean displayOnDevportal =
-                                displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
-                        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                        apiRevisionDeployment.setDeployment(deploymentName);
-                        apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
-                        apiRevisionDeployments.add(apiRevisionDeployment);
-                    }
-                }
                 apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments);
+                if (log.isDebugEnabled()) {
+                    log.debug("API: " + importedApi.getId().getApiName() + "_" + importedApi.getId().getVersion() +
+                            " was deployed in " + apiRevisionDeployments.size() + " gateway environments.");
+                }
+            } else {
+                log.info("Valid deployment environments were not found for the imported artifact. Only working copy " +
+                        "was updated and not deployed in any of the gateway environments.");
             }
             return importedApi;
         } catch (CryptoException | IOException e) {
@@ -354,6 +361,58 @@ public class ImportUtils {
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
         }
+    }
+
+    /**
+     * This method is used to validate the Gateway environments from the deplotment enviornments file. Gateway
+     * environments will be validated with a set of all the labels and environments of the tenant domain. If
+     * environment is not found in this set, it will be skipped with an error message in the console. This method is
+     * common to both APIs and API Products
+     *
+     * @param deploymentInfoArray Deployment environment array found in the import artifact
+     * @param tenantDomain        Tenant domain
+     * @param apiProvider         Provider of the API/ API Product
+     * @return a list of API/API Product revision deployments ready to be deployed.
+     * @throws APIManagementException If an error occurs when validating the deployments list
+     */
+    private static List<APIRevisionDeployment> getValidatedDeploymentsList(JsonArray deploymentInfoArray,
+                                                                           String tenantDomain, APIProvider apiProvider)
+            throws APIManagementException {
+
+        List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
+        if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
+            Set<String> keySet =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet();
+            Set<String> gatewayEnvironmentsSet = new HashSet<>(keySet);
+            List<Label> labels = apiProvider.getAllLabels(tenantDomain);
+            for (Label label : labels) {
+                gatewayEnvironmentsSet.add(label.getName());
+            }
+
+            for (int i = 0; i < deploymentInfoArray.size(); i++) {
+                JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
+                JsonElement deploymentNameElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_NAME);
+                if (deploymentNameElement != null) {
+                    String deploymentName = deploymentNameElement.getAsString();
+                    if (gatewayEnvironmentsSet.contains(deploymentName)) {
+                        JsonElement displayOnDevportalElement =
+                                deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
+                        boolean displayOnDevportal =
+                                displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
+                        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                        apiRevisionDeployment.setDeployment(deploymentName);
+                        apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
+                        apiRevisionDeployments.add(apiRevisionDeployment);
+                    } else {
+                        log.error("Label " + deploymentName + " is not a defined gateway environment. Hence " +
+                                "skipped without deployment");
+                    }
+                }
+
+            }
+        }
+        return apiRevisionDeployments;
     }
 
     /**
@@ -1781,7 +1840,9 @@ public class ImportUtils {
                     importedApiProduct.getId().getProviderName());
 
             JsonArray deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
-            if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
+            List<APIRevisionDeployment> apiProductRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
+                    currentTenantDomain, apiProvider);
+            if (apiProductRevisionDeployments.size() > 0) {
                 String importedAPIUuid = importedApiProduct.getUuid();
                 String revisionId;
                 APIRevision apiProductRevision = new APIRevision();
@@ -1789,6 +1850,11 @@ public class ImportUtils {
                 apiProductRevision.setDescription("Revision created after importing the API Product");
                 try {
                     revisionId = apiProvider.addAPIProductRevision(apiProductRevision);
+                    if (log.isDebugEnabled()) {
+                        log.debug("A new revision has been created for API Product " +
+                                importedApiProduct.getId().getName() + "_"
+                                + importedApiProduct.getId().getVersion() + " with ID: " + revisionId);
+                    }
                 } catch (APIManagementException e) {
                     //if the revision count is more than 5, addAPIProductRevision will throw an exception. If
                     // rotateRevision enabled, earliest revision will be deleted before creating a revision again
@@ -1801,9 +1867,16 @@ public class ImportUtils {
                         //if the earliest revision is already deployed in gateway environments, it will be undeployed
                         //before deleting
                         apiProvider
-                                .undeployAPIProductRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList);
+                                .undeployAPIProductRevisionDeployment(importedAPIUuid, earliestRevisionUuid,
+                                        deploymentsList);
                         apiProvider.deleteAPIProductRevision(importedAPIUuid, earliestRevisionUuid);
                         revisionId = apiProvider.addAPIProductRevision(apiProductRevision);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Revision ID: " + earliestRevisionUuid + " has been undeployed from " +
+                                    deploymentsList.size() + " gateway environments and created a new revision ID: " +
+                                    revisionId + " for API Product " + importedApiProduct.getId().getName() + "_" +
+                                    importedApiProduct.getId().getVersion());
+                        }
                     } else {
                         throw new APIManagementException(e);
                     }
@@ -1811,23 +1884,10 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                List<APIRevisionDeployment> apiProductRevisionDeployments = new ArrayList<>();
-                for (int i = 0; i < deploymentInfoArray.size(); i++) {
-                    JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
-                    JsonElement deploymentNameElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_NAME);
-                    if (deploymentNameElement != null) {
-                        String deploymentName = deploymentNameElement.getAsString();
-                        JsonElement displayOnDevportalElement =
-                                deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
-                        boolean displayOnDevportal =
-                                displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
-                        APIRevisionDeployment apiProductRevisionDeployment = new APIRevisionDeployment();
-                        apiProductRevisionDeployment.setDeployment(deploymentName);
-                        apiProductRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
-                        apiProductRevisionDeployments.add(apiProductRevisionDeployment);
-                    }
-                }
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
+            } else {
+                log.info("Valid deployment environments were not found for the imported artifact. Hence not deployed" +
+                        " in any of the gateway environments.");
             }
 
             return importedApiProduct;
