@@ -94,15 +94,6 @@ public class SseApiHandler extends APIAuthenticationHandler {
         return isAuthenticated;
     }
 
-    //    @Override
-    //    public boolean handleResponse(MessageContext synCtx) {
-    //        if (APIUtil.isAnalyticsEnabled()) {
-    //            GatewayUtils.setRequestDestination(synCtx);
-    //            publishSubscriptionEvent(synCtx);
-    //        }
-    //        return true;
-    //    }
-
     private ThrottleInfo getThrottlingInfo(MessageContext synCtx) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).
@@ -125,12 +116,6 @@ public class SseApiHandler extends APIAuthenticationHandler {
         axis2MC.setProperty(SSE_THROTTLE_DTO, throttleInfo);
         return throttleInfo;
     }
-
-    //    private void publishSubscriptionEvent(MessageContext synCtx) {
-    //        AnalyticsDataProvider provider = new SseSubscriptionEventDataProvider(synCtx);
-    //        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-    //        dataCollector.collectData();
-    //    }
 
     private void handleThrottledOut(MessageContext synCtx) {
 
