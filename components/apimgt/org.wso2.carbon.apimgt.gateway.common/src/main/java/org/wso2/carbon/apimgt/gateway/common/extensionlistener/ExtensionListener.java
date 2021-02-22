@@ -15,11 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.extension.listener;
+package org.wso2.carbon.apimgt.gateway.common.extensionlistener;
 
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ExtensionResponseDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.RequestContextDTO;
-import org.wso2.carbon.apimgt.gateway.extension.listener.model.dto.ResponseContextDTO;
+import org.wso2.carbon.apimgt.gateway.common.dto.ExtensionResponseDTO;
+import org.wso2.carbon.apimgt.gateway.common.dto.RequestContextDTO;
+import org.wso2.carbon.apimgt.gateway.common.dto.ResponseContextDTO;
 
 /**
  * This Interface is providing functionality to listen and extend request/response
@@ -36,6 +36,7 @@ public interface ExtensionListener {
      * Pre process Request.
      * @param requestContextDTO RequestContextDTO
      */
+
     ExtensionResponseDTO preProcessRequest(RequestContextDTO requestContextDTO);
 
     /***

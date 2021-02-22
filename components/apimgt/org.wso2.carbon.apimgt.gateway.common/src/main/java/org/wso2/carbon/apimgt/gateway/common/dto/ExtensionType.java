@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.extension.listener.model;
+package org.wso2.carbon.apimgt.gateway.common.dto;
 
 /**
  * Enum holding values for extension types.

@@ -15,12 +15,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.extension.listener.model;
+package org.wso2.carbon.apimgt.gateway.common.extensionlistener;
+
+import java.io.InputStream;
 
 /**
- * Enum holding values for ExtensionResponseStatus.
+ * This Interface is provides specific extension points to consume the payload from the related message context.
  */
-public enum ExtensionResponseStatus {
-    RETURN_RESPONSE,
-    CONTINUE
+public interface PayloadHandler {
+
+    /**
+     * Consume and return the payload as String.
+     *
+     * @return String payload
+     * @throws Exception if an error occurs
+     */
+    String consumeAsString() throws Exception;
+
+    /**
+     * Consume and return payload as InputStream.
+     *
+     * @return InputStream payload
+     * @throws Exception if an error occurs
+     */
+    InputStream consumeAsStream() throws Exception;
 }
