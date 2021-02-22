@@ -646,7 +646,7 @@
                             io.fabric8.openshift.client.*;version="${org.wso2.orbit.io.fabric8.kubernetes.version}",
                             okio.*;version="${okio.wso2.version}",
                             org.apache.commons.compress.*;version="${org.wso2.orbit.org.apache.commons.compress.version}",
-                            okhttp3.*;version="${okhttp.wso2.version}",
+                            okhttp3.*;version="${okhttp.wso2.version}"
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
