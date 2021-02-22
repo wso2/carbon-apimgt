@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.gateway.extension.listener.ExtensionListener;
+import org.wso2.carbon.apimgt.gateway.common.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;

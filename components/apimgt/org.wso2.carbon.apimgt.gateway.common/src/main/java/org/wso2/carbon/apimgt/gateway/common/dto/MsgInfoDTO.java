@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.common.dto;
 
-import org.wso2.carbon.apimgt.gateway.extension.listener.PayloadHandler;
+import org.wso2.carbon.apimgt.gateway.common.extensionlistener.PayloadHandler;
 
 import java.util.Map;
 

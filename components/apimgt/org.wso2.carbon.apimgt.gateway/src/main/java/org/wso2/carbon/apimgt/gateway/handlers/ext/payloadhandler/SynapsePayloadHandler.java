@@ -25,7 +25,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.extension.listener.PayloadHandler;
+import org.wso2.carbon.apimgt.gateway.common.extensionlistener.PayloadHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
