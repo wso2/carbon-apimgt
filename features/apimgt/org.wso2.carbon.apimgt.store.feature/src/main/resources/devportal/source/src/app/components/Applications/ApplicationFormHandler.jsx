@@ -453,7 +453,7 @@ class ApplicationFormHandler extends React.Component {
             </>
         );
         return (
-            params.application_id && applicationRequest.name === ''
+            params.application_id && applicationRequest.throttlingPolicy === ''
                 ? <Progress />
                 : (
                     <ApplicationCreateBase title={isEdit ? EditPageTitle : CreatePageTitle}>
