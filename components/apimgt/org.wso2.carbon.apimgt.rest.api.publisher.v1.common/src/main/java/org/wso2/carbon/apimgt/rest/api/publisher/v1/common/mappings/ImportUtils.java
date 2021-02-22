@@ -281,7 +281,7 @@ public class ImportUtils {
             importedApi.setStatus(targetStatus);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (deploymentInfoArray == null) {
-                //If the params has overwritten the deployment environments, yaml file will be read
+                //If the params have not overwritten the deployment environments, yaml file will be read
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
             }
             List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
