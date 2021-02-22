@@ -74,7 +74,7 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                                    ExpressionExecutor[] attributeExpressionExecutors,
                                    ExecutionPlanContext executionPlanContext) {
         this.executionPlanContext = executionPlanContext;
-        if (attributeExpressionExecutors.length == 4) {
+        if (attributeExpressionExecutors.length == 3) {
             if (attributeExpressionExecutors[0] instanceof ConstantExpressionExecutor) {
                 if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.INT) {
                     timeInMilliSeconds = (Integer) ((ConstantExpressionExecutor) attributeExpressionExecutors[0]).getValue();
