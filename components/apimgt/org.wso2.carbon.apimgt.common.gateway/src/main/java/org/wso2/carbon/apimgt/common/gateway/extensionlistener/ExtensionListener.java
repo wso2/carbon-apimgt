@@ -27,8 +27,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ResponseContextDTO;
  * You can implement pre-process request, post-process request, pre-process response and post-process response flows
  * of gateway handlers/filters by implementing this interface. Furthermore you need to register your implementation as
  * an OSGI service for this interface with the type using ExtensionType enum.
- * This interface is providing a method to read the ExtensionType. Moreover this interface supports to pass a custom
- * error handler name to handle the fault logic during request/response flows.
+ * This interface provides a method to read the ExtensionType.
  */
 public interface ExtensionListener {
 
