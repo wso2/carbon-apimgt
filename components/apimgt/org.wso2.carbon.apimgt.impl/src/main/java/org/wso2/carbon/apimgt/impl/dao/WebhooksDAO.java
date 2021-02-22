@@ -179,7 +179,7 @@ public class WebhooksDAO {
             long expiryTime = Long.parseLong(properties.getProperty(APIConstants.Webhooks.EXPIRY_AT));
             prepareStmt.setLong(9, expiryTime);
             prepareStmt.setString(10, null);
-            prepareStmt.setString(11, null);
+            prepareStmt.setInt(11, 0);
             prepareStmt.executeUpdate();
         } catch (SQLException | CryptoException e) {
             throw new APIManagementException("Error while adding subscriptions request for callback" +
