@@ -19,4 +19,5 @@ public class BusinessInformationDTO {
     public String getId() {
         return id;
     }
+
 }

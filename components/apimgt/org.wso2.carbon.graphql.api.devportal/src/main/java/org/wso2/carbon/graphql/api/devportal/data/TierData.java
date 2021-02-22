@@ -91,17 +91,17 @@ public class TierData {
 
     }
 
-    public List<TierNameDTO> getTierName(String Id) throws  APIPersistenceException{
-        ArtifactData artifactData = new ArtifactData();
+    public List<TierNameDTO> getTierName(DevPortalAPI devPortalAPI) throws  APIPersistenceException{
+        //ArtifactData artifactData = new ArtifactData();
 
         List<TierNameDTO> tierNameDTOS = new ArrayList<>();
 
 
-       DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+       //DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
 
         Set<String> tierNames = devPortalAPI.getAvailableTierNames();
         for (String tierName : tierNames) {
-            tierNameDTOS.add(new TierNameDTO(Id,tierName));
+            tierNameDTOS.add(new TierNameDTO(devPortalAPI.getId(),tierName));
         }
         return tierNameDTOS;
 

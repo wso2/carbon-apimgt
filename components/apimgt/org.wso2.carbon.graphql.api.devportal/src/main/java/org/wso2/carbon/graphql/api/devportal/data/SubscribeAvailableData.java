@@ -14,10 +14,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 public class SubscribeAvailableData {
 
 
-    public boolean getSubscriptionAvailable(String Id) throws  APIPersistenceException {
-        ArtifactData artifactData = new ArtifactData();
+    public boolean getSubscriptionAvailable(DevPortalAPI devPortalAPI) throws  APIPersistenceException {
+        //ArtifactData artifactData = new ArtifactData();
 
-        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+        //DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
         String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(devPortalAPI.getProviderName()));
         String subscriptionAvailability = devPortalAPI.getSubscriptionAvailability();
         String subscriptionAllowedTenants =devPortalAPI.getSubscriptionAvailableOrgs();

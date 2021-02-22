@@ -63,9 +63,22 @@ public class LabelData {
 
         List<LabelNameDTO> labelNameDTOList = new ArrayList<>();
         for (String labelName : labels) {
-            labelNameDTOList.add(new LabelNameDTO(Id,labelName));
+            labelNameDTOList.add(new LabelNameDTO(devPortalAPI.getId(),labelName));
         }
 
         return labelNameDTOList;
     }
+//    public List<LabelNameDTO> getLabelNamesForApiListing(DevPortalAPI devPortalAPI) throws APIPersistenceException {
+//        ArtifactData artifactData = new ArtifactData();
+//        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+//        Set<String> labels = devPortalAPI.getGatewayLabels();
+//
+//
+//        List<LabelNameDTO> labelNameDTOList = new ArrayList<>();
+//        for (String labelName : labels) {
+//            labelNameDTOList.add(new LabelNameDTO(devPortalAPI.getId(),labelName));
+//        }
+//
+//        return labelNameDTOList;
+//    }
 }

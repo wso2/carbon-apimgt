@@ -15,7 +15,6 @@ type Api{
     status:String!
     isSubscriptionAvailable:Boolean
     monetizationLabel:String
-    businessInformation:BusinessInformation
     label:[Label]
     scope:[Scope]
     apiEndPointInformation:[APIEndpointURLsDTO]
@@ -32,10 +31,10 @@ type Api{
     thumbnailUrl:String
     categories:String
     keyManagers:String!
+    businessInformation:BusinessInformation
     advertiseInfo:Advertise
     timeDetails:TimeDetails
 }
-
 type TimeDetails{
     createdTime:String
     lastUpdate:String

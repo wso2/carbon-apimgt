@@ -16,6 +16,8 @@
 package org.wso2.carbon.apimgt.persistence;
 
 import static org.wso2.carbon.apimgt.persistence.utils.PersistenceUtil.handleException;
+import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.getEnvironments;
+import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.getLabelsFromAPIGovernanceArtifact;
 import static org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil.getLcStateFromArtifact;
 
 import java.io.IOException;
@@ -1106,8 +1108,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 devPortalAPI.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute
                         (APIConstants.Monetization.API_MONETIZATION_STATUS)));
-                //Set<String> labels = new HashSet<>(Arrays.asList(artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS)));
-                //devPortalAPI.setGatewayLabels(labels);
+//                Set<String> labels = new HashSet<>(Arrays.asList(artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS)));
+//                devPortalAPI.setGatewayLabels(labels);
+               // devPortalAPI.setGatewayLabelListForAPI(getLabelsFromAPIGovernanceArtifact(artifact, devPortalAPI.getProviderName()));
+
+
 
                 devPortalAPI.setIsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
 
@@ -1122,6 +1127,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 } else {
                     devPortalAPI.setKeyManagers(Arrays.asList(APIConstants.API_LEVEL_ALL_KEY_MANAGERS));
                 }
+
+                devPortalAPI.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
+                //devPortalAPI.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
+               // devPortalAPI.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, devPortalAPI.getProviderName()));
 
                devPortalAPIList.add(devPortalAPI);
 

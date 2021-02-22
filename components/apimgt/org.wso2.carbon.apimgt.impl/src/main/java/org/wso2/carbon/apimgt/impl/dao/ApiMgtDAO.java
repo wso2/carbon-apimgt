@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Time;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
@@ -209,6 +210,44 @@ public class ApiMgtDAO {
         }
 
         return INSTANCE;
+    }
+
+    public String getApiType(String Id){
+        String type = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_TYPE)) {
+            statement.setString(1, Id);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                type = resultSet.getString("API_TYPE");
+            }
+        } catch (SQLException e) {
+
+        }
+        return type;
+    }
+    public Time getApiTimeDetails(String Id){
+        String createTime = null;
+        String lastUpdate = null;
+        Time time = new Time();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_TIME_DETAILS)) {
+            statement.setString(1, Id);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                createTime = resultSet.getString("CREATED_TIME");
+                time.setCreatedTime(createTime);
+                lastUpdate = resultSet.getString("UPDATED_TIME");
+                time.setLastUpdate(lastUpdate);
+            }
+        } catch (SQLException e) {
+
+        }
+        return time;
     }
 
     /**

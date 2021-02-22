@@ -107,6 +107,7 @@
 
 		</dependency>
 
+
 <!--		<dependency>-->
 <!--			<groupId>com.graphql-java-kickstart</groupId>-->
 <!--			<artifactId>graphql-java-tools</artifactId>-->

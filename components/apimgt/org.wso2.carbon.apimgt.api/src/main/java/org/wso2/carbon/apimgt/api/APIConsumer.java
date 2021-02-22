@@ -45,6 +45,9 @@ public interface APIConsumer extends APIManager {
 
     Map<String, Tier> getTierDetailsFromDAO(String Id) throws APIManagementException, UserStoreException;
 
+    String getApiTypeFromDAO(String Id) ;
+
+    Time getTimeDetailsFromDAO(String Id);
 
     /**
      * @param subscriberId id of the Subscriber

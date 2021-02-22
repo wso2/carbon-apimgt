@@ -779,7 +779,7 @@ public class RegistryPersistenceUtil {
         return api;
     }
 
-    private static Set<String> getEnvironments(String environments) {
+    public static Set<String> getEnvironments(String environments) {
         if(environments != null) {
             String[] publishEnvironmentArray = environments.split(",");
             return new HashSet<String>(Arrays.asList(publishEnvironmentArray));

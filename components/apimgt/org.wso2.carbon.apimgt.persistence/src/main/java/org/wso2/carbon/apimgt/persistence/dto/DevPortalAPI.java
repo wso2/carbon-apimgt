@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import org.wso2.carbon.apimgt.api.model.Label;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private List<String> securityScheme = new ArrayList<>();
     private Set<String> environments;
     private Set<String> gatewayLabels;
+
     private Set<String> apiCategories;
     private boolean isMonetizationEnabled; //(monetizationStatus)
     private List<String> keyManagers = new ArrayList<>();
@@ -70,6 +73,15 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 //        return apiSecurity;
 //    }
     //
+//    private List<Label> gatewayLabelListForAPI;
+//
+//    public List<Label> getGatewayLabelListForAPI() {
+//        return gatewayLabelListForAPI;
+//    }
+//
+//    public void setGatewayLabelListForAPI(List<Label> gatewayLabelListForAPI) {
+//        this.gatewayLabelListForAPI = gatewayLabelListForAPI;
+//    }
 
     public String getContextTemplate() {
         return contextTemplate;

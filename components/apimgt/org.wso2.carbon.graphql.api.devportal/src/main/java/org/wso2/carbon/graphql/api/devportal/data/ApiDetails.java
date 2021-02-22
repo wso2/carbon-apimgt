@@ -3,17 +3,19 @@ package org.wso2.carbon.graphql.api.devportal.data;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.graphql.api.devportal.ArtifactData;
+import org.wso2.carbon.graphql.api.devportal.modules.APIEndpointURLsDTO;
+import org.wso2.carbon.graphql.api.devportal.modules.AdvertiseDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.graphql.api.devportal.modules.BusinessInformationDTO;
+import org.wso2.carbon.graphql.api.devportal.modules.IngressUrlDTO;
+import org.wso2.carbon.graphql.api.devportal.modules.LabelNameDTO;
+import org.wso2.carbon.graphql.api.devportal.modules.TierNameDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -52,12 +54,13 @@ public class ApiDetails {
             String thumbnailUrl = devPortalAPI.getThumbnail();
             boolean hasthumbnail = HasThumbnail(thumbnailUrl);
 
-            Set<String> environmentSet = devPortalAPI.getEnvironments();
+           // Set<String> environmentSet = devPortalAPI.getEnvironments();
+
             String environments = "";
             String wsdUrl = devPortalAPI.getWsdlUrl();
             String status = devPortalAPI.getStatus();
 
-            boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(id);////
+            boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(devPortalAPI);////
 
             Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
@@ -77,8 +80,45 @@ public class ApiDetails {
 
             String allkeyManagers = devPortalAPI.getKeyManagers().toString();
 
+//            BusinessInformationDTO businessInformationDTO = new BusinessInformationDTO("","","","");
+//
+//            BusinessInformationData businessInformationData = new BusinessInformationData();
 
-            Api api = new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+            String businessOwner = devPortalAPI.getBusinessOwner();
+            String businessOwnerEmail = devPortalAPI.getBusinessOwnerEmail();
+            String technicalOwner = devPortalAPI.getTechnicalOwner();
+            String technicalOwnerEmail = devPortalAPI.getTechnicalOwnerEmail();
+
+
+            BusinessInformationDTO businessInformation = new BusinessInformationDTO(businessOwner,businessOwnerEmail,technicalOwner,technicalOwnerEmail);
+
+            boolean advertised = devPortalAPI.isAdvertiseOnly();
+            String originalStoreUrl = devPortalAPI.getRedirectURL();
+            String apiOwner = devPortalAPI.getApiOwner();
+            AdvertiseDTO advertiseInfo = new AdvertiseDTO(advertised,originalStoreUrl,apiOwner);
+
+
+            //APIEndpointURLsDTO apiEndPointInformation = new APIEndpointURLsDTO();
+
+            Set<String> environmentSet = devPortalAPI.getEnvironments();
+           // String transport = devPortalAPI.getTransports();
+
+
+            APIEndpointURLsData apiEndpointURLsData = new APIEndpointURLsData();
+            List<APIEndpointURLsDTO> apiEndPointInformation = apiEndpointURLsData.apiEndpointURLsDTO(devPortalAPI);
+
+
+            TierData tierData = new TierData();
+            List<TierNameDTO>  tierInformation = tierData.getTierName(devPortalAPI);
+
+            LabelData labelData = new LabelData();
+            List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(id);
+
+
+            IngressUrlsData ingressUrlsData = new IngressUrlsData();
+            List<IngressUrlDTO> ingressUrlDTOS = ingressUrlsData.getIngressUrlData(devPortalAPI);
+
+            Api api = new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation,labelNameDTO,ingressUrlDTOS);
             apiDTOList.add(api);
 
 
@@ -161,6 +201,7 @@ public class ApiDetails {
         String username = "wso2.anonymous.user";
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
+
         Float rating  = apiConsumer.getRatingFromDAO(Id);
         return rating;
     }
@@ -199,7 +240,7 @@ public class ApiDetails {
         String wsdUrl = devPortalAPI.getWsdlUrl();
         String status = devPortalAPI.getStatus();
 
-        boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(Id);////
+        boolean isSubscriptionAvailable = subscribeAvailableData.getSubscriptionAvailable(devPortalAPI);////
 
         Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
@@ -220,8 +261,34 @@ public class ApiDetails {
         List<String> allkeymangersList = devPortalAPI.getKeyManagers();
         String allkeyManagers = getKeymanagers(allkeymangersList);
 
+       //BusinessInformationDTO businessInformationDTO = new BusinessInformationDTO("","","","");
 
-        return new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers);
+        String businessOwner = devPortalAPI.getBusinessOwner();
+        String businessOwnerEmail = devPortalAPI.getBusinessOwnerEmail();
+        String technicalOwner = devPortalAPI.getTechnicalOwner();
+        String technicalOwnerEmail = devPortalAPI.getTechnicalOwnerEmail();
+
+        BusinessInformationDTO businessInformation = new BusinessInformationDTO(businessOwner,businessOwnerEmail,technicalOwner,technicalOwnerEmail);
+
+
+        boolean advertised = devPortalAPI.isAdvertiseOnly();
+        String originalStoreUrl = devPortalAPI.getRedirectURL();
+        String apiOwner = devPortalAPI.getApiOwner();
+        AdvertiseDTO advertiseInfo = new AdvertiseDTO(advertised,originalStoreUrl,apiOwner);
+
+        APIEndpointURLsData apiEndpointURLsData = new APIEndpointURLsData();
+        List<APIEndpointURLsDTO> apiEndPointInformation = apiEndpointURLsData.apiEndpointURLsDTO(devPortalAPI);
+
+        TierData tierData = new TierData();
+        List<TierNameDTO>  tierInformation = tierData.getTierName(devPortalAPI);
+
+        LabelData labelData = new LabelData();
+        List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(id);
+
+        IngressUrlsData ingressUrlsData = new IngressUrlsData();
+        List<IngressUrlDTO> ingressUrlDTOS = ingressUrlsData.getIngressUrlData(devPortalAPI);
+
+        return new Api(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation,labelNameDTO,ingressUrlDTOS);
     }
 
 

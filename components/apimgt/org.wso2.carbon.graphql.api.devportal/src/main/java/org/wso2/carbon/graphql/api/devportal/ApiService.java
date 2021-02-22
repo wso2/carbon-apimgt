@@ -3,6 +3,7 @@ package org.wso2.carbon.graphql.api.devportal;
 import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderRegistry;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.graphql.api.devportal.data.*;
 import org.wso2.carbon.graphql.api.devportal.modules.*;
@@ -101,7 +102,11 @@ public class ApiService{
                 List<Object> timeDetails = new ArrayList<>();
 
                 for(int i = 0;i<Ids.size();i++){
-                    timeDetails.add(apidtoData.getApiTimeDetails(Ids.get(i)));
+                    try {
+                        timeDetails.add(apidtoData.getApiTimeDetails(Ids.get(i)));
+                    } catch (APIManagementException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 return timeDetails;
@@ -118,12 +123,12 @@ public class ApiService{
         };
     }
 
-    public DataFetcher getTierNames(){
-        return env->{
-            Api api = env.getSource();
-           return tierData.getTierName(api.getId());
-        };
-    }
+//    public DataFetcher getTierNames(){
+//        return env->{
+//            Api api = env.getSource();
+//           return tierData.getTierName(api.getId());
+//        };
+//    }
 
 
     public DataFetcher getTierDetails(){
@@ -134,19 +139,19 @@ public class ApiService{
         };
     }
 
-    public BatchLoader<String , TierNameDTO> tierBatchLoader = new BatchLoader<String, TierNameDTO>() {
-        @Override
-        public CompletionStage<List<TierNameDTO>> load(List<String> tierIds)  {
-            return  CompletableFuture.supplyAsync(()-> {
-                try {
-                    return tierData.getTierName(tierIds.get(0));
-                } catch (APIPersistenceException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            });
-        }
-    };
+//    public BatchLoader<String , TierNameDTO> tierBatchLoader = new BatchLoader<String, TierNameDTO>() {
+//        @Override
+//        public CompletionStage<List<TierNameDTO>> load(List<String> tierIds)  {
+//            return  CompletableFuture.supplyAsync(()-> {
+//                try {
+//                    return tierData.getTierName(tierIds.get(0));
+//                } catch (APIPersistenceException e) {
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//            });
+//        }
+//    };
 
 
     public DataFetcher getMonetizationLabel(){
@@ -165,21 +170,21 @@ public class ApiService{
 
         };
     }
-    public DataFetcher getBusinessInformation(){
+//    public DataFetcher getBusinessInformation(){
+//
+//        return env-> {
+//            Api api = env.getSource();
+//            return dummyBusinessInformation.getBusinessInformations(env);
+//        };
+//    }
 
-        return env-> {
-            Api api = env.getSource();
-            return dummyBusinessInformation.getBusinessInformations(api.getId());
-        };
-    }
-
-    public DataFetcher getLabelInformation(){
-        return env->{
-//            DataLoader<String,Object> dataLoader = env.getDataLoader("")
-          Api api = env.getSource();
-          return labelData.getLabelNames(api.getId());
-        };
-    }
+//    public DataFetcher getLabelInformation(){
+//        return env->{
+////            DataLoader<String,Object> dataLoader = env.getDataLoader("")
+//          Api api = env.getSource();
+//          return labelData.getLabelNames(api.getId());
+//        };
+//    }
     public DataFetcher getLabelsDetails(){
         return env->{
             LabelNameDTO labelNameDTO = env.getSource();
@@ -193,49 +198,49 @@ public class ApiService{
         };
     }
 
-    public DataFetcher getAdvertiseInformation(){
-        return env->{
-            Api api = env.getSource();
-            return advertiseData.getAdvertiseInformation(api.getId());
-        };
-    }
+//    public DataFetcher getAdvertiseInformation(){
+//        return env->{
+//            Api api = env.getSource();
+//            return advertiseData.getAdvertiseInformation(api.getId());
+//        };
+//    }
 
-    public DataFetcher getApiUrlsEndPoint(){
-        return env->{
-            Api api = env.getSource();
-            return apiEndpointURLData.apiEndpointURLsDTO(api.getId());
+//    public DataFetcher getApiUrlsEndPoint(){
+//        return env->{
+//            Api api = env.getSource();
+//            return apiEndpointURLData.apiEndpointURLsDTO(api.getId());
+//
+//        };
+//    }
+//    public DataFetcher getApiUrlsDTO(){
+//        return env ->{
+//            APIEndpointURLsDTO apiEndpointURLsDTO = env.getSource();
+//            return dummyAPIUrlsDTO.apiURLsDTO(apiEndpointURLsDTO.getApiId());
+//
+//        };
+//    }
+//
+//    public DataFetcher getDefaultApiUrlsDTO(){
+//        return env->{
+//            APIEndpointURLsDTO apiEndpointURLsDTO = env.getSource();
+//            return defaultAPIURLsData.getDefaultAPIURLsData(apiEndpointURLsDTO.getApiId());
+//        };
+//
+//    }
 
-        };
-    }
-    public DataFetcher getApiUrlsDTO(){
-        return env ->{
-            APIEndpointURLsDTO apiEndpointURLsDTO = env.getSource();
-            return dummyAPIUrlsDTO.apiURLsDTO(apiEndpointURLsDTO.getApiId());
 
-        };
-    }
-
-    public DataFetcher getDefaultApiUrlsDTO(){
-        return env->{
-            APIEndpointURLsDTO apiEndpointURLsDTO = env.getSource();
-            return defaultAPIURLsData.getDefaultAPIURLsData(apiEndpointURLsDTO.getApiId());
-        };
-
-    }
-
-
-    public DataFetcher getDeploymentEnvironmentName(){
-        return env->{
-            Api api = env.getSource();
-            return ingressUrlsData.getDeplymentEnvironmentName(api.getId());
-        };
-    }
-    public DataFetcher getDeploymentClusterInformation(){
-        return env ->{
-            Api api = env.getSource();
-            return ingressUrlsData.getDeploymentClusterData(api.getId());
-        };
-    }
+//    public DataFetcher getDeploymentEnvironmentName(){
+//        return env->{
+//            Api api = env.getSource();
+//            return ingressUrlsData.getDeplymentEnvironmentName(api.getId());
+//        };
+//    }
+//    public DataFetcher getDeploymentClusterInformation(){
+//        return env ->{
+//            Api api = env.getSource();
+//            return ingressUrlsData.getDeploymentClusterData(api.getId());
+//        };
+//    }
 
 
 

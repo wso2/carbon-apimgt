@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
+import org.wso2.carbon.apimgt.api.model.Time;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
@@ -330,6 +331,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         return definedTiers;
     }
+
+    @Override
+    public String getApiTypeFromDAO(String id) {
+        String type = ApiMgtDAO.getInstance().getApiType(id);
+        return type;
+    }
+
+    @Override
+    public Time getTimeDetailsFromDAO(String s) {
+        Time time = ApiMgtDAO.getInstance().getApiTimeDetails(s);
+        return time;
+    }
+
 
     /**
      * Returns the set of APIs with the given tag from the taggedAPIs Map

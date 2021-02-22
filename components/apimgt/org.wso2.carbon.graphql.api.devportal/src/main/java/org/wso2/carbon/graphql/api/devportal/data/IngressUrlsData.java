@@ -28,12 +28,12 @@ import java.util.Set;
 
 public class IngressUrlsData {
 
-    public List<IngressUrlDTO>  getIngressUrlData(String Id) throws APIManagementException, APIPersistenceException {
+    public List<IngressUrlDTO>  getIngressUrlData(DevPortalAPI devPortalAPI) throws APIManagementException, APIPersistenceException {
 
-        ArtifactData artifactData = new ArtifactData();
+      //  ArtifactData artifactData = new ArtifactData();
         List<IngressUrlDTO> apiDeployedIngressURLs = new ArrayList<>();
 
-        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+       // DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
 
         Set<org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments> deploymentEnvironments = devPortalAPI.getDeploymentEnvironments();//extractDeploymentsForAPI(deployments);
 
@@ -87,24 +87,24 @@ public class IngressUrlsData {
         return apiDeployedIngressURLs;
     }
 
-    public List<DeploymentClusterInfoDTO> getDeploymentClusterData(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
-        List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
-        List<IngressUrlDTO> ingressUrlDTOList = getIngressUrlData(Id);
-
-        for (int i = 0; i< ingressUrlDTOList.size();i++){
-            deploymentClusterInfoDTOList.add((DeploymentClusterInfoDTO) ingressUrlDTOList.get(i).getClusterDetails());
-        }
-        return deploymentClusterInfoDTOList;
-    }
-
-    public List<DeployEnvironment> getDeplymentEnvironmentName(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
-        List<IngressUrlDTO> ingressUrlDTOList = getIngressUrlData(Id);
-        List<DeployEnvironment> deployEnvironmentList = new ArrayList<>();
-        for(int i = 0; i< ingressUrlDTOList.size();i++){
-            deployEnvironmentList.add(new DeployEnvironment(ingressUrlDTOList.get(i).getDeploymentEnvironmentName()));
-        }
-        return deployEnvironmentList;
-    }
+//    public List<DeploymentClusterInfoDTO> getDeploymentClusterData(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
+//        List<DeploymentClusterInfoDTO> deploymentClusterInfoDTOList = new ArrayList<>();
+//        List<IngressUrlDTO> ingressUrlDTOList = getIngressUrlData(Id);
+//
+//        for (int i = 0; i< ingressUrlDTOList.size();i++){
+//            deploymentClusterInfoDTOList.add((DeploymentClusterInfoDTO) ingressUrlDTOList.get(i).getClusterDetails());
+//        }
+//        return deploymentClusterInfoDTOList;
+//    }
+//
+//    public List<DeployEnvironment> getDeplymentEnvironmentName(String Id) throws APIManagementException, RegistryException, APIPersistenceException, UserStoreException {
+//        List<IngressUrlDTO> ingressUrlDTOList = getIngressUrlData(Id);
+//        List<DeployEnvironment> deployEnvironmentList = new ArrayList<>();
+//        for(int i = 0; i< ingressUrlDTOList.size();i++){
+//            deployEnvironmentList.add(new DeployEnvironment(ingressUrlDTOList.get(i).getDeploymentEnvironmentName()));
+//        }
+//        return deployEnvironmentList;
+//    }
 
 
 

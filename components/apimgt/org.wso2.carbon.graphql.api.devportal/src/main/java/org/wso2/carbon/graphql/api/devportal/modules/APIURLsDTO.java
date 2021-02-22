@@ -15,4 +15,38 @@ public class APIURLsDTO {
         this.wss = wss;
     }
 
+    public APIURLsDTO() {
+    }
+
+    public String getHttp() {
+        return http;
+    }
+
+    public void setHttp(String http) {
+        this.http = http;
+    }
+
+    public String getHttps() {
+        return https;
+    }
+
+    public void setHttps(String https) {
+        this.https = https;
+    }
+
+    public String getWs() {
+        return ws;
+    }
+
+    public void setWs(String ws) {
+        this.ws = ws;
+    }
+
+    public String getWss() {
+        return wss;
+    }
+
+    public void setWss(String wss) {
+        this.wss = wss;
+    }
 }
