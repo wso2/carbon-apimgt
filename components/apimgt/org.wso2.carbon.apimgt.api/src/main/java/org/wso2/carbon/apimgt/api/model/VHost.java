@@ -33,6 +33,11 @@ public class VHost {
     private Integer wsPort;
     private Integer wssPort;
 
+    private final int DEFAULT_HTTP_PORT = 80;
+    private final int DEFAULT_HTTPS_PORT = 443;
+    private final int DEFAULT_WS_PORT = 9099;
+    private final int DEFAULT_WSS_PORT = 8099;
+
     public VHost() {
     }
 
@@ -82,6 +87,27 @@ public class VHost {
 
     public void setWssPort(Integer wssPort) {
         this.wssPort = wssPort;
+    }
+
+    public String getHttpUrl() {
+        return getUrl("http", httpPort == DEFAULT_HTTP_PORT ? "" : ":" + httpPort, httpContext);
+    }
+
+    public String getHttpsUrl() {
+        return getUrl("https", httpsPort == DEFAULT_HTTPS_PORT ? "" : ":" + httpsPort, httpContext);
+    }
+
+    public String getWsUrl() {
+        return getUrl("ws", wsPort == DEFAULT_WS_PORT ? "" : ":" + wsPort, "");
+    }
+
+    public String getWssUrl() {
+        return getUrl("wss", wssPort == DEFAULT_WSS_PORT ? "" : ":" + wssPort, "");
+    }
+
+    private String getUrl(String protocol, String port, String context) {
+        // {protocol}://{host}{port}{context}
+        return String.format("%s://%s%s%s", protocol, host, port, context);
     }
 
     @Override

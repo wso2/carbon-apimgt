@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -1025,7 +1026,11 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
-                return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+
+                APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+                List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apiId);
+                apidto.setEndpointURLs(APIMappingUtil.fromAPIRevisionListToEndpointsList(apidto, revisionDeployments));
+                return apidto;
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }

@@ -16791,6 +16791,37 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Get APIRevisionDeployment details by providing API uuid
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    apiRevisionDeployment.setDeployment(rs.getString(1));
+                    apiRevisionDeployment.setVhost(rs.getString(2));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
+                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
+                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Revision deployment mapping details for api uuid: " +
+                    apiUUID, e);
+        }
+        return apiRevisionDeploymentList;
+    }
+
+    /**
      * Get APIRevisionDeployment details by providing ApiUUID
      *
      * @return List<APIRevisionDeployment> object

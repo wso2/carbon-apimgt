@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.wso2.carbon.apimgt.api.model.VHost;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
