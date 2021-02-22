@@ -466,9 +466,7 @@ public class Utils {
                             bytes = Base64.decodeBase64(certificate);
                         }
                         try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                            CertificateFactory fact = CertificateFactory.getInstance("X.509");
-                            X509Certificate x509Certificate = (X509Certificate) fact.generateCertificate(inputStream);
-                            //X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
+                            X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
                             if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
                                 return x509Certificate;
                             } else {

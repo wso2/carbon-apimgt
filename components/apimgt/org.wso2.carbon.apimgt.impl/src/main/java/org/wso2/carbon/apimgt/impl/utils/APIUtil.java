@@ -296,7 +296,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.net.ssl.SSLContext;
 import javax.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
+import javax.security.cert.X509Certificate;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -10941,7 +10941,7 @@ public final class APIUtil {
                         }
                     }
                 }
-            } catch (KeyStoreException | CertificateException | IOException e) {
+            } catch (KeyStoreException | CertificateException | CertificateEncodingException | IOException e) {
                 String msg = "Error in validating certificate existence";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
@@ -11530,11 +11530,8 @@ public final class APIUtil {
 
             byte[] bytes = Base64.decodeBase64(base64EncodedCertificate);
             try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                CertificateFactory fact = CertificateFactory.getInstance("X.509");
-                X509Certificate cert = (X509Certificate) fact.generateCertificate(inputStream);
-                //return X509Certificate.getInstance(inputStream);
-                return cert;
-            } catch (IOException | CertificateException e) {
+                return X509Certificate.getInstance(inputStream);
+            } catch (IOException | javax.security.cert.CertificateException e) {
                 String msg = "Error while converting into X509Certificate";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);

@@ -50,8 +50,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.security.cert.CertificateEncodingException;
-import javax.security.cert.X509Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;

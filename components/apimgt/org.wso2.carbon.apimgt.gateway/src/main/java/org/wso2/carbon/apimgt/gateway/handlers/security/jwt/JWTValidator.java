@@ -64,8 +64,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.cache.Cache;
-import javax.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
+import javax.security.cert.X509Certificate;
 
 /**
  * A Validator class to validate JWT tokens in an API request.
