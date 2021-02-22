@@ -62,7 +62,7 @@ public class QuotaPolicy {
     public Limit getLimit() {
         if (this.requestCount != null) {
             return this.requestCount;
-        } else if(this.eventCount != null){
+        } else if (this.eventCount != null) {
             return this.eventCount;
         }
         return this.bandwidth;
