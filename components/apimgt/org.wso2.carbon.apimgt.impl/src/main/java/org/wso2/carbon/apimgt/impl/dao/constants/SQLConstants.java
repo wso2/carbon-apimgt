@@ -188,8 +188,8 @@ public class SQLConstants {
 
     public static final String UPDATE_API_SERVICE_MAPPING_SQL = "UPDATE AM_API_SERVICE_MAPPING SET " +
             "   SERVICE_KEY = ?, " +
-            "   MD5 = ?, " +
-            "   WHERE API_UUID = ?";
+            "   MD5 = ? " +
+            "   WHERE API_ID = ?";
 
     public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
@@ -3935,10 +3935,8 @@ public class SQLConstants {
                 "MD5 = ?," +
                 "SERVICE_NAME = ?," +
                 "DISPLAY_NAME = ?," +
-                "SERVICE_VERSION = ?," +
                 "TENANT_ID = ?," +
                 "SERVICE_URL = ?," +
-                "DEFINITION_TYPE = ?," +
                 "DEFINITION_URL = ?," +
                 "DESCRIPTION = ?," +
                 "SECURITY_TYPE = ?," +
@@ -3988,8 +3986,24 @@ public class SQLConstants {
                 "   CREATED_TIME," +
                 "   LAST_UPDATED_TIME," +
                 "   CREATED_BY," +
-                "   UPDATED_BY" +
+                "   UPDATED_BY," +
+                "   SERVICE_DEFINITION" +
                 "   FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "   AND TENANT_ID = ?";
+
+        public static final String GET_USAGE_OF_SERVICES_BY_SERVICE_ID = "SELECT " +
+                "   AM_API.API_ID, " +
+                "   AM_API.API_UUID, " +
+                "   AM_API.API_NAME, " +
+                "   AM_API.API_VERSION, " +
+                "   AM_API.CONTEXT," +
+                "   AM_API.API_PROVIDER " +
+                "   FROM AM_API INNER JOIN AM_API_SERVICE_MAPPING ON " +
+                "   AM_API_SERVICE_MAPPING.API_ID = AM_API.API_ID " +
+                "   WHERE SERVICE_KEY = ?";
+
+        public static final String GET_SERVICE_KEY_BY_SERVICE_UUID = "SELECT SERVICE_KEY FROM AM_SERVICE_CATALOG WHERE" +
+                "   UUID = ? AND TENANT_ID = ?";
+
     }
 }
