@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.common.extensionlistener;
+package org.wso2.carbon.apimgt.common.gateway.extensionlistener;
 
 import java.io.InputStream;
 

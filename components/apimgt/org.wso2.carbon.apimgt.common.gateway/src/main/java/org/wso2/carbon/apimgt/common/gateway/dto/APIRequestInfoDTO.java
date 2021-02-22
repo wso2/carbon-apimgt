@@ -15,36 +15,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.common.dto;
+package org.wso2.carbon.apimgt.common.gateway.dto;
 
 /**
  * Representation of Invoked GW API Request Information of Request/Response.
  */
 public class APIRequestInfoDTO {
 
-    String apiContext;
-    String apiVersion;
+    String context;
+    String version;
     String username;
     String consumerKey;
 
-    public String getApiContext() {
+    public String getContext() {
 
-        return apiContext;
+        return context;
     }
 
-    public void setApiContext(String apiContext) {
+    public void setContext(String context) {
 
-        this.apiContext = apiContext;
+        this.context = context;
     }
 
-    public String getApiVersion() {
+    public String getVersion() {
 
-        return apiVersion;
+        return version;
     }
 
-    public void setApiVersion(String apiVersion) {
+    public void setVersion(String version) {
 
-        this.apiVersion = apiVersion;
+        this.version = version;
     }
 
     public String getUsername() {

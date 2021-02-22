@@ -35,13 +35,13 @@ import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.common.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.gateway.common.dto.ExtensionResponseStatus;
-import org.wso2.carbon.apimgt.gateway.common.dto.APIRequestInfoDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.ExtensionResponseDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.MsgInfoDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.RequestContextDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.ResponseContextDTO;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseStatus;
+import org.wso2.carbon.apimgt.common.gateway.dto.APIRequestInfoDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.MsgInfoDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.ResponseContextDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler.SynapsePayloadHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -65,7 +65,6 @@ import javax.xml.stream.XMLStreamException;
 public class ExtensionListenerUtil {
 
     private static final Log log = LogFactory.getLog(ExtensionListenerUtil.class);
-    private static ExtensionListener defaultExtensionListener = new DefaultExtensionListener();
 
     private ExtensionListenerUtil() {
 
@@ -84,8 +83,9 @@ public class ExtensionListenerUtil {
 
         RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
+        //TODO:check null
         ExtensionResponseDTO responseDTO = extensionListener.preProcessRequest(requestContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
+        return handleExtensionResponse(messageContext, responseDTO);
     }
 
     /**
@@ -101,7 +101,7 @@ public class ExtensionListenerUtil {
         RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         ExtensionResponseDTO responseDTO = extensionListener.postProcessRequest(requestContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
+        return handleExtensionResponse(messageContext, responseDTO);
     }
 
     /**
@@ -117,7 +117,7 @@ public class ExtensionListenerUtil {
         ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         ExtensionResponseDTO responseDTO = extensionListener.preProcessResponse(responseContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
+        return handleExtensionResponse(messageContext, responseDTO);
     }
 
     /**
@@ -133,7 +133,7 @@ public class ExtensionListenerUtil {
         ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         ExtensionResponseDTO responseDTO = extensionListener.postProcessResponse(responseContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO, extensionListener.getErrorHandler());
+        return handleExtensionResponse(messageContext, responseDTO);
     }
 
     /**
@@ -155,10 +155,9 @@ public class ExtensionListenerUtil {
         Object sslCertsObject = axis2MC.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
         javax.security.cert.X509Certificate[] clientCerts = null;
         if (sslCertsObject != null) {
-            javax.security.cert.X509Certificate[] certs = (X509Certificate[]) sslCertsObject;
-            clientCerts = certs;
+            clientCerts = (X509Certificate[]) sslCertsObject;
         }
-        requestDTO.setClientCert(clientCerts);
+        requestDTO.setClientCerts(clientCerts);
         return requestDTO;
     }
 
@@ -189,8 +188,8 @@ public class ExtensionListenerUtil {
     private static APIRequestInfoDTO generateAPIInfoDTO(MessageContext messageContext) {
 
         APIRequestInfoDTO apiRequestInfoDTO = new APIRequestInfoDTO();
-        apiRequestInfoDTO.setApiContext((String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT));
-        apiRequestInfoDTO.setApiVersion((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION));
+        apiRequestInfoDTO.setContext((String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT));
+        apiRequestInfoDTO.setVersion((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION));
         AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authenticationContext != null) {
             apiRequestInfoDTO.setUsername(authenticationContext.getUsername());
@@ -226,12 +225,10 @@ public class ExtensionListenerUtil {
      *
      * @param messageContext       Synapse Message Context
      * @param extensionResponseDTO ExtensionResponseDTO
-     * @param customErrorHandler   Custom Error Handler
      * @return true or false indicating continue or return response
      */
     private static boolean handleExtensionResponse(MessageContext messageContext,
-                                                   ExtensionResponseDTO extensionResponseDTO,
-                                                   String customErrorHandler) {
+                                                   ExtensionResponseDTO extensionResponseDTO) {
 
         if (extensionResponseDTO == null) {
             return true;    // if responseDTO is null, nothing to do hence continuing the normal flow
@@ -251,7 +248,7 @@ public class ExtensionListenerUtil {
         // set Http Response status code
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,
                 extensionResponseDTO.getStatusCode());
-        return evaluateExtensionResponseStatus(extensionResponseDTO, messageContext, customErrorHandler);
+        return evaluateExtensionResponseStatus(extensionResponseDTO, messageContext);
     }
 
     /**
@@ -295,11 +292,10 @@ public class ExtensionListenerUtil {
      *
      * @param extensionResponseDTO ExtensionResponseDTO
      * @param messageContext       MessageContext
-     * @param customErrorHandler   Custom Error Handler
      * @return true or false indicating continue or return response
      */
     private static boolean evaluateExtensionResponseStatus(ExtensionResponseDTO extensionResponseDTO,
-                                                           MessageContext messageContext, String customErrorHandler) {
+                                                           MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -342,11 +338,7 @@ public class ExtensionListenerUtil {
      */
     private static ExtensionListener getExtensionListener(String type) {
 
-        ExtensionListener extensionListener = ServiceReferenceHolder.getInstance().getExtensionListener(type);
-        if (extensionListener == null) {
-            extensionListener = defaultExtensionListener;
-        }
-        return extensionListener;
+        return ServiceReferenceHolder.getInstance().getExtensionListener(type);
     }
 
     @SuppressWarnings("unchecked")

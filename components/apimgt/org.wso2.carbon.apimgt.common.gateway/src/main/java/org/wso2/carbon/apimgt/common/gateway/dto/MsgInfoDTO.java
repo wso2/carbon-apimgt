@@ -15,9 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.common.dto;
+package org.wso2.carbon.apimgt.common.gateway.dto;
 
-import org.wso2.carbon.apimgt.gateway.common.extensionlistener.PayloadHandler;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.PayloadHandler;
 
 import java.util.Map;
 

@@ -15,7 +15,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.common.dto;
+package org.wso2.carbon.apimgt.common.gateway.dto;
+
+import org.apache.commons.lang.SerializationUtils;
 
 import java.util.Map;
 
@@ -55,14 +57,14 @@ public class RequestContextDTO {
         this.apiRequestInfo = apiRequestInfo;
     }
 
-    public X509Certificate[] getClientCert() {
+    public X509Certificate[] getClientCerts() {
 
-        return clientCerts;
+        return (X509Certificate[]) SerializationUtils.clone(clientCerts);
     }
 
-    public void setClientCert(javax.security.cert.X509Certificate[] clientCerts) {
+    public void setClientCerts(javax.security.cert.X509Certificate[] clientCerts) {
 
-        this.clientCerts = clientCerts;
+        this.clientCerts = (X509Certificate[]) SerializationUtils.clone(clientCerts);
     }
 
     public Map<String, Object> getCustomProperty() {

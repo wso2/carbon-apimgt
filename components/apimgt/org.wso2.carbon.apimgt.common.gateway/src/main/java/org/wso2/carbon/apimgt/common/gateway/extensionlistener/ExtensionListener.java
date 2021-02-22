@@ -15,11 +15,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.gateway.common.extensionlistener;
+package org.wso2.carbon.apimgt.common.gateway.extensionlistener;
 
-import org.wso2.carbon.apimgt.gateway.common.dto.ExtensionResponseDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.RequestContextDTO;
-import org.wso2.carbon.apimgt.gateway.common.dto.ResponseContextDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.ResponseContextDTO;
 
 /**
  * This Interface is providing functionality to listen and extend request/response
@@ -64,11 +64,5 @@ public interface ExtensionListener {
      */
     String getType();
 
-    /**
-     * Returns the name of custom error handler. Specific to synapse gateway. Eg: _custom_auth_failure.xml
-     *
-     * @return name of custom error handler
-     */
-    String getErrorHandler();
 }
 
