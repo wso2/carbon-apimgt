@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.springframework.core.io.Resource;
+import org.wso2.carbon.graphql.api.devportal.service.ApiService;
+import org.wso2.carbon.graphql.api.devportal.service.TagSevice;
 
 @Component
 public class GraphqlProvider {

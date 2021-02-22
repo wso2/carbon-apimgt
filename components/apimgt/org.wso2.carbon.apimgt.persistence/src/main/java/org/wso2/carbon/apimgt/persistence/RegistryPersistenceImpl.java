@@ -1136,7 +1136,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 //devPortalAPI.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
                // devPortalAPI.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, devPortalAPI.getProviderName()));
 
-               devPortalAPIList.add(devPortalAPI);
+                devPortalAPI.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
+                devPortalAPI.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
+
+                devPortalAPIList.add(devPortalAPI);
 
 
                 //devPortalAPIInfoList apiInfo = new devPortalAPIInfoList();
