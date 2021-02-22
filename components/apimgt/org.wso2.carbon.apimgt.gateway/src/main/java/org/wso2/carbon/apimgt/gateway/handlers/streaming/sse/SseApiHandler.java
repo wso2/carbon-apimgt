@@ -66,12 +66,12 @@ public class SseApiHandler extends APIAuthenticationHandler {
     public boolean handleRequest(MessageContext synCtx) {
 
         org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
-        axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_SSE);
         synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
                            true);
         GatewayUtils.setRequestDestination(synCtx);
         Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
+        axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         boolean isAuthenticated = super.handleRequest(synCtx);
         // reset http verb after authentication for mediation
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
