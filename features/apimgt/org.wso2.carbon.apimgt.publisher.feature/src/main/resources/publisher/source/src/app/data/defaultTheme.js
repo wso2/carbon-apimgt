@@ -200,9 +200,6 @@ export default {
                 buttonText: '#FF7300',
                 buttonBorder: '#FCA574',
             },
-            definition: {
-                warning: '#ffcc00',
-            },
         },
     },
 };

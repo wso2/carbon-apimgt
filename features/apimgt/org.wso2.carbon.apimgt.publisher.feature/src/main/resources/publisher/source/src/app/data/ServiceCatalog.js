@@ -255,13 +255,12 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
         const promisedServices = serviceCatalog.then(client => {
-            // return client.apis['Services'].getAPIUsages(
-            //     {
-            //         serviceId: id,
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.getAPIUsages();
+            return client.apis['Services'].getServiceUsage(
+                {
+                    serviceId: id,
+                },
+                this._requestMetaData()
+            );
         });
         return promisedServices.then(response => response.body);
     }
