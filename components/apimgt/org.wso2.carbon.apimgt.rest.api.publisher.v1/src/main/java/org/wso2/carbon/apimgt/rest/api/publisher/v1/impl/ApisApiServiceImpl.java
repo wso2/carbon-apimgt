@@ -4301,19 +4301,25 @@ public class ApisApiServiceImpl implements ApisApiService {
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
             String definitionToAdd = validationResponse.getJsonContent();
-            apiProvider.addAPI(apiToAdd);
+            apiToAdd.setAsyncApiDefinition(definitionToAdd);
+            apiToAdd.setUriTemplates(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
+            API addedAPI = apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
 
             //load topics from AsyncAPI
-            if (APIDTO.TypeEnum.WEBSUB.equals(apiDTOFromProperties.getType())){
+            /*if (APIDTO.TypeEnum.WEBSUB.equals(apiDTOFromProperties.getType())){
                 try {
                     apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
                 } catch (FaultGatewaysException e) {
                     e.printStackTrace();
                 }
-            }
+            }*/
 
-            APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
+            //APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
+
+            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
+            APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(addedAPI);
+
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdAPIDTO.getId());
             return Response.created(createdApiUri).entity(createdAPIDTO).build();
 
@@ -4435,6 +4441,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         String apiDefinition = response.getJsonContent();
         //updating APi with the new AsyncAPI definition
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
+        existingAPI.setAsyncApiDefinition(apiDefinition);
+        //updating topics
+        existingAPI.setUriTemplates(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(existingAPI, apiDefinition));
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        existingAPI.setStatus(unModifiedAPI.getStatus());
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         apiProvider.updateAPI(existingAPI);
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId());

@@ -389,6 +389,10 @@ export default function Environments() {
         setRevision(event.target.value);
     };
 
+    const handleSelectForBrokers = (event) => {
+        setRevision(event.target.value);
+    };
+
     const handleClose = () => {
         setOpen(false);
         setExtraRevisionToDelete(null);
@@ -1987,6 +1991,208 @@ export default function Environments() {
                     )
                 }
             </Box>
+            {(api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') && (
+                <Box mx='auto' mt={5}>
+                    <Typography variant='h6' className={classes.sectionTitle}>
+                        <FormattedMessage
+                            id='Apis.Details.Third.Party.Brokers'
+                            defaultMessage='Third-Party Message Brokers'
+                        />
+                    </Typography>
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell align='left'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Third.Party.Brokers.broker.name'
+                                            defaultMessage='Provider'
+                                        />
+                                    </TableCell>
+                                    <TableCell align='left'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Third.Party.Brokers.broker.type'
+                                            defaultMessage='Organization'
+                                        />
+                                    </TableCell>
+                                    <TableCell align='left'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Third.Party.Brokers.broker.environment'
+                                            defaultMessage='Environment'
+                                        />
+                                    </TableCell>
+                                    {api && api.isDefaultVersion !== true
+                                        ? (
+                                            <TableCell align='left'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Environments.
+                                                        Environments.gateway.deployed.revision'
+                                                    defaultMessage='Deployed Revision'
+                                                />
+                                            </TableCell>
+                                        )
+                                        : (
+                                            <TableCell align='left'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Environments.Environments.gateway.action'
+                                                    defaultMessage='Action'
+                                                />
+                                            </TableCell>
+                                        )}
+                                    <TableCell align='left'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Environments.Environments.display.in.devportal'
+                                            defaultMessage='Display in Developer Portal'
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {settings.environment.map((row) => (
+                                    <TableRow key={row.name}>
+                                        <TableCell component='th' scope='row'>
+                                            {/* {row.name} */}
+                                            Solace Message Broker
+                                        </TableCell>
+                                        <TableCell align='left'>
+                                            {/* {row.type} */}
+                                            MyOrg
+                                        </TableCell>
+                                        {/* {api.isWebSocket() ? (
+                                            <>
+                                                <TableCell
+                                                    align='left'
+                                                    className={classes.primaryEndpoint}
+                                                >
+                                                    {row.endpoints.ws}
+                                                    <div className={classes.secondaryEndpoint}>
+                                                        {row.endpoints.wss}
+                                                    </div>
+                                                </TableCell>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <TableCell align='left' className={classes.primaryEndpoint}>
+                                                    {row.endpoints.http}
+                                                    <div className={classes.secondaryEndpoint}>
+                                                        {row.endpoints.https}
+                                                    </div>
+                                                </TableCell>
+                                            </>
+                                        )} */}
+                                        <TableCell align='left'>
+                                            {/* {row.type} */}
+                                            devEnv
+                                        </TableCell>
+                                        <TableCell align='left'>
+                                            {allEnvRevision && allEnvRevision.filter(
+                                                (o1) => {
+                                                    if (o1.deploymentInfo.filter(
+                                                        (o2) => o2.name === 'Solace Message Broker',
+                                                    ).length > 0) {
+                                                        return o1;
+                                                    }
+                                                    return null;
+                                                },
+                                            ).length !== 0 ? (
+                                                    allEnvRevision && allEnvRevision.filter(
+                                                        (o1) => {
+                                                            if (o1.deploymentInfo.filter(
+                                                                (o2) => o2.name === 'Solace Message Broker',
+                                                            ).length > 0) {
+                                                                return o1;
+                                                            }
+                                                            return null;
+                                                        },
+                                                    ).map((o3) => (
+                                                        <div>
+                                                            <Chip
+                                                                label={o3.displayName}
+                                                                style={{ backgroundColor: '#15B8CF' }}
+                                                            />
+                                                            <Button
+                                                                className={classes.button1}
+                                                                variant='outlined'
+                                                                disabled={api.isRevision}
+                                                                onClick={() => undeployRevision(o3.id,
+                                                                    'Solace Message Broker')}
+                                                                size='small'
+                                                            >
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.Third.Party.Brokers.undeploy.btn'
+                                                                    defaultMessage='Undeploy'
+                                                                />
+                                                            </Button>
+                                                        </div>
+                                                    ))) : (
+                                                // eslint-disable-next-line react/jsx-indent
+                                                    <div>
+                                                        <TextField
+                                                            id='revision-selector'
+                                                            select
+                                                            label={(
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.Third.Party.Broker.select.table'
+                                                                    defaultMessage='Select Revision'
+                                                                />
+                                                            )}
+                                                            SelectProps={{
+                                                                MenuProps: {
+                                                                    anchorOrigin: {
+                                                                        vertical: 'bottom',
+                                                                        horizontal: 'left',
+                                                                    },
+                                                                    getContentAnchorEl: null,
+                                                                },
+                                                            }}
+                                                            name='selectRevision'
+                                                            onChange={handleSelectForBrokers}
+                                                            margin='dense'
+                                                            variant='outlined'
+                                                            style={{ width: '50%' }}
+                                                            disabled={api.isRevision
+                                                        || !allRevisions || allRevisions.length === 0}
+                                                        >
+                                                            {/* eslint-disable-next-line max-len */}
+                                                            {allRevisions && allRevisions.length !== 0 && allRevisions.map(
+                                                                (number) => (
+                                                                    <MenuItem value={number.id}>
+                                                                        {number.displayName}
+                                                                    </MenuItem>
+                                                                ),
+                                                            )}
+                                                        </TextField>
+                                                        <Button
+                                                            className={classes.button2}
+                                                            disabled={api.isRevision || !selectedRevision}
+                                                            variant='outlined'
+                                                            onClick={() => deployRevision(selectedRevision,
+                                                                'Solace Message Broker')}
+
+                                                        >
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Third.Party.Broker.deploy.button'
+                                                                defaultMessage='Deploy'
+                                                            />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                        </TableCell>
+                                        <TableCell align='left'>
+                                            <Switch
+                                                checked={row.showInApiConsole}
+                                                onChange={handleChange}
+                                                disabled={api.isRevision}
+                                                name='checkedA'
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
+            )}
         </>
     );
 }

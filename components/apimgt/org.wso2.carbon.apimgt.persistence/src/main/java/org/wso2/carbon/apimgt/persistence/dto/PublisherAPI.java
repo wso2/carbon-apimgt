@@ -46,6 +46,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String visibleRoles;
     private String visibleOrganizations; //visibleTenants
     private boolean endpointSecured;
+    private String asyncApiDefinition;
     private String swaggerDefinition;
     private boolean endpointAuthDigest;
     private String endpointUTUsername;
@@ -97,6 +98,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
         this.soapToRestSequences = soapToRestSequences;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
     }
 
     public String getSwaggerDefinition() {

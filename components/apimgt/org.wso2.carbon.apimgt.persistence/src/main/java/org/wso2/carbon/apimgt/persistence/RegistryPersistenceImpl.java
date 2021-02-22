@@ -671,11 +671,21 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 String apiSourcePath = apiPath.substring(0, prependIndex );
                 String definitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
                         + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
+                String asyncApiDefinitionPath = apiSourcePath + RegistryConstants.PATH_SEPARATOR
+                        + APIConstants.API_ASYNC_API_DEFINITION_RESOURCE_NAME;
 
                 if (registry.resourceExists(definitionPath)) {
                     Resource apiDocResource = registry.get(definitionPath);
                     String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
                     api.setSwaggerDefinition(apiDocContent);
+                }
+
+                if (asyncApiDefinitionPath != null) {
+                    if (registry.resourceExists(asyncApiDefinitionPath)) {
+                        Resource apiDocResource = registry.get(asyncApiDefinitionPath);
+                        String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
+                        api.setAsyncApiDefinition(apiDocContent);
+                    }
                 }
                 
                 if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {

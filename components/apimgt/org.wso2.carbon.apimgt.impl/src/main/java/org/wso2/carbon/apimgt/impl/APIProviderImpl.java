@@ -19,9 +19,15 @@
 package org.wso2.carbon.apimgt.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.gson.Gson;
 
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
+import io.apicurio.datamodels.asyncapi.models.AaiOperationBindings;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -35,6 +41,16 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -231,24 +247,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9764,11 +9763,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiMgtDAO.removeAPIRevisionDeployment(apiId,environmentsToRemove);
             removeFromGateway(api, environmentsToRemove, environmentsToAdd);
         }
-        GatewayArtifactsMgtDAO.getInstance()
-                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
-        apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+        boolean deployedToSolace = false;
+        boolean solaceBrokerAPI = false;
+        final String solaceProviderName = "Solace Message Broker";
         if (environmentsToAdd.size() > 0) {
-            gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
+            for (String environment : environmentsToAdd) {
+                if (StringUtils.equalsIgnoreCase(solaceProviderName, environment)) {
+                    try {
+                        solaceBrokerAPI = true;
+                        deployedToSolace = deployToSolaceBroker(api);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        if (solaceBrokerAPI && deployedToSolace) {
+            apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+        } else if (solaceBrokerAPI && !deployedToSolace) {
+            System.out.println("Error while deploying API in Solace");
+        } else if (!solaceBrokerAPI) {
+            GatewayArtifactsMgtDAO.getInstance()
+                    .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
+            apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+            if (environmentsToAdd.size() > 0) {
+                gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
+            }
         }
     }
 
@@ -10106,5 +10126,159 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.error("Error while deleting Runtime artifacts from artifact Store", e);
             }
         }
+    }
+
+
+    private boolean deployToSolaceBroker(API api) throws IOException {
+        String apiDefinition = api.getAsyncApiDefinition();
+        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
+        String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1/";
+        String urlForOrganizations = baseUrl + "/organizations";
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpClient httpClient2 = HttpClients.createDefault();
+
+        //set authorization String
+        String encoding = Base64.getEncoder().encodeToString(("api-user:Solace123!").getBytes());
+
+        String organization = "MyOrg";
+        String env = "devEnv";
+
+        // 1. Check whether the organization is available
+        //HttpGet request1 = new HttpGet(urlForOrganizations + "/" + organization);
+        //request1.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding );
+        //HttpResponse response1 = httpClient.execute(request1);
+
+        HttpResponse response2 = null;
+        HttpResponse response3 = null;
+        HttpResponse response4 = null;
+
+        //if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+            // 2. check whether the environment is available
+            HttpGet request2 = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + env);
+            request2.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+            response2 = httpClient.execute(request2);
+
+            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+                // 3. create the api in solace broker
+                HttpPut request3 = new HttpPut(baseUrl + "/" + organization + "/apis/" + aai20Document.info.title);
+                request3.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                request3.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
+                //convert json to yaml
+                JsonNode jsonNodeTree = new ObjectMapper().readTree(apiDefinition);
+                String jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);
+                //add definition to request body
+                StringEntity params = new StringEntity(jsonAsYaml);
+                request3.setEntity(params);
+                //response
+                response3 = httpClient2.execute(request3);
+
+                if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+
+                    // 4. create the API product in solace broker
+                    HttpPost request4 = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
+                    request4.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                    request4.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+                    //setRequestBody
+                    org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, env);
+                    StringEntity params2 = new StringEntity(requestBody.toString());
+                    request4.setEntity(params2);
+                    //response
+                    response4 = httpClient2.execute(request4);
+
+                    if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                        return true;
+                    }
+                }
+            }
+        //}
+        return false;
+    }
+
+    private org.json.JSONObject buildAPIProductRequestBody(Aai20Document aai20Document, String environment) throws JsonProcessingException {
+        org.json.JSONObject requestBody = new org.json.JSONObject();
+
+        org.json.JSONArray apiName = new org.json.JSONArray();
+        apiName.put(aai20Document.info.title);
+        requestBody.put("apis", apiName);
+
+        requestBody.put("approvalType", "manual");
+        requestBody.put("description", aai20Document.info.title);
+        requestBody.put("displayName", aai20Document.info.title);
+        requestBody.put("pubResources", new org.json.JSONArray());
+        requestBody.put("subResources", new org.json.JSONArray());
+        requestBody.put("name", aai20Document.info.title);
+
+        org.json.JSONArray environments = new org.json.JSONArray();
+        environments.put(environment);
+        requestBody.put("environments", environments);
+
+        HashSet<String> parameters = new HashSet<>();
+        for (AaiChannelItem channel : aai20Document.getChannels()) {
+            parameters.addAll(channel.parameters.keySet());
+        }
+        org.json.JSONArray attributes = new org.json.JSONArray();
+        for (String parameter : parameters) {
+            org.json.JSONObject attributeObject = new org.json.JSONObject();
+            attributeObject.put("name", parameter);
+            attributeObject.put("value", "");
+            attributes.put(attributeObject);
+        }
+        requestBody.put("attributes", attributes);
+
+        HashSet<String> protocolsHashSet = new HashSet<>();
+        for (AaiChannelItem channel : aai20Document.getChannels()) {
+            protocolsHashSet.addAll(getProtocols(channel));
+        }
+        org.json.JSONArray protocols = new org.json.JSONArray();
+        for (String protocol : protocolsHashSet) {
+            org.json.JSONObject protocolObject = new org.json.JSONObject();
+            protocolObject.put("name", protocol);
+            protocolObject.put("version", "");
+            protocols.put(protocolObject);
+        }
+        requestBody.put("protocols", protocols);
+
+        return requestBody;
+    }
+
+    private HashSet<String> getProtocols (AaiChannelItem channel) {
+
+        HashSet<String> protocols = new HashSet<>();
+
+        if (channel.subscribe != null) {
+            if (channel.subscribe.bindings != null) {
+                protocols.addAll(getProtocolsFromBindings(channel.subscribe.bindings));
+            }
+        }
+        if (channel.publish != null) {
+            if (channel.publish.bindings != null) {
+                protocols.addAll(getProtocolsFromBindings(channel.publish.bindings));
+            }
+        }
+
+        return protocols;
+    }
+
+    private HashSet<String> getProtocolsFromBindings(AaiOperationBindings bindings) {
+
+        HashSet<String> protocolsFromBindings = new HashSet<>();
+
+        if (bindings.http != null) { protocolsFromBindings.add("http"); }
+        if (bindings.ws != null) { protocolsFromBindings.add("ws"); }
+        if (bindings.kafka != null) { protocolsFromBindings.add("kafka"); }
+        if (bindings.amqp != null) { protocolsFromBindings.add("amqp"); }
+        if (bindings.amqp1 != null) { protocolsFromBindings.add("amqp1"); }
+        if (bindings.mqtt != null) { protocolsFromBindings.add("mqtt"); }
+        if (bindings.mqtt5 != null) { protocolsFromBindings.add("mqtt5"); }
+        if (bindings.nats != null) { protocolsFromBindings.add("nats"); }
+        if (bindings.jms != null) { protocolsFromBindings.add("jms"); }
+        if (bindings.sns != null) { protocolsFromBindings.add("sns"); }
+        if (bindings.sqs != null) { protocolsFromBindings.add("sqs"); }
+        if (bindings.stomp != null) { protocolsFromBindings.add("stomp"); }
+        if (bindings.redis != null) { protocolsFromBindings.add("redis"); }
+
+        return protocolsFromBindings;
     }
 }
