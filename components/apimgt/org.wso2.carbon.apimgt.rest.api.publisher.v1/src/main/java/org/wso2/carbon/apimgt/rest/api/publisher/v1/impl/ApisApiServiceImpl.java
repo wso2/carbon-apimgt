@@ -4494,6 +4494,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service);
             api.setEndpointConfig(endpointConfig);
             JSONObject serviceInfo = new JSONObject();
+            serviceInfo.put("name", service.getName());
+            serviceInfo.put("version", service.getVersion());
             serviceInfo.put("key", service.getKey());
             serviceInfo.put("md5", service.getMd5());
             api.setServiceInfo(serviceInfo);

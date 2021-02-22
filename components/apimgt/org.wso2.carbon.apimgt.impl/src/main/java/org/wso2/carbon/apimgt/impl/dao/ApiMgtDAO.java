@@ -17269,6 +17269,10 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     JSONObject serviceInfo = new JSONObject();
                     serviceInfo.put("key", resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+                    serviceInfo.put("name", resultSet.getString(APIConstants.ServiceCatalogConstants
+                            .SERVICE_NAME));
+                    serviceInfo.put("version", resultSet.getString(APIConstants.ServiceCatalogConstants
+                            .SERVICE_VERSION));
                     serviceInfo.put("md5", resultSet.getString("API_SERVICE_MD5"));
                     if (resultSet.getString("SERVICE_MD5").equals(resultSet
                             .getString("API_SERVICE_MD5"))) {

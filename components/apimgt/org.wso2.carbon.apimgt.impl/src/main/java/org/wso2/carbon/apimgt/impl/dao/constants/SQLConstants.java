@@ -193,6 +193,8 @@ public class SQLConstants {
 
     public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
             "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
+            "   AM_SERVICE_CATALOG.SERVICE_NAME, " +
+            "   AM_SERVICE_CATALOG.SERVICE_VERSION, " +
             "   AM_API_SERVICE_MAPPING.MD5 AS API_SERVICE_MD5, " +
             "   AM_API_SERVICE_MAPPING.SERVICE_KEY " +
             "   FROM AM_SERVICE_CATALOG " +
