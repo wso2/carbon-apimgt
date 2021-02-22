@@ -42,7 +42,7 @@ public class DeliveryStatusUpdater extends AbstractMediator {
         try {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext();
-            int status = 0;
+            int status = 2;
             Object statusCode = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
             if (statusCode != null) {
                 String responseStatus = statusCode.toString();
