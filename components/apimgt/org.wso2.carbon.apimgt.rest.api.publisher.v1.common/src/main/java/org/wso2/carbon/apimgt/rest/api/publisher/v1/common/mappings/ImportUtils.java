@@ -153,6 +153,7 @@ public class ImportUtils {
         String lifecycleAction;
         GraphqlComplexityInfo graphqlComplexityInfo = null;
         int tenantId = 0;
+        JsonArray deploymentInfoArray = null;
 
         try {
             if (importedApiDTO == null) {
@@ -163,8 +164,12 @@ public class ImportUtils {
             // Get API params Definition as JSON and resolve them
             JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
             if (paramsConfigObject != null) {
-                importedApiDTO = APIControllerUtil.injectEnvParamsToAPI(importedApiDTO,
-                                paramsConfigObject, extractedFolderPath);
+                importedApiDTO = APIControllerUtil.injectEnvParamsToAPI(importedApiDTO, paramsConfigObject,
+                        extractedFolderPath);
+                JsonElement deploymentsParam = paramsConfigObject.get(ImportExportConstants.DEPLOYMENT_ENVIRONMENTS);
+                if (deploymentsParam != null && !deploymentsParam.isJsonNull()) {
+                    deploymentInfoArray = deploymentsParam.getAsJsonArray();
+                }
             }
 
             String apiType = importedApiDTO.getType().toString();
@@ -272,8 +277,11 @@ public class ImportUtils {
                 apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
             }
             importedApi.setStatus(targetStatus);
-            JSONArray deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
-            if (deploymentInfoArray != null && deploymentInfoArray.length() > 0) {
+            if (deploymentInfoArray == null) {
+                //If the params have overwritten the deployment environments, yaml file will not be read
+                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
+            }
+            if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
                 String importedAPIUuid = importedApi.getUuid();
                 String revisionId;
                 APIRevision apiRevision = new APIRevision();
@@ -305,14 +313,20 @@ public class ImportUtils {
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
                 List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
-                for (int i = 0; i < deploymentInfoArray.length(); i++) {
-                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(
-                            deploymentInfoArray.getJSONObject(i).getString(ImportExportConstants.DEPLOYMENT_NAME));
-                    apiRevisionDeployment
-                            .setDisplayOnDevportal(deploymentInfoArray.getJSONObject(i)
-                                    .getBoolean(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION));
-                    apiRevisionDeployments.add(apiRevisionDeployment);
+                for (int i = 0; i < deploymentInfoArray.size(); i++) {
+                    JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
+                    JsonElement deploymentNameElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_NAME);
+                    if (deploymentNameElement != null) {
+                        String deploymentName = deploymentNameElement.getAsString();
+                        JsonElement displayOnDevportalElement =
+                                deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
+                        boolean displayOnDevportal =
+                                displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
+                        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                        apiRevisionDeployment.setDeployment(deploymentName);
+                        apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
+                        apiRevisionDeployments.add(apiRevisionDeployment);
+                    }
                 }
                 apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments);
             }
@@ -769,10 +783,10 @@ public class ImportUtils {
      * Retrieve the deployment information from the file
      *
      * @param pathToArchive Path to API/API Product archive
-     * @return a JSONArray of the deployed gateway environments
+     * @return a JsonArray of the deployed gateway environments
      * @throws APIManagementException If an error occurs while reading the file
      */
-    private static JSONArray retrieveDeploymentLabelsFromArchive(String pathToArchive, boolean dependentAPIFromProduct)
+    private static JsonArray retrieveDeploymentLabelsFromArchive(String pathToArchive, boolean dependentAPIFromProduct)
             throws APIManagementException {
 
         try {
@@ -785,7 +799,7 @@ public class ImportUtils {
             if (jsonContent == null) {
                 return null;
             }
-            return new JSONArray(jsonContent);
+            return new Gson().fromJson(jsonContent, JsonArray.class);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading deployment environments info from path: "
                     + pathToArchive, e, ExceptionCodes.ERROR_READING_META_DATA);
@@ -1766,8 +1780,8 @@ public class ImportUtils {
             addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
                     importedApiProduct.getId().getProviderName());
 
-            JSONArray deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
-            if (deploymentInfoArray != null && deploymentInfoArray.length() > 0) {
+            JsonArray deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
+            if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
                 String importedAPIUuid = importedApiProduct.getUuid();
                 String revisionId;
                 APIRevision apiProductRevision = new APIRevision();
@@ -1798,14 +1812,20 @@ public class ImportUtils {
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
                 List<APIRevisionDeployment> apiProductRevisionDeployments = new ArrayList<>();
-                for (int i = 0; i < deploymentInfoArray.length(); i++) {
-                    APIRevisionDeployment apiProductRevisionDeployment = new APIRevisionDeployment();
-                    apiProductRevisionDeployment.setDeployment(
-                            deploymentInfoArray.getJSONObject(i).getString(ImportExportConstants.DEPLOYMENT_NAME));
-                    apiProductRevisionDeployment
-                            .setDisplayOnDevportal(deploymentInfoArray.getJSONObject(i)
-                                    .getBoolean(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION));
-                    apiProductRevisionDeployments.add(apiProductRevisionDeployment);
+                for (int i = 0; i < deploymentInfoArray.size(); i++) {
+                    JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
+                    JsonElement deploymentNameElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_NAME);
+                    if (deploymentNameElement != null) {
+                        String deploymentName = deploymentNameElement.getAsString();
+                        JsonElement displayOnDevportalElement =
+                                deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
+                        boolean displayOnDevportal =
+                                displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
+                        APIRevisionDeployment apiProductRevisionDeployment = new APIRevisionDeployment();
+                        apiProductRevisionDeployment.setDeployment(deploymentName);
+                        apiProductRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
+                        apiProductRevisionDeployments.add(apiProductRevisionDeployment);
+                    }
                 }
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             }
