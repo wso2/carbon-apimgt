@@ -83,9 +83,11 @@ public class ExtensionListenerUtil {
 
         RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
-        //TODO:check null
-        ExtensionResponseDTO responseDTO = extensionListener.preProcessRequest(requestContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO);
+        if (extensionListener != null) {
+            ExtensionResponseDTO responseDTO = extensionListener.preProcessRequest(requestContextDTO);
+            return handleExtensionResponse(messageContext, responseDTO);
+        }
+        return true;
     }
 
     /**
@@ -100,8 +102,12 @@ public class ExtensionListenerUtil {
 
         RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
-        ExtensionResponseDTO responseDTO = extensionListener.postProcessRequest(requestContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO);
+        if (extensionListener != null) {
+
+            ExtensionResponseDTO responseDTO = extensionListener.postProcessRequest(requestContextDTO);
+            return handleExtensionResponse(messageContext, responseDTO);
+        }
+        return true;
     }
 
     /**
@@ -116,8 +122,11 @@ public class ExtensionListenerUtil {
 
         ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
-        ExtensionResponseDTO responseDTO = extensionListener.preProcessResponse(responseContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO);
+        if (extensionListener != null) {
+            ExtensionResponseDTO responseDTO = extensionListener.preProcessResponse(responseContextDTO);
+            return handleExtensionResponse(messageContext, responseDTO);
+        }
+        return true;
     }
 
     /**
@@ -132,8 +141,11 @@ public class ExtensionListenerUtil {
 
         ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
-        ExtensionResponseDTO responseDTO = extensionListener.postProcessResponse(responseContextDTO);
-        return handleExtensionResponse(messageContext, responseDTO);
+        if (extensionListener != null) {
+            ExtensionResponseDTO responseDTO = extensionListener.postProcessResponse(responseContextDTO);
+            return handleExtensionResponse(messageContext, responseDTO);
+        }
+        return true;
     }
 
     /**
@@ -242,9 +254,10 @@ public class ExtensionListenerUtil {
         // handle payload
         processResponsePayload(extensionResponseDTO, messageContext);
         // set customProperty map to send in throttle stream
-        //TODO:null check property map
-        messageContext
-                .setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, extensionResponseDTO.getCustomProperty());
+        if (extensionResponseDTO.getCustomProperty() != null) {
+            messageContext
+                    .setProperty(APIMgtGatewayConstants.CUSTOM_PROPERTY, extensionResponseDTO.getCustomProperty());
+        }
         // set Http Response status code
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE,
                 extensionResponseDTO.getStatusCode());
