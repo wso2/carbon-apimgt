@@ -346,13 +346,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         List<Document> mustArray = new ArrayList();
         if (query.contains(" ")) {
             String[] searchAreas = query.split(" ");
-
             for (String area : searchAreas) {
                 List<String> paths = new ArrayList<>();
                 if (area.contains(":")) {
                     String[] queryArray = area.split(":");
-                    String searchField = getSearchField(queryArray[0]);
-                    paths.add(searchField);
+                    paths.addAll(getSearchField(queryArray[0]));
                     searchQuery = "*" + queryArray[1] + "*";
                 } else {
                     searchQuery = "*" + query + "*";
@@ -369,44 +367,15 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         } else {
             List<String> paths = new ArrayList<>();
             if (query.contains(":")) {
-
                 String[] queryArray = query.split(":");
-
-                if (queryArray[0].equalsIgnoreCase("content")) {
-                    searchQuery = "*" + queryArray[1] + "*";
-                    paths.add("apiName");
-                    paths.add("providerName");
-                    paths.add("version");
-                    paths.add("context");
-                    paths.add("status");
-                    paths.add("description");
-                    paths.add("swaggerDefinition");
-                    paths.add("tags");
-                    paths.add("gatewayLabels");
-                    paths.add("additionalProperties");
-                    paths.add("apiCategories");
-                } else {
-                    String searchField = getSearchField(queryArray[0]);
-                    paths.add(searchField);
-                    searchQuery = "*" + queryArray[1] + "*";
-                }
-
+                paths.addAll(getSearchField(queryArray[0]));
+                searchQuery = "*" + queryArray[1] + "*";
             } else {
                 searchQuery = "*" + query + "*";
                 if (query == "") {
                     searchQuery = "*";
                 }
-                paths.add("apiName");
-                paths.add("providerName");
-                paths.add("version");
-                paths.add("context");
-                paths.add("status");
-                paths.add("description");
-                paths.add("swaggerDefinition");
-                paths.add("tags");
-                paths.add("gatewayLabels");
-                paths.add("additionalProperties");
-                paths.add("apiCategories");
+                paths.addAll(getSearchField("content"));
             }
             Document wildCard = new Document();
             Document wildCardBody = new Document();
@@ -456,41 +425,72 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return list;
     }
 
-    private String getSearchField(String queryCriteria) {
+    private List<String> getSearchField(String queryCriteria) {
+        List<String> fieldList = new ArrayList<>();
         if (queryCriteria.equalsIgnoreCase("name")) {
-            return "apiName";
+            fieldList.add("apiName");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("provider")) {
-            return "providerName";
+            fieldList.add("providerName");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("context")) {
-            return "context";
+            fieldList.add("context");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("status")) {
-            return "status";
+            fieldList.add("status");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("version")) {
-            return "version";
+            fieldList.add("version");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("description")) {
-            return "description";
+            fieldList.add("description");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("tags")) {
-            return "tags";
+            fieldList.add("tags");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("api-category")) {
-            return "apiCategories";
+            fieldList.add("apiCategories");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("subcontext")) {
-            return "context";
+            fieldList.add("context");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("doc")) {
-            return "documentationList";
+            fieldList.add("documentationList.name");
+            fieldList.add("documentationList.summary");
+            fieldList.add("documentationList.textContent");
+            return fieldList;
         }
         if (queryCriteria.equalsIgnoreCase("label")) {
-            return "gatewayLabels";
+            fieldList.add("gatewayLabels");
+            return fieldList;
         }
-        return "";
+        if (queryCriteria.equalsIgnoreCase("content")) {
+            fieldList.add("apiName");
+            fieldList.add("providerName");
+            fieldList.add("version");
+            fieldList.add("context");
+            fieldList.add("status");
+            fieldList.add("description");
+            fieldList.add("swaggerDefinition");
+            fieldList.add("tags");
+            fieldList.add("gatewayLabels");
+            fieldList.add("additionalProperties");
+            fieldList.add("apiCategories");
+            fieldList.add("documentationList.name");
+            fieldList.add("documentationList.summary");
+            fieldList.add("documentationList.textContent");
+            return fieldList;
+        }
+        return fieldList;
     }
 
     private List<Document> getDevportalSearchAggregate(String query, int skip, int limit) {
