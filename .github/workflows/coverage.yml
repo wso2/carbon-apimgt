@@ -21,10 +21,6 @@ jobs:
         node-version: '14.x'
     - name: Build carbon-apimgt with Test.
       run: mvn clean install --file pom.xml
-    - name: Upload unit test coverage to Codecov
-      uses: codecov/codecov-action@v1.2.1
-      with:
-        flags: unit_tests
     - name: Get carbon.apimgt.version
       run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
     - name: Print carbon.apimgt.version
@@ -37,6 +33,10 @@ jobs:
         ref: refs/heads/master
     - name: Build Product-Apim with Maven
       run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file ../product-apim/pom.xml
+    - name: Upload unit test coverage to Codecov
+      uses: codecov/codecov-action@v1.2.1
+      with:
+        flags: unit_tests
     - name: Upload integration test coverage to Codecov
       uses: codecov/codecov-action@v1.2.1
       with:
