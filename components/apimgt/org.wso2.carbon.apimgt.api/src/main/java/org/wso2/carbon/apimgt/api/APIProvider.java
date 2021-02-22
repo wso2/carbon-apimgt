@@ -32,6 +32,8 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -878,6 +880,19 @@ public interface APIProvider extends APIManager {
     /**
      * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
      * according to the new state.
+     *
+     * @param api        The API
+     * @param identifier Api identifier
+     * @param newStatus  new state of the lifecycle
+     * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
+     * @throws APIManagementException
+     */
+    Map<String, String> propergateAPIStatusChangeToGateways(API api, APIIdentifier identifier, String newStatus)
+            throws APIManagementException;
+
+    /**
+     * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
+     * according to the new state.
      * @param identifier Api identifier
      * @param newStatus new state of the lifecycle
      * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
@@ -898,6 +913,24 @@ public interface APIProvider extends APIManager {
       */
      boolean updateAPIforStateChange(APIIdentifier identifier, String newStatus,
              Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
+
+    /**
+     * Update api related information such as database entries, registry updates for state change.
+     *
+     * @param api               the API
+     * @param identifier        The API Identifier
+     * @param newStatus         The new status of the API
+     * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
+     *                          accepted if changes are not pushed to a gateway
+     * @param artifactManager   The artifact manager
+     * @param artifact          The artifact
+     * @return boolean value representing success not not
+     * @throws APIManagementException
+     * @throws FaultGatewaysException
+     */
+    boolean updateAPIforStateChange(API api, APIIdentifier identifier, String newStatus,
+            Map<String, String> failedGatewaysMap, GenericArtifactManager artifactManager, GenericArtifact artifact)
+            throws APIManagementException, FaultGatewaysException;
 
     /**
      * Update api related information such as database entries, registry updates for state change.
