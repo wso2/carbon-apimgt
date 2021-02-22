@@ -443,27 +443,41 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param identifier Api identifier
+     * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
      *
-     * @param identifier API identifier
+     * @param apiTypeWrapper Api Type Wrapper
      * @param commentId Comment ID
+     * @param limit
+     * @param offset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(Identifier identifier, String commentId) throws APIManagementException;
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException;
 
     /**
      * @param apiTypeWrapper Api type wrapper
+     * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException;
+
+    /**
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId comment ID
+     * @param comment Comment object
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
@@ -473,6 +487,16 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to delete comment for identifier
      */
     void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @return boolean
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
 
     /**
      * Adds an application
