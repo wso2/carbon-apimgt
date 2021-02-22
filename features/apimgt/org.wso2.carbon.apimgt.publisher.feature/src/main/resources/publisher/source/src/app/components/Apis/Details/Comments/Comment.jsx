@@ -1,5 +1,6 @@
+/* eslint-disable react/prop-types */
 /*
- * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,17 +18,22 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography } from '@material-ui/core/';
+import { Typography, Tooltip } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import AccountBox from '@material-ui/icons/AccountBox';
+import Icon from '@material-ui/core/Icon';
 import Grid from '@material-ui/core/Grid';
+import Divider from '@material-ui/core/Divider';
+import Box from '@material-ui/core/Box';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { injectIntl } from 'react-intl';
+import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
 import API from 'AppData/api';
-import CommentAdd from './CommentAdd';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
-import CommentReply from './CommentReply';
+import CommentAdd from './CommentAdd';
 
 const styles = (theme) => ({
     link: {
@@ -39,18 +45,38 @@ const styles = (theme) => ({
     },
     commentText: {
         color: theme.palette.getContrastText(theme.palette.background.default),
-        marginTop: theme.spacing.unig,
-        width: '100%',
+        marginTop: 0,
+        width: '99%',
         whiteSpace: 'pre-wrap',
         overflowWrap: 'break-word',
+        wordBreak: 'break-all',
     },
     root: {
-        marginTop: theme.spacing(2.5),
+        marginTop: theme.spacing(1),
     },
     contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing(2),
-        paddingTop: theme.spacing(2),
+        paddingTop: theme.spacing(1),
+    },
+    contentWrapperOverview: {
+        background: 'transparent',
+        width: '100%',
+    },
+    divider: {
+        marginTop: theme.spacing(4),
+        marginBottom: theme.spacing(2),
+        width: '60%',
+    },
+    paper: {
+        margin: 0,
+        marginTop: theme.spacing(1 ),
+        marginRight: theme.spacing(3),
+        paddingBottom: theme.spacing(3),
+    },
+    cleanBack: {
+        background: 'transparent',
+        width: '100%',
+        boxShadow: 'none',
     },
 });
 
@@ -69,12 +95,10 @@ class Comment extends React.Component {
         super(props);
         this.state = {
             openDialog: false,
-            replyIndex: -1,
+            replyId: -1,
             editIndex: -1,
             deleteComment: null,
         };
-        this.keyCount = 0;
-        this.getKey = this.getKey.bind(this);
         this.handleClickDeleteComment = this.handleClickDeleteComment.bind(this);
         this.handleShowEdit = this.handleShowEdit.bind(this);
         this.handleShowReply = this.handleShowReply.bind(this);
@@ -88,41 +112,33 @@ class Comment extends React.Component {
     }
 
     /**
-     * Genereates unique keys for comments
-     * @memberof Comment
-     */
-    getKey() {
-        return this.keyCount++;
-    }
-
-    /**
-     * Filters the comments to be remained
-     * @memberof Comment
+     * Add two numbers.
+     * @param {string} commentToFilter comment to filter.
+     * @returns {boolean} filtering needed or not.
      */
     filterRemainingComments(commentToFilter) {
         const { deleteComment } = this.state;
-        return commentToFilter.commentId !== deleteComment.commentId;
+        return commentToFilter.id !== deleteComment.id;
     }
 
     /**
-     * Filters the comments to be deleted
-     * @memberof Comment
+     * Add two numbers.
+     * @param {JSON} commentToFilter comment to filter.
+     * @returns {string} id of the comment.
      */
     filterCommentToDelete(commentToFilter) {
         const { deleteComment } = this.state;
-        return commentToFilter.commentId === deleteComment.parentCommentId;
+        return commentToFilter.id === deleteComment.replyTo;
+        return commentToFilter.id;
     }
 
     /**
      * Shows the component to add a new comment
-     * @param {any} index Index of comment in the array
+     * @param {any} id of comment
      * @memberof Comment
      */
-    showAddComment(index) {
-        const { editIndex } = this.state;
-        if (editIndex === -1) {
-            this.setState({ replyIndex: index });
-        }
+    showAddComment(id) {
+        this.setState({ replyId: id });
     }
 
     /**
@@ -152,7 +168,7 @@ class Comment extends React.Component {
      * @memberof Comment
      */
     handleShowReply() {
-        this.setState({ replyIndex: -1 });
+        this.setState({ replyId: -1 });
     }
 
     /**
@@ -177,7 +193,7 @@ class Comment extends React.Component {
 
     /**
      * Handles the Confirm Dialog
-     * @param {*} bool properies passed by the Confirm Dialog
+     * @param {*} message properies passed by the Confirm Dialog
      * @memberof Comment
      */
     handleConfirmDialog(message) {
@@ -193,19 +209,23 @@ class Comment extends React.Component {
      * @memberof Comment
      */
     handleClickDeleteComment() {
-        const Api = new API();
+        const apiClient = new API();
+
         const { deleteComment } = this.state;
-        const { api, allComments, commentsUpdate } = this.props;
-        const commentIdOfCommentToDelete = deleteComment.commentId;
-        const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
-        const apiId = api.id;
+        const {
+            apiId, allComments, commentsUpdate, intl,
+        } = this.props;
+        const commentIdOfCommentToDelete = deleteComment.id;
+        const parentCommentIdOfCommentToDelete = deleteComment.replyTo;
         this.handleClose();
 
-        Api.deleteComment(apiId, commentIdOfCommentToDelete)
+        apiClient
+            .deleteComment(apiId, commentIdOfCommentToDelete)
             .then(() => {
                 if (parentCommentIdOfCommentToDelete === undefined) {
                     const remainingComments = allComments.filter(this.filterRemainingComments);
                     commentsUpdate(remainingComments);
+                    Alert.message('Comment' + commentIdOfCommentToDelete + 'has been successfully deleted');
                 } else {
                     const index = allComments.findIndex(this.filterCommentToDelete);
                     const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
@@ -217,8 +237,16 @@ class Comment extends React.Component {
                 console.error(error);
                 if (error.response) {
                     Alert.error(error.response.body.message);
-                } else {
-                    Alert.error(`Something went wrong while deleting comment - ${commentIdOfCommentToDelete}`);
+                }
+                else {
+                    Alert.error(
+                        intl.formatMessage({
+                            defaultMessage: 'Something went wrong while deleting comment',
+                            id: 'Apis.Details.Comments.Comment.something.went.wrong',
+                        })
+                        + ' - '
+                        + commentIdOfCommentToDelete,
+                    );
                 }
             });
     }
@@ -230,86 +258,138 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, api, allComments, commentsUpdate,
+            classes, comments, apiId, allComments, commentsUpdate, isOverview,
         } = this.props;
-        const { editIndex, replyIndex, openDialog } = this.state;
-        const props = { api, allComments, commentsUpdate };
-        return [
-            comments
-                && comments
-                    .slice(0)
-                    .reverse()
-                    .map((comment, index) => (
-                        <div key={this.getKey()} className={classes.contentWrapper}>
-                            <Grid container spacing={2} className={classes.root}>
-                                <Grid item>
-                                    <AccountBox className={classes.commentIcon} />
-                                </Grid>
-                                <Grid item xs zeroMinWidth>
-                                    <Typography noWrap className={classes.commentText} variant='body1'>
-                                        {comment.createdBy}
-                                    </Typography>
 
-                                    {index !== editIndex && (
-                                        <Typography className={classes.commentText}>{comment.commentText}</Typography>
-                                    )}
+        const { editIndex, openDialog, replyId } = this.state;
+        return (
+            <>
+                <div className={classes.paper}>
+                    {comments
+                    && comments
+                        .slice(0)
+                        .reverse()
+                        .map((comment, index) => (
+                            <div key={comment.id + '-' + index} className={classes.contentWrapper}>
+                                {index !== 0 && <Divider light className={classes.divider} />}
+                                <Grid md={8} container spacing={1} className={classNames({ [classes.root]: !isOverview })}>
+                                    <Grid item>
+                                        <Icon className={classes.commentIcon}>account_circle</Icon>
+                                    </Grid>
+                                    <Grid item xs zeroMinWidth>
+                                        <Typography noWrap className={classes.commentText}>
+                                            {(comment.commenterInfo && comment.commenterInfo.firstName) ?
+                                                (comment.commenterInfo.firstName + comment.commenterInfo.lastName) :
+                                                comment.createdBy}
+                                        </Typography>
+                                        <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
+                                            <Typography noWrap className={classes.commentText} variant='caption'>
+                                                {dayjs.extend(relativeTime)}
+                                                {dayjs(comment.createdTime).fromNow()}
+                                            </Typography>
+                                        </Tooltip>
 
-                                    {index === editIndex && (
-                                        <CommentEdit
-                                            {...props}
+                                        <Typography className={classes.commentText}>{comment.content}</Typography>
+
+                                        <CommentOptions
                                             comment={comment}
-                                            toggleShowEdit={this.handleShowEdit}
+                                            editIndex={editIndex}
+                                            index={index}
+                                            showAddComment={this.showAddComment}
+                                            handleClickOpen={this.handleClickOpen}
+                                            showEditComment={this.showEditComment}
                                         />
-                                    )}
 
-                                    <CommentOptions
-                                        classes={classes}
-                                        comment={comment}
-                                        editIndex={editIndex}
-                                        index={index}
-                                        showAddComment={this.showAddComment}
-                                        handleClickOpen={this.handleClickOpen}
-                                        showEditComment={this.showEditComment}
-                                    />
+                                        {comment.id === replyId && (
+                                            <Box ml={6} mb={2}>
+                                                <CommentAdd
+                                                    apiId={apiId}
+                                                    replyTo={comment.id}
+                                                    allComments={allComments}
+                                                    commentsUpdate={commentsUpdate}
+                                                    handleShowReply={this.handleShowReply}
+                                                    cancelButton
+                                                />
+                                            </Box>
+                                        )}
 
-                                    {index === replyIndex && (
-                                        <CommentAdd
-                                            {...props}
-                                            parentCommentId={comment.commentId}
-                                            toggleShowReply={this.handleShowReply}
-                                            cancelButton
-                                        />
-                                    )}
-                                    {comment.replies.length !== 0 && (
-                                        <CommentReply {...props} classes={classes} comments={comment.replies} />
-                                    )}
+                                        {comment.replies && comment.replies.list.map((reply, index) => (
+                                            <>
+                                                <Box ml={8}>
+                                                    {index !== 0 && <Divider light className={classes.divider} />}
+                                                    <Grid container spacing={1} className={classes.root}>
+                                                        <Grid item>
+                                                            <Icon className={classes.commentIcon}>account_circle</Icon>
+                                                        </Grid>
+                                                        <Grid item xs zeroMinWidth>
+                                                            <Typography noWrap className={classes.commentText}>
+                                                                {(reply.commenterInfo && reply.commenterInfo.fullName)
+                                                                    ? reply.commenterInfo.fullName : reply.createdBy}
+                                                            </Typography>
+                                                            <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
+                                                                <Typography noWrap className={classes.commentText} variant='caption'>
+                                                                    {dayjs(reply.createdTime).fromNow()}
+                                                                </Typography>
+                                                            </Tooltip>
+
+                                                            {index !== editIndex && (
+                                                                <Typography className={classes.commentText}>
+                                                                    {reply.content}</Typography>
+                                                            )}
+
+                                                            {index === editIndex && (
+                                                                <CommentEdit
+                                                                    apiId={apiId}
+                                                                    allComments={reply}
+                                                                    commentsUpdate={commentsUpdate}
+                                                                    comment={reply}
+                                                                    toggleShowEdit={this.handleShowEdit}
+                                                                />
+                                                            )}
+
+                                                            <CommentOptions
+                                                                comment={reply}
+                                                                editIndex={editIndex}
+                                                                index={index}
+                                                                showAddComment={this.showAddComment}
+                                                                handleClickOpen={this.handleClickOpen}
+                                                                showEditComment={this.showEditComment}
+                                                            />
+                                                        </Grid>
+                                                    </Grid>
+                                                </Box>
+                                            </>
+                                        ))}
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </div>
-                    )),
-            <ConfirmDialog
-                key='key-dialog'
-                labelCancel='Cancel'
-                title='Confirm Delete'
-                message='Are you sure you want to delete this comment?'
-                labelOk='Yes'
-                callback={this.handleConfirmDialog}
-                open={openDialog}
-            />,
-        ];
+                            </div>
+                        ))}
+                </div>
+                <ConfirmDialog
+                    key='key-dialog'
+                    labelCancel='Cancel'
+                    title='Confirm Delete'
+                    message='Are you sure you want to delete this comment?'
+                    labelOk='Yes'
+                    callback={this.handleConfirmDialog}
+                    open={openDialog}
+                />
+            </>
+        );
     }
 }
 
 Comment.defaultProps = {
-    api: null,
+    isOverview: false,
 };
 
 Comment.propTypes = {
-    classes: PropTypes.instanceOf(Object).isRequired,
-    api: PropTypes.instanceOf(Object),
+    classes: PropTypes.shape({}).isRequired,
+    apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
+    isOverview: PropTypes.bool,
 };
 
-export default withStyles(styles)(Comment);
+export default injectIntl(withStyles(styles)(Comment));

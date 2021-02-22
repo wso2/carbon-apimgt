@@ -35,6 +35,7 @@ import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import StoreIcon from '@material-ui/icons/Store';
 import DashboardIcon from '@material-ui/icons/Dashboard';
+import CommentIcon from '@material-ui/icons/Comment';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
@@ -690,17 +691,31 @@ class Details extends Component {
                                 iconText='test'
                             />
                         )}
-                        <Divider />
                         {!isAPIProduct && settingsContext.externalStoresEnabled && (
+                            <>
+                                <Divider />
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.external-stores',
+                                        defaultMessage: 'external dev portals',
+                                    })}
+                                    to={pathPrefix + 'external-devportals'}
+                                    Icon={<StoreIcon />}
+                                />
+                            </>
+                        )}
+                        {!isAPIProduct && <Divider />}
+                        {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
-                                    id: 'Apis.Details.index.external-stores',
-                                    defaultMessage: 'external dev portals',
+                                    id: 'Apis.Details.index.comments',
+                                    defaultMessage: 'Comments',
                                 })}
-                                to={pathPrefix + 'external-devportals'}
-                                Icon={<StoreIcon />}
+                                to={pathPrefix + 'comments'}
+                                Icon={<CommentIcon />}
                             />
                         )}
+                        <Divider />
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
@@ -820,6 +835,10 @@ class Details extends Component {
                                     component={() => <TestConsole apiObj={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
+                                <Route
+                                    path={Details.subPaths.COMMENTS}
+                                    component={() => <Comments apiObj={api} />}
+                                />
                             </Switch>
                         </div>
                     </div>
