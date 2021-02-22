@@ -2096,5 +2096,6 @@
         <analytics.event.publisher.client.version>0.4.0</analytics.event.publisher.client.version>
         <analytics.event.publisher.client.version.range>[0.4.0,1.0.0)</analytics.event.publisher.client.version.range>
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
+        <skip.aspectj>false</skip.aspectj>
     </properties>
 </project>
