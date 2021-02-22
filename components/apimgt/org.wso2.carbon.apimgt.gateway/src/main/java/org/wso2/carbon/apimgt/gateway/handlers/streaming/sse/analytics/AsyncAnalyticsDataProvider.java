@@ -16,29 +16,40 @@
  * under the License.
  */
 
-
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics;
 
 import org.apache.synapse.MessageContext;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 
-/**
- * Data provider for the request/subscription events of server sent events.
- */
-public class SseSubscriptionEventDataProvider extends SseEventDataProvider {
+public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
 
-    private static final String SUBSCRIPTION_OPERATION_PREFIX = "subscription:";
+    private MessageContext messageContext;
 
-    public SseSubscriptionEventDataProvider(MessageContext messageContext) {
-
+    public AsyncAnalyticsDataProvider(MessageContext messageContext) {
         super(messageContext);
+        this.messageContext = messageContext;
+    }
+
+    @Override
+    public Latencies getLatencies() {
+        Latencies latencies = new Latencies();
+        latencies.setResponseLatency(0L);
+        latencies.setBackendLatency(0L);
+        latencies.setRequestMediationLatency(0L);
+        latencies.setResponseMediationLatency(0L);
+        return latencies;
     }
 
     @Override
     public Operation getOperation() {
 
         Operation operation = super.getOperation();
-        operation.setApiResourceTemplate(SUBSCRIPTION_OPERATION_PREFIX + operation.getApiResourceTemplate());
+        String eventName = ""; // // todo get this from smg ctx
+        if (!eventName.isEmpty()) {
+            operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
+        }
         return operation;
     }
 }

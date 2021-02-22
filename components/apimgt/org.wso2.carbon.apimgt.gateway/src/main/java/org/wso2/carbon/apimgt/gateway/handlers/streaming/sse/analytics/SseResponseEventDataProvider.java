@@ -23,7 +23,7 @@ import org.apache.synapse.MessageContext;
 /**
  * Data provider for the response events of server sent events.
  */
-public class SseResponseEventDataProvider extends SseEventDataProvider {
+public class SseResponseEventDataProvider extends AsyncAnalyticsDataProvider {
 
     private int responseCode;
 
