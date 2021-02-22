@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.persistence.dto.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBThumbnail;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -78,9 +79,11 @@ public class MongoDBConnectionUtil {
                         ClassModel.builder(CORSConfiguration.class).enableDiscriminator(false).build();
                 ClassModel<APIDocumentation> apiDocumentation =
                         ClassModel.builder(APIDocumentation.class).enableDiscriminator(false).build();
+                ClassModel<MongoDBThumbnail> mongoDBThumbnail =
+                        ClassModel.builder(MongoDBThumbnail.class).enableDiscriminator(false).build();
                 CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder()
                         .register(publisherAPI, deploymentEnv, corsConfiguration, mongoDBAPIDocument,
-                                mongoDBDevPortalAPI, devPortalAPI, apiDocumentation).build());
+                                mongoDBDevPortalAPI, devPortalAPI, apiDocumentation, mongoDBThumbnail).build());
                 CodecRegistry codecRegistry = fromRegistries(MongoClientSettings
                         .getDefaultCodecRegistry(), pojoCodecRegistry);
 

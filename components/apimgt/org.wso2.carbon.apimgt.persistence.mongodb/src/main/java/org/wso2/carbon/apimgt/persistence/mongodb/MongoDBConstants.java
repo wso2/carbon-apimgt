@@ -20,6 +20,7 @@ public class MongoDBConstants {
 
     public static final String MONGODB_DEFAULT_DATABASE = "APIM_DB";
     public static final String MONGODB_COLLECTION_SUR_FIX = "_apis";
+    public static final String MONGODB_GRIDFS_THMBNAIL_SUR_FIX = "_thumbnail";
     public static final String MONGODB_COLLECTION_DEFAULT_ORG = "carbon.super";
 
     /**

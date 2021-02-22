@@ -29,6 +29,7 @@ import com.mongodb.client.model.FindOneAndReplaceOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.InsertOneResult;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceExcepti
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBThumbnail;
 import org.wso2.carbon.apimgt.persistence.mongodb.mappers.DocumentationMapper;
 import org.wso2.carbon.apimgt.persistence.mongodb.mappers.MongoAPIMapper;
 import org.wso2.carbon.apimgt.persistence.mongodb.utils.MongoDBConnectionUtil;
@@ -99,12 +101,14 @@ import static com.mongodb.client.model.Updates.pull;
 import static com.mongodb.client.model.Updates.push;
 import static com.mongodb.client.model.Updates.set;
 import static com.mongodb.client.model.Projections.exclude;
+import static com.mongodb.client.model.Updates.unset;
 import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.DEFAULT_RETRY_COUNT;
 import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.DEFAULT_TREAD_COUNT;
 import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.REGISTRY_CONFIG_RETRY_COUNT;
 import static org.wso2.carbon.apimgt.persistence.PersistenceConstants.REGISTRY_CONFIG_TREAD_COUNT;
 import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_DEFAULT_ORG;
 import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_SUR_FIX;
+import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_GRIDFS_THMBNAIL_SUR_FIX;
 
 @MethodStats
 public class MongoDBPersistenceImpl implements APIPersistence {
@@ -225,6 +229,14 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         String swaggerDefinition = mongoDBPublisherAPI.getSwaggerDefinition();
         String apiId = mongoDBPublisherAPI.getId();
 
+        try {
+            MongoDBPublisherAPI mongoDBAPIDocument = getMongoDBPublisherAPIFromId(org, apiId);
+            mongoDBPublisherAPI.setMongoDBThumbnail(mongoDBAPIDocument.getMongoDBThumbnail());
+            mongoDBPublisherAPI.setDocumentationList(mongoDBAPIDocument.getDocumentationList());
+        } catch (APIPersistenceException e) {
+            throw new APIPersistenceException("Error when getting API " + publisherAPI.getId(), e);
+        }
+
         //Temporary check
         if (swaggerDefinition == null) {
             try {
@@ -242,14 +254,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
-        MongoDBPublisherAPI mongoDBAPIDocument =
-                collection.find(eq("_id", new ObjectId(apiId)))
-                        .projection(exclude("swaggerDefinition")).first();
-        if (mongoDBAPIDocument == null) {
-            String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
-            throw new APIPersistenceException(msg);
-        }
+        MongoDBPublisherAPI mongoDBAPIDocument = getMongoDBPublisherAPIFromId(org, apiId);
         PublisherAPI api = MongoAPIMapper.INSTANCE.toPublisherApi(mongoDBAPIDocument);
         return api;
     }
@@ -742,6 +747,10 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public DocumentContent getDocumentationContent(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
+        String orgName = org.getName();
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
         APIDocumentation apiDocumentation = getMongodbDocUsingId(org, apiId, docId);
         String sourceType = apiDocumentation.getSourceType().name();
         ObjectId gridFsReference = apiDocumentation.getGridFsReference();
@@ -751,7 +760,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
         if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType) && gridFsReference != null) {
             MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-            GridFSBucket gridFSBucket = GridFSBuckets.create(database, org.getName());
+            GridFSBucket gridFSBucket = GridFSBuckets.create(database, orgName);
             GridFSDownloadStream downloadStream = gridFSBucket.openDownloadStream(gridFsReference);
             ResourceFile resourceFile = new ResourceFile(downloadStream, apiDocumentation.getContentType());
             resourceFile.setName(downloadStream.getGridFSFile().getFilename());
@@ -765,13 +774,17 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void deleteDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        String orgName = org.getName();
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(orgName);
         APIDocumentation apiDocumentation = getMongodbDocUsingId(org, apiId, docId);
         String sourceType = apiDocumentation.getSourceType().name();
         ObjectId gridFsReference = apiDocumentation.getGridFsReference();
         if (DocumentContent.ContentSourceType.FILE.name().equalsIgnoreCase(sourceType) && gridFsReference != null) {
             MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-            GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getName());
+            GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, orgName);
             gridFSFilesBucket.delete(apiDocumentation.getGridFsReference());
         }
 
@@ -815,8 +828,12 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     private void handleFileTypeContent(Organization org, String apiId, String docId, DocumentContent content)
             throws DocumentationPersistenceException {
         MongoDatabase database = MongoDBConnectionUtil.getDatabase();
-        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
-        GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, org.getName());
+        String orgName = org.getName();
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(orgName);
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database, orgName);
         ResourceFile resourceFile = content.getResourceFile();
         InputStream inputStream = resourceFile.getContent();
         GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400);
@@ -903,17 +920,84 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void saveThumbnail(Organization org, String apiId, ResourceFile resourceFile)
             throws ThumbnailPersistenceException {
-
+        MongoDatabase database = MongoDBConnectionUtil.getDatabase();
+        String orgName = org.getName();
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(orgName);
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        GridFSBucket gridFSFilesBucket = GridFSBuckets.create(database,
+                orgName + MONGODB_GRIDFS_THMBNAIL_SUR_FIX);
+        InputStream inputStream = resourceFile.getContent();
+        GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400);
+        try {
+            String fileName = resourceFile.getName();
+            if (fileName == null) {
+                fileName = RandomStringUtils.randomAlphanumeric(10);
+            }
+            File file = MongoDBUtil.writeStream(inputStream, fileName);
+            InputStream gridFsStream = MongoDBUtil.readStream(file, fileName);
+            ObjectId gridFsReference =
+                    gridFSFilesBucket.uploadFromStream(fileName, gridFsStream, options);
+            MongoDBThumbnail mongoDBThumbnail = new MongoDBThumbnail();
+            mongoDBThumbnail.setThumbnailReference(gridFsReference);
+            mongoDBThumbnail.setContentType(resourceFile.getContentType());
+            mongoDBThumbnail.setName(fileName);
+            collection.updateOne(
+                    eq("_id", new ObjectId(apiId)),
+                    set("mongoDBThumbnail", mongoDBThumbnail)
+            );
+        } catch (PersistenceException e) {
+            throw new ThumbnailPersistenceException("Failed to update thumbnail for in mongodb, for api " + apiId, e);
+        }
     }
 
     @Override
     public ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
-        return null;
+        String orgName = org.getName();
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        MongoDBPublisherAPI mongoDBAPIDocument;
+        try {
+            mongoDBAPIDocument = getMongoDBPublisherAPIFromId(org, apiId);
+        } catch (APIPersistenceException e) {
+            throw new ThumbnailPersistenceException(e);
+        }
+        MongoDBThumbnail thumbnail = mongoDBAPIDocument.getMongoDBThumbnail();
+        if (thumbnail == null) {
+            return null;
+        }
+        MongoDatabase database = MongoDBConnectionUtil.getDatabase();
+        GridFSBucket gridFSBucket = GridFSBuckets.create(database, orgName + MONGODB_GRIDFS_THMBNAIL_SUR_FIX);
+        GridFSDownloadStream downloadStream = gridFSBucket.openDownloadStream(thumbnail.getThumbnailReference());
+        ResourceFile resourceFile = new ResourceFile(downloadStream, thumbnail.getContentType());
+        resourceFile.setName(thumbnail.getName());
+        return resourceFile;
     }
 
     @Override
     public void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
-
+        MongoDatabase database = MongoDBConnectionUtil.getDatabase();
+        String orgName = org.getName();
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(orgName);
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        MongoDBPublisherAPI mongoDBAPIDocument;
+        try {
+            mongoDBAPIDocument = getMongoDBPublisherAPIFromId(org, apiId);
+            MongoDBThumbnail thumbnail = mongoDBAPIDocument.getMongoDBThumbnail();
+            GridFSBucket gridFSBucket = GridFSBuckets.create(database, orgName + MONGODB_GRIDFS_THMBNAIL_SUR_FIX);
+            gridFSBucket.delete(thumbnail.getThumbnailReference());
+            collection.updateOne(
+                    eq("_id", new ObjectId(apiId)),
+                    unset("mongoDBThumbnail")
+            );
+            log.info("Successfully deleted thumbnail for api " + apiId);
+        } catch (APIPersistenceException e) {
+            throw new ThumbnailPersistenceException("Error when deleting thumbnail for " + apiId);
+        }
     }
 
     @Override
@@ -939,6 +1023,19 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException {
 
+    }
+
+    private MongoDBPublisherAPI getMongoDBPublisherAPIFromId(Organization org, String apiId)
+            throws APIPersistenceException {
+        MongoCollection<MongoDBPublisherAPI> collection = getPublisherCollection(org.getName());
+        MongoDBPublisherAPI mongoDBAPIDocument =
+                collection.find(eq("_id", new ObjectId(apiId)))
+                        .projection(exclude("swaggerDefinition")).first();
+        if (mongoDBAPIDocument == null) {
+            String msg = "Failed to get API. " + apiId + " does not exist in mongodb database";
+            throw new APIPersistenceException(msg);
+        }
+        return mongoDBAPIDocument;
     }
 
     private MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String orgName) {

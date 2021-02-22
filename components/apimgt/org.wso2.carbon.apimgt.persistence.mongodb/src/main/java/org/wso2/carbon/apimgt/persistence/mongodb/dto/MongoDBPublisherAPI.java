@@ -30,6 +30,7 @@ public class MongoDBPublisherAPI extends PublisherAPI {
     @BsonProperty(value = "_id")
     @BsonId
     private ObjectId mongodbUuId;
+    private MongoDBThumbnail mongoDBThumbnail;
 
     private Set<APIDocumentation> documentationList;
 
@@ -47,5 +48,13 @@ public class MongoDBPublisherAPI extends PublisherAPI {
 
     public void setMongodbUuId(ObjectId mongodbUuId) {
         this.mongodbUuId = mongodbUuId;
+    }
+
+    public MongoDBThumbnail getMongoDBThumbnail() {
+        return mongoDBThumbnail;
+    }
+
+    public void setMongoDBThumbnail(MongoDBThumbnail mongoDBThumbnail) {
+        this.mongoDBThumbnail = mongoDBThumbnail;
     }
 }
