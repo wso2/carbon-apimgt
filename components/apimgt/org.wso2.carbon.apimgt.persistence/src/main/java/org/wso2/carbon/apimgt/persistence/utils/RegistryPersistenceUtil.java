@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -87,6 +88,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -115,7 +117,7 @@ public class RegistryPersistenceUtil {
      * @param artifact initial governance artifact
      * @param api      API object with the attributes value
      * @return GenericArtifact
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create API
+     * @throws APIManagementException if failed to create API
      */
     public static GenericArtifact createAPIArtifactContent(GenericArtifact artifact, API api)
                                     throws APIManagementException {
@@ -249,6 +251,11 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                                             RegistryPersistenceUtil.getCorsConfigurationJsonFromDto(
                                                                             api.getCorsConfiguration()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
+                    RegistryPersistenceUtil.getWebsubSubscriptionJsonFromDto(api.getWebsubSubscriptionConfiguration()));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WS_URI_MAPPING,
+                    RegistryPersistenceUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
 
             //attaching micro-gateway labels to the API
             
@@ -291,7 +298,7 @@ public class RegistryPersistenceUtil {
             }
 
             //          set deployments selected
-            Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
+            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
             String json = new Gson().toJson(deploymentEnvironments);
             artifact.setAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS, json);
 
@@ -303,6 +310,10 @@ public class RegistryPersistenceUtil {
         return artifact;
     }
 
+    private static String getWsUriMappingJsonFromDto(Map<String, String> wsUriMapping) {
+        return new Gson().toJson(wsUriMapping);
+    }
+
     /**
      * Used to generate Json string from CORS Configuration object
      *
@@ -312,6 +323,11 @@ public class RegistryPersistenceUtil {
     public static String getCorsConfigurationJsonFromDto(org.wso2.carbon.apimgt.api.model.CORSConfiguration corsConfiguration) {
 
         return new Gson().toJson(corsConfiguration);
+    }
+
+    public static String getWebsubSubscriptionJsonFromDto(org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+
+        return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
     /**
@@ -720,12 +736,15 @@ public class RegistryPersistenceUtil {
 
             api.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setWebsubSubscriptionConfiguration(getWebsubSubscriptionConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //set data and status related to monetization
             api.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute
                     (APIConstants.Monetization.API_MONETIZATION_STATUS)));
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+
+            api.setWsUriMapping(getWsUriMappingFromArtifact(artifact));
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
@@ -777,6 +796,13 @@ public class RegistryPersistenceUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+    private static Map<String,String> getWsUriMappingFromArtifact(GovernanceArtifact artifact)
+            throws GovernanceException {
+        Map wsUriMapping = new Gson()
+                .fromJson(artifact.getAttribute(APIConstants.API_OVERVIEW_WS_URI_MAPPING), Map.class);
+        return wsUriMapping;
     }
 
     private static Set<String> getEnvironments(String environments) {
@@ -1147,6 +1173,15 @@ public class RegistryPersistenceUtil {
                 artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION),
                 org.wso2.carbon.apimgt.api.model.CORSConfiguration.class);
         return corsConfiguration;
+    }
+
+    public static org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationFromArtifact(
+            GovernanceArtifact artifact) throws GovernanceException {
+
+        org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration websubSubscriptionConfiguration = new Gson()
+                .fromJson(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION),
+                org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration.class);
+        return websubSubscriptionConfiguration;
     }
     
     /**

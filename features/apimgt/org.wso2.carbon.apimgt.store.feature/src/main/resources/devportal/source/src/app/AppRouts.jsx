@@ -132,6 +132,18 @@ function AppRouts(props) {
                         }
                     }}
                 />
+                <Route
+                    path='/applications/:application_uuid/webhooks/'
+                    render={(localProps) => {
+                        if (isAuthenticated) {
+                            return <Details {...localProps} />;
+                        } else if (isUserFound) {
+                            return <ScopeNotFound {...localProps} />;
+                        } else {
+                            return <RedirectToLogin {...localProps} />;
+                        }
+                    }}
+                />
                 <Route component={PageNotFound} />
             </Switch>
         </Suspense>

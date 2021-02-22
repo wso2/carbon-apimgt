@@ -1,0 +1,193 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package org.wso2.carbon.apimgt.common.gateway.dto;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Holds information related to jwt token.
+ *
+ */
+public class JWTInfoDto {
+    private String applicationtier;
+    private String keytype;
+    private String version;
+    private String applicationname;
+    private String enduser;
+    private int endusertenantid;
+    private String applicationuuid;
+    private String subscriber;
+    private String subscriptionTier;
+    private String applicationid;
+    private String apicontext;
+    private String apiName;
+    private JWTValidationInfo jwtValidationInfo;
+    private Map<String, String> appAttributes = new HashMap<>();
+
+    public String getApplicationtier() {
+
+        return applicationtier;
+    }
+
+    public void setApplicationtier(String applicationtier) {
+
+        this.applicationtier = applicationtier;
+    }
+
+    public String getKeytype() {
+
+        return keytype;
+    }
+
+    public void setKeytype(String keytype) {
+
+        this.keytype = keytype;
+    }
+
+    public String getVersion() {
+
+        return version;
+    }
+
+    public void setVersion(String version) {
+
+        this.version = version;
+    }
+
+    public String getApplicationname() {
+
+        return applicationname;
+    }
+
+    public void setApplicationname(String applicationname) {
+
+        this.applicationname = applicationname;
+    }
+
+    public String getEnduser() {
+
+        return enduser;
+    }
+
+    public void setEnduser(String enduser) {
+
+        this.enduser = enduser;
+    }
+
+    public int getEndusertenantid() {
+
+        return endusertenantid;
+    }
+
+    public void setEndusertenantid(int endusertenantid) {
+
+        this.endusertenantid = endusertenantid;
+    }
+
+    public String getApplicationuuid() {
+
+        return applicationuuid;
+    }
+
+    public void setApplicationuuid(String applicationuuid) {
+
+        this.applicationuuid = applicationuuid;
+    }
+
+    public String getSubscriber() {
+
+        return subscriber;
+    }
+
+    public void setSubscriber(String subscriber) {
+
+        this.subscriber = subscriber;
+    }
+
+    public String getSubscriptionTier() {
+
+        return subscriptionTier;
+    }
+
+    public void setSubscriptionTier(String subscriptionTier) {
+
+        this.subscriptionTier = subscriptionTier;
+    }
+
+    public String getApplicationid() {
+
+        return applicationid;
+    }
+
+    public void setApplicationid(String applicationid) {
+
+        this.applicationid = applicationid;
+    }
+
+    public String getApicontext() {
+
+        return apicontext;
+    }
+
+    public void setApicontext(String apicontext) {
+
+        this.apicontext = apicontext;
+    }
+
+    public JWTValidationInfo getJwtValidationInfo() {
+
+        return jwtValidationInfo;
+    }
+
+    public void setJwtValidationInfo(JWTValidationInfo jwtValidationInfo) {
+
+        this.jwtValidationInfo = jwtValidationInfo;
+    }
+
+    /*public MessageContext getMessageContext() {
+
+        return messageContext;
+    }
+
+    public void setMessageContext(MessageContext messageContext) {
+
+        this.messageContext = messageContext;
+    }*/
+
+    public String getApiName() {
+
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+
+        this.apiName = apiName;
+    }
+
+    public Map<String, String> getAppAttributes() {
+
+        return appAttributes;
+    }
+
+    public void setAppAttributes(Map<String, String> appAttributes) {
+
+        this.appAttributes = appAttributes;
+    }
+}

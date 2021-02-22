@@ -29,6 +29,10 @@ const DefaultConfigurations = {
             fontWeight: 400,
             fontSize: '1.3rem'
         },
+        caption: {
+            fontSize: '0.70rem',
+            color: '#666',
+        },
     },
     custom: {
         contentAreaWidth: 1240,
@@ -70,7 +74,7 @@ const DefaultConfigurations = {
             rootBackground: '#000',
         },
         infoBar: {
-            height: 120,
+            height: 70,
             background: '#ffffff',
             showThumbnail: true,
             starColor: '#f6bf21', // Rating star color
@@ -331,7 +335,17 @@ const DefaultConfigurations = {
        publicTenantStore: {
             active: true,
             redirectToIfInactive: 'https://wso2.com/api-management/cloud/',
-        }
+        },
+        overrides: {
+             MuiOutlinedInput: {
+                 root: {
+                     borderColor: '#444',
+                 },
+                 notchedOutline: {
+                     borderColor: '#444',
+                 },
+             },
+        },
     },
 };
 

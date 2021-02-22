@@ -180,6 +180,28 @@ public class SQLConstants {
                     "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                     "   AND APP.APPLICATION_ID = ?";
 
+    public static final String ADD_API_SERVICE_MAPPING_SQL = "INSERT INTO AM_API_SERVICE_MAPPING (API_ID, SERVICE_KEY" +
+            ", MD5, TENANT_ID) VALUES (?,?,?,?)";
+
+    public static final String GET_SERVICE_KEY_BY_API_ID_SQL = "SELECT SERVICE_KEY FROM AM_API_SERVICE_MAPPING WHERE " +
+            " API_ID = ? AND TENANT_ID = ?";
+
+    public static final String UPDATE_API_SERVICE_MAPPING_SQL = "UPDATE AM_API_SERVICE_MAPPING SET " +
+            "   SERVICE_KEY = ?, " +
+            "   MD5 = ?, " +
+            "   WHERE API_UUID = ?";
+
+    public static final String GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL = "SELECT " +
+            "   AM_SERVICE_CATALOG.MD5 AS SERVICE_MD5, " +
+            "   AM_API_SERVICE_MAPPING.MD5 AS API_SERVICE_MD5, " +
+            "   AM_API_SERVICE_MAPPING.SERVICE_KEY " +
+            "   FROM AM_SERVICE_CATALOG " +
+            "   INNER JOIN AM_API_SERVICE_MAPPING" +
+            "   ON " +
+            "   AM_API_SERVICE_MAPPING.SERVICE_KEY = AM_SERVICE_CATALOG.SERVICE_KEY " +
+            "   WHERE " +
+            "   AM_API_SERVICE_MAPPING.API_ID = ?";
+
     public static final String GET_SUBSCRIBED_USERS_FOR_API_SQL =
             " SELECT " +
             "   SB.USER_ID, " +
@@ -3166,6 +3188,23 @@ public class SQLConstants {
                     "ON PROD_MAP.URL_MAPPING_ID = API_UM.URL_MAPPING_ID " +
                     "WHERE PROD_MAP.API_ID = ? AND API_UM.REVISION_UUID = ? AND PROD_MAP.REVISION_UUID = ? ";
 
+    public static final String GET_WH_TOPIC_SUBSCRIPTIONS =
+            "SELECT SUBSCRIPTION.HUB_TOPIC, SUBSCRIPTION.API_UUID, " +
+            "SUBSCRIPTION.DELIVERED_AT, SUBSCRIPTION.DELIVERY_STATE, SUBSCRIPTION.HUB_CALLBACK_URL, APPLICATION.APPLICATION_ID " +
+            "FROM AM_WEBHOOKS_SUBSCRIPTION SUBSCRIPTION INNER JOIN AM_APPLICATION APPLICATION " +
+            "ON SUBSCRIPTION.APPLICATION_ID = APPLICATION.APPLICATION_ID WHERE APPLICATION.UUID = ?";
+
+    public static final String GET_WH_TOPIC_SUBSCRIPTIONS_BY_API_KEY =
+            "SELECT SUBSCRIPTION.HUB_TOPIC, SUBSCRIPTION.API_UUID, " +
+            "SUBSCRIPTION.DELIVERED_AT, SUBSCRIPTION.DELIVERY_STATE, SUBSCRIPTION.HUB_CALLBACK_URL, APPLICATION.APPLICATION_ID " +
+            "FROM AM_WEBHOOKS_SUBSCRIPTION SUBSCRIPTION INNER JOIN AM_APPLICATION APPLICATION " +
+            "ON SUBSCRIPTION.APPLICATION_ID = APPLICATION.APPLICATION_ID WHERE APPLICATION.UUID = ? " +
+            "AND SUBSCRIPTION.API_UUID = ?";
+
+    public static final String GET_ALL_TOPICS_BY_API_ID =
+            "SELECT DISTINCT URL.URL_PATTERN, URL.HTTP_METHOD, API.API_ID FROM AM_API_URL_MAPPING URL INNER JOIN " +
+            "AM_API API ON URL.API_ID = API.API_ID WHERE API.API_UUID = ? AND URL.REVISION_UUID IS NULL ORDER BY URL.URL_PATTERN ASC";
+
     public static final String GET_SCOPE_KEYS_BY_URL_MAPPING_ID =
             "SELECT SCOPE_NAME FROM AM_API_RESOURCE_SCOPE_MAPPING WHERE URL_MAPPING_ID = ?" ;
 
@@ -3716,6 +3755,33 @@ public class SQLConstants {
 
     public static final String SCOPE_EXIST_SQL = "SELECT 1 FROM AM_SCOPE WHERE NAME = ? AND TENANT_ID = ?";
 
+    /**
+     * Static class to hold database queries related to webhooks subscriptions
+     */
+    public static class WebhooksSqlConstants {
+        public static final String FIND_SUBSCRIPTION =
+                "SELECT WH_SUBSCRIPTION_ID FROM AM_WEBHOOKS_SUBSCRIPTION WHERE API_UUID = ? AND " +
+                        "APPLICATION_ID = ? AND TENANT_DOMAIN = ? AND HUB_CALLBACK_URL = ? AND HUB_TOPIC = ?";
+        public static final String ADD_SUBSCRIPTION =
+                "INSERT INTO AM_WEBHOOKS_SUBSCRIPTION (API_UUID, APPLICATION_ID, TENANT_DOMAIN, " +
+                        "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, UPDATED_AT, EXPIRY_AT, " +
+                        "DELIVERED_AT, DELIVERY_STATE) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE AM_WEBHOOKS_SUBSCRIPTION SET " +
+                "HUB_SECRET = ?, HUB_LEASE_SECONDS = ?, UPDATED_AT = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
+        public static final String DELETE_IF_EXISTS_SUBSCRIBER =
+                "DELETE FROM AM_WEBHOOKS_SUBSCRIPTION WHERE API_UUID = ? AND APPLICATION_ID = ? AND TENANT_DOMAIN = ? AND " +
+                        "HUB_CALLBACK_URL = ? AND HUB_TOPIC = ?";
+        public static final String ADD_UNSUBSCRIPTION =
+                "INSERT INTO AM_WEBHOOKS_UNSUBSCRIPTION (API_UUID, APPLICATION_ID, TENANT_DOMAIN, " +
+                        "HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS, ADDED_AT) VALUES (?,?,?,?,?,?,?,?)";
+        public static final String GET_ALL_VALID_SUBSCRIPTIONS =
+                "SELECT API_UUID, APPLICATION_ID, HUB_CALLBACK_URL, HUB_TOPIC, HUB_SECRET, EXPIRY_AT " +
+                        "FROM AM_WEBHOOKS_SUBSCRIPTION WHERE EXPIRY_AT >= ? AND TENANT_DOMAIN = ?";
+        public static final String UPDATE_DELIVERY_STATE =
+                "UPDATE AM_WEBHOOKS_SUBSCRIPTION SET DELIVERED_AT = ?, DELIVERY_STATE = ? WHERE API_UUID = ? AND " +
+                        "APPLICATION_ID = ? AND TENANT_DOMAIN = ? AND HUB_CALLBACK_URL = ? AND HUB_TOPIC = ?";
+    }
+
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =
                 " INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,CONFIGURATION,TENANT_DOMAIN,ENABLED," +
@@ -3784,6 +3850,8 @@ public class SQLConstants {
                 "AND ID = ?";
         public static final String GET_EARLIEST_REVISION_ID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
                 "ORDER BY ID ASC LIMIT 1";
+        public static final String GET_MOST_RECENT_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE " +
+                "API_UUID = ? ORDER BY ID DESC LIMIT 1";
         public static final String GET_REVISION_APIID_BY_REVISION_UUID = "SELECT API_UUID, ID FROM AM_REVISION WHERE REVISION_UUID = ?";
         public static final String GET_REVISIONS_BY_API_UUID = "SELECT * FROM AM_REVISION AR LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING ADRM"
                 + " ON AR.REVISION_UUID = ADRM.REVISION_UUID  WHERE AR.API_UUID = ? ";

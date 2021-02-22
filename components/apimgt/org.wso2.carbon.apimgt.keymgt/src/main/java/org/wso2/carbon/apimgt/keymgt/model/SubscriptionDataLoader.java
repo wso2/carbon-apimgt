@@ -116,7 +116,8 @@ public interface SubscriptionDataLoader {
      * @return A list of {@link ApplicationKeyMapping}s
      * @throws DataLoadingException If any error
      */
-    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keyManager) throws DataLoadingException;
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keyManager, String tenantDomain)
+            throws DataLoadingException;
 
     /**
      * Retrieve {@link API} object.

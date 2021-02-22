@@ -24,9 +24,12 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.notification.DefaultKeyManagerEventHandlerImpl;
 import org.wso2.carbon.apimgt.notification.NotificationEventService;
+import org.wso2.carbon.apimgt.notification.WebhooksDeliveryEventHandler;
+import org.wso2.carbon.apimgt.notification.WebhooksSubscriptionEventHandler;
 import org.wso2.carbon.event.stream.core.EventStreamService;
 
 /**
@@ -40,6 +43,10 @@ public class ApimgtNotificationServiceComponent {
 
         ctxt.getBundleContext().registerService(KeyManagerEventHandler.class, new DefaultKeyManagerEventHandlerImpl(),
                 null);
+        ctxt.getBundleContext().registerService(EventHandler.class, new WebhooksSubscriptionEventHandler(),
+                null);
+        ctxt.getBundleContext().registerService(EventHandler.class, new WebhooksDeliveryEventHandler(),
+                null);
         ctxt.getBundleContext().registerService(NotificationEventService.class, new NotificationEventService(), null);
     }
 
@@ -51,13 +58,30 @@ public class ApimgtNotificationServiceComponent {
             unbind = "removeKeyManagerEventHandlers")
     protected void addKeyManagerEventHandlers(KeyManagerEventHandler keyManagerEventHandler) {
 
-        ServiceReferenceHolder.getInstance().addKeyManagerEventHandler(keyManagerEventHandler.getType(),
+        ServiceReferenceHolder.getInstance().addEventHandler(keyManagerEventHandler.getType(),
                 keyManagerEventHandler);
     }
 
     protected void removeKeyManagerEventHandlers(KeyManagerEventHandler keyManagerEventHandler) {
 
-        ServiceReferenceHolder.getInstance().removeKeyManagerEventHandlers(keyManagerEventHandler.getType());
+        ServiceReferenceHolder.getInstance().removeEventHandlers(keyManagerEventHandler.getType());
+    }
+
+    @Reference(
+            name = "event.handlers",
+            service = EventHandler.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeEventHandlers")
+    protected void addEventHandlers(EventHandler eventHandler) {
+
+        ServiceReferenceHolder.getInstance().addEventHandler(eventHandler.getType(),
+                eventHandler);
+    }
+
+    protected void removeEventHandlers(EventHandler eventHandler) {
+
+        ServiceReferenceHolder.getInstance().removeEventHandlers(eventHandler.getType());
     }
 
     @Reference(

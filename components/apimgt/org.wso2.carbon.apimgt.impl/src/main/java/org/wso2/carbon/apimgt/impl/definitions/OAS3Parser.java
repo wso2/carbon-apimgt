@@ -1490,6 +1490,64 @@ public class OAS3Parser extends APIDefinition {
         return Json.pretty(openAPI);
     }
 
+    @Override
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent) {
+
+        OpenAPI existingOpenAPI = getOpenAPI(existingOASContent);
+        OpenAPI updatedOpenAPI = getOpenAPI(updatedOASContent);
+        Paths updatedPaths = updatedOpenAPI.getPaths();
+        Paths existingPaths = existingOpenAPI.getPaths();
+
+        // Merge Security Schemes
+        if (existingOpenAPI.getComponents().getSecuritySchemes() != null) {
+            if (updatedOpenAPI.getComponents() != null) {
+                updatedOpenAPI.getComponents().setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+            } else {
+                Components components = new Components();
+                components.setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+                updatedOpenAPI.setComponents(components);
+            }
+        }
+
+        // Merge Operation specific vendor extensions
+        for (String pathKey : updatedPaths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = updatedPaths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> updatedEntry : operationsMap.entrySet()) {
+                if (existingPaths.keySet().contains(pathKey)) {
+                    for (Map.Entry<PathItem.HttpMethod, Operation> existingEntry : existingPaths.get(pathKey)
+                            .readOperationsMap().entrySet()) {
+                        if (updatedEntry.getKey().equals(existingEntry.getKey())) {
+                            Map<String, Object> vendorExtensions = updatedEntry.getValue().getExtensions();
+                            Map<String, Object> existingExtensions = existingEntry.getValue().getExtensions();
+                            boolean extensionsAreEmpty = false;
+                            if (vendorExtensions == null) {
+                                vendorExtensions = new HashMap<>();
+                                extensionsAreEmpty = true;
+                            }
+                            OASParserUtil.copyOperationVendorExtensions(existingExtensions, vendorExtensions);
+                            if (extensionsAreEmpty) {
+                                updatedEntry.getValue().setExtensions(existingExtensions);
+                            }
+                            List<SecurityRequirement> securityRequirements = existingEntry.getValue().getSecurity();
+                            List<SecurityRequirement> updatedRequirements = new ArrayList<>();
+                            if (securityRequirements != null) {
+                                for (SecurityRequirement requirement : securityRequirements) {
+                                    List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
+                                    if (scopes != null) {
+                                        updatedRequirements.add(requirement);
+                                    }
+                                }
+                                updatedEntry.getValue().setSecurity(updatedRequirements);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return Json.pretty(updatedOpenAPI);
+    }
+
     /**
      * This method will extract scopes from legacy x-wso2-security and add them to default scheme
      * @param openAPI openAPI definition
