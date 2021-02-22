@@ -418,24 +418,17 @@ public class APIManagerConfiguration {
                             APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
                                     APIConstants.API_GATEWAY_VIRTUAL_HOST);
                     while (vhostIterator.hasNext()) {
-                        VHost vhost = new VHost();
                         OMElement vhostElem = (OMElement) vhostIterator.next();
-                        vhost.setHost(APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_NAME)).getText()));
-                        vhost.setHttpContext(APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
-                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_CONTEXT)).getText()));
-                        vhost.setHttpPort(Integer.parseInt(APIUtil.replaceSystemProperty(
-                                vhostElem.getFirstChildWithName(new QName(
-                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_PORT)).getText())));
-                        vhost.setHttpsPort(Integer.parseInt(APIUtil.replaceSystemProperty(
-                                vhostElem.getFirstChildWithName(new QName(
-                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_PORT)).getText())));
-                        vhost.setWsPort(Integer.parseInt(APIUtil.replaceSystemProperty(
-                                vhostElem.getFirstChildWithName(new QName(
-                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_PORT)).getText())));
-                        vhost.setWssPort(Integer.parseInt(APIUtil.replaceSystemProperty(
-                                vhostElem.getFirstChildWithName(new QName(
-                                        APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_PORT)).getText())));
+                        String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
+                        String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
+                        String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
+                        String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+
+                        VHost vhost = VHost.fromEndpointUrls(new String[]{httpEp, httpsEp, wsEp, wssEp});
                         vhosts.add(vhost);
                     }
 

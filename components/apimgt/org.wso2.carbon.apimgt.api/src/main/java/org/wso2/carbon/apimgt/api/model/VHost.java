@@ -18,7 +18,10 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,16 +30,22 @@ import java.util.List;
  */
 public class VHost {
     private String host;
-    private String httpContext;
-    private Integer httpPort;
-    private Integer httpsPort;
-    private Integer wsPort;
-    private Integer wssPort;
+    private String httpContext = "";
+    private Integer httpPort = DEFAULT_HTTP_PORT;
+    private Integer httpsPort = DEFAULT_HTTPS_PORT;
+    private Integer wsPort = DEFAULT_WS_PORT;
+    private Integer wssPort = DEFAULT_WSS_PORT;
 
-    private final int DEFAULT_HTTP_PORT = 80;
-    private final int DEFAULT_HTTPS_PORT = 443;
-    private final int DEFAULT_WS_PORT = 9099;
-    private final int DEFAULT_WSS_PORT = 8099;
+    public static final int DEFAULT_HTTP_PORT = 80;
+    public static final int DEFAULT_HTTPS_PORT = 443;
+    public static final int DEFAULT_WS_PORT = 9099;
+    public static final int DEFAULT_WSS_PORT = 8099;
+
+    public static final String HTTP_PROTOCOL = "http";
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final String WS_PROTOCOL = "ws";
+    public static final String WSS_PROTOCOL = "wss";
+    public static final String PROTOCOL_SEPARATOR = "://";
 
     public VHost() {
     }
@@ -108,6 +117,61 @@ public class VHost {
     private String getUrl(String protocol, String port, String context) {
         // {protocol}://{host}{port}{context}
         return String.format("%s://%s%s%s", protocol, host, port, context);
+    }
+
+    public static VHost fromEndpointUrls(String[] endpoints) throws APIManagementException {
+        VHost vhost = new VHost();
+
+        for (String endpoint : endpoints) {
+            if (StringUtils.isEmpty(endpoint)) {
+                continue;
+            }
+
+            String[] elem = endpoint.split(PROTOCOL_SEPARATOR);
+            if (elem.length != 2) {
+                throw new APIManagementException("Error reading gateway environment endpoint URL");
+            }
+            URL url; // URL is not parsing for ws and wss protocols
+            try {
+                switch (elem[0]) {
+                    case HTTPS_PROTOCOL:
+                        url = new URL(endpoint);
+                        vhost.setHttpsPort(url.getPort() < 0 ? DEFAULT_HTTPS_PORT : url.getPort());
+                        vhost.setHost(url.getHost());
+                        vhost.setHttpContext(url.getPath());
+                        break;
+                    case HTTP_PROTOCOL:
+                        url = new URL(endpoint);
+                        vhost.setHttpPort(url.getPort() < 0 ? DEFAULT_HTTP_PORT : url.getPort());
+                        String host = StringUtils.isNotEmpty(vhost.getHost()) ?
+                                vhost.getHost() : url.getHost();
+                        vhost.setHost(host);
+                        String httpContext = StringUtils.isNotEmpty(vhost.getHttpContext()) ?
+                                vhost.getHttpContext() : url.getPath();
+                        vhost.setHttpContext(httpContext);
+                        break;
+                    case WSS_PROTOCOL:
+                        // URL is not parsing for wss protocols, hence change to https
+                        url = new URL(HTTPS_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
+                        vhost.setWssPort(url.getPort() < 0 ? DEFAULT_WSS_PORT : url.getPort());
+                        break;
+                    case WS_PROTOCOL:
+                        // URL is not parsing for ws protocols, hence change to http
+                        url = new URL(HTTP_PROTOCOL + PROTOCOL_SEPARATOR + elem[1]);
+                        vhost.setWsPort(url.getPort() < 0 ? DEFAULT_WS_PORT : url.getPort());
+                        break;
+                }
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error reading gateway environment endpoint URL", e);
+            }
+        }
+
+        // host of Vhost is set by HTTP or HTTPS endpoints, if host is empty, the required fields are missing.
+        if (StringUtils.isEmpty(vhost.getHost())) {
+            throw new APIManagementException("Error while building VHost, missing required HTTP or HTTPS endpoint");
+        }
+
+        return vhost;
     }
 
     @Override

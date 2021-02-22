@@ -156,48 +156,7 @@ public class Environment extends org.wso2.carbon.apimgt.api.model.Environment im
 
     public void setEndpointsAsVhost() throws APIManagementException {
         String[] endpoints = (apiGatewayEndpoint + "," + websocketGatewayEndpoint).split(",", 4);
-        VHost vhost = new VHost();
-
-        for (String endpoint : endpoints) {
-            String[] elem = endpoint.split("://");
-            if (elem.length != 2) {
-                continue;
-            }
-            URL url; // URL is not parsing for ws and wss protocols
-            try {
-                switch (elem[0]) {
-                    case APIConstants.HTTPS_PROTOCOL:
-                        url = new URL(endpoint);
-                        vhost.setHttpsPort(url.getPort() < 0 ? APIConstants.HTTPS_PROTOCOL_PORT : url.getPort());
-                        vhost.setHost(url.getHost());
-                        vhost.setHttpContext(url.getPath());
-                        break;
-                    case APIConstants.HTTP_PROTOCOL:
-                        url = new URL(endpoint);
-                        vhost.setHttpPort(url.getPort() < 0 ? APIConstants.HTTP_PROTOCOL_PORT : url.getPort());
-                        String host = StringUtils.isNotEmpty(vhost.getHost()) ?
-                                vhost.getHost() : url.getHost();
-                        vhost.setHost(host);
-                        String httpContext = StringUtils.isNotEmpty(vhost.getHttpContext()) ?
-                                vhost.getHttpContext() : url.getPath();
-                        vhost.setHttpContext(httpContext);
-                        break;
-                    case APIConstants.WSS_PROTOCOL:
-                        // URL is not parsing for wss protocols, hence change to https
-                        url = new URL(APIConstants.HTTPS_PROTOCOL_URL_PREFIX + elem[1]);
-                        vhost.setWssPort(url.getPort() < 0 ? APIConstants.WSS_PROTOCOL_PORT : url.getPort());
-                        break;
-                    case APIConstants.WS_PROTOCOL:
-                        // URL is not parsing for ws protocols, hence change to http
-                        url = new URL(APIConstants.HTTP_PROTOCOL_URL_PREFIX + elem[1]);
-                        vhost.setWsPort(url.getPort() < 0 ? APIConstants.WS_PROTOCOL_PORT : url.getPort());
-                        break;
-                }
-            } catch (MalformedURLException e) {
-                throw new APIManagementException("Error reading gateway environment endpoint URL", e);
-            }
-        }
-        getVhosts().add(vhost);
+        getVhosts().add(VHost.fromEndpointUrls(endpoints));
     }
 
     @Override

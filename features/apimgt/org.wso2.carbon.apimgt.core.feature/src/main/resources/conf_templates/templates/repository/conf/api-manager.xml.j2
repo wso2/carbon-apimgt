@@ -159,12 +159,10 @@
                 <VirtualHosts>
                     {% for vhost in environment_name.virtual_host %}
                     <VirtualHost>
-                        <Host>{{vhost.host}}</Host>
-                        <HttpContext>{{vhost.http_context}}</HttpContext>
-                        <HttpPort>{{vhost.http_port}}</HttpPort>
-                        <HttpsPort>{{vhost.https_port}}</HttpsPort>
-                        <WsPort>{{vhost.ws_port}}</WsPort>
-                        <WssPort>{{vhost.ws_port}}</WssPort>
+                        <HttpEndpoint>{{vhost.http_endpoint}}</HttpEndpoint>
+                        <HttpsEndpoint>{{vhost.https_endpoint}}</HttpsEndpoint>
+                        <WsEndpoint>{{vhost.ws_endpoint}}</WsEndpoint>
+                        <WssEndpoint>{{vhost.wss_endpoint}}</WssEndpoint>
                     </VirtualHost>
                     {% endfor %}
                 </VirtualHosts>
