@@ -20,10 +20,11 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.RequestDataPublisher;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultEventType;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.FaultyRequestDataPublisher;
 
 /**
@@ -33,24 +34,28 @@ public class UnclassifiedFaultDataCollector extends AbstractFaultDataCollector {
     private static final Log log = LogFactory.getLog(UnclassifiedFaultDataCollector.class);
     private AnalyticsDataProvider provider;
 
-    public UnclassifiedFaultDataCollector(AnalyticsDataProvider provider, FaultEventType subType,
+    public UnclassifiedFaultDataCollector(AnalyticsDataProvider provider, FaultCategory subType,
             RequestDataPublisher processor) {
         super(provider, subType, processor);
     }
 
     public UnclassifiedFaultDataCollector(AnalyticsDataProvider provider) {
-        this(provider, FaultEventType.OTHER, new FaultyRequestDataPublisher());
+        this(provider, FaultCategory.OTHER, new FaultyRequestDataPublisher());
         this.provider = provider;
     }
 
     @Override
-    public void collectFaultData(Event faultyEvent) {
+    public void collectFaultData(Event faultyEvent) throws AnalyticsException {
         log.debug("handling unclassified failure analytics events");
         Application application;
-        if (provider.isAuthenticated() && provider.isAnonymous()) {
-            application = getAnonymousApp();
+        if (provider.isAuthenticated()) {
+            if (provider.isAnonymous()) {
+                application = getAnonymousApp();
+            } else {
+                application = provider.getApplication();
+            }
         } else {
-            application = provider.getApplication();
+            application = getUnknownApp();
         }
         faultyEvent.setApplication(application);
         this.processRequest(faultyEvent);
