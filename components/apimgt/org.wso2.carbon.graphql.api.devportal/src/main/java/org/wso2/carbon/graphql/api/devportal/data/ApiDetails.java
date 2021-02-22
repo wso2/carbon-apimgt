@@ -112,7 +112,7 @@ public class ApiDetails {
             List<TierNameDTO>  tierInformation = tierData.getTierName(devPortalAPI);
 
             LabelData labelData = new LabelData();
-            List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(id);
+            List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(devPortalAPI);
 
 
             IngressUrlsData ingressUrlsData = new IngressUrlsData();
@@ -283,7 +283,7 @@ public class ApiDetails {
         List<TierNameDTO>  tierInformation = tierData.getTierName(devPortalAPI);
 
         LabelData labelData = new LabelData();
-        List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(id);
+        List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(devPortalAPI);
 
         IngressUrlsData ingressUrlsData = new IngressUrlsData();
         List<IngressUrlDTO> ingressUrlDTOS = ingressUrlsData.getIngressUrlData(devPortalAPI);

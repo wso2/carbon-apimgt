@@ -1108,9 +1108,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
                 devPortalAPI.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute
                         (APIConstants.Monetization.API_MONETIZATION_STATUS)));
-//                Set<String> labels = new HashSet<>(Arrays.asList(artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS)));
-//                devPortalAPI.setGatewayLabels(labels);
-               // devPortalAPI.setGatewayLabelListForAPI(getLabelsFromAPIGovernanceArtifact(artifact, devPortalAPI.getProviderName()));
+                List<Label> gatewayLabelListForAPI = getLabelsFromAPIGovernanceArtifact(artifact, devPortalAPI.getProviderName());
+                Set<String> gatewayLabelNames = new HashSet<String>();
+                for(int i=0;i<gatewayLabelListForAPI.size();i++){
+                    gatewayLabelNames.add(gatewayLabelListForAPI.get(i).getName());
+                }
+                devPortalAPI.setGatewayLabels(gatewayLabelNames);
+                // devPortalAPI.setGatewayLabelListForAPI(getLabelsFromAPIGovernanceArtifact(artifact, devPortalAPI.getProviderName()));
 
 
 

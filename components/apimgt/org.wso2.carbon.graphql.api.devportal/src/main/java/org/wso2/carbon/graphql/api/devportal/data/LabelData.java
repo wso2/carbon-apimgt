@@ -55,9 +55,9 @@ public class LabelData {
         return labelData;
     }
 
-    public List<LabelNameDTO> getLabelNames(String Id) throws APIPersistenceException {
-        ArtifactData artifactData = new ArtifactData();
-        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+    public List<LabelNameDTO> getLabelNames(DevPortalAPI devPortalAPI) throws APIPersistenceException {
+//        ArtifactData artifactData = new ArtifactData();
+//        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
         Set<String> labels = devPortalAPI.getGatewayLabels();
 
 
