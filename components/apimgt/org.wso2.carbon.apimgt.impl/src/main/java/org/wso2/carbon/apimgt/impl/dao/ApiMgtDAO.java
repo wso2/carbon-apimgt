@@ -6086,7 +6086,7 @@ public class ApiMgtDAO {
             prepStmt.setString(9, api.getType());
             prepStmt.setString(10, api.getUUID());
             prepStmt.setString(11, api.getOrganizationId());
-            prepStmt.setString(12,APIConstants.CREATED);
+            prepStmt.setString(12, APIConstants.CREATED);
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();

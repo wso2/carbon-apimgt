@@ -1461,8 +1461,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getAPIDocumentByDocumentId(String apiId, String documentId, String ifNoneMatch,
-                                               String organizationId, MessageContext messageContext) {
+    public Response getAPIDocumentByDocumentId(String apiId, String documentId, String ifNoneMatch, String organizationId,
+                                                MessageContext messageContext) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -2224,7 +2224,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             }
-            API api = apiProvider.getAPI(apiIdentifier);
+            API api = apiProvider.getAPIbyUUID(apiId, organizationId);
             Monetization monetizationImplementation = apiProvider.getMonetizationImplClass();
             Map<String, String> monetizedPoliciesToPlanMapping = monetizationImplementation.
                     getMonetizedPoliciesToPlanMapping(api);
