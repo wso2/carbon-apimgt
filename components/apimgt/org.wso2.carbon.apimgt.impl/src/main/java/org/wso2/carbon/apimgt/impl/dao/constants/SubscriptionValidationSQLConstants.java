@@ -212,17 +212,12 @@ public class SubscriptionValidationSQLConstants {
                     "APPLICATION_ID = ? " +
                     "AND KEY_TYPE = ? ";
 
-    public static final String GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL =
-            "SELECT " +
-                    "   APPLICATION_ID," +
-                    "   CONSUMER_KEY," +
-                    "   KEY_TYPE," +
-                    "   KEY_MANAGER," +
-                    "   STATE " +
-                    " FROM " +
-                    "   AM_APPLICATION_KEY_MAPPING" +
-                    " WHERE " +
-                    "CONSUMER_KEY = ? ";
+    public static final String GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL = "SELECT AM_APPLICATION_KEY_MAPPING" +
+            ".APPLICATION_ID,AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY,AM_APPLICATION_KEY_MAPPING.KEY_TYPE," +
+            "AM_KEY_MANAGER.NAME AS KEY_MANAGER,AM_APPLICATION_KEY_MAPPING.STATE FROM " +
+            "AM_APPLICATION_KEY_MAPPING,AM_KEY_MANAGER WHERE AM_KEY_MANAGER.UUID=AM_APPLICATION_KEY_MAPPING" +
+            ".KEY_MANAGER AND AM_APPLICATION_KEY_MAPPING.CONSUMER_KEY = ? AND AM_KEY_MANAGER.NAME = ? AND " +
+            "AM_KEY_MANAGER.TENANT_DOMAIN  = ? ";
 
     public static final String GET_TENANT_SUBSCRIPTIONS_SQL =
             "SELECT " +
@@ -623,16 +618,18 @@ public class SubscriptionValidationSQLConstants {
                     "   MAPPING.APPLICATION_ID," +
                     "   MAPPING.CONSUMER_KEY," +
                     "   MAPPING.KEY_TYPE," +
-                    "   MAPPING.KEY_MANAGER," +
+                    "   KEYM.NAME AS KEY_MANAGER," +
                     "   MAPPING.STATE" +
                     " FROM " +
                     "   AM_APPLICATION_KEY_MAPPING MAPPING," +
                     "   AM_APPLICATION APP," +
-                    "   AM_SUBSCRIBER SUB" +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_KEY_MANAGER KEYM"+
                     " WHERE " +
                     "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND" +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
-                    "   SUB.TENANT_ID = ?";
+                    "   MAPPING.KEY_MANAGER = KEYM.UUID" +
+                    "   AND SUB.TENANT_ID = ?";
 
     public static final String GET_ALL_API_URL_MAPPING_SQL =
             "SELECT " +
