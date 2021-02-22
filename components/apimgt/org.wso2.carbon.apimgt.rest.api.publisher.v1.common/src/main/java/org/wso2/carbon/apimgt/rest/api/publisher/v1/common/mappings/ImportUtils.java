@@ -293,7 +293,8 @@ public class ImportUtils {
                         //if the earliest revision is already deployed in gateway environments, it will be undeployed
                         //before deleting
                         apiProvider
-                                .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList);
+                                .undeployAPIRevisionDeployment(importedAPIUuid, earliestRevisionUuid, deploymentsList,
+                                        organizationId);
                         apiProvider.deleteAPIRevision(importedAPIUuid, earliestRevisionUuid, tenantDomain);
                         revisionId = apiProvider.addAPIRevision(apiRevision, tenantDomain);
                     } else {
@@ -313,7 +314,7 @@ public class ImportUtils {
                                     .getBoolean(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION));
                     apiRevisionDeployments.add(apiRevisionDeployment);
                 }
-                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments);
+                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organizationId);
             }
             return importedApi;
         } catch (CryptoException | IOException e) {

@@ -10068,13 +10068,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiProductIdentifier.setUUID(apiProductId);
         try {
             apiPersistenceInstance.restoreAPIRevision(new Organization(tenantDomain),
-                    apiProductIdentifier.getUUID(), apiRevision.getId());
+                    apiProductIdentifier.getUUID(), apiRevision.getApiUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIProductRevision(apiRevision);
+    }
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    @Override
+    public void deployAPIRevision(String apiId, String apiRevisionId,
+                                  List<APIRevisionDeployment> apiRevisionDeployments, String organizationId)
+            throws APIManagementException {
+
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
+                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        API api = getAPIbyUUID(apiId, organizationId);
+        Set<String> environmentsToAdd = new HashSet<>();
+        Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
+        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+            for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
+                if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                        apiRevisionDeployment.getDeployment())) {
+                    environmentsToRemove.add(currentapiRevisionDeployment);
+                }
+            }
+            environmentsToAdd.add(apiRevisionDeployment.getDeployment());
+        }
+        if (environmentsToRemove.size() > 0) {
+            apiMgtDAO.removeAPIRevisionDeployment(apiId,environmentsToRemove);
+            removeFromGateway(api, environmentsToRemove, environmentsToAdd);
+        }
+        GatewayArtifactsMgtDAO.getInstance()
+                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
+        apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+        if (environmentsToAdd.size() > 0) {
+            gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
+        }
     }
 
     @Override

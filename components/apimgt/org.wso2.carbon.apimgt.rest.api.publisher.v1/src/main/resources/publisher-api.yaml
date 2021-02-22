@@ -486,6 +486,7 @@ paths:
       operationId: reimportServiceFromCatalog
       parameters:
         - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |
@@ -1744,6 +1745,7 @@ paths:
       description: This operation can be used to create an API from a Service from Service Catalog
       operationId: importServiceFromCatalog
       parameters:
+        - $ref: '#/components/parameters/organizationId'
         - name: serviceKey
           in: query
           required: true
@@ -7446,6 +7448,8 @@ paths:
       tags:
         - APIs
       summary: import an AsyncAPI Specification
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
       description:
         This operation can be used to create and API from the AsyncAPI Specification. Provide either 'url' or 'file'
         to specify the definition.

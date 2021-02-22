@@ -2610,8 +2610,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiId));
             }
             if(url != null || fileInputStream != null) {
-                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream,
-                        fileDetail, true);
+                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail,
+                        true, false);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
                 if (!validationResponse.isValid()) {
@@ -2928,7 +2928,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Import the API and Definition
         try {
-            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, apiDTOFromProperties, fileDetail, null);
+            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, apiDTOFromProperties, fileDetail, null,
+                    organizationId);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3374,7 +3375,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                             + existingAPI.getId().getApiName(), ExceptionCodes.from(API_ALREADY_EXISTS, apiId));
                 }
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
-                newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto, null, service);
+                newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto, null,
+                        service, organizationId);
             } else {
                 API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
@@ -3516,8 +3518,9 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API import response
      * @throws APIManagementException when error occurred while trying to import the API
      */
-    @Override public Response importAPI(InputStream fileInputStream, Attachment fileDetail,
-            Boolean preserveProvider, String organizationId, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
+    @Override
+    public Response importAPI(InputStream fileInputStream, Attachment fileDetail, String organizationId,
+            Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException {
         // Check whether to update. If not specified, default value is false.
         overwrite = overwrite == null ? false : overwrite;
 
@@ -3530,6 +3533,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite, tokenScopes, organizationId);
         return Response.status(Response.Status.OK).entity("API imported successfully.").build();
     }
+
 
     /**
      * Validate graphQL Schema
@@ -4022,12 +4026,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response undeployAPIRevision(String apiId, String revisionId, String organizationId,
-                                        List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
+    public Response undeployAPIRevision(String apiId, String revisionId, String revisionNumber, String organizationId,
+                                        Boolean allEnvironments, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                         MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        if (revisionId == null && revisionNum != null) {
-            revisionId = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+        if (revisionId == null && revisionNumber != null) {
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, apiId);
             if (revisionId == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
@@ -4163,7 +4167,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return API import using AsyncAPI specification response
      */
     @Override
-    public Response importAsyncAPISpecification(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException {
+    public Response importAsyncAPISpecification(String organizationId, InputStream fileInputStream, Attachment fileDetail,
+                String url, String additionalProperties, MessageContext messageContext) throws APIManagementException {
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
@@ -4215,7 +4220,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername());
+                    RestApiCommonUtil.getLoggedInUsername(), organizationId);
             String definitionToAdd = validationResponse.getJsonContent();
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
@@ -4357,7 +4362,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response importServiceFromCatalog(String serviceKey, APIDTO apiDto, MessageContext messageContext) {
+    public Response importServiceFromCatalog(String serviceKey, String organizationId, APIDTO apiDto, MessageContext messageContext) {
         if (StringUtils.isEmpty(serviceKey)) {
             RestApiUtil.handleBadRequest("Required parameter serviceKey is missing", log);
         }
@@ -4369,7 +4374,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDTO createdApiDTO = null;
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, apiDto, null, service);
+                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, apiDto, null, service, organizationId);
             }
             if (createdApiDTO != null) {
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -4395,7 +4400,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response reimportServiceFromCatalog(String apiId, MessageContext messageContext)
+    public Response reimportServiceFromCatalog(String apiId, String organizationId,  MessageContext messageContext)
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -4423,7 +4428,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 if (!validationResponse.isValid()) {
                     RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
                 }
-                PublisherCommonUtils.updateSwagger(apiId, validationResponse, true);
+                PublisherCommonUtils.updateSwagger(apiId, validationResponse, true, organizationId);
             } else {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to " +
                         "API using the service type " + service.getDefinitionType(), log);
@@ -4440,7 +4445,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
-                                           Attachment fileDetail, ServiceEntry service) {
+                                           Attachment fileDetail, ServiceEntry service, String organizationId) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
@@ -4473,7 +4478,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername());
+                    RestApiCommonUtil.getLoggedInUsername(), organizationId);
             if (service != null) {
                 apiToAdd.setServiceInfo("serviceKey", service.getKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());

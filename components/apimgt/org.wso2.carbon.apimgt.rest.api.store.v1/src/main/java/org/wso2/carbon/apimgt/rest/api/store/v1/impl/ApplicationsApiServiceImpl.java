@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -366,7 +367,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId, xWSO2Tenant);
+            Application application = apiConsumer.getApplicationByUUID(applicationId, MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
             if (application != null) {
                 // Remove hidden attributes and set the rest of the attributes from config
                 JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
@@ -743,7 +745,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams, keyManagerName, xWSO2Tenant);
+                            jsonParams, keyManagerName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1074,7 +1076,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
-                                                         String xWSO2Tenant, MessageContext messageContext)
+                                                          MessageContext messageContext)
             throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -1093,8 +1095,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
                 Map<String, Object> keyDetails = apiConsumer
-                        .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName, xWSO2Tenant);
+                        .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId, application.getName(),
+                                keyType, tokenType, keyManagerName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1109,10 +1111,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysGet(String applicationId, String organizationId, MessageContext messageContext)
+    public Response applicationsApplicationIdOauthKeysGet(String applicationId, String organizationId,
+                                                          MessageContext messageContext)
             throws APIManagementException {
 
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, xWso2Tenant);
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
         applicationKeyListDTO.setCount(0);

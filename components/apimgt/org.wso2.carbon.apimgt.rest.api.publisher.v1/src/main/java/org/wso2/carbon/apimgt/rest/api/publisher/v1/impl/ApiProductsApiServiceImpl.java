@@ -701,7 +701,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
      * @return API Product import response
      * @throws APIManagementException
      */
-    @Override public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail,
+    @Override
+    public Response importAPIProduct(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveProvider, Boolean rotateRevision, Boolean importAPIs, Boolean overwriteAPIProduct,
             Boolean overwriteAPIs, MessageContext messageContext) throws APIManagementException {
         // If importAPIs flag is not set, the default value is false
@@ -739,7 +740,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         preserveProvider = preserveProvider == null || preserveProvider;
 
         importExportAPI.importAPIProduct(fileInputStream, preserveProvider, rotateRevision, overwriteAPIProduct,
-                overwriteAPIs, importAPIs, tokenScopes);
+                overwriteAPIs, importAPIs, tokenScopes, null);
         return Response.status(Response.Status.OK).entity("API Product imported successfully.").build();
     }
 
