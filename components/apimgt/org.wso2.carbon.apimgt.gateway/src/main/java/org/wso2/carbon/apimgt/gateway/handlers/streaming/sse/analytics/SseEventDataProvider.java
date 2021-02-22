@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
+package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics;
 
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;

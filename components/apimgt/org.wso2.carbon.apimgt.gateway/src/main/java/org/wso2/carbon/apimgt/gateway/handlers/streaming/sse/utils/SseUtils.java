@@ -16,11 +16,12 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
+package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.throttling.ThrottleInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;

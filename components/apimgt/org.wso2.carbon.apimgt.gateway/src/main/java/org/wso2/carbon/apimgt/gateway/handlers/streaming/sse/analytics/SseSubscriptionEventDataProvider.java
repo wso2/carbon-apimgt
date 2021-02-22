@@ -16,40 +16,39 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
+
+package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics;
 
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 
-public class SseResponseEventDataProvider extends SseEventDataProvider {
+/**
+ * Data provider for the request/subscription events of server sent events.
+ */
+public class SseSubscriptionEventDataProvider extends SseEventDataProvider {
 
-    private MessageContext messageContext;
-    private int responseCode;
+    private static final String SUBSCRIPTION_OPERATION_PREFIX = "subscription:";
 
-    public SseResponseEventDataProvider(MessageContext messageContext) {
+    public SseSubscriptionEventDataProvider(MessageContext messageContext) {
+
         super(messageContext);
-        this.messageContext = messageContext;
     }
 
     @Override
     public int getTargetResponseCode() {
-        return responseCode;
+        return 0;
     }
 
     @Override
     public int getProxyResponseCode() {
-        return responseCode;
+        return 0;
     }
 
     @Override
     public Operation getOperation() {
 
         Operation operation = super.getOperation();
-        operation.setApiResourceTemplate("event:" + operation.getApiResourceTemplate());
+        operation.setApiResourceTemplate(SUBSCRIPTION_OPERATION_PREFIX + operation.getApiResourceTemplate());
         return operation;
-    }
-
-    public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
     }
 }

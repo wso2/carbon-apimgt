@@ -29,6 +29,9 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics.SseResponseEventDataProvider;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.throttling.ThrottleInfo;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.utils.SseUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -40,7 +43,7 @@ import java.util.concurrent.Executors;
 
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_ANALYTICS_INFO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
-import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseUtils.isThrottled;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.utils.SseUtils.isThrottled;
 
 /**
  * This is used for handling throttling, and analytics event publishing of sse apis (subset of streaming apis).
