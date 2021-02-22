@@ -40,6 +40,7 @@ import { Helmet } from 'react-helmet';
 import Subscriptions from './Subscriptions';
 import InfoBar from './InfoBar';
 import Overview from './Overview';
+import WebHookDetails from './WebHookDetails';
 
 /**
  *
@@ -291,7 +292,7 @@ class Details extends Component {
                     )}
                 >
                     {rootIconVisible && (
-                        <Link to='/applications' className={classes.leftLInkMain}>
+                        <Link to='/applications' className={classes.leftLInkMain} aria-label='All applications'>
                             <CustomIcon width={rootIconSize} height={rootIconSize} icon='applications' />
                             {rootIconTextVisible && (
                                 <Typography className={classes.leftLInkMainText}>
@@ -322,6 +323,10 @@ class Details extends Component {
                             <Route
                                 path='/applications/:applicationId/overview'
                                 component={Overview}
+                            />
+                            <Route
+                                path='/applications/:applicationId/webhooks/:apiId'
+                                component={WebHookDetails}
                             />
                             <Route
                                 path='/applications/:applicationId/productionkeys/oauth'

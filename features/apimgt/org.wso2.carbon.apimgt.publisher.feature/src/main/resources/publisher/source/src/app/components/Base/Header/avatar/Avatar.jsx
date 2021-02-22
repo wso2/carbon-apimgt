@@ -47,15 +47,14 @@ class Avatar extends Component {
         this.handleClose = this.handleClose.bind(this);
     }
 
-
     /**
-     * Do OIDC logout redirection
-     * @param {React.SyntheticEvent} e Click event of the submit button
+     *
+     * Close Avatar dropdown menu
+     * @memberof Avatar
      */
-    doOIDCLogout = (e) => {
-        e.preventDefault();
-        window.location = `${Configurations.app.context}/services/logout`;
-    };
+    handleClose() {
+        this.setState({ anchorEl: null });
+    }
 
     /**
      *
@@ -68,13 +67,13 @@ class Avatar extends Component {
     }
 
     /**
-     *
-     * Close Avatar dropdown menu
-     * @memberof Avatar
+     * Do OIDC logout redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
      */
-    handleClose() {
-        this.setState({ anchorEl: null });
-    }
+    doOIDCLogout = (e) => {
+        e.preventDefault();
+        window.location = `${Configurations.app.context}/services/logout`;
+    };
 
     /**
      *

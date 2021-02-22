@@ -43,6 +43,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
@@ -151,9 +152,9 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
 
         String resourceList = validationContext.getMatchingResource();
         List<String> resourceArray;
-        if ((validationContext.getHttpVerb().equalsIgnoreCase(APIConstants.GRAPHQL_QUERY))
-                || (validationContext.getHttpVerb().equalsIgnoreCase(APIConstants.GRAPHQL_MUTATION))
-                || (validationContext.getHttpVerb().equalsIgnoreCase(APIConstants.GRAPHQL_SUBSCRIPTION))) {
+        if ((APIConstants.GRAPHQL_QUERY.equalsIgnoreCase(validationContext.getHttpVerb()))
+                || (APIConstants.GRAPHQL_MUTATION.equalsIgnoreCase(validationContext.getHttpVerb()))
+                || (APIConstants.GRAPHQL_SUBSCRIPTION.equalsIgnoreCase(validationContext.getHttpVerb()))) {
             resourceArray = new ArrayList<>(Arrays.asList(resourceList.split(",")));
         } else {
             resourceArray = new ArrayList<>(Arrays.asList(resourceList));
@@ -176,7 +177,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 List<URLMapping> resources = api.getResources();
                 URLMapping urlMapping = null;
                 for (URLMapping mapping : resources) {
-                    if (httpVerb.equals(mapping.getHttpMethod())) {
+                    if (Objects.equals(mapping.getHttpMethod(), httpVerb) || "WS".equalsIgnoreCase(api.getApiType())) {
                         if (isResourcePathMatching(resource, mapping)) {
                             urlMapping = mapping;
                             break;

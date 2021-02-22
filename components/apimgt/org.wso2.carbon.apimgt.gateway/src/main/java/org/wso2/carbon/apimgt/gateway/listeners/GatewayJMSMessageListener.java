@@ -51,8 +51,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.Iterator;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -95,6 +93,14 @@ public class GatewayJMSMessageListener implements MessageListener {
                                     payloadData.get(APIConstants.EVENT_TIMESTAMP).asLong(),
                                     payloadData.get(APIConstants.EVENT_PAYLOAD).asText());
                         }
+                    } else if (APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA.equalsIgnoreCase
+                            (jmsDestination.getTopicName())) {
+                        String mode = payloadData.get(APIConstants.Webhooks.MODE).asText();
+                        if (APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(mode)) {
+                            handleAsyncWebhooksSubscriptionMessage(payloadData);
+                        } else if (APIConstants.Webhooks.UNSUBSCRIBE_MODE.equalsIgnoreCase(mode)) {
+                            handleAsyncWebhooksUnSubscriptionMessage(payloadData);
+                        }
                     }
 
                 } else {
@@ -116,30 +122,26 @@ public class GatewayJMSMessageListener implements MessageListener {
         if (APIConstants.EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)
                 || APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
             DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded), DeployAPIInGatewayEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
-            gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             String tenantDomain = gatewayEvent.getTenantDomain();
             boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
             if (tenantLoaded) {
+                gatewayEvent.getGatewayLabels().retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
                 if (!gatewayEvent.getGatewayLabels().isEmpty()) {
-                    for (String gatewayLabel : gatewayEvent.getGatewayLabels()) {
+                    ServiceReferenceHolder.getInstance().getKeyManagerDataService().updateDeployedAPIRevision(gatewayEvent);
                         if (EventType.DEPLOY_API_IN_GATEWAY.name().equals(eventType)) {
-
                             boolean tenantFlowStarted = false;
                             try {
                                 startTenantFlow(tenantDomain);
                                 tenantFlowStarted = true;
-                                inMemoryApiDeployer.deployAPI(gatewayEvent, gatewayLabel);
+                                inMemoryApiDeployer.deployAPI(gatewayEvent);
                             } catch (ArtifactSynchronizerException e) {
-                                log.error("Error in deploying artifacts for " + gatewayEvent.getApiId() +
+                                log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
                                         "in the Gateway");
                             } finally {
                                 if (tenantFlowStarted) {
                                     endTenantFlow();
                                 }
                             }
-                        }
-
                     }
                     if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(eventType)) {
                         boolean tenantFlowStarted = false;
@@ -159,7 +161,7 @@ public class GatewayJMSMessageListener implements MessageListener {
 
                 if (debugEnabled) {
                     log.debug("Event with ID " + gatewayEvent.getEventId() + " is received and " +
-                            gatewayEvent.getApiId() + " is successfully deployed/undeployed");
+                            gatewayEvent.getUuid() + " is successfully deployed/undeployed");
                 }
             }
         }
@@ -185,9 +187,6 @@ public class GatewayJMSMessageListener implements MessageListener {
         } else if (EventType.APPLICATION_REGISTRATION_CREATE.toString().equals(eventType)) {
             ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateApplicationKeyMapping(event);
-        } else if (EventType.API_DELETE.toString().equals(eventType)) {
-            APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
-            ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeAPI(event);
         } else if (EventType.SUBSCRIPTIONS_DELETE.toString().equals(eventType)) {
             SubscriptionEvent event = new Gson().fromJson(eventJson, SubscriptionEvent.class);
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeSubscription(event);
@@ -290,5 +289,36 @@ public class GatewayJMSMessageListener implements MessageListener {
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                 setTenantDomain(tenantDomain, true);
+    }
+
+    private synchronized void handleAsyncWebhooksSubscriptionMessage(JsonNode payloadData) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received event for -  Async Webhooks API subscription for : " + payloadData.
+                    get(APIConstants.Webhooks.API_UUID).asText());
+        }
+        String apiKey = payloadData.get(APIConstants.Webhooks.API_UUID).textValue();
+        String applicationID = payloadData.get(APIConstants.Webhooks.APPLICATION_ID).textValue();
+        String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).textValue();
+        String callback = payloadData.get(APIConstants.Webhooks.CALLBACK).textValue();
+        String secret = payloadData.get(APIConstants.Webhooks.SECRET).textValue();
+        String topicName = payloadData.get(APIConstants.Webhooks.TOPIC).textValue();
+        long expiredAt = payloadData.get(APIConstants.Webhooks.EXPIRY_AT).asLong();
+        ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
+                .addSubscription(apiKey, applicationID, tenantDomain, callback, secret, topicName, expiredAt);
+    }
+
+    private synchronized void handleAsyncWebhooksUnSubscriptionMessage(JsonNode payloadData) {
+        if (log.isDebugEnabled()) {
+            log.debug("Received event for -  Async Webhooks API unsubscription for : " + payloadData.
+                    get(APIConstants.Webhooks.API_UUID).asText());
+        }
+        String apiKey = payloadData.get(APIConstants.Webhooks.API_UUID).asText();
+        String applicationID = payloadData.get(APIConstants.Webhooks.APPLICATION_ID).asText();
+        String tenantDomain = payloadData.get(APIConstants.Webhooks.TENANT_DOMAIN).asText();
+        String callback = payloadData.get(APIConstants.Webhooks.CALLBACK).asText();
+        String secret = payloadData.get(APIConstants.Webhooks.SECRET).asText();
+        String topicName = payloadData.get(APIConstants.Webhooks.TOPIC).asText();
+        ServiceReferenceHolder.getInstance().getSubscriptionsDataService()
+                .removeSubscription(apiKey, applicationID, tenantDomain, callback, secret, topicName);
     }
 }

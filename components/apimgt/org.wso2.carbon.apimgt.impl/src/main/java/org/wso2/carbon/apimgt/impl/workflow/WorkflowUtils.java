@@ -68,31 +68,31 @@ public class WorkflowUtils {
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO; 
             SubscribedAPI sub = ApiMgtDAO.getInstance()
-                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
+                    .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
                     subWFDto.getTenantId(), subWFDto.getTenantDomain(),
-                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    Integer.parseInt(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
                     sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_UPDATE.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
             SubscribedAPI sub = ApiMgtDAO.getInstance()
-                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
+                    .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(),
                     subWFDto.getTenantId(), subWFDto.getTenantDomain(),
-                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    Integer.parseInt(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
                     sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION.equalsIgnoreCase(wfType)) {
             SubscriptionWorkflowDTO subWFDto = (SubscriptionWorkflowDTO) workflowDTO;
             SubscribedAPI sub = ApiMgtDAO.getInstance()
-                    .getSubscriptionById(Integer.valueOf(subWFDto.getWorkflowReference()));
+                    .getSubscriptionById(Integer.parseInt(subWFDto.getWorkflowReference()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(),
                     subWFDto.getTenantId(), subWFDto.getTenantDomain(),
-                    Integer.valueOf(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
+                    Integer.parseInt(subWFDto.getWorkflowReference()), sub.getIdentifier().getId(),
                     sub.getApplication().getId(), sub.getTier().getName(), sub.getSubCreatedStatus());
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
         } else if (WorkflowConstants.WF_TYPE_AM_API_STATE.equalsIgnoreCase(wfType)) {
@@ -100,7 +100,8 @@ public class WorkflowUtils {
             APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.API_LIFECYCLE_CHANGE.name(), apiStateWFDto.getTenantId(),
                     apiStateWFDto.getTenantDomain(), apiStateWFDto.getApiName(),
-                    Integer.valueOf(apiStateWFDto.getWorkflowReference()), apiStateWFDto.getApiVersion(),
+                    Integer.parseInt(apiStateWFDto.getWorkflowReference()), apiStateWFDto.getApiUUID(),
+                    apiStateWFDto.getApiVersion(),
                     apiStateWFDto.getApiType(), apiStateWFDto.getApiContext(), apiStateWFDto.getApiProvider(),
                     apiStateWFDto.getApiLCAction());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());

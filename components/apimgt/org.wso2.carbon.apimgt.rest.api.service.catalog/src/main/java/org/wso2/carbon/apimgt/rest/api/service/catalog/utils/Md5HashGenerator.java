@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
 import org.apache.commons.io.comparator.NameFileComparator;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -35,8 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.fromFileToServiceInfo;
-import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.generateServiceKey;
+import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.fromFileToServiceEntry;
 
 /**
  * This class generates MD5 hash value for the given files of the zip
@@ -75,28 +73,24 @@ public class Md5HashGenerator {
             if (file.isDirectory()) {
                 // Else is not required since this for taking only the directories. If it is an empty zip, then
                 // the final map will be empty.
-                File[] fArray = file.listFiles();
-                if (fArray != null) {
+                File[] fileArray = file.listFiles();
+                if (fileArray != null) {
                     // Order files according to the alphabetical order of file names when concatenating hashes.
-                    Arrays.sort(fArray, NameFileComparator.NAME_COMPARATOR);
+                    Arrays.sort(fileArray, NameFileComparator.NAME_COMPARATOR);
                     String key = null;
-                    for (File aFile : fArray) {
-                        if (aFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
+                    for (File yamlFile : fileArray) {
+                        if (yamlFile.getName().startsWith(APIConstants.METADATA_FILE_NAME)) {
                             // This if only check whether the file start with the name "metadata".
                             try {
-                                ServiceEntry serviceEntry = fromFileToServiceInfo(aFile, null);
-                                if (!StringUtils.isBlank(serviceEntry.getKey())) {
-                                    key  = serviceEntry.getKey();
-                                } else {
-                                    key = generateServiceKey(serviceEntry);
-                                }
+                                ServiceEntry service = fromFileToServiceEntry(yamlFile, null);
+                                key = service.getKey();
                             } catch (IOException e) {
                                 RestApiUtil.handleBadRequest("Failed to fetch metadata information", log);
                             }
                         }
                     }
                     try {
-                        endpoints.put(key, calculateHash(fArray));
+                        endpoints.put(key, calculateHash(fileArray));
                     } catch (NoSuchAlgorithmException | IOException e) {
                         RestApiUtil.handleInternalServerError("Failed to generate MD5 Hash due to " +
                                 e.getMessage(), log);

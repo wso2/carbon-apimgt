@@ -27,14 +27,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
 import org.wso2.carbon.apimgt.impl.utils.UserClaims;
 import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.ClaimManager;
-import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -65,7 +64,7 @@ public class DefaultClaimsRetrieverTestCase {
     private UserRealm userRealm = Mockito.mock(UserRealm.class);
     private ClaimManager claimManager = Mockito.mock(ClaimManager.class);
     private UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
-    private JWTConfigurationDto jwtConfigurationDto = Mockito.mock(JWTConfigurationDto.class);
+    private ExtendedJWTConfigurationDto jwtConfigurationDto = Mockito.mock(ExtendedJWTConfigurationDto.class);
 
     @Before
     public void setup() throws UserStoreException {

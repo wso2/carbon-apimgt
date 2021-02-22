@@ -178,14 +178,28 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String[] callbackURLs = callBackURL.trim().split("\\s*,\\s*");
             clientInfo.setRedirectUris(Arrays.asList(callbackURLs));
         }
-        clientInfo.setClientName(applicationName);
+
+        String overrideSpName = System.getProperty(APIConstants.APPLICATION.OVERRIDE_SP_NAME);
+        if (StringUtils.isNotEmpty(overrideSpName) && !Boolean.parseBoolean(overrideSpName)) {
+            clientInfo.setClientName(info.getClientName());
+        } else {
+            clientInfo.setClientName(applicationName);
+        }
+        
         //todo: run tests by commenting the type
         if (StringUtils.isEmpty(info.getTokenType())) {
             clientInfo.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         } else {
             clientInfo.setTokenType(info.getTokenType());
         }
-        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+
+        // Use a generated user as the app owner for cross tenant subscription scenarios, to avoid the tenant admin
+        // being exposed in the JWT token.
+        if (APIUtil.isCrossTenantSubscriptionsEnabled()) {
+            clientInfo.setApplication_owner(APIConstants.DEFAULT_RESERVED_USERNAME);
+        } else {
+            clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+        }
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());

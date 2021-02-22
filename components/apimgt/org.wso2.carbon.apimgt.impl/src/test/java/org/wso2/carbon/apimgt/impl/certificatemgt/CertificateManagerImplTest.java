@@ -24,6 +24,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -46,7 +47,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
@@ -119,10 +119,12 @@ public class CertificateManagerImplTest {
     }
 
     @Test
-    public void testAddToPublisherWithInternalServerError() {
+    public void testAddToPublisherWithInternalServerError() throws CertificateAliasExistsException,
+                                                                   CertificateManagementException {
 
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,
+        Mockito.when(certificateMgtDAO.addCertificate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyInt())).thenReturn(true);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore", String.class,
                 String.class))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
         ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
@@ -133,7 +135,9 @@ public class CertificateManagerImplTest {
     @Test
     public void testAddToPublisherWithExpiredCertificate()
             throws CertificateAliasExistsException, CertificateManagementException {
-        Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT,ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
+
+        Mockito.when(certificateMgtDAO.addCertificate(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyInt())).thenReturn(true);
         Mockito.when(certificateMgtDAO.deleteCertificate(ALIAS,END_POINT,TENANT_ID)).thenReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,
                 String.class))

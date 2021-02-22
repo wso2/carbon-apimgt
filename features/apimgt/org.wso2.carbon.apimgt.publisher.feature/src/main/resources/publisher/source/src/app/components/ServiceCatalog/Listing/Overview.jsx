@@ -690,7 +690,7 @@ function Overview(props) {
 
 Overview.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }).isRequired,
 };
 

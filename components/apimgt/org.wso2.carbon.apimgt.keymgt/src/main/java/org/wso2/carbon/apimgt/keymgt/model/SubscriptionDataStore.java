@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.ApplicationPolicy;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Scope;
 import org.wso2.carbon.apimgt.keymgt.model.entity.Subscription;
 import org.wso2.carbon.apimgt.keymgt.model.entity.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 
 import java.util.Map;
 
@@ -59,6 +60,15 @@ public interface SubscriptionDataStore {
      * @return {@link API} entry represented by Context and Version.
      */
     API getApiByContextAndVersion(String context, String version);
+
+    /**
+     * Get API by Name and Version
+     *
+     * @param name Name of the API
+     * @param version Version of the API
+     * @return {@link API} entry represented by Context and Version.
+     */
+    API getApiByNameAndVersion(String name, String version);
 
 
     /**

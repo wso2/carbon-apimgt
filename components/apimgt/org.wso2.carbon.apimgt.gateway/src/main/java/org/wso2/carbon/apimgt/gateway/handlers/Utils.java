@@ -39,11 +39,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.api.API;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.api.API;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -51,6 +52,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -67,7 +69,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import javax.cache.Caching;
 import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
@@ -328,6 +329,43 @@ public class Utils {
     }
 
     /**
+     * Removes the apikey that was cached in the tenant's cache space and adds it to the invalid apiKey token cache.
+     *
+     * @param tokenIdentifier        - Token Identifier to be removed from the cache.
+     * @param cachedTenantDomain - Tenant domain from which the apikey should be removed.
+     */
+    public static void invalidateApiKeyInTenantCache(String tokenIdentifier, String cachedTenantDomain) {
+        //If the apiKey is cached in the tenant cache
+        if (cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Removing cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+            }
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(cachedTenantDomain, true);
+                removeCacheEntryFromGatewayAPiKeyCache(tokenIdentifier);
+                putInvalidApiKeyEntryIntoInvalidApiKeyCache(tokenIdentifier, cachedTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+                }
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
+     * Add a token identifier to the invalid apikey cache of the given tenant domain
+     *
+     * @param tokenIdentifier   Token identifier to be added to the invalid token cache
+     * @param tenantDomain  Tenant domain of the apikey
+     */
+    public static void putInvalidApiKeyEntryIntoInvalidApiKeyCache(String tokenIdentifier, String tenantDomain) {
+        CacheProvider.getInvalidGatewayApiKeyCache().put(tokenIdentifier, tenantDomain);
+    }
+
+    /**
      * Remove a token from gateway token cache
      *
      * @param key Access token which should be removed from the cache
@@ -367,6 +405,16 @@ public class Utils {
     public static String getCachedTenantDomain(String token) {
         return (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(token);
+    }
+
+    /**
+     * Get the tenant domain of a cached api key
+     *
+     * @param token Cached access token
+     * @return Tenant domain
+     */
+    public static String getApiKeyCachedTenantDomain(String token) {
+        return (String) CacheProvider.getGatewayApiKeyCache().get(token);
     }
 
     public static String getClientCertificateHeader() {
@@ -502,12 +550,40 @@ public class Utils {
 
     public static API getSelectedAPI(MessageContext messageContext) {
 
-        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         Object apiObject = messageContext.getProperty(RESTConstants.PROCESSED_API);
         if (apiObject != null) {
             return (API) apiObject;
         } else {
+            String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
             return messageContext.getConfiguration().getAPI(apiName);
         }
+    }
+
+    public static void setSubRequestPath(API api, MessageContext synCtx) {
+
+        synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, getSubRequestPath(api, synCtx));
+    }
+
+    public static String getSubRequestPath(API api, MessageContext synCtx) {
+
+        Object requestSubPath = synCtx.getProperty(RESTConstants.REST_SUB_REQUEST_PATH);
+        if (requestSubPath != null) {
+            return (String) requestSubPath;
+        }
+        String subPath = null;
+        String path = ApiUtils.getFullRequestPath(synCtx);
+        if (api != null) {
+            if (VersionStrategyFactory.TYPE_URL.equals(api.getVersionStrategy().getVersionType())) {
+                subPath = path.substring(
+                        api.getContext().length() + api.getVersionStrategy().getVersion().length() + 1);
+            } else {
+                subPath = path.substring(api.getContext().length());
+            }
+        }
+        if (subPath != null && subPath.isEmpty()) {
+            subPath = "/";
+        }
+        synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+        return subPath;
     }
 }
