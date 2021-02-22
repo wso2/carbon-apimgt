@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics;
 
 import org.apache.synapse.MessageContext;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
  * Data provider for the response events of server sent events.
@@ -26,9 +28,11 @@ import org.apache.synapse.MessageContext;
 public class SseResponseEventDataProvider extends AsyncAnalyticsDataProvider {
 
     private int responseCode;
+    private MessageContext messageContext;
 
     public SseResponseEventDataProvider(MessageContext messageContext) {
         super(messageContext);
+        this.messageContext = messageContext;
     }
 
     @Override
@@ -39,6 +43,15 @@ public class SseResponseEventDataProvider extends AsyncAnalyticsDataProvider {
     @Override
     public int getProxyResponseCode() {
         return responseCode;
+    }
+
+    @Override
+    public Operation getOperation() {
+
+        Operation operation = super.getOperation();
+        String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
+        operation.setApiResourceTemplate(apiResourceTemplate);
+        return operation;
     }
 
     public void setResponseCode(int responseCode) {
