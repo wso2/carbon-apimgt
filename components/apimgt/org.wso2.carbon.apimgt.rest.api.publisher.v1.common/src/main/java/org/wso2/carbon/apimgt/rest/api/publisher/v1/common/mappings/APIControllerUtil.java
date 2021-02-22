@@ -197,7 +197,7 @@ public class APIControllerUtil {
 
         // handle available subscription policies
         JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
-        if (!policies.isJsonNull()) {
+        if (policies != null && !policies.isJsonNull()) {
             handleSubscriptionPolicies(policies, importedApiDto);
         }
         return importedApiDto;
