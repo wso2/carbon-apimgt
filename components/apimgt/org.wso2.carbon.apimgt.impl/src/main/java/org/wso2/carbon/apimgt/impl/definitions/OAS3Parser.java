@@ -1500,7 +1500,13 @@ public class OAS3Parser extends APIDefinition {
 
         // Merge Security Schemes
         if (existingOpenAPI.getComponents().getSecuritySchemes() != null) {
-            updatedOpenAPI.getComponents().setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+            if (updatedOpenAPI.getComponents() != null) {
+                updatedOpenAPI.getComponents().setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+            } else {
+                Components components = new Components();
+                components.setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+                updatedOpenAPI.setComponents(components);
+            }
         }
 
         // Merge Operation specific vendor extensions

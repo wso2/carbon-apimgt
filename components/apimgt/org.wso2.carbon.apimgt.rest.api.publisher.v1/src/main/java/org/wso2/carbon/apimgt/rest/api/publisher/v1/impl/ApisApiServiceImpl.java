@@ -4280,14 +4280,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
-        //validate websocket url and change type of the API in APIDTO
-        /*if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
-            apiDTOFromProperties.setType(APIDTO.TypeEnum.WS);
+        //validate websocket url and change transport types
+        if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDTOFromProperties.setTransport(websocketTransports);
-        }*/
+        }
 
         //Only WS type APIs should be allowed
         /*if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){
@@ -4305,12 +4304,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
 
             //load topics from AsyncAPI
-            if (APIDTO.TypeEnum.WEBSUB.equals(apiDTOFromProperties.getType())){
-                try {
-                    apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
-                } catch (FaultGatewaysException e) {
-                    e.printStackTrace();
-                }
+            try {
+                apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
+            } catch (FaultGatewaysException e) {
+                e.printStackTrace();
             }
 
             APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
@@ -4436,6 +4433,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         //updating APi with the new AsyncAPI definition
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
+        //load new topics
+        apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(existingAPI, apiDefinition));
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
     }

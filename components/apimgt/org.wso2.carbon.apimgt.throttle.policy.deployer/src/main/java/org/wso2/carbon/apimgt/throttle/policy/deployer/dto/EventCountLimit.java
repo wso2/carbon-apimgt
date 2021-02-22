@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.throttle.policy.deployer.dto;
 /**
  * Entity for keeping details of a Event Count Limit
  */
+
 public class EventCountLimit extends Limit {
 
     private long eventCount;

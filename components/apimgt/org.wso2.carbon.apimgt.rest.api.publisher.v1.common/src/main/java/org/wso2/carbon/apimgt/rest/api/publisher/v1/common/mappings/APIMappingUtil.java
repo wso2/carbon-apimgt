@@ -2014,7 +2014,8 @@ public class APIMappingUtil {
             APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
 
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
-                String uriMapping = api.getWsUriMapping().get(operationsDTO.getVerb() + "_" + operationsDTO.getTarget());
+                String uriMapping = api.getWsUriMapping().get(
+                        operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
                 operationsDTO.setUriMapping(uriMapping);
             }
             operationsDTOList.add(operationsDTO);

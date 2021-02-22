@@ -568,30 +568,6 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  /webhooks-subscriptions:
-    get:
-      summary: Get webhooks subscriptions
-      description: |
-        This will provide list of webhooks subscriptions from the database.
-      parameters:
-        - name: xWSO2Tenant
-          in: header
-          description: |
-            This is used to specify the tenant domain, where the resource need to be
-                        retrieved from.
-          type: string
-          required: true
-      tags:
-        - Retrieving webhooks subscriptions
-      responses:
-        200:
-          description: An array of webhooks subscriptions
-          schema:
-            $ref: '#/definitions/webhooksSubscriptionsList'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
   /notify:
     post:
       summary: Push notification events into nodes.
@@ -611,6 +587,10 @@ paths:
           description: 'Event Received success'
           schema:
             type: object
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -1035,9 +1015,21 @@ definitions:
   #-----------------------------------------------------
   webhooksSubscription:
     properties:
-      apiKey:
+      apiUUID:
         type: string
-        description: The API key
+        description: The API UUID
+      apiContext:
+        type: string
+        description: The API context.
+      apiVersion:
+        type: string
+        description: The API version.
+      tenantDomain:
+        type: string
+        description: The tenant domain.
+      tenantId:
+        type: integer
+        description: The tenant id.
       appID:
         type: string
         description: The application ID of the subscription.
@@ -1054,6 +1046,18 @@ definitions:
         type: integer
         format: int64
         description: the expiry time in millis
+      tier:
+        type: string
+        description: the subscription tier.
+      applicationTier:
+        type: string
+        description: the application tier.
+      apiTier:
+        type: string
+        description: the API tier.
+      subscriberName:
+        type: string
+        description: the subscriber name.
 
 
   #---------------------  --------------------------------

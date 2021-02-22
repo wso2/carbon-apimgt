@@ -59,7 +59,7 @@ describe('Test APIs main routing component', () => {
         expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
         expect(wrapper.contains('Testing Listing page')).toBeTruthy();
     });
-    test.skip('should return ApiCreate component when request path match with /apis/create', () => {
+    test('should return ApiCreate component when request path match with /apis/create', () => {
         const apiCreatePath = '/apis/create';
         const createAPI = (
             <MemoryRouter initialEntries={[apiCreatePath]}>

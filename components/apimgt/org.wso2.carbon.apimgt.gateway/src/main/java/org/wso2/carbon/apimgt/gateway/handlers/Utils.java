@@ -47,8 +47,10 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -61,7 +63,11 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URLDecoder;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -585,5 +591,22 @@ public class Utils {
         }
         synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
         return subPath;
+    }
+
+    public static JSONObject setRemoteIp(JSONObject jsonObMap, String remoteIP) {
+        if (remoteIP != null && remoteIP.length() > 0) {
+            try {
+                InetAddress address = APIUtil.getAddress(remoteIP);
+                if (address instanceof Inet4Address) {
+                    jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
+                } else if (address instanceof Inet6Address) {
+                    jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(remoteIP));
+                }
+            } catch (UnknownHostException e) {
+                //ignore the error and log it
+                log.error("Error while parsing host IP " + remoteIP, e);
+            }
+        }
+        return jsonObMap;
     }
 }

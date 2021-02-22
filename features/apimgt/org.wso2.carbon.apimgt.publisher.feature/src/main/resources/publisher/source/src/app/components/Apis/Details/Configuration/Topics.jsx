@@ -299,66 +299,124 @@ class Topics extends Component {
             asyncAPI.channelNames().forEach((name) => {
                 const channel = asyncAPI.channel(name);
                 if (topic.name === name) {
-                    if (channel.hasPublish()) {
-                        // eslint-disable-next-line no-underscore-dangle, no-param-reassign
-                        topic.description = channel.publish().message()._json['x-parser-message-name'];
-                        // eslint-disable-next-line guard-for-in
-                        for (const i in channel.publish().message().payload().properties()) {
-                            topic.payload.properties.push({
-                                name: i,
-                                // eslint-disable-next-line no-underscore-dangle
-                                type: channel.publish().message().payload().properties()[i]._json.type,
-                                advanced: '',
-                                description: '',
-                                editable: false,
-                                new: false,
-                            });
-                            // eslint-disable-next-line no-underscore-dangle
-                            if (channel.publish().message().payload().properties()[i]._json.type === 'object') {
-                                // eslint-disable-next-line guard-for-in
-                                for (const j in channel.publish().message().payload().properties()[i].properties()) {
-                                    topic.payload.properties.push({
-                                        name: i + ' / ' + j,
-                                        // eslint-disable-next-line no-underscore-dangle
-                                        type: channel.publish().message().payload().properties()[i].properties()[j]
-                                            ._json.type,
-                                        advanced: '',
-                                        description: '',
-                                        editable: false,
-                                        new: false,
-                                    });
+                    /* if (channel.hasPublish() && topic.mode === 'PUBLISH') {
+                        let pubMessage = null;
+                        if (!channel.publish().hasMultipleMessages()) {
+                            pubMessage = channel.publish().message();
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = pubMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in pubMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: pubMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false,
+                                });
+                                if (pubMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in pubMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + ' / ' + j,
+                                            type: pubMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false,
+                                        });
+                                    }
+                                }
+                            }
+                        } else {
+                            // eslint-disable-next-line prefer-destructuring
+                            pubMessage = channel.publish().messages()[0];
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = pubMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in pubMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: pubMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false,
+                                });
+                                if (pubMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in pubMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + ' / ' + j,
+                                            type: pubMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false,
+                                        });
+                                    }
                                 }
                             }
                         }
-                    }
+                    } */
                     if (channel.hasSubscribe()) {
-                        // eslint-disable-next-line no-underscore-dangle, no-param-reassign
-                        topic.description = channel.subscribe().message()._json['x-parser-message-name'];
-                        // eslint-disable-next-line guard-for-in
-                        for (const i in channel.subscribe().message().payload().properties()) {
-                            topic.payload.properties.push({
-                                name: i,
-                                // eslint-disable-next-line no-underscore-dangle
-                                type: channel.subscribe().message().payload().properties()[i]._json.type,
-                                advanced: '',
-                                description: '',
-                                editable: false,
-                                new: false,
-                            });
-                            // eslint-disable-next-line no-underscore-dangle
-                            if (channel.subscribe().message().payload().properties()[i]._json.type === 'object') {
-                                // eslint-disable-next-line guard-for-in
-                                for (const j in channel.subscribe().message().payload().properties()[i].properties()) {
-                                    topic.payload.properties.push({
-                                        name: i + ' / ' + j,
-                                        // eslint-disable-next-line no-underscore-dangle
-                                        type: channel.subscribe().message().payload().properties()[i].properties()[j]
-                                            ._json.type,
-                                        advanced: '',
-                                        description: '',
-                                        editable: false,
-                                        new: false,
-                                    });
+                        let subMessage = null;
+                        if (!channel.subscribe().hasMultipleMessages()) {
+                            subMessage = channel.subscribe().message();
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = subMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in subMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: subMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false,
+                                });
+                                if (subMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in subMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + ' / ' + j,
+                                            type: subMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false,
+                                        });
+                                    }
+                                }
+                            }
+                        } else {
+                            // eslint-disable-next-line prefer-destructuring
+                            subMessage = channel.subscribe().messages()[0];
+                            // eslint-disable-next-line no-param-reassign
+                            topic.description = subMessage.uid();
+                            // eslint-disable-next-line guard-for-in
+                            for (const i in subMessage.payload().properties()) {
+                                topic.payload.properties.push({
+                                    name: i,
+                                    type: subMessage.payload().properties()[i].type(),
+                                    advanced: '',
+                                    description: '',
+                                    editable: false,
+                                    new: false,
+                                });
+                                if (subMessage.payload().properties()[i].type() === 'object') {
+                                    // eslint-disable-next-line guard-for-in
+                                    for (const j in subMessage.payload().properties()[i].properties()) {
+                                        topic.payload.properties.push({
+                                            name: i + ' / ' + j,
+                                            type: subMessage.payload().properties()[i].properties()[j].type(),
+                                            advanced: '',
+                                            description: '',
+                                            editable: false,
+                                            new: false,
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -594,26 +652,46 @@ class Topics extends Component {
         asyncAPI.channelNames().forEach((name) => {
             const channel = asyncAPI.channel(name);
             if (name === topic.name) {
-                if (channel.hasSubscribe()) {
-                    if (channel.subscribe().message() !== null) {
-                        schema = channel.subscribe().message().payload();
+                /* if (topic.mode === 'SUBSCRIBE') {
+                    if (channel.hasSubscribe()) {
+                        if (!channel.subscribe().hasMultipleMessages()) {
+                            if (channel.subscribe().message() !== null) {
+                                schema = channel.subscribe().message().payload();
+                            }
+                        } else {
+                            // eslint-disable-next-line no-lonely-if
+                            if (channel.subscribe().messages()[0] !== null) {
+                                schema = channel.subscribe().messages()[0].payload();
+                            }
+                        }
                     }
                 }
-                // TODO:
-                // if (topic.mode === 'SUBSCRIBE') {
-                //     if (channel.hasSubscribe()) {
-                //         if (channel.subscribe().message() !== null) {
-                //             schema = channel.subscribe().message().payload();
-                //         }
-                //     }
-                // }
-                // if (topic.mode === 'PUBLISH') {
-                //     if (channel.hasPublish()) {
-                //         if (channel.publish().message() !== null) {
-                //             schema = channel.publish().message().payload();
-                //         }
-                //     }
-                // }
+                if (topic.mode === 'PUBLISH') {
+                    if (channel.hasPublish()) {
+                        if (!channel.publish().hasMultipleMessages()) {
+                            if (channel.publish().message() !== null) {
+                                schema = channel.publish().message().payload();
+                            }
+                        } else {
+                            // eslint-disable-next-line no-lonely-if
+                            if (channel.publish().messages()[0] !== null) {
+                                schema = channel.publish().messages()[0].payload();
+                            }
+                        }
+                    }
+                } */
+                if (channel.hasSubscribe()) {
+                    if (!channel.subscribe().hasMultipleMessages()) {
+                        if (channel.subscribe().message() !== null) {
+                            schema = channel.subscribe().message().payload();
+                        }
+                    } else {
+                        // eslint-disable-next-line no-lonely-if
+                        if (channel.subscribe().messages()[0] !== null) {
+                            schema = channel.subscribe().messages()[0].payload();
+                        }
+                    }
+                }
             }
         });
         return JSON.stringify(schema, null, '\t');
