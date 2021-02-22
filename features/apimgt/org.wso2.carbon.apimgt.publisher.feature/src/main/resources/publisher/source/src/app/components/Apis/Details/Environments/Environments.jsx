@@ -297,6 +297,7 @@ export default function Environments() {
     const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState([]);
     const [selectedVhost, setVhost] = useState([]);
+    const [selectedVhostDeploy, setVhostDeploy] = useState([]);
     const [extraRevisionToDelete, setExtraRevisionToDelete] = useState(null);
     const [description, setDescription] = useState('');
     const [mgLabels, setMgLabels] = useState([]);
@@ -396,6 +397,12 @@ export default function Environments() {
         const vhosts = selectedVhost.filter((v) => v.env !== event.target.name);
         vhosts.push({ env: event.target.name, vhost: event.target.value });
         setVhost(vhosts);
+    };
+
+    const handleVhostDeploySelect = (event) => {
+        const vhosts = selectedVhostDeploy.filter((v) => v.env !== event.target.name);
+        vhosts.push({ env: event.target.name, vhost: event.target.value });
+        setVhostDeploy(vhosts);
     };
 
     const handleClose = () => {
@@ -700,7 +707,7 @@ export default function Environments() {
       * Handles adding a new revision and deploy
       * @memberof Revisions
       */
-    function createDeployRevision(envList) {
+    function createDeployRevision(envList, vhostList) {
         const body = {
             description,
         };
@@ -712,6 +719,7 @@ export default function Environments() {
                     for (let i = 0; i < envList.length; i++) {
                         body1.push({
                             name: envList[i],
+                            vhost: vhostList.find(v => v.env === envList[i]).vhost,
                             displayOnDevportal: true,
                         });
                     }
@@ -782,16 +790,17 @@ export default function Environments() {
     /**
      * Handles creating and deploying a new revision
      * @param {Object} envList the environment list
+     * @param {Array} vhostList the vhost list
      * @param {Object} length the length of the list
      */
-    function handleCreateAndDeployRevision(envList) {
+    function handleCreateAndDeployRevision(envList, vhostList) {
         if (extraRevisionToDelete) {
             deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
                 .then(() => {
-                    createDeployRevision(envList);
+                    createDeployRevision(envList, vhostList);
                 }).finally(() => setExtraRevisionToDelete(null));
         } else {
-            createDeployRevision(envList);
+            createDeployRevision(envList, vhostList);
         }
     }
 
@@ -1485,6 +1494,42 @@ export default function Environments() {
                                                         direction='column'
                                                         spacing={2}
                                                     >
+                                                        <Grid item xs={12}>
+                                                            <TextField
+                                                                id='vhost-selector'
+                                                                select
+                                                                label={(
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.Environments.create.vhost'
+                                                                        defaultMessage='VHost'
+                                                                    />
+                                                                )}
+                                                                SelectProps={{
+                                                                    MenuProps: {
+                                                                        anchorOrigin: {
+                                                                            vertical: 'bottom',
+                                                                            horizontal: 'left',
+                                                                        },
+                                                                        getContentAnchorEl: null,
+                                                                    },
+                                                                }}
+                                                                name={row.name}
+                                                                onChange={handleVhostDeploySelect}
+                                                                margin='dense'
+                                                                variant='outlined'
+                                                                style={{ width: '50%' }}
+                                                                fullWidth
+                                                                helperText={getVhostHelperText(row.name)}
+                                                            >
+                                                                {row.vhosts.map(
+                                                                    (vhost) => (
+                                                                        <MenuItem value={vhost.host}>
+                                                                            {vhost.host}
+                                                                        </MenuItem>
+                                                                    ),
+                                                                )}
+                                                            </TextField>
+                                                        </Grid>
                                                         <Grid item>
                                                             {allEnvRevision
                                                                 && allEnvRevision.filter(
@@ -1634,7 +1679,7 @@ export default function Environments() {
                             type='submit'
                             variant='contained'
                             onClick={
-                                () => handleCreateAndDeployRevision(SelectedEnvironment)
+                                () => handleCreateAndDeployRevision(SelectedEnvironment, selectedVhostDeploy)
                             }
                             color='primary'
                             disabled={SelectedEnvironment.length === 0
