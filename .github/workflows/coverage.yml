@@ -1,6 +1,9 @@
-name: API Manager Build with Test
+name: Test Coverage Uploader
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -30,3 +33,12 @@ jobs:
         ref: refs/heads/master
     - name: Build Product-Apim with Maven
       run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file ../product-apim/pom.xml
+    - name: Upload unit test coverage to Codecov
+      uses: codecov/codecov-action@v1.2.1
+      with:
+        flags: unit_tests
+    - name: Upload integration test coverage to Codecov
+      uses: codecov/codecov-action@v1.2.1
+      with:
+        flags: integration_tests
+        directory: ../product-apim/
