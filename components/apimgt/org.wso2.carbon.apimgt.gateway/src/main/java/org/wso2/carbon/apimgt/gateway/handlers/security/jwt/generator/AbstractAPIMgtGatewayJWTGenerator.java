@@ -64,7 +64,6 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
             signatureAlgorithm = SHA256_WITH_RSA;
         }
-
     }
 
     public String generateToken(JWTInfoDto jwtInfoDto) throws APIManagementException {
@@ -207,7 +206,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 }
             } else if (Boolean.parseBoolean(System.getProperty(FORMAT_JSON_ARRAY_PROPERTY)) &&
                     claimVal instanceof String && claimVal.toString().contains("[\"")
-                    && claimVal.toString().contains("\"]")){
+                    && claimVal.toString().contains("\"]")) {
                 try {
                     List<String> arrayList = mapper.readValue(claimVal.toString(), List.class);
                     jwtClaimSetBuilder.claim(claimEntry.getKey(), arrayList);
@@ -229,13 +228,16 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         JWTClaimsSet jwtClaimsSet = jwtClaimSetBuilder.build();
         return jwtClaimsSet.toJSONObject().toString();
     }
+
     public String encode(byte[] stringToBeEncoded) throws APIManagementException {
         return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
     }
+
     public String getDialectURI() {
         return dialectURI;
     }
 
-    public abstract Map<String,Object> populateStandardClaims(JWTInfoDto jwtInfoDto);
-    public abstract Map<String,Object> populateCustomClaims(JWTInfoDto jwtInfoDto);
+    public abstract Map<String, Object> populateStandardClaims(JWTInfoDto jwtInfoDto);
+
+    public abstract Map<String, Object> populateCustomClaims(JWTInfoDto jwtInfoDto);
 }

@@ -74,7 +74,7 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
         long expireIn;
         if (jwtTokenInfoDTO.getExpirationTime() == -1 ||
-                jwtTokenInfoDTO.getExpirationTime() > (Integer.MAX_VALUE-currentTime)) {
+                jwtTokenInfoDTO.getExpirationTime() > (Integer.MAX_VALUE - currentTime)) {
             expireIn = -1;
         } else {
             expireIn = currentTime + jwtTokenInfoDTO.getExpirationTime();
@@ -125,7 +125,7 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         KeyStoreManager tenantKSM = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
         try {
 
-            ServerConfigurationService config =  tenantKSM.getServerConfigService();
+            ServerConfigurationService config = tenantKSM.getServerConfigService();
             String apiKeySignKeyStoreName = APIUtil.getApiKeySignKeyStoreName();
             String keyStorePassword = config.getFirstProperty(APIConstants.KeyStoreManagement
                     .SERVER_APIKEYSIGN_PRIVATE_KEY_PASSWORD.replaceFirst(APIConstants.KeyStoreManagement.KeyStoreName,
@@ -176,7 +176,7 @@ public class DefaultApiKeyGenerator implements ApiKeyGenerator {
         try {
             return java.util.Base64.getUrlEncoder().encodeToString(stringToBeEncoded);
         } catch (Exception e) {
-            throw new APIManagementException("Error while encoding the Api Key ",e);
+            throw new APIManagementException("Error while encoding the Api Key ", e);
         }
     }
 
