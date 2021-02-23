@@ -898,21 +898,31 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationKeyMapping}
      *
      * */
-    public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey, String keymanager, String tenantDomain) {
+    public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey) {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL)) {
             ps.setString(1, consumerKey);
-            ps.setString(2, keymanager);
-            ps.setString(3, tenantDomain);
+
             try (ResultSet resultSet = ps.executeQuery()) {
-                if (resultSet.next()) {
+                while (resultSet.next()) {
+                    String keyManagerName = resultSet.getString("KEY_MANAGER");
+                    ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+                    try {
+                        KeyManagerConfigurationDTO keyManager = apiMgtDAO.
+                                getKeyManagerConfigurationByUUID(keyManagerName);
+                        if (keyManager != null) {
+                            keyManagerName = keyManager.getName();
+                        }
+                    } catch (APIManagementException e) {
+                        log.error("Error in fetching Key manager: " + keyManagerName);
+                    }
                     ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
                     keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                     keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
                     keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
-                    keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                    keyMapping.setKeyManager(keyManagerName);
                     return keyMapping;
                 }
             }
