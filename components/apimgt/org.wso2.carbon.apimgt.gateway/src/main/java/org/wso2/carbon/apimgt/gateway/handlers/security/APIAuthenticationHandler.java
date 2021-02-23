@@ -339,7 +339,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
 
-            if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
                 if (authenticators.isEmpty()) {
                     initializeAuthenticators();
                 }

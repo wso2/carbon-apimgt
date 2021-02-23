@@ -34,14 +34,14 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseStatus;
 import org.wso2.carbon.apimgt.common.gateway.dto.APIRequestInfoDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseStatus;
 import org.wso2.carbon.apimgt.common.gateway.dto.MsgInfoDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.RequestContextDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ResponseContextDTO;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.payloadhandler.SynapsePayloadHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -81,9 +81,9 @@ public class ExtensionListenerUtil {
      */
     public static boolean preProcessRequest(MessageContext messageContext, String type) {
 
-        RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         if (extensionListener != null) {
+            RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.preProcessRequest(requestContextDTO);
             return handleExtensionResponse(messageContext, responseDTO);
         }
@@ -100,10 +100,9 @@ public class ExtensionListenerUtil {
      */
     public static boolean postProcessRequest(MessageContext messageContext, String type) {
 
-        RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         if (extensionListener != null) {
-
+            RequestContextDTO requestContextDTO = generateRequestContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.postProcessRequest(requestContextDTO);
             return handleExtensionResponse(messageContext, responseDTO);
         }
@@ -120,9 +119,9 @@ public class ExtensionListenerUtil {
      */
     public static boolean preProcessResponse(MessageContext messageContext, String type) {
 
-        ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         if (extensionListener != null) {
+            ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.preProcessResponse(responseContextDTO);
             return handleExtensionResponse(messageContext, responseDTO);
         }
@@ -139,9 +138,9 @@ public class ExtensionListenerUtil {
      */
     public static boolean postProcessResponse(MessageContext messageContext, String type) {
 
-        ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
         ExtensionListener extensionListener = getExtensionListener(type);
         if (extensionListener != null) {
+            ResponseContextDTO responseContextDTO = generateResponseContextDTO(messageContext);
             ExtensionResponseDTO responseDTO = extensionListener.postProcessResponse(responseContextDTO);
             return handleExtensionResponse(messageContext, responseDTO);
         }
