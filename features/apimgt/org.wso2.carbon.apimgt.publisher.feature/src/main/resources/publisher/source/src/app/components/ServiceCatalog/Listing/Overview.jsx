@@ -41,12 +41,14 @@ import Container from '@material-ui/core/Container';
 import Utils from 'AppData/Utils';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import SwapHorizontalCircle from '@material-ui/icons/SwapHorizontalCircle';
+import SwaggerUI from 'AppComponents/Apis/Details/APIDefinition/swaggerUI/SwaggerUI';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import Slide from '@material-ui/core/Slide';
 import YAML from 'js-yaml';
 import Box from '@material-ui/core/Box';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -139,6 +141,14 @@ const useStyles = makeStyles((theme) => ({
     downloadButtonSpacing: {
         marginLeft: theme.spacing(1),
     },
+    editorPane: {
+        width: '50%',
+        height: '100%',
+        overflow: 'scroll',
+    },
+    editorRoot: {
+        height: '100%',
+    },
 }));
 
 /**
@@ -154,10 +164,9 @@ function Overview(props) {
     const serviceId = match.params.service_uuid;
     const [service, setService] = useState(null);
     const [notFound, setNotFound] = useState(false);
-    const [serviceDefinition, setServiceDefinition] = useState({});
+    const [serviceDefinition, setServiceDefinition] = useState(null);
     const [openReadOnlyDefinition, setOpenReadOnlyDefinition] = useState(false);
     const [format, setFormat] = useState('yaml');
-    const [convertTo, setConvertTo] = useState(null);
     const theme = useTheme();
     const {
         graphqlIcon,
@@ -204,44 +213,16 @@ function Overview(props) {
         });
     }
 
-    /**
-     * Toggle the format of the service definition.
-     * JSON -> YAML, YAML -> JSON
-     */
-    const onChangeFormatClick = () => {
-        let formattedString = '';
-        if (convertTo === 'json') {
-            formattedString = JSON.stringify(YAML.load(serviceDefinition), null, 1);
-        } else {
-            formattedString = YAML.safeDump(YAML.safeLoad(serviceDefinition));
-        }
-        setServiceDefinition(formattedString);
-        const tmpConvertTo = convertTo;
-        setConvertTo(format);
-        setFormat(tmpConvertTo);
-    };
-
-    const getConvertToFormat = (value) => {
-        return value === 'json' ? 'yaml' : 'json';
-    };
-
     const showServiceDefinition = () => {
-        if (openReadOnlyDefinition) {
-            setOpenReadOnlyDefinition(false);
-            setConvertTo(null);
-            setServiceDefinition({});
-            setFormat('yaml');
-        } else {
+        if (!serviceDefinition) {
             const promisedServiceDefinition = ServiceCatalog.getServiceDefinition(serviceId);
             promisedServiceDefinition.then((data) => {
                 if (service.definitionType !== 'GRAPHQL_SDL') {
                     setServiceDefinition(YAML.safeDump(YAML.safeLoad(data)));
                     setFormat('yaml');
-                    setConvertTo(getConvertToFormat(format));
                 } else {
                     setServiceDefinition(data.obj.schemaDefinition);
                     setFormat('txt');
-                    setConvertTo(null);
                 }
                 setOpenReadOnlyDefinition(true);
             }).catch((error) => {
@@ -255,12 +236,27 @@ function Overview(props) {
                 }
             });
         }
-        return null;
     };
 
     useEffect(() => {
         getService();
     }, []);
+
+    /**
+     * Sets the state to close the swagger-editor drawer.
+     * */
+    function closeEditor() {
+        setOpenReadOnlyDefinition(false);
+    }
+
+    /**
+     * Handles the transition of the drawer.
+     * @param {object} props1 list of props
+     * @return {object} The Slide transition component
+     * */
+    function transition(props1) {
+        return <Slide direction='up' {...props1} />;
+    }
 
     const listingRedirect = () => {
         history.push('/service-catalog');
@@ -544,8 +540,8 @@ function Overview(props) {
                                                             onClick={showServiceDefinition}
                                                             color='primary'
                                                             endIcon={
-                                                                openReadOnlyDefinition
-                                                                    ? (<ExpandLessIcon />) : (<ExpandMoreIcon />)
+                                                                !openReadOnlyDefinition
+                                                                && <OpenInNewIcon />
                                                             }
                                                         >
                                                             <FormattedMessage
@@ -554,37 +550,53 @@ function Overview(props) {
                                                             />
                                                         </Button>
                                                     </div>
-                                                    { service.definitionType !== 'GRAPHQL_SDL' && convertTo && (
-                                                        <div>
-                                                            <Button
-                                                                size='small'
-                                                                className={classes.button}
-                                                                onClick={onChangeFormatClick}
-                                                            >
-                                                                <SwapHorizontalCircle className={classes.buttonIcon} />
-                                                                <FormattedMessage
-                                                                    id='ServiceCatalog.Listing.Overview.convert.to'
-                                                                    defaultMessage='Convert to'
-                                                                />
-                                                                {' '}
-                                                                {convertTo}
-                                                            </Button>
-                                                        </div>
-                                                    )}
                                                 </div>
-                                                {openReadOnlyDefinition && (
-                                                    <Suspense fallback={<Progress />}>
-                                                        <MonacoEditor
-                                                            language={format}
-                                                            width={(service.definitionType !== 'GRAPHQL_SDL')
-                                                                ? 'calc(100% + 55px)' : 'calc(100% + 120px)'}
-                                                            height='calc(75vh - 200px)'
-                                                            theme='vs-dark'
-                                                            value={serviceDefinition}
-                                                            options={editorOptions}
-                                                        />
+                                                <Dialog
+                                                    fullScreen
+                                                    open={openReadOnlyDefinition}
+                                                    onClose={closeEditor}
+                                                    TransitionComponent={transition}
+                                                >
+                                                    <Paper square className={classes.popupHeader}>
+                                                        <IconButton
+                                                            className={classes.button}
+                                                            color='inherit'
+                                                            onClick={closeEditor}
+                                                            aria-label={(
+                                                                <FormattedMessage
+                                                                    id='ServiceCatalog.Listing.Overview.close.btn'
+                                                                    defaultMessage='Close'
+                                                                />
+                                                            )}
+                                                        >
+                                                            <Icon>close</Icon>
+                                                        </IconButton>
+                                                    </Paper>
+                                                    <Suspense
+                                                        fallback={(
+                                                            <Progress />
+                                                        )}
+                                                    >
+                                                        <Grid container spacing={2} className={classes.editorRoot}>
+                                                            <Grid item className={classes.editorPane}>
+                                                                <MonacoEditor
+                                                                    language={format}
+                                                                    width='100%'
+                                                                    height='calc(100vh - 51px)'
+                                                                    theme='vs-dark'
+                                                                    value={serviceDefinition}
+                                                                    options={editorOptions}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item className={classes.editorPane}>
+                                                                <SwaggerUI
+                                                                    url={'data:text/' + format + ','
+                                                                    + encodeURIComponent(serviceDefinition)}
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
                                                     </Suspense>
-                                                )}
+                                                </Dialog>
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>
