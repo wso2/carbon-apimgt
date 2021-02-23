@@ -331,7 +331,12 @@ function AddEditGWEnvironment(props) {
                         </span>
                     )}
                     fullWidth
-                    helperText='Display name of the Gateway Environment'
+                    helperText={(
+                        <FormattedMessage
+                            id='AdminPages.Gateways.AddEdit.form.displayName.help'
+                            defaultMessage='Display name of the Gateway Environment'
+                        />
+                    )}
                     variant='outlined'
                 />
                 <TextField

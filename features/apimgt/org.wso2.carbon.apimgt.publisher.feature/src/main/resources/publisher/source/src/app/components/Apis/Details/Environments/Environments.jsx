@@ -1517,7 +1517,6 @@ export default function Environments() {
                                                                 onChange={handleVhostDeploySelect}
                                                                 margin='dense'
                                                                 variant='outlined'
-                                                                style={{ width: '50%' }}
                                                                 fullWidth
                                                                 helperText={getVhostHelperText(row.name)}
                                                             >
