@@ -52,19 +52,19 @@ export default function Tags(props) {
                 disabled={isRestricted(['apim:api_create', 'apim:api_publish'], apiFromContext)}
                 value={api.tags}
                 error={!isTagValid}
-                // helperText={isTagValid ? (
-                //     <FormattedMessage
-                //         id='Apis.Details.Configuration.components.Tags.helper'
-                //         defaultMessage='Press `Enter` after typing the tag name to add a new tag'
-                //     />
-                // ) : (
-                //     <FormattedMessage
-                //         defaultMessage={
-                //             'The tag contains one or more illegal characters '
-                //             + '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
-                //         }
-                //     />
-                // )}
+                helperText={isTagValid ? (
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.Tags.helper'
+                        defaultMessage='Press `Enter` after typing the tag name to add a new tag'
+                    />
+                ) : (
+                    <FormattedMessage
+                        defaultMessage={
+                            'The tag contains one or more illegal characters '
+                            + '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
+                        }
+                    />
+                )}
                 onAdd={(tag) => {
                     if (regexPattern.test(tag)) {
                         setIsTagValid(false);
