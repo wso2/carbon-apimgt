@@ -42,14 +42,14 @@ public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
         return latencies;
     }
 
-    @Override
-    public Operation getOperation() {
-
-        Operation operation = super.getOperation();
-        String eventName = ""; // // todo get this from smg ctx
-        if (!eventName.isEmpty()) {
-            operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
-        }
-        return operation;
-    }
+//    @Override
+//    public Operation getOperation() {
+//
+//        Operation operation = super.getOperation();
+//        String eventName = "subscription"; // // todo get this from smg ctx
+//        if (!eventName.isEmpty()) {
+//            operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
+//        }
+//        return operation;
+//    }
 }

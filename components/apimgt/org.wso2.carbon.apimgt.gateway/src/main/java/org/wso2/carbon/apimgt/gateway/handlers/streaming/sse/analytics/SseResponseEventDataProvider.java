@@ -44,15 +44,15 @@ public class SseResponseEventDataProvider extends AsyncAnalyticsDataProvider {
     public int getProxyResponseCode() {
         return responseCode;
     }
-
-    @Override
-    public Operation getOperation() {
-
-        Operation operation = super.getOperation();
-        String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
-        operation.setApiResourceTemplate(apiResourceTemplate);
-        return operation;
-    }
+//
+//    @Override
+//    public Operation getOperation() {
+//
+//        Operation operation = super.getOperation();
+//        String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
+//        operation.setApiResourceTemplate(apiResourceTemplate);
+//        return operation;
+//    }
 
     public void setResponseCode(int responseCode) {
         this.responseCode = responseCode;
