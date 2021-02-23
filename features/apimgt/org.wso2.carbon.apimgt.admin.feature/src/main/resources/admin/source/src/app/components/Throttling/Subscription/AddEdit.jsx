@@ -514,7 +514,7 @@ function AddEdit(props) {
                 },
                 permissions: {
                     permissionType: state.permissions.permissionStatus,
-                    roles: getRoleList(state.permissions.roles),
+                    roles: validRoles,
                 },
             };
         } else {
