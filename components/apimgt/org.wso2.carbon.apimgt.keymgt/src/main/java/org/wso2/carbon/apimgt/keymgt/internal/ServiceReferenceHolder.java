@@ -16,7 +16,12 @@
 
 package org.wso2.carbon.apimgt.keymgt.internal;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler;
 import org.wso2.carbon.apimgt.keymgt.handlers.KeyValidationHandler;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
@@ -27,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ServiceReferenceHolder {
 
+    private static final Log log = LogFactory.getLog(ServiceReferenceHolder.class);
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfigurationService amConfigurationService;
@@ -73,9 +79,21 @@ public class ServiceReferenceHolder {
         if (keyValidationHandlerMap.containsKey(tenantDomain)) {
             return keyValidationHandlerMap.get(tenantDomain);
         }
-        DefaultKeyValidationHandler defaultKeyValidationHandler = new DefaultKeyValidationHandler();
-        keyValidationHandlerMap.put(tenantDomain, defaultKeyValidationHandler);
-        return defaultKeyValidationHandler;
+
+        KeyValidationHandler keyValidationHandler = null;
+        String className = amConfigurationService.getAPIManagerConfiguration().getFirstProperty
+                (APIConstants.KEY_VALIDATION_HANDLER_CLASSNAME);
+        try {
+            if (StringUtils.isNotEmpty(className)) {
+                keyValidationHandler = (KeyValidationHandler) APIUtil.getClassForName(className).newInstance();
+            } else {
+                keyValidationHandler = new DefaultKeyValidationHandler();
+            }
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            log.error("Key validation handler object creation error", e);
+        }
+        keyValidationHandlerMap.put(tenantDomain, keyValidationHandler);
+        return keyValidationHandler;
     }
     public RealmService getRealmService() {
         return realmService;
