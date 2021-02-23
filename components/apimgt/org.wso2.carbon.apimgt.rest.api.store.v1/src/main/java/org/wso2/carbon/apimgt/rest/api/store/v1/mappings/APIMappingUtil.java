@@ -464,7 +464,10 @@ public class APIMappingUtil {
         defaultVhost.setWsPort(APIConstants.WS_PROTOCOL_PORT);
         defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
         // Deployed VHost
-        VHost vHost = environment.getVhosts().stream().findAny().orElse(defaultVhost);
+        VHost vHost = environment.getVhosts().stream()
+                .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
+                .findAny()
+                .orElse(defaultVhost);
 
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
         apiEndpointURLsDTO.setEnvironmentName(environment.getName());
@@ -472,8 +475,9 @@ public class APIMappingUtil {
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
         String context = apidto.getContext();
-        boolean isHttpAPI = StringUtils.equalsIgnoreCase(apidto.getType(), "HTTP");
-        if (isHttpAPI) {
+        boolean isWs = apidto.getEndpointURLs().size() > 0
+                && apidto.getEndpointURLs().get(0).getUrLs().getWs() != null;
+        if (!isWs) {
             apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
             apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
         } else {
@@ -483,9 +487,9 @@ public class APIMappingUtil {
         apiEndpointURLsDTO.setUrLs(apiurLsDTO);
 
         APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
-        if (apidto.isIsDefaultVersion()) {
+        if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
             String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
-            if (isHttpAPI) {
+            if (!isWs) {
                 apiDefaultVersionURLsDTO.setHttp(vHost.getHttpUrl() + defaultContext);
                 apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
             } else {
