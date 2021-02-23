@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -50,7 +49,6 @@ public class ServiceReferenceHolder {
     private static UserRealm userRealm;
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
-    private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
     private KeyStore trustStore;
     private AccessTokenGenerator accessTokenGenerator;
     private KeyManagerConfigurationService keyManagerConfigurationService;
@@ -122,14 +120,6 @@ public class ServiceReferenceHolder {
 
     public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         this.outputEventAdapterService = outputEventAdapterService;
-    }
-
-    public APIMgtWorkflowDataPublisher getApiMgtWorkflowDataPublisher() {
-        return apiMgtWorkflowDataPublisher;
-    }
-
-    public void setApiMgtWorkflowDataPublisher(APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher) {
-        this.apiMgtWorkflowDataPublisher = apiMgtWorkflowDataPublisher;
     }
 
     public KeyStore getTrustStore() {

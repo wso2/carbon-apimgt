@@ -80,7 +80,6 @@ import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -264,11 +263,6 @@ public class APIManagerComponent {
             SQLConstantManagerFactory.initializeSQLConstantManager();
             // Initialize PasswordResolver
             PasswordResolverFactory.initializePasswordResolver();
-
-            boolean analyticsEnabled = APIUtil.isAnalyticsEnabled();
-            if (analyticsEnabled) {
-                ServiceReferenceHolder.getInstance().setApiMgtWorkflowDataPublisher(new APIMgtWorkflowDataPublisher());
-            }
 
             APIUtil.init();
 
