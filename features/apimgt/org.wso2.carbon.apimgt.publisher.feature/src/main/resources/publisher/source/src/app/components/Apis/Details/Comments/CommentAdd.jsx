@@ -112,7 +112,7 @@ class CommentAdd extends React.Component {
     /**
      * Handles adding a new comment
      * @memberof CommentAdd
-     * **/
+     * * */
     handleClickAddComment() {
         const {
             apiId, replyTo, allComments, commentsUpdate,
@@ -148,24 +148,6 @@ class CommentAdd extends React.Component {
             Alert.error('You cannot enter a blank comment');
         }
         this.setState({ currentLength: 0 });
-    }
-
-    /**
-     * Filters the comment to add the reply
-     * @memberof CommentAdd
-     */
-    filterCommentToAddReply(commentToFilter) {
-        const { parentCommentId } = this.props;
-        return commentToFilter.commentId === parentCommentId;
-    }
-
-    /**
-     * Handles the comment text when input changes
-     * @param {Object} {target} target element
-     * @memberof CommentAdd
-     */
-    inputChange({ target }) {
-        this.setState({ commentText: target.value, currentLength: target.value.length });
     }
 
     /**

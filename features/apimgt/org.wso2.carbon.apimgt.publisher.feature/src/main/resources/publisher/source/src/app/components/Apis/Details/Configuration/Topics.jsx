@@ -173,6 +173,30 @@ class Topics extends Component {
         this.renderSchemaForTopic = this.renderSchemaForTopic.bind(this);
     }
 
+    getAsyncAPIDefinition() {
+        const result = this.props.api.getAsyncAPIDefinition();
+        result.then(async (response) => {
+            $RefParser.dereference(response.body, (err) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    this.setState({
+                        // eslint-disable-next-line react/no-unused-state
+                        definition: response.body,
+                    });
+                }
+            });
+            const doc = await parse(response.body);
+            this.setState({ asyncAPI: doc }, this.loadTopicMetaData);
+        });
+    }
+
+    getSortedOperations() {
+        const operations = [...this.props.api.operations];
+        operations.sort((a, b) => ((a.target + a.verb > b.target + b.verb) ? 1 : -1));
+        return operations;
+    }
+
     handleCancelSave() {
         this.setState({ topics: this.loadTopics(this.getSortedOperations()) });
     }
@@ -222,30 +246,6 @@ class Topics extends Component {
             new: true,
         });
         this.setState({ topics: topicsCopy });
-    }
-
-    getAsyncAPIDefinition() {
-        const result = this.props.api.getAsyncAPIDefinition();
-        result.then(async (response) => {
-            $RefParser.dereference(response.body, (err) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    this.setState({
-                        // eslint-disable-next-line react/no-unused-state
-                        definition: response.body,
-                    });
-                }
-            });
-            const doc = await parse(response.body);
-            this.setState({ asyncAPI: doc }, this.loadTopicMetaData);
-        });
-    }
-
-    getSortedOperations() {
-        const operations = [...this.props.api.operations];
-        operations.sort((a, b) => ((a.target + a.verb > b.target + b.verb) ? 1 : -1));
-        return operations;
     }
 
     loadTopics() {
