@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -947,32 +946,6 @@ public class APIManagerComponent {
         } else {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
-    }
-
-    /**
-     * Initialize the ExtensionListener Service dependency.
-     *
-     * @param extensionListener {@link ExtensionListener} service reference
-     */
-    @Reference(
-            name = "gateway.extension.listener.service",
-            service = ExtensionListener.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "removeExtensionListener")
-    protected void addExtensionListener(ExtensionListener extensionListener) {
-
-        ServiceReferenceHolder.getInstance().addExtensionListener(extensionListener.getType(), extensionListener);
-    }
-
-    /**
-     * De-reference the ExtensionListener service.
-     *
-     * @param extensionListener {@link ExtensionListener} service reference
-     */
-    protected void removeExtensionListener(ExtensionListener extensionListener) {
-
-        ServiceReferenceHolder.getInstance().removeExtensionListener(extensionListener.getType());
     }
 
     @Reference(

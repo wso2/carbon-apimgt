@@ -344,14 +344,16 @@ public class ExtensionListenerUtil {
 
     /**
      * Returns extension listener implementation for the given Extension type. If no listener implementations registered
-     * for the given type, return the default extension listener.
+     * for the given type, return null.
      *
      * @param type ExtensionType value
      * @return ExtensionListener implementation
      */
     private static ExtensionListener getExtensionListener(String type) {
 
-        return ServiceReferenceHolder.getInstance().getExtensionListener(type);
+        Map<String, ExtensionListener> extensionListeners = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getExtensionListenerMap();
+        return extensionListeners.get(type);
     }
 
     @SuppressWarnings("unchecked")

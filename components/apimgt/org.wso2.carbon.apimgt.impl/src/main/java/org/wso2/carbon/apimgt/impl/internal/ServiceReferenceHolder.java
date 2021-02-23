@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
@@ -62,7 +61,6 @@ public class ServiceReferenceHolder {
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
     private ImportExportAPI importExportService;
     private Map<String, GatewayArtifactGenerator> gatewayArtifactGeneratorMap = new HashMap<>();
-    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -246,21 +244,6 @@ public class ServiceReferenceHolder {
     public GatewayArtifactGenerator getGatewayArtifactGenerator(String type) {
 
         return gatewayArtifactGeneratorMap.get(type);
-    }
-
-    public void addExtensionListener(String type, ExtensionListener extensionListener) {
-
-        extensionListenerMap.put(type, extensionListener);
-    }
-
-    public void removeExtensionListener(String type) {
-
-        extensionListenerMap.remove(type);
-    }
-
-    public ExtensionListener getExtensionListener(String type) {
-
-        return extensionListenerMap.get(type);
     }
 
     public Set<String> getGatewayArtifactGeneratorTypes() {
