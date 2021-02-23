@@ -2659,6 +2659,6 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENERS = "ExtensionListeners";
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
-        public static final String EXTENSION_LISTENER_CLASS_NAME = "ExtensionListenerClassName";
+        public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
     }
 }
