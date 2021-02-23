@@ -462,12 +462,13 @@ class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    createNewAPIVersion(version, isDefaultVersion, callback = null) {
+    createNewAPIVersion(version, isDefaultVersion, serviceVersion, callback = null) {
         const promise_copy_api = this.client.then(client => {
             return client.apis['APIs'].createNewAPIVersion(
                 {
                     apiId: this.id,
                     newVersion: version,
+                    serviceVersion: serviceVersion,
                     defaultVersion: isDefaultVersion,
                 },
                 this._requestMetaData(),
@@ -2196,6 +2197,60 @@ class API extends Resource {
             });
     }
 
+    /**
+     * Create API from service
+     * @returns {promise} Add response.
+     */
+    static createApiFromService(serviceKey, apiMetaData) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        const promisedServiceResponse = apiClient.then(client => {
+            return client.apis['APIs'].importServiceFromCatalog(
+                {
+                    serviceKey: serviceKey,
+                },
+                { requestBody: apiMetaData},
+                this._requestMetaData() 
+            );
+        });
+        return promisedServiceResponse.then(response => response.body);
+    }
+
+     /**
+     * Reimport service.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    static reimportService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {   
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
+    /**
+     * Create new version service.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    static newVersionService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {   
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+    
 
     /**
      * Get details of a given API

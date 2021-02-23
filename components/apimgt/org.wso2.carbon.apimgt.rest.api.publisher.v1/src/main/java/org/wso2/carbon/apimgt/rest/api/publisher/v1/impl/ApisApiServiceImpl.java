@@ -3200,6 +3200,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (fileDetail != null && fileInputStream != null) {
                 ResourceFile wsdlResource = new ResourceFile(fileInputStream,
                         fileDetail.getContentType().toString());
+                if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
+                        APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
+                    wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+                } else {
+                    wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+                }
                 apiToAdd.setWsdlResource(wsdlResource);
                 apiProvider.addWSDLResource(apiToAdd.getUuid(), wsdlResource, null, tenantDomain);
             }
@@ -3347,9 +3353,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (StringUtils.isNotBlank(url)) {
             apiProvider.addWSDLResource(apiId, null, url, tenantDomain);
         } else {
-            ResourceFile wsdlResource = new ResourceFile(fileInputStream,
-                    fileDetail.getContentType().toString());
-
+            ResourceFile wsdlResource;
+            if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
+                    APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
+                wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+            } else {
+                wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+            }
             apiProvider.addWSDLResource(apiId, wsdlResource, null, tenantDomain);
         }
         return Response.ok().build();
@@ -4450,6 +4460,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(username);
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+            if (service == null) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceKey, log);
+            }
             APIDTO createdApiDTO = null;
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
@@ -4494,6 +4507,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service);
             api.setEndpointConfig(endpointConfig);
             JSONObject serviceInfo = new JSONObject();
+            serviceInfo.put("name", service.getName());
+            serviceInfo.put("version", service.getVersion());
             serviceInfo.put("key", service.getKey());
             serviceInfo.put("md5", service.getMd5());
             api.setServiceInfo(serviceInfo);
@@ -4559,7 +4574,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
             if (service != null) {
-                apiToAdd.setServiceInfo("serviceKey", service.getKey());
+                apiToAdd.setServiceInfo("key", service.getKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());
                 apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service));
             }

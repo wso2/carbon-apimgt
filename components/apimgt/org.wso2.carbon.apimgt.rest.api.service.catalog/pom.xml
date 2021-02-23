@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.229-SNAPSHOT</version>
+        <version>6.8.244-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -267,6 +267,18 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/service/catalog/dto/**/*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/service/catalog/**Api.**</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/service/catalog/**Service.**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

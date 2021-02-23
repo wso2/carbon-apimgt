@@ -223,7 +223,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " limit ? , ? "+
                     " )x ";
 
-    public static final String GET_ALL_SERVICES_BY_TENANT_ID = "SELECT " +
+    public static final String GET_ALL_SERVICES_BY_WITH_SERVICE_KEY = "SELECT " +
             "   UUID," +
             "   SERVICE_KEY," +
             "   MD5," +
@@ -245,9 +245,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   WHERE TENANT_ID = ? " +
             "   AND SERVICE_NAME LIKE ? " +
             "   AND SERVICE_VERSION LIKE ? " +
-            "   AND DEFINITION_TYPE LIKE ?" +
             "   AND DISPLAY_NAME LIKE ?" +
-            "   AND SERVICE_KEY LIKE ?" +
+            "   AND SERVICE_KEY = ?" +
             "   ORDER BY $1 $2 " +
             "   LIMIT ?, ? ";
 

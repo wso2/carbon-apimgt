@@ -422,6 +422,7 @@ public final class APIConstants {
     public static final String ACCESS_TOKEN_USER_TYPE_APPLICATION = "APPLICATION";
     public static final String USER_TYPE_END_USER = "END_USER";
     public static final String FIELD_API_NAME = "API_NAME";
+    public static final String FIELD_API_VERSION = "API_VERSION";
     public static final String FIELD_CONSUMER_KEY = "CONSUMER_KEY";
     public static final String FIELD_API_PUBLISHER = "API_PROVIDER";
 
@@ -1005,6 +1006,8 @@ public final class APIConstants {
     public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tenants";
     public static final String NO_PERMISSION_ERROR = "noPermissions";
     public static final String JSON_PARSE_ERROR = "parseErrors";
+
+    public static final String ACCOUNT_LOCKED_CLAIM = "http://wso2.org/claims/identity/accountLocked";
 
     //TODO: move this to a common place (& Enum) to be accessible by all components
     public static class KeyValidationStatus {
@@ -2053,6 +2056,7 @@ public final class APIConstants {
 
     public static final String APPLICATION_GZIP = "application/gzip";
     public static final String APPLICATION_ZIP = "application/zip";
+    public static final String APPLICATION_X_ZIP_COMPRESSED = "application/x-zip-compressed";
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";

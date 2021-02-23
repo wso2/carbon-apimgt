@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -63,7 +62,7 @@ import javax.xml.stream.XMLStreamException;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, UserSignUpWSWorkflowExecutor.class, ApiMgtDAO.class, APIUtil.class,
-        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class, APIMgtWorkflowDataPublisher.class})
+        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class})
 public class UserSignUpWSWorkflowExecutorTest {
 
     private UserSignUpWSWorkflowExecutor userSignUpWSWorkflowExecutor;
@@ -113,8 +112,6 @@ public class UserSignUpWSWorkflowExecutorTest {
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
         Mockito.when(realmService.getTenantUserRealm(tenantID)).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
-        APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher = Mockito.mock(APIMgtWorkflowDataPublisher.class);
-        Mockito.when(serviceReferenceHolder.getApiMgtWorkflowDataPublisher()).thenReturn(apiMgtWorkflowDataPublisher);
         PowerMockito.whenNew(UserAdminStub.class).withAnyArguments().thenReturn(userAdminStub);
         apiMgtDAO = TestUtils.getApiMgtDAO();
         userSignUpWSWorkflowExecutor = new UserSignUpWSWorkflowExecutor();
