@@ -4630,10 +4630,34 @@ definitions:
         type: integer
         format: int64
         example: 50
+      dataUnit:
+        description: |
+          Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
+        type: string
+        example: KB
       unitTime:
         type: integer
         format: int64
         example: 60000
+      timeUnit:
+        type: string
+        example: min
+      rateLimitCount:
+        type: integer
+        default: 0
+        description: Burst control request count
+        example: 10
+      rateLimitTimeUnit:
+        type: string
+        description: Burst control time unit
+        example: min
+      quotaPolicyType:
+        type: string
+        description: Default quota limit type
+        enum:
+          - REQUESTCOUNT
+          - BANDWIDTHVOLUME
+        example: REQUESTCOUNT
       tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
