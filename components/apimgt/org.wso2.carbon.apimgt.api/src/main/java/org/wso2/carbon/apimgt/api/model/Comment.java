@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This class represent the model for API comments

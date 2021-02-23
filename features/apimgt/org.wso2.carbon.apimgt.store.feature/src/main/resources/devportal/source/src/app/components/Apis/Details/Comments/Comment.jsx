@@ -26,6 +26,8 @@ import Divider from '@material-ui/core/Divider';
 import Box from '@material-ui/core/Box';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
+
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
@@ -291,7 +293,6 @@ class Comment extends React.Component {
                                             </Typography>
                                             <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
                                                 <Typography noWrap className={classes.commentText} variant='caption'>
-                                                    {dayjs.extend(relativeTime)}
                                                     {dayjs(comment.createdTime).fromNow()}
                                                 </Typography>
                                             </Tooltip>
