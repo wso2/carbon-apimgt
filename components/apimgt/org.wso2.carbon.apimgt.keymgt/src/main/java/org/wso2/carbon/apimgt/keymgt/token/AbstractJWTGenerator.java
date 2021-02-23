@@ -95,7 +95,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
         }
 
-
         String claimsRetrieverImplClass = jwtConfigurationDto.getClaimRetrieverImplClass();
 
         if (claimsRetrieverImplClass != null) {
