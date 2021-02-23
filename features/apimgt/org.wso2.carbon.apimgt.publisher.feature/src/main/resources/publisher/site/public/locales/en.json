@@ -1,7 +1,4 @@
 {
-  "8+ZR29": {
-    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
-  },
   "APis.Details.tryout.help.main": {
     "defaultMessage": "Test APIs while in the Development stage."
   },
@@ -237,17 +234,26 @@
   "Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully": {
     "defaultMessage": "API Definition Updated Successfully"
   },
+  "Apis.Details.APIDefinition.APIDefinition.api.outdated.definition": {
+    "defaultMessage": "Current API definition outdated, You can either re-import existing resource or create new version"
+  },
   "Apis.Details.APIDefinition.APIDefinition.asyncAPI.definition": {
     "defaultMessage": "AsyncAPI Definition"
   },
   "Apis.Details.APIDefinition.APIDefinition.audit.api": {
     "defaultMessage": "Audit API"
   },
+  "Apis.Details.APIDefinition.APIDefinition.btn.cancel": {
+    "defaultMessage": "Cancel"
+  },
   "Apis.Details.APIDefinition.APIDefinition.btn.close": {
     "defaultMessage": "Close"
   },
   "Apis.Details.APIDefinition.APIDefinition.btn.no": {
     "defaultMessage": "CANCEL"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.btn.reimport": {
+    "defaultMessage": "Re-import"
   },
   "Apis.Details.APIDefinition.APIDefinition.btn.yes": {
     "defaultMessage": "SAVE"
@@ -296,6 +302,15 @@
   },
   "Apis.Details.APIDefinition.APIDefinition.import.wsdl": {
     "defaultMessage": "Import WSDL"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.link.new.version": {
+    "defaultMessage": "Create new verison"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.outdated.api.definition": {
+    "defaultMessage": "Outdated Definition"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.outdated.definition": {
+    "defaultMessage": "Outdated Definition"
   },
   "Apis.Details.APIDefinition.APIDefinition.save.api.definition": {
     "defaultMessage": "Save API Definition"
@@ -3552,13 +3567,12 @@
     "defaultMessage": "Create API"
   },
   "ServiceCatalog.CreateApi.error.create.api": {
-    "defaultMessage": "Error while creating API from service"
+  },
+  "ServiceCatalog.CreateApi.mandatory.field.label": {
+    "defaultMessage": "Mandatory fields"
   },
   "ServiceCatalog.CreateApi.update.btn": {
     "defaultMessage": "Create API"
-  },
-  "ServiceCatalog.Listing.CreateApi.get.service.def.error": {
-    "defaultMessage": "Something went wrong while retrieving the Service Definition."
   },
   "ServiceCatalog.Listing.Delete.cancel": {
     "defaultMessage": "Cancel"
@@ -3605,6 +3619,21 @@
   "ServiceCatalog.Listing.Listing.version": {
     "defaultMessage": "Version"
   },
+  "ServiceCatalog.Listing.Onboarding.Heading1.description": {
+    "defaultMessage": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+  },
+  "ServiceCatalog.Listing.Onboarding.Heading1.description2": {
+    "defaultMessage": "Create and Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
+  },
+  "ServiceCatalog.Listing.Onboarding.Heading1.subHeading": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.Heading2.subHeading": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.add.sample": {
+    "defaultMessage": "Add a sample"
+  },
   "ServiceCatalog.Listing.Onboarding.add.sample.service": {
     "defaultMessage": "Add Sample Service"
   },
@@ -3617,17 +3646,14 @@
   "ServiceCatalog.Listing.Onboarding.get.started": {
     "defaultMessage": "Get Started"
   },
-  "ServiceCatalog.Listing.Onboarding.welcome.description": {
-    "defaultMessage": "The Service Catalog enables API-First Integration. Through this, integration services are made discoverable to the API Management layer so that API proxies can directly be created using them."
-  },
-  "ServiceCatalog.Listing.Onboarding.welcome.msg": {
-    "defaultMessage": "Welcome to WSO2 API Manager"
+  "ServiceCatalog.Listing.Onboarding.write.first.intg": {
+    "defaultMessage": "Write your first"
   },
   "ServiceCatalog.Listing.Overview.back.btn": {
     "defaultMessage": "Go Back"
   },
-  "ServiceCatalog.Listing.Overview.convert.to": {
-    "defaultMessage": "Convert to"
+  "ServiceCatalog.Listing.Overview.close.btn": {
+    "defaultMessage": "Close"
   },
   "ServiceCatalog.Listing.Overview.created.time": {
     "defaultMessage": "Created Time"
@@ -3644,8 +3670,8 @@
   "ServiceCatalog.Listing.Overview.download.service": {
     "defaultMessage": "Download"
   },
-  "ServiceCatalog.Listing.Overview.download.service.zip.error": {
-    "defaultMessage": "Something went wrong while downloading the Service."
+  "ServiceCatalog.Listing.Overview.download.service.error": {
+    "defaultMessage": "Something went wrong while downloading the Service Definition."
   },
   "ServiceCatalog.Listing.Overview.error.loading.service": {
     "defaultMessage": "Error while loading service"
@@ -3772,6 +3798,9 @@
   },
   "n8vnpP": {
     "defaultMessage": "Topic Name"
+  },
+  "qLKC50": {
+    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = { } | < > , ' \" \\\\ / ) ."
   },
   "sIDiOO": {
     "defaultMessage": "Yes. Delete"
