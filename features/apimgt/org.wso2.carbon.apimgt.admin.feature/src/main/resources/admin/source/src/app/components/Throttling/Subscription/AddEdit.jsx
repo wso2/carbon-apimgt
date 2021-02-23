@@ -47,6 +47,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
 import Joi from '@hapi/joi';
+import ChipInput from 'material-ui-chip-input';
+import base64url from 'base64url';
+import Error from '@material-ui/icons/Error';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -159,6 +165,9 @@ function AddEdit(props) {
     const { history, match: { params } } = props;
     const restApi = new API();
     const isEdit = (params.id !== null) && (params.id !== undefined);
+    const [validRoles, setValidRoles] = useState(['Internal/everyone']);
+    const [invalidRoles, setInvalidRoles] = useState([]);
+    const [roleValidity, setRoleValidity] = useState(true);
 
     const [initialState, setInitialState] = useState({
         policyName: '',
@@ -185,7 +194,7 @@ function AddEdit(props) {
         customAttributes: [],
         stopOnQuotaReach: true,
         permissions: {
-            roles: 'Internal/everyone',
+            roles: ['Internal/everyone'],
             permissionStatus: 'ALLOW',
         },
         graphQL: {
@@ -227,6 +236,7 @@ function AddEdit(props) {
                     timeUnitEdit = result.body.defaultLimit.eventCount.timeUnit;
                     typeEdit = result.body.defaultLimit.type;
                 }
+                setValidRoles(result.body.permissions.roles);
                 const editState = {
                     policyName: result.body.policyName,
                     description: result.body.description,
@@ -256,8 +266,7 @@ function AddEdit(props) {
                         permissionStatus: (result.body.permissions === null)
                             ? 'ALLOW' : result.body.permissions.permissionType,
                         roles: (result.body.permissions === null)
-                            ? 'Internal/everyone' : result.body.permissions.roles
-                            && result.body.permissions.roles.join(','),
+                            ? ['Internal/everyone'] : validRoles,
                     },
                     graphQL: {
                         maxComplexity: (result.body.graphQLMaxComplexity === 0) ? '' : result.body.graphQLMaxComplexity,
@@ -292,7 +301,7 @@ function AddEdit(props) {
             customAttributes: [],
             stopOnQuotaReach: true,
             permissions: {
-                roles: 'Internal/everyone',
+                roles: ['Internal/everyone'],
                 permissionStatus: 'ALLOW',
             },
             graphQL: {
@@ -393,7 +402,6 @@ function AddEdit(props) {
             billingCycle,
         },
         permissions: {
-            roles,
             permissionStatus,
         },
         graphQL: {
@@ -429,14 +437,37 @@ function AddEdit(props) {
         return errorText;
     };
 
-    const getRoleList = (rolesString) => {
-        // Split the roles string using comma, trim spaces and remove empty strings (if any)
-        if (rolesString.indexOf(',') === -1) {
-            return [rolesString];
+    const handleRoleAddition = (role) => {
+        const promise = restApi.validateSystemRole(base64url.encode(role));
+        promise
+            .then(() => {
+                setValidRoles(validRoles.concat(role));
+                if (invalidRoles.length === 0) {
+                    setRoleValidity(true);
+                } else {
+                    setRoleValidity(false);
+                }
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    setInvalidRoles(invalidRoles.concat(role));
+                    setRoleValidity(false);
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
+    };
+
+    const handleRoleDeletion = (role) => {
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
+            setInvalidRoles(invalidRolesArray);
+            if (invalidRolesArray.length === 0) {
+                setRoleValidity(true);
+            }
         } else {
-            return rolesString.split(',').map((role) => {
-                return role.trim();
-            }).filter((role) => role !== '');
+            setValidRoles(validRoles.filter((existingRole) => existingRole !== role));
         }
     };
 
@@ -479,7 +510,7 @@ function AddEdit(props) {
                 },
                 permissions: {
                     permissionType: state.permissions.permissionStatus,
-                    roles: getRoleList(state.permissions.roles),
+                    roles: validRoles,
                 },
             };
         } else if (type === 'BANDWIDTHLIMIT') {
@@ -548,7 +579,7 @@ function AddEdit(props) {
                 },
                 permissions: {
                     permissionType: state.permissions.permissionStatus,
-                    roles: getRoleList(state.permissions.roles),
+                    roles: validRoles,
                 },
             };
         }
@@ -1468,58 +1499,70 @@ function AddEdit(props) {
                     <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <Box display='flex' flexDirection='row' alignItems='center'>
-                                {permissionStatus === 'ALLOW' ? (
-                                    <Box flex='1'>
-                                        <TextField
-                                            name='roles'
-                                            margin='dense'
-                                            required
-                                            value={roles}
-                                            onChange={onChange}
-                                            label={(
-                                                <span>
+                                <ChipInput
+                                    label='Roles'
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    variant='outlined'
+                                    value={validRoles.concat(invalidRoles)}
+                                    alwaysShowPlaceholder={false}
+                                    placeholder='Enter roles and press Enter'
+                                    blurBehavior='clear'
+                                    InputProps={{
+                                        endAdornment: !roleValidity && (
+                                            <InputAdornment position='end'>
+                                                <Error color='error' />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    onAdd={handleRoleAddition}
+                                    error={!roleValidity}
+                                    helperText={
+                                        !roleValidity ? (
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.Roles.Invalid'
+                                                defaultMessage='A Role is invalid'
+                                            />
+                                        ) : [
+                                            (permissionStatus === 'ALLOW'
+                                                ? (
                                                     <FormattedMessage
-                                                        id='Throttling.Subscription.AddEdit.form.roles'
-                                                        defaultMessage='Roles'
+                                                        id='Throttling.Subscription.enter.permission.allowed'
+                                                        defaultMessage='This policy is "Allowed" for above roles.'
                                                     />
-                                                </span>
-                                            )}
-                                            fullWidth
-                                            multiline
-                                            helperText={intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.permission.allowed',
-                                                defaultMessage: 'This policy is "Allowed" for above roles.',
-                                            }) + ' ' + intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
-                                                defaultMessage: 'Use comma to seperate roles.',
-                                            })}
-                                            variant='outlined'
+                                                )
+                                                : (
+                                                    <FormattedMessage
+                                                        id='Throttling.Subscription.enter.permission.denied'
+                                                        defaultMessage='This policy is "Denied" for above roles.'
+                                                    />
+                                                )
+                                            ),
+                                            ' ',
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.CreateScope.roles.help'
+                                                defaultMessage='Enter a valid role and press `Enter`.'
+                                            />,
+                                        ]
+                                    }
+                                    chipRenderer={({ value }, key) => (
+                                        <Chip
+                                            key={key}
+                                            label={value}
+                                            onDelete={() => {
+                                                handleRoleDeletion(value);
+                                            }}
+                                            style={{
+                                                backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                                margin: '8px 8px 8px 0',
+                                                float: 'left',
+                                            }}
                                         />
-                                    </Box>
-                                ) : (
-                                    <Box flex='1'>
-                                        <TextField
-                                            name='roles'
-                                            margin='dense'
-                                            required
-                                            value={roles}
-                                            onChange={onChange}
-                                            label='Roles'
-                                            fullWidth
-                                            multiline
-                                            helperText={intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.permission.denied',
-                                                defaultMessage: 'This policy is "Denied" for above roles.',
-                                            }) + ' ' + intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
-                                                defaultMessage: 'Use comma to seperate roles.',
-                                            })}
-                                            variant='outlined'
-                                        />
-                                    </Box>
-                                )}
+                                    )}
+                                />
                             </Box>
-                            <Box flex='1'>
+                            <Box flex='1' mt={3}>
                                 <RadioGroup
                                     name='permissionStatus'
                                     value={permissionStatus}
@@ -1537,7 +1580,12 @@ function AddEdit(props) {
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Box component='span' m={1}>
-                            <Button variant='contained' color='primary' onClick={formSaveCallback}>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={formSaveCallback}
+                                disabled={invalidRoles.length !== 0}
+                            >
                                 {saving ? (<CircularProgress size={16} />) : (
                                     <FormattedMessage
                                         id='Throttling.Subscription.AddEdit.form.add'

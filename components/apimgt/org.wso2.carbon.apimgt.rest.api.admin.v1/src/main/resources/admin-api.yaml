@@ -3549,6 +3549,36 @@ paths:
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v2/system-scopes/role-aliases"'
 
   ######################################################
+  # Roles resource APIs
+  ######################################################
+  /roles/{roleId}:
+    head:
+      tags:
+        - Roles
+      summary: Check Whether Given Role Name already Exist
+      description: |
+        Using this operation, user can check a given role name exists or not.
+      operationId: validateSystemRole
+      parameters:
+        - $ref: '#/components/parameters/roleId'
+      responses:
+        200:
+          description: OK. Requested role name exists.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:role_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v2/roles/SW50ZXJuYWwvcHVibGlzaGVyCQ"'
+
+  ######################################################
   # The Tenant Theme resource APIs
   ######################################################
   /tenant-theme:
@@ -5580,6 +5610,16 @@ components:
       required: true
       schema:
         type: string
+    roleId:
+      name: roleId
+      in: path
+      description: |
+        The Base 64 URL encoded role name with domain. If the given role is in PRIMARY user-store, role ID should be
+        derived as Base64URLEncode(role-name). If the given role is in secondary user-store, role ID should be
+        derived as Base64URLEncode({user-store-name}/{role-name}).
+      required: true
+      schema:
+        type: string
   securitySchemes:
     OAuth2Security:
       type: oauth2
@@ -5614,3 +5654,4 @@ components:
             apim:admin_alert_manage: Manage admin alerts
             apim:api_workflow_view: Retrive workflow requests
             apim:scope_manage: Manage system scopes
+            apim:role_manage: Manage system roles

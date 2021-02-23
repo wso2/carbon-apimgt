@@ -8146,6 +8146,12 @@ components:
             key:
               type: string
               example: PetStore-1.0.0
+            name:
+              type: string
+              example: PetStore
+            version:
+              type: string
+              example: 1.0.0
             outdated:
               type: boolean
               example: false

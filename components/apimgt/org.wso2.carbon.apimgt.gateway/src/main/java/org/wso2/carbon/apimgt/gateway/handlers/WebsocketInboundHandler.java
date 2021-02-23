@@ -63,17 +63,11 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
-import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
+import org.wso2.carbon.apimgt.gateway.handlers.ws.DataPublisherUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -89,7 +83,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import javax.cache.Cache;
 
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.DEFAULT_RESOURCE_NAME;
@@ -104,7 +97,6 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSoc
 public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
     private String tenantDomain;
-    private static APIMgtUsageDataPublisher usageDataPublisher;
     private String fullRequestPath;
     private String requestPath; // request path without query param section
     private String version;
@@ -123,21 +115,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void initializeDataPublisher() {
-        if (APIUtil.isAnalyticsEnabled() && usageDataPublisher == null) {
-            String publisherClass = getApiManagerAnalyticsConfiguration().getPublisherClass();
-
-            try {
-                synchronized (this) {
-                    if (usageDataPublisher == null) {
-                        log.debug("Instantiating Web Socket Data Publisher");
-                        usageDataPublisher = new APIMgtUsageDataBridgeDataPublisher();
-                        usageDataPublisher.init();
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Cannot publish event. " + e.getMessage(), e);
-            }
-        }
+        // ignore publisher initialization
     }
 
     @SuppressWarnings("unchecked")
@@ -394,10 +372,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain);
     }
 
-    protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
-        return DataPublisherUtil.getApiManagerAnalyticsConfiguration();
-    }
-
     /**
      * Checks if the request is throttled
      *
@@ -444,7 +418,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                                                             applicationLevelThrottleKey);
             if (isThrottled) {
                 if (APIUtil.isAnalyticsEnabled()) {
-                    publishThrottleEvent();
+                    // Ignore data publishing
                 }
                 return false;
             }
@@ -478,98 +452,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @param isThrottledOut request is throttled out or not
      */
     public void publishRequestEvent(String clientIp, boolean isThrottledOut) {
-        long requestTime = System.currentTimeMillis();
-        String useragent = headers.get(HttpHeaders.USER_AGENT);
-
-        try {
-            String appOwner = infoDTO.getSubscriber();
-            String keyType = infoDTO.getType();
-            String correlationID = UUID.randomUUID().toString();
-
-            RequestResponseStreamDTO requestPublisherDTO = new RequestResponseStreamDTO();
-            requestPublisherDTO.setApiName(infoDTO.getApiName());
-            requestPublisherDTO.setApiCreator(infoDTO.getApiPublisher());
-            requestPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
-            requestPublisherDTO.setApiVersion(infoDTO.getApiName() + ':' + version);
-            requestPublisherDTO.setApplicationId(infoDTO.getApplicationId());
-            requestPublisherDTO.setApplicationName(infoDTO.getApplicationName());
-            requestPublisherDTO.setApplicationOwner(appOwner);
-            requestPublisherDTO.setUserIp(clientIp);
-            requestPublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
-            //context will always be empty as this method will call only for WebSocketFrame and url is null
-            requestPublisherDTO.setApiContext(apiContext);
-            requestPublisherDTO.setThrottledOut(isThrottledOut);
-            requestPublisherDTO.setApiHostname(DataPublisherUtil.getHostAddress());
-            requestPublisherDTO.setApiMethod("-");
-            requestPublisherDTO.setRequestTimestamp(requestTime);
-            requestPublisherDTO.setApiResourcePath("-");
-            requestPublisherDTO.setApiResourceTemplate("-");
-            requestPublisherDTO.setUserAgent(useragent);
-            requestPublisherDTO.setUsername(infoDTO.getEndUserName());
-            requestPublisherDTO.setUserTenantDomain(tenantDomain);
-            requestPublisherDTO.setApiTier(infoDTO.getTier());
-            requestPublisherDTO.setApiVersion(version);
-            requestPublisherDTO.setMetaClientType(keyType);
-            requestPublisherDTO.setCorrelationID(correlationID);
-            requestPublisherDTO.setUserAgent(useragent);
-            requestPublisherDTO.setCorrelationID(correlationID);
-            requestPublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-            requestPublisherDTO.setLabel(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
-            requestPublisherDTO.setProtocol("WebSocket");
-            requestPublisherDTO.setDestination("-");
-            requestPublisherDTO.setBackendTime(0);
-            requestPublisherDTO.setResponseCacheHit(false);
-            requestPublisherDTO.setResponseCode(0);
-            requestPublisherDTO.setResponseSize(0);
-            requestPublisherDTO.setServiceTime(0);
-            requestPublisherDTO.setResponseTime(0);
-            ExecutionTimeDTO executionTime = new ExecutionTimeDTO();
-            executionTime.setBackEndLatency(0);
-            executionTime.setOtherLatency(0);
-            executionTime.setRequestMediationLatency(0);
-            executionTime.setResponseMediationLatency(0);
-            executionTime.setSecurityLatency(0);
-            executionTime.setThrottlingLatency(0);
-            requestPublisherDTO.setExecutionTime(executionTime);
-            usageDataPublisher.publishEvent(requestPublisherDTO);
-        } catch (Exception e) {
-            // flow should not break if event publishing failed
-            log.error("Cannot publish event. " + e.getMessage(), e);
-        }
-
-    }
-
-    /*
-     * Publish throttle events.
-     */
-    private void publishThrottleEvent() {
-        long requestTime = System.currentTimeMillis();
-        String correlationID = UUID.randomUUID().toString();
-        try {
-            ThrottlePublisherDTO throttlePublisherDTO = new ThrottlePublisherDTO();
-            throttlePublisherDTO.setKeyType(infoDTO.getType());
-            throttlePublisherDTO.setTenantDomain(tenantDomain);
-            //throttlePublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
-            throttlePublisherDTO.setApiname(infoDTO.getApiName());
-            throttlePublisherDTO.setVersion(infoDTO.getApiName() + ':' + version);
-            throttlePublisherDTO.setContext(apiContext);
-            throttlePublisherDTO.setApiCreator(infoDTO.getApiPublisher());
-            throttlePublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
-            throttlePublisherDTO.setApplicationName(infoDTO.getApplicationName());
-            throttlePublisherDTO.setApplicationId(infoDTO.getApplicationId());
-            throttlePublisherDTO.setSubscriber(infoDTO.getSubscriber());
-            throttlePublisherDTO.setThrottledTime(requestTime);
-            throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-            throttlePublisherDTO.setThrottledOutReason("-");
-            throttlePublisherDTO.setUsername(infoDTO.getEndUserName());
-            throttlePublisherDTO.setCorrelationID(correlationID);
-            throttlePublisherDTO.setHostName(DataPublisherUtil.getHostAddress());
-            throttlePublisherDTO.setAccessToken("-");
-            usageDataPublisher.publishEvent(throttlePublisherDTO);
-        } catch (Exception e) {
-            // flow should not break if event publishing failed
-            log.error("Cannot publish event. " + e.getMessage(), e);
-        }
+        //ignore data publishing
     }
 
     private void removeTokenFromQuery(Map<String, List<String>> parameters) {

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.8.240-SNAPSHOT</version>
+        <version>6.8.244-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -98,10 +98,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.samples.pizzashack</artifactId>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
@@ -248,9 +244,6 @@
                                 <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
                                 <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
                                 <bundleDef>commons-codec:commons-codec</bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}
-                                </bundleDef>
                                 <bundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}
                                 </bundleDef>

@@ -5954,7 +5954,7 @@ public class ApiMgtDAO {
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
             }
-            String serviceKey = api.getServiceInfo("serviceKey");
+            String serviceKey = api.getServiceInfo("key");
             if (StringUtils.isNotEmpty(serviceKey)) {
                 addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
             }
@@ -7283,9 +7283,10 @@ public class ApiMgtDAO {
                     removeAPIFromDefaultVersion(api.getId(), connection);
                 }
             }
-            String serviceKey = api.getServiceInfo("serviceKey");
+            String serviceKey = api.getServiceInfo("key");
             if (StringUtils.isNotEmpty(serviceKey)) {
-                updateAPIServiceMapping(api.getUuid(), serviceKey, api.getServiceInfo("md5"), connection);
+                int apiId = getAPIID(api.getId());
+                updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -17298,6 +17299,11 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     JSONObject serviceInfo = new JSONObject();
                     serviceInfo.put("key", resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+                    serviceInfo.put("name", resultSet.getString(APIConstants.ServiceCatalogConstants
+                            .SERVICE_NAME));
+                    serviceInfo.put("version", resultSet.getString(APIConstants.ServiceCatalogConstants
+                            .SERVICE_VERSION));
+                    serviceInfo.put("md5", resultSet.getString("API_SERVICE_MD5"));
                     if (resultSet.getString("SERVICE_MD5").equals(resultSet
                             .getString("API_SERVICE_MD5"))) {
                         serviceInfo.put("outdated", false);
@@ -17359,12 +17365,12 @@ public class ApiMgtDAO {
      * @param md5        MD5 value of the Service
      * @throws SQLException
      */
-    public void updateAPIServiceMapping(String apiId, String serviceKey, String md5, Connection connection)
+    public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
             throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
             statement.setString(1, serviceKey);
             statement.setString(2, md5);
-            statement.setString(3, apiId);
+            statement.setInt(3, apiId);
             statement.executeUpdate();
         }
     }
