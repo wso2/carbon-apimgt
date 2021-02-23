@@ -1898,7 +1898,7 @@ public class APIManagerConfiguration {
     public void setExtensionListenerConfigurations(OMElement omElement) {
 
         Iterator extensionListenersElement =
-                omElement.getChildrenWithLocalName(APIConstants.ExtensionListenerConstants.EXTENSION_LISTENERS);
+                omElement.getChildrenWithLocalName(APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER);
         while (extensionListenersElement.hasNext()) {
             OMElement listenerElement = (OMElement) extensionListenersElement.next();
             OMElement listenerTypeElement =
@@ -1908,17 +1908,14 @@ public class APIManagerConfiguration {
                     listenerElement
                             .getFirstChildWithName(new QName(
                                     APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER_CLASS_NAME));
-            if (listenerTypeElement != null && listenerClassElement != null && EnumUtils.isValidEnumIgnoreCase(
-                    ExtensionType.class, listenerTypeElement.getText())) {
+            if (listenerTypeElement != null && listenerClassElement != null) {
                 String listenerClass = listenerClassElement.getText();
                 try {
                     ExtensionListener extensionListener = (ExtensionListener) APIUtil
                             .getClassForName(listenerClass).newInstance();
                     extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
                 } catch (InstantiationException e) {
-                    log.error(
-                            "Error while instantiating class " + listenerClass,
-                            e);
+                    log.error("Error while instantiating class " + listenerClass, e);
                 } catch (IllegalAccessException e) {
                     log.error(e);
                 } catch (ClassNotFoundException e) {
