@@ -17,7 +17,6 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-import com.google.gson.Gson;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +24,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.BotDataDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -46,7 +44,6 @@ public class BotDetectionMediator extends AbstractMediator {
     private static final Cache botAccessCountCache = APIUtil
             .getCache(APIConstants.API_MANAGER_CACHE_MANAGER, BOT_ACCESS_COUNT_CACHE, 60, 60);
     private int throttleLimit = 2;
-    private static final Gson GSON = new Gson();
 
     /**
      * initiated a cache to keep the bot access count
@@ -87,27 +84,6 @@ public class BotDetectionMediator extends AbstractMediator {
         log.info(String.format(
                 "MessageId : %s | Request Method : %s | Message Body : %s | client Ip : %s | " + "Headers set : %s",
                 messageId, apiMethod, messageBody, clientIP, headerSet));
-
-        /**
-         * check whether analytics enabled or not
-         */
-        if (!APIUtil.isAnalyticsEnabled()) {
-            return true;
-        }
-
-        if (!log.isDebugEnabled()) {
-            return true;
-        }
-        BotDataDTO botDataDTO = new BotDataDTO();
-        botDataDTO.setCurrentTime(currentTime);
-        botDataDTO.setMessageID(messageId);
-        botDataDTO.setApiMethod(apiMethod);
-        botDataDTO.setHeaderSet(headerSet);
-        botDataDTO.setMessageBody(messageBody);
-        botDataDTO.setClientIp(clientIP);
-        String jsonContent = GSON.toJson(botDataDTO);
-        log.debug(jsonContent);
-        return true;
     }
 
     /**
