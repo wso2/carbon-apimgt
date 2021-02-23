@@ -2553,6 +2553,11 @@ public final class APIConstants {
 
     }
 
+    public static class AsyncApi {
+        public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
+        public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "subscribe";
+    }
+
     public static class TopicNames {
 
         //APIM default topic names

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics;
 
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
@@ -44,15 +45,16 @@ public class SseResponseEventDataProvider extends AsyncAnalyticsDataProvider {
     public int getProxyResponseCode() {
         return responseCode;
     }
-//
-//    @Override
-//    public Operation getOperation() {
-//
-//        Operation operation = super.getOperation();
-//        String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
-//        operation.setApiResourceTemplate(apiResourceTemplate);
-//        return operation;
-//    }
+
+    @Override
+    public Operation getOperation() {
+        String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+        String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
+        Operation operation = new Operation();
+        operation.setApiMethod(httpMethod);
+        operation.setApiResourceTemplate(apiResourceTemplate);
+        return operation;
+    }
 
     public void setResponseCode(int responseCode) {
         this.responseCode = responseCode;

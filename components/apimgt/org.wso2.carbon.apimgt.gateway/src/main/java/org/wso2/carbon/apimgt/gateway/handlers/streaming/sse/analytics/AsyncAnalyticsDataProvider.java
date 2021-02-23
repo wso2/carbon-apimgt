@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+
 public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
 
     private MessageContext messageContext;
@@ -42,14 +44,19 @@ public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
         return latencies;
     }
 
-//    @Override
-//    public Operation getOperation() {
-//
-//        Operation operation = super.getOperation();
-//        String eventName = "subscription"; // // todo get this from smg ctx
-//        if (!eventName.isEmpty()) {
-//            operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
-//        }
-//        return operation;
-//    }
+    @Override
+    public Operation getOperation() {
+
+        Operation operation = super.getOperation();
+        String eventName = "";
+        Object eventPrefix = messageContext.getProperty(ASYNC_MESSAGE_TYPE);
+        if (eventPrefix != null) {
+            eventName = eventPrefix.toString();
+        }
+        if (!eventName.isEmpty()) {
+            operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
+        }
+        return operation;
+    }
+
 }

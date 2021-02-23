@@ -55,6 +55,8 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConsta
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.THROTTLED_MESSAGE;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.THROTTLED_OUT_ERROR_MESSAGE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE;
 
 /**
  * Wraps the authentication handler for the purpose of changing the http method before calling it.
@@ -78,6 +80,7 @@ public class SseApiHandler extends APIAuthenticationHandler {
         boolean isAuthenticated = super.handleRequest(synCtx);
         // reset http verb after authentication for mediation
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
+        synCtx.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
         if (isAuthenticated) {
             ThrottleInfo throttleInfo = getThrottlingInfo(synCtx);
             boolean isThrottled = SseUtils.isThrottled(throttleInfo.getSubscriberTenantDomain(),
