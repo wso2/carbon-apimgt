@@ -13,9 +13,7 @@ import java.util.*;
 
 public class RegistryPersistenceImpl {
 
-    protected Registry registry;
     protected String username;
-    protected String tenantDomain;
     APIPersistence apiPersistenceInstance;
 
 

@@ -11,7 +11,6 @@ import java.util.List;
 public class ApiListing {
 
     public ApiListingDTO getApiListing(int start, int offset) throws APIPersistenceException, APIManagementException {
-        //PaginationData paginationData = new PaginationData();
         ApiRegistry apiDetails = new ApiRegistry();
         RegistryPersistenceImpl artifactData = new RegistryPersistenceImpl();
         List<ApiDTO> apis = apiDetails.getAllApis(start, offset);

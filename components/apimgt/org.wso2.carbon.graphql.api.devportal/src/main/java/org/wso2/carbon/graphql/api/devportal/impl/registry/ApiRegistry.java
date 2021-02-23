@@ -42,17 +42,12 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.*;
 
 
-
 public class ApiRegistry {
 
 
     APIPersistence apiPersistenceInstance;
 
-
     public List<ApiDTO> getAllApis(int start, int offset) throws APIPersistenceException, APIManagementException {
-        //SubscribeAvailableData subscribeAvailableData = new SubscribeAvailableData();
-        //ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
-
 
         RegistryPersistenceImpl artifactData = new RegistryPersistenceImpl();
 
@@ -94,7 +89,7 @@ public class ApiRegistry {
 
             Set<String> categoriesSet = devPortalAPI.getApiCategories();
 
-            String categories = "";//devPortalAPI.getGatewayLabels().toString();
+            String categories = "";
 
             String allkeyManagers = devPortalAPI.getKeyManagers().toString();
 
@@ -117,7 +112,6 @@ public class ApiRegistry {
             Set<String> environmentSet = devPortalAPI.getEnvironments();
 
 
-            //APIEndpointURLsData apiEndpointURLsData = new APIEndpointURLsData();
             List<APIEndpointURLsDTO> apiEndPointInformation = apiEndpointURLsDTO(devPortalAPI);
 
 
@@ -128,7 +122,6 @@ public class ApiRegistry {
             List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(devPortalAPI);
 
 
-            //IngressUrlsData ingressUrlsData = new IngressUrlsData();
             List<IngressUrlDTO> ingressUrlDTOS = getIngressUrlData(devPortalAPI);
 
             ApiDTO api = new ApiDTO(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation,labelNameDTO,ingressUrlDTOS);
@@ -177,10 +170,10 @@ public class ApiRegistry {
         return hasthumbnail;
     }
 
-    public String getEnvironmentList(String Id) throws RegistryException, APIPersistenceException, UserStoreException {
+    public String getEnvironmentList(String Id) throws APIPersistenceException {
 
         RegistryPersistenceImpl artifactData = new RegistryPersistenceImpl();
-        Set<String> environmentset = artifactData.getApiFromUUID(Id).getEnvironments();//getEnvironments(artifactData.getDevportalApis(Id).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS));
+        Set<String> environmentset = artifactData.getApiFromUUID(Id).getEnvironments();
         String environments = null;
         if(environmentset!=null){
             List<String> environmentList = new ArrayList<>(environmentset);
@@ -209,14 +202,6 @@ public class ApiRegistry {
         return catogories;
     }
 
-
-//    public Float getApiRating(String Id) throws APIManagementException {
-//        String username = "wso2.anonymous.user";
-//        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-//        Float rating  = apiConsumer.getRatingFromDAO(Id);
-//        return rating;
-//    }
-
     public String getApiDefinition(String Id) throws OASPersistenceException {
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
@@ -227,21 +212,8 @@ public class ApiRegistry {
         return apiDefinition;
 
     }
-//    public TimeDTO getApiTimeDetails(String Id) throws APIManagementException {
-//        String username = "wso2.anonymous.user";
-//        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-//        Time time = apiConsumer.getTimeDetailsFromDAO(Id);
-//        String createTime = time.getCreatedTime();
-//        String lastUpdate = time.getLastUpdate();
-//        return new TimeDTO(createTime,lastUpdate);
-//    }
 
-
-
-    public ApiDTO getApi(String Id) throws APIManagementException, RegistryException, OASPersistenceException, UserStoreException, APIPersistenceException {
-        //SubscribeAvailableData subscribeAvailableData = new SubscribeAvailableData();
-        //MonetizationLabelData monetizationLabelData = new MonetizationLabelData();
-       // ThrottlingPoliciesData throttlingPoliciesData = new ThrottlingPoliciesData();
+    public ApiDTO getApi(String Id) throws APIManagementException, APIPersistenceException {
 
         RegistryPersistenceImpl artifactData = new RegistryPersistenceImpl();
 
@@ -250,9 +222,9 @@ public class ApiRegistry {
         String id = devPortalAPI.getId();
 
 
-        String name = devPortalAPI.getApiName();//apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
+        String name = devPortalAPI.getApiName();
 
-        String description = devPortalAPI.getDescription();//apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
+        String description = devPortalAPI.getDescription();
 
         String context = devPortalAPI.getContext();
         String version = devPortalAPI.getVersion();
@@ -268,7 +240,7 @@ public class ApiRegistry {
         String wsdUrl = devPortalAPI.getWsdlUrl();
         String status = devPortalAPI.getStatus();
 
-        boolean isSubscriptionAvailable = getSubscriptionAvailable(devPortalAPI);////
+        boolean isSubscriptionAvailable = getSubscriptionAvailable(devPortalAPI);
 
         Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
@@ -289,8 +261,6 @@ public class ApiRegistry {
         List<String> allkeymangersList = devPortalAPI.getKeyManagers();
         String allkeyManagers = getKeymanagers(allkeymangersList);
 
-       //BusinessInformationDTO businessInformationDTO = new BusinessInformationDTO("","","","");
-
         String businessOwner = devPortalAPI.getBusinessOwner();
         String businessOwnerEmail = devPortalAPI.getBusinessOwnerEmail();
         String technicalOwner = devPortalAPI.getTechnicalOwner();
@@ -304,7 +274,6 @@ public class ApiRegistry {
         String apiOwner = devPortalAPI.getApiOwner();
         AdvertiseDTO advertiseInfo = new AdvertiseDTO(advertised,originalStoreUrl,apiOwner);
 
-        //APIEndpointURLsData apiEndpointURLsData = new APIEndpointURLsData();
         List<APIEndpointURLsDTO> apiEndPointInformation = apiEndpointURLsDTO(devPortalAPI);
 
         TierDAO tierData = new TierDAO();
@@ -313,12 +282,11 @@ public class ApiRegistry {
         LabelDAO labelData = new LabelDAO();
         List<LabelNameDTO> labelNameDTO = labelData.getLabelNames(devPortalAPI);
 
-        //IngressUrlsData ingressUrlsData = new IngressUrlsData();
         List<IngressUrlDTO> ingressUrlDTOS = getIngressUrlData(devPortalAPI);
 
         return new ApiDTO(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation,labelNameDTO,ingressUrlDTOS);
     }
-    public boolean getSubscriptionAvailable(DevPortalAPI devPortalAPI) throws  APIPersistenceException {
+    public boolean getSubscriptionAvailable(DevPortalAPI devPortalAPI) {
         String apiTenant = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(devPortalAPI.getProviderName()));
         String subscriptionAvailability = devPortalAPI.getSubscriptionAvailability();
         String subscriptionAllowedTenants =devPortalAPI.getSubscriptionAvailableOrgs();
@@ -353,7 +321,7 @@ public class ApiRegistry {
         return subscriptionAllowed;
     }
 
-    public List<APIEndpointURLsDTO> apiEndpointURLsDTO(DevPortalAPI devPortalAPI) throws APIPersistenceException, APIManagementException {
+    public List<APIEndpointURLsDTO> apiEndpointURLsDTO(DevPortalAPI devPortalAPI) throws APIManagementException {
 
         String Id = devPortalAPI.getId();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(null);
@@ -381,7 +349,7 @@ public class ApiRegistry {
 
                 DefaultAPIURLsDTO defaultAPIURLsDTO =  new DefaultAPIURLsDTO();
 
-                String[] gwEndpoints = null;//environment.getApiGatewayEndpoint().split(",");
+                String[] gwEndpoints = null;
                 if ("WS".equalsIgnoreCase(devPortalAPI.getType())) {
                     gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
                 } else {
@@ -444,10 +412,7 @@ public class ApiRegistry {
 
     public List<IngressUrlDTO>  getIngressUrlData(DevPortalAPI devPortalAPI) throws APIManagementException, APIPersistenceException {
 
-        //  ArtifactData artifactData = new ArtifactData();
         List<IngressUrlDTO> apiDeployedIngressURLs = new ArrayList<>();
-
-        // DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
 
         Set<org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments> deploymentEnvironments = devPortalAPI.getDeploymentEnvironments();//extractDeploymentsForAPI(deployments);
 
