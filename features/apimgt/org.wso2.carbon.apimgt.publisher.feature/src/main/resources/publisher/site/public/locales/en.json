@@ -766,11 +766,23 @@
   "Apis.Details.Configuration.components.KeyManager.more.than.one.info": {
     "defaultMessage": "Select one or more Key Managers"
   },
-  "Apis.Details.Configuration.components.MarkdownEditor.add.description.button": {
-    "defaultMessage": "Add Description"
+  "Apis.Details.Configuration.components.MarkdownEditor.add.content.button": {
+    "defaultMessage": "Add Content"
   },
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.button": {
-    "defaultMessage": "Edit Description"
+  "Apis.Details.Configuration.components.MarkdownEditor.cancel.button": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.content.button": {
+    "defaultMessage": "Edit Content"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.of": {
+    "defaultMessage": "Edit Description of"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of": {
+    "defaultMessage": "Edit Overview of"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.update.content.button": {
+    "defaultMessage": "Update Content"
   },
   "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": {
     "defaultMessage": "Maximum backend transactions per second in integers"
@@ -1118,10 +1130,10 @@
     "defaultMessage": "Edit Content"
   },
   "Apis.Details.Documents.MarkdownEditor.edit.content.of": {
-    "defaultMessage": "Edit Description of"
+    "defaultMessage": "Edit Content of"
   },
   "Apis.Details.Documents.MarkdownEditor.update.content.button": {
-    "defaultMessage": "Update Description"
+    "defaultMessage": "Update Content"
   },
   "Apis.Details.Documents.MarkdownEditor.update.success.message": {
     "defaultMessage": "updated successfully."
