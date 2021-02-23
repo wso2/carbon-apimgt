@@ -15,10 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import PropTypes from 'prop-types';
 import WarningIcon from '@material-ui/icons/Warning';
-import Configurations from 'Config';
 import Alert from 'AppComponents/Shared/Alert';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
@@ -47,6 +47,7 @@ export default function DefinitionOutdated(props) {
         classes,
     } = props;
     const [openImport, setOpenImport] = useState(false);
+    const { updateAPI } = useContext(APIContext);
     function reimportService() {
         const promisedReimportService = API.reimportService(api.id);
         promisedReimportService.then(() => {
@@ -60,6 +61,8 @@ export default function DefinitionOutdated(props) {
                 Alert.error(message);
             }
             console.error(error);
+        }).finally(() => {
+            updateAPI();
         });
     }
 
@@ -116,17 +119,6 @@ export default function DefinitionOutdated(props) {
                                 defaultMessage='Cancel'
                             />
                         </Button>
-                        <a
-                            className={classes.downloadLink}
-                            href={`${Configurations.app.context}/apis/${api.id}/new_version`}
-                        >
-                            <Button color='primary'>
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.link.new.version'
-                                    defaultMessage='Create new verison'
-                                />
-                            </Button>
-                        </a>
                         <Button
                             onClick={reimportService}
                             color='primary'

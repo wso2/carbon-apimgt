@@ -47,6 +47,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import APISecurityAudit from './APISecurityAudit';
 import ImportDefinition from './ImportDefinition';
+import DefinitionOutdated from './DefinitionOutdated';
 
 const EditorDialog = lazy(() => import('./SwaggerEditorDrawer' /* webpackChunkName: "EditorDialog" */));
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
@@ -64,6 +65,9 @@ const styles = (theme) => ({
     },
     buttonIcon: {
         marginRight: 10,
+    },
+    buttonWarningColor: {
+        color: theme.palette.warning.light,
     },
     topBar: {
         display: 'flex',
@@ -613,6 +617,12 @@ class APIDefinition extends React.Component {
                         )}
                         {api.type !== 'APIProduct' && (
                             <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
+                        )}
+                        {api.serviceInfo && api.serviceInfo.outdated && (
+                            <DefinitionOutdated
+                                api={api}
+                                classes={classes}
+                            />
                         )}
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>

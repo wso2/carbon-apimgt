@@ -303,9 +303,6 @@
   "Apis.Details.APIDefinition.APIDefinition.import.wsdl": {
     "defaultMessage": "Import WSDL"
   },
-  "Apis.Details.APIDefinition.APIDefinition.link.new.version": {
-    "defaultMessage": "Create new verison"
-  },
   "Apis.Details.APIDefinition.APIDefinition.outdated.api.definition": {
     "defaultMessage": "Outdated Definition"
   },
@@ -2139,6 +2136,9 @@
   },
   "Apis.Details.NewVersion.NewVersion.new.version": {
     "defaultMessage": "New Version"
+  },
+  "Apis.Details.NewVersion.NewVersion.service.version": {
+    "defaultMessage": "Service Version"
   },
   "Apis.Details.NewVersion.NewVersion.success": {
     "defaultMessage": "Successfully created new version"

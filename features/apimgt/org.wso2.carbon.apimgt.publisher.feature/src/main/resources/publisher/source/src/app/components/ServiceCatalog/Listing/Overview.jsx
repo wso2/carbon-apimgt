@@ -195,12 +195,12 @@ function Overview(props) {
 
     /**
      * Download Service Definition
-     * @param {string} serviceKey The service key.
+     * @param {string} serviceKey The service id.
      * @returns {Object} Service Definition File.
      */
     function downloadServiceDefinition(serviceKey) {
         return ServiceCatalog.getServiceDefinition(serviceKey).then((file) => {
-            return Utils.forceDownload(file);
+            return Utils.downloadServiceDefinition(file);
         }).catch((error) => {
             if (error.response) {
                 Alert.error(error.response.body.description);
@@ -523,7 +523,7 @@ function Overview(props) {
                                                         <Button
                                                             onClick={
                                                                 () => downloadServiceDefinition(
-                                                                    service.serviceId,
+                                                                    service.id,
                                                                 )
                                                             }
                                                             color='primary'
