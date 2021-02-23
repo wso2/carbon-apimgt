@@ -201,6 +201,7 @@ public class ExtensionListenerUtil {
         APIRequestInfoDTO apiRequestInfoDTO = new APIRequestInfoDTO();
         apiRequestInfoDTO.setContext((String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT));
         apiRequestInfoDTO.setVersion((String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION));
+        apiRequestInfoDTO.setApiId((String) messageContext.getProperty(APIMgtGatewayConstants.API_UUID_PROPERTY));
         AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authenticationContext != null) {
             apiRequestInfoDTO.setUsername(authenticationContext.getUsername());

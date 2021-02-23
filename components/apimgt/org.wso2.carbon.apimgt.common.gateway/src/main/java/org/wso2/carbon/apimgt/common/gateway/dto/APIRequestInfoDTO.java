@@ -26,6 +26,17 @@ public class APIRequestInfoDTO {
     String version;
     String username;
     String consumerKey;
+    String apiId;
+
+    public String getApiId() {
+
+        return apiId;
+    }
+
+    public void setApiId(String apiId) {
+
+        this.apiId = apiId;
+    }
 
     public String getContext() {
 
