@@ -146,6 +146,16 @@ class API extends Resource {
     }
 
     /**
+     * Validate a given role
+     */
+    validateSystemRole(role) {
+        const promise = this.client.then(client => {
+            return client.apis.Roles.validateSystemRole({ roleId: role });
+        });
+        return promise;
+    }
+
+    /**
      * Get list of advanced throttling policies
      */
     getThrottlingPoliciesAdvanced() {

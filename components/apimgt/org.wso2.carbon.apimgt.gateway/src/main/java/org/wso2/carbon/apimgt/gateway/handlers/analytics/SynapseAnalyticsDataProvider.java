@@ -23,6 +23,10 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
@@ -34,6 +38,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -43,6 +48,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -55,14 +61,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public boolean isSuccessRequest() {
-        return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)
-                && APISecurityUtils.getAuthenticationContext(messageContext) != null;
-    }
-
-    @Override
-    public boolean isFaultRequest() {
-        return messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
+    public EventCategory getEventCategory() {
+        if (isSuccessRequest()) {
+            return EventCategory.SUCCESS;
+        } else if (isFaultRequest()) {
+            return EventCategory.FAULT;
+        } else {
+            return EventCategory.INVALID;
+        }
     }
 
     @Override
@@ -78,49 +84,20 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public boolean isAuthFaultRequest() {
-        int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
-    }
-
-    @Override
-    public boolean isThrottledFaultRequest() {
-        int errorCode = getErrorCode();
-        return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
-    }
-
-    @Override
-    public boolean isTargetFaultRequest() {
-        int errorCode = getErrorCode();
-        return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
-                || errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE;
-    }
-
-    @Override
-    public boolean isResourceNotFound() {
-        if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
-            int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
-                    && errorCode == Constants.RESOURCE_NOT_FOUND_ERROR_CODE;
+    public FaultCategory getFaultType() {
+        if (isAuthFaultRequest()) {
+            return FaultCategory.AUTH;
+        } else if (isThrottledFaultRequest()) {
+            return FaultCategory.THROTTLED;
+        } else if (isTargetFaultRequest()) {
+            return FaultCategory.TARGET_CONNECTIVITY;
+        } else {
+            return FaultCategory.OTHER;
         }
-        return false;
     }
 
     @Override
-    public boolean isMethodNotAllowed() {
-        if (messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)) {
-            int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-            return messageContext.getPropertyKeySet().contains(RESTConstants.PROCESSED_API)
-                    && errorCode == Constants.METHOD_NOT_ALLOWED_ERROR_CODE;
-        }
-        return false;
-    }
-
-    @Override
-    public API getApi() {
+    public API getApi() throws DataNotFoundException {
         String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
@@ -135,7 +112,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
                 apiObj = new SubscriptionDataLoaderImpl().getApi(apiContext, apiVersion);
             } catch (DataLoadingException e) {
                 log.error("Error occurred when getting api.", e);
-                throw new RuntimeException("Error occurred when getting API information", e);
+                throw new DataNotFoundException("Error occurred when getting API information", e);
             }
         }
 
@@ -151,8 +128,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Application getApplication() {
+    public Application getApplication() throws DataNotFoundException {
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
+        if (authContext == null) {
+            throw new DataNotFoundException("Error occurred when getting Application information");
+        }
         Application application = new Application();
         application.setApplicationId(authContext.getApplicationUUID());
         application.setApplicationName(authContext.getApplicationName());
@@ -162,7 +142,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Operation getOperation() {
+    public Operation getOperation() throws DataNotFoundException {
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
         Operation operation = new Operation();
@@ -207,9 +187,18 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     public MetaInfo getMetaInfo() {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(UUID.randomUUID().toString());
-        metaInfo.setDeploymentId(Constants.DEPLOYMENT_ID);
         metaInfo.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-        metaInfo.setRegionId(Constants.REGION_ID);
+        Map<String, String> configMap = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                .getAPIAnalyticsConfiguration().getReporterProperties();
+        String region;
+        if (System.getProperties().containsKey(Constants.REGION_ID_PROP)) {
+            region = System.getProperty(Constants.REGION_ID_PROP);
+        } else if (configMap != null && configMap.containsKey(Constants.REGION_ID_PROP)) {
+            region = configMap.get(Constants.REGION_ID_PROP);
+        } else {
+            region = Constants.DEFAULT_REGION_ID;
+        }
+        metaInfo.setRegionId(region);
         return metaInfo;
     }
 
@@ -237,18 +226,55 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Error getError() {
+    public Error getError(FaultCategory faultCategory) {
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
-        String errorMessage = (String) messageContext.getProperty(SynapseConstants.ERROR_MESSAGE);
+        FaultCodeClassifier faultCodeClassifier = new FaultCodeClassifier(messageContext);
+        FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory, errorCode);
         Error error = new Error();
         error.setErrorCode(errorCode);
-        error.setErrorMessage(errorMessage);
+        error.setErrorMessage(faultSubCategory);
         return error;
     }
 
     @Override
     public String getUserAgentHeader() {
         return (String) messageContext.getProperty(Constants.USER_AGENT_PROPERTY);
+    }
+
+    @Override
+    public String getEndUserIP() {
+        if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
+            return (String) messageContext.getProperty(Constants.USER_IP_PROPERTY);
+        }
+        return null;
+    }
+
+    private boolean isSuccessRequest() {
+        return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)
+                && APISecurityUtils.getAuthenticationContext(messageContext) != null;
+    }
+
+    private boolean isFaultRequest() {
+        return messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
+    }
+
+    private boolean isAuthFaultRequest() {
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
+    }
+
+    private boolean isThrottledFaultRequest() {
+        int errorCode = getErrorCode();
+        return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
+    }
+
+    private boolean isTargetFaultRequest() {
+        int errorCode = getErrorCode();
+        return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
+                && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
+                || errorCode == Constants.ENDPOINT_SUSPENDED_ERROR_CODE;
     }
 
     private int getErrorCode() {

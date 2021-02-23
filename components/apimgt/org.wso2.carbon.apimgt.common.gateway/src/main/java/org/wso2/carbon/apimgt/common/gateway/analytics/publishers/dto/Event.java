@@ -40,6 +40,7 @@ public class Event {
     private int proxyResponseCode;
     private String requestTimestamp;
     private String userAgentHeader;
+    private String userIp;
 
     private String errorType;
 
@@ -129,5 +130,13 @@ public class Event {
 
     public void setUserAgentHeader(String userAgentHeader) {
         this.userAgentHeader = userAgentHeader;
+    }
+
+    public String getUserIp() {
+        return userIp;
+    }
+
+    public void setUserIp(String userIp) {
+        this.userIp = userIp;
     }
 }
