@@ -84,6 +84,7 @@ public class BotDetectionMediator extends AbstractMediator {
         log.info(String.format(
                 "MessageId : %s | Request Method : %s | Message Body : %s | client Ip : %s | " + "Headers set : %s",
                 messageId, apiMethod, messageBody, clientIP, headerSet));
+        return true;
     }
 
     /**
