@@ -165,10 +165,6 @@ class Topics extends Component {
         this.handleAddTopic = this.handleAddTopic.bind(this);
         this.handleDeleteTopic = this.handleDeleteTopic.bind(this);
         this.handleAddProperty = this.handleAddProperty.bind(this);
-        this.handleSaveProperty = this.handleSaveProperty.bind(this);
-        this.handleCancelSaveProperty = this.handleCancelSaveProperty.bind(this);
-        this.handleEditProperty = this.handleEditProperty.bind(this);
-        this.handleDeleteProperty = this.handleDeleteProperty.bind(this);
         this.renderEditableProperty = this.renderEditableProperty.bind(this);
         this.loadTopics = this.loadTopics.bind(this);
         this.getSortedOperations = this.getSortedOperations.bind(this);

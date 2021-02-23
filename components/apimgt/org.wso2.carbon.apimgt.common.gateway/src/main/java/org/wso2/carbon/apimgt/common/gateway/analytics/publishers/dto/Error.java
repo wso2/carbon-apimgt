@@ -17,13 +17,15 @@
 
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
+
 /**
  * Error attribute in analytics event
  */
 public class Error {
 
     private int errorCode;
-    private String errorMessage;
+    private FaultSubCategory errorMessage;
 
     public int getErrorCode() {
         return errorCode;
@@ -33,11 +35,11 @@ public class Error {
         this.errorCode = errorCode;
     }
 
-    public String getErrorMessage() {
+    public FaultSubCategory getErrorMessage() {
         return errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage) {
+    public void setErrorMessage(FaultSubCategory errorMessage) {
         this.errorMessage = errorMessage;
     }
 }

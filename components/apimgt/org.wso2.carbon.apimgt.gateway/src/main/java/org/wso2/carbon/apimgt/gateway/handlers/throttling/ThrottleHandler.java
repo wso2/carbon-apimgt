@@ -194,6 +194,12 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         //If Authz context is not null only we can proceed with throttling
         if (authContext != null) {
             authorizedUser = authContext.getUsername();
+
+            //Check if the tenant domain is appended with authorizedUser and append if it is not there
+            if (!StringUtils.contains(authorizedUser, apiTenantDomain)) {
+                authorizedUser = authContext.getUsername() + "@" + apiTenantDomain;
+            }
+
             //Check if request is blocked. If request is blocked then will not proceed further and
             //inform to client.
 

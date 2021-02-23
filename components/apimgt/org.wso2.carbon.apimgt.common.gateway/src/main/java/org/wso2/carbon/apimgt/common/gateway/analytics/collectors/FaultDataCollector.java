@@ -17,11 +17,12 @@
 
 package org.wso2.carbon.apimgt.common.gateway.analytics.collectors;
 
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 
 /**
  * Interface to faulty handlers
  */
 public interface FaultDataCollector {
-    void collectFaultData(Event faultyEvent);
+    void collectFaultData(Event faultyEvent) throws AnalyticsException;
 }

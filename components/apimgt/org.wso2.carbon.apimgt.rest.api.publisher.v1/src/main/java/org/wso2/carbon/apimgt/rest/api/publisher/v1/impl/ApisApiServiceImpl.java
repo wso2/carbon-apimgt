@@ -3200,6 +3200,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (fileDetail != null && fileInputStream != null) {
                 ResourceFile wsdlResource = new ResourceFile(fileInputStream,
                         fileDetail.getContentType().toString());
+                if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
+                        APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
+                    wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+                } else {
+                    wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+                }
                 apiToAdd.setWsdlResource(wsdlResource);
                 apiProvider.addWSDLResource(apiToAdd.getUuid(), wsdlResource, null, tenantDomain);
             }
@@ -3347,9 +3353,13 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (StringUtils.isNotBlank(url)) {
             apiProvider.addWSDLResource(apiId, null, url, tenantDomain);
         } else {
-            ResourceFile wsdlResource = new ResourceFile(fileInputStream,
-                    fileDetail.getContentType().toString());
-
+            ResourceFile wsdlResource;
+            if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
+                    APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
+                wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+            } else {
+                wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
+            }
             apiProvider.addWSDLResource(apiId, wsdlResource, null, tenantDomain);
         }
         return Response.ok().build();
