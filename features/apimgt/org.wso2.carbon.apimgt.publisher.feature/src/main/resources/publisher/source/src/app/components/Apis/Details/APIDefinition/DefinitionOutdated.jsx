@@ -119,17 +119,6 @@ export default function DefinitionOutdated(props) {
                                 defaultMessage='Cancel'
                             />
                         </Button>
-                        {/* <a
-                            className={classes.downloadLink}
-                            href={`${Configurations.app.context}/apis/${api.id}/new_version`}
-                        >
-                            <Button color='primary'>
-                                <FormattedMessage
-                                    id='Apis.Details.APIDefinition.APIDefinition.link.new.version'
-                                    defaultMessage='Create new verison'
-                                />
-                            </Button>
-                        </a> */}
                         <Button
                             onClick={reimportService}
                             color='primary'

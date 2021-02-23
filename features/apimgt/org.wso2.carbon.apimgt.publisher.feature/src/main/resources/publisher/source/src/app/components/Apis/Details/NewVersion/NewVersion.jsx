@@ -117,8 +117,7 @@ class CreateNewVersion extends React.Component {
         if (api.serviceInfo !== null) {
             const promisedServices = ServiceCatalog.getServiceByName(api.serviceInfo);
             promisedServices.then((data) => {
-                const array = [];
-                data.list.map((item) => array.push(item.version));
+                const array = data.list.map((item) => item.version);
                 this.setState({ versionList: array });
             }).catch((error) => {
                 console.error(error);
@@ -135,9 +134,9 @@ class CreateNewVersion extends React.Component {
     };
 
     handleServiceVersionChange = () => (event) => {
-        const { value } = event.target;
+        const { key } = event.target;
         this.setState({
-            serviceVersion: value,
+            serviceVersion: key,
         });
     };
 
@@ -302,7 +301,7 @@ class CreateNewVersion extends React.Component {
                                             variant='outlined'
                                         >
                                             {this.state.versionList && this.state.versionList.map((item) => (
-                                                <MenuItem value={item}>
+                                                <MenuItem key={item}>
                                                     {item}
                                                 </MenuItem>
                                             ))}
