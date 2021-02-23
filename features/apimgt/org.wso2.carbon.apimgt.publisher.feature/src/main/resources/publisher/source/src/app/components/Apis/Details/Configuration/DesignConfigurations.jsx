@@ -247,11 +247,6 @@ export default function DesignConfigurations() {
                     text = text.replace(regex, api[fieldName]);
                 });
                 setOverview(text);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
             });
     };
     const addDocument = async () => {
