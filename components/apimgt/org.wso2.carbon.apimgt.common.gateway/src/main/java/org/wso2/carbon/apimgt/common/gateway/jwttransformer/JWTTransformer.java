@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.jwt.transformer;
+package org.wso2.carbon.apimgt.common.gateway.jwttransformer;
 
 import com.nimbusds.jwt.JWTClaimsSet;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 
 import java.util.List;
 
@@ -32,14 +32,14 @@ public interface JWTTransformer {
      * @param jwtClaimsSet retrieved JwtClaimSet
      * @return consumerKey of JWT
      */
-    public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws APIManagementException;
+    public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException;
 
     /**
      * This method used to retrieve Scopes From JWT
      * @param jwtClaimsSet retrieved JwtClaimSet
      * @return scopes of JWT
      */
-    public List<String> getTransformedScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException;
+    public List<String> getTransformedScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException;
 
 
     /**
@@ -48,7 +48,7 @@ public interface JWTTransformer {
      * @param jwtClaimsSet jwtClaimSet from given JWT
      * @return transformed JWT Claims.
      */
-    public JWTClaimsSet transform(JWTClaimsSet jwtClaimsSet) throws APIManagementException;
+    public JWTClaimsSet transform(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException;
 
     /**
      * This method returns issuer name which used the implementation to transform JWT.
@@ -65,10 +65,11 @@ public interface JWTTransformer {
      *
      * @param jwtClaimsSet jwtClaimSet from given JWT
      * @return transformed JWT Claims
-     * @throws APIManagementException if an error occurs while retrieving whether token type is Application
+     * @throws JWTGeneratorException if an error occurs while retrieving whether token type is Application
      */
-    default Boolean getTransformedIsAppTokenType(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    default Boolean getTransformedIsAppTokenType(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
-        return null;
+        return false;
     }
 }
+
