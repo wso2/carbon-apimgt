@@ -64,6 +64,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.cache.Cache;
+import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
 
 /**

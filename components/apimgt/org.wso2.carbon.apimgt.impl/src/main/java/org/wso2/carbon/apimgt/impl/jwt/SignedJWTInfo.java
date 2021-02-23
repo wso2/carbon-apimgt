@@ -37,8 +37,8 @@ import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
+import javax.security.cert.CertificateEncodingException;
+import javax.security.cert.X509Certificate;
 
 /**
  * JWT internal Representation

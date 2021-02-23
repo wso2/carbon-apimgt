@@ -46,7 +46,7 @@ import java.util.List;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
-import java.security.cert.X509Certificate;
+import javax.security.cert.X509Certificate;
 
 /**
  * Authenticator responsible for handle API requests with mutual SSL.
