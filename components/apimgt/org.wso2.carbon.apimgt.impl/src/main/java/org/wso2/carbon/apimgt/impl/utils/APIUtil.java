@@ -8542,7 +8542,8 @@ public final class APIUtil {
                 retrievedPolicy.getPolicyName(), retrievedPolicy.getDefaultQuotaPolicy().getType(),
                 retrievedPolicy.getRateLimitCount(), retrievedPolicy.getRateLimitTimeUnit(),
                 retrievedPolicy.isStopOnQuotaReach(),
-                retrievedPolicy.getGraphQLMaxDepth(), retrievedPolicy.getGraphQLMaxComplexity());
+                retrievedPolicy.getGraphQLMaxDepth(), retrievedPolicy.getGraphQLMaxComplexity(),
+                retrievedPolicy.getSubscriberCount());
         APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
     }
 
