@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.*;
 import java.util.Date;
 
 /**
