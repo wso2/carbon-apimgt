@@ -228,6 +228,25 @@ class ServiceCatalog {
     }
 
     /**
+     * Get a service by Name
+     * @param id {string} name of the service.
+     * @returns {promise} Service Entry promise.
+     */
+    static getServiceByName(info) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+        const promisedServices = serviceCatalog.then(client => {
+            return client.apis.Services.searchServices(
+                {
+                    name: info.name,
+                },
+                this._requestMetaData()
+            );
+        });
+        return promisedServices.then(response => response.body);
+    }
+
+    /**
      * Get the definition of a service
      * @param id {string} UUID of the service.
      * @returns {promise} Service Entry promise.

@@ -462,12 +462,13 @@ class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    createNewAPIVersion(version, isDefaultVersion, callback = null) {
+    createNewAPIVersion(version, isDefaultVersion, serviceVersion, callback = null) {
         const promise_copy_api = this.client.then(client => {
             return client.apis['APIs'].createNewAPIVersion(
                 {
                     apiId: this.id,
                     newVersion: version,
+                    serviceVersion: serviceVersion,
                     defaultVersion: isDefaultVersion,
                 },
                 this._requestMetaData(),

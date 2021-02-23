@@ -19,7 +19,6 @@ import React, { useState, useContext } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import PropTypes from 'prop-types';
 import WarningIcon from '@material-ui/icons/Warning';
-import Configurations from 'Config';
 import Alert from 'AppComponents/Shared/Alert';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
@@ -120,7 +119,7 @@ export default function DefinitionOutdated(props) {
                                 defaultMessage='Cancel'
                             />
                         </Button>
-                        <a
+                        {/* <a
                             className={classes.downloadLink}
                             href={`${Configurations.app.context}/apis/${api.id}/new_version`}
                         >
@@ -130,7 +129,7 @@ export default function DefinitionOutdated(props) {
                                     defaultMessage='Create new verison'
                                 />
                             </Button>
-                        </a>
+                        </a> */}
                         <Button
                             onClick={reimportService}
                             color='primary'

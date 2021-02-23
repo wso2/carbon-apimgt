@@ -303,9 +303,6 @@
   "Apis.Details.APIDefinition.APIDefinition.import.wsdl": {
     "defaultMessage": "Import WSDL"
   },
-  "Apis.Details.APIDefinition.APIDefinition.link.new.version": {
-    "defaultMessage": "Create new verison"
-  },
   "Apis.Details.APIDefinition.APIDefinition.outdated.api.definition": {
     "defaultMessage": "Outdated Definition"
   },
@@ -786,9 +783,6 @@
   },
   "Apis.Details.Configuration.components.Subscription.subscription": {
     "defaultMessage": "Subscription"
-  },
-  "Apis.Details.Configuration.components.Tags.helper": {
-    "defaultMessage": "Press `Enter` after typing the tag name to add a new tag"
   },
   "Apis.Details.Configuration.components.Tags.title": {
     "defaultMessage": "Tags"
@@ -2139,6 +2133,9 @@
   },
   "Apis.Details.NewVersion.NewVersion.new.version": {
     "defaultMessage": "New Version"
+  },
+  "Apis.Details.NewVersion.NewVersion.service.version": {
+    "defaultMessage": "Service Version"
   },
   "Apis.Details.NewVersion.NewVersion.success": {
     "defaultMessage": "Successfully created new version"
@@ -3798,9 +3795,6 @@
   },
   "n8vnpP": {
     "defaultMessage": "Topic Name"
-  },
-  "qLKC50": {
-    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = { } | < > , ' \" \\\\ / ) ."
   },
   "sIDiOO": {
     "defaultMessage": "Yes. Delete"

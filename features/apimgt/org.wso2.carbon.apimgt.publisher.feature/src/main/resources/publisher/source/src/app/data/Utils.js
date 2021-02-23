@@ -356,7 +356,7 @@ class Utils {
     }
 
     /**
-     * Force file download in browser
+     * Force service definition download in browser
      *
      * @static
      * @param {*} response

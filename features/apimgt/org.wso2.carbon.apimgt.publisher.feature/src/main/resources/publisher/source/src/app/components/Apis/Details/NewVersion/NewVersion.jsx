@@ -26,8 +26,10 @@ import Container from '@material-ui/core/Container';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
 import { FormattedMessage } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
+import ServiceCatalog from 'AppData/ServiceCatalog';
 import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -97,6 +99,8 @@ class CreateNewVersion extends React.Component {
         super(props);
         this.state = {
             isDefaultVersion: 'no',
+            serviceVersion: null,
+            versionList: [],
             valid: {
                 version: {
                     empty: false,
@@ -108,10 +112,32 @@ class CreateNewVersion extends React.Component {
         };
     }
 
+    componentDidMount() {
+        const { api } = this.props;
+        if (api.serviceInfo !== null) {
+            const promisedServices = ServiceCatalog.getServiceByName(api.serviceInfo);
+            promisedServices.then((data) => {
+                const array = [];
+                data.list.map((item) => array.push(item.version));
+                this.setState({ versionList: array });
+            }).catch((error) => {
+                console.error(error);
+                Alert.error('Error while loading services version');
+            });
+        }
+    }
+
     handleDefaultVersionChange = () => (event) => {
         const { value } = event.target;
         this.setState({
             isDefaultVersion: value,
+        });
+    };
+
+    handleServiceVersionChange = () => (event) => {
+        const { value } = event.target;
+        this.setState({
+            serviceVersion: value,
         });
     };
 
@@ -137,14 +163,14 @@ class CreateNewVersion extends React.Component {
      * @param {string} newVersion new version to create
      * @param {string} isDefaultVersion specifies whether the new API should be marked as default version ('yes' | 'no')
      */
-    handleSubmit(api, newVersion, isDefaultVersion) {
+    handleSubmit(api, newVersion, isDefaultVersion, serviceVersion) {
         if (!newVersion) {
             this.setState({ valid: { version: { empty: true } } });
             return;
         }
         const isDefaultVersionBool = isDefaultVersion === 'yes';
         const { intl } = this.props;
-        api.createNewAPIVersion(newVersion, isDefaultVersionBool)
+        api.createNewAPIVersion(newVersion, isDefaultVersionBool, serviceVersion)
             .then((response) => {
                 this.setState({
                     redirectToReferrer: true,
@@ -259,6 +285,30 @@ class CreateNewVersion extends React.Component {
                                         autoFocus
                                     />
                                 </FormControl>
+                                {api.serviceInfo && (
+                                    <FormControl margin='normal' className={classes.FormControlOdd}>
+                                        <TextField
+                                            id='version-selector'
+                                            select
+                                            label={(
+                                                <FormattedMessage
+                                                    id='Apis.Details.NewVersion.NewVersion.service.version'
+                                                    defaultMessage='Service Version'
+                                                />
+                                            )}
+                                            name='selectVersion'
+                                            onChange={this.handleServiceVersionChange()}
+                                            margin='dense'
+                                            variant='outlined'
+                                        >
+                                            {this.state.versionList && this.state.versionList.map((item) => (
+                                                <MenuItem value={item}>
+                                                    {item}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    </FormControl>
+                                )}
                                 <FormControl margin='normal' className={classes.FormControl}>
                                     <FormLabel className={classes.FormLabel} component='legend'>
                                         <FormattedMessage
@@ -317,7 +367,8 @@ class CreateNewVersion extends React.Component {
                                                     variant='contained'
                                                     color='primary'
                                                     id='createBtn'
-                                                    onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion)}
+                                                    onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion,
+                                                        this.state.serviceVersion)}
                                                     disabled={
                                                         valid.version.empty
                                                         || valid.version.alreadyExists
