@@ -25,7 +25,7 @@ import Paper from '@material-ui/core/Paper';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
-import API from 'AppData/api';
+import CommentsAPI from 'AppData/Comments';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 
@@ -116,8 +116,7 @@ class Comments extends Component {
      */
     componentDidMount() {
         const { api, theme } = this.props;
-        const Api = new API();
-        Api.getAllComments(api.id)
+        CommentsAPI.all(api.id)
             .then((result) => {
                 const commentList = result.body.list;
                 this.setState({ allComments: commentList, totalComments: commentList.length });
@@ -228,15 +227,15 @@ class Comments extends Component {
                     </Typography>
                 </div>
 
-                    <div className={classes.paper}>
-                        <CommentAdd
-                            apiId={api.id}
-                            commentsUpdate={this.updateCommentList}
-                            allComments={allComments}
-                            replyTo={null}
-                            cancelButton
-                        />
-                    </div>
+                <div className={classes.paper}>
+                    <CommentAdd
+                        apiId={api.id}
+                        commentsUpdate={this.updateCommentList}
+                        allComments={allComments}
+                        replyTo={null}
+                        cancelButton
+                    />
+                </div>
 
                 {!allComments && (
                     <Paper className={classes.paperProgress}>
@@ -244,7 +243,8 @@ class Comments extends Component {
                     </Paper>
                 )}
                 {allComments && totalComments === 0
-                && <div className={classes.genericMessageWrapper}>
+                && (
+                    <div className={classes.genericMessageWrapper}>
                         <InlineMessage type='info' className={classes.dialogContainer}>
                             <Typography variant='h5' component='h3'>
                                 <FormattedMessage
@@ -260,7 +260,7 @@ class Comments extends Component {
                             </Typography>
                         </InlineMessage>
                     </div>
-                }
+                )}
                 <Comment
                     comments={comments}
                     apiId={api.id}
@@ -273,8 +273,9 @@ class Comments extends Component {
                             <Grid item>
                                 <Typography className={classes.verticalSpace} variant='body1'>
                                     <a
-                                        className={classes.link + ' ' + classes.loadMoreLink}
+                                        className={classes.link + classes.loadMoreLink}
                                         onClick={this.handleLoadMoreComments}
+                                        onKeyDown={this.handleLoadMoreComments}
                                     >
                                         <FormattedMessage
                                             id='Apis.Details.Comments.load.previous.comments'
@@ -292,7 +293,7 @@ class Comments extends Component {
                     </div>
                 )}
             </div>
-        )
+        );
     }
 }
 

@@ -18,11 +18,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { TextField, Button, Typography, InputLabel } from '@material-ui/core';
+import {
+    TextField, Button, Typography, InputLabel,
+} from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
-import API from 'AppData/api';
+import CommentsAPI from 'AppData/Comments';
 
 const styles = (theme) => ({
     commentIcon: {
@@ -72,13 +74,11 @@ class CommentAdd extends React.Component {
         super(props);
         this.state = {
             content: '',
-            category: 'General',
             currentLength: 0,
         };
         this.inputChange = this.inputChange.bind(this);
         this.handleClickAddComment = this.handleClickAddComment.bind(this);
         this.handleClickCancel = this.handleClickCancel.bind(this);
-        this.handleCategoryChange = this.handleCategoryChange.bind(this);
         this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
     }
 
@@ -101,15 +101,8 @@ class CommentAdd extends React.Component {
     }
 
     /**
-     * Handles category when the category is changed
-     * @param {any} event Drop down select event
+     * Filters the comment to add the reply
      * @memberof CommentAdd
-     */
-    handleCategoryChange(event) {
-        this.setState({ category: event.target.value });
-    }
-
-    /**
      */
     filterCommentToAddReply(commentToFilter) {
         const { replyTo } = this.props;
@@ -122,22 +115,18 @@ class CommentAdd extends React.Component {
      * **/
     handleClickAddComment() {
         const {
-            apiId, replyTo, allComments, toggleShowReply, commentsUpdate,
+            apiId, replyTo, allComments, commentsUpdate,
         } = this.props;
-        const { category, content } = this.state;
-        const Api = new API();
+        const { content } = this.state;
         const comment = {
-            apiId: apiId,
-            category,
             content: content.trim(),
-            replyTo,
         };
 
         // to check whether a string does not contain only white spaces
         if (comment.content.replace(/\s/g, '').length) {
-            Api.addComment(apiId, comment, replyTo)
+            CommentsAPI.add(apiId, comment, replyTo)
                 .then((newComment) => {
-                    this.setState({ content: '', category: 'General' });
+                    this.setState({ content: '' });
                     const addedComment = newComment.body;
                     if (replyTo === null) {
                         allComments.push(addedComment);
@@ -185,13 +174,15 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     render() {
-        const { classes, cancelButton, theme, intl } = this.props;
-        const { category, content, currentLength } = this.state;
+        const {
+            classes, cancelButton, theme, intl,
+        } = this.props;
+        const { content, currentLength } = this.state;
         return (
             <Grid container spacing={2} className={classes.contentWrapper}>
                 <Grid item xs zeroMinWidth>
                     <div className={classes.commentAddWrapper}>
-                        <InputLabel htmlFor="standard-multiline-flexible">
+                        <InputLabel htmlFor='standard-multiline-flexible'>
                             <FormattedMessage
                                 id='Apis.Details.Comments.CommentAdd.write.comment.label'
                                 defaultMessage='Write a comment'

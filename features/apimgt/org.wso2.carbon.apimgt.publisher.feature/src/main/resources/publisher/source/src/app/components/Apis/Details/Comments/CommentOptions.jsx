@@ -143,7 +143,7 @@ class CommentOptions extends React.Component {
      */
     render() {
         const {
-            classes, comment, editIndex, index, theme,
+            classes, comment, editIndex, theme,
         } = this.props;
         const canDelete = (comment.createdBy === AuthManager.getUser().name)
             || (AuthManager.getUser().name === theme.custom.adminRole);
@@ -206,7 +206,6 @@ CommentOptions.defaultProps = {
 CommentOptions.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     editIndex: PropTypes.number.isRequired,
-    index: PropTypes.number.isRequired,
     comment: PropTypes.instanceOf(Object).isRequired,
     handleClickOpen: PropTypes.func.isRequired,
     showEditComment: PropTypes.func.isRequired,
