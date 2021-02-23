@@ -226,8 +226,7 @@ public class ExtensionListenerUtil {
         //Add a payload handler instance for the current message context to consume the payload later
         msgInfoDTO.setPayloadHandler(new SynapsePayloadHandler(messageContext));
         msgInfoDTO.setMessageId(axis2MC.getLogCorrelationID());
-        msgInfoDTO.setHttpMethod((String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(APIMgtGatewayConstants.HTTP_METHOD));
+        msgInfoDTO.setHttpMethod((String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
         return msgInfoDTO;
     }
 
