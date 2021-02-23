@@ -15,10 +15,14 @@
  *
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.ws;
+package org.wso2.carbon.apimgt.gateway.handlers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.base.ServerConfiguration;
 
 import java.net.Inet4Address;
@@ -26,6 +30,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Map;
 
 public class DataPublisherUtil {
 
@@ -78,4 +83,27 @@ public class DataPublisherUtil {
         return null;
     }
 
+    public static String getEndUserIP(MessageContext messageContext) {
+        String clientIp;
+        Map<?, ?> headers = (Map<?, ?>) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        if (headers.containsKey(Constants.HEADER_X_FORWARDED_FOR)) {
+            String xForwardForHeader = (String) headers.get(Constants.HEADER_X_FORWARDED_FOR);
+            clientIp = xForwardForHeader;
+            int idx = xForwardForHeader.indexOf(',');
+            if (idx > -1) {
+                clientIp = clientIp.substring(0, idx);
+            }
+        } else {
+            clientIp = (String) messageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+        }
+        if (StringUtils.isEmpty(clientIp)) {
+            return null;
+        }
+        if (clientIp.contains(":") && clientIp.split(":").length == 2) {
+            log.warn("Client port will be ignored and only the IP address will concern from " + clientIp);
+            clientIp = clientIp.split(":")[0];
+        }
+        return clientIp;
+    }
 }
