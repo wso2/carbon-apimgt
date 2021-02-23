@@ -178,7 +178,7 @@ export default {
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
         adminRole: 'admin',
         commentsLimit: 5,
-        maxCommentLength: 1300,
+        maxCommentLength: 256,
         productSampleProgess: {
             backgroundMain: '#15b8cf',
             backgroundChip: '#5aebf9',

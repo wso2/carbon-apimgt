@@ -47,6 +47,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import APISecurityAudit from './APISecurityAudit';
 import ImportDefinition from './ImportDefinition';
+import DefinitionOutdated from './DefinitionOutdated';
 
 const EditorDialog = lazy(() => import('./SwaggerEditorDrawer' /* webpackChunkName: "EditorDialog" */));
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
@@ -64,6 +65,9 @@ const styles = (theme) => ({
     },
     buttonIcon: {
         marginRight: 10,
+    },
+    buttonWarningColor: {
+        color: theme.palette.warning.light,
     },
     topBar: {
         display: 'flex',
@@ -191,24 +195,6 @@ class APIDefinition extends React.Component {
             });
     }
 
-    /**
-     * Handles the No button action of the save api definition confirmation dialog box.
-     */
-    handleNo() {
-        this.setState({ openDialog: false });
-    }
-
-    /**
-     * Handles the yes button action of the save api definition confirmation dialog box.
-     */
-    handleOk() {
-        const { swaggerModified, asyncAPIModified } = this.state;
-        if (asyncAPIModified !== null) {
-            this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
-        } else {
-            this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
-        }
-    }
 
     /**
      * Method to handle asyncAPI content change
@@ -328,6 +314,25 @@ class APIDefinition extends React.Component {
      */
     getConvertToFormat(format) {
         return format === 'json' ? 'yaml' : 'json';
+    }
+
+    /**
+     * Handles the No button action of the save api definition confirmation dialog box.
+     */
+    handleNo() {
+        this.setState({ openDialog: false });
+    }
+
+    /**
+     * Handles the yes button action of the save api definition confirmation dialog box.
+     */
+    handleOk() {
+        const { swaggerModified, asyncAPIModified } = this.state;
+        if (asyncAPIModified !== null) {
+            this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
+        } else {
+            this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+        }
     }
 
     /**
@@ -613,6 +618,12 @@ class APIDefinition extends React.Component {
                         )}
                         {api.type !== 'APIProduct' && (
                             <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
+                        )}
+                        {api.serviceInfo && api.serviceInfo.outdated && (
+                            <DefinitionOutdated
+                                api={api}
+                                classes={classes}
+                            />
                         )}
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>

@@ -25,6 +25,10 @@ const CONSTS = {
         NO_TOKEN_FOUND: '901401: No partial token found!',
     },
     TENANT_STATE_ACTIVE: 'ACTIVE',
+    DESCRIPTION_TYPES: {
+        DESCRIPTION: 'description',
+        OVERVIEW: '_overview',
+    },
 };
 
 export default CONSTS;

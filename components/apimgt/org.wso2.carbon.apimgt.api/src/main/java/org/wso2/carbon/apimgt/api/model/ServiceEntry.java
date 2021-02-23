@@ -30,6 +30,7 @@ public class ServiceEntry {
     private String version = null;
     private String displayName = null;
     private String serviceUrl = null;
+    private int usage = 0;
 
     public enum DefinitionType {
         OAS2, OAS3, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API
@@ -193,4 +194,8 @@ public class ServiceEntry {
     public void setCreatedTime(Timestamp createdTime) {
         this.createdTime = createdTime;
     }
+
+    public void setUsage(int usage) { this.usage = usage; }
+
+    public int getUsage() { return usage; }
 }

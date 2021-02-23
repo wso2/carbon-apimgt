@@ -24,9 +24,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 
 import java.io.Serializable;
@@ -59,7 +56,6 @@ public abstract class WorkflowExecutor implements Serializable {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             apiMgtDAO.addWorkflowEntry(workflowDTO);
-            publishEvents(workflowDTO);
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while persisting workflow", e);
         }
@@ -107,7 +103,6 @@ public abstract class WorkflowExecutor implements Serializable {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
-            publishEvents(workflowDTO);
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while updating workflow", e);
         }
@@ -153,20 +148,6 @@ public abstract class WorkflowExecutor implements Serializable {
 
     public void setCallbackURL(String callbackURL) {
         this.callbackURL = callbackURL;
-    }
-
-    /**
-     * This method is to publish workflow events
-     *
-     * @param workflowDTO workflow DTO
-     */
-    public void publishEvents(WorkflowDTO workflowDTO) {
-        boolean enabled = APIUtil.isAnalyticsEnabled();
-        if (enabled) {
-            APIMgtWorkflowDataPublisher publisher = ServiceReferenceHolder.getInstance()
-                    .getApiMgtWorkflowDataPublisher();
-            publisher.publishEvent(workflowDTO);
-        }
     }
 
     /**

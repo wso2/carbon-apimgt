@@ -108,6 +108,10 @@ class BusinessInformation extends React.Component {
         this.setState({ [name]: value });
     };
 
+    isValid = () => {
+        return (this.isValidBusinessOwnerEmail && this.isValidTechnicalOwnerEmail && this.isFormUpdated);
+    }
+
     /**
      *
      *
@@ -123,10 +127,6 @@ class BusinessInformation extends React.Component {
             businessOwner, businessOwnerEmail, technicalOwner, technicalOwnerEmail,
         };
         updateAPI({ businessInformation });
-    }
-
-    isValid = () => {
-        return (this.isValidBusinessOwnerEmail && this.isValidTechnicalOwnerEmail && this.isFormUpdated);
     }
 
     /**

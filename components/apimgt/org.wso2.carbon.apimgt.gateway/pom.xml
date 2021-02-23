@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.240-SNAPSHOT</version>
+        <version>6.8.247-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -167,8 +167,8 @@
             <artifactId>org.wso2.carbon.metrics.manager</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>

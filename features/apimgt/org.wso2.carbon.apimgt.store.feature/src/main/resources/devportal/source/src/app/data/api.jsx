@@ -339,9 +339,10 @@ export default class API extends Resource {
      * @param apiId apiId of the api to which the comment is added
      * @param comment comment text
      */
-    addComment(apiId, comment) {
+    addComment(apiId, comment, replyTo) {
         return this.client.then((client) => {
-            const payload = { apiId };
+            debugger;
+            const payload = { apiId ,replyTo};
             return client.apis.Comments.addCommentToAPI(
                 payload,
                 { requestBody: comment },

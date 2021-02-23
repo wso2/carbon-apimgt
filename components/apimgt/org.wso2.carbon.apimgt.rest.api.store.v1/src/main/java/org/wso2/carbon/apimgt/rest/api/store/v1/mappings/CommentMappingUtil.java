@@ -50,6 +50,18 @@ public class CommentMappingUtil {
         commentDTO.setContent(comment.getText());
         commentDTO.setCreatedBy(comment.getUser());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
+        if (comment.getUpdatedTime()!=null){
+            commentDTO.setUpdatedTime(comment.getUpdatedTime().toString());
+        }
+        commentDTO.setCategory(comment.getCategory());
+        commentDTO.setParentCommentId(comment.getParentCommentID());
+        if (comment.getEntryPoint().equals("devPortal")){
+            commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.DEVPORTAL);
+        } else if (comment.getEntryPoint().equals("publisher")){
+            commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.PUBLISHER);
+        }
+        commentDTO.setReplies(fromCommentListToDTO(comment.getReplies().toArray(
+                new Comment[comment.getReplies().size()]), 30, 0, false));
         return commentDTO;
     }
 
@@ -104,7 +116,6 @@ public class CommentMappingUtil {
         comment.setApiId(apiId);
         return comment;
     }
-
     /**
      * Wraps a List of Comments to a CommentListDTO
      *
