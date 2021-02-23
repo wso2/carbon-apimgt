@@ -69,7 +69,7 @@ const styles = (theme) => ({
     },
     paper: {
         margin: 0,
-        marginTop: theme.spacing(1 ),
+        marginTop: theme.spacing(1),
         marginRight: theme.spacing(3),
         paddingBottom: theme.spacing(3),
     },
@@ -223,9 +223,9 @@ class Comment extends React.Component {
             .deleteComment(apiId, commentIdOfCommentToDelete)
             .then(() => {
                 if (parentCommentIdOfCommentToDelete === undefined) {
-                const remainingComments = allComments.filter(this.filterRemainingComments);
-                commentsUpdate(remainingComments);
-                Alert.message('Comment' + commentIdOfCommentToDelete + 'has been successfully deleted');
+                    const remainingComments = allComments.filter(this.filterRemainingComments);
+                    commentsUpdate(remainingComments);
+                    Alert.info('Comment' + commentIdOfCommentToDelete + 'has been successfully deleted');
                 } else {
                     const index = allComments.findIndex(this.filterCommentToDelete);
                     const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
@@ -266,111 +266,111 @@ class Comment extends React.Component {
             <>
                 <div className={classNames({ [classes.paper]: !isOverview && comments.length > 0 }, { [classes.cleanBack]: isOverview })}>
                     {comments
-                    && comments
-                        .slice(0)
-                        .reverse()
-                        .map((comment, index) => (
-                            <div
-                                // eslint-disable-next-line react/no-array-index-key
-                                key={comment.id + '-' + index}
-                                className={classNames(
-                                    { [classes.contentWrapper]: !isOverview },
-                                    { [classes.contentWrapperOverview]: isOverview },
-                                )}
-                            >
-                                {index !== 0 && <Divider className={classes.divider} />}
-                                <Grid md={8} container spacing={1} className={classNames({ [classes.root]: !isOverview })}>
-                                    <Grid item>
-                                        <Icon className={classes.commentIcon}>account_circle</Icon>
-                                    </Grid>
-                                    <Grid item xs zeroMinWidth>
-                                        <Typography noWrap className={classes.commentText}>
-                                            {(comment.commenterInfo && comment.commenterInfo.firstName) ?
-                                                (comment.commenterInfo.firstName + comment.commenterInfo.lastName) :
-                                                comment.createdBy}
-                                        </Typography>
-                                        <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
-                                            <Typography noWrap className={classes.commentText} variant='caption'>
-                                                {dayjs.extend(relativeTime)}
-                                                {dayjs(comment.createdTime).fromNow()}
+                        && comments
+                            .slice(0)
+                            .reverse()
+                            .map((comment, index) => (
+                                <div
+                                    // eslint-disable-next-line react/no-array-index-key
+                                    key={comment.id + '-' + index}
+                                    className={classNames(
+                                        { [classes.contentWrapper]: !isOverview },
+                                        { [classes.contentWrapperOverview]: isOverview },
+                                    )}
+                                >
+                                    {index !== 0 && <Divider className={classes.divider} />}
+                                    <Grid md={8} container spacing={1} className={classNames({ [classes.root]: !isOverview })}>
+                                        <Grid item>
+                                            <Icon className={classes.commentIcon}>account_circle</Icon>
+                                        </Grid>
+                                        <Grid item xs zeroMinWidth>
+                                            <Typography noWrap className={classes.commentText}>
+                                                {(comment.commenterInfo && comment.commenterInfo.firstName) ?
+                                                    (comment.commenterInfo.firstName + comment.commenterInfo.lastName) :
+                                                    comment.createdBy}
                                             </Typography>
-                                        </Tooltip>
+                                            <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
+                                                <Typography noWrap className={classes.commentText} variant='caption'>
+                                                    {dayjs.extend(relativeTime)}
+                                                    {dayjs(comment.createdTime).fromNow()}
+                                                </Typography>
+                                            </Tooltip>
 
-                                        <Typography className={classes.commentText}>{comment.content}</Typography>
+                                            <Typography className={classes.commentText}>{comment.content}</Typography>
 
-                                        <CommentOptions
-                                            comment={comment}
-                                            editIndex={editIndex}
-                                            index={index}
-                                            showAddComment={this.showAddComment}
-                                            handleClickOpen={this.handleClickOpen}
-                                            showEditComment={this.showEditComment}
-                                        />
+                                            <CommentOptions
+                                                comment={comment}
+                                                editIndex={editIndex}
+                                                index={index}
+                                                showAddComment={this.showAddComment}
+                                                handleClickOpen={this.handleClickOpen}
+                                                showEditComment={this.showEditComment}
+                                            />
 
-                                        {comment.id === replyId && (
-                                            <Box ml={6} mb={2}>
-                                                <CommentAdd
-                                                    apiId={apiId}
-                                                    replyTo={comment.id}
-                                                    allComments={allComments}
-                                                    commentsUpdate={commentsUpdate}
-                                                    handleShowReply={this.handleShowReply}
-                                                    cancelButton
-                                                />
-                                            </Box>
-                                        )}
-
-                                        {comment.replies && comment.replies.list.map((reply, index) => (
-                                            <>
-                                                <Box ml={8}>
-                                                    {index !== 0 && <Divider className={classes.divider} />}
-                                                    <Grid container spacing={1} className={classes.root}>
-                                                        <Grid item>
-                                                            <Icon className={classes.commentIcon}>account_circle</Icon>
-                                                        </Grid>
-                                                        <Grid item xs zeroMinWidth>
-                                                            <Typography noWrap className={classes.commentText}>
-                                                                {(reply.commenterInfo && reply.commenterInfo.fullName)
-                                                                    ? reply.commenterInfo.fullName : reply.createdBy}
-                                                            </Typography>
-                                                            <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
-                                                                <Typography noWrap className={classes.commentText} variant='caption'>
-                                                                    {dayjs(reply.createdTime).fromNow()}
-                                                                </Typography>
-                                                            </Tooltip>
-
-                                                            {index !== editIndex && (
-                                                                <Typography className={classes.commentText}>
-                                                                    {reply.content}</Typography>
-                                                            )}
-
-                                                            {index === editIndex && (
-                                                            <CommentEdit
-                                                                apiId={apiId}
-                                                                allComments={reply}
-                                                                commentsUpdate={commentsUpdate}
-                                                                comment={reply}
-                                                                toggleShowEdit={this.handleShowEdit}
-                                                            />
-                                                            )}
-
-                                                            <CommentOptions
-                                                                comment={reply}
-                                                                editIndex={editIndex}
-                                                                index={index}
-                                                                showAddComment={this.showAddComment}
-                                                                handleClickOpen={this.handleClickOpen}
-                                                                showEditComment={this.showEditComment}
-                                                            />
-                                                        </Grid>
-                                                    </Grid>
+                                            {comment.id === replyId && (
+                                                <Box ml={6} mb={2}>
+                                                    <CommentAdd
+                                                        apiId={apiId}
+                                                        replyTo={comment.id}
+                                                        allComments={allComments}
+                                                        commentsUpdate={commentsUpdate}
+                                                        handleShowReply={this.handleShowReply}
+                                                        cancelButton
+                                                    />
                                                 </Box>
-                                            </>
-                                        ))}
+                                            )}
+
+                                            {comment.replies && comment.replies.list.map((reply, index) => (
+                                                <>
+                                                    <Box ml={8}>
+                                                        {index !== 0 && <Divider className={classes.divider} />}
+                                                        <Grid container spacing={1} className={classes.root}>
+                                                            <Grid item>
+                                                                <Icon className={classes.commentIcon}>account_circle</Icon>
+                                                            </Grid>
+                                                            <Grid item xs zeroMinWidth>
+                                                                <Typography noWrap className={classes.commentText}>
+                                                                    {(reply.commenterInfo && reply.commenterInfo.fullName)
+                                                                        ? reply.commenterInfo.fullName : reply.createdBy}
+                                                                </Typography>
+                                                                <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
+                                                                    <Typography noWrap className={classes.commentText} variant='caption'>
+                                                                        {dayjs(reply.createdTime).fromNow()}
+                                                                    </Typography>
+                                                                </Tooltip>
+
+                                                                {index !== editIndex && (
+                                                                    <Typography className={classes.commentText}>
+                                                                        {reply.content}</Typography>
+                                                                )}
+
+                                                                {index === editIndex && (
+                                                                    <CommentEdit
+                                                                        apiId={apiId}
+                                                                        allComments={reply}
+                                                                        commentsUpdate={commentsUpdate}
+                                                                        comment={reply}
+                                                                        toggleShowEdit={this.handleShowEdit}
+                                                                    />
+                                                                )}
+
+                                                                <CommentOptions
+                                                                    comment={reply}
+                                                                    editIndex={editIndex}
+                                                                    index={index}
+                                                                    showAddComment={this.showAddComment}
+                                                                    handleClickOpen={this.handleClickOpen}
+                                                                    showEditComment={this.showEditComment}
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Box>
+                                                </>
+                                            ))}
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </div>
-                        ))}
+                                </div>
+                            ))}
                 </div>
                 <ConfirmDialog
                     key='key-dialog'

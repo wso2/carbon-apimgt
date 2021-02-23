@@ -340,39 +340,15 @@ export default class API extends Resource {
      * @param comment comment text
      */
     addComment(apiId, comment, replyTo) {
-        // return this.client.then((client) => {
-        //     const payload = { apiId };
-        //     return client.apis.Comments.addCommentToAPI(
-        //         payload,
-        //         { requestBody: comment, replyTo },
-        //         this._requestMetaData()
-        //     );
-        // });
-        const response = {
-            id: '01234567-0123-0123-0123-012345678901',
-            commenterInfo: {
-                firstName: "John",
-                lastName: "David",
-                fullName: "John David"
-            },
-            content: comment.content,
-            createdBy: 'admin',
-            createdTime: '2020-02-20T13:57:16.229Z',
-            replyTo: replyTo,
-            replies: {
-                count: 1,
-                list: [
-                ],
-                pagination: {
-                    offset: 0,
-                    limit: 1,
-                    total: 10,
-                    next: "string",
-                    previous: "string"
-                }
-            }
-        };
-        return Promise.resolve({ body: response });
+        return this.client.then((client) => {
+            debugger;
+            const payload = { apiId ,replyTo};
+            return client.apis.Comments.addCommentToAPI(
+                payload,
+                { requestBody: comment },
+                this._requestMetaData()
+            );
+        });
     }
 
     /**
@@ -380,158 +356,8 @@ export default class API extends Resource {
      * @param apiId api id of the api to which the comment is added
      */
     getAllComments(apiId) {
-        // return this.client.then((client) => {
-        //     return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
-        // });
-        return new Promise((resolve, reject) => {
-            resolve({
-                body: {
-                    count: 18,
-                    list: [
-                        {
-                            id: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
-                            content: "Information and user interface components must be presentable to users in ways they can perceive. This principle addresses the fundamentals of information and content presentation, such as compositional sequence, colors, contrasts, contextual relationships and display of text",
-                            createdTime: "2021-02-02 16:33:43.236",
-                            createdBy: "admin",
-                            category: "general",
-                            replyTo: null,
-                            entryPoint: "publisher",
-                            commenterInfo: {
-                                firstName: "John",
-                                lastName: "David",
-                                fullName: "John David"
-                            },
-                            replies: {
-                                    count: 1,
-                                    list: [
-                                        {
-                                            id: "953d3002-000c-42d3-a1b9-d6559f8a4d49",
-                                            content: "This is a child comment",
-                                            createdTime: "2021-02-04 16:33:43.236",
-                                            createdBy: "user1",
-                                            category: "general",
-                                            replyTo: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
-                                            entryPoint: "devportal",
-                                            commenterInfo: {
-                                                firstName: "Jane",
-                                                lastName: "David",
-                                                fullName: "Jane David"
-                                            }
-                                        }
-                                    ],
-                                    pagination: {
-                                        offset: 0,
-                                        limit: 1,
-                                        total: 10,
-                                        next: "string",
-                                        previous: "string"
-                                    }
-                                }
-                        },
-                        {
-                            id: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
-                            content: "This is a Parent comment",
-                            createdTime: "2021-02-02 16:33:43.236",
-                            createdBy: "admin",
-                            category: "general",
-                            replyTo: null,
-                            entryPoint: "publisher",
-                            commenterInfo: {
-                                firstName: "",
-                                lastName: "",
-                                fullName: ""
-                            },
-                            replies: {
-                                count: 1,
-                                list: [
-                                    {
-                                        id: "953d3002-000c-42d3-a1b9-d6559f8a5d50",
-                                        content: "This is a child comment",
-                                        createdTime: "2021-02-03 16:33:43.236",
-                                        createdBy: "user1",
-                                        category: "general",
-                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
-                                        entryPoint: "devportal",
-                                        commenterInfo: {
-                                            firstName: "John",
-                                            lastName: "David",
-                                            fullName: "John David"
-                                        }
-                                    }
-                                ],
-                                pagination: {
-                                    offset: 0,
-                                    limit: 1,
-                                    total: 10,
-                                    next: "string",
-                                    previous: "string"
-                                }
-                            }
-                        },
-                        {
-                            id: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
-                            content: "This is a Parent comment",
-                            createdTime: "2021-02-02 16:33:43.236",
-                            createdBy: "admin",
-                            category: "general",
-                            replyTo: null,
-                            entryPoint: "publisher",
-                            commenterInfo: {
-                                firstName: "John",
-                                lastName: "David",
-                                fullName: "John David"
-                            },
-                            replies: {
-                                    count: 2,
-                                    list: [
-                                        {
-                                            id: "953d3002-000c-42d3-a1b9-d6559f8a5d60",
-                                            content: "This is a child comment",
-                                            createdTime: "2021-02-03 16:33:43.236",
-                                            createdBy: "user1",
-                                            category: "general",
-                                            replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
-                                            entryPoint: "devportal",
-                                            commenterInfo: {
-                                                firstName: "Jane",
-                                                lastName: "David",
-                                                fullName: "Jane David"
-                                            }
-                                        },
-                                        {
-                                            id: "953d3002-000c-42d3-a1b9-d6559f8a5d61",
-                                            content: "This is a child comment",
-                                            createdTime: "2021-02-04 16:33:43.236",
-                                            createdBy: "admin",
-                                            category: "general",
-                                            replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
-                                            entryPoint: "devportal",
-                                            commenterInfo: {
-                                                firstName: "John",
-                                                lastName: "David",
-                                                fullName: "John David"
-                                            }
-                                        }
-                                    ],
-                                    pagination: {
-                                        offset: 0,
-                                        limit: 1,
-                                        total: 10,
-                                        next: "string",
-                                        previous: "string"
-                                    }
-                                }
-                        },
-
-                    ],
-                    pagination: {
-                        offset: 0,
-                        limit: 1,
-                        total: 10,
-                        next: "string",
-                        previous: "string"
-                    }
-                }});
+        return this.client.then((client) => {
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
         });
     }
 
