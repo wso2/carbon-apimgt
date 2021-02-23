@@ -61,7 +61,6 @@ public class ServiceReferenceHolder {
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
     private ImportExportAPI importExportService;
     private Map<String, GatewayArtifactGenerator> gatewayArtifactGeneratorMap = new HashMap<>();
-
     public static ConfigurationContextService getContextService() {
         return contextService;
     }

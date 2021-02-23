@@ -53,7 +53,6 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.handlers.UserPostSelfRegistrationHandler;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
@@ -947,7 +946,6 @@ public class APIManagerComponent {
             log.info("api-manager.xml not loaded. Wso2Event Publisher will not be enabled.");
         }
     }
-
     @Reference(
             name = "artifactGenerator.service",
             service = GatewayArtifactGenerator.class,
