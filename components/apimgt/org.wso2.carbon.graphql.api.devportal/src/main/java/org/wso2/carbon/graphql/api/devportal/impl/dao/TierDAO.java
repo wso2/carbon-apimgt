@@ -18,7 +18,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTiers;
 
 public class TierDAO {
 
-    public List<TierDTO> getTierData(String Id, String name) throws APIManagementException, RegistryException, UserStoreException, APIPersistenceException {
+    public List<TierDTO> getTierDetailsFromDAO(String Id, String name) throws APIManagementException, RegistryException, UserStoreException, APIPersistenceException {
 
 
         String username = "wso2.anonymous.user";

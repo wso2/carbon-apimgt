@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class ApiDAO {
 
-    public TimeDTO getApiTimeDetails(String Id) throws APIManagementException {
+    public TimeDTO getApiTimeDetailsFromDAO(String Id) throws APIManagementException {
         String username = "wso2.anonymous.user";
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         Time time = apiConsumer.getTimeDetailsFromDAO(Id);
@@ -25,13 +25,13 @@ public class ApiDAO {
         String lastUpdate = time.getLastUpdate();
         return new TimeDTO(createTime,lastUpdate);
     }
-    public Float getApiRating(String Id) throws APIManagementException {
+    public Float getApiRatingFromDAO(String Id) throws APIManagementException {
         String username = "wso2.anonymous.user";
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         Float rating  = apiConsumer.getRatingFromDAO(Id);
         return rating;
     }
-    public String getMonetizationLabelData(String Id) throws APIManagementException, UserStoreException, APIPersistenceException {
+    public String getMonetizationLabel(String Id) throws APIManagementException, UserStoreException, APIPersistenceException {
 
 
         RegistryPersistenceImpl artifactData = new RegistryPersistenceImpl();

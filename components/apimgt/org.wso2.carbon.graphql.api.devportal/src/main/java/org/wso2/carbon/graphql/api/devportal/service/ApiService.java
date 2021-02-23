@@ -78,7 +78,7 @@ public class ApiService{
 
                 for(int i = 0;i<Ids.size();i++){
                     try {
-                        timeDetails.add(apiDAO.getApiTimeDetails(Ids.get(i)));
+                        timeDetails.add(apiDAO.getApiTimeDetailsFromDAO(Ids.get(i)));
                     } catch (APIManagementException e) {
                         e.printStackTrace();
                     }
@@ -94,40 +94,40 @@ public class ApiService{
     public DataFetcher  getApiRating(){
         return env->{
             ApiDTO api = env.getSource();
-            return apiDAO.getApiRating(api.getId());
+            return apiDAO.getApiRatingFromDAO(api.getId());
         };
     }
     public DataFetcher getTierDetails(){
         return env->{
             TierNameDTO tierNameDTO = env.getSource();
 
-            return tierDAO.getTierData(tierNameDTO.getApiId(),tierNameDTO.getName());
+            return tierDAO.getTierDetailsFromDAO(tierNameDTO.getApiId(),tierNameDTO.getName());
         };
     }
     public DataFetcher getMonetizationLabel(){
         return env->{
             ApiDTO api = env.getSource();
-            return apiDAO.getMonetizationLabelData(api.getId());
+            return apiDAO.getMonetizationLabel(api.getId());
         };
     }
 
     public DataFetcher getOperationInformation(){
         return env->{
             ApiDTO api = env.getSource();
-            return operationDAO.getOperationData(api.getId());
+            return operationDAO.getOperationDetailsFromDAO(api.getId());
 
         };
     }
     public DataFetcher getLabelsDetails(){
         return env->{
             LabelNameDTO labelNameDTO = env.getSource();
-            return labelDAO.getLabeldata(labelNameDTO.getName());
+            return labelDAO.getLabelDetailsFromDAO(labelNameDTO.getName());
         };
     }
     public DataFetcher getScopeInformation(){
         return env->{
             ApiDTO api = env.getSource();
-            return scopesDAO.getScopesData(api.getId());
+            return scopesDAO.getScopesDetailsFromDAO(api.getId());
         };
     }
 

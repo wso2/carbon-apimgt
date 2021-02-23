@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class LabelDAO {
 
-    public List<LabelDTO> getLabeldata(String name) throws APIManagementException {
+    public List<LabelDTO> getLabelDetailsFromDAO(String name) throws APIManagementException {
 
 
         String username = "wso2.anonymous.user";

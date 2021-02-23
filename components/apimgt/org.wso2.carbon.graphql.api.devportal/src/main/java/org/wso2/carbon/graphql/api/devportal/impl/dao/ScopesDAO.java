@@ -10,7 +10,7 @@ import java.util.*;
 
 public class ScopesDAO {
 
-    public List<ScopesDTO> getScopesData(String Id) throws APIManagementException{
+    public List<ScopesDTO> getScopesDetailsFromDAO(String Id) throws APIManagementException{
 
 
         String username = "wso2.anonymous.user";

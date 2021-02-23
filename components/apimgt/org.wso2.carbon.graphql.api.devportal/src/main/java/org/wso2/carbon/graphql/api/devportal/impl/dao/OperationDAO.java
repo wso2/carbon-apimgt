@@ -14,7 +14,7 @@ import java.util.Set;
 public class OperationDAO {
 
 
-    public List<OperationDTO> getOperationData(String Id) throws  APIManagementException {
+    public List<OperationDTO> getOperationDetailsFromDAO(String Id) throws  APIManagementException {
         String username = "wso2.anonymous.user";
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         String type = apiConsumer.getApiTypeFromDAO(Id);
