@@ -3143,10 +3143,14 @@ public class SQLConstants {
 
     /** Environment related constants **/
 
-    public static final String GET_ENVIRONMENT_BY_TENANT_SQL = "SELECT * FROM AM_GATEWAY_ENVIRONMENT " +
+    public static final String GET_ENVIRONMENT_BY_TENANT_SQL =
+            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION " +
+            "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ?";
 
-    public static final String GET_ENVIRONMENT_BY_TENANT_AND_UUID_SQL = "SELECT * FROM AM_GATEWAY_ENVIRONMENT " +
+    public static final String GET_ENVIRONMENT_BY_TENANT_AND_UUID_SQL =
+            "SELECT ID, UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION " +
+            "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ? AND UUID = ?";
 
     public static final String GET_ENVIRONMENT_NAME_COUNT_BY_TENANT_SQL =
@@ -3163,7 +3167,9 @@ public class SQLConstants {
 
     public static final String DELETE_GATEWAY_VHOSTS_SQL = "DELETE FROM AM_GW_VHOST WHERE GATEWAY_ENV_ID = ?";
 
-    public static final String GET_ENVIRONMENT_VHOSTS_BY_ID_SQL = "SELECT * FROM AM_GW_VHOST WHERE GATEWAY_ENV_ID = ?";
+    public static final String GET_ENVIRONMENT_VHOSTS_BY_ID_SQL =
+            "SELECT GATEWAY_ENV_ID, HOST, HTTP_CONTEXT, HTTP_PORT, HTTPS_PORT, WS_PORT. WSS_PORT " +
+            "FROM AM_GW_VHOST WHERE GATEWAY_ENV_ID = ?";
 
     public static final String DELETE_ENVIRONMENT_SQL = "DELETE FROM AM_GATEWAY_ENVIRONMENT WHERE UUID = ?";
 

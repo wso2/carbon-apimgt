@@ -229,27 +229,15 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
-        if (apiMgtDAO.isEnvironmentNameExist(tenantDomain, environment.getName())) {
+        if (getAllEnvironments(tenantDomain).stream()
+                .anyMatch(e -> StringUtils.equals(e.getName(), environment.getName()))) {
             String errorMessage = String.format("Failed to add Environment. An Environment named %s already exists",
                     environment.getName());
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.EXISTING_GATEWAY_ENVIRONMENT_FOUND,
                             String.format("name '%s'", environment.getName())));
         }
-
-        List<String> hosts = new ArrayList<>(environment.getVhosts().size());
-        boolean isDuplicateVhosts = environment.getVhosts().stream().map(VHost::getHost).anyMatch(host -> {
-            boolean exist = hosts.contains(host);
-            hosts.add(host);
-            return exist;
-        });
-        if (isDuplicateVhosts) {
-            String errorMessage = String.format("Failed to add Environment. Virtual Host %s is duplicated",
-                    hosts.get(hosts.size() - 1));
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND));
-        }
-
+        validateForUniqueVhostNames(environment);
         return apiMgtDAO.addEnvironment(tenantDomain, environment);
     }
 
@@ -286,8 +274,24 @@ public class APIAdminImpl implements APIAdmin {
                     ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT_NAME));
         }
 
+        validateForUniqueVhostNames(environment);
         environment.setId(existingEnv.getId());
         return apiMgtDAO.updateEnvironment(environment);
+    }
+
+    private void validateForUniqueVhostNames(Environment environment) throws APIManagementException {
+        List<String> hosts = new ArrayList<>(environment.getVhosts().size());
+        boolean isDuplicateVhosts = environment.getVhosts().stream().map(VHost::getHost).anyMatch(host -> {
+            boolean exist = hosts.contains(host);
+            hosts.add(host);
+            return exist;
+        });
+        if (isDuplicateVhosts) {
+            String errorMessage = String.format("Failed to add Environment. Virtual Host %s is duplicated",
+                    hosts.get(hosts.size() - 1));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND));
+        }
     }
 
     @Override

@@ -101,16 +101,15 @@ function AddEditGWEnvironment(props) {
     }, []);
 
     const handleHostValidation = (vhost) => {
-        if (vhost === undefined) {
+        if (!vhost) {
             return false;
         }
         if (!vhost.host) {
             return 'Host of Vhost is empty';
         }
         // same pattern used in admin Rest API
-        const hostPattern = '^(((\\*[\\.-])?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*'
-            + '([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))|((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*'
-            + '[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))([\\.-]\\*)?|\\*)$';
+        const hostPattern = '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9]'
+            + '[A-Za-z0-9\\-]*[A-Za-z0-9])$';
         const hostRegex = new RegExp(hostPattern, 'g');
         const validHost = vhost.host && vhost.host.match(hostRegex);
         if (!validHost) {
@@ -128,7 +127,7 @@ function AddEditGWEnvironment(props) {
         let portError;
         const ports = ['httpPort', 'httpsPort', 'wsPort', 'wssPort'];
         for (const port of ports) {
-            portError = vhost[port] >= 1 && vhost[port] <= 65535 ? '' : 'Invalid Port';
+            portError = Number.isInteger(vhost[port]) && vhost[port] >= 1 && vhost[port] <= 65535 ? '' : 'Invalid Port';
             if (portError) {
                 return portError;
             }
@@ -153,7 +152,7 @@ function AddEditGWEnvironment(props) {
                 }
                 break;
             case 'displayName':
-                if (value === '') {
+                if (!value) {
                     error = 'Display Name is Empty';
                 } else {
                     error = false;
@@ -173,8 +172,8 @@ function AddEditGWEnvironment(props) {
                     error = 'VHosts are duplicated';
                     break;
                 }
-                for (const h of value) {
-                    error = handleHostValidation(h);
+                for (const host of value) {
+                    error = handleHostValidation(host);
                     if (error) {
                         break;
                     }
