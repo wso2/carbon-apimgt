@@ -15,13 +15,17 @@
  *
  */
 
-package org.wso2.carbon.apimgt.common.gateway.analytics.collectors;
-
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+package org.wso2.carbon.apimgt.common.gateway.analytics.exceptions;
 
 /**
- * interface to request handlers
+ * Exception class to handle data not found cases
  */
-public interface RequestDataCollector {
-    void collectData() throws AnalyticsException;
+public class DataNotFoundException extends AnalyticsException {
+    public DataNotFoundException(String message) {
+        super(message);
+    }
+
+    public DataNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

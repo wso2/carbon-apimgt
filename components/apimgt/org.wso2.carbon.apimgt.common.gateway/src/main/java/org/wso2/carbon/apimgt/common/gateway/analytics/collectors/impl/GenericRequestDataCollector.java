@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.RequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 
 /**
  * Handle all the request and forward to appropriate sub request handlers
@@ -39,26 +40,17 @@ public class GenericRequestDataCollector implements RequestDataCollector {
         this.provider = provider;
     }
 
-    public void collectData() {
-
-        if (provider.isSuccessRequest()) {
-            handleSuccessRequest();
-        } else if (provider.isFaultRequest()) {
-            handleFaultRequest();
-        } else {
-            handleUnclassifiedRequest();
+    public void collectData() throws AnalyticsException {
+        switch (provider.getEventCategory()) {
+        case SUCCESS:
+            successDataCollector.collectData();
+            break;
+        case FAULT:
+            faultDataCollector.collectData();
+            break;
+        case INVALID:
+            unclassifiedDataCollector.collectData();
+            break;
         }
-    }
-
-    private void handleSuccessRequest() {
-        successDataCollector.collectData();
-    }
-
-    private void handleFaultRequest() {
-        faultDataCollector.collectData();
-    }
-
-    private void handleUnclassifiedRequest() {
-        unclassifiedDataCollector.collectData();
     }
 }

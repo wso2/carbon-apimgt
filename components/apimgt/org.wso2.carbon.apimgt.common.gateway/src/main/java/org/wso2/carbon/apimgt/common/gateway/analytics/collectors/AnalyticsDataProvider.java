@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.common.gateway.analytics.collectors;
 
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
@@ -24,34 +25,27 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 
 /**
  * Data provider interface to extract request data
  */
 public interface AnalyticsDataProvider {
-    boolean isSuccessRequest();
 
-    boolean isFaultRequest();
+    EventCategory getEventCategory();
 
     boolean isAnonymous();
 
     boolean isAuthenticated();
 
-    boolean isAuthFaultRequest();
+    FaultCategory getFaultType();
 
-    boolean isThrottledFaultRequest();
+    API getApi() throws DataNotFoundException;
 
-    boolean isTargetFaultRequest();
+    Application getApplication() throws DataNotFoundException;
 
-    boolean isResourceNotFound();
-
-    boolean isMethodNotAllowed();
-
-    API getApi();
-
-    Application getApplication();
-
-    Operation getOperation();
+    Operation getOperation() throws DataNotFoundException;
 
     Target getTarget();
 
@@ -65,8 +59,9 @@ public interface AnalyticsDataProvider {
 
     long getRequestTime();
 
-    Error getError();
+    Error getError(FaultCategory faultCategory);
 
     String getUserAgentHeader();
 
+    String getEndUserIP();
 }

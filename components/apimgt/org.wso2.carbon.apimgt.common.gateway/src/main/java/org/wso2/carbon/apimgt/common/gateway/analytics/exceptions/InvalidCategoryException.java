@@ -15,17 +15,16 @@
  *
  */
 
-package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums;
+package org.wso2.carbon.apimgt.common.gateway.analytics.exceptions;
+
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 
 /**
- * Enum to denote faulty event types
+ * Exception class to handler invalid category.
  */
-public enum FaultEventType {
-    AUTH,
-    TARGET_CONNECTIVITY,
-    THROTTLED,
-    RESOURCE_NOT_FOUND,
-    API_NOT_FOUND,
-    METHOD_NOT_ALLOWED,
-    OTHER
+public class InvalidCategoryException extends AnalyticsException {
+
+    public InvalidCategoryException(FaultCategory faultCategory, String faultSubCategory) {
+        super("Un-Supported subcategory " + faultSubCategory + " provided for " + faultCategory);
+    }
 }

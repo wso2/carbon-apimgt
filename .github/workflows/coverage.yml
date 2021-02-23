@@ -19,8 +19,8 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '14.x'
-    - name: Build carbon-apimgt with Test.
-      run: mvn clean install --file pom.xml
+    - name: Build carbon-apimgt with Tests, skipping AspectJ
+      run: mvn clean install --file pom.xml -Dskip.aspectj=true
     - name: Get carbon.apimgt.version
       run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
     - name: Print carbon.apimgt.version
@@ -31,7 +31,7 @@ jobs:
       with: 
         repository: wso2/product-apim
         ref: refs/heads/master
-    - name: Build Product-Apim with Maven
+    - name: Build Product-Apim with Tests
       run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file ../product-apim/pom.xml
     - name: Upload unit test coverage to Codecov
       uses: codecov/codecov-action@v1.2.1
