@@ -27,6 +27,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
@@ -48,7 +49,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
         String userAgent = getUserAgent(messageContext);
-        String userIp = getEndUserIP(messageContext);
+        String userIp = DataPublisherUtil.getEndUserIP(messageContext);
         messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);
         if (userIp != null) {
             messageContext.setProperty(Constants.USER_IP_PROPERTY, userIp);
@@ -118,27 +119,4 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         return (String) headers.get(APIConstants.USER_AGENT);
     }
 
-    private String getEndUserIP(MessageContext messageContext) {
-        String clientIp;
-        Map<?, ?> headers = (Map<?, ?>) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers.containsKey(Constants.HEADER_X_FORWARDED_FOR)) {
-            String xForwardForHeader = (String) headers.get(Constants.HEADER_X_FORWARDED_FOR);
-            clientIp = xForwardForHeader;
-            int idx = xForwardForHeader.indexOf(',');
-            if (idx > -1) {
-                clientIp = clientIp.substring(0, idx);
-            }
-        } else {
-            clientIp = (String) messageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-        }
-        if (StringUtils.isEmpty(clientIp)) {
-            return null;
-        }
-        if (clientIp.contains(":") && clientIp.split(":").length == 2) {
-            log.warn("Client port will be ignored and only the IP address will concern from " + clientIp);
-            clientIp = clientIp.split(":")[0];
-        }
-        return clientIp;
-    }
 }
