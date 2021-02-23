@@ -70,7 +70,7 @@ public class APIRevisionDeploymentDTO   {
   
   @ApiModelProperty(example = "mg.wso2.com", value = "")
   @JsonProperty("vhost")
- @Pattern(regexp="^(((\\*[\\.-])?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))|((([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9]))([\\.-]\\*)?|\\*)$") @Size(min=1,max=255)  public String getVhost() {
+ @Pattern(regexp="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$") @Size(min=1,max=255)  public String getVhost() {
     return vhost;
   }
   public void setVhost(String vhost) {
