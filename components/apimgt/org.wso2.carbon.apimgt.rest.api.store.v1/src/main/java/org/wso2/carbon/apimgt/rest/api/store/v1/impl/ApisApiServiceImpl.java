@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -64,6 +65,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AsyncAPIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -688,6 +690,36 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(apiId)) {
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+            Set<Topic> topics;
+            try {
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
+                TopicListDTO topicListDTO;
+                if (apiTypeWrapper.isAPIProduct()) {
+                    topics = apiConsumer.getTopics(apiTypeWrapper.getApiProduct().getUuid());
+                } else {
+                    topics = apiConsumer.getTopics(apiTypeWrapper.getApi().getUuid());
+                }
+                topicListDTO = AsyncAPIMappingUtil.fromTopicListToDTO(topics);
+                return Response.ok().entity(topicListDTO).build();
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Failed to get topics of Async API " + apiId, e, log);
+                }
+            }
+        } else {
+            RestApiUtil.handleBadRequest("API Id is missing in request", log);
         }
         return null;
     }

@@ -422,7 +422,14 @@ public class OASParserUtil {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
                             Content content = parameter.getContent();
-                            extractReferenceFromContent(content, context);
+                            if (content != null) {
+                                extractReferenceFromContent(content, context);
+                            } else {
+                                String ref = parameter.get$ref();
+                                if (ref != null) {
+                                    extractReferenceWithoutSchema(ref, context);
+                                }
+                            }
                         }
                     }
                 }
@@ -609,9 +616,17 @@ public class OASParserUtil {
     private static void setRefOfParameters(List<Parameter> parameters, SwaggerUpdateContext context) {
         if (parameters != null) {
             for (Parameter parameter : parameters) {
-                String ref = parameter.getSchema().get$ref();
-                if (ref != null) {
-                    addToReferenceObjectMap(ref, context);
+                Schema schema = parameter.getSchema();
+                if (schema != null) {
+                    String ref = schema.get$ref();
+                    if (ref != null) {
+                        addToReferenceObjectMap(ref, context);
+                    }
+                } else {
+                    String ref = parameter.get$ref();
+                    if (ref != null) {
+                        extractReferenceWithoutSchema(ref, context);
+                    }
                 }
             }
         }
@@ -624,6 +639,12 @@ public class OASParserUtil {
 
                 extractReferenceFromSchema(schema, context);
             }
+        }
+    }
+
+    private static void extractReferenceWithoutSchema(String reference, SwaggerUpdateContext context) {
+        if (reference != null) {
+            addToReferenceObjectMap(reference, context);
         }
     }
 
@@ -1536,6 +1557,46 @@ public class OASParserUtil {
             appSecurityState = Boolean.parseBoolean(String.valueOf(appSecurityTypesNode.get("optional")));
         }
         return appSecurityState;
+    }
+
+    public static void copyOperationVendorExtensions(Map<String, Object> existingExtensions,
+                                                     Map<String, Object> updatedVendorExtensions) {
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AUTH_TYPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_WSO2_SECURITY, existingExtensions
+                    .get(APIConstants.SWAGGER_X_WSO2_SECURITY));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_SCOPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_SCOPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_SCOPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT));
+        }
+        if (existingExtensions.get(APIConstants.X_WSO2_APP_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.X_WSO2_APP_SECURITY, existingExtensions
+                    .get(APIConstants.X_WSO2_APP_SECURITY));
+        }
     }
 
 }

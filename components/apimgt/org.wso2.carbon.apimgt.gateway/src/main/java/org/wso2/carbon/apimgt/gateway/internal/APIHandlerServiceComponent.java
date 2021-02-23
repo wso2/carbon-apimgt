@@ -29,10 +29,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
@@ -79,6 +80,12 @@ public class APIHandlerServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component activated");
         }
+        // Set public cert
+        ServiceReferenceHolder.getInstance().setPublicCert();
+
+        // Set private key
+        ServiceReferenceHolder.getInstance().setPrivateKey();
+
         try {
             ConfigurationContext ctx =
                     ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(),
@@ -214,6 +221,8 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service bound to the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
+        AnalyticsConfigurationHolder.getInstance()
+                .setConfigurations(amcService.getAPIAnalyticsConfiguration().getReporterProperties());
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {

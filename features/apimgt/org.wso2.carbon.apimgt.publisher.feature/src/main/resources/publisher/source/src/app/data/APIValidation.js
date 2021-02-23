@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -138,6 +137,10 @@ const definition = {
     apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[^~!@#:%^&*+=|\\<>"',&\s]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Context ' + getMessage(error.type, 60) }));
+        }),
+    documentName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+        .error((errors) => {
+            return errors.map((error) => ({ ...error, message: 'Document name ' + getMessage(error.type, 50) }));
         }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),

@@ -26,7 +26,6 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import APIs from './Apis';
 import APICreateRoutes from './Create/APICreateRoutes';
 
-
 jest.mock('./Listing/Listing', () => () => {
     return <div>Testing Listing page</div>;
 });
@@ -60,7 +59,7 @@ describe('Test APIs main routing component', () => {
         expect(wrapper.find(Route).prop('path')).toEqual(exactPath);
         expect(wrapper.contains('Testing Listing page')).toBeTruthy();
     });
-    test('should return ApiCreate component when request path match with /apis/create', () => {
+    test.skip('should return ApiCreate component when request path match with /apis/create', () => {
         const apiCreatePath = '/apis/create';
         const createAPI = (
             <MemoryRouter initialEntries={[apiCreatePath]}>

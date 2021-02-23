@@ -113,7 +113,7 @@ function checkContext(value, result) {
  */
 export default function DefaultAPIForm(props) {
     const {
-        onChange, onValidate, api, isAPIProduct, isWebSocket,
+        onChange, onValidate, api, isAPIProduct, isWebSocket, children, appendChildrenBeforeEndpoint, hideEndpoint,
     } = props;
     const classes = useStyles();
     const [validity, setValidity] = useState({});
@@ -390,7 +390,8 @@ export default function DefaultAPIForm(props) {
                         </>
                     )}
                 </Grid>
-                {!isAPIProduct && (
+                {appendChildrenBeforeEndpoint && !!children && children}
+                {!isAPIProduct && !hideEndpoint && (
                     <TextField
                         fullWidth
                         id='itest-id-apiendpoint-input'
@@ -441,7 +442,7 @@ export default function DefaultAPIForm(props) {
                                                 ? <CircularProgress size={20} />
                                                 : (
                                                     <Icon>
-                                                check_circle
+                                                        check_circle
                                                     </Icon>
                                                 )}
                                         </IconButton>
@@ -451,13 +452,15 @@ export default function DefaultAPIForm(props) {
                         }}
                     />
                 )}
+
+                {!appendChildrenBeforeEndpoint && !!children && children}
             </form>
             <Grid container direction='row' justify='flex-end' alignItems='center'>
                 <Grid item>
                     <Typography variant='caption' display='block' gutterBottom>
                         <sup style={{ color: 'red' }}>*</sup>
                         {' '}
-Mandatory fields
+                        Mandatory fields
                     </Typography>
                 </Grid>
             </Grid>

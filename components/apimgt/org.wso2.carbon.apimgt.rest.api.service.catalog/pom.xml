@@ -38,6 +38,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
             <scope>provided</scope>
@@ -243,7 +247,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#service-catalog</warName>
+                    <warName>api#am#service-catalog#v0</warName>
                 </configuration>
             </plugin>
             <plugin>
@@ -263,6 +267,18 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/service/catalog/dto/**/*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/service/catalog/**Api.**</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/service/catalog/**Service.**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

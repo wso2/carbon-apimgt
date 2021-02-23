@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
@@ -952,15 +953,16 @@ public class SubscriptionValidationDAO {
      * @return {@link ApplicationKeyMapping}
      *
      * */
-    public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey) {
+    public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey, String keymanager, String tenantDomain) {
 
         try (Connection conn = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
                      conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL)) {
             ps.setString(1, consumerKey);
-
+            ps.setString(2, keymanager);
+            ps.setString(3, tenantDomain);
             try (ResultSet resultSet = ps.executeQuery()) {
-                while (resultSet.next()) {
+                if (resultSet.next()) {
                     ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
                     keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                     keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));

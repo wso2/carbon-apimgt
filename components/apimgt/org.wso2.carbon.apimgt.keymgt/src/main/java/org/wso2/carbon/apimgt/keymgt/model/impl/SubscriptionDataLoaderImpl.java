@@ -142,7 +142,8 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         List<API> apis = new ArrayList<>();
         if (gatewayLabels != null && gatewayLabels.size() > 0) {
             for (String gatewayLabel : gatewayLabels) {
-                String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?gatewayLabel=" + gatewayLabel;
+                String apisEP =
+                        APIConstants.SubscriptionValidationResources.APIS + "?gatewayLabel=" + getEncodedLabel(gatewayLabel);
                 String responseString = null;
                 try {
                     responseString = invokeService(apisEP, tenantDomain);
@@ -226,7 +227,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
         String endPoint =
                 APIConstants.SubscriptionValidationResources.SUBSCRIPTIONS + "?apiId=" + apiId + "&appId=" + appId;
-        Subscription subscription = new Subscription();
+        Subscription subscription = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);
@@ -248,7 +249,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public Application getApplicationById(int appId) throws DataLoadingException {
 
         String endPoint = APIConstants.SubscriptionValidationResources.APPLICATIONS + "?appId=" + appId;
-        Application application = new Application();
+        Application application = null;
         String responseString;
         try {
             responseString = invokeService(endPoint, null);
@@ -267,14 +268,18 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException {
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager, String tenantDomain)
+            throws DataLoadingException {
 
-        String endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
-                + consumerKey;
-        ApplicationKeyMapping application = new ApplicationKeyMapping();
+        ApplicationKeyMapping application = null;
         String responseString;
+        String endPoint = null;
         try {
-            responseString = invokeService(endPoint, null);
+            keymanager = URLEncoder.encode(keymanager, APIConstants.DigestAuthConstants.CHARSET);
+            keymanager = keymanager.replace("\\+", "%20");
+            endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
+                    + consumerKey + "&keymanager=" + keymanager;
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
@@ -283,7 +288,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         if (responseString != null && !responseString.isEmpty()) {
             ApplicationKeyMappingList list = new Gson().fromJson(responseString, ApplicationKeyMappingList.class);
             if (list.getList() != null && !list.getList().isEmpty()) {
-                application = list.getList().get(0); 
+                application = list.getList().get(0);
             }
         }
         return application;
@@ -296,16 +301,9 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
         List<API> apis = new ArrayList<>();
         if (gatewayLabels != null && gatewayLabels.size() > 0) {
             for (String gatewayLabel : gatewayLabels) {
-                String encodedGatewayLabel;
-                try {
-                    encodedGatewayLabel = URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
-                } catch (UnsupportedEncodingException e) {
-                    throw new DataLoadingException("Error while encoding label", e);
-                }
-                encodedGatewayLabel = encodedGatewayLabel.replace("\\+", "%20");
                 String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +
-                        "&version=" + version + "&gatewayLabel=" + encodedGatewayLabel;
-                API api = new API();
+                        "&version=" + version + "&gatewayLabel=" + getEncodedLabel(gatewayLabel);
+                API api = null;
                 String responseString;
                 try {
                     responseString = invokeService(apisEP, null);
@@ -485,4 +483,13 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 (StandardCharsets.UTF_8));
     }
 
+    private String getEncodedLabel(String label) throws DataLoadingException {
+        String encodedGatewayLabel;
+        try {
+            encodedGatewayLabel = URLEncoder.encode(label, APIConstants.DigestAuthConstants.CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            throw new DataLoadingException("Error while encoding label", e);
+        }
+        return encodedGatewayLabel.replace("\\+", "%20");
+    }
 }

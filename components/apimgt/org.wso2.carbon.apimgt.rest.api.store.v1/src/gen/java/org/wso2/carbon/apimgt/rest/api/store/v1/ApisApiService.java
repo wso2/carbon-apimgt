@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicListDTO;
 
 import java.util.List;
 
@@ -44,6 +45,7 @@ public interface ApisApiService {
       public Response apisApiIdSubscriptionPoliciesGet(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdSwaggerGet(String apiId, String organizationId, String labelName, String environmentName, String clusterName, String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdThumbnailGet(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdUserRatingDelete(String apiId, String organizationId, String xWSO2Tenant, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdUserRatingGet(String apiId, String organizationId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdUserRatingPut(String apiId, RatingDTO ratingDTO, String organizationId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;

@@ -21,7 +21,6 @@ import { Grid, withStyles } from '@material-ui/core';
 import Alerts from 'AppComponents/Apis/Settings/Alerts/Alerts';
 import PropTypes from 'prop-types';
 
-
 const styles = (theme) => ({
     settingsRoot: {
         padding: theme.spacing(1),

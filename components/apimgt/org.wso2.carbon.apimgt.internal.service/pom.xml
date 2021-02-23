@@ -209,6 +209,18 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/internal/service/dto/**/*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/internal/service/**Api.**</exclude>
+                        <exclude>org/wso2/carbon/apimgt/internal/service/**Service.**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

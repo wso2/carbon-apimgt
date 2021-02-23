@@ -217,7 +217,7 @@ public class APIProductImportUtil {
                 apiProvider.addAPIProductSwagger(apiToProductResourceMapping, importedApiProduct);
                 APIProductIdentifier createdAPIProductIdentifier = importedApiProduct.getId();
                 APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
-                apiProvider.saveToGateway(createdProduct);
+                //apiProvider.saveToGateway(createdProduct);
             }
 
             String swaggerContent = APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive);

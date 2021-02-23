@@ -37,7 +37,6 @@ import Alert from 'AppComponents/Shared/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AuthManager from 'AppData/AuthManager';
 
-
 const useStyles = makeStyles((theme) => ({
     root: {
         width: '90%',
@@ -389,20 +388,20 @@ export default function CustomizedSteppers() {
                                 onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
                                 disabled={api.workflowStatus === 'CREATED' || AuthManager.isNotPublisher()}
                             >
-                                        Deploy as a prototype
+                                Deploy as a prototype
                                 {isUpdating && <CircularProgress size={20} />}
                             </Button>
-
                         ) : (
                             <Button
                                 size='small'
                                 variant='contained'
                                 color='primary'
                                 onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                disabled={(!isEndpointAvailable || !isTierAvailable) || api.isRevision
-                                        || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED'}
+                                disabled={((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable)
+                                    || api.isRevision || AuthManager.isNotPublisher()
+                                    || api.workflowStatus === 'CREATED'}
                             >
-                                        Publish
+                                Publish
                                 {isUpdating && <CircularProgress size={20} />}
                             </Button>
                         )}
@@ -468,31 +467,33 @@ export default function CustomizedSteppers() {
                     <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
                         <div className={`${classes.pointerMiddle} ${step2Class}`}>
                             <Box p={2} borderLeft='0' borderRight='0'>
-                                <Tooltip
-                                    title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
-                                    placement='top'
-                                >
-                                    <Grid className={classes.gridEndpoint}>
-                                        {isEndpointAvailable ? (
-                                            <CheckIcon className={classes.iconTrue} />
-                                        ) : (
-                                            <CloseIcon className={classes.iconFalse} />
-                                        )}
-                                        <Typography variant='h7'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
-                                                defaultMessage='Endpoint'
-                                            />
-                                        </Typography>
-                                        <Link to={'/apis/' + api.id + '/endpoints'}>
-                                            <LaunchIcon
-                                                style={{ marginLeft: '5px' }}
-                                                color='primary'
-                                                fontSize='small'
-                                            />
-                                        </Link>
-                                    </Grid>
-                                </Tooltip>
+                                { api.type !== 'WEBSUB' && (
+                                    <Tooltip
+                                        title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
+                                        placement='top'
+                                    >
+                                        <Grid className={classes.gridEndpoint}>
+                                            {isEndpointAvailable ? (
+                                                <CheckIcon className={classes.iconTrue} />
+                                            ) : (
+                                                <CloseIcon className={classes.iconFalse} />
+                                            )}
+                                            <Typography variant='h7'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
+                                                    defaultMessage='Endpoint'
+                                                />
+                                            </Typography>
+                                            <Link to={'/apis/' + api.id + '/endpoints'}>
+                                                <LaunchIcon
+                                                    style={{ marginLeft: '5px' }}
+                                                    color='primary'
+                                                    fontSize='small'
+                                                />
+                                            </Link>
+                                        </Grid>
+                                    </Tooltip>
+                                )}
                                 <Tooltip
                                     title={isTierAvailable ? '' : 'You have to select the business plan for the API'}
                                     placement='bottom'
@@ -545,7 +546,7 @@ export default function CustomizedSteppers() {
                                                 defaultMessage=' Deployments'
                                             />
                                         </Typography>
-                                        {((!isEndpointAvailable || !isTierAvailable)
+                                        {(((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable)
                                         || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED')
                                             ? (
                                                 <LaunchIcon

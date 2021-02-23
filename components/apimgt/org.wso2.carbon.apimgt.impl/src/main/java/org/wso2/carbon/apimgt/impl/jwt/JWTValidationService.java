@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.impl.jwt;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 
 public interface JWTValidationService {
 

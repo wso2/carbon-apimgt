@@ -52,6 +52,7 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
+import Subscription from './components/Subscription';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -151,6 +152,11 @@ function copyAPIConfig(api) {
             accessControlAllowOrigins: [...api.corsConfiguration.accessControlAllowOrigins],
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
+        },
+        websubSubscriptionConfiguration: {
+            secret: api.websubSubscriptionConfiguration.secret,
+            signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
+            signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
         },
     };
     return apiConfigJson;
@@ -280,11 +286,24 @@ export default function RuntimeConfiguration() {
                     nextState.keyManagers = keyManagersConfigured;
                 }
                 return nextState;
+            case 'secret':
+            case 'signingAlgorithm':
+            case 'signatureHeader':
+                nextState.websubSubscriptionConfiguration[action] = value;
+                return nextState;
             default:
                 return state;
         }
     }
     const { api, updateAPI } = useContext(APIContext);
+    const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
+    const isWebSub = api.type === 'WEBSUB';
+    api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
+        secret: '',
+        signingAlgorithm: '',
+        signatureHeader: '',
+    };
+
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
@@ -334,7 +353,6 @@ export default function RuntimeConfiguration() {
     const updateFaultMediationPolicy = (policy) => {
         setFaultPolicy({ id: policy.id, name: policy.name, type: policy.type });
     };
-
 
     /**
      * Update the GraphQL Query Complexity Values
@@ -412,10 +430,18 @@ export default function RuntimeConfiguration() {
                 <Grid container direction='row' justify='space-around' alignItems='stretch' spacing={8}>
                     <Grid item xs={12} md={7}>
                         <Typography className={classes.heading} variant='h6'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.section.request'
-                                defaultMessage='Request'
-                            />
+                            { isAsyncAPI
+                                ? (
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.section.initial.request'
+                                        defaultMessage='Initial Request'
+                                    />
+                                ) : (
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.section.request'
+                                        defaultMessage='Request'
+                                    />
+                                )}
                         </Typography>
                         <Grid
                             direction=' column'
@@ -426,11 +452,13 @@ export default function RuntimeConfiguration() {
                             <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
                                 <Paper className={classes.paper} elevation={0}>
                                     <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
-                                    <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
+                                    { api.type !== 'WS' && (
+                                        <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
+                                    )}
 
-                                    {api.type !== 'GRAPHQL'
+                                    {(api.type !== 'GRAPHQL' && !isAsyncAPI)
                                         && <SchemaValidation api={apiConfig} configDispatcher={configDispatcher} />}
-                                    {!api.isAPIProduct() && (
+                                    {!api.isAPIProduct() && !isAsyncAPI && (
                                         <Flow
                                             api={apiConfig}
                                             type='IN'
@@ -448,34 +476,41 @@ export default function RuntimeConfiguration() {
                                             />
                                         </Box>
                                     )}
+                                    {api.type === 'WEBSUB' && (
+                                        <Subscription api={apiConfig} configDispatcher={configDispatcher} />
+                                    )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />
                             </Grid>
-                            <Typography className={classes.heading} variant='h6'>
-                                <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.section.response'
-                                    defaultMessage='Response'
-                                />
-                            </Typography>
-                            <Grid item xs={12} style={{ position: 'relative' }}>
-                                <Box mb={3}>
-                                    <Paper className={classes.paper} elevation={0}>
-                                        {!api.isAPIProduct() && (
-                                            <Box mb={3}>
-                                                <Flow
-                                                    api={apiConfig}
-                                                    type='OUT'
-                                                    updateMediationPolicy={updateOutMediationPolicy}
-                                                    selectedMediationPolicy={outPolicy}
-                                                    isRestricted={isRestricted(['apim:api_create'], api)}
-                                                />
-                                            </Box>
-                                        )}
-                                        <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
-                                    </Paper>
-                                    <ArrowBackIcon className={classes.arrowBackIcon} />
-                                </Box>
-                            </Grid>
+                            { !isAsyncAPI && (
+                                <>
+                                    <Typography className={classes.heading} variant='h6'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.section.response'
+                                            defaultMessage='Response'
+                                        />
+                                    </Typography>
+                                    <Grid item xs={12} style={{ position: 'relative' }}>
+                                        <Box mb={3}>
+                                            <Paper className={classes.paper} elevation={0}>
+                                                {!api.isAPIProduct() && (
+                                                    <Box mb={3}>
+                                                        <Flow
+                                                            api={apiConfig}
+                                                            type='OUT'
+                                                            updateMediationPolicy={updateOutMediationPolicy}
+                                                            selectedMediationPolicy={outPolicy}
+                                                            isRestricted={isRestricted(['apim:api_create'], api)}
+                                                        />
+                                                    </Box>
+                                                )}
+                                                <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
+                                            </Paper>
+                                            <ArrowBackIcon className={classes.arrowBackIcon} />
+                                        </Box>
+                                    </Grid>
+                                </>
+                            )}
                             {!api.isAPIProduct() && (
                                 <>
                                     <Typography className={classes.heading} variant='h6'>
@@ -509,8 +544,12 @@ export default function RuntimeConfiguration() {
                         <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
                             {!api.isAPIProduct() && (
                                 <>
-                                    <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
-                                    <Endpoints api={api} />
+                                    {!isAsyncAPI && (
+                                        <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                    )}
+                                    { !isWebSub && (
+                                        <Endpoints api={api} />
+                                    )}
                                 </>
                             )}
 

@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -366,7 +367,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            Application application = apiConsumer.getApplicationByUUID(applicationId, MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
             if (application != null) {
                 // Remove hidden attributes and set the rest of the attributes from config
                 JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
@@ -743,7 +745,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
                             username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                             accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                            jsonParams, keyManagerName);
+                            jsonParams, keyManagerName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                     ApplicationKeyDTO applicationKeyDTO =
                             ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                     applicationKeyDTO.setKeyManager(keyManagerName);
@@ -815,7 +817,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param applicationUUID Id of the application
      * @return List of application keys
      */
-    private Set<APIKey> getApplicationKeys(String applicationUUID) {
+    private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain) {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
@@ -823,7 +825,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationUUID);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    return apiConsumer.getApplicationKeysOfApplication(application.getId());
+                    return apiConsumer.getApplicationKeysOfApplication(application.getId(), tenantDomain);
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
                 }
@@ -834,6 +836,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationUUID, e, log);
         }
         return null;
+    }
+
+    /**
+     * Used to get all keys of an application
+     *
+     * @param applicationUUID Id of the application
+     * @return List of application keys
+     */
+    private Set<APIKey> getApplicationKeys(String applicationUUID) {
+
+        return getApplicationKeys(applicationUUID, null);
     }
 
     @Override
@@ -936,13 +949,20 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Application Key Information
      */
     private ApplicationKeyDTO getApplicationKeyByAppIDAndKeyMapping(String applicationId, String keyMappingId) {
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
-        if (applicationKeys != null) {
-            for (APIKey apiKey : applicationKeys) {
-                if (keyMappingId != null && keyMappingId.equals(apiKey.getMappingId())) {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            if (application != null) {
+                APIKey apiKey = apiConsumer.getApplicationKeyByAppIDAndKeyMapping(application.getId(), keyMappingId);
+                if (apiKey != null) {
                     return ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
                 }
+            } else {
+                log.error("Application not found with ID: " + applicationId);
             }
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -1056,7 +1076,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     @Override
     public Response applicationsApplicationIdMapKeysPost(String applicationId, ApplicationKeyMappingRequestDTO body,
-                                                         MessageContext messageContext) throws APIManagementException {
+                                                          MessageContext messageContext)
+            throws APIManagementException {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         JSONObject jsonParamObj = new JSONObject();
@@ -1074,8 +1095,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 jsonParamObj.put(APIConstants.SUBSCRIPTION_KEY_TYPE, body.getKeyType().toString());
                 jsonParamObj.put(APIConstants.JSON_CLIENT_SECRET, body.getConsumerSecret());
                 Map<String, Object> keyDetails = apiConsumer
-                        .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId,
-                                application.getName(), keyType, tokenType, keyManagerName);
+                        .mapExistingOAuthClient(jsonParamObj.toJSONString(), username, clientId, application.getName(),
+                                keyType, tokenType, keyManagerName, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil
                         .fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
                 applicationKeyDTO.setKeyManager(keyManagerName);
@@ -1090,10 +1111,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdOauthKeysGet(String applicationId, String organizationId, MessageContext messageContext)
+    public Response applicationsApplicationIdOauthKeysGet(String applicationId, String organizationId,
+                                                          MessageContext messageContext)
             throws APIManagementException {
 
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId);
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
         applicationKeyListDTO.setCount(0);
