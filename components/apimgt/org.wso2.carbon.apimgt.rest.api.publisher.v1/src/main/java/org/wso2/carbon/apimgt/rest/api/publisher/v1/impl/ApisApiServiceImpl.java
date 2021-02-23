@@ -4450,6 +4450,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(username);
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+            if (service == null) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceKey, log);
+            }
             APIDTO createdApiDTO = null;
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
