@@ -493,6 +493,39 @@
   "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.name.helper.text": {
     "defaultMessage": "Provide the name of the technical owner"
   },
+  "Apis.Details.Comments.Comment.something.went.wrong": {
+    "defaultMessage": "Something went wrong while deleting comment"
+  },
+  "Apis.Details.Comments.CommentAdd.btn.add.comment": {
+    "defaultMessage": "Comment"
+  },
+  "Apis.Details.Comments.CommentAdd.btn.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Comments.CommentAdd.write.comment.help": {
+    "defaultMessage": "Write a comment"
+  },
+  "Apis.Details.Comments.CommentAdd.write.comment.label": {
+    "defaultMessage": "Write a comment"
+  },
+  "Apis.Details.Comments.CommentOptions.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Comments.CommentOptions.reply": {
+    "defaultMessage": "Reply"
+  },
+  "Apis.Details.Comments.load.previous.comments": {
+    "defaultMessage": "Show More"
+  },
+  "Apis.Details.Comments.no.comments": {
+    "defaultMessage": "No Comments Yet"
+  },
+  "Apis.Details.Comments.no.comments.content": {
+    "defaultMessage": "No comments available for this API yet"
+  },
+  "Apis.Details.Comments.title": {
+    "defaultMessage": "Comments"
+  },
   "Apis.Details.Configurartion.components.QueryAnalysis": {
     "defaultMessage": "Query Analysis"
   },
@@ -2883,6 +2916,9 @@
   },
   "Apis.Details.index.business.info": {
     "defaultMessage": "business info"
+  },
+  "Apis.Details.index.comments": {
+    "defaultMessage": "Comments"
   },
   "Apis.Details.index.design.configs": {
     "defaultMessage": "Basic info"

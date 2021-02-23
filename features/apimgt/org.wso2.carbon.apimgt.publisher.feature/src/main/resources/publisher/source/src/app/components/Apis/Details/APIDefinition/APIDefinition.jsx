@@ -195,24 +195,6 @@ class APIDefinition extends React.Component {
             });
     }
 
-    /**
-     * Handles the No button action of the save api definition confirmation dialog box.
-     */
-    handleNo() {
-        this.setState({ openDialog: false });
-    }
-
-    /**
-     * Handles the yes button action of the save api definition confirmation dialog box.
-     */
-    handleOk() {
-        const { swaggerModified, asyncAPIModified } = this.state;
-        if (asyncAPIModified !== null) {
-            this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
-        } else {
-            this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
-        }
-    }
 
     /**
      * Method to handle asyncAPI content change
@@ -332,6 +314,25 @@ class APIDefinition extends React.Component {
      */
     getConvertToFormat(format) {
         return format === 'json' ? 'yaml' : 'json';
+    }
+
+    /**
+     * Handles the No button action of the save api definition confirmation dialog box.
+     */
+    handleNo() {
+        this.setState({ openDialog: false });
+    }
+
+    /**
+     * Handles the yes button action of the save api definition confirmation dialog box.
+     */
+    handleOk() {
+        const { swaggerModified, asyncAPIModified } = this.state;
+        if (asyncAPIModified !== null) {
+            this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
+        } else {
+            this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+        }
     }
 
     /**
