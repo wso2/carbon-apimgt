@@ -20,7 +20,7 @@ import React, { useEffect, useReducer, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
 import { makeStyles } from '@material-ui/core/styles';
 import FormDialogBase from 'AppComponents/AdminPages/Addons/FormDialogBase';
@@ -69,6 +69,7 @@ function reducer(state, { field, value }) {
  * @returns {JSX}.
  */
 function AddEditGWEnvironment(props) {
+    const intl = useIntl();
     const {
         updateList, dataRow, icon, triggerButtonText, title,
     } = props;
@@ -105,7 +106,12 @@ function AddEditGWEnvironment(props) {
             return false;
         }
         if (!vhost.host) {
-            return 'Host of Vhost is empty';
+            return (
+                intl.formatMessage({
+                    id: 'GatewayEnvironments.AddEditGWEnvironment.form.vhost.host.empty',
+                    defaultMessage: 'Host of Vhost is empty',
+                })
+            );
         }
         // same pattern used in admin Rest API
         const hostPattern = '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9]'
@@ -113,7 +119,12 @@ function AddEditGWEnvironment(props) {
         const hostRegex = new RegExp(hostPattern, 'g');
         const validHost = vhost.host && vhost.host.match(hostRegex);
         if (!validHost) {
-            return 'Invalid Host';
+            return (
+                intl.formatMessage({
+                    id: 'GatewayEnvironments.AddEditGWEnvironment.form.vhost.host.invalid',
+                    defaultMessage: 'Invalid Host',
+                })
+            );
         }
 
         // same pattern used in admin Rest API
@@ -121,7 +132,12 @@ function AddEditGWEnvironment(props) {
         // empty http context are valid
         const validHttpContext = !vhost.httpContext || vhost.httpContext.match(httpContextRegex);
         if (!validHttpContext) {
-            return 'Invalid Http context';
+            return (
+                intl.formatMessage({
+                    id: 'GatewayEnvironments.AddEditGWEnvironment.form.vhost.context.invalid',
+                    defaultMessage: 'Invalid Http context',
+                })
+            );
         }
 
         let portError;
@@ -144,16 +160,31 @@ function AddEditGWEnvironment(props) {
                     break;
                 }
                 if (value === '') {
-                    error = 'Name is Empty';
+                    error = (
+                        intl.formatMessage({
+                            id: 'GatewayEnvironments.AddEditGWEnvironment.form.environment.name.empty',
+                            defaultMessage: 'Name is Empty',
+                        })
+                    );
                 } else if (/[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
-                    error = 'Name field contains special characters';
+                    error = (
+                        intl.formatMessage({
+                            id: 'GatewayEnvironments.AddEditGWEnvironment.form.environment.name.invalid',
+                            defaultMessage: 'Name field contains special characters',
+                        })
+                    );
                 } else {
                     error = false;
                 }
                 break;
             case 'displayName':
                 if (!value) {
-                    error = 'Display Name is Empty';
+                    error = (
+                        intl.formatMessage({
+                            id: 'AdminPagesGatewayEnvironments.AddEditGWEnvironment.form.environment.displayName.empty',
+                            defaultMessage: 'Display Name is Empty',
+                        })
+                    );
                 } else {
                     error = false;
                 }
@@ -164,12 +195,22 @@ function AddEditGWEnvironment(props) {
                     break;
                 }
                 if (value.length === 0) {
-                    error = 'VHost is empty';
+                    error = (
+                        intl.formatMessage({
+                            id: 'AdminPagesGatewayEnvironments.AddEditGWEnvironment.form.environment.vhost.empty',
+                            defaultMessage: 'VHost is empty',
+                        })
+                    );
                     break;
                 }
                 const hosts = value.map((vhost) => vhost.host);
                 if (hosts.length !== new Set(hosts).size) {
-                    error = 'VHosts are duplicated';
+                    error = (
+                        intl.formatMessage({
+                            id: 'AdminPagesGatewayEnvironments.AddEditGWEnvironment.form.environment.vhost.duplicate',
+                            defaultMessage: 'VHosts are duplicated',
+                        })
+                    );
                     break;
                 }
                 for (const host of value) {
@@ -238,15 +279,15 @@ function AddEditGWEnvironment(props) {
             if (dataRow) {
                 return (
                     <FormattedMessage
-                        id='AdminPages.Gateways.AddEdit.form.info.edit.successful'
-                        defaultMessage='Gateway Label edited successfully'
+                        id='GatewayEnvironments.AddEditGWEnvironment.form.info.edit.successful'
+                        defaultMessage='Gateway Environment edited successfully'
                     />
                 );
             } else {
                 return (
                     <FormattedMessage
-                        id='AdminPages.Gateways.AddEdit.form.info.add.successful'
-                        defaultMessage='Gateway Label added successfully'
+                        id='GatewayEnvironments.AddEditGWEnvironment.form.info.add.successful'
+                        defaultMessage='Gateway Environment added successfully'
                     />
                 );
             }
@@ -287,7 +328,7 @@ function AddEditGWEnvironment(props) {
             title={title}
             saveButtonText={(
                 <FormattedMessage
-                    id='AdminPages.Gateways.AddEdit.form.save.button.label'
+                    id='GatewayEnvironments.AddEditGWEnvironment.form.save.button.label'
                     defaultMessage='Save'
                 />
             )}
@@ -306,7 +347,10 @@ function AddEditGWEnvironment(props) {
                     onChange={onChange}
                     label={(
                         <span>
-                            <FormattedMessage id='AdminPages.Gateways.AddEdit.form.name' defaultMessage='Name' />
+                            <FormattedMessage
+                                id='GatewayEnvironments.AddEditGWEnvironment.form.name'
+                                defaultMessage='Name'
+                            />
                             <span className={classes.error}>*</span>
                         </span>
                     )}
@@ -324,7 +368,7 @@ function AddEditGWEnvironment(props) {
                     label={(
                         <span>
                             <FormattedMessage
-                                id='AdminPages.Gateways.AddEdit.form.displayName'
+                                id='GatewayEnvironments.AddEditGWEnvironment.form.displayName'
                                 defaultMessage='Display Name'
                             />
                             <span className={classes.error}>*</span>
@@ -333,7 +377,7 @@ function AddEditGWEnvironment(props) {
                     fullWidth
                     helperText={(
                         <FormattedMessage
-                            id='AdminPages.Gateways.AddEdit.form.displayName.help'
+                            id='GatewayEnvironments.AddEditGWEnvironment.form.displayName.help'
                             defaultMessage='Display name of the Gateway Environment'
                         />
                     )}
@@ -347,7 +391,12 @@ function AddEditGWEnvironment(props) {
                     label='Description'
                     fullWidth
                     multiline
-                    helperText='Description of the Gateway label'
+                    helperText={(
+                        <FormattedMessage
+                            id='GatewayEnvironments.AddEditGWEnvironment.form.description.help'
+                            defaultMessage='Description of the Gateway Environment'
+                        />
+                    )}
                     variant='outlined'
                 />
                 <AddEditVhost
