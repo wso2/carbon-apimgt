@@ -425,7 +425,10 @@ public enum ExceptionCodes implements ErrorHandler {
     ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
 
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
-            "Gateway type not found available Gateway types : " + "%s");
+            "Gateway type not found available Gateway types : " + "%s"),
+
+    SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE(900910, "Service import is failed" , 412, "Cannot update existing services " +
+                                                    "when overwrite is false");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
