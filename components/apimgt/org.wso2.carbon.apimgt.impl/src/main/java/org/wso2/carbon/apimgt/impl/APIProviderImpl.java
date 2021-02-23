@@ -21,12 +21,14 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.gson.Gson;
 
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiOperationBindings;
+import io.apicurio.datamodels.asyncapi.models.AaiParameter;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -9780,6 +9782,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if (solaceBrokerAPI && deployedToSolace) {
             apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
+            api.getEnvironments().add(solaceProviderName);
+            try {
+                updateAPI(api);
+            } catch (FaultGatewaysException e) {
+                e.printStackTrace();
+            }
         } else if (solaceBrokerAPI && !deployedToSolace) {
             System.out.println("Error while deploying API in Solace");
         } else if (!solaceBrokerAPI) {
@@ -10132,6 +10140,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private boolean deployToSolaceBroker(API api) throws IOException {
         String apiDefinition = api.getAsyncApiDefinition();
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
+        String[] apiContextParts = api.getContext().split("/");
+        String apiNameWithContext = api.getId().getName() + "_" + apiContextParts[1] + "_" + apiContextParts[2];
         String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1/";
         String urlForOrganizations = baseUrl + "/organizations";
         HttpClient httpClient = HttpClients.createDefault();
@@ -10181,7 +10191,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     request4.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                     request4.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
                     //setRequestBody
-                    org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, env);
+                    org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, env, apiNameWithContext);
                     StringEntity params2 = new StringEntity(requestBody.toString());
                     request4.setEntity(params2);
                     //response
@@ -10196,7 +10206,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return false;
     }
 
-    private org.json.JSONObject buildAPIProductRequestBody(Aai20Document aai20Document, String environment) throws JsonProcessingException {
+    private org.json.JSONObject buildAPIProductRequestBody(Aai20Document aai20Document, String environment, String apiNameWithContext) throws JsonProcessingException {
         org.json.JSONObject requestBody = new org.json.JSONObject();
 
         org.json.JSONArray apiName = new org.json.JSONArray();
@@ -10204,11 +10214,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         requestBody.put("apis", apiName);
 
         requestBody.put("approvalType", "manual");
-        requestBody.put("description", aai20Document.info.title);
+        if (aai20Document.info.description != null) {
+            requestBody.put("description", aai20Document.info.description);
+        } else {
+            requestBody.put("description", aai20Document.info.title);
+        }
         requestBody.put("displayName", aai20Document.info.title);
         requestBody.put("pubResources", new org.json.JSONArray());
         requestBody.put("subResources", new org.json.JSONArray());
-        requestBody.put("name", aai20Document.info.title);
+        requestBody.put("name", apiNameWithContext);
 
         org.json.JSONArray environments = new org.json.JSONArray();
         environments.put(environment);
@@ -10220,10 +10234,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         org.json.JSONArray attributes = new org.json.JSONArray();
         for (String parameter : parameters) {
-            org.json.JSONObject attributeObject = new org.json.JSONObject();
-            attributeObject.put("name", parameter);
-            attributeObject.put("value", "");
-            attributes.put(attributeObject);
+            AaiParameter parameterObj = aai20Document.components.parameters.get(parameter);
+            if (parameterObj.schema != null) {
+                ObjectNode schemaNode = (ObjectNode) parameterObj.schema;
+                org.json.JSONObject schemaJson = new org.json.JSONObject(schemaNode.toString());
+                if (schemaJson.has("enum")) {
+                    org.json.JSONArray enumArray = schemaJson.getJSONArray("enum");
+                    List<String> enumList = new ArrayList<>();
+                    for (int i = 0; i < enumArray.length(); i++) {
+                        enumList.add(enumArray.getString(i));
+                    }
+                    //List<Object> enumList = enumArray.toList();
+                    StringBuilder enumStringBuilder = new StringBuilder();
+                    for (String value : enumList) {
+                        enumStringBuilder.append(value).append(", ");
+                    }
+                    String enumString = enumStringBuilder.substring(0, enumStringBuilder.length()-2);
+
+                    org.json.JSONObject attributeObject = new org.json.JSONObject();
+                    attributeObject.put("name", parameter);
+                    attributeObject.put("value", enumString);
+                    attributes.put(attributeObject);
+                }
+            }
         }
         requestBody.put("attributes", attributes);
 
@@ -10235,7 +10268,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (String protocol : protocolsHashSet) {
             org.json.JSONObject protocolObject = new org.json.JSONObject();
             protocolObject.put("name", protocol);
-            protocolObject.put("version", "");
+            protocolObject.put("version", getProtocolVersion(protocol));
             protocols.put(protocolObject);
         }
         requestBody.put("protocols", protocols);
@@ -10280,5 +10313,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (bindings.redis != null) { protocolsFromBindings.add("redis"); }
 
         return protocolsFromBindings;
+    }
+
+    private String getProtocolVersion(String protocol) {
+        HashMap<String, String> protocolsWithVersions = new HashMap<>();
+        protocolsWithVersions.put("http", "1.1");
+        protocolsWithVersions.put("mqtt", "3.1.1");
+        protocolsWithVersions.put("mqtt5", "5.0");
+        protocolsWithVersions.put("amqp", "0.9.1");
+        protocolsWithVersions.put("amqp1", "1.0");
+        if (protocolsWithVersions.get(protocol) != null) {
+            return protocolsWithVersions.get(protocol);
+        }
+        return "";
     }
 }
