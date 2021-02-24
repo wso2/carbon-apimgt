@@ -143,28 +143,8 @@ public class SignedJWTInfo implements Serializable {
         return x509ClientCertificateHash;
     }
 
-    public boolean isValidCertificateBoundAccessToken() { //Holder of Key token
+    public X509Certificate getX509ClientCertificate() {
 
-        if (isCertificateBoundAccessTokenEnabled()) {
-            if (X509ClientCertificate == null || StringUtils.isEmpty(getX509ClientCertificateHash()))
-                return false;
-            if (getX509ClientCertificateHash().equals(getCertificateThumbprint())) {
-                return true;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isCertificateBoundAccessTokenEnabled() {
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (config != null) {
-            String firstProperty = config
-                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
-            return Boolean.parseBoolean(firstProperty);
-        }
-        return false;
+        return X509ClientCertificate;
     }
 }
