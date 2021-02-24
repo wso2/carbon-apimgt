@@ -155,7 +155,8 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                     return applicationKeyMapping;
                 }
                 try {
-                    applicationKeyMapping = new SubscriptionDataLoaderImpl().getKeyMapping(key, keyManager);
+                    applicationKeyMapping = new SubscriptionDataLoaderImpl()
+                            .getKeyMapping(key, keyManager, tenantDomain);
                 } catch (DataLoadingException e) {
                     log.error("Error while Loading KeyMapping Information from Internal API.", e);
                 }

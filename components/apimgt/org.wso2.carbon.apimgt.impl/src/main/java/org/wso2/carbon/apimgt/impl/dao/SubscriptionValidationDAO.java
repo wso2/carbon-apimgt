@@ -895,30 +895,78 @@ public class SubscriptionValidationDAO {
 
     /*
      * @param consumerKey : consumer key of an application
+     * @param keymanager : key manager
+     * @param tenantDomain : tenant domain
      * @return {@link ApplicationKeyMapping}
      *
      * */
     public ApplicationKeyMapping getApplicationKeyMapping(String consumerKey, String keymanager, String tenantDomain) {
-
-        try (Connection conn = APIMgtDBUtil.getConnection();
-             PreparedStatement ps =
-                     conn.prepareStatement(SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL)) {
-            ps.setString(1, consumerKey);
-            ps.setString(2, keymanager);
-            ps.setString(3, tenantDomain);
-            try (ResultSet resultSet = ps.executeQuery()) {
-                if (resultSet.next()) {
-                    ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
-                    keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
-                    keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
-                    keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
-                    keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
-                    return keyMapping;
+        ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
+        if (keymanager != null) {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                    PreparedStatement ps = conn.prepareStatement(
+                            SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_AND_KM_NAME_SQL)) {
+                ps.setString(1, consumerKey);
+                ps.setString(2, keymanager);
+                ps.setString(3, tenantDomain);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
+                        keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                        keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                        keyMapping.setKeyManager(resultSet.getString("KEY_MANAGER"));
+                        return keyMapping;
+                    } else {
+                        try (PreparedStatement ps1 = conn.prepareStatement(
+                                SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_AND_KM_UUID_SQL)) {
+                            ps1.setString(1, consumerKey);
+                            ps1.setString(2, keymanager);
+                            ps1.setString(3, tenantDomain);
+                            try (ResultSet resultSet1 = ps1.executeQuery()) {
+                                if (resultSet1.next()) {
+                                    keyMapping.setApplicationId(resultSet1.getInt("APPLICATION_ID"));
+                                    keyMapping.setConsumerKey(resultSet1.getString("CONSUMER_KEY"));
+                                    keyMapping.setKeyType(resultSet1.getString("KEY_TYPE"));
+                                    keyMapping.setKeyManager(resultSet1.getString("KEY_MANAGER"));
+                                    return keyMapping;
+                                }
+                            }
+                        }
+                    }
                 }
-            }
 
-        } catch (SQLException e) {
-            log.error("Error in loading Application Key Mapping for consumer key : " + consumerKey, e);
+            } catch (SQLException e) {
+                log.error("Error in loading Application Key Mapping for consumer key : " + consumerKey
+                        + " and Key Manager " + keymanager + " for tenant domain " + tenantDomain, e);
+            }
+        } else {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                    PreparedStatement ps = conn.prepareStatement(
+                            SubscriptionValidationSQLConstants.GET_AM_KEY_MAPPING_BY_CONSUMER_KEY_SQL)) {
+                ps.setString(1, consumerKey);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    while (resultSet.next()) {
+                        String keyManagerName = resultSet.getString("KEY_MANAGER");
+                        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+                        try {
+                            KeyManagerConfigurationDTO keyManager = apiMgtDAO.
+                                    getKeyManagerConfigurationByUUID(keyManagerName);
+                            if (keyManager != null) {
+                                keyManagerName = keyManager.getName();
+                            }
+                        } catch (APIManagementException e) {
+                            log.error("Error in fetching Key manager: " + keyManagerName);
+                        }
+                        keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
+                        keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
+                        keyMapping.setKeyType(resultSet.getString("KEY_TYPE"));
+                        keyMapping.setKeyManager(keyManagerName);
+                        return keyMapping;
+                    }
+                }
+            } catch (SQLException e) {
+                log.error("Error in loading Application Key Mapping for consumer key : " + consumerKey, e);
+            }
         }
         return null;
     }

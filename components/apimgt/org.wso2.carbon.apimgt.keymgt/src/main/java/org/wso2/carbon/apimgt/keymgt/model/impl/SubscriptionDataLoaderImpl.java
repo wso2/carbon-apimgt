@@ -256,11 +256,11 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     @Override
     public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException {
-        return getKeyMapping(consumerKey, null);
+        return getKeyMapping(consumerKey, null, null);
     }
 
     @Override
-    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager)
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keymanager, String tenantDomain)
             throws DataLoadingException {
         ApplicationKeyMapping application = null;
         String responseString;
@@ -275,7 +275,7 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 endPoint = APIConstants.SubscriptionValidationResources.APPLICATION_KEY_MAPPINGS + "?consumerKey="
                         + consumerKey;
             }
-            responseString = invokeService(endPoint, null);
+            responseString = invokeService(endPoint, tenantDomain);
         } catch (IOException e) {
             String msg = "Error while executing the http client " + endPoint;
             log.error(msg, e);
