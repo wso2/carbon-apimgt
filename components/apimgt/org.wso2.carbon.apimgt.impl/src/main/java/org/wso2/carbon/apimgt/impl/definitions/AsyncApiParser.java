@@ -1436,6 +1436,7 @@ public class AsyncApiParser extends APIDefinition {
         //import and load AsyncAPI HyperSchema for JSON schema validation
         JSONObject hyperSchema = new JSONObject(ASYNCAPI_JSON_HYPERSCHEMA);
         Schema schemaValidator = SchemaLoader.load(hyperSchema);
+        String protocol = StringUtils.EMPTY;
 
         boolean validationSuccess = false;
         List<String> validationErrorMessages = null;
@@ -1468,7 +1469,8 @@ public class AsyncApiParser extends APIDefinition {
             AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             validationErrorMessages = new ArrayList<>();
             if (asyncApiDocument.getServers().size() == 1) {
-                if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
+                protocol = asyncApiDocument.getServers().get(0).protocol;
+                if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(protocol)) {
                     isWebSocket = true;
                 }
             }
@@ -1537,6 +1539,9 @@ public class AsyncApiParser extends APIDefinition {
             validationResponse.setParser(this);
             if (returnJsonContent) {
                 validationResponse.setJsonContent(apiDefinition);
+            }
+            if (StringUtils.isNotEmpty(protocol)) {
+                validationResponse.setProtocol(protocol);
             }
         } else {
             if (validationErrorMessages != null){

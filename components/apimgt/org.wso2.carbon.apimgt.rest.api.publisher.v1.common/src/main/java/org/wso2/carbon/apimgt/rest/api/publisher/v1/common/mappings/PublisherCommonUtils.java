@@ -765,7 +765,8 @@ public class PublisherCommonUtils {
         return isValid;
     }
 
-    public static String constructEndpointConfigForService(ServiceEntry service) {
+    public static String constructEndpointConfigForService(ServiceEntry service, String protocol)
+            throws APIManagementException {
         StringBuilder sb = new StringBuilder();
         String endpoint_type = APIDTO.TypeEnum.HTTP.value();
         switch (service.getDefinitionType()) {
@@ -776,7 +777,11 @@ public class PublisherCommonUtils {
             case WSDL2:
                 endpoint_type = APIDTO.TypeEnum.SOAP.value();
             case ASYNC_API:
-                // TODO Need to update the endpoint_type for ASYNC_API
+                if (StringUtils.isEmpty(protocol)) {
+                    throw new APIManagementException("Missing protocol in Async API Definition",
+                            ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION);
+                }
+                endpoint_type = APIDTO.TypeEnum.fromValue(protocol).value();
         }
         if (StringUtils.isNotEmpty(service.getServiceUrl())) {
             sb.append("{\"endpoint_type\": \"")
@@ -934,6 +939,40 @@ public class PublisherCommonUtils {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
         return apiToAdd;
+    }
+
+    public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,
+                                         ServiceEntry service) throws APIManagementException, FaultGatewaysException {
+        if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
+                ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
+            return updateSwagger(apiId, response, true);
+        } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
+            return updateAsyncAPIDefinition(apiId, response);
+        }
+        return null;
+    }
+
+    /**
+     * update AsyncPI definition of the given api
+     *
+     * @param apiId API Id
+     * @param response response of the AsyncAPI definition validation call
+     * @return updated AsyncAPI definition
+     * @throws APIManagementException when error occurred updating AsyncAPI definition
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
+            throws APIManagementException, FaultGatewaysException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        //this will fall if user does not have access to the API or the API does not exist
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        String apiDefinition = response.getJsonContent();
+        //updating APi with the new AsyncAPI definition
+        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
+        apiProvider.updateAPI(existingAPI);
+        //retrieves the updated AsyncAPI definition
+        return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
     }
 
     /**
