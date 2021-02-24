@@ -463,11 +463,18 @@ public class APIMappingUtil {
         defaultVhost.setHttpPort(APIConstants.HTTP_PROTOCOL_PORT);
         defaultVhost.setWsPort(APIConstants.WS_PROTOCOL_PORT);
         defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
+
         // Deployed VHost
-        VHost vHost = environment.getVhosts().stream()
-                .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
-                .findAny()
-                .orElse(defaultVhost);
+        VHost vHost;
+        if (revisionDeployment.getVhost() == null && environment.getVhosts().size() > 0) {
+            // VHost is NULL set first Vhost (set in deployment toml)
+            vHost = environment.getVhosts().get(0);
+        } else {
+            vHost = environment.getVhosts().stream()
+                    .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
+                    .findAny()
+                    .orElse(defaultVhost);
+        }
 
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
         apiEndpointURLsDTO.setEnvironmentName(environment.getName());
