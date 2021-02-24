@@ -14217,33 +14217,6 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Whether an Environment exists in the tenant domain with the given name
-     *
-     * @param tenantDomain tenant domain
-     * @param envName environment name
-     * @return whether an Environment exist or not
-     * @throws APIManagementException if failed to find
-     */
-    public boolean isEnvironmentNameExist(String tenantDomain, String envName) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_NAME_COUNT_BY_TENANT_SQL)) {
-            prepStmt.setString(1, envName);
-            prepStmt.setString(2, tenantDomain);
-
-            int envCount = 0;
-            try (ResultSet rs = prepStmt.executeQuery()) {
-                if (rs.next()) {
-                    envCount = rs.getInt("ENVIRONMENT_COUNT");
-                }
-            }
-            return envCount > 0;
-        } catch (SQLException e) {
-            handleException("Failed to get Environment count of " + tenantDomain, e);
-        }
-        return false;
-    }
-
-    /**
      * Returns a list of vhosts belongs to the gateway environments
      *
      * @param connection DB connection
@@ -14287,8 +14260,8 @@ public class ApiMgtDAO {
      */
     public void deleteEnvironment(String uuid) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_ENVIRONMENT_SQL)) {
-                connection.setAutoCommit(false);
                 prepStmt.setString(1, uuid);
                 prepStmt.executeUpdate();
                 connection.commit();
@@ -14310,8 +14283,8 @@ public class ApiMgtDAO {
      */
     public Environment updateEnvironment(Environment environment) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
-                connection.setAutoCommit(false);
                 prepStmt.setString(1, environment.getDisplayName());
                 prepStmt.setString(2, environment.getDescription());
                 prepStmt.setString(3, environment.getUuid());
@@ -16648,18 +16621,18 @@ public class ApiMgtDAO {
                     if (previousRevision != null) {
                         revisionList.remove(previousRevision);
                     }
-                    apiRevision.setId(rs.getInt(1));
-                    apiRevision.setApiUUID(rs.getString(2));
-                    apiRevision.setRevisionUUID(rs.getString(3));
-                    apiRevision.setDescription(rs.getString(4));
-                    apiRevision.setCreatedTime(rs.getString(5));
-                    apiRevision.setCreatedBy(rs.getString(6));
-                    if (!StringUtils.isEmpty(rs.getString(7))) {
-                        apiRevisionDeployment.setDeployment(rs.getString(7));
-                        apiRevisionDeployment.setVhost(rs.getString(8));
+                    apiRevision.setId(rs.getInt("ID"));
+                    apiRevision.setApiUUID(rs.getString("API_UUID"));
+                    apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevision.setDescription(rs.getString("DESCRIPTION"));
+                    apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
+                    apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
+                    if (!StringUtils.isEmpty(rs.getString("NAME"))) {
+                        apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                        apiRevisionDeployment.setVhost(rs.getString("VHOST"));
                         //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
-                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(10));
-                        apiRevisionDeployment.setDeployedTime(rs.getString(11));
+                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                        apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
                         apiRevisionDeploymentList.add(apiRevisionDeployment);
                     }
                     apiRevision.setApiRevisionDeploymentList(apiRevisionDeploymentList);
@@ -16746,11 +16719,11 @@ public class ApiMgtDAO {
             statement.setString(1, name);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    apiRevisionDeployment.setDeployment(rs.getString(1));
-                    apiRevisionDeployment.setVhost(rs.getString(2));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
                 }
             }
         } catch (SQLException e) {
@@ -16775,11 +16748,11 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(rs.getString(1));
-                    apiRevisionDeployment.setVhost(rs.getString(2));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
@@ -16806,11 +16779,11 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(rs.getString(1));
-                    apiRevisionDeployment.setVhost(rs.getString(2));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }
@@ -16837,11 +16810,11 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(rs.getString(1));
-                    apiRevisionDeployment.setVhost(rs.getString(2));
-                    apiRevisionDeployment.setRevisionUUID(rs.getString(3));
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean(4));
-                    apiRevisionDeployment.setDeployedTime(rs.getString(5));
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
                     apiRevisionDeploymentList.add(apiRevisionDeployment);
                 }
             }

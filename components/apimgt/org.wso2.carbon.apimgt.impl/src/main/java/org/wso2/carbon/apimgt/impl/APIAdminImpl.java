@@ -212,10 +212,11 @@ public class APIAdminImpl implements APIAdmin {
 
     @Override
     public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
-        Environment env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+        // priority for configured environments over dynamic environments
+        // name is the UUID of environments configured in api-manager.xml
+        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
-            // name is the UUID of environments configured in api-manager.xml
-            env = APIUtil.getReadOnlyEnvironments().get(uuid);
+            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
             if (env == null) {
                 String errorMessage = String.format("Failed to retrieve Environment with UUID %s. Environment not found",
                         uuid);

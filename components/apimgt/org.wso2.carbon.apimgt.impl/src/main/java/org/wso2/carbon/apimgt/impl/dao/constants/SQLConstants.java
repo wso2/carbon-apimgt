@@ -3153,10 +3153,6 @@ public class SQLConstants {
             "FROM AM_GATEWAY_ENVIRONMENT " +
             "WHERE TENANT_DOMAIN = ? AND UUID = ?";
 
-    public static final String GET_ENVIRONMENT_NAME_COUNT_BY_TENANT_SQL =
-            "SELECT COUNT(ID) AS ENVIRONMENT_COUNT FROM AM_GATEWAY_ENVIRONMENT " +
-                    "WHERE LOWER(NAME) = LOWER(?) AND TENANT_DOMAIN = ?";
-
     public static final String INSERT_ENVIRONMENT_SQL = "INSERT INTO " +
             "AM_GATEWAY_ENVIRONMENT (UUID, NAME, TENANT_DOMAIN, DISPLAY_NAME, DESCRIPTION) " +
             "VALUES (?,?,?,?,?)";
