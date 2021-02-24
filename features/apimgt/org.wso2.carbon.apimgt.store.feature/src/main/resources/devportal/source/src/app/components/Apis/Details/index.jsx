@@ -45,6 +45,7 @@ import User from '../../../data/User';
 
 const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));
 const GraphQLConsole = lazy(() => import('./GraphQLConsole/GraphQLConsole' /* webpackChunkName: "GraphQLConsole" */));
+const AsyncApiConsole = lazy(() => import('./AsyncApiConsole/AsyncApiConsole'));
 const Overview = lazy(() => import('./Overview' /* webpackChunkName: "APIOverview" */));
 const Documents = lazy(() => import('./Documents/Documents' /* webpackChunkName: "APIDocuments" */));
 const Credentials = lazy(() => import('./Credentials/Credentials' /* webpackChunkName: "APICredentials" */));
@@ -62,7 +63,9 @@ const LoadableSwitch = withRouter((props) => {
     let tryoutRoute;
     if (api.type === 'GRAPHQL') {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />
-    }else {
+    } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
+        tryoutRoute = <Route path='/apis/:apiUuid/test' component={AsyncApiConsole} />
+    } else {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />
     }
 
@@ -465,7 +468,7 @@ class Details extends React.Component {
                                     
                                 </>
                             )}
-                            {!isAsyncApi && showTryout && (
+                            {api.type !== 'WS' && api.type !== 'SSE' && showTryout && (
                                     <LeftMenuItem
                                         text={<FormattedMessage id='Apis.Details.index.try.out'
                                             defaultMessage='Try out' />}
@@ -514,7 +517,7 @@ class Details extends React.Component {
                             />
                        
                     )}
-                    {!api.advertiseInfo.advertised && api.type !== 'WS' && showSdks && (
+                    {!api.advertiseInfo.advertised && !isAsyncApi && showSdks && (
                         
                             <LeftMenuItem
                                 text={<FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />}
