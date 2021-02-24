@@ -35,9 +35,9 @@ import Alert from 'AppComponents/Shared/Alert';
 import Icon from '@material-ui/core/Icon';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import DefaultConfigurations from '../../../../defaultTheme';
-import ImageGenerator from './ImageGenerator';
+import ImageGenerator from './APICards/ImageGenerator';
 import ApiThumb from './ApiThumb';
-import DocThumb from './DocThumb';
+import DocThumb from './APICards/DocThumb';
 import { ApiContext } from '../Details/ApiContext';
 import NoApi from './NoApi';
 

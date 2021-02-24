@@ -30,7 +30,7 @@ import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
 import { app } from 'Settings';
-import ImageGenerator from '../ImageGenerator';
+import ImageGenerator from './ImageGenerator';
 import Api from '../../../../data/api';
 import { ApiContext } from '../../Details/ApiContext';
 import classNames from 'classnames';

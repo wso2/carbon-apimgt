@@ -27,8 +27,8 @@ import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import CONSTS from 'AppData/Constants';
 import ImageGenerator from './ImageGenerator';
-import Api from '../../../data/api';
-import { ApiContext } from '../Details/ApiContext';
+import Api from '../../../../data/api';
+import { ApiContext } from '../../Details/ApiContext';
 
 /**
  *

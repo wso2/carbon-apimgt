@@ -118,6 +118,10 @@ const DefaultConfigurations = {
             mutation: '#c1dea0',
             subscription: '#ffcc80',
         },
+        thumbnailTemplates: {
+            active: false,
+            variant: 'plain', // default templates available templates 'plain'.
+        },
         thumbnail: {
             width: 240,
             height: 140,

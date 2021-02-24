@@ -1,16 +1,27 @@
-import React, { useEffect, useTheme } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useEffect, useState } from 'react';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Icon from '@material-ui/core/Icon';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-
+import Box from '@material-ui/core/Box';
+import Chip from '@material-ui/core/Chip';
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
+import { app } from 'Settings';
 import Api from 'AppData/api';
+import classNames from 'classnames';
 
-const useStyles = makeStyles({
+
+
+import { getIcon } from './ImageUtils';
+
+const useStyles = makeStyles((theme) => ({
     root: {
-        minWidth: 275,
+        minWidth: 200,
+        marginTop: 10,
     },
     bullet: {
         display: 'inline-block',
@@ -23,13 +34,50 @@ const useStyles = makeStyles({
     pos: {
         marginBottom: 12,
     },
-});
+    thumbHeader: {
+        width: '150px',
+        color: '#444',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        cursor: 'pointer',
+        margin: 0,
+        'padding-left': '5px',
+    },
+    contextBox: {
+        maxWidth: 120,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        paddingLeft: '5px',
+    },
+    caption: {
+        color: theme.palette.grey[700],
+    },
+    imageDisplay: {
+        maxWidth: '40px',
+        maxHeight: '40px',
+    },
+}));
+const windowURL = window.URL || window.webkitURL;
 
-export default function APIThumbPlain(props) {
+function APIThumbPlain(props) {
+    const theme = useTheme();
     const classes = useStyles();
+    const { api, showInfo } = props;
+    const { custom: { thumbnail, social: { showRating } } } = theme;
+    const { name, version, context, provider } = api;
+
+    const [imageConf, setImageConf] = useState({
+        selectedIcon: '',
+        category: '',
+        color: '#ccc',
+    });
+    const [imageObj, setIMageObj] = useState(null);
+    const [imageLoaded, setImageLoaded] = useState(false);
+
     const bull = <span className={classes.bullet}>•</span>;
     useEffect(() => {
-        const { api } =props;
         const restApi = new Api();
 
         const promisedThumbnail = restApi.getAPIThumbnail(api.id);
@@ -38,42 +86,154 @@ export default function APIThumbPlain(props) {
             if (response && response.data) {
                 if (response.headers['content-type'] === 'application/json') {
                     const iconJson = JSON.parse(response.data);
-                    this.setState({
+                    setImageConf({
                         selectedIcon: iconJson.key,
                         category: iconJson.category,
                         color: iconJson.color,
-                        backgroundIndex: iconJson.backgroundIndex,
                     });
                 } else if (response && response.data.size > 0) {
-                    const url = windowURL.createObjectURL(response.data);
-                    this.setState({ imageObj: url });
+                    setIMageObj(windowURL.createObjectURL(response.data));
                 }
             }
         }).finally(() => {
-            this.setState({ imageLoaded: true })
+            setImageLoaded(true);
         })
     }, []);
+    let ImageView;
+    if (!imageLoaded) {
+        ImageView = (<div class="image-load-frame">
+            <div class="image-load-animation1"></div>
+            <div class="image-load-animation2"></div>
+        </div>)
+    } else if (imageObj) {
+        ImageView = (
+            <img
+                src={imageObj}
+                alt='API Thumbnail'
+                className={classes.imageDisplay}
+            />
+        );
+    } else {
+        ImageView = (
+            <Icon className={classes.icon} style={{ fontSize: 40 + 'px', color: imageConf.color }}>
+                {getIcon(imageConf.selectedIcon, imageConf.category, theme, api)}
+            </Icon>
+        );
+    }
+
+    if (!showInfo) {
+        return (
+            <Link to={'/apis/' + api.id} aria-hidden='true'>
+                <Box display='flex'>
+                    <Box>
+                        {!thumbnail.defaultApiImage && ImageView}
+                        {thumbnail.defaultApiImage && <img src={app.context + thumbnail.defaultApiImage} alt='img' />}
+                    </Box>
+                </Box>
+
+            </Link>
+        )
+    }
     return (
         <Card className={classes.root} variant="outlined">
             <CardContent>
-                <Typography className={classes.title} color="textSecondary" gutterBottom>
-                    Word of the Day
-        </Typography>
-                <Typography variant="h5" component="h2">
-                    be{bull}nev{bull}o{bull}lent
-        </Typography>
-                <Typography className={classes.pos} color="textSecondary">
-                    adjective
-        </Typography>
-                <Typography variant="body2" component="p">
-                    well meaning and kindly.
-          <br />
-                    {'"a benevolent smile"'}
-                </Typography>
+                <Box>
+                    <Link to={'/apis/' + api.id} aria-hidden='true'>
+                        <Box display='flex'>
+                            <Box>
+                                {!thumbnail.defaultApiImage && ImageView}
+                                {thumbnail.defaultApiImage && <img src={app.context + thumbnail.defaultApiImage} alt='img' />}
+                            </Box>
+                            <Typography
+                                variant='h5'
+                                gutterBottom
+                                title={name}
+                                className={classes.thumbHeader}
+                            >{name}</Typography>
+                        </Box>
+
+                    </Link>
+                </Box>
+                {provider && (<><Typography variant='caption' gutterBottom align='left' className={classes.caption} component='span'>
+                    <FormattedMessage defaultMessage='By' id='Apis.Listing.ApiThumb.by' />
+                    <FormattedMessage defaultMessage=' : ' id='Apis.Listing.ApiThumb.by.colon' />
+                </Typography><Typography variant='body2' component='span'>{provider}</Typography></>)}
+                <Box display='flex' mt={2}>
+                    <Box flex={1}>
+                        <Typography variant='subtitle1'>{version}</Typography>
+                        <Typography variant='caption' gutterBottom align='left' className={classes.caption}>
+                            <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
+                        </Typography>
+                    </Box>
+                    <Box>
+                        <Typography variant='subtitle1' align='right' className={classes.contextBox}>
+                            {context}
+                        </Typography>
+                        <Typography
+                            variant='caption'
+                            gutterBottom
+                            align='right'
+                            className={classes.caption}
+                            Component='div'
+                        >
+                            <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
+                        </Typography>
+                    </Box>
+                </Box>
+
+                <Box display='flex' mt={2}>
+                    {showRating && <Box flex={1}>
+                        <Typography
+                            variant='subtitle1'
+                            gutterBottom
+                            align='left'
+                            className={classNames('api-thumb-rating', classes.ratingWrapper)}
+                        >
+                            <StarRatingBar
+                                apiRating={api.avgRating}
+                                apiId={api.id}
+                                isEditable={false}
+                                showSummary={false}
+                            />
+                        </Typography>
+                    </Box>}
+                    <Box>
+                        <Typography
+                            variant='subtitle1'
+                            gutterBottom
+                            align='right'
+                            className={classes.chipWrapper}
+                        >
+                            {(api.type === 'GRAPHQL' || api.transportType === 'GRAPHQL') && (
+                                <Chip
+                                    label={api.transportType === undefined ? api.type : api.transportType}
+                                    color='primary'
+                                />
+                            )}
+                            {(api.lifeCycleStatus === 'PROTOTYPED') && (
+                                <Chip
+                                    label={api.apiType === 'APIProduct' ? api.state : api.lifeCycleStatus}
+                                    color='default'
+                                />
+                            )}
+                        </Typography>
+                    </Box>
+                </Box>
             </CardContent>
-            <CardActions>
-                <Button size="small">Learn More</Button>
-            </CardActions>
         </Card>
     );
 }
+
+
+APIThumbPlain.defaultProps = {
+    customWidth: null,
+    customHeight: null,
+    showInfo: true,
+};
+APIThumbPlain.propTypes = {
+    customWidth: PropTypes.number,
+    customHeight: PropTypes.number,
+    showInfo: PropTypes.bool,
+};
+
+export default APIThumbPlain;
