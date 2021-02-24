@@ -645,7 +645,7 @@
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/endpoint-registry/{version}/settings</URI>
+                <URI>/api/am/service-catalog/{serviceCatalogVersion}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -1316,4 +1316,15 @@
      <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
       change his/her password via devportal. By default this feature is enabled.-->
      <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
+
+    {% if apim.extension.listener is defined %}
+    <ExtensionListeners>
+        {%- for listener in apim.extension.listener -%}
+        <ExtensionListener>
+            <Type>{{listener.type}}</Type>
+            <ClassName>{{listener.class}}</ClassName>
+        </ExtensionListener>
+        {% endfor %}
+    </ExtensionListeners>
+    {% endif %}
 </APIManager>

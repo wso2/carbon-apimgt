@@ -922,6 +922,8 @@ public class APIMappingUtil {
             APIServiceInfoDTO apiServiceInfoDTO = new APIServiceInfoDTO();
             apiServiceInfoDTO.setKey(serviceKey);
             apiServiceInfoDTO.setOutdated(Boolean.parseBoolean(model.getServiceInfo("outdated")));
+            apiServiceInfoDTO.setName(model.getServiceInfo("name"));
+            apiServiceInfoDTO.setVersion(model.getServiceInfo("version"));
             dto.setServiceInfo(apiServiceInfoDTO);
         }
         dto.setCacheTimeout(model.getCacheTimeout());

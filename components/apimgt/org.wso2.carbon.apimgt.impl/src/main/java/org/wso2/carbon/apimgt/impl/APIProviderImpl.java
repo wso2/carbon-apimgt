@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -999,7 +1000,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
-        String serviceKey = api.getServiceInfo("serviceKey");
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -9146,6 +9146,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while searching the api ", e);
         }
         return result ;
+    }
+
+    @Override
+    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(identifier, comment, user);
+    }
+
+    @Override
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException {
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
+    }
+
+    @Override
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID)
+            throws APIManagementException {
+        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID);
+    }
+
+    @Override
+    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+            APIManagementException{
+        return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
+    }
+
+    @Override
+    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+        return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
     }
 
     /**

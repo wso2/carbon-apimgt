@@ -105,6 +105,8 @@ public final class APIConstants {
 
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
 
+    public static final String APPLICATION_XML_SOAP_MEDIA_TYPE = "application/soap+xml";
+
     public static final String WSDL_NAMESPACE_URI = "http://www.w3.org/2005/08/addressing";
 
     public static final String WSDL_ELEMENT_LOCAL_NAME = "Address";
@@ -424,6 +426,7 @@ public final class APIConstants {
     public static final String ACCESS_TOKEN_USER_TYPE_APPLICATION = "APPLICATION";
     public static final String USER_TYPE_END_USER = "END_USER";
     public static final String FIELD_API_NAME = "API_NAME";
+    public static final String FIELD_API_VERSION = "API_VERSION";
     public static final String FIELD_CONSUMER_KEY = "CONSUMER_KEY";
     public static final String FIELD_API_PUBLISHER = "API_PROVIDER";
 
@@ -2662,5 +2665,13 @@ public final class APIConstants {
         public static final String SERVER_APIKEYSIGN_KEYSTORE_KEY_ALIAS = "Security.KeyStoreName.KeyAlias";
         public static final String SERVER_APIKEYSIGN_KEYSTORE_TYPE = "Security.KeyStoreName.Type";
         public static final String SERVER_APIKEYSIGN_PRIVATE_KEY_PASSWORD = "Security.KeyStoreName.KeyPassword";
+    }
+
+    public static class ExtensionListenerConstants {
+
+        public static final String EXTENSION_LISTENERS = "ExtensionListeners";
+        public static final String EXTENSION_LISTENER = "ExtensionListener";
+        public static final String EXTENSION_TYPE = "Type";
+        public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
     }
 }

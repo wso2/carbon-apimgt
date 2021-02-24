@@ -81,7 +81,7 @@ beforeEach(() => {
     wrapper = shallow(<CommentUnwrapped {...props} />);
 });
 
-describe('<Comment /> rendering', () => {
+describe.skip('<Comment /> rendering', () => {
     it('renders correctly', () => {
         expect(wrapper).toMatchSnapshot();
     });

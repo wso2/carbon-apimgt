@@ -51,7 +51,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.service.APIKeyValidationService;
-import org.wso2.carbon.apimgt.gateway.handlers.ws.DataPublisherUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 import org.wso2.carbon.registry.core.Resource;

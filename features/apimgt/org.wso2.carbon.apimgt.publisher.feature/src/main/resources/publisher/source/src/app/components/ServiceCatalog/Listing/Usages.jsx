@@ -84,7 +84,7 @@ function Usages(props) {
                     disableRipple
                     color='primary'
                 >
-                    {usageNumber}
+                    {usageNumber !== null ? usageNumber : 0}
                 </Button>
             );
         } else {
@@ -100,7 +100,7 @@ function Usages(props) {
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Usages.service.usage'
                             defaultMessage='Used by {usage} API(s)'
-                            values={{ usage: usageNumber }}
+                            values={{ usage: usageNumber !== null ? usageNumber : 0 }}
                         />
                     </Typography>
                 </Button>

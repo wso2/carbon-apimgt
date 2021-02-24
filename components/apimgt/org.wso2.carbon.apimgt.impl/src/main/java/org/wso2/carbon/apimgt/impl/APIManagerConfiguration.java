@@ -23,6 +23,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +33,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -118,6 +121,14 @@ public class APIManagerConfiguration {
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
+
+    public Map<String, ExtensionListener> getExtensionListenerMap() {
+
+        return extensionListenerMap;
+    }
+
+    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
+
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
         return realtimeNotifierProperties;
@@ -572,6 +583,8 @@ public class APIManagerConfiguration {
                 setContainerMgtConfigurations(element);
             } else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
                 setSkipListConfigurations(element);
+            } else if (APIConstants.ExtensionListenerConstants.EXTENSION_LISTENERS.equals(localName)) {
+                setExtensionListenerConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1906,5 +1919,40 @@ public class APIManagerConfiguration {
 
     public static Map<String, String> getAnalyticsProperties() {
         return analyticsProperties;
+    }
+
+    /**
+     * Set Extension Listener Configurations.
+     *
+     * @param omElement XML Config
+     */
+    public void setExtensionListenerConfigurations(OMElement omElement) {
+
+        Iterator extensionListenersElement =
+                omElement.getChildrenWithLocalName(APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER);
+        while (extensionListenersElement.hasNext()) {
+            OMElement listenerElement = (OMElement) extensionListenersElement.next();
+            OMElement listenerTypeElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(APIConstants.ExtensionListenerConstants.EXTENSION_TYPE));
+            OMElement listenerClassElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(
+                                    APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER_CLASS_NAME));
+            if (listenerTypeElement != null && listenerClassElement != null) {
+                String listenerClass = listenerClassElement.getText();
+                try {
+                    ExtensionListener extensionListener = (ExtensionListener) APIUtil
+                            .getClassForName(listenerClass).newInstance();
+                    extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
+                } catch (InstantiationException e) {
+                    log.error("Error while instantiating class " + listenerClass, e);
+                } catch (IllegalAccessException e) {
+                    log.error(e);
+                } catch (ClassNotFoundException e) {
+                    log.error("Cannot find the class " + listenerClass + e);
+                }
+            }
+        }
     }
 }

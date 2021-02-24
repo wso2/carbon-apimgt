@@ -83,6 +83,14 @@ class CommentReply extends React.Component {
     }
 
     /**
+     * Genereates unique keys for comments
+     * @memberof Comment
+     */
+    getKey() {
+        return this.keyCount++;
+    }
+
+    /**
      * Hides the component to edit a comment
      * @param {any} index Index of comment in the array
      * @memberof CommentReply
@@ -157,14 +165,6 @@ class CommentReply extends React.Component {
                     Alert.error(`Something went wrong while deleting comment - ${commentIdOfCommentToDelete}`);
                 }
             });
-    }
-
-    /**
-     * Genereates unique keys for comments
-     * @memberof Comment
-     */
-    getKey() {
-        return this.keyCount++;
     }
 
     /**
