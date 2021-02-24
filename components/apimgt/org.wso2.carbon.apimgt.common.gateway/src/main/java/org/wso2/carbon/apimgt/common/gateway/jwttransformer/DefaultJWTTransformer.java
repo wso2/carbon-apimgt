@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,36 @@
  * limitations under the License.
  */
 
-
-package org.wso2.carbon.apimgt.impl.jwt.transformer;
+package org.wso2.carbon.apimgt.common.gateway.jwttransformer;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Default implementation of jwt transformer
+ */
 public class DefaultJWTTransformer implements JWTTransformer {
 
-    protected TokenIssuerDto tokenIssuer;
+    protected TokenIssuerDto tokenIssuer = null;
 
     @Override
-    public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    public String getTransformedConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         try {
             if (tokenIssuer.getConsumerKeyClaim() == null) {
-                if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY) != null) {
-                    return jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.CONSUMER_KEY);
-                } else if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY) != null) {
-                    return jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_PARTY);
+                if (jwtClaimsSet.getClaim(JWTConstants.CONSUMER_KEY) != null) {
+                    return jwtClaimsSet.getStringClaim(JWTConstants.CONSUMER_KEY);
+                } else if (jwtClaimsSet.getClaim(JWTConstants.AUTHORIZED_PARTY) != null) {
+                    return jwtClaimsSet.getStringClaim(JWTConstants.AUTHORIZED_PARTY);
                 }
             } else {
                 if (jwtClaimsSet.getClaim(tokenIssuer.getConsumerKeyClaim()) != null) {
@@ -49,30 +51,30 @@ public class DefaultJWTTransformer implements JWTTransformer {
                 }
             }
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing JWT claims", e);
+            throw new JWTGeneratorException("Error while parsing JWT claims", e);
         }
 
         return null;
     }
 
     @Override
-    public List<String> getTransformedScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    public List<String> getTransformedScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         try {
-            String scopeClaim = APIConstants.JwtTokenConstants.SCOPE;
-            if (StringUtils.isNotEmpty(tokenIssuer.getScopesClaim())){
+            String scopeClaim = JWTConstants.SCOPE;
+            if (StringUtils.isNotEmpty(tokenIssuer.getScopesClaim())) {
                 scopeClaim = tokenIssuer.getScopesClaim();
             }
             if (jwtClaimsSet.getClaim(scopeClaim) instanceof String) {
                 return Arrays.asList(jwtClaimsSet.getStringClaim(scopeClaim)
-                        .split(APIConstants.JwtTokenConstants.SCOPE_DELIMITER));
+                        .split(JWTConstants.SCOPE_DELIMITER));
             } else if (jwtClaimsSet.getClaim(scopeClaim) instanceof List) {
                 return jwtClaimsSet.getStringListClaim(scopeClaim);
             }
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing JWT claims", e);
+            throw new JWTGeneratorException("Error while parsing JWT claims", e);
         }
-        return Arrays.asList(APIConstants.OAUTH2_DEFAULT_SCOPE);
+        return Arrays.asList(JWTConstants.OAUTH2_DEFAULT_SCOPE);
     }
 
     @Override
@@ -92,7 +94,6 @@ public class DefaultJWTTransformer implements JWTTransformer {
             return transformedJWT.build();
         }
         return jwtClaimsSet;
-
     }
 
     @Override
@@ -115,17 +116,18 @@ public class DefaultJWTTransformer implements JWTTransformer {
      * @return Boolean whether Application token type or not
      */
     @Override
-    public Boolean getTransformedIsAppTokenType(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    public Boolean getTransformedIsAppTokenType(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         try {
-            if (jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.AUTHORIZED_USER_TYPE) != null) {
-                String aut = jwtClaimsSet.getStringClaim(APIConstants.JwtTokenConstants.AUTHORIZED_USER_TYPE);
-                return StringUtils.equalsIgnoreCase(aut, APIConstants.JwtTokenConstants.APPLICATION);
+            if (jwtClaimsSet.getClaim(JWTConstants.AUTHORIZED_USER_TYPE) != null) {
+                String aut = jwtClaimsSet.getStringClaim(JWTConstants.AUTHORIZED_USER_TYPE);
+                return StringUtils.equalsIgnoreCase(aut, JWTConstants.APPLICATION);
             }
         } catch (ParseException e) {
-            throw new APIManagementException("Error while parsing JWT claims", e);
+            throw new JWTGeneratorException("Error while parsing JWT claims", e);
         }
-        return null;
+        return false;
     }
 
 }
+
