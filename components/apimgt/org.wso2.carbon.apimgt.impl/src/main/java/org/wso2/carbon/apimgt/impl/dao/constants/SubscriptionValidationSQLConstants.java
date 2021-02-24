@@ -635,7 +635,7 @@ public class SubscriptionValidationSQLConstants {
                     "      AND APIS.API_VERSION = DEF.PUBLISHED_DEFAULT_API_VERSION";
 
     public static final String GET_TENANT_AM_KEY_MAPPING_SQL =
-            "SELECT " +
+            "(SELECT " +
                     "   MAPPING.APPLICATION_ID," +
                     "   MAPPING.CONSUMER_KEY," +
                     "   MAPPING.KEY_TYPE," +
@@ -650,7 +650,23 @@ public class SubscriptionValidationSQLConstants {
                     "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND" +
                     "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
                     "   MAPPING.KEY_MANAGER = KEYM.UUID" +
-                    "   AND SUB.TENANT_ID = ?";
+                    "   AND SUB.TENANT_ID = ?)" +
+                    " UNION (SELECT " +
+                    "   MAPPING.APPLICATION_ID," +
+                    "   MAPPING.CONSUMER_KEY," +
+                    "   MAPPING.KEY_TYPE," +
+                    "   KEYM.NAME AS KEY_MANAGER," +
+                    "   MAPPING.STATE" +
+                    " FROM " +
+                    "   AM_APPLICATION_KEY_MAPPING MAPPING," +
+                    "   AM_APPLICATION APP," +
+                    "   AM_SUBSCRIBER SUB," +
+                    "   AM_KEY_MANAGER KEYM"+
+                    " WHERE " +
+                    "   MAPPING.APPLICATION_ID = APP.APPLICATION_ID AND" +
+                    "   APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID AND" +
+                    "   MAPPING.KEY_MANAGER = KEYM.NAME" +
+                    "   AND SUB.TENANT_ID = ?)";
 
     public static final String GET_ALL_API_URL_MAPPING_SQL =
             "SELECT " +

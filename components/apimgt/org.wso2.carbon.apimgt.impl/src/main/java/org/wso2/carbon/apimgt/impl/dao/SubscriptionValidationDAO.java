@@ -511,6 +511,7 @@ public class SubscriptionValidationDAO {
                 log.error("Error in loading ApplicationKeyMappings for tenantDomain : " + tenantDomain, e);
             }
             ps.setInt(1, tenantId);
+            ps.setInt(2, tenantId);
 
             try (ResultSet resultSet = ps.executeQuery()) {
                 populateApplicationKeyMappingsList(keyMappings, resultSet);
@@ -529,16 +530,6 @@ public class SubscriptionValidationDAO {
 
             while (resultSet.next()) {
                 String keyManagerName = resultSet.getString("KEY_MANAGER");
-                ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-                try {
-                    KeyManagerConfigurationDTO keyManager = apiMgtDAO.getKeyManagerConfigurationByUUID(keyManagerName);
-                    if (keyManager != null) {
-                        keyManagerName = keyManager.getName();
-                    }
-                } catch (APIManagementException e) {
-                    log.error("Error in fetching Key manager: " + keyManagerName);
-                }
-
                 ApplicationKeyMapping keyMapping = new ApplicationKeyMapping();
                 keyMapping.setApplicationId(resultSet.getInt("APPLICATION_ID"));
                 keyMapping.setConsumerKey(resultSet.getString("CONSUMER_KEY"));
