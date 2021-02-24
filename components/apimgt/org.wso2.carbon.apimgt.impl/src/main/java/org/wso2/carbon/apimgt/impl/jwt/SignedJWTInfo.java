@@ -50,7 +50,7 @@ public class SignedJWTInfo implements Serializable {
     private JWTClaimsSet jwtClaimsSet;
     private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
     private String certificateThumbprint; //holder of key certificate bound access token
-    private X509Certificate X509ClientCertificate; //holder of key certificate cnf
+    private X509Certificate x509ClientCertificate; //holder of key certificate cnf
     private String x509ClientCertificateHash; //holder of key certificate cnf
     private static final Log log = LogFactory.getLog(JWTValidator.class);
 
@@ -109,7 +109,7 @@ public class SignedJWTInfo implements Serializable {
 
     public void setX509ClientCertificate(X509Certificate x509ClientCertificate) {
 
-        X509ClientCertificate = x509ClientCertificate;
+        x509ClientCertificate = x509ClientCertificate;
         if (x509ClientCertificate != null) {
             byte[] encoded = new byte[0];
             try {
@@ -145,6 +145,6 @@ public class SignedJWTInfo implements Serializable {
 
     public X509Certificate getX509ClientCertificate() {
 
-        return X509ClientCertificate;
+        return x509ClientCertificate;
     }
 }
