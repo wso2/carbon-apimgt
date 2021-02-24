@@ -744,7 +744,7 @@
                 <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-
+            
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
