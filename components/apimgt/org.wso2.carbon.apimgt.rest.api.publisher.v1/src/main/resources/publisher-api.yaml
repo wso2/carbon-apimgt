@@ -4245,7 +4245,7 @@ paths:
   ######################################################
   # The "Subscription Throttling Based on Quota Type" resource APIs
   ######################################################
-  /throttling-policies/subscription/:
+  /throttling-policies/subscription2/:
     get:
       tags:
         - Throttling Policies
