@@ -190,38 +190,6 @@ public class OAuthAuthenticator implements Authenticator {
         }
         String authenticationScheme;
         try {
-            //Initial guess of a JWT token using the presence of a DOT.
-            if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
-                try {
-                    if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
-                        log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
-                        throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                "Invalid JWT token");
-                    }
-
-                    signedJWTInfo = getSignedJwt(accessToken);
-                    String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
-                            .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
-                    if (StringUtils.isNotEmpty(keyManager)){
-                        if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
-                                keyManagerList.contains(keyManager)) {
-                            isJwtToken = true;
-                        } else {
-                            return new AuthenticationResponse(false, isMandatory, true,
-                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                    APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                        }
-                    }
-                } catch (ParseException | IllegalArgumentException e) {
-                    log.debug("Not a JWT token. Failed to decode the token header.", e);
-                } catch (APIManagementException e) {
-                    log.error("error while check validation of JWt", e);
-                    return new AuthenticationResponse(false, isMandatory, true,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                }
-            }
-
             authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         } catch (APISecurityException ex) {
             return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
@@ -294,6 +262,42 @@ public class OAuthAuthenticator implements Authenticator {
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
+            try {
+                //Initial guess of a JWT token using the presence of a DOT.
+                if (StringUtils.isNotEmpty(accessToken) && accessToken.contains(APIConstants.DOT)) {
+                    try {
+                        if (StringUtils.countMatches(accessToken, APIConstants.DOT) != 2) {
+                            log.debug("Invalid JWT token. The expected token format is <header.payload.signature>");
+                            throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                    "Invalid JWT token");
+                        }
+
+                        signedJWTInfo = getSignedJwt(accessToken);
+                        String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
+                                .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
+                        if (StringUtils.isNotEmpty(keyManager)){
+                            if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
+                                    keyManagerList.contains(keyManager)) {
+                                isJwtToken = true;
+                            } else {
+                                return new AuthenticationResponse(false, isMandatory, true,
+                                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                            }
+                        }
+                    } catch (ParseException | IllegalArgumentException e) {
+                        log.debug("Not a JWT token. Failed to decode the token header.", e);
+                    } catch (APIManagementException e) {
+                        log.error("error while check validation of JWt", e);
+                        return new AuthenticationResponse(false, isMandatory, true,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    }
+                }
+            } catch (APISecurityException ex) {
+                return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
+            }
+
             //Start JWT token validation
             if (isJwtToken) {
                 try {
