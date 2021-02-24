@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.wso2.carbon.apimgt.api.model.VHost;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
@@ -677,6 +679,8 @@ public final class APIConstants {
     }
 
     public static final String API_GATEWAY = "APIGateway.";
+    public static final String API_GATEWAY_NAME = "Name";
+    public static final String API_GATEWAY_DISPLAY_NAME = "DisplayName";
     public static final String API_GATEWAY_SERVER_URL = "ServerURL";
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";
@@ -684,6 +688,12 @@ public final class APIConstants {
     public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
+    public static final String API_GATEWAY_VIRTUAL_HOST = "VirtualHost";
+    public static final String API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT = "HttpEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT = "HttpsEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT = "WsEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT = "WssEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
@@ -1630,6 +1640,8 @@ public final class APIConstants {
     public static final String WS_PROTOCOL_URL_PREFIX = "ws://";
     public static final String WSS_PROTOCOL = "wss";
     public static final String WSS_PROTOCOL_URL_PREFIX = "wss://";
+    public static final int WSS_PROTOCOL_PORT = 8099;
+    public static final int WS_PROTOCOL_PORT = 9099;
 
     public static final String EMAIL_TRANSPORT = "mailto";
 

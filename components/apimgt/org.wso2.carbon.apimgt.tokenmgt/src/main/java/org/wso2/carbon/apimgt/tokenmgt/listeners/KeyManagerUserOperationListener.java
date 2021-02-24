@@ -198,10 +198,14 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager) {
 
         username = getUserName(username, userStoreManager);
-        APIManagerConfiguration config = getApiManagerConfiguration();
 
-        if (config.getApiGatewayEnvironments().size() <= 0) {
-            return true;
+        try {
+            if (APIUtil.getEnvironments().size() <= 0) {
+                return true;
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while reading configured gateway environments", e);
+            return false;
         }
 
         ApiMgtDAO apiMgtDAO = getDAOInstance();

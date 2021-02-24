@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -1071,4 +1072,13 @@ public interface APIConsumer extends APIManager {
      */
     String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName)
             throws APIManagementException;
+
+    /**
+     * Get an API Revisions Deployment mapping details of API by providing API uuid
+     *
+     * @param apiUUID API UUID
+     * @return List<APIRevisionDeployment> Object
+     * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
+     */
+    List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
 }

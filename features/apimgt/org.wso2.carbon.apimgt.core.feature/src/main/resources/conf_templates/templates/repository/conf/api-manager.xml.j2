@@ -128,6 +128,7 @@
             {% for environment_name in apim.gateway.environment%}
             <Environment type="{{environment_name.type}}" api-console="{{environment_name.display_in_api_console}}" isDefault="{{environment_name.show_as_token_endpoint_url}}">
                 <Name>{{environment_name.name}}</Name>
+                <DisplayName>{{environment_name.display_name}}</DisplayName>
                 <Description>{{environment_name.description}}</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>{{environment_name.service_url}}</ServerURL>
@@ -155,6 +156,16 @@
                 {% else %}
                 <GatewayWSEndpoint></GatewayWSEndpoint>
                 {% endif %}
+                <VirtualHosts>
+                    {% for vhost in environment_name.virtual_host %}
+                    <VirtualHost>
+                        <HttpEndpoint>{{vhost.http_endpoint}}</HttpEndpoint>
+                        <HttpsEndpoint>{{vhost.https_endpoint}}</HttpsEndpoint>
+                        <WsEndpoint>{{vhost.ws_endpoint}}</WsEndpoint>
+                        <WssEndpoint>{{vhost.wss_endpoint}}</WssEndpoint>
+                    </VirtualHost>
+                    {% endfor %}
+                </VirtualHosts>
             </Environment>
             {% endfor %}
         </Environments>

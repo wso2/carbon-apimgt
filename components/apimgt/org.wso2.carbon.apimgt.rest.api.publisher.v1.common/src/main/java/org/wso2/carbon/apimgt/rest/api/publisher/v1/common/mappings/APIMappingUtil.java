@@ -132,8 +132,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2987,6 +2985,7 @@ public class APIMappingUtil {
     public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model) throws APIManagementException {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
+        apiRevisionDeploymentDTO.setVhost(model.getVhost());
         if (model.getRevisionUUID() != null) {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }

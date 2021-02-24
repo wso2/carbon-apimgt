@@ -35,12 +35,12 @@ function Delete({ updateList, dataRow }) {
     const formSaveCallback = () => {
         const restApi = new API();
         return restApi
-            .deleteMicrogatewayLabel(id)
+            .deleteGatewayEnvironment(id)
             .then(() => {
                 return (
                     <FormattedMessage
                         id='AdminPages.Gateways.Delete.form.delete.successful'
-                        defaultMessage='Gateway Label deleted successfully'
+                        defaultMessage='Gateway Environment deleted successfully'
                     />
                 );
             })
@@ -54,15 +54,16 @@ function Delete({ updateList, dataRow }) {
 
     return (
         <FormDialogBase
-            title='Delete Gateway Label?'
+            title='Delete Gateway Environment?'
             saveButtonText='Delete'
             icon={<DeleteForeverIcon />}
+            triggerIconProps={{ disabled: dataRow && dataRow.isReadOnly }}
             formSaveCallback={formSaveCallback}
         >
             <DialogContentText>
                 <FormattedMessage
                     id='AdminPages.Gateways.Delete.form.delete.confirmation.message'
-                    defaultMessage='Are you sure you want to delete this Gateway Label?'
+                    defaultMessage='Are you sure you want to delete this Gateway Environment?'
                 />
             </DialogContentText>
         </FormDialogBase>

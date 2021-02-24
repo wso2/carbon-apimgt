@@ -1554,14 +1554,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!APIConstants.CREATED.equals(api.getStatus()) && !APIConstants.RETIRED
                     .equals(api.getStatus())) {
                 if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                    api.setEnvironments(
-                            ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                    api.setEnvironments(APIUtil.getEnvironments().keySet());
                 }
                 if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                    api.setEnvironments(
-                            ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                    api.setEnvironments(APIUtil.getEnvironments().keySet());
                 }
             }
 
@@ -8097,10 +8093,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.warn(message);
                 throw new APIManagementException(message);
             }
-
-            APIManagerConfiguration config = getAPIManagerConfiguration();
-            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
-            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse

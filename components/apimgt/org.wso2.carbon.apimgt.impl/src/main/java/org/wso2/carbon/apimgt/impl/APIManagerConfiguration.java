@@ -32,6 +32,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
@@ -61,6 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -382,7 +384,14 @@ public class APIManagerConfiguration {
                         environment.setDefault(false);
                     }
                     environment.setName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName("Name")).getText()));
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_NAME)).getText()));
+                    environment.setDisplayName(APIUtil.replaceSystemProperty(
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+                    if (StringUtils.isEmpty(environment.getDisplayName())) {
+                        environment.setDisplayName(environment.getName());
+                    }
                     environment.setServerURL(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_SERVER_URL)).getText()));
@@ -412,6 +421,28 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setDescription("");
                     }
+                    environment.setReadOnly(true);
+                    List<VHost> vhosts = new LinkedList<>();
+                    environment.setVhosts(vhosts);
+                    environment.setEndpointsAsVhost();
+                    Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
+                            APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
+                                    APIConstants.API_GATEWAY_VIRTUAL_HOST);
+                    while (vhostIterator.hasNext()) {
+                        OMElement vhostElem = (OMElement) vhostIterator.next();
+                        String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
+                        String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
+                        String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
+                        String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+
+                        VHost vhost = VHost.fromEndpointUrls(new String[]{httpEp, httpsEp, wsEp, wssEp});
+                        vhosts.add(vhost);
+                    }
+
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {
