@@ -16456,12 +16456,17 @@ public class ApiMgtDAO {
                 List<URITemplate> urlMappingList = new ArrayList<>();
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
                     while (rs.next()) {
+                        String script = null;
                         URITemplate uriTemplate = new URITemplate();
                         uriTemplate.setHTTPVerb(rs.getString(1));
                         uriTemplate.setAuthType(rs.getString(2));
                         uriTemplate.setUriTemplate(rs.getString(3));
                         uriTemplate.setThrottlingTier(rs.getString(4));
-                        uriTemplate.setMediationScript(rs.getString(5));
+                        InputStream mediationScriptBlob = rs.getBinaryStream(5);
+                        if (mediationScriptBlob != null) {
+                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        }
+                        uriTemplate.setMediationScript(script);
                         if (!StringUtils.isEmpty(rs.getString(6))) {
                             Scope scope = new Scope();
                             scope.setKey(rs.getString(6));
@@ -17047,12 +17052,17 @@ public class ApiMgtDAO {
                 List<URITemplate> urlMappingList = new ArrayList<>();
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
                     while (rs.next()) {
+                        String script = null;
                         URITemplate uriTemplate = new URITemplate();
                         uriTemplate.setHTTPVerb(rs.getString(1));
                         uriTemplate.setAuthType(rs.getString(2));
                         uriTemplate.setUriTemplate(rs.getString(3));
                         uriTemplate.setThrottlingTier(rs.getString(4));
-                        uriTemplate.setMediationScript(rs.getString(5));
+                        InputStream mediationScriptBlob = rs.getBinaryStream(5);
+                        if (mediationScriptBlob != null) {
+                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        }
+                        uriTemplate.setMediationScript(script);
                         if (!StringUtils.isEmpty(rs.getString(6))) {
                             Scope scope = new Scope();
                             scope.setKey(rs.getString(6));
@@ -17312,12 +17322,17 @@ public class ApiMgtDAO {
                 List<URITemplate> urlMappingList = new ArrayList<>();
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
                     while (rs.next()) {
+                        String script = null;
                         URITemplate uriTemplate = new URITemplate();
                         uriTemplate.setHTTPVerb(rs.getString(1));
                         uriTemplate.setAuthType(rs.getString(2));
                         uriTemplate.setUriTemplate(rs.getString(3));
                         uriTemplate.setThrottlingTier(rs.getString(4));
-                        uriTemplate.setMediationScript(rs.getString(5));
+                        InputStream mediationScriptBlob = rs.getBinaryStream(5);
+                        if (mediationScriptBlob != null) {
+                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        }
+                        uriTemplate.setMediationScript(script);
                         if (!StringUtils.isEmpty(rs.getString(6))) {
                             Scope scope = new Scope();
                             scope.setKey(rs.getString(6));
