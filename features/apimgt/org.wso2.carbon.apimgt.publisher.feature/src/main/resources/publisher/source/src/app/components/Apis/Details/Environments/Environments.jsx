@@ -296,8 +296,8 @@ export default function Environments() {
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState([]);
-    const [selectedVhost, setVhost] = useState([]);
-    const [selectedVhostDeploy, setVhostDeploy] = useState([]);
+    const [selectedVhosts, setVhosts] = useState([]);
+    const [selectedVhostDeploy, setVhostsDeploy] = useState([]);
     const [extraRevisionToDelete, setExtraRevisionToDelete] = useState(null);
     const [description, setDescription] = useState('');
     const [mgLabels, setMgLabels] = useState([]);
@@ -394,15 +394,15 @@ export default function Environments() {
     };
 
     const handleVhostSelect = (event) => {
-        const vhosts = selectedVhost.filter((v) => v.env !== event.target.name);
+        const vhosts = selectedVhosts.filter((v) => v.env !== event.target.name);
         vhosts.push({ env: event.target.name, vhost: event.target.value });
-        setVhost(vhosts);
+        setVhosts(vhosts);
     };
 
     const handleVhostDeploySelect = (event) => {
         const vhosts = selectedVhostDeploy.filter((v) => v.env !== event.target.name);
         vhosts.push({ env: event.target.name, vhost: event.target.value });
-        setVhostDeploy(vhosts);
+        setVhostsDeploy(vhosts);
     };
 
     const handleClose = () => {
@@ -1259,7 +1259,7 @@ export default function Environments() {
      */
     function getGatewayAccessUrl(vhost, type) {
         const endpoints = { primary: '', secondary: '', combined: '' };
-        if (vhost == null) {
+        if (!vhost && !vhost.host) {
             return endpoints;
         }
 
@@ -1279,13 +1279,20 @@ export default function Environments() {
         return endpoints;
     }
 
-    function getVhostHelperText(env) {
-        const selected = selectedVhost.find((v) => v.env === env);
+    function getVhostHelperText(env, selectionList, shorten, maxTextLen) {
+        const selected = selectionList && selectionList.find((v) => v.env === env);
         if (selected) {
             const vhost = settings.environment.find((e) => e.name === env).vhosts.find(
                 (v) => v.host === selected.vhost,
             );
-            return getGatewayAccessUrl(vhost, api.isWebSocket() ? 'WS' : 'HTTP').combined;
+
+            const maxtLen = maxTextLen || 30;
+            const gatewayUrls = getGatewayAccessUrl(vhost, api.isWebSocket() ? 'WS' : 'HTTP');
+            if (shorten) {
+                const helperText = getGatewayAccessUrl(vhost, api.isWebSocket() ? 'WS' : 'HTTP').secondary;
+                return helperText.length > maxtLen ? helperText.substring(0, maxtLen) + '...' : helperText;
+            }
+            return gatewayUrls.combined;
         }
         return '';
     }
@@ -1495,39 +1502,46 @@ export default function Environments() {
                                                         spacing={2}
                                                     >
                                                         <Grid item xs={12}>
-                                                            <TextField
-                                                                id='vhost-selector'
-                                                                select
-                                                                label={(
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.Environments.create.vhost'
-                                                                        defaultMessage='VHost'
-                                                                    />
-                                                                )}
-                                                                SelectProps={{
-                                                                    MenuProps: {
-                                                                        anchorOrigin: {
-                                                                            vertical: 'bottom',
-                                                                            horizontal: 'left',
-                                                                        },
-                                                                        getContentAnchorEl: null,
-                                                                    },
-                                                                }}
-                                                                name={row.name}
-                                                                onChange={handleVhostDeploySelect}
-                                                                margin='dense'
-                                                                variant='outlined'
-                                                                fullWidth
-                                                                helperText={getVhostHelperText(row.name)}
+                                                            <Tooltip
+                                                                title={getVhostHelperText(row.name,
+                                                                    selectedVhostDeploy)}
+                                                                placement='bottom'
                                                             >
-                                                                {row.vhosts.map(
-                                                                    (vhost) => (
-                                                                        <MenuItem value={vhost.host}>
-                                                                            {vhost.host}
-                                                                        </MenuItem>
-                                                                    ),
-                                                                )}
-                                                            </TextField>
+                                                                <TextField
+                                                                    id='vhost-selector'
+                                                                    select
+                                                                    label={(
+                                                                        <FormattedMessage
+                                                                            id='Apis.Details.Environments.deploy.vhost'
+                                                                            defaultMessage='VHost'
+                                                                        />
+                                                                    )}
+                                                                    SelectProps={{
+                                                                        MenuProps: {
+                                                                            anchorOrigin: {
+                                                                                vertical: 'bottom',
+                                                                                horizontal: 'left',
+                                                                            },
+                                                                            getContentAnchorEl: null,
+                                                                        },
+                                                                    }}
+                                                                    name={row.name}
+                                                                    onChange={handleVhostDeploySelect}
+                                                                    margin='dense'
+                                                                    variant='outlined'
+                                                                    fullWidth
+                                                                    helperText={getVhostHelperText(row.name,
+                                                                        selectedVhostDeploy, true)}
+                                                                >
+                                                                    {row.vhosts.map(
+                                                                        (vhost) => (
+                                                                            <MenuItem value={vhost.host}>
+                                                                                {vhost.host}
+                                                                            </MenuItem>
+                                                                        ),
+                                                                    )}
+                                                                </TextField>
+                                                            </Tooltip>
                                                         </Grid>
                                                         <Grid item>
                                                             {allEnvRevision
@@ -1953,7 +1967,10 @@ export default function Environments() {
                                     ) : (
                                         <>
                                             <TableCell align='left'>
-                                                <Tooltip title={getVhostHelperText(row.name)} placement='bottom'>
+                                                <Tooltip
+                                                    title={getVhostHelperText(row.name, selectedVhosts)}
+                                                    placement='bottom'
+                                                >
                                                     <TextField
                                                         id='vhost-selector'
                                                         select
@@ -1976,10 +1993,11 @@ export default function Environments() {
                                                         onChange={handleVhostSelect}
                                                         margin='dense'
                                                         variant='outlined'
-                                                        style={{ width: '50%' }}
+                                                        fullWidth
                                                         disabled={api.isRevision
                                                         || !allRevisions || allRevisions.length === 0}
-                                                        helperText={getVhostHelperText(row.name)}
+                                                        helperText={getVhostHelperText(row.name, selectedVhosts,
+                                                            true, 100)}
                                                     >
                                                         {row.vhosts.map(
                                                             (vhost) => (
@@ -1993,7 +2011,7 @@ export default function Environments() {
                                             </TableCell>
                                         </>
                                     )}
-                                    <TableCell align='left'>
+                                    <TableCell align='left' style={{ width: '300px' }}>
                                         {allEnvDeployments[row.name].revision != null
                                             ? (
                                                 <div>
@@ -2056,13 +2074,13 @@ export default function Environments() {
                                                         className={classes.button2}
                                                         disabled={api.isRevision || !selectedRevision.some(
                                                             (r) => r.env === row.name && r.revision,
-                                                        ) || !selectedVhost.some(
+                                                        ) || !selectedVhosts.some(
                                                             (v) => v.env === row.name && v.vhost,
                                                         )}
                                                         variant='outlined'
                                                         onClick={() => deployRevision(selectedRevision.find(
                                                             (r) => r.env === row.name,
-                                                        ).revision, row.name, selectedVhost.find(
+                                                        ).revision, row.name, selectedVhosts.find(
                                                             (v) => v.env === row.name,
                                                         ).vhost)}
 
