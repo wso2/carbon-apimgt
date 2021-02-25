@@ -33,6 +33,17 @@ public class JWTConfigurationDto {
     private String gatewayJWTGeneratorImpl;
     private Map<String,TokenIssuerDto> tokenIssuerDtoMap = new HashMap();
     private Set<String> jwtExcludedClaims = new HashSet<>();
+    private boolean tenantBasedSigningEnabled = false;
+
+    public boolean isTenantBasedSigningEnabled() {
+
+        return tenantBasedSigningEnabled;
+    }
+
+    public void setTenantBasedSigningEnabled(boolean tenantBasedSigningEnabled) {
+
+        this.tenantBasedSigningEnabled = tenantBasedSigningEnabled;
+    }
 
     public boolean isEnabled() {
 

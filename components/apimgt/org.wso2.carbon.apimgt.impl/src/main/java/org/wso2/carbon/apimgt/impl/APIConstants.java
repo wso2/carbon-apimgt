@@ -455,6 +455,7 @@ public final class APIConstants {
     public static final String GATEWAY_JWT_GENERATOR_CLAIMS = "ExcludedClaims";
     public static final String GATEWAY_JWT_GENERATOR_CLAIM = "Claim";
     public static final String CONVERT_CLAIMS_TO_CONSUMER_DIALECT = JWT_CONFIGS + ".ConvertClaimsToConsumerDialect";
+    public static final String ENABLE_TENANT_BASED_JWT_SIGNING = "EnableTenantBasedSigning";
 
     public static final String OAUTH_CONFIGS = "OAuthConfigurations.";
     public static final String AUTHORIZATION_HEADER = "AuthorizationHeader";
@@ -2481,5 +2482,6 @@ public final class APIConstants {
         public static final String SERVER_APIKEYSIGN_KEYSTORE_KEY_ALIAS = "Security.KeyStoreName.KeyAlias";
         public static final String SERVER_APIKEYSIGN_KEYSTORE_TYPE = "Security.KeyStoreName.Type";
         public static final String SERVER_APIKEYSIGN_PRIVATE_KEY_PASSWORD = "Security.KeyStoreName.KeyPassword";
+        public static final String KEY_STORE_EXTENSION_JKS = ".jks";
     }
 }
