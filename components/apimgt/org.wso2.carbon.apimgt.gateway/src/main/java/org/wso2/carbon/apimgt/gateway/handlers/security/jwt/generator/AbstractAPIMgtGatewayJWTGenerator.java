@@ -162,11 +162,7 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                     //obtain private key
                     privateKey = tenantKeyStoreManager.getPrivateKey(jksName, tenantDomain);
                 } else {
-                    try {
-                        privateKey = tenantKeyStoreManager.getDefaultPrivateKey();
-                    } catch (Exception e) {
-                        log.error("Error while obtaining private key for super tenant", e);
-                    }
+                    privateKey = tenantKeyStoreManager.getDefaultPrivateKey();
                 }
                 if (privateKey != null) {
                     privateKeys.put(tenantId, privateKey);
@@ -178,10 +174,10 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 throw new APIManagementException("Error while obtaining private key for tenant: " + tenantDomain);
             }
             return APIUtil.signJwt(assertion, (PrivateKey) privateKey, signatureAlgorithm);
-
         } catch (RegistryException e) {
-            String error = "Error in loading tenant registry for " + tenantDomain;
-            throw new APIManagementException(error, e);
+            throw new APIManagementException("Error while loading tenant registry for " + tenantDomain, e);
+        } catch (Exception e) {
+            throw new APIManagementException("Error while obtaining private key for tenant: " + tenantDomain, e);
         }
     }
 
@@ -233,9 +229,9 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
         if (!tenantBasedSigningEnabled) {
             tenantId = MultitenantConstants.SUPER_TENANT_ID;
         }
+        //get tenant domain of the key to add the certificate from
+        String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         try {
-            //get tenant domain of the key to add the certificate from
-            String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
             Certificate publicCert;
             if (!(publicCerts.containsKey(tenantId))) {
                 //get tenant's key store manager
@@ -259,13 +255,16 @@ public abstract class AbstractAPIMgtGatewayJWTGenerator {
                 publicCert = publicCerts.get(tenantId);
             }
             if (publicCert == null) {
-                throw new APIManagementException("Error in obtaining keystore for tenantDomain = " + tenantDomain);
+                throw new APIManagementException(
+                        "Error while obtaining public certificate from keystore for tenant: " + tenantDomain);
             } else {
                 return APIUtil.generateHeader(publicCert, signatureAlgorithm);
             }
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while loading tenant registry for " + tenantDomain, e);
         } catch (Exception e) {
-            String error = "Error in obtaining tenant's keystore";
-            throw new APIManagementException(error, e);
+            throw new APIManagementException(
+                    "Error while obtaining public certificate from keystore for tenant: " + tenantDomain, e);
         }
     }
 
