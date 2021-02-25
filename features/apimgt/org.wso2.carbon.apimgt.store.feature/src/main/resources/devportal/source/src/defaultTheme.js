@@ -114,6 +114,7 @@ const DefaultConfigurations = {
         },
         thumbnail: {
             width: 240,
+            height: 140,
             contentPictureOverlap: false,
             iconColor: 'rgba(0, 0, 0, 0.38)',
             listViewIconSize: 20,
