@@ -26,11 +26,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.SubscriptionValidationDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -41,11 +50,7 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+
 import java.util.UUID;
 
 import javax.naming.Context;
@@ -61,6 +66,7 @@ import static org.junit.Assert.assertNotNull;
 public class SubscriptionValidationDAOTest {
 
     public SubscriptionValidationDAO subscriptionValidationDAO;
+    public static ApiMgtDAO apiMgtDAO;
     private static String KM_UUID = UUID.randomUUID().toString();
     private static String APP1_UUID = UUID.randomUUID().toString();
     private static String APP2_UUID = UUID.randomUUID().toString();
@@ -70,13 +76,9 @@ public class SubscriptionValidationDAOTest {
     private static String CONSUMER_KEY2 = "gYBKWtmq323neB4kTIbtY8324hca";
     private static String TENANT_DOMAIN = "carbon.super";
     private static String KEY_TYPE = "PRODUCTION";
-    private static String STATE = "COMPLETED";
     private static String APPLICATION1_NAME = "Application1";
     private static String APPLICATION2_NAME = "Application2";
-    private static String STATUS = "APPROVED";
-    private static String TIER = "Unlimited";
-    private static String APP_OWNER = "admin";
-    private static String TOKEN_TYPE = "JWT";
+    private static String APP_OWNER = "subscriptionValidationUser";
 
     @Before
     public void setUp() throws Exception {
@@ -87,25 +89,40 @@ public class SubscriptionValidationDAOTest {
         ServiceReferenceHolder.getInstance()
                 .setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl(config));
         APIMgtDBUtil.initialize();
+        apiMgtDAO = ApiMgtDAO.getInstance();
         subscriptionValidationDAO = new SubscriptionValidationDAO();
         IdentityTenantUtil.setRealmService(new TestRealmService());
         String identityConfigPath = System.getProperty("IdentityConfigurationPath");
         IdentityConfigParser.getInstance(identityConfigPath);
         OAuthServerConfiguration oAuthServerConfiguration = OAuthServerConfiguration.getInstance();
         ServiceReferenceHolder.getInstance().setOauthServerConfiguration(oAuthServerConfiguration);
-        //Insert Key Manager entry to the database
-        insertKeyManagerEntry(KM_UUID, APIConstants.KeyManager.DEFAULT_KEY_MANAGER,
-                APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION,
-                APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE, TENANT_DOMAIN);
-        //Insert applications
-        APPLICATION1_ID = insertApplication(APPLICATION1_NAME, TIER, STATUS, APP_OWNER, APP1_UUID, TOKEN_TYPE);
-        APPLICATION2_ID = insertApplication(APPLICATION2_NAME, TIER, STATUS, APP_OWNER, APP2_UUID, TOKEN_TYPE);
-        //Insert application key mapping entries
-        //Application 1 where the db entry has key manager name
-        insertApplicationKeyMappingEntry(APP1_UUID, APPLICATION1_ID, CONSUMER_KEY1, KEY_TYPE, STATE,
-                APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-        //Application 2 where the db entry has key manager uuid
-        insertApplicationKeyMappingEntry(APP2_UUID, APPLICATION2_ID, CONSUMER_KEY2, KEY_TYPE, STATE, KM_UUID);
+        //Add subscriber
+        Subscriber subscriber = new Subscriber(APP_OWNER);
+        subscriber.setTenantId(-1234);
+        subscriber.setSubscribedDate(new Date());
+        apiMgtDAO.addSubscriber(subscriber, null);
+        //Add Application1
+        Application app1 = new Application(APPLICATION1_NAME, subscriber);
+        app1.setUUID(APP1_UUID);
+        APPLICATION1_ID = apiMgtDAO.addApplication(app1, APP_OWNER);
+        //Add Application2
+        Application app2 = new Application(APPLICATION2_NAME, subscriber);
+        app2.setUUID(APP2_UUID);
+        APPLICATION2_ID = apiMgtDAO.addApplication(app2, APP_OWNER);
+        //Add application key mapping for Application1
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(KEY_TYPE, APPLICATION1_NAME, APP_OWNER,
+                CONSUMER_KEY1, APIConstants.KeyManager.DEFAULT_KEY_MANAGER, APP1_UUID);
+        //Add application key mapping for Application2
+        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(KEY_TYPE, APPLICATION2_NAME, APP_OWNER,
+                CONSUMER_KEY2, KM_UUID, APP2_UUID);
+        //Add Key Manager
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+        keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+        keyManagerConfigurationDTO.setUuid(KM_UUID);
+        keyManagerConfigurationDTO.setDescription(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_DESCRIPTION);
+        keyManagerConfigurationDTO.setTenantDomain(TENANT_DOMAIN);
+        keyManagerConfigurationDTO.setType(APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE);
+        apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationDTO);
     }
 
     private static void initializeDatabase(String configFilePath) {
@@ -168,87 +185,6 @@ public class SubscriptionValidationDAOTest {
         assertEquals(CONSUMER_KEY2, keyMapping.getConsumerKey());
     }
 
-    private int insertApplication(String name, String tier, String status, String owner, String uuid, String tokenType)
-            throws SQLException {
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement ps = null;
-        int applicationId = 0;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            String query = "INSERT INTO AM_APPLICATION (NAME, APPLICATION_TIER, "
-                    + " APPLICATION_STATUS, CREATED_BY, CREATED_TIME, UPDATED_TIME, UUID,"
-                    + " TOKEN_TYPE) VALUES (?,?,?,?,?,?,?,?)";
-            ps = conn.prepareStatement(query);
-            ps.setString(1, name);
-            ps.setString(2, tier);
-            ps.setString(3, status);
-            ps.setString(4, owner);
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            ps.setTimestamp(5, timestamp);
-            ps.setTimestamp(6, timestamp);
-            ps.setString(7, uuid);
-            ps.setString(8, tokenType);
-            ps.executeUpdate();
-            rs = ps.getGeneratedKeys();
-            while (rs.next()) {
-                applicationId = Integer.parseInt(rs.getString(1));
-            }
-            conn.commit();
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return applicationId;
-    }
-
-    private void insertApplicationKeyMappingEntry(String uuid, int appId, String consumerKey, String keyType,
-            String state, String keyManager) throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            String query = "INSERT INTO AM_APPLICATION_KEY_MAPPING (UUID, APPLICATION_ID, CONSUMER_KEY, KEY_TYPE, "
-                    + "STATE, KEY_MANAGER) VALUES (?,?,?,?,?,?)";
-            ps = conn.prepareStatement(query);
-            ps.setString(1, uuid);
-            ps.setInt(2, appId);
-            ps.setString(3, consumerKey);
-            ps.setString(4, keyType);
-            ps.setString(5, state);
-            ps.setString(6, keyManager);
-            ps.executeUpdate();
-            conn.commit();
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, null);
-        }
-    }
-
-    private void insertKeyManagerEntry(String uuid, String name, String description, String type, String tenantDomain)
-            throws SQLException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            conn.setAutoCommit(false);
-
-            String query = "INSERT INTO AM_KEY_MANAGER (UUID,NAME,DESCRIPTION,TYPE,TENANT_DOMAIN) VALUES (?,?,?,?,?)";
-            ps = conn.prepareStatement(query);
-            ps.setString(1, uuid);
-            ps.setString(2, name);
-            ps.setString(3, description);
-            ps.setString(4, type);
-            ps.setString(5, tenantDomain);
-            ps.executeUpdate();
-            conn.commit();
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, null);
-        }
-    }
-
     private void deleteKeyManager(String uuid, String tenantDomain) throws SQLException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -298,6 +234,22 @@ public class SubscriptionValidationDAOTest {
         }
     }
 
+    private void deleteSubscriber(String subscriber) throws SQLException {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            String query = "DELETE FROM AM_SUBSCRIBER WHERE USER_ID = ?";
+            ps = conn.prepareStatement(query);
+            ps.setString(1, subscriber);
+            ps.executeUpdate();
+            conn.commit();
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
     @After
     public void deleteArtifactsFromDB() throws Exception {
         //Delete application key mappings
@@ -306,6 +258,8 @@ public class SubscriptionValidationDAOTest {
         //Delete applications
         deleteApplication(APPLICATION1_ID);
         deleteApplication(APPLICATION2_ID);
+        //Delete subscriber
+        deleteSubscriber(APP_OWNER);
         //Delete the key manager entry from the database
         deleteKeyManager(KM_UUID, TENANT_DOMAIN);
     }
