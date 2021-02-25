@@ -1986,7 +1986,6 @@ public final class APIConstants {
         public static final String EXPIRY_TIME = "exp";
         public static final String JWT_KID = "kid";
         public static final String SIGNATURE_ALGORITHM = "alg";
-        public static final String TOKEN_TYPE = "typ";
         public static final String BACKEND_TOKEN = "backendJwt";
         public static final String SUBSCRIBED_APIS = "subscribedAPIs";
         public static final String API_CONTEXT = "context";
@@ -2003,6 +2002,8 @@ public final class APIConstants {
         public static final String ISSUER_IDENTIFIER = "iss";
         public static final String END_USERNAME = "sub";
         public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
+        public static final String TOKEN_TYPE = "token_type";
+        public static final String API_KEY_TOKEN_TYPE = "apiKey";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

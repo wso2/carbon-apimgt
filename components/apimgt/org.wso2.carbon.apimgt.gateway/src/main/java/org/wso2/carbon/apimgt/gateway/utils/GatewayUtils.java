@@ -1244,4 +1244,20 @@ public class GatewayUtils {
         }
         return null;
     }
+
+    public static boolean isAPIKey(JWTClaimsSet jwtClaimsSet) {
+        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (tokenTypeClaim != null) {
+            return APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null;
+    }
+
+    public static boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {
+        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (tokenTypeClaim != null) {
+            return APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return false;
+    }
 }

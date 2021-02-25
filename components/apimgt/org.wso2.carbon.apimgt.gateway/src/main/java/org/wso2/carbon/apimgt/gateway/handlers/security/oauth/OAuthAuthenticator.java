@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -215,13 +216,20 @@ public class OAuthAuthenticator implements Authenticator {
                     }
 
                     signedJWTInfo = getSignedJwt(accessToken);
+                    if (GatewayUtils.isInternalKey(signedJWTInfo.getJwtClaimsSet())
+                            || GatewayUtils.isAPIKey(signedJWTInfo.getJwtClaimsSet())) {
+                        log.debug("Invalid Token Provided");
+                        return new AuthenticationResponse(false, isMandatory, true,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                    }
                     String keyManager = ServiceReferenceHolder.getInstance().getJwtValidationService()
                             .getKeyManagerNameIfJwtValidatorExist(signedJWTInfo);
-                    if (StringUtils.isNotEmpty(keyManager)){
+                    if (StringUtils.isNotEmpty(keyManager)) {
                         if (keyManagerList.contains(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS) ||
                                 keyManagerList.contains(keyManager)) {
                             isJwtToken = true;
-                        }else{
+                        } else {
                             return new AuthenticationResponse(false, isMandatory, true,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                                     APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);

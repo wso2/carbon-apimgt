@@ -120,8 +120,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE, e);
                 }
                 // Check if the decoded header contains type as 'InternalKey'.
-                if (!APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE
-                        .equals(payload.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE))) {
+                if (!GatewayUtils.isInternalKey(payload)) {
                     if (log.isDebugEnabled()) {
                         log.debug("Invalid Internal Key token type. Internal API Key: " + GatewayUtils.getMaskedToken(splitToken[0]));
                     }
