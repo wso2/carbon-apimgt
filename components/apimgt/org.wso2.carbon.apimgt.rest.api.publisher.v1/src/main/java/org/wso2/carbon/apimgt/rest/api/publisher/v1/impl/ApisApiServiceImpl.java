@@ -4227,7 +4227,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, returnContent);
         } else if (fileInputStream != null){
             //validate file
-            String fileName = fileDetail.getContentDisposition().getFilename();
+            String fileName = fileDetail != null ? fileDetail.getContentDisposition().getFilename() : StringUtils.EMPTY;
             try {
                 if (isServiceAPI || fileName.endsWith(APIConstants.YAML_FILE_EXTENSION) || fileName
                         .endsWith(APIConstants.YML_FILE_EXTENSION)){
@@ -4478,8 +4478,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
             }
             String protocol = validationResponse.getProtocol();
-            String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service, protocol);
-            api.setEndpointConfig(endpointConfig);
+            if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
+                api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
+                        protocol));
+            }
             API updatedApi = apiProvider.updateAPI(api, originalAPI);
             PublisherCommonUtils.updateAPIDefinition(apiId, validationResponse, service);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
@@ -4501,8 +4503,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                            Attachment fileDetail, ServiceEntry service) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
+        boolean isServiceAPI = false;
         try {
-            boolean isServiceAPI = false;
             if (service != null) {
                 isServiceAPI = true;
             }
@@ -4530,12 +4532,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
-            if (service != null) {
+            if (isServiceAPI) {
                 apiToAdd.setServiceInfo("key", service.getKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());
-                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service, null));
+                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
+                        .getServiceUrl(), null));
             }
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
             // Rearrange paths according to the API payload and save the OpenAPI definition
@@ -4583,8 +4587,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                            Attachment fileDetail, ServiceEntry service) {
         //validate and retrieve the AsyncAPI specification
         Map validationResponseMap = null;
+        boolean isServiceAPI = false;
         try {
-            boolean isServiceAPI = false;
             if (service != null) {
                 isServiceAPI = true;
             }
@@ -4606,17 +4610,20 @@ public class ApisApiServiceImpl implements ApisApiService {
         //Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername());
             String definitionToAdd = validationResponse.getJsonContent();
             String protocol = validationResponse.getProtocol();
-            if (StringUtils.isNotEmpty(protocol)) {
-                apiToAdd.setType(protocol);
+            if (isServiceAPI) {
+                apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
             }
-            if (service != null) {
+            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
+                    RestApiCommonUtil.getLoggedInUsername());
+            if (isServiceAPI) {
                 apiToAdd.setServiceInfo("key", service.getKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());
-                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service, protocol));
+                if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
+                    apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
+                            .getServiceUrl(), protocol));
+                }
             }
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);

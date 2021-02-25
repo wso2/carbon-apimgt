@@ -765,33 +765,40 @@ public class PublisherCommonUtils {
         return isValid;
     }
 
-    public static String constructEndpointConfigForService(ServiceEntry service, String protocol)
-            throws APIManagementException {
+    public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
         StringBuilder sb = new StringBuilder();
-        String endpoint_type = APIDTO.TypeEnum.HTTP.value();
-        switch (service.getDefinitionType()) {
-            case GRAPHQL_SDL:
-                endpoint_type = APIDTO.TypeEnum.GRAPHQL.value();
+        String endpoint_type = APIDTO.TypeEnum.HTTP.value().toLowerCase();
+        if (APIDTO.TypeEnum.SSE.equals(protocol.toUpperCase()) || APIDTO.TypeEnum.WS.equals(protocol.toUpperCase())) {
+            endpoint_type = "ws";
+        }
+        if (StringUtils.isNotEmpty(serviceUrl)) {
+            sb.append("{\"endpoint_type\": \"")
+                    .append(endpoint_type)
+                    .append("\",")
+                    .append("\"production_endpoints\": {\"url\": \"")
+                    .append(serviceUrl)
+                    .append("\"}}");
+        } // TODO Need to check on the endpoint security
+        return sb.toString();
+    }
+
+    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) throws
+            APIManagementException {
+        switch (definitionType) {
             case WSDL1:
-                endpoint_type = APIDTO.TypeEnum.SOAP.value();
             case WSDL2:
-                endpoint_type = APIDTO.TypeEnum.SOAP.value();
+                return APIDTO.TypeEnum.SOAP;
+            case GRAPHQL_SDL:
+                return APIDTO.TypeEnum.GRAPHQL;
             case ASYNC_API:
                 if (StringUtils.isEmpty(protocol)) {
                     throw new APIManagementException("Missing protocol in Async API Definition",
                             ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION);
                 }
-                endpoint_type = APIDTO.TypeEnum.fromValue(protocol).value();
+                return APIDTO.TypeEnum.fromValue(protocol.toUpperCase());
+            default:
+                return APIDTO.TypeEnum.HTTP;
         }
-        if (StringUtils.isNotEmpty(service.getServiceUrl())) {
-            sb.append("{\"endpoint_type\": \"")
-                    .append(endpoint_type)
-                    .append("\",")
-                    .append("\"production_endpoints\": {\"url\": \"")
-                    .append(service.getServiceUrl())
-                    .append("\"}}");
-        } // TODO Need to check on the endpoint security
-        return sb.toString();
     }
 
     /**
