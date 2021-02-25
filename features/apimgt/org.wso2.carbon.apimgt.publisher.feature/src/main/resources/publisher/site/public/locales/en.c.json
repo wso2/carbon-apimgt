@@ -20,13 +20,13 @@
   "Apis.APIProductCreateWrapper.error.errorMessage.create.revision": [
     {
       "type": 0,
-      "value": "Something went wrong while creating the API Revision"
+      "value": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API."
     }
   ],
   "Apis.APIProductCreateWrapper.error.errorMessage.deploy.revision": [
     {
       "type": 0,
-      "value": "Something went wrong while deploying the API Revision"
+      "value": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API."
     }
   ],
   "Apis.Create.APIProduct.APIProductCreateWrapper.back": [
@@ -228,19 +228,19 @@
   "Apis.Create.Default.APICreateDefault.error.errorMessage.create.revision": [
     {
       "type": 0,
-      "value": "Something went wrong while creating the API Revision"
+      "value": "Cancel"
     }
   ],
   "Apis.Create.Default.APICreateDefault.error.errorMessage.deploy.revision": [
     {
       "type": 0,
-      "value": "Something went wrong while deploying the API Revision"
+      "value": "Cancel"
     }
   ],
   "Apis.Create.Default.APICreateDefault.error.errorMessage.publish": [
     {
       "type": 0,
-      "value": "Something went wrong while publishing the API"
+      "value": "Cancel"
     }
   ],
   "Apis.Create.Default.APICreateDefault.error.policies.not.available": [
@@ -6508,13 +6508,13 @@
   "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.create.revision": [
     {
       "type": 0,
-      "value": "Something went wrong while creating the API Revision"
+      "value": "Sample PizzaShackAPI API created successfully"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.deploy.revision": [
     {
       "type": 0,
-      "value": "Something went wrong while deploying the API Revision"
+      "value": "Sample PizzaShackAPI API created successfully"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [

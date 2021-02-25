@@ -460,7 +460,7 @@ class TestConsole extends React.Component {
                     <>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             <FormattedMessage
-                                id='Apis.Details.index.Tryout'
+                                id='Apis.Details.index.Tryout.not.prototyped'
                                 defaultMessage='Test Console'
                             />
                         </Typography>
@@ -552,7 +552,7 @@ class TestConsole extends React.Component {
                     <>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             <FormattedMessage
-                                id='Apis.Details.index.Tryout'
+                                id='Apis.Details.index.Tryout.not.enable.for.test'
                                 defaultMessage='Test Console'
                             />
                         </Typography>

@@ -237,10 +237,9 @@ export default function ApiProductCreateWrapper(props) {
                                 if (error.response) {
                                     Alert.error(error.response.body.description);
                                 } else {
-                                    const message = 'Something went wrong while deploying the API Revision';
                                     Alert.error(intl.formatMessage({
                                         id: 'Apis.APIProductCreateWrapper.error.errorMessage.deploy.revision',
-                                        defaultMessage: message,
+                                        defaultMessage: 'Something went wrong while deploying the API Revision',
                                     }));
                                 }
                                 console.error(error);
@@ -250,10 +249,9 @@ export default function ApiProductCreateWrapper(props) {
                         if (error.response) {
                             Alert.error(error.response.body.description);
                         } else {
-                            const message = 'Something went wrong while creating the API Revision';
                             Alert.error(intl.formatMessage({
                                 id: 'Apis.APIProductCreateWrapper.error.errorMessage.create.revision',
-                                defaultMessage: message,
+                                defaultMessage: 'Something went wrong while creating the API Revision',
                             }));
                         }
                         console.error(error);
