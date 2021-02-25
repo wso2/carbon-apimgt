@@ -1,139 +1,67 @@
 package org.wso2.carbon.graphql.api.devportal.service;
 
-import org.dataloader.BatchLoader;
-import org.dataloader.DataLoader;
-import org.dataloader.DataLoaderRegistry;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-//import org.wso2.carbon.graphql.api.devportal.data.*;
-import org.wso2.carbon.graphql.api.devportal.impl.dao.ApiDAO;
-import org.wso2.carbon.graphql.api.devportal.impl.dao.TierDAO;
-import org.wso2.carbon.graphql.api.devportal.impl.ApiListing;
-import org.wso2.carbon.graphql.api.devportal.impl.registry.ApiRegistry;
-import org.wso2.carbon.graphql.api.devportal.impl.dao.LabelDAO;
-import org.wso2.carbon.graphql.api.devportal.impl.dao.OperationDAO;
-import org.wso2.carbon.graphql.api.devportal.impl.dao.ScopesDAO;
-import graphql.schema.DataFetcher;
-import org.springframework.stereotype.Component;
-import org.wso2.carbon.graphql.api.devportal.modules.api.ApiDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.LabelNameDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.TierNameDTO;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Time;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.graphql.api.devportal.modules.api.TimeDTO;
+import org.wso2.carbon.user.api.UserStoreException;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
+import java.util.Map;
+import java.util.Set;
 
-@Component
-public class ApiService{
+public class ApiService {
 
-    ApiRegistry apiRegistry = new ApiRegistry();
-    TierDAO tierDAO = new TierDAO();
-    ScopesDAO scopesDAO = new ScopesDAO();
-    OperationDAO operationDAO = new OperationDAO();
-    LabelDAO labelDAO = new LabelDAO();
-    ApiDAO apiDAO = new ApiDAO();
-    ApiListing apiListing = new ApiListing();
-
-
-
-
-    public DataFetcher getApiListing(){
-        return env-> {
-            int start = env.getArgument("start");
-            int offset = env.getArgument("offset");
-            return apiListing.getApiListing(start,offset);
-        };
+    public TimeDTO getApiTimeDetailsFromDAO(String Id) throws APIManagementException {
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        Time time = apiConsumer.getTimeDetailsFromDAO(Id);
+        String createTime = time.getCreatedTime();
+        String lastUpdate = time.getLastUpdate();
+        return new TimeDTO(createTime,lastUpdate);
     }
-
-    public DataFetcher getApiDefinition(){
-        return env->{
-            ApiDTO api = env.getSource();
-            return apiRegistry.getApiDefinition(api.getId());
-
-        };
+    public Float getApiRatingFromDAO(String Id) throws APIManagementException {
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        Float rating  = apiConsumer.getRatingFromDAO(Id);
+        return rating;
     }
+    public String getMonetizationLabel(String Id) throws APIManagementException, UserStoreException, APIPersistenceException {
 
-    public DataFetcher getApiFromArtifact(){
-        return env->{
-            String Id = env.getArgument("id");
-            return apiRegistry.getApi(Id);
 
-        };
-    }
-    public DataFetcher getApiTimeDetails(){
-        return env->{
-            ApiDTO api = env.getSource();
+        RegistryPersistenceService artifactData = new RegistryPersistenceService();
+        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
 
-            DataLoaderRegistry dataLoaderRegistry = env.getContext();
-            DataLoader<String , Object> timeDetailsLoader = dataLoaderRegistry.getDataLoader("times");
+        Set<String> tiers = devPortalAPI.getAvailableTierNames();
 
-            return timeDetailsLoader.load(api.getId());
 
-        };
-    }
-    public BatchLoader<String, Object> timeBatchLoader = new BatchLoader<String, Object>() {
-        @Override
-        public CompletionStage<List<Object>> load(List<String> Ids)  {
-            return  CompletableFuture.supplyAsync(()-> {
-                List<Object> timeDetails = new ArrayList<>();
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
 
-                for(int i = 0;i<Ids.size();i++){
-                    try {
-                        timeDetails.add(apiDAO.getApiTimeDetailsFromDAO(Ids.get(i)));
-                    } catch (APIManagementException e) {
-                        e.printStackTrace();
-                    }
-                }
+        Map<String, Tier> definedTiers = apiConsumer.getTierDetailsFromDAO(Id);
 
-                return timeDetails;
-            });
+        String monetizationLabel = null;
+        int free = 0, commercial = 0;
+        for(String name: tiers){
+            Tier definedTier = definedTiers.get(name);
+            if (definedTier.getTierPlan().equalsIgnoreCase(APIConstants.API_CATEGORY_FREE)) {
+                free = free + 1;
+            } else if (definedTier.getTierPlan().equalsIgnoreCase(APIConstants.COMMERCIAL_TIER_PLAN)) {
+                commercial = commercial + 1;
+            }
         }
-
-    };
-
-
-    public DataFetcher  getApiRating(){
-        return env->{
-            ApiDTO api = env.getSource();
-            return apiDAO.getApiRatingFromDAO(api.getId());
-        };
+        if (free > 0 && commercial == 0) {
+            monetizationLabel= APIConstants.API_CATEGORY_FREE;
+        } else if (free == 0 && commercial > 0) {
+            monetizationLabel = APIConstants.API_CATEGORY_PAID;
+        } else if (free > 0 && commercial > 0) {
+            monetizationLabel = APIConstants.API_CATEGORY_FREEMIUM;
+        }
+        return monetizationLabel;
     }
-    public DataFetcher getTierDetails(){
-        return env->{
-            TierNameDTO tierNameDTO = env.getSource();
-
-            return tierDAO.getTierDetailsFromDAO(tierNameDTO.getApiId(),tierNameDTO.getName());
-        };
-    }
-    public DataFetcher getMonetizationLabel(){
-        return env->{
-            ApiDTO api = env.getSource();
-            return apiDAO.getMonetizationLabel(api.getId());
-        };
-    }
-
-    public DataFetcher getOperationInformation(){
-        return env->{
-            ApiDTO api = env.getSource();
-            return operationDAO.getOperationDetailsFromDAO(api.getId());
-
-        };
-    }
-    public DataFetcher getLabelsDetails(){
-        return env->{
-            LabelNameDTO labelNameDTO = env.getSource();
-            return labelDAO.getLabelDetailsFromDAO(labelNameDTO.getName());
-        };
-    }
-    public DataFetcher getScopeInformation(){
-        return env->{
-            ApiDTO api = env.getSource();
-            return scopesDAO.getScopesDetailsFromDAO(api.getId());
-        };
-    }
-
-
-
-
-
 
 }

@@ -14,8 +14,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.springframework.core.io.Resource;
-import org.wso2.carbon.graphql.api.devportal.service.ApiService;
-import org.wso2.carbon.graphql.api.devportal.service.TagSevice;
+import org.wso2.carbon.graphql.api.devportal.dataFetcher.ApiDataFetcherImpl;
+import org.wso2.carbon.graphql.api.devportal.dataFetcher.TagDataFetcherImpl;
 
 @Component
 public class GraphqlProvider {
@@ -25,10 +25,10 @@ public class GraphqlProvider {
 
 
     @Autowired
-    ApiService apiService;
+    ApiDataFetcherImpl apiDataFetcher;
 
     @Autowired
-    TagSevice tagSevice;
+    TagDataFetcherImpl tagDataFetcher;
 
 
 
@@ -77,51 +77,51 @@ public class GraphqlProvider {
 
     private TypeRuntimeWiring.Builder QueryApiListing(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getApiListing", apiService.getApiListing());
+                .dataFetcher("getApiListing", apiDataFetcher.getApiListing());
     }
 
     private TypeRuntimeWiring.Builder queryApi(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getApi", apiService.getApiFromArtifact());
+                .dataFetcher("getApi", apiDataFetcher.getApiFromArtifact());
     }
     private TypeRuntimeWiring.Builder queryApiTags(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getTags", tagSevice.getTagsData());
+                .dataFetcher("getTags", tagDataFetcher.getTagsData());
     }
     private TypeRuntimeWiring.Builder ApiTimeDetailsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("timeDetails",apiService.getApiTimeDetails());
+                .dataFetcher("timeDetails",apiDataFetcher.getApiTimeDetails());
     }
     private TypeRuntimeWiring.Builder ApiDefinitionDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("apiDefinition",apiService.getApiDefinition());
+                .dataFetcher("apiDefinition",apiDataFetcher.getApiDefinition());
     }
 
     private TypeRuntimeWiring.Builder ApiRatingDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("rating",apiService.getApiRating());
+                .dataFetcher("rating",apiDataFetcher.getApiRating());
     }
 
     private TypeRuntimeWiring.Builder TierDetailsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Tier")
-                .dataFetcher("tierDetails",apiService.getTierDetails());
+                .dataFetcher("tierDetails",apiDataFetcher.getTierDetails());
     }
     private TypeRuntimeWiring.Builder MonetizationLabelDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("monetizationLabel",apiService.getMonetizationLabel());
+                .dataFetcher("monetizationLabel",apiDataFetcher.getMonetizationLabel());
     }
 
     private TypeRuntimeWiring.Builder OperationInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("operationInformation",apiService.getOperationInformation());
+                .dataFetcher("operationInformation",apiDataFetcher.getOperationInformation());
     }
     private TypeRuntimeWiring.Builder LabelDetailsDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Label")
-                .dataFetcher("labelDetails",apiService.getLabelsDetails());
+                .dataFetcher("labelDetails",apiDataFetcher.getLabelsDetails());
     }
     private TypeRuntimeWiring.Builder ScopeInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("scope",apiService.getScopeInformation());
+                .dataFetcher("scope",apiDataFetcher.getScopeInformation());
     }
 
 

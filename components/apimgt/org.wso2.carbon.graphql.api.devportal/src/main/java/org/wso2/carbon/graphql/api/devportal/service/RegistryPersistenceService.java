@@ -1,4 +1,4 @@
-package org.wso2.carbon.graphql.api.devportal.impl;
+package org.wso2.carbon.graphql.api.devportal.service;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -7,11 +7,10 @@ import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.registry.core.Registry;
 
 import java.util.*;
 
-public class RegistryPersistenceImpl {
+public class RegistryPersistenceService {
 
     //protected String username;
     APIPersistence apiPersistenceInstance;

@@ -1,4 +1,4 @@
-package org.wso2.carbon.graphql.api.devportal.modules.Tag;
+package org.wso2.carbon.graphql.api.devportal.modules.tag;
 
 public class TagDTO {
     private String value;

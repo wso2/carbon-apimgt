@@ -1,30 +1,20 @@
-package org.wso2.carbon.graphql.api.devportal.impl.dao;
+package org.wso2.carbon.graphql.api.devportal.mapping;
 
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.graphql.api.devportal.modules.api.TierDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.TierNameDTO;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.user.api.UserStoreException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTiers;
+public class TierMapping {
 
-public class TierDAO {
-
-    public List<TierDTO> getTierDetailsFromDAO(String Id, String name) throws APIManagementException, RegistryException, UserStoreException, APIPersistenceException {
-
-
-        String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        Map<String, Tier> definedTiers = apiConsumer.getTierDetailsFromDAO(Id);// getTiers(tenantId);
-
+    public List<TierDTO> fromTierToTierDTO( Map<String, Tier> definedTiers,String name){
         List<TierDTO> tierList = new ArrayList<TierDTO>();
         String tierPlan=null;
         String displayName = null;
@@ -73,7 +63,7 @@ public class TierDAO {
 
     }
 
-    public List<TierNameDTO> getTierName(DevPortalAPI devPortalAPI) throws  APIPersistenceException{
+    public List<TierNameDTO> fromTierNametoTierNameDTO(DevPortalAPI devPortalAPI) throws APIPersistenceException {
 
         List<TierNameDTO> tierNameDTOS = new ArrayList<>();
 
@@ -85,5 +75,4 @@ public class TierDAO {
 
 
     }
-
 }

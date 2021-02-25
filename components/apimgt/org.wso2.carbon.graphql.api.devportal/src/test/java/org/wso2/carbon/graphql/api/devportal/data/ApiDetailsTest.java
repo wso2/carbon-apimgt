@@ -8,18 +8,18 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.graphql.api.devportal.impl.RegistryPersistenceImpl;
-import org.wso2.carbon.graphql.api.devportal.impl.registry.ApiRegistry;
+import org.wso2.carbon.graphql.api.devportal.service.RegistryPersistenceService;
+import org.wso2.carbon.graphql.api.devportal.service.ApiRegistryService;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ApiRegistry.class, RestApiUtil.class, RegistryPersistenceImpl.class,ApiMgtDAO.class})
+@PrepareForTest({ApiRegistryService.class, RestApiUtil.class, RegistryPersistenceService.class,ApiMgtDAO.class})
 class ApiDetailsTest {
 
     //public static ApiMgtDAO apiMgtDAO;
     @Test
     void getApiCount() throws  APIManagementException {
-        ApiRegistry apiDetails = new ApiRegistry();
+        ApiRegistryService apiDetails = new ApiRegistryService();
 
         //ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
 
