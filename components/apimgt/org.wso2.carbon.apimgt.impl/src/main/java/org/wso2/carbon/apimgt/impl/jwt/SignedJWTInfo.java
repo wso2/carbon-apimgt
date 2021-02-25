@@ -109,7 +109,7 @@ public class SignedJWTInfo implements Serializable {
 
     public void setX509ClientCertificate(X509Certificate x509ClientCertificate) {
 
-        x509ClientCertificate = x509ClientCertificate;
+        this.x509ClientCertificate = x509ClientCertificate;
         if (x509ClientCertificate != null) {
             byte[] encoded = new byte[0];
             try {
