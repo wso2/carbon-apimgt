@@ -1,6 +1,6 @@
 <div class="main-content">
 
-        <h2>APIDeploymentClusterInfo</h2>
+        <h2>Endpoints</h2>
             <table class="table table-hover">
                 <colgroup>
                     <col style="width: 10%;"/>
@@ -21,48 +21,33 @@
                 <tbody>
                     <tr>
                         <td class="parameter">
-                            <p>clusterName</p>
-                            <p class="param-required">
-                                required
-                                
-                            </p>
-                        </td>
-                        <td class="parameter"><p class="marked">Name of the cluster </p></td>
-                        <td class="parameter">
-                                <a href="#!/models#string">string</a>
-                        </td>
-                        <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">minikube</p></td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            <p>clusterDisplayName</p>
+                            <p>deployedEndpoints</p>
                             <p class="param-required">
                                 
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">Display name of the cluster </p></td>
+                        <td class="parameter"><p class="marked">The end points which has been deployed in the gateway </p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">Minikube Cluster</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
-                            <p>ingressURL</p>
+                            <p>UnDeployedEndpoints</p>
                             <p class="param-required">
-                                required
                                 
+                                optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked">ingress URL</p></td>
+                        <td class="parameter"><p class="marked">The end points which has not been deployed in the gateway </p></td>
                         <td class="parameter">
-                                <a href="#!/models#string">string</a>
+                                <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">http://wso2.com:9443</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                 </tbody>
             </table>
