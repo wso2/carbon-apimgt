@@ -49,7 +49,7 @@ public class SearchApiServiceImpl implements SearchApiService {
 
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
 
-    public Response searchGet(Integer limit, Integer offset, String query, String ifNoneMatch,
+    public Response search(Integer limit, Integer offset, String query, String ifNoneMatch,
                               MessageContext messageContext) {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
@@ -62,13 +62,17 @@ public class SearchApiServiceImpl implements SearchApiService {
             if (!query.contains(":")) {
                 query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
             }
-            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
+
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-            Map<String, Object> result = apiProvider
-                    .searchPaginatedAPIs(newSearchQuery, tenantDomain, offset, limit, false);
+            Map<String, Object> result = null;
+            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
+                result = apiProvider.searchPaginatedContent(query, tenantDomain, offset, limit);
+            } else {
+                result = apiProvider.searchPaginatedAPIs(query, tenantDomain, offset, limit);
+            }
             ArrayList<Object> apis;
             /* Above searchPaginatedAPIs method underneath calls searchPaginatedAPIsByContent method,searchPaginatedAPIs
             method and searchAPIDoc method in AbstractApiManager. And those methods respectively returns ArrayList,

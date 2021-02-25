@@ -138,6 +138,27 @@ class WSDL extends React.Component {
     }
 
     /**
+     * Downloads WSDL ZIP file.
+     *
+     */
+    handleDownloadWSDLZip() {
+        const { api, intl } = this.props;
+        const wsdlZipContent = api.getWSDL(api.id);
+        wsdlZipContent.then((response) => {
+            Utils.forceDownload(response);
+        })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.WSDL.download.error',
+                    defaultMessage: 'Error downloading WSDL ZIP file',
+                }));
+            });
+    }
+
+    /**
      * Downloads and loads the API's WSDL in the editor.
      *
      * @param {*} api API
@@ -168,27 +189,6 @@ class WSDL extends React.Component {
                         defaultMessage: 'Error loading WSDL',
                     }));
                 }
-            });
-    }
-
-    /**
-     * Downloads WSDL ZIP file.
-     *
-     */
-    handleDownloadWSDLZip() {
-        const { api, intl } = this.props;
-        const wsdlZipContent = api.getWSDL(api.id);
-        wsdlZipContent.then((response) => {
-            Utils.forceDownload(response);
-        })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-                Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.WSDL.download.error',
-                    defaultMessage: 'Error downloading WSDL ZIP file',
-                }));
             });
     }
 
@@ -319,10 +319,10 @@ WSDL.propTypes = {
         apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     history: PropTypes.shape({
-        push: PropTypes.object,
+        push: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
-        pathname: PropTypes.object,
+        pathname: PropTypes.shape({}),
     }).isRequired,
     resourceNotFountMessage: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,

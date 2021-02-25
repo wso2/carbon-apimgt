@@ -40,7 +40,7 @@ function getIDPCheckSessionEndpoint() {
     return utils.getExternalIDPCheckSessionEndpoint();
 }
 
-var getTenantBasePublisherContext = function() {
+var getTenantBasePublisherContext = function () {
     var tenantDomain = getTenantDomain();
     var tenantContext = utils.getTenantBasedPublisherContext(tenantDomain);
     if (tenantContext != null && tenantContext != " ") {
@@ -50,20 +50,20 @@ var getTenantBasePublisherContext = function() {
     }
 };
 
-var getTenantBasedLoginCallBack = function() {
+var getTenantBasedLoginCallBack = function () {
     var tenantDomain = getTenantDomain();
     var publisherDomainMapping = utils.getTenantBasedPublisherDomainMapping(tenantDomain);
     if (publisherDomainMapping != null) {
         if (publisherDomainMapping.get('login') != null) {
             return publisherDomainMapping.get('login');
         }
-        return "https://"+publisherDomainMapping.get('customUrl') + LOGIN_CALLBACK_URL_SUFFIX;
-    }else{
+        return "https://" + publisherDomainMapping.get('customUrl') + LOGIN_CALLBACK_URL_SUFFIX;
+    } else {
         return null;
     }
 };
 
-var getTenantBasedLogoutCallBack = function() {
+var getTenantBasedLogoutCallBack = function () {
     var tenantDomain = getTenantDomain();
     var publisherDomainMapping = utils.getTenantBasedPublisherDomainMapping(tenantDomain);
     if (publisherDomainMapping != null) {
@@ -76,13 +76,13 @@ var getTenantBasedLogoutCallBack = function() {
     }
 };
 
-var isPerTenantServiceProviderEnabled = function() {
+var isPerTenantServiceProviderEnabled = function () {
     var tenantDomain = getTenantDomain();
     var perTenantServiceProviderEnabled = utils.isPerTenantServiceProviderEnabled(tenantDomain);
     return perTenantServiceProviderEnabled;
 };
 
-var getTenantDomain = function() {
+var getTenantDomain = function () {
     var tenantDomain = request.getParameter("tenant");
     if (tenantDomain == null) {
         tenantDomain = request.getHeader("X-WSO2-Tenant");
@@ -93,7 +93,7 @@ var getTenantDomain = function() {
     return tenantDomain;
 };
 
-var getServiceProviderTenantDomain = function() {
+var getServiceProviderTenantDomain = function () {
     var tenantDomain = getTenantDomain();
     if (isPerTenantServiceProviderEnabled()) {
         return tenantDomain;

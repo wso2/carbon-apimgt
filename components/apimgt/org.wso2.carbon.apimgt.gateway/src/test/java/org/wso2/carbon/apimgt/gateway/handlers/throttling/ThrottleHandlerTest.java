@@ -27,24 +27,37 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.gateway.TestUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Test cases for for ThrottleHandler
+ * Test cases for for ThrottleHandler.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class})
 public class ThrottleHandlerTest {
+
     private Timer timer;
     private Timer.Context context;
     private ThrottleConditionEvaluator throttleEvaluator;
@@ -63,6 +76,10 @@ public class ThrottleHandlerTest {
     private static final String RESPONSE = "RESPONSE";
     private static final String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
     private static final String VERB_INFO_DTO = "VERB_INFO";
+    private static final String blockedUserWithTenantDomain = "blockedUser@carbon.super";
+    private static final String userWithTenantDomain = "user@carbon.super";
+    private static final String blockedUserWithOutTenantDomain = "blockedUser";
+    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
     @Before
     public void init() {
@@ -85,6 +102,19 @@ public class ThrottleHandlerTest {
 
         apiLevelThrottleKey = apiContext + ":" + apiVersion;
         resourceLevelThrottleKey = apiContext + "/" + apiVersion + resourceUri + ":" + httpVerb;
+
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        Mockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                .getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                .class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
+                (apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getExtensionListenerMap()).thenReturn(extensionListenerMap);
 
     }
 
@@ -327,7 +357,7 @@ public class ThrottleHandlerTest {
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
+                .getUsername()+ "@" + throttleHandler.getTenantDomain();
         //Set application level throttled out
         throttleDataHolder.addThrottleData(applicationLevelThrottleKey, System.currentTimeMillis() + 10000);
 
@@ -392,7 +422,7 @@ public class ThrottleHandlerTest {
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
                 + apiVersion;
         String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
+                .getUsername()+ "@" + throttleHandler.getTenantDomain();
         String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
 //        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
 //        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
@@ -533,6 +563,50 @@ public class ThrottleHandlerTest {
         matchingConditions.add(conditionGroupDTO);
         throttleDataHolder.addKeyTemplate("testKeyTemplate", "testKeyTemplateValue");
         throttleDataHolder.addThrottleData("testKeyTemplate", System.currentTimeMillis() - 10000);
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+    }
+
+    @Test
+    public void testMsgThrottleOutWithUserBlockingConditions() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
+        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
+        MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
+        messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
+                .MessageContext.TRANSPORT_HEADERS);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
+        verbInfo.setConditionGroups(conditionGroupDTOs);
+        ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
+        // Adding a user blocking condition
+        throttleDataHolder.addUserBlockingCondition(blockedUserWithTenantDomain, blockedUserWithTenantDomain);
+        matchingConditions.add(conditionGroupDTO);
+        authenticationContext.setApiTier("Unlimited");
+
+        // When a blocked user is invoking
+        authenticationContext.setUsername(blockedUserWithTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
+        Assert.assertFalse(throttleHandler.handleRequest(messageContext));
+
+        // When an unblocked user is invoking
+        authenticationContext.setUsername(userWithTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+
+        // When a blocked user without tenant domain in the username is invoking
+        authenticationContext.setUsername(blockedUserWithOutTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
+        Assert.assertFalse(throttleHandler.handleRequest(messageContext));
+
+        // Remove the user block condition and use blocked user to invoke
+        throttleDataHolder.removeUserBlockingCondition(blockedUserWithTenantDomain);
+        authenticationContext.setUsername(blockedUserWithTenantDomain);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
         Assert.assertTrue(throttleHandler.handleRequest(messageContext));
     }
 

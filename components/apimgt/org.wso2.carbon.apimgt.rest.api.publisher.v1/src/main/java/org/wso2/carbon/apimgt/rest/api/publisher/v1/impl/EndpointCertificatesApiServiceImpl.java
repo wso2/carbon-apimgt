@@ -51,7 +51,7 @@ import java.util.List;
 public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesApiService {
 
     private static Log log = LogFactory.getLog(EndpointCertificatesApiServiceImpl.class);
-    public Response endpointCertificatesAliasContentGet(String alias, MessageContext messageContext) {
+    public Response getEndpointCertificateContentByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String certFileName = alias + ".crt";
@@ -85,7 +85,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
-    public Response endpointCertificatesAliasDelete(String alias, MessageContext messageContext) {
+    public Response deleteEndpointCertificateByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -120,7 +120,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
-    public Response endpointCertificatesAliasGet(String alias, MessageContext messageContext) {
+    public Response getEndpointCertificateByAlias(String alias, MessageContext messageContext) {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
 
@@ -163,7 +163,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
-    public Response endpointCertificatesAliasPut(String alias, InputStream certificateInputStream,
+    public Response updateEndpointCertificateByAlias(String alias, InputStream certificateInputStream,
                                                  Attachment certificateDetail, MessageContext messageContext) {
         try {
             if (StringUtils.isEmpty(alias)) {
@@ -226,7 +226,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
-    public Response endpointCertificatesGet(Integer limit, Integer offset, String alias, String endpoint,
+    public Response getEndpointCertificates(Integer limit, Integer offset, String alias, String endpoint,
             MessageContext messageContext) {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -262,7 +262,7 @@ public class EndpointCertificatesApiServiceImpl implements EndpointCertificatesA
         return null;
     }
 
-    public Response endpointCertificatesPost(InputStream certificateInputStream, Attachment certificateDetail,
+    public Response addEndpointCertificate(InputStream certificateInputStream, Attachment certificateDetail,
             String alias, String endpoint, MessageContext messageContext) {
         try {
             if (StringUtils.isEmpty(alias) || StringUtils.isEmpty(endpoint)) {

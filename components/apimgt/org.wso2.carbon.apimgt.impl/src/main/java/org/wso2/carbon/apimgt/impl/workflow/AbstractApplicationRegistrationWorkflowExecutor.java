@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -133,8 +134,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
         try {
             //get new key manager
-            String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-            String keyManagerName = workflowDTO.getKeyManager();
+            //Here the default flow is set expecting an ID as the keymanager as this flow only involves new applications
+            String keyManagerId = workflowDTO.getKeyManager();
+            KeyManagerConfigurationDTO km = dao.getKeyManagerConfigurationByUUID(keyManagerId);
+            String tenantDomain = km.getTenantDomain();
+            String keyManagerName = km.getName();
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance(tenantDomain, keyManagerName);
             if (keyManager == null){
                 throw new APIManagementException("Key Manager " + keyManagerName + " not configured");
@@ -151,11 +155,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             //update associateApplication
             ApplicationUtils
-                    .updateOAuthAppAssociation(application, workflowDTO.getKeyType(), oAuthApplication, keyManagerName);
+                    .updateOAuthAppAssociation(application, workflowDTO.getKeyType(), oAuthApplication, keyManagerId);
 
             //change create application status in to completed.
             dao.updateApplicationRegistration(APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED,
-                    workflowDTO.getKeyType(), workflowDTO.getApplication().getId(), keyManagerName);
+                    workflowDTO.getKeyType(), workflowDTO.getApplication().getId(), keyManagerId);
 
             workflowDTO.setApplicationInfo(oAuthApplication);
             AccessTokenInfo tokenInfo;

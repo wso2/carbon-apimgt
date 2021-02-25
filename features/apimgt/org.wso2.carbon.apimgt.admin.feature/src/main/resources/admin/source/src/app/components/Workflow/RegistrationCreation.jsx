@@ -54,6 +54,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
+import { Alert as MUIAlert } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
     searchInput: {
@@ -88,6 +89,7 @@ function ListLabels() {
     const [isUpdating, setIsUpdating] = useState(null);
     const [buttonValue, setButtonValue] = useState();
     const [hasListPermission, setHasListPermission] = useState(true);
+    const [errorMessage, setError] = useState(null);
 
     /**
     * Mock API call
@@ -141,10 +143,7 @@ function ListLabels() {
         })
             .catch((e) => {
                 console.error('Unable to fetch data. ', e.message);
-                Alert.error(intl.formatMessage({
-                    id: 'Workflow.RegistrationCreation.fetch.has.errors',
-                    defaultMessage: 'Unable to fetch data.',
-                }));
+                setError(e.message);
             });
     };
 
@@ -438,11 +437,20 @@ function ListLabels() {
             />
         );
     }
-    if (!data) {
+    if (!errorMessage && !data) {
         return (
             <ContentBase pageStyle='paperLess'>
                 <InlineProgress />
             </ContentBase>
+
+        );
+    }
+    if (errorMessage) {
+        return (
+            <ContentBase {...pageProps}>
+                <MUIAlert severity='error'>{errorMessage}</MUIAlert>
+            </ContentBase>
+
         );
     }
     return (

@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.8.119-SNAPSHOT</version>
+        <version>9.0.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 API Manager Publisher REST API - v1</name>
+    <name>WSO2 API Manager Publisher REST API - v2</name>
     <description>WSO2 API Manager REST API for API Publisher</description>
 
 
@@ -100,6 +100,17 @@
             <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>${commons-logging.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -133,7 +144,6 @@
                                 <apiPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1</apiPackage>
                                 <modelPackage>org.wso2.carbon.apimgt.rest.api.publisher.v1.dto</modelPackage>
                                 <sourceFolder>src/gen/java</sourceFolder>
-                                <dateLibrary>custom</dateLibrary>
                                 <hideGenerationTimestamp>true</hideGenerationTimestamp>
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
@@ -198,6 +208,16 @@
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>*</exclude>
+                        <exclude>org/wso2/carbon/apimgt/rest/api/publisher/v1/dto/**/*</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 

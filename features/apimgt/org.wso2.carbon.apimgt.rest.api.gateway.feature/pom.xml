@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.8.119-SNAPSHOT</version>
+        <version>9.0.5-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.gateway.v1</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.gateway</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -83,11 +83,11 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.gateway.v1</artifactId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.gateway</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#gateway.war</destFileName>
+                                    <destFileName>api#am#gateway#v2.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -110,49 +110,9 @@
                                 <resource>
                                     <directory>resources</directory>
                                     <includes>
-                                        <include>api#am#gateway.war</include>
+                                        <include>api#am#gateway#v2.war</include>
                                         <include>p2.inf</include>
                                         <include>build.properties</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-common-doc-resources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                                    </directory>
-                                    <excludes>
-                                        <exclude>**/*.mustache</exclude>
-                                    </excludes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-specific-doc-resources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v1/src/main/resources/documentation
-                                    </directory>
-                                    <includes>
-                                        <include>*</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -197,36 +157,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v1/src/main/resources/gateway-api.yaml
-                            </inputSpec>
-                            <language>org.wso2.carbon.apimgt.rest.api.util.codegen.DynamicHtmlGen</language>
-                            <templateDirectory>
-                                ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates
-                            </templateDirectory>
-                            <output>src/main/resources/api-docs</output>
-                        </configuration>
-                    </execution>
-                </executions>
-
-                <dependencies>
-                    <dependency>
-                        <groupId>org.wso2.carbon.apimgt</groupId>
-                        <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
-                        <version>${carbon.apimgt.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

@@ -148,6 +148,7 @@ public class APIMgtGatewayConstants {
     public static final String CUSTOM_ANALYTICS_REQUEST_PROPERTIES = "apim.analytics.request.properties";
     public static final String CUSTOM_ANALYTICS_RESPONSE_PROPERTIES = "apim.analytics.response.properties";
     public static final String CUSTOM_ANALYTICS_PROPERTY_SEPARATOR = ",";
+    public static final String API_UUID_PROPERTY = "API_UUID";
 
     /**
      * Constants for swagger schema validator
@@ -217,5 +218,7 @@ public class APIMgtGatewayConstants {
     public static final String AUTHENTICATION_ENDPOINT_CONTEXT = "/authenticationendpoint";
     public static final String LOGIN_CONTEXT = "/logincontext";
     public static final String OAUTH2_CONTEXT = "/oauth2";
+
+    public static final String CUSTOM_PROPERTY = "customProperty";
 }
 

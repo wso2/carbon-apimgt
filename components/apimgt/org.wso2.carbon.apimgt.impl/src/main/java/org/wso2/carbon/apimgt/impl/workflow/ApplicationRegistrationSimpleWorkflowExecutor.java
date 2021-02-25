@@ -52,7 +52,6 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 
         workFlowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workFlowDTO);
-        super.publishEvents(workFlowDTO);
 		return new GeneralWorkflowResponse();
     }
 

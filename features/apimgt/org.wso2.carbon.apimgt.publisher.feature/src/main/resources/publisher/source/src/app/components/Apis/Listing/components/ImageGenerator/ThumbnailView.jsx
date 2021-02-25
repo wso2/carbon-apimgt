@@ -213,6 +213,13 @@ class ThumbnailView extends Component {
         this.setState({ file: acceptedFile });
     }
 
+    selectIcon = (selectedIconUpdate) => {
+        this.setState({ selectedIconUpdate });
+    };
+
+    selectBackground = (backgroundIndexUpdate) => {
+        this.setState({ backgroundIndexUpdate });
+    };
 
     /**
      * @param {SyntheticEvent} e React event object
@@ -258,7 +265,6 @@ class ThumbnailView extends Component {
         }
     };
 
-
     handleChange = (event, selectedTab) => {
         this.setState({ selectedTab });
     };
@@ -267,18 +273,9 @@ class ThumbnailView extends Component {
         this.setState({ [name]: event.target.value });
     };
 
-    selectIcon = (selectedIconUpdate) => {
-        this.setState({ selectedIconUpdate });
-    };
-
     handleChangeComplete = (colorUpdate) => {
         this.setState({ colorUpdate: colorUpdate.hex });
     };
-
-    selectBackground = (backgroundIndexUpdate) => {
-        this.setState({ backgroundIndexUpdate });
-    };
-
 
     /**
      * Handle modal close event
@@ -366,6 +363,7 @@ class ThumbnailView extends Component {
             api, classes, width, height, isEditable, theme, intl, imageUpdate,
         } = this.props;
         const colorPairs = theme.custom.thumbnail.backgrounds;
+        const maxSize = 1000000;
         const {
             file,
             thumbnail,
@@ -462,6 +460,7 @@ class ThumbnailView extends Component {
                                     <Dropzone
                                         multiple={false}
                                         accept='image/*'
+                                        maxSize={maxSize}
                                         className={classes.dropzone}
                                         activeClassName={classes.acceptDrop}
                                         rejectClassName={classes.rejectDrop}
@@ -469,21 +468,40 @@ class ThumbnailView extends Component {
                                             this.onDrop(dropFile);
                                         }}
                                     >
-                                        {({ getRootProps, getInputProps }) => (
-                                            <div {...getRootProps({ style: dropzoneStyles })}>
-                                                <input {...getInputProps()} />
-                                                <div className={classes.dropZoneWrapper}>
-                                                    <Icon className={classes.dropIcon}>cloud_upload</Icon>
-                                                    <Typography>
-                                                        <FormattedMessage
-                                                            id='upload.image'
-                                                            defaultMessage='Click or drag the image to upload.'
-                                                        />
-                                                    </Typography>
+                                        {({ getRootProps, getInputProps, rejectedFiles }) => {
+                                            const isFileTooLarge = rejectedFiles.length > 0
+                                                && rejectedFiles[0].size > maxSize;
+                                            return (
+                                                <div {...getRootProps({ style: dropzoneStyles })}>
+                                                    <input {...getInputProps()} />
+                                                    {isFileTooLarge && (
+                                                        <Typography color='error'>
+                                                            <FormattedMessage
+                                                                id='upload.image.size.error'
+                                                                defaultMessage='Uploaded File is too large.
+                                                                Maximum file size limit to 1MB'
+                                                            />
+                                                        </Typography>
+                                                    )}
+                                                    <div className={classes.dropZoneWrapper}>
+                                                        <Icon className={classes.dropIcon}>cloud_upload</Icon>
+                                                        <Typography>
+                                                            <FormattedMessage
+                                                                id='upload.image'
+                                                                defaultMessage='Click or drag the image to upload.'
+                                                            />
+                                                        </Typography>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            );
+                                        }}
                                     </Dropzone>
+                                    <Typography>
+                                        <FormattedMessage
+                                            id='upload.image.size.info'
+                                            defaultMessage='Maximum file size limit to 1MB'
+                                        />
+                                    </Typography>
                                 </Grid>
                             </Grid>
                         )}

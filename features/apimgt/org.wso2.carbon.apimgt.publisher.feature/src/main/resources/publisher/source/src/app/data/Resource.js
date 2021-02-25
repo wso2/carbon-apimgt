@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import API from 'AppData/api';
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 
@@ -39,7 +40,6 @@ export default class Resource {
         };
     }
 
-
     /**
      * Check whether current resource is of type APIProduct
      *
@@ -47,7 +47,7 @@ export default class Resource {
      * @memberof Resource
      */
     isAPIProduct() {
-        return this.apiType === 'APIProduct';
+        return this.apiType === API.CONSTS.APIProduct;
     }
 
     /**
@@ -70,5 +70,9 @@ export default class Resource {
 
     isSOAP() {
         return this.type === 'SOAP';
+    }
+
+    isWebSub() {
+        return this.type === 'WEBSUB';
     }
 }

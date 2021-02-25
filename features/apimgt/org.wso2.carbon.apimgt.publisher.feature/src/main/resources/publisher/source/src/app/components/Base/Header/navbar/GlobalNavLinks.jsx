@@ -166,7 +166,7 @@ function GlobalNavLinks(props) {
                             primary={(
                                 <FormattedMessage
                                     id='Base.Header.navbar.GlobalNavBar.apis'
-                                    defaultMessage='API Listing'
+                                    defaultMessage='APIs'
                                 />
                             )}
                         />
@@ -203,7 +203,7 @@ function GlobalNavLinks(props) {
                                 primary={(
                                     <FormattedMessage
                                         id='Base.Header.navbar.GlobalNavBar.api.products'
-                                        defaultMessage='API Product Listing'
+                                        defaultMessage='API Products'
                                     />
                                 )}
                             />

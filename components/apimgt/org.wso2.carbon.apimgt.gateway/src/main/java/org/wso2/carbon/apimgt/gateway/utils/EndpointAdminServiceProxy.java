@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.endpoint.EndpointAdminException;
 import org.wso2.carbon.endpoint.service.EndpointAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -143,11 +144,29 @@ public class EndpointAdminServiceProxy {
 
     public List<String> getEndpoints(String endpointName)
             throws EndpointAdminException {
-            String endPoints= endpointAdmin.getEndpointConfiguration(endpointName);
-            if (endPoints != null) {
-                return Arrays.asList(endPoints);
+
+        String endPoints = endpointAdmin.getEndpointConfiguration(endpointName);
+        if (endPoints != null) {
+            return Arrays.asList(endPoints);
+        }
+        return null;
+    }
+
+    public String getEndpoint(String endpointName) throws EndpointAdminException {
+
+        boolean tenantFlowStarted = false;
+        try {
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                tenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-            return null;
+            return endpointAdmin.getEndpointConfiguration(endpointName);
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
     }
 
     public boolean isEndpointExist(String endpointName)
@@ -158,5 +177,15 @@ public class EndpointAdminServiceProxy {
         } else {
             return endpointAdmin.isEndpointExistForTenant(endpointName, tenantDomain);
         }
+    }
+
+    public String[] getEndpoints() throws AxisFault {
+
+        try {
+            return endpointAdmin.getEndPointsNames();
+        } catch (EndpointAdminException e) {
+            throw new AxisFault("Error while retrieving endpoints" + e.getMessage(), e);
+        }
+
     }
 }

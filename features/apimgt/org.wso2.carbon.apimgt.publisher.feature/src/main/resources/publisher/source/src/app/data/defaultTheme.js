@@ -79,6 +79,7 @@ export default {
         secondary: {
             light: '#0066ff',
             main: '#a2ecf5',
+            highlight: '#e8fafd',
             // dark: will be calculated from palette.secondary.main,
             contrastText: '#ffcc00',
         },
@@ -177,17 +178,28 @@ export default {
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
         adminRole: 'admin',
         commentsLimit: 5,
-        maxCommentLength: 1300,
+        maxCommentLength: 256,
         productSampleProgess: {
             backgroundMain: '#15b8cf',
             backgroundChip: '#5aebf9',
         },
         warningColor: '#ffc439',
+        landingPageIcons: {
+            graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
+            restApiIcon: '/site/public/images/landing-icons/restapi.svg',
+            soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
+            streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+            websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+        },
         title: {
             prefix: '[Publisher]',
             sufix: '- WSO2 APIM',
         },
-        buttonText: '#FF7300',
-        buttonBorder: '#FCA574',
+        serviceCatalog: {
+            onboarding: {
+                buttonText: '#FF7300',
+                buttonBorder: '#FCA574',
+            },
+        },
     },
 };

@@ -18,7 +18,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { TextField, Button, Typography } from '@material-ui/core';
+import { TextField, Button, Typography, InputLabel } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -37,7 +37,7 @@ const styles = theme => ({
     contentWrapper: {
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing(2),
-        paddingTop: theme.spacing.unig,
+        paddingTop: theme.spacing(1),
         marginTop: theme.spacing(2),
     },
     textField: {
@@ -48,6 +48,10 @@ const styles = theme => ({
     commentAddWrapper: {
         display: 'flex',
         alignItems: 'top',
+        flexFlow: 'column',
+        '& label': {
+            marginBottom: theme.spacing(1),
+        },
     },
     commentAddButton: {
         '& span.MuiButton-label': {
@@ -77,7 +81,7 @@ class CommentAdd extends React.Component {
         this.handleClickAddComment = this.handleClickAddComment.bind(this);
         this.handleClickCancel = this.handleClickCancel.bind(this);
         // this.handleCategoryChange = this.handleCategoryChange.bind(this);
-        // this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
+        this.filterCommentToAddReply = this.filterCommentToAddReply.bind(this);
     }
 
     /**
@@ -95,18 +99,18 @@ class CommentAdd extends React.Component {
      */
     handleClickCancel() {
         this.setState({ content: '' });
-        // const { toggleShowReply } = this.props;
-        // toggleShowReply();
+        const { handleShowReply } = this.props;
+        handleShowReply(-1);
     }
 
-    // /**
-    //  * Filters the comment to add the reply
-    //  * @memberof CommentAdd
-    //  */
-    // filterCommentToAddReply(commentToFilter) {
-    //     const { parentCommentId } = this.props;
-    //     return commentToFilter.commentId === parentCommentId;
-    // }
+    /**
+     * Filters the comment to add the reply
+     * @memberof CommentAdd
+     */
+    filterCommentToAddReply(commentToFilter) {
+        const { replyTo } = this.props;
+        return commentToFilter.id === replyTo;
+    }
 
     /**
      * Handles adding a new comment
@@ -114,7 +118,7 @@ class CommentAdd extends React.Component {
      */
     handleClickAddComment() {
         const {
-            apiId, allComments, commentsUpdate, intl,
+            apiId, allComments, commentsUpdate, intl, replyTo, handleShowReply,
         } = this.props;
         const { content } = this.state;
         const Api = new API();
@@ -124,18 +128,16 @@ class CommentAdd extends React.Component {
 
         // to check whether a string does not contain only white spaces
         if (comment.content.replace(/\s/g, '').length) {
-            Api.addComment(apiId, comment)
+            Api.addComment(apiId, comment, replyTo)
                 .then((newComment) => {
                     this.setState({ content: '' });
                     const addedComment = newComment.body;
-                    // if (parentCommentId === null) {
-                    //     allComments.push(addedComment);
-                    // } else {
-                    //     const index = allComments.findIndex(this.filterCommentToAddReply);
-                    //     allComments[index].replies.push(addedComment);
-                    //     toggleShowReply();
-                    // }
-                    allComments.push(addedComment);
+                    if (replyTo === null) {
+                        allComments.push(addedComment);
+                    } else {
+                        const index = allComments.findIndex(this.filterCommentToAddReply)
+                        allComments[index].replies.list.push(addedComment);
+                    }
                     commentsUpdate(allComments);
                 })
                 .catch((error) => {
@@ -156,6 +158,7 @@ class CommentAdd extends React.Component {
             }));
         }
         this.setState({ currentLength: 0 });
+        handleShowReply(-1);
     }
 
     /**
@@ -169,19 +172,26 @@ class CommentAdd extends React.Component {
         } = this.props;
         const { content, currentLength } = this.state;
         return (
-            <Grid container spacing={3} className={classes.contentWrapper}>
+            <Grid container spacing={1} className={classes.contentWrapper}>
                 <Grid item xs zeroMinWidth>
                     <div className={classes.commentAddWrapper}>
+                        <InputLabel htmlFor="standard-multiline-flexible">
+                            <FormattedMessage
+                                id='Apis.Details.Comments.CommentAdd.write.comment.label'
+                                defaultMessage='Write a comment'
+                            />
+                        </InputLabel>
                         <TextField
                             id='standard-multiline-flexible'
                             autoFocus
                             multiline
+                            rows='4'
+                            label={intl.formatMessage({
+                                defaultMessage: 'Comment',
+                                id: 'Apis.Details.Comments.CommentAdd.comment',
+                            })}
                             className={classes.textField}
                             margin='normal'
-                            label={intl.formatMessage({
-                                defaultMessage: 'Write a comment',
-                                id: 'Apis.Details.Comments.CommentAdd.write.comment.label',
-                            })}
                             placeholder={intl.formatMessage({
                                 defaultMessage: 'Write a comment',
                                 id: 'Apis.Details.Comments.CommentAdd.write.comment.help',
@@ -191,7 +201,7 @@ class CommentAdd extends React.Component {
                             onChange={this.inputChange}
                             variant='outlined'
                         />
-                        <Typography className={classes.content} align='left'>
+                        <Typography className={classes.content} align='right'>
                             {currentLength + '/' + theme.custom.maxCommentLength}
                         </Typography>
                     </div>
@@ -206,13 +216,13 @@ class CommentAdd extends React.Component {
                             >
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentAdd.btn.add.comment'
-                                    defaultMessage='Add Comment'
+                                    defaultMessage='Comment'
                                 />
                             </Button>
                         </Grid>
                         {cancelButton && (
                             <Grid item>
-                                <Button onClick={() => this.handleClickCancel()} className={classes.button}>
+                                <Button onClick={() => this.handleClickCancel(-1)} className={classes.button}>
                                     <FormattedMessage
                                         id='Apis.Details.Comments.CommentAdd.btn.cancel'
                                         defaultMessage='Cancel'
@@ -228,8 +238,8 @@ class CommentAdd extends React.Component {
 }
 
 CommentAdd.defaultProps = {
-    parentCommentId: null,
-    toggleShowReply: null,
+    replyTo: null,
+    handleShowReply: null,
     commentsUpdate: null,
 };
 
@@ -237,8 +247,8 @@ CommentAdd.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     cancelButton: PropTypes.bool.isRequired,
     apiId: PropTypes.string.isRequired,
-    parentCommentId: PropTypes.string,
-    toggleShowReply: PropTypes.func,
+    replyTo: PropTypes.string,
+    handleShowReply: PropTypes.func,
     commentsUpdate: PropTypes.func,
     allComments: PropTypes.instanceOf(Array).isRequired,
     intl: PropTypes.shape({

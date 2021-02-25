@@ -99,7 +99,7 @@ return null;
   @ApiModelProperty(example = "CalculatorApp", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="^[a-zA-Z0-9 ._-]*$") @Size(min=1,max=70)  public String getName() {
+ @Size(min=1,max=70)  public String getName() {
     return name;
   }
   public void setName(String name) {

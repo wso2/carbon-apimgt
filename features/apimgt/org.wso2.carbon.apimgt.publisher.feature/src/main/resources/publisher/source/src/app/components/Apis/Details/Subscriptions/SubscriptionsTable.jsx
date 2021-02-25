@@ -277,6 +277,7 @@ class SubscriptionsTable extends Component {
         this.fetchSubscriptionData();
     }
 
+    // TODO: This is a React anti-pattern, have to move this to a component ~tmkb
     /**
      * Returns the set of action buttons based on the current subscription state
      *
@@ -309,6 +310,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.all'
@@ -321,6 +323,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.unblockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='unblock'
@@ -338,6 +341,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockProductionOnly(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.production.only'
@@ -363,6 +367,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.unblockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='unblock'
@@ -380,6 +385,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockProductionOnly(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.production.only'
@@ -392,6 +398,7 @@ class SubscriptionsTable extends Component {
                         color='primary'
                         onClick={() => this.blockSubscription(subscriptionId)}
                         className={classes.button}
+                        disabled={this.api.isRevision}
                     >
                         <FormattedMessage
                             id='block.all'
@@ -414,6 +421,24 @@ class SubscriptionsTable extends Component {
                 </dev>
             );
         }
+    }
+
+    /**
+     * handleChangePage handle change in selected page
+     *
+     * @param page selected page
+     * */
+    handleChangePage(page) {
+        this.setState({ page }, this.fetchSubscriptionData);
+    }
+
+    /**
+     * handleChangeRowsPerPage handle change in rows per page
+     *
+     * @param event rows per page change event
+     * */
+    handleChangeRowsPerPage(event) {
+        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
     }
 
     /**
@@ -595,15 +620,6 @@ class SubscriptionsTable extends Component {
     }
 
     /**
-     * handleChangePage handle change in selected page
-     *
-     * @param page selected page
-     * */
-    handleChangePage(page) {
-        this.setState({ page }, this.fetchSubscriptionData);
-    }
-
-    /**
      * Checks whether the policy is a usage based monetization plan
      *
      * */
@@ -617,15 +633,6 @@ class SubscriptionsTable extends Component {
         } else {
             return false;
         }
-    }
-
-    /**
-     * handleChangeRowsPerPage handle change in rows per page
-     *
-     * @param event rows per page change event
-     * */
-    handleChangeRowsPerPage(event) {
-        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
     }
 
     /**
@@ -685,7 +692,6 @@ class SubscriptionsTable extends Component {
             </div>
         );
     }
-
 
     /**
      *
@@ -910,7 +916,7 @@ class SubscriptionsTable extends Component {
         const emails = subscriberClaims && Object.entries(subscriberClaims).map(([, v]) => {
             let email = null;
             if (!subMails[v.name]) {
-                email = v.claims.find((claim) => claim.URI === 'http://wso2.org/claims/emailaddress').value;
+                email = v.claims.find((claim) => claim.uri === 'http://wso2.org/claims/emailaddress').value;
                 subMails[v.name] = email;
             }
             return email;

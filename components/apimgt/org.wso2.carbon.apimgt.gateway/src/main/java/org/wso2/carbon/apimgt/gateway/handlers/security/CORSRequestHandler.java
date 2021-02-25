@@ -23,15 +23,14 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.API;
+import org.apache.synapse.api.API;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
-import org.apache.synapse.rest.Resource;
-import org.apache.synapse.rest.dispatch.RESTDispatcher;
+import org.apache.synapse.api.Resource;
+import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -148,20 +147,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             String corsRequestMethod = (String) headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_REQUEST_METHOD);
 
             Resource selectedResource = null;
-            String subPath = null;
-            String path = getFullRequestPath(messageContext);
-            if (selectedApi != null) {
-                if (VersionStrategyFactory.TYPE_URL.equals(selectedApi.getVersionStrategy().getVersionType())) {
-                    subPath = path.substring(
-                            selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
-                } else {
-                    subPath = path.substring(selectedApi.getContext().length());
-                }
-            }
-            if (subPath != null && subPath.isEmpty()) {
-                subPath = "/";
-            }
-            messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+            Utils.setSubRequestPath(selectedApi, messageContext);
 
             if (selectedApi != null) {
                 Resource[] allAPIResources = selectedApi.getResources();

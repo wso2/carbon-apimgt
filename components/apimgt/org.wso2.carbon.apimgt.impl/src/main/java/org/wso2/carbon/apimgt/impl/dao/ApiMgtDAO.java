@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
@@ -42,6 +43,8 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -49,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Label;
@@ -58,12 +62,16 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -90,7 +98,6 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
@@ -120,13 +127,13 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -134,6 +141,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -155,7 +163,6 @@ public class ApiMgtDAO {
 
     private boolean forceCaseInsensitiveComparisons = false;
     private boolean multiGroupAppSharingEnabled = false;
-    private static boolean initialAutoCommit = false;
 
     private final Object scopeMutex = new Object();
 
@@ -1295,6 +1302,124 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, result);
         }
         return subscriber;
+    }
+
+    /**
+     * Retrieves the Topic for a specified async API.
+     *
+     * @param apiId API UUID
+     * @return Set of Topic objects
+     * @throws APIManagementException if failed to retrieve topics of the web hook API
+     */
+    public Set<Topic> getAPITopics(String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicsQuery = SQLConstants.GET_ALL_TOPICS_BY_API_ID;
+        Set<Topic> topicSet = new HashSet();
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicsQuery);
+            ps.setString(1, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Topic topic = new Topic();
+                topic.setName(resultSet.getString("URL_PATTERN"));
+                topic.setApiId(resultSet.getString("API_ID"));
+                topic.setType(resultSet.getString("HTTP_METHOD"));
+                topicSet.add(topic);
+            }
+            return topicSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topics available in api " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves set of web hook topic subscriptions for a application.
+     *
+     * @param applicationId application UUID
+     * @return set of web hook subscriptions.
+     * @throws APIManagementException if failed to retrieve web hook topc subscriptions
+     */
+    public Set<Subscription> getTopicSubscriptions(String applicationId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsQuery);
+            ps.setString(1, applicationId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves the web hook topc subscriptions from an application to a given api.
+     *
+     * @param applicationId application uuid
+     * @param apiId         api uuid
+     * @return set of web hook topic subscriptions
+     * @throws APIManagementException
+     */
+    public Set<Subscription> getTopicSubscriptionsByApiUUID(String applicationId, String apiId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        String getTopicSubscriptionsByApiIdQuery = SQLConstants.GET_WH_TOPIC_SUBSCRIPTIONS_BY_API_KEY;
+        Set<Subscription> subscriptionSet = new HashSet();
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(getTopicSubscriptionsByApiIdQuery);
+            ps.setString(1, applicationId);
+            ps.setString(2, apiId);
+            resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                Subscription subscription = new Subscription();
+                subscription.setApiUuid(resultSet.getString("API_UUID"));
+                subscription.setCallback(resultSet.getString("HUB_CALLBACK_URL"));
+                Timestamp deliveryTime = resultSet.getTimestamp("DELIVERED_AT");
+                if (deliveryTime != null) {
+                    subscription.setLastDelivery(new Date(deliveryTime.getTime()));
+                }
+                subscription.setLastDeliveryState(resultSet.getInt("DELIVERY_STATE"));
+                subscription.setTopic(resultSet.getString("HUB_TOPIC"));
+                subscription.setAppID(resultSet.getString("APPLICATION_ID"));
+                subscriptionSet.add(subscription);
+            }
+            return subscriptionSet;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve topic subscriptions for application  " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+
+        return null;
     }
 
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException {
@@ -2991,8 +3116,8 @@ public class ApiMgtDAO {
      * @param keyManagerName
      */
     public void updateApplicationKeyTypeMapping(Application application, String keyType,
-                                                String keyManagerName) throws APIManagementException {
-        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerName);
+                                                String keyManagerId) throws APIManagementException {
+        OAuthApplicationInfo app = application.getOAuthApp(keyType,keyManagerId);
         String consumerKey = null;
         if (app != null) {
             consumerKey = app.getClientId();
@@ -3008,12 +3133,12 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, consumerKey);
-                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerName);
+                OAuthApplicationInfo oAuthApp = application.getOAuthApp(keyType, keyManagerId);
                 String content = new Gson().toJson(oAuthApp);
                 ps.setBinaryStream(2, new ByteArrayInputStream(content.getBytes()));
                 ps.setInt(3, application.getId());
                 ps.setString(4, keyType);
-                ps.setString(5, keyManagerName);
+                ps.setString(5, keyManagerId);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -3217,6 +3342,71 @@ public class ApiMgtDAO {
 
             ps = connection.prepareStatement(sqlQuery);
             ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
+            result = ps.executeQuery();
+
+            Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
+            while (result.next()) {
+                int subId = result.getInt("SUBSCRIPTION_ID");
+                Map<String, String> keyData = getAccessTokenData(subId);
+                String accessToken = keyData.get("token");
+                String tokenStatus = keyData.get("status");
+                String userId = result.getString("USER_ID");
+                String application = result.getString("APPNAME");
+                int appId = result.getInt("APPLICATION_ID");
+                String subStatus = result.getString("SUB_STATUS");
+                String subsCreateState = result.getString("SUBS_CREATE_STATE");
+                String key = userId + "::" + application;
+                UserApplicationAPIUsage usage = userApplicationUsages.get(key);
+                if (usage == null) {
+                    usage = new UserApplicationAPIUsage();
+                    usage.setUserId(userId);
+                    usage.setApplicationName(application);
+                    usage.setAppId(appId);
+                    usage.setAccessToken(accessToken);
+                    usage.setAccessTokenStatus(tokenStatus);
+                    userApplicationUsages.put(key, usage);
+                }
+                APIIdentifier apiId = new APIIdentifier(result.getString("API_PROVIDER"), result.getString
+                        ("API_NAME"), result.getString("API_VERSION"));
+                SubscribedAPI apiSubscription = new SubscribedAPI(new Subscriber(userId), apiId);
+                apiSubscription.setSubStatus(subStatus);
+                apiSubscription.setSubCreatedStatus(subsCreateState);
+                apiSubscription.setUUID(result.getString("SUB_UUID"));
+                apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
+                Application applicationObj = new Application(result.getString("APP_UUID"));
+                apiSubscription.setApplication(applicationObj);
+                usage.addApiSubscriptions(apiSubscription);
+            }
+            return userApplicationUsages.values().toArray(new UserApplicationAPIUsage[userApplicationUsages.size()]);
+        } catch (SQLException e) {
+            handleException("Failed to find API Usage for :" + providerName, e);
+            return null;
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, result);
+        }
+    }
+
+    /**
+     * @param providerName Name of the provider
+     * @param identifier APIIdentifier which contains API name and version
+     * @return UserApplicationAPIUsage of given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
+     *                                                           UserApplicationAPIUsage for given provider
+     */
+    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet result = null;
+
+        try {
+            String sqlQuery = SQLConstants.GET_APP_API_USAGE_BY_PROVIDER_AND_ID_SQL;
+            connection = APIMgtDBUtil.getConnection();
+
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
+            ps.setString(2, identifier.getApiName());
+            ps.setString(3, identifier.getVersion());
             result = ps.executeQuery();
 
             Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
@@ -4402,6 +4592,30 @@ public class ApiMgtDAO {
         return appId;
     }
 
+    public String getApplicationUUID(String appName, String username) throws APIManagementException {
+        if (username == null) {
+            return null;
+        }
+        Subscriber subscriber = getSubscriber(username);
+        String applicationUUID = null;
+
+        String sql = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ? AND SUBSCRIBER_ID  = ?";
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection.prepareStatement(sql)) {
+            prepStmt.setString(1, appName);
+            prepStmt.setInt(2, subscriber.getId());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    applicationUUID = rs.getString("UUID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error when getting the application id from" + " the persistence store.", e);
+        }
+        return applicationUUID;
+    }
+
     /**
      * Find the name of the application by Id
      *
@@ -4642,7 +4856,7 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             String driverName = connection.getMetaData().getDriverName();
-            if (driverName.contains("MS SQL") || driverName.contains("Microsoft") || driverName.contains("Oracle")) {
+            if (driverName.contains("Oracle")) {
                 offset = start + offset;
             }
             // sortColumn, sortOrder variable values has sanitized in jaggery level (applications-list.jag)for security.
@@ -5180,6 +5394,34 @@ public class ApiMgtDAO {
 
         }
     }
+    /**
+     * Retrieves the consumer keys and keymanager in a given application
+     * @param appId application id
+     * @return Map<ConsumerKey, keyManager>
+     * @throws APIManagementException
+     */
+    public Map<String, String> getConsumerKeysForApplication(int appId) throws APIManagementException {
+
+        Map<String, String> consumerKeysOfApplication = new HashMap<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection
+                     .prepareStatement(SQLConstants.GET_CONSUMER_KEY_OF_APPLICATION_SQL)) {
+            preparedStatement.setInt(1, appId);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String consumerKey = resultSet.getString("CONSUMER_KEY");
+                    String keyManager = resultSet.getString("KEY_MANAGER");
+                    consumerKeysOfApplication.put(consumerKey, keyManager);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys for application " + appId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return consumerKeysOfApplication;
+    }
 
     public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {
 
@@ -5374,40 +5616,44 @@ public class ApiMgtDAO {
         return subscriber;
     }
 
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, APIStatus oldStatus, APIStatus newStatus,
-                                        String userId, int tenantId) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus.toString(), newStatus.toString(), userId, tenantId, conn);
-        } catch (SQLException e) {
-            handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
-        }
-    }
-
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
+    public void recordAPILifeCycleEvent(APIIdentifier apiIdentifier, String oldStatus, String newStatus, String userId,
                                         int tenantId) throws APIManagementException {
-        Connection conn = null;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, tenantId, conn);
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            int apiId = getAPIID(apiIdentifier, conn);
+            conn.setAutoCommit(false);
+            try {
+                recordAPILifeCycleEvent(apiId, oldStatus, newStatus, userId, tenantId, conn);
+                changeAPILifeCycleStatus(conn, apiId, newStatus);
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
     }
 
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus, String userId,
-                                        int tenantId, Connection conn) throws APIManagementException {
-        //Connection conn = null;
-        ResultSet resultSet = null;
-        PreparedStatement ps = null;
-        PreparedStatement selectQuerySt = null;
 
-        int apiId = -1;
+
+    public void recordAPILifeCycleEvent(int apiId, String oldStatus, String newStatus, String userId,
+                                        int tenantId) throws APIManagementException {
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                recordAPILifeCycleEvent(apiId, oldStatus, newStatus, userId, tenantId, conn);
+                changeAPILifeCycleStatus(conn, apiId, newStatus);
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to record API state change", e);
+        }
+    }
+    private void recordAPILifeCycleEvent(int apiId, String oldStatus, String newStatus, String userId,
+                                         int tenantId, Connection conn) throws APIManagementException, SQLException {
 
         if (oldStatus == null && !newStatus.equals(APIConstants.CREATED)) {
             String msg = "Invalid old and new state combination";
@@ -5419,27 +5665,9 @@ public class ApiMgtDAO {
             throw new APIManagementException(msg);
         }
 
-        String getAPIQuery = SQLConstants.GET_API_ID_SQL;
         String sqlQuery = SQLConstants.ADD_API_LIFECYCLE_EVENT_SQL;
-        try {
-            conn.setAutoCommit(false);
 
-            selectQuerySt = conn.prepareStatement(getAPIQuery);
-            selectQuerySt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            selectQuerySt.setString(2, identifier.getApiName());
-            selectQuerySt.setString(3, identifier.getVersion());
-            resultSet = selectQuerySt.executeQuery();
-            if (resultSet.next()) {
-                apiId = resultSet.getInt("API_ID");
-            }
-
-            if (apiId == -1) {
-                String msg = "Unable to find the API: " + identifier + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-
-            ps = conn.prepareStatement(sqlQuery);
+        try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
             ps.setInt(1, apiId);
             if (oldStatus != null) {
                 ps.setString(2, oldStatus);
@@ -5450,23 +5678,18 @@ public class ApiMgtDAO {
             ps.setString(4, userId);
             ps.setInt(5, tenantId);
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
-
             ps.executeUpdate();
-
-            // finally commit transaction
             conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the API state change record", e1);
-                }
-            }
-            handleException("Failed to record API state change", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(selectQuerySt, null, null);
-            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+        }
+        // finally commit transaction
+    }
+
+    private void changeAPILifeCycleStatus(Connection connection, int apiId, String updatedStatus) throws SQLException {
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.UPDATE_API_STATUS)) {
+            preparedStatement.setString(1, updatedStatus);
+            preparedStatement.setInt(2, apiId);
+            connection.commit();
         }
     }
 
@@ -5714,6 +5937,7 @@ public class ApiMgtDAO {
             prepStmt.setString(8, api.getApiLevelPolicy());
             prepStmt.setString(9, api.getType());
             prepStmt.setString(10, api.getUUID());
+            prepStmt.setString(11,APIConstants.CREATED);
             prepStmt.execute();
 
             rs = prepStmt.getGeneratedKeys();
@@ -5725,11 +5949,15 @@ public class ApiMgtDAO {
 
             String tenantUserName = MultitenantUtils
                     .getTenantAwareUsername(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
+            recordAPILifeCycleEvent(apiId,null, APIStatus.CREATED.toString(), tenantUserName, tenantId,
                     connection);
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if (api.isDefaultVersion()) {
                 addUpdateAPIAsDefaultVersion(api, connection);
+            }
+            String serviceKey = api.getServiceInfo("key");
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                addAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), tenantId, connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -7040,9 +7268,10 @@ public class ApiMgtDAO {
             prepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             prepStmt.setString(5, api.getApiLevelPolicy());
             prepStmt.setString(6, api.getType());
-            prepStmt.setString(7, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            prepStmt.setString(8, api.getId().getApiName());
-            prepStmt.setString(9, api.getId().getVersion());
+            prepStmt.setString(7, api.getUUID());
+            prepStmt.setString(8, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            prepStmt.setString(9, api.getId().getApiName());
+            prepStmt.setString(10, api.getId().getVersion());
             prepStmt.execute();
             //}
 
@@ -7054,6 +7283,11 @@ public class ApiMgtDAO {
                 } else { //tick is removed
                     removeAPIFromDefaultVersion(api.getId(), connection);
                 }
+            }
+            String serviceKey = api.getServiceInfo("key");
+            if (StringUtils.isNotEmpty(serviceKey)) {
+                int apiId = getAPIID(api.getId());
+                updateAPIServiceMapping(apiId, serviceKey, api.getServiceInfo("md5"), connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -7071,8 +7305,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public int getAPIID(Identifier apiId, Connection connection) throws APIManagementException {
-        boolean created = false;
+    public int getAPIID(Identifier apiId) throws APIManagementException {
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
 
@@ -7084,33 +7317,37 @@ public class ApiMgtDAO {
         }
 
         try {
-            if (connection == null) {
-
-                // If connection is not provided a new one will be created.
-                connection = APIMgtDBUtil.getConnection();
-                created = true;
-            }
-
-            prepStmt = connection.prepareStatement(getAPIQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
-            prepStmt.setString(2, apiId.getName());
-            prepStmt.setString(3, apiId.getVersion());
-            rs = prepStmt.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt("API_ID");
-            }
-            if (id == -1) {
-                String msg = "Unable to find the API: " + apiId + " in the database";
-                log.error(msg);
-                throw new APIManagementException(msg);
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                return getAPIID(apiId,connection);
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
-        } finally {
-            if (created) {
-                APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
-            } else {
-                APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
+        }
+        return id;
+    }
+
+    public int getAPIID(Identifier apiId, Connection connection) throws APIManagementException, SQLException {
+
+        int id = -1;
+        String getAPIQuery = SQLConstants.GET_API_ID_SQL;
+
+        if (apiId instanceof APIProductIdentifier) {
+            getAPIQuery = SQLConstants.GET_API_PRODUCT_ID_SQL;
+        }
+
+        try (PreparedStatement prepStmt = connection.prepareStatement(getAPIQuery)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            prepStmt.setString(2, apiId.getName());
+            prepStmt.setString(3, apiId.getVersion());
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    id = rs.getInt("API_ID");
+                }
+                if (id == -1) {
+                    String msg = "Unable to find the API: " + apiId + " in the database";
+                    log.error(msg);
+                    throw new APIManagementException(msg);
+                }
             }
         }
         return id;
@@ -7187,7 +7424,6 @@ public class ApiMgtDAO {
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
-
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -7371,65 +7607,125 @@ public class ApiMgtDAO {
             throws APIManagementException {
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
+        //Check If the API is a Revision
+        if (checkAPIUUIDIsARevisionUUID(identifier.getUUID()).getApiUUID() != null) {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
+                ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                ps.setString(2, identifier.getName());
+                ps.setString(3, identifier.getVersion());
+                ps.setString(4, identifier.getUUID());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                        String scopeName = rs.getString("SCOPE_NAME");
 
-        try (Connection conn = APIMgtDBUtil.getConnection();
-            PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
-            ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            ps.setString(2, identifier.getName());
-            ps.setString(3, identifier.getVersion());
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
-                    String scopeName = rs.getString("SCOPE_NAME");
+                        if (scopeToURITemplateId.containsKey(uriTemplateId) && !StringUtils.isEmpty(scopeName)
+                                && !scopeToURITemplateId.get(uriTemplateId).contains(scopeName)
+                                && uriTemplates.containsKey(uriTemplateId)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            scopeToURITemplateId.get(uriTemplateId).add(scopeName);
+                            uriTemplates.get(uriTemplateId).setScopes(scope);
+                            continue;
+                        }
+                        String urlPattern = rs.getString("URL_PATTERN");
+                        String verb = rs.getString("HTTP_METHOD");
 
-                    if (scopeToURITemplateId.containsKey(uriTemplateId) && !StringUtils.isEmpty(scopeName)
-                            && !scopeToURITemplateId.get(uriTemplateId).contains(scopeName)
-                            && uriTemplates.containsKey(uriTemplateId)) {
-                        Scope scope = new Scope();
-                        scope.setKey(scopeName);
-                        scopeToURITemplateId.get(uriTemplateId).add(scopeName);
-                        uriTemplates.get(uriTemplateId).setScopes(scope);
-                        continue;
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setUriTemplate(urlPattern);
+                        uriTemplate.setHTTPVerb(verb);
+                        uriTemplate.setHttpVerbs(verb);
+                        String authType = rs.getString("AUTH_SCHEME");
+                        String throttlingTier = rs.getString("THROTTLING_TIER");
+                        if (StringUtils.isNotEmpty(scopeName)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            uriTemplate.setScope(scope);
+                            uriTemplate.setScopes(scope);
+                            Set<String> templateScopes = new HashSet<>();
+                            templateScopes.add(scopeName);
+                            scopeToURITemplateId.put(uriTemplateId, templateScopes);
+                        }
+                        uriTemplate.setAuthType(authType);
+                        uriTemplate.setAuthTypes(authType);
+                        uriTemplate.setThrottlingTier(throttlingTier);
+                        uriTemplate.setThrottlingTiers(throttlingTier);
+
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                            uriTemplate.setMediationScript(script);
+                            uriTemplate.setMediationScripts(verb, script);
+                        }
+
+                        uriTemplates.put(uriTemplateId, uriTemplate);
                     }
-                    String urlPattern = rs.getString("URL_PATTERN");
-                    String verb = rs.getString("HTTP_METHOD");
-
-                    URITemplate uriTemplate = new URITemplate();
-                    uriTemplate.setUriTemplate(urlPattern);
-                    uriTemplate.setHTTPVerb(verb);
-                    uriTemplate.setHttpVerbs(verb);
-                    String authType = rs.getString("AUTH_SCHEME");
-                    String throttlingTier = rs.getString("THROTTLING_TIER");
-                    if (StringUtils.isNotEmpty(scopeName)) {
-                        Scope scope = new Scope();
-                        scope.setKey(scopeName);
-                        uriTemplate.setScope(scope);
-                        uriTemplate.setScopes(scope);
-                        Set<String> templateScopes = new HashSet<>();
-                        templateScopes.add(scopeName);
-                        scopeToURITemplateId.put(uriTemplateId, templateScopes);
-                    }
-                    uriTemplate.setAuthType(authType);
-                    uriTemplate.setAuthTypes(authType);
-                    uriTemplate.setThrottlingTier(throttlingTier);
-                    uriTemplate.setThrottlingTiers(throttlingTier);
-
-                    InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
-                    if (mediationScriptBlob != null) {
-                        String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
-                        uriTemplate.setMediationScript(script);
-                        uriTemplate.setMediationScripts(verb, script);
-                    }
-
-                    uriTemplates.put(uriTemplateId, uriTemplate);
                 }
+
+                setAssociatedAPIProducts(identifier, uriTemplates);
+            } catch (SQLException e) {
+                handleException("Failed to get URI Templates of API" + identifier, e);
             }
+        } else {
+            try (Connection conn = APIMgtDBUtil.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_SQL)) {
+                ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                ps.setString(2, identifier.getName());
+                ps.setString(3, identifier.getVersion());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                        String scopeName = rs.getString("SCOPE_NAME");
 
-            setAssociatedAPIProducts(identifier, uriTemplates);
-        } catch (SQLException e) {
-            handleException("Failed to get URI Templates of API" + identifier, e);
+                        if (scopeToURITemplateId.containsKey(uriTemplateId) && !StringUtils.isEmpty(scopeName)
+                                && !scopeToURITemplateId.get(uriTemplateId).contains(scopeName)
+                                && uriTemplates.containsKey(uriTemplateId)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            scopeToURITemplateId.get(uriTemplateId).add(scopeName);
+                            uriTemplates.get(uriTemplateId).setScopes(scope);
+                            continue;
+                        }
+                        String urlPattern = rs.getString("URL_PATTERN");
+                        String verb = rs.getString("HTTP_METHOD");
+
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setUriTemplate(urlPattern);
+                        uriTemplate.setHTTPVerb(verb);
+                        uriTemplate.setHttpVerbs(verb);
+                        String authType = rs.getString("AUTH_SCHEME");
+                        String throttlingTier = rs.getString("THROTTLING_TIER");
+                        if (StringUtils.isNotEmpty(scopeName)) {
+                            Scope scope = new Scope();
+                            scope.setKey(scopeName);
+                            uriTemplate.setScope(scope);
+                            uriTemplate.setScopes(scope);
+                            Set<String> templateScopes = new HashSet<>();
+                            templateScopes.add(scopeName);
+                            scopeToURITemplateId.put(uriTemplateId, templateScopes);
+                        }
+                        uriTemplate.setAuthType(authType);
+                        uriTemplate.setAuthTypes(authType);
+                        uriTemplate.setThrottlingTier(throttlingTier);
+                        uriTemplate.setThrottlingTiers(throttlingTier);
+
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            String script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                            uriTemplate.setMediationScript(script);
+                            uriTemplate.setMediationScripts(verb, script);
+                        }
+
+                        uriTemplates.put(uriTemplateId, uriTemplate);
+                    }
+                }
+
+                setAssociatedAPIProducts(identifier, uriTemplates);
+            } catch (SQLException e) {
+                handleException("Failed to get URI Templates of API" + identifier, e);
+            }
         }
-
         return new LinkedHashSet<>(uriTemplates.values());
     }
 
@@ -7505,11 +7801,9 @@ public class ApiMgtDAO {
         PreparedStatement insertPrepStmt = null;
         int commentId = -1;
         int apiId = -1;
-
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-
             String getApiQuery = SQLConstants.GET_API_ID_SQL;
             getPrepStmt = connection.prepareStatement(getApiQuery);
             getPrepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -7519,26 +7813,21 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 apiId = resultSet.getInt("API_ID");
             }
-
             if (apiId == -1) {
                 String msg = "Unable to get the API ID for: " + identifier;
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
-
             /*This query to update the AM_API_COMMENTS table */
             String addCommentQuery = SQLConstants.ADD_COMMENT_SQL;
-
             /*Adding data to the AM_API_COMMENTS table*/
             String dbProductName = connection.getMetaData().getDatabaseProductName();
             insertPrepStmt = connection.prepareStatement(addCommentQuery,
                     new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "comment_id")});
-
             insertPrepStmt.setString(1, commentText);
             insertPrepStmt.setString(2, user);
             insertPrepStmt.setTimestamp(3, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
             insertPrepStmt.setInt(4, apiId);
-
             insertPrepStmt.executeUpdate();
             insertSet = insertPrepStmt.getGeneratedKeys();
             while (insertSet.next()) {
@@ -7562,206 +7851,229 @@ public class ApiMgtDAO {
         return commentId;
     }
 
-    /**
+    /******************************
      * Adds a comment for an API
      *
      * @param identifier API identifier
-     * @param comment    Commented Text
-     * @param user       User who did the comment
+     * @param comment Commented Text
+     * @param user User who did the comment
      * @return Comment ID
      */
     public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
-        Connection connection = null;
-        ResultSet insertSet = null;
-        PreparedStatement insertPrepStmt = null;
         String commentId = null;
-        int id = -1;
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection()){
+            int id = -1;
             connection.setAutoCommit(false);
-            //Get API Id
             id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
-                log.error(msg);
                 throw new APIManagementException(msg);
             }
-
-            /*This query is to update the AM_API_COMMENTS table */
             String addCommentQuery = SQLConstants.ADD_COMMENT_SQL;
             commentId = UUID.randomUUID().toString();
-
-            /*Adding data to the AM_API_COMMENTS table*/
-            String dbProductName = connection.getMetaData().getDatabaseProductName();
-            insertPrepStmt = connection.prepareStatement(addCommentQuery);
-
-            insertPrepStmt.setString(1, commentId);
-            insertPrepStmt.setString(2, comment.getText());
-            insertPrepStmt.setString(3, user);
-            insertPrepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
-            insertPrepStmt.setInt(5, id);
-
-            insertPrepStmt.executeUpdate();
-            connection.commit();
+            try(PreparedStatement insertPrepStmt = connection.prepareStatement(addCommentQuery)){
+                insertPrepStmt.setString(1, commentId);
+                insertPrepStmt.setString(2, comment.getText());
+                insertPrepStmt.setString(3, user);
+                insertPrepStmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
+                insertPrepStmt.setInt(5, id);
+                insertPrepStmt.setString(6, comment.getParentCommentID());
+                insertPrepStmt.setString(7, comment.getEntryPoint());
+                insertPrepStmt.setString(8, comment.getCategory());
+                insertPrepStmt.executeUpdate();
+                connection.commit();}
         } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add comment ", e1);
-                }
-            }
             handleException("Failed to add comment data, for  " + identifier.getName() + "-" + identifier.getVersion(),
                     e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(insertPrepStmt, null, insertSet);
         }
         return commentId;
+    }
+
+    /**************************
+     * Returns a specific comment of an API
+     *
+     * @param commentId  Comment ID
+     * @param apiTypeWrapper Api Type Wrapper
+     * @return Comment Array
+     * @throws APIManagementException
+     */
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException {
+
+        Identifier identifier;
+        if (apiTypeWrapper.isAPIProduct()) {
+            identifier = apiTypeWrapper.getApiProduct().getId();
+        } else {
+            identifier = apiTypeWrapper.getApi().getId();
+        }
+
+        try (Connection connection = APIMgtDBUtil.getConnection()){
+            Comment comment = new Comment();
+            int id = -1;
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                throw new APIManagementException(msg);
+            }
+            String getCommentQuery = SQLConstants.GET_COMMENT_SQL;
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                throw new APIManagementException(msg);
+            }
+            try (PreparedStatement prepStmt = connection.prepareStatement(getCommentQuery)) {
+                prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                prepStmt.setString(2, identifier.getName());
+                prepStmt.setString(3, identifier.getVersion());
+                prepStmt.setString(4, commentId);
+                try (ResultSet resultSet = prepStmt.executeQuery()) {
+                    if (resultSet.next()) {
+                        comment.setId(resultSet.getString("COMMENT_ID"));
+                        comment.setText(resultSet.getString("COMMENT_TEXT"));
+                        comment.setUser(resultSet.getString("CREATED_BY"));
+                        comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                        comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                        comment.setApiId(resultSet.getString("API_ID"));
+                        comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                        comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                        comment.setCategory(resultSet.getString("CATEGORY"));
+                        comment.setReplies(Arrays.asList(getComments(apiTypeWrapper, commentId)));
+                        return comment;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve comment for API " + identifier.getName() + "with comment ID " +
+                    commentId, e);
+        }
+        return null;
+    }
+
+    /****************************************
+     * Returns all the Comments on an API
+     *
+     * @param apiTypeWrapper API type Wrapper
+     * @param parentCommentID Parent Comment ID
+     * @return Comment Array
+     * @throws APIManagementException
+     */
+    public Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException {
+        Comment[] commentList = null;
+        try (Connection connection = APIMgtDBUtil.getConnection()){
+            int id = -1;
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                throw new APIManagementException(msg);
+            }
+            commentList = getComments( identifier,  parentCommentID,  connection);
+        } catch (SQLException e) {
+            handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
+        }
+        return commentList;
+    }
+
+    /****************************************
+     * Returns all the Comments on an API
+     *
+     * @param parentCommentID Parent Comment ID
+     * @param connection Database connection
+     * @return Comment Array
+     * @throws APIManagementException
+     */
+    private Comment[] getComments(Identifier identifier, String parentCommentID, Connection connection) throws
+            APIManagementException {
+
+        List<Comment> commentList = new ArrayList<Comment>();
+        String sqlQuery;
+        if (parentCommentID == null){
+            sqlQuery  = SQLConstants.GET_ROOT_COMMENTS_SQL;
+        }else {
+            sqlQuery  = SQLConstants.GET_REPLIES_SQL;
+        }
+        try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getName());
+            prepStmt.setString(3, identifier.getVersion());
+            if (parentCommentID != null){
+                prepStmt.setString(4, parentCommentID);
+            }
+            try (ResultSet resultSet = prepStmt.executeQuery()){
+                while (resultSet.next()) {
+                    Comment comment = new Comment();
+                    comment.setId(resultSet.getString("COMMENT_ID"));
+                    comment.setText(resultSet.getString("COMMENT_TEXT"));
+                    comment.setUser(resultSet.getString("CREATED_BY"));
+                    comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                    comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                    comment.setApiId(resultSet.getString("API_ID"));
+                    comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                    comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                    comment.setCategory(resultSet.getString("CATEGORY"));
+                    comment.setReplies(Arrays.asList(getComments(identifier, resultSet.getString("COMMENT_ID"),
+                            connection)));
+                    commentList.add(comment);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve comments for  " + identifier.getName(), e);
+        }
+        return commentList.toArray(new Comment[commentList.size()]);
     }
 
     /**
      * Returns all the Comments on an API
      *
      * @param identifier API Identifier
+     * @param parentCommentID Parent Comment ID
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment[] getComments(APIIdentifier identifier) throws APIManagementException {
+    public Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException {
         List<Comment> commentList = new ArrayList<Comment>();
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
-
-        String sqlQuery = SQLConstants.GET_COMMENTS_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getApiName());
-            prepStmt.setString(3, identifier.getVersion());
-            resultSet = prepStmt.executeQuery();
-            while (resultSet.next()) {
-                Comment comment = new Comment();
-                comment.setId(resultSet.getString("COMMENT_ID"));
-                comment.setText(resultSet.getString("COMMENT_TEXT"));
-                comment.setUser(resultSet.getString("COMMENTED_USER"));
-                comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
-                commentList.add(comment);
-            }
-        } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException e1) {
-                log.error("Failed to retrieve comments ", e1);
-            }
-            handleException("Failed to retrieve comments for  " + identifier.getApiName() + '-' + identifier
-                    .getVersion(), e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
-        }
-        return commentList.toArray(new Comment[commentList.size()]);
-    }
-
-    /**
-     * Returns a specific comment of an API
-     *
-     * @param commentId  Comment ID
-     * @param identifier API identifier
-     * @return Comment Array
-     * @throws APIManagementException
-     */
-    public Comment getComment(Identifier identifier, String commentId) throws APIManagementException {
-
-        Comment comment = new Comment();
-        Connection connection = null;
-        ResultSet resultSet = null;
-        PreparedStatement prepStmt = null;
-        int id = -1;
-
-        String getCommentQuery = SQLConstants.GET_COMMENT_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            id = getAPIID(identifier, connection);
-            if (id == -1) {
-                String msg = "Could not load API record for: " + identifier.getName();
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-            prepStmt = connection.prepareStatement(getCommentQuery);
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getName());
-            prepStmt.setString(3, identifier.getVersion());
-            prepStmt.setString(4, commentId);
-            resultSet = prepStmt.executeQuery();
-
-            if (resultSet.next()) {
-                comment.setId(resultSet.getString("COMMENT_ID"));
-                comment.setText(resultSet.getString("COMMENT_TEXT"));
-                comment.setUser(resultSet.getString("COMMENTED_USER"));
-                comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
-                return comment;
-            }
-        } catch (SQLException e) {
-            try {
-                if (connection != null) {
-                    connection.rollback();
-                }
-            } catch (SQLException e1) {
-                log.error("Failed to retrieve comment ", e1);
-            }
-            handleException("Failed to retrieve comment for API " + identifier.getName() + "with comment ID " +
-                    commentId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
-        }
-        return null;
-    }
-
-    /**
-     * Returns all the Comments on an API
-     *
-     * @param apiTypeWrapper API type wrapper
-     * @return Comment Array
-     * @throws APIManagementException
-     */
-    public Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
-        List<Comment> commentList = new ArrayList<Comment>();
-        Connection connection = null;
-        ResultSet resultSet = null;
-        PreparedStatement prepStmt = null;
-        boolean isProduct = apiTypeWrapper.isAPIProduct();
         int id = -1;
         String sqlQuery;
-        sqlQuery  = SQLConstants.GET_COMMENTS_SQL;
-        Identifier identifier;
-
+        if (parentCommentID == null){
+            sqlQuery  = SQLConstants.GET_ROOT_COMMENTS_SQL;
+        } else{
+            sqlQuery  = SQLConstants.GET_REPLIES_SQL;
+        }
         try {
             connection = APIMgtDBUtil.getConnection();
-            if (!isProduct) {
-                identifier = apiTypeWrapper.getApi().getId();
-            } else  {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            }
             id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
-                log.error(msg);
                 throw new APIManagementException(msg);
             }
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getName());
             prepStmt.setString(3, identifier.getVersion());
+            if (parentCommentID != null){
+                prepStmt.setString(4, parentCommentID);
+            }
             resultSet = prepStmt.executeQuery();
             while (resultSet.next()) {
                 Comment comment = new Comment();
                 comment.setId(resultSet.getString("COMMENT_ID"));
                 comment.setText(resultSet.getString("COMMENT_TEXT"));
-                comment.setUser(resultSet.getString("COMMENTED_USER"));
-                comment.setCreatedTime(resultSet.getTimestamp("DATE_COMMENTED"));
+                comment.setUser(resultSet.getString("CREATED_BY"));
+                comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                comment.setApiId(resultSet.getString("API_ID"));
+                comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                comment.setCategory(resultSet.getString("CATEGORY"));
+                comment.setReplies(Arrays.asList(getComments(identifier, resultSet.getString("COMMENT_ID"))));
                 commentList.add(comment);
             }
         } catch (SQLException e) {
@@ -7772,11 +8084,89 @@ public class ApiMgtDAO {
             } catch (SQLException e1) {
                 log.error("Failed to retrieve comments ", e1);
             }
-            handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
+            handleException("Failed to retrieve comments for  " + identifier.getName(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
         return commentList.toArray(new Comment[commentList.size()]);
+    }
+
+    /***********
+     * Edit a comment
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @param comment Comment object
+     * @throws APIManagementException
+     */
+    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+            APIManagementException{
+
+        try (Connection connection = APIMgtDBUtil.getConnection()){
+            int id = -1;
+            String editCommentQuery = SQLConstants.EDIT_COMMENT;
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                throw new APIManagementException(msg);
+            }
+            connection.setAutoCommit(false);
+            try (PreparedStatement prepStmt = connection.prepareStatement(editCommentQuery)){
+                prepStmt.setString(1, comment.getText());
+                prepStmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()), Calendar.getInstance());
+                prepStmt.setString(3, comment.getCategory());
+                prepStmt.setInt(4, id);
+                prepStmt.setString(5, commentId);
+                prepStmt.execute();
+                connection.commit();
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Error while editing comment " + commentId + " from the database", e);
+        }
+        return false;
+    }
+
+    /**************************************
+     * Delete a comment
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @throws APIManagementException
+     */
+    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()){
+            int id = -1;
+            String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
+            Identifier identifier;
+            if (apiTypeWrapper.isAPIProduct()) {
+                identifier = apiTypeWrapper.getApiProduct().getId();
+            } else {
+                identifier = apiTypeWrapper.getApi().getId();
+            }
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                throw new APIManagementException(msg);
+            }
+            connection.setAutoCommit(false);
+            try (PreparedStatement prepStmt = connection.prepareStatement(deleteCommentQuery)) {
+                prepStmt.setInt(1, id);
+                prepStmt.setString(2, commentId);
+                prepStmt.execute();
+                connection.commit();
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting comment " + commentId + " from the database", e);
+        }
+        return false;
     }
 
     /**
@@ -7787,22 +8177,23 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-
-        String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            int id = -1;
+            id = getAPIID(identifier, connection);
+            if (id == -1) {
+                String msg = "Could not load API record for: " + identifier.getName();
+                throw new APIManagementException(msg);
+            }
+            String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
             connection.setAutoCommit(false);
-            prepStmt = connection.prepareStatement(deleteCommentQuery);
-            prepStmt.setString(1, commentId);
-            prepStmt.execute();
-            connection.commit();
+            try (PreparedStatement prepStmt = connection.prepareStatement(deleteCommentQuery)){
+                prepStmt.setInt(1, id);
+                prepStmt.setString(2, commentId);
+                prepStmt.execute();
+                connection.commit();
+            }
         } catch (SQLException e) {
             handleException("Error while deleting comment " + commentId + " from the database", e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
 
@@ -8099,15 +8490,23 @@ public class ApiMgtDAO {
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
-                String keyManagerName = rs.getString("KEY_MANAGER");
-                workflowDTO.setKeyManager(keyManagerName);
-                OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
-                        application.getCallbackUrl(), rs
-                                .getString("TOKEN_SCOPE"),
-                        rs.getString("INPUTS"), application.getTokenType(),tenantDomain, keyManagerName);
-                workflowDTO.setAppInfoDTO(request);
+                String keyManagerUUID = rs.getString("KEY_MANAGER");
+                workflowDTO.setKeyManager(keyManagerUUID);
+                KeyManagerConfigurationDTO keyManagerConfigurationByUUID = getKeyManagerConfigurationByUUID(conn,
+                        keyManagerUUID);
+                if (keyManagerConfigurationByUUID != null) {
+                    OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
+                            application.getCallbackUrl(), rs
+                                    .getString("TOKEN_SCOPE"),
+                            rs.getString("INPUTS"), application.getTokenType(),
+                            keyManagerConfigurationByUUID.getTenantDomain(), keyManagerConfigurationByUUID.getName());
+                    workflowDTO.setAppInfoDTO(request);
+                } else {
+                    throw new APIManagementException("Error occured while finding the KeyManager from uuid "
+                            + keyManagerUUID + ".", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+                }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error occurred while retrieving an " +
                     "Application Registration Entry for Workflow : " + workflowDTO
                     .getExternalWorkflowReference(), e);
@@ -8281,45 +8680,39 @@ public class ApiMgtDAO {
      */
     public String getExternalWorkflowReferenceForSubscription(Identifier identifier, int appID)
             throws APIManagementException {
+
         String workflowExtRef = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         int id = -1;
         int subscriptionID = -1;
 
         String sqlQuery = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_SQL;
         String postgreSQL = SQLConstants.GET_EXTERNAL_WORKFLOW_REFERENCE_FOR_SUBSCRIPTION_POSTGRE_SQL;
-        try {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
             if (identifier instanceof APIIdentifier) {
                 id = getAPIID((APIIdentifier) identifier, conn);
 
             } else if (identifier instanceof APIProductIdentifier) {
                 id = ((APIProductIdentifier) identifier).getProductId();
             }
-
-            conn = APIMgtDBUtil.getConnection();
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
                 sqlQuery = postgreSQL;
             }
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, id);
-            ps.setInt(2, appID);
-            ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            rs = ps.executeQuery();
+            try (PreparedStatement ps = conn.prepareStatement(sqlQuery)) {
+                ps.setInt(1, id);
+                ps.setInt(2, appID);
+                ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                try (ResultSet rs = ps.executeQuery()) {
+                    // returns only one row
+                    if (rs.next()) {
+                        workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+                    }
+                }
 
-            // returns only one row
-            while (rs.next()) {
-                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
             }
-
         } catch (SQLException e) {
             handleException("Error occurred while getting workflow entry for " +
                     "Subscription : " + subscriptionID, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
-
         return workflowExtRef;
     }
 
@@ -8672,6 +9065,43 @@ public class ApiMgtDAO {
                     keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
                     keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
                     keyManagerConfigurationDTO.setTenantDomain(tenantDomain);
+                    try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
+                        String configurationContent = IOUtils.toString(configuration);
+                        Map map = new Gson().fromJson(configurationContent, Map.class);
+                        keyManagerConfigurationDTO.setAdditionalProperties(map);
+                    }
+                    return keyManagerConfigurationDTO;
+                }
+            }
+        }
+        return null;
+    }
+
+    public KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(String uuid)
+            throws APIManagementException {
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            return  getKeyManagerConfigurationByUUID(conn, uuid);
+        } catch (SQLException | IOException e) {
+            throw new APIManagementException(
+                    "Error while retrieving key manager configuration for key manager uuid: " + uuid, e);
+        }
+    }
+
+    private KeyManagerConfigurationDTO getKeyManagerConfigurationByUUID(Connection connection ,String uuid)
+            throws SQLException, IOException {
+        final String query = "SELECT * FROM AM_KEY_MANAGER WHERE UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()){
+                    KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                    keyManagerConfigurationDTO.setUuid(resultSet.getString("UUID"));
+                    keyManagerConfigurationDTO.setName(resultSet.getString("NAME"));
+                    keyManagerConfigurationDTO.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+                    keyManagerConfigurationDTO.setDescription(resultSet.getString("DESCRIPTION"));
+                    keyManagerConfigurationDTO.setType(resultSet.getString("TYPE"));
+                    keyManagerConfigurationDTO.setEnabled(resultSet.getBoolean("ENABLED"));
+                    keyManagerConfigurationDTO.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     try (InputStream configuration = resultSet.getBinaryStream("CONFIGURATION")) {
                         String configurationContent = IOUtils.toString(configuration);
                         Map map = new Gson().fromJson(configurationContent, Map.class);
@@ -10741,10 +11171,10 @@ public class ApiMgtDAO {
                           .ThrottleSQLConstants.DELETE_CONDITION_GROUP_SQL);
                   PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
                 if (selectQuery.equals(SQLConstants.ThrottleSQLConstants.GET_API_POLICY_ID_SQL)) {
-                    selectStatement .setString(1, policy.getPolicyName());
-                    selectStatement .setInt(2, policy.getTenantId());
+                    selectStatement.setString(1, policy.getPolicyName());
+                    selectStatement.setInt(2, policy.getTenantId());
                 } else {
-                    selectStatement .setString(1, policy.getUUID());
+                    selectStatement.setString(1, policy.getUUID());
                 }
                 try (ResultSet resultSet = selectStatement.executeQuery()) {
                     if (resultSet.next()) {
@@ -13550,6 +13980,38 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Returns the Label detail for name and the TenantId.
+     *
+     * @param tenantDomain The tenant domain.
+     * @return List of labels.
+     */
+    public Label getLabelDetailByLabelAndTenantDomain(String labelName, String tenantDomain)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.GET_LABEL_DETAIL_BY_LABEL_AND_TENANT)) {
+            statement.setString(1, tenantDomain);
+            statement.setString(2, labelName);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    String labelId = rs.getString("LABEL_ID");
+                    String description = rs.getString("DESCRIPTION");
+                    Label label = new Label();
+                    label.setLabelId(labelId);
+                    label.setName(labelName);
+                    label.setDescription(description);
+                    label.setAccessUrls(getAccessUrlList(connection, labelId));
+                    return label;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Label of " + tenantDomain, e);
+        }
+        return null;
+    }
+
+    /**
      * Returns the URL list for label id.
      *
      * @param labelId label id.
@@ -13585,7 +14047,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
 
                 statement.setString(1, uuid);
@@ -13600,8 +14061,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to add label: " + uuid, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to add label: " + uuid, e);
@@ -13641,7 +14100,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, labelUUID);
                 statement.executeUpdate();
@@ -13649,8 +14107,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to delete label : " + labelUUID, e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to delete label : " + labelUUID, e);
@@ -13683,7 +14139,6 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_LABEL_SQL)) {
             try {
-                initialAutoCommit = connection.getAutoCommit();
                 connection.setAutoCommit(false);
                 statement.setString(1, label.getName());
                 statement.setString(2, label.getDescription());
@@ -13696,13 +14151,251 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to update label : ", e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to update label : ", e);
         }
         return label;
+    }
+
+    /**
+     * Returns the Environments List for the TenantId.
+     *
+     * @param tenantDomain The tenant domain.
+     * @return List of Environments.
+     */
+    public List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException {
+        List<Environment> envList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_TENANT_SQL)) {
+            prepStmt.setString(1, tenantDomain);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    Integer id = rs.getInt("ID");
+                    String uuid = rs.getString("UUID");
+                    String name = rs.getString("NAME");
+                    String displayName = rs.getString("DISPLAY_NAME");
+                    String description = rs.getString("DESCRIPTION");
+
+                    Environment env = new Environment();
+                    env.setId(id);
+                    env.setUuid(uuid);
+                    env.setName(name);
+                    env.setDisplayName(displayName);
+                    env.setDescription(description);
+                    env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                    envList.add(env);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Environments in tenant domain: " + tenantDomain, e);
+        }
+        return envList;
+    }
+
+    /**
+     * Returns the Environment for the uuid in the tenant domain.
+     *
+     * @param tenantDomain the tenant domain to look environment
+     * @param uuid UUID of the environment
+     * @return Gateway environment with given UUID
+     */
+    public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
+        Environment env = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_BY_TENANT_AND_UUID_SQL)) {
+            prepStmt.setString(1, tenantDomain);
+            prepStmt.setString(2, uuid);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    Integer id = rs.getInt("ID");
+                    String name = rs.getString("NAME");
+                    String displayName = rs.getString("DISPLAY_NAME");
+                    String description = rs.getString("DESCRIPTION");
+
+                    env = new Environment();
+                    env.setId(id);
+                    env.setUuid(uuid);
+                    env.setName(name);
+                    env.setDisplayName(displayName);
+                    env.setDescription(description);
+                    env.setVhosts(getVhostGatewayEnvironments(connection, id));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get Environment in tenant domain:" + tenantDomain, e);
+        }
+        return env;
+    }
+
+    /**
+     * Add an Environment
+     *
+     * @param tenantDomain tenant domain
+     * @param environment Environment
+     * @return added Environment
+     * @throws APIManagementException if failed to add environment
+     */
+    public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
+        String uuid = UUID.randomUUID().toString();
+        environment.setUuid(uuid);
+
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement prepStmt = conn.prepareStatement(SQLConstants.INSERT_ENVIRONMENT_SQL,
+                    new String[]{"ID"})){
+                prepStmt.setString(1, uuid);
+                prepStmt.setString(2, environment.getName());
+                prepStmt.setString(3, tenantDomain);
+                prepStmt.setString(4, environment.getDisplayName());
+                prepStmt.setString(5, environment.getDescription());
+                prepStmt.executeUpdate();
+
+                ResultSet rs = prepStmt.getGeneratedKeys();
+                int id = -1;
+                if (rs.next()) {
+                    id = rs.getInt(1);
+                }
+                addGatewayVhosts(conn, id, environment.getVhosts());
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                handleException("Failed to add VHost: " + uuid, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add VHost: " + uuid, e);
+        }
+        return environment;
+    }
+
+    /**
+     * Add VHost assigned to gateway environment
+     *
+     * @param connection connection
+     * @param id Environment ID in the databse
+     * @param vhosts list of VHosts assigned to the environment
+     * @throws APIManagementException if falied to add VHosts
+     */
+    private void addGatewayVhosts(Connection connection, int id, List<VHost> vhosts) throws
+            APIManagementException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.INSERT_GATEWAY_VHOSTS_SQL)) {
+            for (VHost vhost : vhosts) {
+                prepStmt.setInt(1, id);
+                prepStmt.setString(2, vhost.getHost());
+                prepStmt.setString(3, vhost.getHttpContext());
+                prepStmt.setString(4, vhost.getHttpPort().toString());
+                prepStmt.setString(5, vhost.getHttpsPort().toString());
+                prepStmt.setString(6, vhost.getWsPort().toString());
+                prepStmt.setString(7, vhost.getWssPort().toString());
+                prepStmt.addBatch();
+            }
+            prepStmt.executeBatch();
+        } catch (SQLException e) {
+            handleException("Failed to add VHosts for environment ID: " + id, e);
+        }
+    }
+
+    /**
+     * Delete all VHosts assigned to gateway environment
+     *
+     * @param connection connection
+     * @param id Environment ID in the databse
+     * @throws APIManagementException if falied to delete VHosts
+     */
+    private void deleteGatewayVhosts(Connection connection, int id) throws
+            APIManagementException {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_GATEWAY_VHOSTS_SQL)) {
+            prepStmt.setInt(1, id);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete VHosts for environment ID: " + id, e);
+        }
+    }
+
+    /**
+     * Returns a list of vhosts belongs to the gateway environments
+     *
+     * @param connection DB connection
+     * @param envId Environment id.
+     * @return list of vhosts belongs to the gateway environments.
+     */
+    private List<VHost> getVhostGatewayEnvironments(Connection connection, Integer envId) throws APIManagementException {
+        List<VHost> vhosts = new ArrayList<>();
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ENVIRONMENT_VHOSTS_BY_ID_SQL)) {
+            prepStmt.setInt(1, envId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String host = rs.getString("HOST");
+                    String httpContext = rs.getString("HTTP_CONTEXT");
+                    Integer httpPort = rs.getInt("HTTP_PORT");
+                    Integer httpsPort = rs.getInt("HTTPS_PORT");
+                    Integer wsPort = rs.getInt("WS_PORT");
+                    Integer wssPort = rs.getInt("WSS_PORT");
+
+                    VHost vhost = new VHost();
+                    vhost.setHost(host);
+                    vhost.setHttpContext(httpContext);
+                    vhost.setHttpPort(httpPort);
+                    vhost.setHttpsPort(httpsPort);
+                    vhost.setWsPort(wsPort);
+                    vhost.setWssPort(wssPort);
+                    vhosts.add(vhost);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get gateway environments list of VHost: " , e);
+        }
+        return vhosts;
+    }
+
+    /**
+     * Delete an Environment
+     *
+     * @param uuid UUID of the environment
+     * @throws APIManagementException if failed to delete environment
+     */
+    public void deleteEnvironment(String uuid) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_ENVIRONMENT_SQL)) {
+                prepStmt.setString(1, uuid);
+                prepStmt.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete Environment", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete Environment", e);
+        }
+    }
+
+    /**
+     * Update Gateway Environment
+     *
+     * @param environment Environment to be updated
+     * @return Updated Environment
+     * @throws APIManagementException if failed to updated Environment
+     */
+    public Environment updateEnvironment(Environment environment) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
+                prepStmt.setString(1, environment.getDisplayName());
+                prepStmt.setString(2, environment.getDescription());
+                prepStmt.setString(3, environment.getUuid());
+                prepStmt.executeUpdate();
+                deleteGatewayVhosts(connection, environment.getId());
+                addGatewayVhosts(connection, environment.getId(), environment.getVhosts());
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to update Environment", e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to update Environment", e);
+        }
+        return environment;
     }
 
     private void addApplicationAttributes(Connection conn, Map<String, String> attributes, int applicationId, int tenantId)
@@ -14046,23 +14739,120 @@ public class ApiMgtDAO {
                 connection = APIMgtDBUtil.getConnection();
                 isNewConnection = true;
             }
-
-            prepStmtAddResourceMapping = connection.prepareStatement(addProductResourceMappingSql);
-
-            //add the resources in each API in the API product.
+            //add the duplicate resources in each API in the API product.
             for (APIProductResource apiProductResource : productResources) {
                 APIProductIdentifier productIdentifier = apiProductResource.getProductIdentifier();
                 int productId = getAPIID(productIdentifier, connection);
-                URITemplate uriTemplate = apiProductResource.getUriTemplate();
-                prepStmtAddResourceMapping.setInt(1, productId);
-                prepStmtAddResourceMapping.setInt(2, uriTemplate.getId());
-                prepStmtAddResourceMapping.addBatch();
-            }
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(productIdentifier.getProviderName()));
+                URITemplate uriTemplateOriginal = apiProductResource.getUriTemplate();
+                int urlMappingId = uriTemplateOriginal.getId();
+                // Adding to AM_API_URL_MAPPING table
+                PreparedStatement getURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.
+                                GET_URL_MAPPINGS_WITH_SCOPE_BY_URL_MAPPING_ID);
+                getURLMappingsStatement.setInt(1, urlMappingId);
+                List<URITemplate> urlMappingList = new ArrayList<>();
+                try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
+                    while (rs.next()) {
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setHTTPVerb(rs.getString(1));
+                        uriTemplate.setAuthType(rs.getString(2));
+                        uriTemplate.setUriTemplate(rs.getString(3));
+                        uriTemplate.setThrottlingTier(rs.getString(4));
+                        uriTemplate.setMediationScript(rs.getString(5));
+                        if (!StringUtils.isEmpty(rs.getString(6))) {
+                            Scope scope = new Scope();
+                            scope.setKey(rs.getString(6));
+                            uriTemplate.setScope(scope);
+                        }
+                        if (rs.getInt(7) != 0) {
+                            // Adding api id to uri template id just to store value
+                            uriTemplate.setId(rs.getInt(7));
+                        }
+                        urlMappingList.add(uriTemplate);
+                    }
+                }
 
-            prepStmtAddResourceMapping.executeBatch();
-            prepStmtAddResourceMapping.clearBatch();
+                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                for (URITemplate urlMapping : urlMappingList) {
+                    if (urlMapping.getScope() != null) {
+                        URITemplate urlMappingNew = urlMapping;
+                        URITemplate urlMappingExisting = uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                urlMappingExisting.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                        urlMappingExisting);
+                            }
+                        } else {
+                            urlMappingNew.setScopes(urlMapping.getScope());
+                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(), urlMappingNew);
+                        }
+                    } else if (urlMapping.getId() != 0) {
+                        URITemplate urlMappingExisting = uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting == null) {
+                            uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                        }
+                    } else {
+                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                    }
+                }
+
+                PreparedStatement insertURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    insertURLMappingsStatement.setInt(1, urlMapping.getId());
+                    insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                    insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                    insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                    insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.setString(6, String.valueOf(productId));
+                    insertURLMappingsStatement.addBatch();
+                }
+                insertURLMappingsStatement.executeBatch();
+
+                // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
+                PreparedStatement getRevisionedURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_URL_MAPPINGS_ID);
+                PreparedStatement insertScopeResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                PreparedStatement insertProductResourceMappingStatement = connection
+                        .prepareStatement(addProductResourceMappingSql);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    getRevisionedURLMappingsStatement.setInt(1, urlMapping.getId());
+                    getRevisionedURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                    getRevisionedURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                    getRevisionedURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                    getRevisionedURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    getRevisionedURLMappingsStatement.setString(6, String.valueOf(productId));
+                    if (!urlMapping.getScopes().isEmpty()) {
+                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (Scope scope : urlMapping.getScopes()) {
+                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                    insertScopeResourceMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
+                    try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                        while (rs.next()) {
+                            insertProductResourceMappingStatement.setInt(1, productId);
+                            insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
+                            insertProductResourceMappingStatement.setString(3, "Current API");
+                            insertProductResourceMappingStatement.addBatch();
+                        }
+                    }
+                }
+                insertScopeResourceMappingStatement.executeBatch();
+                insertProductResourceMappingStatement.executeBatch();
+            }
         } catch (SQLException e) {
-            handleException("Error while adding API product Resources" , e);
+            handleException("Error while adding API product Resources", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmtAddResourceMapping, null, null);
             if (isNewConnection) {
@@ -14079,20 +14869,33 @@ public class ApiMgtDAO {
      */
     public void updateAPIProductResourceMappings(APIProduct apiProduct, int productId, Connection connection) throws APIManagementException {
 
-        PreparedStatement prepStmtRemoveResourceToProductMappings = null;
-
-        String removeResourceToProductMappingsSql = SQLConstants.DELETE_FROM_AM_API_PRODUCT_MAPPING_SQL;
-
+        PreparedStatement removeURLMappingsStatement = null;
         try {
-            prepStmtRemoveResourceToProductMappings = connection.prepareStatement(removeResourceToProductMappingsSql);
-            prepStmtRemoveResourceToProductMappings.setInt(1, productId);
-            prepStmtRemoveResourceToProductMappings.execute();
-
+            // Retrieve Product Resources
+            PreparedStatement getProductMappingsStatement = connection.prepareStatement(SQLConstants.
+                    APIRevisionSqlConstants.GET_CUURENT_API_PRODUCT_RESOURCES);
+            getProductMappingsStatement.setInt(1, productId);
+            List<Integer> urlMappingIds = new ArrayList<>();
+            try (ResultSet rs = getProductMappingsStatement.executeQuery()) {
+                while (rs.next()) {
+                    urlMappingIds.add(rs.getInt(1));
+                }
+            }
+            // Removing related revision entries from AM_API_URL_MAPPING table
+            // This will cascade remove entries from AM_API_RESOURCE_SCOPE_MAPPING and AM_API_PRODUCT_MAPPING tables
+            removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                    .APIRevisionSqlConstants.REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID);
+            for (int id : urlMappingIds) {
+                removeURLMappingsStatement.setInt(1, id);
+                removeURLMappingsStatement.addBatch();
+            }
+            removeURLMappingsStatement.executeBatch();
+            //Add new resources
             addAPIProductResourceMappings(apiProduct.getProductResources(), connection);
         } catch (SQLException e) {
             handleException("Error while updating API-Product Resources.", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmtRemoveResourceToProductMappings, null, null);
+            APIMgtDBUtil.closeAllConnections(removeURLMappingsStatement, null, null);
         }
     }
 
@@ -14237,40 +15040,85 @@ public class ApiMgtDAO {
         int productId = getAPIProductId(productIdentifier);
         List<APIProductResource> productResourceList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT;
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, productId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) {
-                        APIProductResource resource = new APIProductResource();
-                        APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
-                                rs.getString("API_VERSION"));
-                        resource.setProductIdentifier(productIdentifier);
-                        resource.setApiIdentifier(apiId);
-                        resource.setApiName(rs.getString("API_NAME"));
-                        URITemplate uriTemplate = new URITemplate();
-                        uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
-                        uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
-                        uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
-                        int uriTemplateId = rs.getInt("URL_MAPPING_ID");
-                        uriTemplate.setId(uriTemplateId);
-                        uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
-                        uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+            if (checkAPIUUIDIsARevisionUUID(productIdentifier.getUUID()).getApiUUID() == null) {
+                String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT;
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setInt(1, productId);
+                    ps.setString(2, String.valueOf(productId));
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            APIProductResource resource = new APIProductResource();
+                            APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
+                                    rs.getString("API_VERSION"));
+                            apiId.setUuid(rs.getString("API_UUID"));
+                            resource.setProductIdentifier(productIdentifier);
+                            resource.setApiIdentifier(apiId);
+                            resource.setApiName(rs.getString("API_NAME"));
+                            URITemplate uriTemplate = new URITemplate();
+                            uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                            uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
+                            uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                            int uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                            uriTemplate.setId(uriTemplateId);
+                            uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                            uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
 
-                        try (PreparedStatement scopesStatement = connection.
-                                prepareStatement(SQLConstants.GET_SCOPE_KEYS_BY_URL_MAPPING_ID)) {
-                            scopesStatement.setInt(1, uriTemplateId);
-                            try (ResultSet scopesResult = scopesStatement.executeQuery()) {
-                                while (scopesResult.next()) {
-                                    Scope scope = new Scope();
-                                    scope.setKey(scopesResult.getString("SCOPE_NAME"));
-                                    uriTemplate.setScopes(scope);
+                            try (PreparedStatement scopesStatement = connection.
+                                    prepareStatement(SQLConstants.GET_SCOPE_KEYS_BY_URL_MAPPING_ID)) {
+                                scopesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet scopesResult = scopesStatement.executeQuery()) {
+                                    while (scopesResult.next()) {
+                                        Scope scope = new Scope();
+                                        scope.setKey(scopesResult.getString("SCOPE_NAME"));
+                                        uriTemplate.setScopes(scope);
+                                    }
                                 }
                             }
-                        }
 
-                        resource.setUriTemplate(uriTemplate);
-                        productResourceList.add(resource);
+                            resource.setUriTemplate(uriTemplate);
+                            productResourceList.add(resource);
+                        }
+                    }
+                }
+            } else {
+                String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT_REVISION;
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setInt(1, productId);
+                    ps.setString(2, productIdentifier.getUUID());
+                    ps.setString(3, productIdentifier.getUUID());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) {
+                            APIProductResource resource = new APIProductResource();
+                            APIIdentifier apiId = new APIIdentifier(rs.getString("API_PROVIDER"), rs.getString("API_NAME"),
+                                    rs.getString("API_VERSION"));
+                            apiId.setUuid(rs.getString("API_UUID"));
+                            resource.setProductIdentifier(productIdentifier);
+                            resource.setApiIdentifier(apiId);
+                            resource.setApiName(rs.getString("API_NAME"));
+                            URITemplate uriTemplate = new URITemplate();
+                            uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                            uriTemplate.setResourceURI(rs.getString("URL_PATTERN"));
+                            uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                            int uriTemplateId = rs.getInt("URL_MAPPING_ID");
+                            uriTemplate.setId(uriTemplateId);
+                            uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                            uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+
+                            try (PreparedStatement scopesStatement = connection.
+                                    prepareStatement(SQLConstants.GET_SCOPE_KEYS_BY_URL_MAPPING_ID)) {
+                                scopesStatement.setInt(1, uriTemplateId);
+                                try (ResultSet scopesResult = scopesStatement.executeQuery()) {
+                                    while (scopesResult.next()) {
+                                        Scope scope = new Scope();
+                                        scope.setKey(scopesResult.getString("SCOPE_NAME"));
+                                        uriTemplate.setScopes(scope);
+                                    }
+                                }
+                            }
+
+                            resource.setUriTemplate(uriTemplate);
+                            productResourceList.add(resource);
+                        }
                     }
                 }
             }
@@ -14288,10 +15136,10 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public void addAuditApiMapping(APIIdentifier apiIdentifier, String uuid) throws APIManagementException {
-        Connection connection = null;
+
         String query = SQLConstants.ADD_SECURITY_AUDIT_MAP_SQL;
-        int apiId = getAPIID(apiIdentifier, connection);
         try (Connection conn = APIMgtDBUtil.getConnection()) {
+            int apiId = getAPIID(apiIdentifier, conn);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setInt(1, apiId);
                 ps.setString(2, uuid);
@@ -14309,11 +15157,10 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public String getAuditApiId(APIIdentifier apiIdentifier) throws APIManagementException {
-        Connection connection = null;
         String query = SQLConstants.GET_AUDIT_UUID_SQL;
-        int apiId = getAPIID(apiIdentifier, connection);
         String auditUuid = null;
         try (Connection conn = APIMgtDBUtil.getConnection()) {
+            int apiId = getAPIID(apiIdentifier, conn);
             try (PreparedStatement ps = conn.prepareStatement(query)) {
                 ps.setInt(1, apiId);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -14519,7 +15366,7 @@ public class ApiMgtDAO {
      * @param field field to be queried to obtain the bot detection alert subscription. Can be uuid or email
      * @param value value corresponding to the field (uuid or email value)
      * @return if subscription exist, returns the bot detection alert subscription, else returns a null object
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs when retrieving a bot detection alert subscription
      */
     public BotDetectionData getBotDetectionAlertSubscription(String field, String value)
             throws APIManagementException {
@@ -15424,6 +16271,1450 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to delete tenant theme of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+    
+    /**
+     * Return the existing versions for the given api name for the provider
+     * @param apiName api name
+     * @param apiProvider provider
+     * @return set version
+     * @throws APIManagementException
+     */
+    public Set<String> getAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+        Set<String> versions = new HashSet<String>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                versions.add(resultSet.getString("API_VERSION"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+                    e);
+        }
+        return versions;
+    }
+    /**
+     * Return ids of the versions for the given name for the given provider
+     * @param apiName api name
+     * @param apiProvider provider
+     * @return set ids
+     * @throws APIManagementException
+     */
+    public Set<String> getUUIDsOfAPIVersions(String apiName, String apiProvider) throws APIManagementException {
+        Set<String> versions = new HashSet<String>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_VERSIONS_UUID)) {
+            statement.setString(1, APIUtil.replaceEmailDomainBack(apiProvider));
+            statement.setString(2, apiName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                versions.add(resultSet.getString("API_UUID"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving versions for api " + apiName + " for the provider " + apiProvider,
+                    e);
+        }
+        return versions;
+    }
+
+    /**
+     * Get count of the revisions created for a particular API.
+     *
+     * @return revision count
+     * @throws APIManagementException if an error occurs while retrieving revision count
+     */
+    public int getRevisionCountByAPI(String apiUUID) throws APIManagementException {
+        int count = 0;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_COUNT_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revisions count for API UUID: " + apiUUID, e);
+        }
+        return count;
+    }
+
+    /**
+     * Get most recent revision id of the revisions created for a particular API.
+     *
+     * @return revision id
+     * @throws APIManagementException if an error occurs while retrieving revision id
+     */
+    public int getMostRecentRevisionId(String apiUUID) throws APIManagementException {
+        int revisionId = 0;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_ID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionId = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get most recent revision ID for API UUID: " + apiUUID, e);
+        }
+        return revisionId;
+    }
+
+    /**
+     * Get the latest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID       UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getLatestRevisionUUID(String apiUUID) throws APIManagementException {
+        String revisionUUID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_MOST_RECENT_REVISION_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the latest revision for api ID: " + apiUUID, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
+     * Adds an API revision record to the database
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void addAPIRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Adding to AM_REVISION table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION);
+                statement.setInt(1, apiRevision.getId());
+                statement.setString(2, apiRevision.getApiUUID());
+                statement.setString(3, apiRevision.getRevisionUUID());
+                statement.setString(4, apiRevision.getDescription());
+                statement.setString(5, apiRevision.getCreatedBy());
+                statement.executeUpdate();
+
+                // Retrieve API ID
+                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+                int apiId = getAPIID(apiIdentifier, connection);
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+
+                // Adding to AM_API_URL_MAPPING table
+                PreparedStatement getURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID);
+                getURLMappingsStatement.setInt(1, apiId);
+                List<URITemplate> urlMappingList = new ArrayList<>();
+                try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
+                    while (rs.next()) {
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setHTTPVerb(rs.getString(1));
+                        uriTemplate.setAuthType(rs.getString(2));
+                        uriTemplate.setUriTemplate(rs.getString(3));
+                        uriTemplate.setThrottlingTier(rs.getString(4));
+                        uriTemplate.setMediationScript(rs.getString(5));
+                        if (!StringUtils.isEmpty(rs.getString(6))) {
+                            Scope scope = new Scope();
+                            scope.setKey(rs.getString(6));
+                            uriTemplate.setScope(scope);
+                        }
+                        if (rs.getInt(7) != 0) {
+                            // Adding product id to uri template id just to store value
+                            uriTemplate.setId(rs.getInt(7));
+                        }
+                        urlMappingList.add(uriTemplate);
+                    }
+                }
+
+                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                for (URITemplate urlMapping : urlMappingList) {
+                    if (urlMapping.getScope() != null) {
+                        URITemplate urlMappingNew = urlMapping;
+                        URITemplate urlMappingExisting =  uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                urlMappingExisting.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                        urlMappingExisting);
+                            }
+                        } else {
+                            urlMappingNew.setScopes(urlMapping.getScope());
+                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(), urlMappingNew);
+                        }
+                    } else if (urlMapping.getId() != 0 ) {
+                        URITemplate urlMappingExisting =  uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting == null) {
+                            uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                        }
+                    } else {
+                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                    }
+                }
+
+                PreparedStatement insertURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    insertURLMappingsStatement.setInt(1, apiId);
+                    insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                    insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                    insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                    insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.setString(6, apiRevision.getRevisionUUID());
+                    insertURLMappingsStatement.addBatch();
+                }
+                insertURLMappingsStatement.executeBatch();
+
+                // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
+                PreparedStatement getRevisionedURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                PreparedStatement insertScopeResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                PreparedStatement insertProductResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    if (urlMapping.getScopes() != null) {
+                        getRevisionedURLMappingsStatement.setInt(1, apiId);
+                        getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                        getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
+                        getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
+                        getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
+                        getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (Scope scope: urlMapping.getScopes()) {
+                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                    insertScopeResourceMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
+                    if (urlMapping.getId() != 0) {
+                        getRevisionedURLMappingsStatement.setInt(1, apiId);
+                        getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                        getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
+                        getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
+                        getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
+                        getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                insertProductResourceMappingStatement.setInt(1, urlMapping.getId());
+                                insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
+                                insertProductResourceMappingStatement.addBatch();
+                            }
+                        }
+                    }
+                }
+                insertScopeResourceMappingStatement.executeBatch();
+                insertProductResourceMappingStatement.executeBatch();
+
+                // Adding to AM_API_CLIENT_CERTIFICATE
+                PreparedStatement getClientCertificatesStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
+                getClientCertificatesStatement.setInt(1, apiId);
+                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                        clientCertificateDTO.setAlias(rs.getString(1));
+                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                        clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTOS.add(clientCertificateDTO);
+                    }
+                }
+                PreparedStatement insertClientCertificateStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                    insertClientCertificateStatement.setInt(1, tenantId);
+                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                    insertClientCertificateStatement.setInt(3, apiId);
+                    insertClientCertificateStatement.setBinaryStream(4, getInputStream(clientCertificateDTO.getCertificate()));
+                    insertClientCertificateStatement.setBoolean(5, false);
+                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                    insertClientCertificateStatement.setString(7, apiRevision.getRevisionUUID());
+                    insertClientCertificateStatement.addBatch();
+                }
+                insertClientCertificateStatement.executeBatch();
+
+                // Adding to AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement getGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY);
+                List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
+                getGraphQLComplexityStatement.setInt(1, apiId);
+                try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
+                    while (rs1.next()) {
+                        CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                        customComplexityDetails.setType(rs1.getString("TYPE"));
+                        customComplexityDetails.setField(rs1.getString("FIELD"));
+                        customComplexityDetails.setComplexityValue(rs1.getInt("COMPLEXITY_VALUE"));
+                        customComplexityDetailsList.add(customComplexityDetails);
+                    }
+                }
+
+                PreparedStatement insertGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY);
+                for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
+                    insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
+                    insertGraphQLComplexityStatement.setInt(2, apiId);
+                    insertGraphQLComplexityStatement.setString(3, customComplexityDetails.getType());
+                    insertGraphQLComplexityStatement.setString(4, customComplexityDetails.getField());
+                    insertGraphQLComplexityStatement.setInt(5, customComplexityDetails.getComplexityValue());
+                    insertGraphQLComplexityStatement.setString(6, apiRevision.getRevisionUUID());
+                    insertGraphQLComplexityStatement.addBatch();
+                }
+                insertGraphQLComplexityStatement.executeBatch();
+
+                connection.commit();
+            } catch (SQLException e){
+                connection.rollback();
+                handleException("Failed to add API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add API Revision entry of API UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    /**
+     * To get the input stream from string.
+     *
+     * @param value : Relevant string that need to be converted to input stream.
+     * @return input stream.
+     */
+    private InputStream getInputStream(String value) {
+
+        byte[] cert = value.getBytes(StandardCharsets.UTF_8);
+        return new ByteArrayInputStream(cert);
+    }
+
+    /**
+     * Get revision details by providing revision UUID
+     *
+     * @return revision object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public APIRevision getRevisionByRevisionUUID(String revisionUUID) throws APIManagementException {
+        APIRevision apiRevision = new APIRevision();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_BY_REVISION_UUID)) {
+            statement.setString(1, revisionUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    apiRevision.setId(rs.getInt(1));
+                    apiRevision.setApiUUID(rs.getString(2));
+                    apiRevision.setRevisionUUID(rs.getString(3));
+                    apiRevision.setDescription(rs.getString(4));
+                    apiRevision.setCreatedTime(rs.getString(5));
+                    apiRevision.setCreatedBy(rs.getString(6));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revision details for revision UUID: " + revisionUUID, e);
+        }
+        return apiRevision;
+    }
+
+    /**
+     * Get revision UUID providing revision number
+     *
+     * @param revisionNum   Revision number
+     * @param apiUUID       UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getRevisionUUID(String revisionNum, String apiUUID) throws APIManagementException {
+        String revisionUUID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_UUID)) {
+            statement.setString(1, apiUUID);
+            statement.setString(2, revisionNum);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revision UUID for Revision " + revisionNum, e);
+        }
+        return revisionUUID;
+    }
+
+
+    /**
+     * Get the earliest revision UUID from the revision list for a given API
+     *
+     * @param apiUUID       UUID of the API
+     * @return UUID of the revision
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public String getEarliestRevision(String apiUUID) throws APIManagementException {
+        String revisionUUID = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_EARLIEST_REVISION_ID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    revisionUUID = rs.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the earliest revision for api ID: " + apiUUID, e);
+        }
+        return revisionUUID;
+    }
+
+    /**
+     * Get revision details by providing revision UUID
+     *
+     * @return revisions List object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public List<APIRevision> getRevisionsListByAPIUUID(String apiUUID) throws APIManagementException {
+
+        List<APIRevision> revisionList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONS_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevision apiRevision = new APIRevision();
+                    List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    APIRevision previousRevision = null;
+                    for (APIRevision apiRevisionObject : revisionList) {
+                        if (apiRevisionObject.getId() == rs.getInt(1)) {
+                            apiRevisionDeploymentList = apiRevisionObject.getApiRevisionDeploymentList();
+                            previousRevision = apiRevisionObject;
+                        }
+                    }
+                    if (previousRevision != null) {
+                        revisionList.remove(previousRevision);
+                    }
+                    apiRevision.setId(rs.getInt("ID"));
+                    apiRevision.setApiUUID(rs.getString("API_UUID"));
+                    apiRevision.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevision.setDescription(rs.getString("DESCRIPTION"));
+                    apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
+                    apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
+                    if (!StringUtils.isEmpty(rs.getString("NAME"))) {
+                        apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                        apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                        //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
+                        apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                        apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                        apiRevisionDeploymentList.add(apiRevisionDeployment);
+                    }
+                    apiRevision.setApiRevisionDeploymentList(apiRevisionDeploymentList);
+                    revisionList.add(apiRevision);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get revision details for API UUID: " + apiUUID, e);
+        }
+        return revisionList;
+    }
+
+    /**
+     * Get a provided api uuid is in the revision db table
+     *
+     * @return String apiUUID
+     * @throws APIManagementException if an error occurs while checking revision table
+     */
+    public APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
+        APIRevision apiRevision = new APIRevision();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    apiRevision.setApiUUID(rs.getString(1));
+                    apiRevision.setId(rs.getInt(2));
+                    apiRevision.setRevisionUUID(apiUUID);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to search UUID: " + apiUUID + " in the revision db table", e);
+        }
+        return apiRevision;
+    }
+
+    /**
+     * Adds an API revision Deployment mapping record to the database
+     *
+     * @param apiRevisionId          uuid of the revision
+     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void addAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Adding to AM_DEPLOYMENT_REVISION_MAPPING table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION_DEPLOYMENT_MAPPING);
+                for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+                    statement.setString(1, apiRevisionDeployment.getDeployment());
+                    statement.setString(2, apiRevisionDeployment.getVhost());
+                    statement.setString(3, apiRevisionId);
+                    statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID "
+                        + apiRevisionId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add API Revision Deployment Mapping entry for Revision UUID " + apiRevisionId, e);
+        }
+    }
+
+    /**
+     * Get APIRevisionDeployment details by providing deployment name
+     *
+     * @return APIRevisionDeployment object
+     * @throws APIManagementException if an error occurs while retrieving revision details
+     */
+    public APIRevisionDeployment getAPIRevisionDeploymentByName(String name) throws APIManagementException {
+        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_TYPE)) {
+            statement.setString(1, name);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Revision deployment mapping details for deployment name: " + name, e);
+        }
+        return apiRevisionDeployment;
+    }
+
+    /**
+     * Get APIRevisionDeployment details by providing revision uuid
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentByRevisionUUID(String revisionUUID) throws APIManagementException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID)) {
+            statement.setString(1, revisionUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Revision deployment mapping details for revision uuid: " +
+                    revisionUUID, e);
+        }
+        return apiRevisionDeploymentList;
+    }
+
+    /**
+     * Get APIRevisionDeployment details by providing API uuid
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentByApiUUID(String apiUUID) throws APIManagementException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Revision deployment mapping details for api uuid: " +
+                    apiUUID, e);
+        }
+        return apiRevisionDeploymentList;
+    }
+
+    /**
+     * Get APIRevisionDeployment details by providing ApiUUID
+     *
+     * @return List<APIRevisionDeployment> object
+     * @throws APIManagementException if an error occurs while retrieving revision deployment mapping details
+     */
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentsByApiUUID(String apiUUID) throws APIManagementException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_API_UUID)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
+                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
+                    apiRevisionDeploymentList.add(apiRevisionDeployment);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API Revision deployment mapping details for api uuid: " +
+                    apiUUID, e);
+        }
+        return apiRevisionDeploymentList;
+    }
+    /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiRevisionId          uuid of the revision
+     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void removeAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
+                for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+                    statement.setString(1, apiRevisionDeployment.getDeployment());
+                    statement.setString(2, apiRevisionId);
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                        + apiRevisionId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove API Revision Deployment Mapping entry for Revision UUID "
+                    + apiRevisionId, e);
+        }
+    }
+
+    /**
+     * Remove an API revision Deployment mapping record to the database
+     *
+     * @param apiRevisionId          uuid of the revision
+     * @param apiRevisionDeployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void removeAPIRevisionDeployment(String apiUUID, Set<APIRevisionDeployment> deployments)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Remove an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.REMOVE_API_REVISION_DEPLOYMENT_MAPPING);
+                for (APIRevisionDeployment deployment : deployments) {
+                    statement.setString(1, deployment.getDeployment());
+                    statement.setString(2, deployment.getRevisionUUID());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to remove API Revision Deployment Mapping entry for API UUID "
+                    + apiUUID, e);
+        }
+    }
+
+
+    /**
+     * Restore API revision database records as the Current API of an API
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    public void restoreAPIRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Retrieve API ID
+                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+                int apiId = getAPIID(apiIdentifier, connection);
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+
+                // Removing related Current API entries from AM_API_URL_MAPPING table
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID);
+                removeURLMappingsStatement.setInt(1, apiId);
+                removeURLMappingsStatement.executeUpdate();
+
+                // Restoring to AM_API_URL_MAPPING table
+                PreparedStatement getURLMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID);
+                getURLMappingsStatement.setInt(1, apiId);
+                getURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                List<URITemplate> urlMappingList = new ArrayList<>();
+                try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
+                    while (rs.next()) {
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setHTTPVerb(rs.getString(1));
+                        uriTemplate.setAuthType(rs.getString(2));
+                        uriTemplate.setUriTemplate(rs.getString(3));
+                        uriTemplate.setThrottlingTier(rs.getString(4));
+                        uriTemplate.setMediationScript(rs.getString(5));
+                        if (!StringUtils.isEmpty(rs.getString(6))) {
+                            Scope scope = new Scope();
+                            scope.setKey(rs.getString(6));
+                            uriTemplate.setScope(scope);
+                        }
+                        if (rs.getInt(7) != 0) {
+                            // Adding product id to uri template id just to store value
+                            uriTemplate.setId(rs.getInt(7));
+                        }
+                        urlMappingList.add(uriTemplate);
+                    }
+                }
+
+                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                for (URITemplate urlMapping : urlMappingList) {
+                    if (urlMapping.getScope() != null) {
+                        URITemplate urlMappingNew = urlMapping;
+                        URITemplate urlMappingExisting =  uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                urlMappingExisting.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                        urlMappingExisting);
+                            }
+                        } else {
+                            urlMappingNew.setScopes(urlMapping.getScope());
+                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(), urlMappingNew);
+                        }
+                    } else {
+                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                    }
+                }
+
+
+                PreparedStatement insertURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS_CURRENT_API);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    insertURLMappingsStatement.setInt(1, apiId);
+                    insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                    insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                    insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                    insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.addBatch();
+                }
+                insertURLMappingsStatement.executeBatch();
+
+                // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
+                PreparedStatement getCurrentAPIURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CURRENT_API_URL_MAPPINGS_ID);
+                PreparedStatement insertScopeResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                PreparedStatement insertProductResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    if (urlMapping.getScopes() != null) {
+                        getCurrentAPIURLMappingsStatement.setInt(1, apiId);
+                        getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                        getCurrentAPIURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                        getCurrentAPIURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                        getCurrentAPIURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (Scope scope: urlMapping.getScopes()) {
+                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                    insertScopeResourceMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
+                    if (urlMapping.getId() != 0) {
+                        getCurrentAPIURLMappingsStatement.setInt(1, apiId);
+                        getCurrentAPIURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                        getCurrentAPIURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                        getCurrentAPIURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                        getCurrentAPIURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                        try (ResultSet rs = getCurrentAPIURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                insertProductResourceMappingStatement.setInt(1, urlMapping.getId());
+                                insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
+                                insertProductResourceMappingStatement.addBatch();
+                            }
+                        }
+                    }
+                }
+                insertScopeResourceMappingStatement.executeBatch();
+                insertProductResourceMappingStatement.executeBatch();
+
+                // Restoring AM_API_CLIENT_CERTIFICATE table entries
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
+                removeClientCertificatesStatement.setInt(1, apiId);
+                removeClientCertificatesStatement.executeUpdate();
+
+                PreparedStatement getClientCertificatesStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID);
+                getClientCertificatesStatement.setInt(1, apiId);
+                getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                        clientCertificateDTO.setAlias(rs.getString(1));
+                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                        clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTOS.add(clientCertificateDTO);
+                    }
+                }
+                PreparedStatement insertClientCertificateStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                    insertClientCertificateStatement.setInt(1, tenantId);
+                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                    insertClientCertificateStatement.setInt(3, apiId);
+                    insertClientCertificateStatement.setBinaryStream(4, getInputStream(clientCertificateDTO.getCertificate()));
+                    insertClientCertificateStatement.setBoolean(5, false);
+                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                    insertClientCertificateStatement.setString(7, "Current API");
+                    insertClientCertificateStatement.addBatch();
+                }
+                insertClientCertificateStatement.executeBatch();
+
+                // Restoring AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
+                removeGraphQLComplexityStatement.setInt(1, apiId);
+                removeGraphQLComplexityStatement.executeUpdate();
+
+                PreparedStatement getGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
+                getGraphQLComplexityStatement.setInt(1, apiId);
+                getGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
+                try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
+                    while (rs1.next()) {
+                        CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                        customComplexityDetails.setType(rs1.getString("TYPE"));
+                        customComplexityDetails.setField(rs1.getString("FIELD"));
+                        customComplexityDetails.setComplexityValue(rs1.getInt("COMPLEXITY_VALUE"));
+                        customComplexityDetailsList.add(customComplexityDetails);
+                    }
+                }
+
+                PreparedStatement insertGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
+                for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
+                    insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
+                    insertGraphQLComplexityStatement.setInt(2, apiId);
+                    insertGraphQLComplexityStatement.setString(3, customComplexityDetails.getType());
+                    insertGraphQLComplexityStatement.setString(4, customComplexityDetails.getField());
+                    insertGraphQLComplexityStatement.setInt(5, customComplexityDetails.getComplexityValue());
+                    insertGraphQLComplexityStatement.addBatch();
+                }
+                insertGraphQLComplexityStatement.executeBatch();
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to restore API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to restore API Revision entry of API UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    /**
+     * Restore API revision database records as the Current API of an API
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    public void deleteAPIRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Retrieve API ID
+                APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
+                int apiId = getAPIID(apiIdentifier, connection);
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+
+                // Removing related revision entries from AM_REVISION table
+                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.DELETE_API_REVISION);
+                removeAMRevisionStatement.setString(1, apiRevision.getRevisionUUID());
+                removeAMRevisionStatement.executeUpdate();
+
+                // Removing related revision entries from AM_API_URL_MAPPING table
+                // This will cascade remove entries from AM_API_RESOURCE_SCOPE_MAPPING and AM_API_PRODUCT_MAPPING tables
+                PreparedStatement removeURLMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID);
+                removeURLMappingsStatement.setInt(1, apiId);
+                removeURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                removeURLMappingsStatement.executeUpdate();
+
+                // Removing related revision entries from AM_API_CLIENT_CERTIFICATE table
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
+                removeClientCertificatesStatement.setInt(1, apiId);
+                removeClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                removeClientCertificatesStatement.executeUpdate();
+
+                // Removing related revision entries from AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                removeGraphQLComplexityStatement.setInt(1, apiId);
+                removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
+                removeGraphQLComplexityStatement.executeUpdate();
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete API Revision entry of API UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    /**
+     * Adds an API Product revision record to the database
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void addAPIProductRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Adding to AM_REVISION table
+                PreparedStatement statement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION);
+                statement.setInt(1, apiRevision.getId());
+                statement.setString(2, apiRevision.getApiUUID());
+                statement.setString(3, apiRevision.getRevisionUUID());
+                statement.setString(4, apiRevision.getDescription());
+                statement.setString(5, apiRevision.getCreatedBy());
+                statement.executeUpdate();
+
+                // Retrieve API Product ID
+                APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
+                int apiId = getAPIID(apiProductIdentifier, connection);
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
+
+                // Adding to AM_API_URL_MAPPING table
+                PreparedStatement getURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.
+                                GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_PRODUCT_ID);
+                getURLMappingsStatement.setInt(1, apiId);
+                List<URITemplate> urlMappingList = new ArrayList<>();
+                try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
+                    while (rs.next()) {
+                        URITemplate uriTemplate = new URITemplate();
+                        uriTemplate.setHTTPVerb(rs.getString(1));
+                        uriTemplate.setAuthType(rs.getString(2));
+                        uriTemplate.setUriTemplate(rs.getString(3));
+                        uriTemplate.setThrottlingTier(rs.getString(4));
+                        uriTemplate.setMediationScript(rs.getString(5));
+                        if (!StringUtils.isEmpty(rs.getString(6))) {
+                            Scope scope = new Scope();
+                            scope.setKey(rs.getString(6));
+                            uriTemplate.setScope(scope);
+                        }
+                        if (rs.getInt(7) != 0) {
+                            // Adding api id to uri template id just to store value
+                            uriTemplate.setId(rs.getInt(7));
+                        }
+                        urlMappingList.add(uriTemplate);
+                    }
+                }
+
+                Map<String, URITemplate> uriTemplateMap = new HashMap<>();
+                for (URITemplate urlMapping : urlMappingList) {
+                    if (urlMapping.getScope() != null) {
+                        URITemplate urlMappingNew = urlMapping;
+                        URITemplate urlMappingExisting =  uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting != null && urlMappingExisting.getScopes() != null) {
+                            if (!urlMappingExisting.getScopes().contains(urlMapping.getScope())) {
+                                urlMappingExisting.setScopes(urlMapping.getScope());
+                                uriTemplateMap.put(urlMappingExisting.getUriTemplate() + urlMappingExisting.getHTTPVerb(),
+                                        urlMappingExisting);
+                            }
+                        } else {
+                            urlMappingNew.setScopes(urlMapping.getScope());
+                            uriTemplateMap.put(urlMappingNew.getUriTemplate() + urlMappingNew.getHTTPVerb(), urlMappingNew);
+                        }
+                    } else if (urlMapping.getId() != 0 ) {
+                        URITemplate urlMappingExisting =  uriTemplateMap.get(urlMapping.getUriTemplate()
+                                + urlMapping.getHTTPVerb());
+                        if (urlMappingExisting == null) {
+                            uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                        }
+                    } else {
+                        uriTemplateMap.put(urlMapping.getUriTemplate() + urlMapping.getHTTPVerb(), urlMapping);
+                    }
+                }
+
+                PreparedStatement insertURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_URL_MAPPINGS);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    insertURLMappingsStatement.setInt(1, urlMapping.getId());
+                    insertURLMappingsStatement.setString(2, urlMapping.getHTTPVerb());
+                    insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
+                    insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
+                    insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.setString(6, apiRevision.getRevisionUUID());
+                    insertURLMappingsStatement.addBatch();
+                }
+                insertURLMappingsStatement.executeBatch();
+
+                // Add to AM_API_RESOURCE_SCOPE_MAPPING table and to AM_API_PRODUCT_MAPPING
+                PreparedStatement getRevisionedURLMappingsStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISIONED_URL_MAPPINGS_ID);
+                PreparedStatement insertScopeResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_SCOPE_RESOURCE_MAPPING);
+                PreparedStatement insertProductResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_REVISION_RESOURCE_MAPPING);
+                for (URITemplate urlMapping : uriTemplateMap.values()) {
+                    getRevisionedURLMappingsStatement.setInt(1, urlMapping.getId());
+                    getRevisionedURLMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                    getRevisionedURLMappingsStatement.setString(3, urlMapping.getHTTPVerb());
+                    getRevisionedURLMappingsStatement.setString(4, urlMapping.getAuthType());
+                    getRevisionedURLMappingsStatement.setString(5, urlMapping.getUriTemplate());
+                    getRevisionedURLMappingsStatement.setString(6, urlMapping.getThrottlingTier());
+                    if (urlMapping.getScopes() != null) {
+                        try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                            while (rs.next()) {
+                                for (Scope scope : urlMapping.getScopes()) {
+                                    insertScopeResourceMappingStatement.setString(1, scope.getKey());
+                                    insertScopeResourceMappingStatement.setInt(2, rs.getInt(1));
+                                    insertScopeResourceMappingStatement.setInt(3, tenantId);
+                                    insertScopeResourceMappingStatement.addBatch();
+                                }
+                            }
+                        }
+                    }
+                    try (ResultSet rs = getRevisionedURLMappingsStatement.executeQuery()) {
+                        while (rs.next()) {
+                            insertProductResourceMappingStatement.setInt(1, apiId);
+                            insertProductResourceMappingStatement.setInt(2, rs.getInt(1));
+                            insertProductResourceMappingStatement.setString(3, apiRevision.getRevisionUUID());
+                            insertProductResourceMappingStatement.addBatch();
+                        }
+                    }
+
+                }
+                insertScopeResourceMappingStatement.executeBatch();
+                insertProductResourceMappingStatement.executeBatch();
+
+                // Adding to AM_API_CLIENT_CERTIFICATE
+                PreparedStatement getClientCertificatesStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES);
+                getClientCertificatesStatement.setInt(1, apiId);
+                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                        clientCertificateDTO.setAlias(rs.getString(1));
+                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                        clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTOS.add(clientCertificateDTO);
+                    }
+                }
+                PreparedStatement insertClientCertificateStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES);
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                    insertClientCertificateStatement.setInt(1, tenantId);
+                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                    insertClientCertificateStatement.setInt(3, apiId);
+                    insertClientCertificateStatement.setBinaryStream(4, getInputStream(clientCertificateDTO.getCertificate()));
+                    insertClientCertificateStatement.setBoolean(5, false);
+                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                    insertClientCertificateStatement.setString(7, apiRevision.getRevisionUUID());
+                    insertClientCertificateStatement.addBatch();
+                }
+                insertClientCertificateStatement.executeBatch();
+
+                // Adding to AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement getGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY);
+                List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
+                getGraphQLComplexityStatement.setInt(1, apiId);
+                try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
+                    while (rs1.next()) {
+                        CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                        customComplexityDetails.setType(rs1.getString("TYPE"));
+                        customComplexityDetails.setField(rs1.getString("FIELD"));
+                        customComplexityDetails.setComplexityValue(rs1.getInt("COMPLEXITY_VALUE"));
+                        customComplexityDetailsList.add(customComplexityDetails);
+                    }
+                }
+
+                PreparedStatement insertGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY);
+                for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
+                    insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
+                    insertGraphQLComplexityStatement.setInt(2, apiId);
+                    insertGraphQLComplexityStatement.setString(3, customComplexityDetails.getType());
+                    insertGraphQLComplexityStatement.setString(4, customComplexityDetails.getField());
+                    insertGraphQLComplexityStatement.setInt(5, customComplexityDetails.getComplexityValue());
+                    insertGraphQLComplexityStatement.setString(6, apiRevision.getRevisionUUID());
+                    insertGraphQLComplexityStatement.addBatch();
+                }
+                insertGraphQLComplexityStatement.executeBatch();
+
+                connection.commit();
+            } catch (SQLException e){
+                connection.rollback();
+                handleException("Failed to add API Revision entry of API Product UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to add API Revision entry of API Product UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    /**
+     * Restore API Product revision database records as the Current API Product of an API Product
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    public void restoreAPIProductRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Retrieve API ID
+                APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
+                int apiId = getAPIID(apiProductIdentifier, connection);
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
+
+                // Removing related current API product entries from AM_API_PRODUCT_MAPPING table
+                PreparedStatement removeProductMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_API_PRODUCT_ID);
+                removeProductMappingsStatement.setInt(1, apiId);
+                removeProductMappingsStatement.executeUpdate();
+
+                // Restoring to AM_API_PRODUCT_MAPPING table
+                PreparedStatement getProductMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.GET_PRODUCT_RESOURCES_BY_REVISION_UUID);
+                getProductMappingsStatement.setInt(1, apiId);
+                getProductMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                List<Integer> urlMappingIds = new ArrayList<>();
+                try (ResultSet rs = getProductMappingsStatement.executeQuery()) {
+                    while (rs.next()) {
+                        urlMappingIds.add(rs.getInt(1));
+                    }
+                }
+
+                PreparedStatement insertProductResourceMappingStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_REVISION_RESOURCE_MAPPING);
+                for (int urlMappingId: urlMappingIds) {
+                    insertProductResourceMappingStatement.setInt(1, apiId);
+                    insertProductResourceMappingStatement.setInt(2, urlMappingId);
+                    insertProductResourceMappingStatement.setString(3, "Current API");
+                    insertProductResourceMappingStatement.addBatch();
+                }
+                insertProductResourceMappingStatement.executeBatch();
+
+                // Restoring AM_API_CLIENT_CERTIFICATE table entries
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID);
+                removeClientCertificatesStatement.setInt(1, apiId);
+                removeClientCertificatesStatement.executeUpdate();
+
+                PreparedStatement getClientCertificatesStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_CLIENT_CERTIFICATES_BY_REVISION_UUID);
+                getClientCertificatesStatement.setInt(1, apiId);
+                getClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                List<ClientCertificateDTO> clientCertificateDTOS = new ArrayList<>();
+                try (ResultSet rs = getClientCertificatesStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ClientCertificateDTO clientCertificateDTO = new ClientCertificateDTO();
+                        clientCertificateDTO.setAlias(rs.getString(1));
+                        clientCertificateDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream(2)));
+                        clientCertificateDTO.setTierName(rs.getString(3));
+                        clientCertificateDTOS.add(clientCertificateDTO);
+                    }
+                }
+                PreparedStatement insertClientCertificateStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API);
+                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                    insertClientCertificateStatement.setInt(1, tenantId);
+                    insertClientCertificateStatement.setString(2, clientCertificateDTO.getAlias());
+                    insertClientCertificateStatement.setInt(3, apiId);
+                    insertClientCertificateStatement.setBinaryStream(4, getInputStream(clientCertificateDTO.getCertificate()));
+                    insertClientCertificateStatement.setBoolean(5, false);
+                    insertClientCertificateStatement.setString(6, clientCertificateDTO.getTierName());
+                    insertClientCertificateStatement.setString(7, "Current API");
+                    insertClientCertificateStatement.addBatch();
+                }
+                insertClientCertificateStatement.executeBatch();
+
+                // Restoring AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID);
+                removeGraphQLComplexityStatement.setInt(1, apiId);
+                removeGraphQLComplexityStatement.executeUpdate();
+
+                PreparedStatement getGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<>();
+                getGraphQLComplexityStatement.setInt(1, apiId);
+                getGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
+                try (ResultSet rs1 = getGraphQLComplexityStatement.executeQuery()) {
+                    while (rs1.next()) {
+                        CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                        customComplexityDetails.setType(rs1.getString("TYPE"));
+                        customComplexityDetails.setField(rs1.getString("FIELD"));
+                        customComplexityDetails.setComplexityValue(rs1.getInt("COMPLEXITY_VALUE"));
+                        customComplexityDetailsList.add(customComplexityDetails);
+                    }
+                }
+
+                PreparedStatement insertGraphQLComplexityStatement = connection
+                        .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_GRAPHQL_COMPLEXITY_AS_CURRENT_API);
+                for (CustomComplexityDetails customComplexityDetails : customComplexityDetailsList) {
+                    insertGraphQLComplexityStatement.setString(1, UUID.randomUUID().toString());
+                    insertGraphQLComplexityStatement.setInt(2, apiId);
+                    insertGraphQLComplexityStatement.setString(3, customComplexityDetails.getType());
+                    insertGraphQLComplexityStatement.setString(4, customComplexityDetails.getField());
+                    insertGraphQLComplexityStatement.setInt(5, customComplexityDetails.getComplexityValue());
+                    insertGraphQLComplexityStatement.addBatch();
+                }
+                insertGraphQLComplexityStatement.executeBatch();
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to restore API Revision entry of API UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to restore API Revision entry of API UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    /**
+     * Delete API Product revision database records
+     *
+     * @param apiRevision content of the revision
+     * @throws APIManagementException if an error occurs when restoring an API revision
+     */
+    public void deleteAPIProductRevision(APIRevision apiRevision) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                // Retrieve API ID
+                APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
+                int apiId = getAPIID(apiProductIdentifier, connection);
+                int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(apiProductIdentifier.getProviderName()));
+
+                // Removing related revision entries from AM_REVISION table
+                PreparedStatement removeAMRevisionStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.DELETE_API_REVISION);
+                removeAMRevisionStatement.setString(1, apiRevision.getRevisionUUID());
+                removeAMRevisionStatement.executeUpdate();
+
+                // Removing related revision entries from AM_API_PRODUCT_MAPPING table
+                PreparedStatement removeProductMappingsStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_REVISION_UUID);
+                removeProductMappingsStatement.setInt(1, apiId);
+                removeProductMappingsStatement.setString(2, apiRevision.getRevisionUUID());
+                removeProductMappingsStatement.executeUpdate();
+
+                // Removing related revision entries from AM_API_CLIENT_CERTIFICATE table
+                PreparedStatement removeClientCertificatesStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID);
+                removeClientCertificatesStatement.setInt(1, apiId);
+                removeClientCertificatesStatement.setString(2, apiRevision.getRevisionUUID());
+                removeClientCertificatesStatement.executeUpdate();
+
+                // Removing related revision entries from AM_GRAPHQL_COMPLEXITY table
+                PreparedStatement removeGraphQLComplexityStatement = connection.prepareStatement(SQLConstants
+                        .APIRevisionSqlConstants.REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID);
+                removeGraphQLComplexityStatement.setInt(1, apiId);
+                removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
+                removeGraphQLComplexityStatement.executeUpdate();
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete API Revision entry of API Product UUID "
+                        + apiRevision.getApiUUID(), e);
+            }
+        } catch (SQLException e) {
+            handleException("Failed to delete API Revision entry of API Product UUID "
+                    + apiRevision.getApiUUID(), e);
+        }
+    }
+
+    /**
+     * Retrieve Service Info and Set it to API
+     *
+     * @param api API Object
+     * @param apiId Internal Unique API Id
+     * @throws APIManagementException
+     */
+    public void setServiceStatusInfoToAPI(API api, int apiId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                     .GET_MD5_VALUE_OF_SERVICE_BY_API_ID_SQL)) {
+            preparedStatement.setInt(1, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    JSONObject serviceInfo = new JSONObject();
+                    serviceInfo.put("key", resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY));
+                    serviceInfo.put("name", resultSet.getString(APIConstants.ServiceCatalogConstants
+                            .SERVICE_NAME));
+                    serviceInfo.put("version", resultSet.getString(APIConstants.ServiceCatalogConstants
+                            .SERVICE_VERSION));
+                    serviceInfo.put("md5", resultSet.getString("API_SERVICE_MD5"));
+                    if (resultSet.getString("SERVICE_MD5").equals(resultSet
+                            .getString("API_SERVICE_MD5"))) {
+                        serviceInfo.put("outdated", false);
+                    } else {
+                        serviceInfo.put("outdated", true);
+                    }
+                    api.setServiceInfo(serviceInfo);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the service status associated with the API - "
+                    + api.getId().getApiName() + "-" + api.getId().getVersion(), e);
+        }
+    }
+
+    private void addAPIServiceMapping(int apiId, String serviceKey, String md5sum, int tenantId,
+                                      Connection connection) throws SQLException {
+        String addAPIServiceMappingSQL = SQLConstants.ADD_API_SERVICE_MAPPING_SQL;
+        try (PreparedStatement preparedStatement = connection.prepareStatement(addAPIServiceMappingSQL)) {
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setString(2, serviceKey);
+            preparedStatement.setString(3, md5sum);
+            preparedStatement.setInt(4, tenantId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Retrieve the Unique Identifier of the Service used in API
+     *
+     * @param apiId Unique Identifier of API
+     * @param tenantId Tenant ID
+     * @return Service Key
+     * @throws APIManagementException
+     */
+    public String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException {
+        String retrieveServiceKeySQL = SQLConstants.GET_SERVICE_KEY_BY_API_ID_SQL;
+        String serviceKey = StringUtils.EMPTY;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(retrieveServiceKeySQL)) {
+            preparedStatement.setInt(1, apiId);
+            preparedStatement.setInt(2, tenantId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    serviceKey = resultSet.getString(APIConstants.ServiceCatalogConstants.SERVICE_KEY);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Service Key associated with API " + apiId, e);
+        }
+        return serviceKey;
+    }
+
+    /**
+     * Update API Service Mapping entry in AM_API_SERVICE_MAPPING
+     *
+     * @param apiId      Unique Identifier of API
+     * @param serviceKey Unique key of the Service
+     * @param md5        MD5 value of the Service
+     * @throws SQLException
+     */
+    public void updateAPIServiceMapping(int apiId, String serviceKey, String md5, Connection connection)
+            throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_API_SERVICE_MAPPING_SQL)) {
+            statement.setString(1, serviceKey);
+            statement.setString(2, md5);
+            statement.setInt(3, apiId);
+            statement.executeUpdate();
         }
     }
 }

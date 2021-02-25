@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -30,14 +31,17 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -56,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.Arrays;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
@@ -63,6 +68,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.GraphqlQueryAnalysisMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.AsyncAPIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -90,36 +96,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid",
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
-            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
 
             //revert content search back to normal search by name to avoid doc result complexity and to comply with REST api practices
-            if (newSearchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=")) {
-                newSearchQuery = newSearchQuery
-                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + "=", APIConstants.NAME_TYPE_PREFIX + "=");
-            }
-            // Append LC state query criteria if the search is not doc or subcontext
-            // based
-            if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
-                    !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
-                boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-
-                String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };
-                if (displayAPIsWithMultipleStatus) {
-                    statusList = new String[] { APIConstants.PUBLISHED, APIConstants.PROTOTYPED,
-                            APIConstants.DEPRECATED };
-                }
-
-                String enableStoreCriteria = APIConstants.ENABLE_STORE_SEARCH_TYPE_KEY;
-                newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + enableStoreCriteria;
-
-                String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
-                lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
-
-                newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
+            if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
+                query = query
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
-            Map allMatchedApisMap = apiConsumer
-                    .searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset, limit, false);
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(query, requestedTenantDomain, offset,
+                    limit);
+            
+
             Set<Object> sortedSet = (Set<Object>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<Object> allMatchedApis = new ArrayList<>(sortedSet);
 
@@ -172,7 +159,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 GraphqlComplexityInfo graphqlComplexityInfo = apiConsumer.getComplexityDetails(apiIdentifier);
                 GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
@@ -204,7 +191,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
-            API api = apiConsumer.getAPIbyUUID(apiId, tenantDomain);
+            API api = apiConsumer.getLightweightAPIByUUID(apiId, tenantDomain);
             if (APIConstants.GRAPHQL_API.equals(api.getType())) {
                 String schemaContent = apiConsumer.getGraphqlSchema(apiIdentifier);
                 List<GraphqlSchemaType> typeList = graphql.extractGraphQLTypeList(schemaContent);
@@ -238,7 +225,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId,
                     requestedTenantDomain);
-            String graphQLSchema = apiConsumer.getGraphqlSchema(apiIdentifier);
+            String graphQLSchema = apiConsumer.getGraphqlSchemaDefinition(apiId, requestedTenantDomain);
             return Response.ok().entity(graphQLSchema).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -254,7 +241,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response addCommentToAPI(String apiId, CommentDTO body, MessageContext messageContext) {
+    public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo,
+                                    MessageContext messageContext) throws APIManagementException{
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -266,9 +254,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
             }
-            Comment comment = CommentMappingUtil.fromDTOToComment(body, username, apiId);
+            Comment comment = new Comment();
+            comment.setText(postRequestBodyDTO.getContent());
+            comment.setCategory(postRequestBodyDTO.getCategory());
+            comment.setParentCommentID(replyTo);
+            comment.setEntryPoint("devPortal");
+            comment.setUser(username);
+            comment.setApiId(apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
-            Comment createdComment = apiConsumer.getComment(identifier, createdCommentId);
+            Comment createdComment = apiConsumer.getComment(apiTypeWrapper, createdCommentId, 0, 0);
             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
@@ -282,28 +276,28 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comment content location for API " + apiId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            throw new APIManagementException("Error while retrieving comment content location for API " + apiId);
         }
         return null;
     }
 
     @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
-                                        Boolean includeCommenterInfo, MessageContext messageContext) {
+                                        Boolean includeCommenterInfo, MessageContext messageContext)
+            throws APIManagementException{
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-
-            Comment[] comments = apiConsumer.getComments(apiTypeWrapper);
+            String parentCommentID = null;
+            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
                     includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
-            return Response.created(uri).entity(commentDTO).build();
+            return Response.ok(uri).entity(commentDTO).build();
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -320,19 +314,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                    Boolean includeCommenterInfo, MessageContext messageContext) {
+                                    Boolean includeCommenterInfo, Integer limit, Integer offset,
+                                    MessageContext messageContext) throws APIManagementException{
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Identifier identifier;
-            if (apiTypeWrapper.isAPIProduct()) {
-                identifier = apiTypeWrapper.getApiProduct().getId();
-            } else {
-                identifier = apiTypeWrapper.getApi().getId();
-            }
-
-            Comment comment = apiConsumer.getComment(identifier, commentId);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, limit, offset);
 
             if (comment != null) {
                 CommentDTO commentDTO;
@@ -346,7 +334,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                         RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
                 URI uri = new URI(uriString);
-                return Response.created(uri).entity(commentDTO).build();
+                return Response.ok(uri).entity(commentDTO).build();
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
                         String.valueOf(commentId), log);
@@ -368,14 +356,116 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
+                                        Integer offset, String ifNoneMatch, Boolean includeCommenterInfo,
+                                        MessageContext messageContext) throws APIManagementException{
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, commentId);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
+                    includeCommenterInfo);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            URI uri = new URI(uriString);
+            return Response.ok(uri).entity(commentDTO).build();
+
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to get comments of API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comments content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
+                                     MessageContext messageContext) throws APIManagementException{
+        String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                if ( comment.getUser().equals(username)) {
+                    boolean commentEdited = false;
+                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment.getCategory()))){
+                        comment.setCategory(patchRequestBodyDTO.getCategory());
+                        commentEdited = true;
+                    }
+                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment.getText()))){
+                        comment.setText(patchRequestBodyDTO.getContent());
+                        commentEdited = true;
+                    }
+                    if (commentEdited){
+                        if (apiConsumer.editComment(apiTypeWrapper, commentId, comment)){
+                            Comment editedComment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+                            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
-            apiConsumer.deleteComment(apiIdentifier, commentId);
-            return Response.ok("The comment has been deleted").build();
+                            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
+                                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                            URI uri = new URI(uriString);
+                            return Response.ok(uri).entity(commentDTO).build();
+                        }
+                    } else {
+                        return Response.notModified("Not Modified").type(MediaType.APPLICATION_JSON).build();
+                    }
+                } else {
+                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location for API " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext)
+            throws APIManagementException {
+
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+                if ( Arrays.asList(tokenScopes).contains("apim:app_import_export")|| comment.getUser().equals(username)) {
+                    if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("id", commentId);
+                        obj.put("message", "The comment has been deleted");
+                        return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
+                    } else {
+                        return Response.status(405, "Method Not Allowed").type(MediaType.APPLICATION_JSON).build();
+                    }
+                } else {
+                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
@@ -392,10 +482,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
             String ifNoneMatch, MessageContext messageContext) {
-        Documentation documentation;
+
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
-            String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
             if (!APIUtil.isTenantAvailable(requestedTenantDomain)) {
@@ -403,33 +492,30 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
 
-            //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
-
-            documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
-            if (documentation == null) {
+            DocumentationContent docContent = apiConsumer.getDocumentationContent(apiId, documentId,
+                    requestedTenantDomain);
+            if (docContent == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
             }
 
-            if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
-                String resource = documentation.getFilePath();
-                Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, requestedTenantDomain);
-                Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
-                Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
+            // gets the content depending on the type of the document
+            if (docContent.getSourceType().equals(DocumentationContent.ContentSourceType.FILE)) {
+                String contentType = docContent.getResourceFile().getContentType();
                 contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
-                String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
-                return Response.ok(fileDataStream)
+                String name = docContent.getResourceFile().getName();
+                return Response.ok(docContent.getResourceFile().getContent())
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
                         .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
                         .build();
-            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) || documentation.getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
-                String content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
+            } else if (docContent.getSourceType().equals(DocumentationContent.ContentSourceType.INLINE)
+                    || docContent.getSourceType().equals(DocumentationContent.ContentSourceType.MARKDOWN)) {
+                String content = docContent.getTextContent();
                 return Response.ok(content)
                         .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
                         .build();
-            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
-                String sourceUrl = documentation.getSourceUrl();
+            } else if (docContent.getSourceType().equals(DocumentationContent.ContentSourceType.URL)) {
+                String sourceUrl = docContent.getTextContent();
                 return Response.seeOther(new URI(sourceUrl)).build();
             }
         } catch (APIManagementException e) {
@@ -467,7 +553,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
-            documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
+            documentation = apiConsumer.getDocumentation(apiId, documentId, requestedTenantDomain);
             if (null != documentation) {
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();
@@ -506,9 +592,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             //this will fail if user doesn't have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
+            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
 
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
+            //List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiId, requestedTenantDomain);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
 
@@ -657,6 +744,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+            if (api.getUuid() == null) {
+                api.setUuid(apiId);
+            }
+
+            if (api.getSwaggerDefinition() != null) {
+                api.setSwaggerDefinition(APIUtil.removeXMediationScriptsFromSwagger(api.getSwaggerDefinition()));
+            } else {
+                api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, requestedTenantDomain));
+            }
 
             // gets the first available environment if any of label, environment or cluster name is not provided
             if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
@@ -692,7 +788,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiSwagger = null;
             if (StringUtils.isNotEmpty(environmentName)) {
                 try {
-                    apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api.getId(), environmentName);
+                    apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
                 } catch (APIManagementException e) {
                     // handle gateway not found exception otherwise pass it
                     if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -703,11 +799,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                     throw e;
                 }
             } else if (StringUtils.isNotEmpty(labelName)) {
-                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api.getId(), labelName);
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api, labelName);
             } else if (StringUtils.isNotEmpty(clusterName)) {
-                apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api.getId(), clusterName);
+                apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api, clusterName);
             } else {
-                apiSwagger = apiConsumer.getOpenAPIDefinition(api.getId());
+                apiSwagger = api.getSwaggerDefinition();
             }
 
             return Response.ok().entity(apiSwagger).header("Content-Disposition",
@@ -738,8 +834,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         ExceptionCodes.INVALID_TENANT.getErrorCode(), log);
             }
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, requestedTenantDomain);
-            ResourceFile thumbnailResource = apiConsumer.getIcon(apiIdentifier);
+            apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
+            ResourceFile thumbnailResource = apiConsumer.getIcon(apiId, requestedTenantDomain);
 
             if (thumbnailResource != null) {
                 return Response
@@ -760,6 +856,36 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
+    public Response apisApiIdTopicsGet(String apiId, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(apiId)) {
+            String username = RestApiCommonUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+            Set<Topic> topics;
+            try {
+                APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+                ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, tenantDomain);
+                TopicListDTO topicListDTO;
+                if (apiTypeWrapper.isAPIProduct()) {
+                    topics = apiConsumer.getTopics(apiTypeWrapper.getApiProduct().getUuid());
+                } else {
+                    topics = apiConsumer.getTopics(apiTypeWrapper.getApi().getUuid());
+                }
+                topicListDTO = AsyncAPIMappingUtil.fromTopicListToDTO(topics);
+                return Response.ok().entity(topicListDTO).build();
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Failed to get topics of Async API " + apiId, e, log);
+                }
+            }
+        } else {
+            RestApiUtil.handleBadRequest("API Id is missing in request", log);
         }
         return null;
     }
@@ -929,8 +1055,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        API api = apiConsumer.getLightweightAPIByUUID(apiId, xWSO2Tenant);
+        API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
         APIIdentifier apiIdentifier = api.getId();
 
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
@@ -948,11 +1075,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (selectedEnvironment == null) {
-                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.INVALID_GATEWAY_ENVIRONMENT,
                         environmentName));
             }
-            ResourceFile wsdl = apiConsumer.getWSDL(apiIdentifier, selectedEnvironment.getName(),
-                    selectedEnvironment.getType());
+            ResourceFile wsdl = apiConsumer.getWSDL(api, selectedEnvironment.getName(), selectedEnvironment.getType(),
+                    requestedTenantDomain);
 
             return RestApiUtil.getResponseFromResourceFile(apiIdentifier.toString(), wsdl);
         } else {
@@ -1004,7 +1131,11 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
-                return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+
+                APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
+                List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apiId);
+                apidto.setEndpointURLs(APIMappingUtil.fromAPIRevisionListToEndpointsList(apidto, revisionDeployments));
+                return apidto;
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }

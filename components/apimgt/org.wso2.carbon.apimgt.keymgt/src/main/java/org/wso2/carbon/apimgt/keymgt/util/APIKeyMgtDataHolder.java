@@ -23,7 +23,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.token.JWTGenerator;
 import org.wso2.carbon.apimgt.keymgt.token.TokenGenerator;
@@ -73,7 +74,7 @@ public class APIKeyMgtDataHolder {
                 log.error("API Manager configuration is not initialized");
             } else {
 
-                JWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
+                ExtendedJWTConfigurationDto jwtConfigurationDto = configuration.getJwtConfigurationDto();
                 if (log.isDebugEnabled()) {
                     log.debug("JWTGeneration enabled : " + jwtConfigurationDto.isEnabled());
                 }

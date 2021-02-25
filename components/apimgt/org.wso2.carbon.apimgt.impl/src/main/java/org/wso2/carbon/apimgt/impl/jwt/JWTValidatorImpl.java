@@ -28,12 +28,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
-import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.jwt.transformer.DefaultJWTTransformer;
-import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 
 import java.io.IOException;
@@ -59,26 +61,34 @@ public class JWTValidatorImpl implements JWTValidator {
             state = validateSignature(signedJWTInfo.getSignedJWT());
             if (state) {
                 JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-                state = validateTokenExpiry(jwtClaimsSet);
+                state = signedJWTInfo.isValidCertificateBoundAccessToken();
                 if (state) {
-                    jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
-                    jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
-                    jwtValidationInfo.setAppToken(getIsAppToken(jwtClaimsSet));
-                    JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
-                    createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
-                    jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
-                    return jwtValidationInfo;
+                    state = validateTokenExpiry(jwtClaimsSet);
+                    if (state) {
+                        jwtValidationInfo.setConsumerKey(getConsumerKey(jwtClaimsSet));
+                        jwtValidationInfo.setScopes(getScopes(jwtClaimsSet));
+                        jwtValidationInfo.setAppToken(getIsAppToken(jwtClaimsSet));
+                        JWTClaimsSet transformedJWTClaimSet = transformJWTClaims(jwtClaimsSet);
+                        createJWTValidationInfoFromJWT(jwtValidationInfo, transformedJWTClaimSet);
+                        jwtValidationInfo.setRawPayload(signedJWTInfo.getToken());
+                        return jwtValidationInfo;
+                    } else {
+                        jwtValidationInfo.setValid(false);
+                        jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                        return jwtValidationInfo;
+                    }
                 } else {
                     jwtValidationInfo.setValid(false);
                     jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                     return jwtValidationInfo;
+
                 }
             } else {
                 jwtValidationInfo.setValid(false);
                 jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return jwtValidationInfo;
             }
-        } catch (ParseException e) {
+        } catch (ParseException | JWTGeneratorException e) {
             throw new APIManagementException("Error while parsing JWT", e);
         }
     }
@@ -145,22 +155,22 @@ public class JWTValidatorImpl implements JWTValidator {
         return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
     }
 
-    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.transform(jwtClaimsSet);
     }
 
-    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
     }
 
-    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedScopes(jwtClaimsSet);
     }
 
-    protected Boolean getIsAppToken(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected Boolean getIsAppToken(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedIsAppTokenType(jwtClaimsSet);
     }

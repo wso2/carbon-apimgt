@@ -42,12 +42,15 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -96,6 +99,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private OpenAPI openAPI;
     private String keyManagers;
     private List<String> keyManagersList = new ArrayList<>();
+    private final String type = ExtensionType.AUTHENTICATION.toString();
+
     public String getApiUUID() {
         return apiUUID;
     }
@@ -308,6 +313,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
@@ -333,12 +339,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
 
-            if (authenticators.isEmpty()) {
-                initializeAuthenticators();
-            }
-            if (isAuthenticate(messageContext)) {
-                setAPIParametersToMessageContext(messageContext);
-                return true;
+            if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
+                if (authenticators.isEmpty()) {
+                    initializeAuthenticators();
+                }
+                try {
+                    if (isAuthenticate(messageContext)) {
+                        setAPIParametersToMessageContext(messageContext);
+                        return ExtensionListenerUtil.postProcessRequest(messageContext, type);
+                    }
+                } catch (APIManagementException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Authentication of message context failed", e);
+                    }
+                }
             }
         } catch (APISecurityException e) {
 
@@ -346,30 +360,30 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
             }
             if (log.isDebugEnabled()) {
-                // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
-                // to all the gateway calls that is happening.
-                endTime = System.nanoTime();
-                difference = (endTime - startTime) / 1000000;
-                String messageDetails = logMessageDetails(messageContext);
-                log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
-                        difference / 1000000);
-            }
-
-            String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
-
-            if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
-                log.error("API authentication failure due to "
-                        + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
-            } else {
-                // We do not need to log known authentication failures as errors since these are not product errors.
-                log.warn("API authentication failure due to " + errorMessage);
-
-                if (log.isDebugEnabled()) {
-                    log.debug("API authentication failed with error " + e.getErrorCode(), e);
+                    // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
+                    // to all the gateway calls that is happening.
+                    endTime = System.nanoTime();
+                    difference = (endTime - startTime) / 1000000;
+                    String messageDetails = logMessageDetails(messageContext);
+                    log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
+                            difference / 1000000);
                 }
-            }
 
-            handleAuthFailure(messageContext, e);
+                String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
+
+                if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
+                    log.error("API authentication failure due to "
+                            + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                } else {
+                    // We do not need to log known authentication failures as errors since these are not product errors.
+                    log.warn("API authentication failure due to " + errorMessage);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("API authentication failed with error " + e.getErrorCode(), e);
+                    }
+                }
+
+                handleAuthFailure(messageContext, e);
         } finally {
             if (Util.tracingEnabled()) {
                 Util.finishSpan(keySpan);
@@ -379,7 +393,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             stopMetricTimer(context);
 
         }
-
         return false;
     }
 
@@ -400,7 +413,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @return true if the authentication is successful (never returns false)
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException {
+    protected boolean isAuthenticate(MessageContext messageContext) throws APISecurityException, APIManagementException {
         boolean authenticated = false;
         AuthenticationResponse authenticationResponse;
         List<AuthenticationResponse> authResponses = new ArrayList<>();
@@ -471,7 +484,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
-        return true;
+
+        if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            return ExtensionListenerUtil.postProcessResponse(messageContext, type);
+        }
+        return false;
+
     }
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
@@ -646,26 +664,16 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
         //if publisher is null,extract the publisher from the api_version
         if (apiPublisher == null) {
-            int ind = apiVersion.indexOf("--");
-            apiPublisher = apiVersion.substring(0, ind);
-            if (apiPublisher.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiPublisher = apiPublisher
-                        .replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT, APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-        }
-        int index = apiVersion.indexOf("--");
-
-        if (index != -1) {
-            apiVersion = apiVersion.substring(index + 2);
+            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(context, version,
+                    GatewayUtils.getTenantDomain());
         }
 
-        String api = apiVersion.split(":")[0];
-        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String api = GatewayUtils.getAPINameFromContextAndVersion(context,version,GatewayUtils.getTenantDomain());
         String resource = extractResource(messageContext);
         String method = (String) (axis2MsgContext.getProperty(
                 Constants.Configuration.HTTP_METHOD));
@@ -674,7 +682,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         messageContext.setProperty(APIMgtGatewayConstants.CONSUMER_KEY, consumerKey);
         messageContext.setProperty(APIMgtGatewayConstants.USER_ID, username);
         messageContext.setProperty(APIMgtGatewayConstants.CONTEXT, context);
-        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, apiVersion);
+        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, version);
         messageContext.setProperty(APIMgtGatewayConstants.API, api);
         messageContext.setProperty(APIMgtGatewayConstants.VERSION, version);
         messageContext.setProperty(APIMgtGatewayConstants.RESOURCE, resource);

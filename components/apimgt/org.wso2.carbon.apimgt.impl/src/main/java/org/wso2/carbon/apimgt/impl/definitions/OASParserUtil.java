@@ -80,6 +80,7 @@ import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
@@ -87,6 +88,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -420,7 +422,14 @@ public class OASParserUtil {
                         for (String refKey : refCategoryEntry.getValue()) {
                             Parameter parameter = parameters.get(refKey);
                             Content content = parameter.getContent();
-                            extractReferenceFromContent(content, context);
+                            if (content != null) {
+                                extractReferenceFromContent(content, context);
+                            } else {
+                                String ref = parameter.get$ref();
+                                if (ref != null) {
+                                    extractReferenceWithoutSchema(ref, context);
+                                }
+                            }
                         }
                     }
                 }
@@ -607,9 +616,17 @@ public class OASParserUtil {
     private static void setRefOfParameters(List<Parameter> parameters, SwaggerUpdateContext context) {
         if (parameters != null) {
             for (Parameter parameter : parameters) {
-                String ref = parameter.getSchema().get$ref();
-                if (ref != null) {
-                    addToReferenceObjectMap(ref, context);
+                Schema schema = parameter.getSchema();
+                if (schema != null) {
+                    String ref = schema.get$ref();
+                    if (ref != null) {
+                        addToReferenceObjectMap(ref, context);
+                    }
+                } else {
+                    String ref = parameter.get$ref();
+                    if (ref != null) {
+                        extractReferenceWithoutSchema(ref, context);
+                    }
                 }
             }
         }
@@ -622,6 +639,12 @@ public class OASParserUtil {
 
                 extractReferenceFromSchema(schema, context);
             }
+        }
+    }
+
+    private static void extractReferenceWithoutSchema(String reference, SwaggerUpdateContext context) {
+        if (reference != null) {
+            addToReferenceObjectMap(reference, context);
         }
     }
 
@@ -919,9 +942,14 @@ public class OASParserUtil {
     public static Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry)
             throws APIManagementException {
         Map<String, String> timeStampMap = new HashMap<String, String>();
-        String resourcePath =
-                APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(), apiIdentifier.getVersion(),
-                        apiIdentifier.getProviderName());
+        String resourcePath;
+        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
+        } else {
+            resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                    apiIdentifier.getProviderName());
+        }
         try {
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
                 Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
@@ -999,8 +1027,13 @@ public class OASParserUtil {
         String resourcePath = "";
 
         if (apiIdentifier instanceof APIIdentifier) {
-            resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                    apiIdentifier.getProviderName());
+            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
+            if (apiRevision != null && apiRevision.getApiUUID() != null) {
+                resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
+            } else {
+                resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
+                        apiIdentifier.getProviderName());
+            }
         } else if (apiIdentifier instanceof APIProductIdentifier) {
             resourcePath =
                     APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
@@ -1324,7 +1357,7 @@ public class OASParserUtil {
      * This method will change the given definition
      *
      * @param swaggerContent String
-     * @return String
+     * @return swagger definition as String
      */
     public static String preProcess(String swaggerContent) throws APIManagementException {
         //Load required properties from swagger to the API
@@ -1352,7 +1385,7 @@ public class OASParserUtil {
      * This method returns extension of throttling tier related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return String
+     * @return throttling tier as String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getThrottleTierFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1364,7 +1397,7 @@ public class OASParserUtil {
      * This method returns extension of transports(http,https) related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return String
+     * @return transport type as String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getTransportsFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1384,7 +1417,7 @@ public class OASParserUtil {
      * This method returns extension of mutualSSL related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return String
+     * @return mutualSSL value as String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getMutualSSLEnabledFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1396,7 +1429,7 @@ public class OASParserUtil {
      * This method returns extension of CORS config related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return CORSConfiguration
+     * @return CORSConfiguration object with configurations
      * @throws APIManagementException throws if an error occurred
      */
     public static CORSConfiguration getCorsConfigFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1431,7 +1464,7 @@ public class OASParserUtil {
      * This method returns extension of responseCache enabling check related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return boolean
+     * @return response cache enable or disable as boolean
      * @throws APIManagementException throws if an error occurred
      */
     public static boolean getResponseCacheFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1449,7 +1482,7 @@ public class OASParserUtil {
      * This method returns extension of cache timeout related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return int
+     * @return cache timeout value as int
      * @throws APIManagementException throws if an error occurred
      */
     public static int getCacheTimeOutFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1467,7 +1500,7 @@ public class OASParserUtil {
      * This method returns extension of custom authorization Header related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return String
+     * @return authorization header value as String
      * @throws APIManagementException throws if an error occurred
      */
     public static String getAuthorizationHeaderFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1479,7 +1512,7 @@ public class OASParserUtil {
      * This method returns extension of custom authorization Header related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return String
+     * @return security disable or enable value as String
      * @throws APIManagementException throws if an error occurred
      */
     public static boolean getDisableSecurity(Map<String, Object> extensions) throws APIManagementException {
@@ -1494,7 +1527,7 @@ public class OASParserUtil {
      * This method returns extension of application security types related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return String
+     * @return application security types as String
      * @throws APIManagementException throws if an error occurred
      */
     public static List<String> getApplicationSecurityTypes(Map<String, Object> extensions) throws APIManagementException {
@@ -1512,7 +1545,7 @@ public class OASParserUtil {
      * This method returns extension of application security types state related to micro-gw
      *
      * @param extensions Map<String, Object>
-     * @return boolean
+     * @return application security state as boolean
      * @throws APIManagementException throws if an error occurred
      */
     public static boolean getAppSecurityStateFromSwagger(Map<String, Object> extensions) throws APIManagementException {
@@ -1524,6 +1557,46 @@ public class OASParserUtil {
             appSecurityState = Boolean.parseBoolean(String.valueOf(appSecurityTypesNode.get("optional")));
         }
         return appSecurityState;
+    }
+
+    public static void copyOperationVendorExtensions(Map<String, Object> existingExtensions,
+                                                     Map<String, Object> updatedVendorExtensions) {
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AUTH_TYPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, existingExtensions
+                    .get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_WSO2_SECURITY, existingExtensions
+                    .get(APIConstants.SWAGGER_X_WSO2_SECURITY));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_SCOPE) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_SCOPE, existingExtensions
+                    .get(APIConstants.SWAGGER_X_SCOPE));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+        }
+        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT) != null) {
+            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, existingExtensions
+                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT));
+        }
+        if (existingExtensions.get(APIConstants.X_WSO2_APP_SECURITY) != null) {
+            updatedVendorExtensions.put(APIConstants.X_WSO2_APP_SECURITY, existingExtensions
+                    .get(APIConstants.X_WSO2_APP_SECURITY));
+        }
     }
 
 }

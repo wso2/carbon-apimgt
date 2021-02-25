@@ -7,10 +7,14 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.GraphQLSchemaTypeListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PatchRequestBodyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PostRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ThrottlingPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.TopicListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApisApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -59,8 +63,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Comment object that should to be added " ,required=true) CommentDTO commentDTO) throws APIManagementException{
-        return delegate.addCommentToAPI(apiId, commentDTO, securityContext);
+    public Response addCommentToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) PostRequestBodyDTO postRequestBodyDTO,  @ApiParam(value = "ID of the perent comment. ")  @QueryParam("replyTo") String replyTo) throws APIManagementException{
+        return delegate.addCommentToAPI(apiId, postRequestBodyDTO, replyTo, securityContext);
     }
 
     @GET
@@ -139,14 +143,14 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @GET
     @Path("/{apiId}/graphql-policies/complexity")
     
-    
-    @ApiOperation(value = "Get the Complexity Related Details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = Void.class, authorizations = {
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the Complexity Related Details of an API", notes = "This operation can be used to retrieve complexity related details belonging to an API by providing the API id. ", response = GraphQLQueryComplexityInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
     }, tags={ "GraphQL Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested complexity details returned. ", response = Void.class),
+        @ApiResponse(code = 200, message = "OK. Requested complexity details returned. ", response = GraphQLQueryComplexityInfoDTO.class),
         @ApiResponse(code = 404, message = "Not Found. Requested API does not contain any complexity details. ", response = Void.class) })
     public Response apisApiIdGraphqlPoliciesComplexityGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.apisApiIdGraphqlPoliciesComplexityGet(apiId, securityContext);
@@ -274,6 +278,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.apisApiIdThumbnailGet(apiId, xWSO2Tenant, ifNoneMatch, securityContext);
     }
 
+    @GET
+    @Path("/{apiId}/topics")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get a list of available topics for a given async API ", notes = "This operation will provide a list of topics available for a given Async API, based on the provided API ID. ", response = TopicListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Topics",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Topic list returned. ", response = TopicListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response apisApiIdTopicsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.apisApiIdTopicsGet(apiId, xWSO2Tenant, securityContext);
+    }
+
     @DELETE
     @Path("/{apiId}/user-rating")
     
@@ -357,6 +378,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
         return delegate.deleteComment(commentId, apiId, ifMatch, securityContext);
     }
 
+    @PATCH
+    @Path("/{apiId}/comments/{commentId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Edit a comment", notes = "Edit the individual comment ", response = CommentDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "Comments",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Comment updated. ", response = CommentDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
+    public Response editCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "" ,required=true) PatchRequestBodyDTO patchRequestBodyDTO) throws APIManagementException{
+        return delegate.editCommentOfAPI(commentId, apiId, patchRequestBodyDTO, securityContext);
+    }
+
     @GET
     @Path("/{apiId}/comments")
     
@@ -389,8 +429,27 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo) throws APIManagementException{
-        return delegate.getCommentOfAPI(commentId, apiId, xWSO2Tenant, ifNoneMatch, includeCommenterInfo, securityContext);
+    public Response getCommentOfAPI(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo,  @ApiParam(value = "Maximum size of replies array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("replyLimit") Integer replyLimit,  @ApiParam(value = "Starting point within the complete list of replies. ", defaultValue="0") @DefaultValue("0") @QueryParam("replyOffset") Integer replyOffset) throws APIManagementException{
+        return delegate.getCommentOfAPI(commentId, apiId, xWSO2Tenant, ifNoneMatch, includeCommenterInfo, replyLimit, replyOffset, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/comments/{commentId}/replies")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get replies of a comment", notes = "Get replies of a comment ", response = CommentListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Comments",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Comment returned. ", response = CommentListDTO.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
+        @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getRepliesOfComment(@ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId, @ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo) throws APIManagementException{
+        return delegate.getRepliesOfComment(commentId, apiId, xWSO2Tenant, limit, offset, ifNoneMatch, includeCommenterInfo, securityContext);
     }
 
     @GET

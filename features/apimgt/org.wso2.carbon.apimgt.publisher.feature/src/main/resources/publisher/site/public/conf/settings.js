@@ -19,10 +19,26 @@ const AppConfig = {
         },
         singleLogout: {
             enabled: true, // If enabled, user will be logged out from the App when logged out from the IDP (eg: SSO logout from a different App).
-            timeout: 4000 // Defines the timeout for the above periodical session status check
+            timeout: 4000, // Defines the timeout for the above periodical session status check
         },
-        propertyDisplaySuffix: '__display'
-    }
+        propertyDisplaySuffix: '__display',
+    },
+    serviceCatalogDefinitionTypes: {
+        OAS2: 'Swagger',
+        OAS3: 'Open API V3',
+        WSDL1: 'WSDL 1',
+        WSDL2: 'WSDL 2',
+        GRAPHQL_SDL: 'GraphQL SDL',
+        ASYNC_API: 'AsyncAPI',
+    },
+    serviceCatalogSecurityTypes: {
+        BASIC: 'Basic',
+        DIGEST: 'Digest',
+        OAUTH2: 'OAuth2',
+        NONE: 'None',
+        X509: 'X509',
+        API_KEY: 'API Key',
+    },
 };
 
 if (typeof module !== 'undefined') {

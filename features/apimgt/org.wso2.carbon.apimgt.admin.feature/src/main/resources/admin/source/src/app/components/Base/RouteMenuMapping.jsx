@@ -30,7 +30,7 @@ import SubscriptionThrottlingPolicies from 'AppComponents/Throttling/Subscriptio
 import APICategories from 'AppComponents/APICategories/ListApiCategories';
 import BlacklistThrottlingPolicies from 'AppComponents/Throttling/Blacklist/List';
 import ListApplications from 'AppComponents/ApplicationSettings/ListApplications';
-import MicrogatewayLabels from 'AppComponents/MicrogatewayLabels/ListMGLabels';
+import GatewayEnvironments from 'AppComponents/GatewayEnvironments/ListGWEnviornments';
 import AdvancedThrottlePolicies from 'AppComponents/Throttling/Advanced';
 import CustomThrottlingPolicies from 'AppComponents/Throttling/Custom';
 import TenantTheme from 'AppComponents/TenantTheme/UploadTheme';
@@ -176,8 +176,8 @@ const RouteMenuMapping = (intl) => [
             id: 'Base.RouteMenuMapping.gateways',
             defaultMessage: 'Gateways',
         }),
-        path: '/settings/mg-labels',
-        component: MicrogatewayLabels,
+        path: '/settings/environments',
+        component: GatewayEnvironments,
         icon: <GamesIcon />,
     },
     {
@@ -323,7 +323,7 @@ const RouteMenuMapping = (intl) => [
             {
                 id: intl.formatMessage({
                     id: 'Base.RouteMenuMapping.role.permissions',
-                    defaultMessage: 'Role Permissions',
+                    defaultMessage: 'Scope Assignments',
                 }),
                 path: '/settings/scope-mapping',
                 component: ListRoles,

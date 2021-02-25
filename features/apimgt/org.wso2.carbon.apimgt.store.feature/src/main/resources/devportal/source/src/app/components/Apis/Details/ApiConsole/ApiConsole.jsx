@@ -55,9 +55,6 @@ const styles = (theme) => ({
     paper: {
         margin: theme.spacing(1),
         padding: theme.spacing(1),
-        '& span, & h5, & label, & td, & li, & div, & input': {
-            color: theme.palette.getContrastText(theme.palette.background.paper),
-        },
     },
     grid: {
         marginTop: theme.spacing(4),
@@ -172,6 +169,12 @@ class ApiConsole extends React.Component {
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
+
+                let defaultSecurityScheme = 'OAUTH';
+                if (!apiData.securityScheme.includes('oauth2')) {
+                    defaultSecurityScheme = apiData.securityScheme.includes('api_key') ? 'API-KEY' : 'BASIC';
+                }
+
                 this.setState({
                     api: apiData,
                     swagger,
@@ -181,6 +184,7 @@ class ApiConsole extends React.Component {
                     productionAccessToken,
                     sandboxAccessToken,
                     selectedEnvironment,
+                    securitySchemeType: defaultSecurityScheme,
                 });
                 if (user != null) {
                     return this.apiClient.getSubscriptions(apiID);
@@ -441,7 +445,7 @@ class ApiConsole extends React.Component {
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
         return (
             <>
-                <Typography variant='h4' className={classes.titleSub}>
+                <Typography variant='h4' component='h1' className={classes.titleSub}>
                     <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
                 </Typography>
                 <Paper className={classes.paper}>

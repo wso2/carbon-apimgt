@@ -47,7 +47,6 @@ class Avatar extends Component {
         this.handleClose = this.handleClose.bind(this);
     }
 
-
     /**
      * Do OIDC logout redirection
      * @param {React.SyntheticEvent} e Click event of the submit button
@@ -59,21 +58,21 @@ class Avatar extends Component {
 
     /**
      *
+     * Close Avatar dropdown menu
+     * @memberof Avatar
+     */
+    handleClose() {
+        this.setState({ anchorEl: null });
+    }
+
+    /**
+     *
      * Open Avatar dropdown menu
      * @param {React.SyntheticEvent} event `click` event on Avatar
      * @memberof Avatar
      */
     handleClick(event) {
         this.setState({ anchorEl: event.currentTarget });
-    }
-
-    /**
-     *
-     * Close Avatar dropdown menu
-     * @memberof Avatar
-     */
-    handleClose() {
-        this.setState({ anchorEl: null });
     }
 
     /**
