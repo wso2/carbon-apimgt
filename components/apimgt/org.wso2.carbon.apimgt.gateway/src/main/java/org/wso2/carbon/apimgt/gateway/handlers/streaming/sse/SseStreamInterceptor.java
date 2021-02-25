@@ -18,22 +18,25 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.context.MessageContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.transport.passthru.DefaultStreamInterceptor;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.WebsocketUtil;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
+import org.json.JSONObject;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseUtils.isThrottled;
 
 /**
  * This is used for handling throttling, and analytics event publishing of sse apis (subset of streaming apis).
@@ -41,6 +44,15 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConsta
 public class SseStreamInterceptor extends DefaultStreamInterceptor {
 
     private static final Log log = LogFactory.getLog(SseStreamInterceptor.class);
+    private static final String SSE_STREAM_DELIMITER = "\n\n";
+    private static final int DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS = 100;
+    private String charset = StandardCharsets.UTF_8.name();
+    private ExecutorService throttlePublisherService;
+    private int noOfExecutorThreads = DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS;
+
+    public SseStreamInterceptor() {
+        throttlePublisherService = Executors.newFixedThreadPool(noOfExecutorThreads);
+    }
 
     @Override
     public boolean interceptTargetResponse(MessageContext axisCtx) {
@@ -51,57 +63,53 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
     @Override
     public boolean targetResponse(ByteBuffer buffer, MessageContext axis2Ctx) {
         int eventCount = getEventCount(buffer);
-        return handleThrottlingAndAnalytics(eventCount, axis2Ctx);
+        if (log.isDebugEnabled()) {
+            log.debug("No. of events =" + eventCount);
+        }
+        if (eventCount > 0) {
+            return handleThrottlingAndAnalytics(eventCount, axis2Ctx);
+        }
+        return true;
     }
 
-    private int getEventCount(ByteBuffer buffer) {
-        int count = 0;
-        // do process
-        return count;
+    @SuppressWarnings("unused")
+    public void setNoOfExecutorThreads(int executorThreads) {
+        this.noOfExecutorThreads = executorThreads;
+    }
+
+    private int getEventCount(ByteBuffer stream) {
+        Charset charsetValue = Charset.forName(this.charset);
+        String text = charsetValue.decode(stream).toString();
+        return StringUtils.countMatches(text, SSE_STREAM_DELIMITER);
     }
 
     private boolean handleThrottlingAndAnalytics(int eventCount, MessageContext axi2Ctx) {
 
-        boolean throttleResult = false;
         Object throttleObject = axi2Ctx.getProperty(SSE_THROTTLE_DTO);
         if (throttleObject != null) {
-
-            ThrottleDTO throttleDTO = (ThrottleDTO) throttleObject;
-            APIKeyValidationInfoDTO infoDTO = new APIKeyValidationInfoDTO();
-
-            String tenantDomain = infoDTO.getSubscriberTenantDomain();
-            try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                boolean isThrottled = WebsocketUtil.isThrottled(null, null, null);
-                if (isThrottled) {
-                    if (APIUtil.isAnalyticsEnabled()) {
-                        //  dataCollector.collectData();
-                    }
-                    return false;
-                }
-            } finally {
-                PrivilegedCarbonContext.endTenantFlow();
+            String messageId = UIDGenerator.generateURNString();
+            ThrottleInfo throttleInfo = (ThrottleInfo) throttleObject;
+            String remoteIP = throttleInfo.getRemoteIp();
+            JSONObject propertiesMap = new JSONObject();
+            Utils.setRemoteIp(propertiesMap, remoteIP);
+            boolean isThrottled = isThrottled(throttleInfo.getSubscriberTenantDomain(),
+                                              throttleInfo.getResourceLevelThrottleKey(),
+                                              throttleInfo.getSubscriptionLevelThrottleKey(),
+                                              throttleInfo.getApplicationLevelThrottleKey());
+            if (isThrottled) {
+                log.warn("Request is throttled out");
+                return false;
             }
-            Object[] objects =
-                    new Object[] { null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                            null, null, null };
-            org.wso2.carbon.databridge.commons.Event event = new org.wso2.carbon.databridge.commons.Event(
-                    "org.wso2.throttle.request.stream:1.0.0", System.currentTimeMillis(), null, null, objects);
-
-            ThrottleDataPublisher throttleDataPublisher =
-                    ServiceReferenceHolder.getInstance().getThrottleDataPublisher();
-            if (throttleDataPublisher != null) {
-                // todo need to publish per number of events
-                throttleDataPublisher.getDataPublisher().tryPublish(event);
-            } else {
-                log.error("Cannot publish events to traffic manager because ThrottleDataPublisher "
-                                  + "has not been initialised");
-            }
+            throttlePublisherService.execute(
+                    () -> SseUtils.publishNonThrottledEvent(eventCount, messageId, throttleInfo, propertiesMap));
             return true;
         } else {
             log.error("Throttle object cannot be null.");
         }
-        return throttleResult;
+        return true;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 }

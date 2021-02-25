@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer, useContext } from 'react';
+import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
 import { withStyles } from '@material-ui/core/styles';
@@ -26,11 +26,6 @@ import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-
-import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 
 const styles = (theme) => ({
     root: {
@@ -138,8 +133,6 @@ function Topics(props) {
         const { action, value } = configAction;
         switch (action) {
             case 'name':
-            case 'isSubscribe':
-            case 'isPublish':
                 // eslint-disable-next-line no-param-reassign
                 currentState[action] = value;
                 break;
@@ -151,11 +144,9 @@ function Topics(props) {
 
     const { classes, handleAddTopic, handleCancelAddTopic } = props;
     // eslint-disable-next-line no-unused-vars
-    const { api, updateAPI } = useContext(APIContext);
+    // const { api, updateAPI } = useContext(APIContext);
     const [topic, inputsDispatcher] = useReducer(configReducer, {
         name: '',
-        isSubscribe: api.type !== 'WS',
-        isPublish: false,
     });
 
     function handleOnChange(event) {
@@ -179,6 +170,7 @@ function Topics(props) {
                         label={(
                             <>
                                 <FormattedMessage
+                                    id='Apis.Create.Components.NewTopic.topic.name'
                                     defaultMessage='Topic Name'
                                 />
                                 <sup>*</sup>
@@ -188,46 +180,15 @@ function Topics(props) {
                         name='name'
                         margin='normal'
                         variant='outlined'
-                        onChange={(e) => handleOnChange({
-                            name: 'name',
-                            value: e.target.value,
-                        })}
+                        onChange={(e) => {
+                            let { value } = e.target;
+                            if (value.length > 0 && value.substr(0, 1) !== '/') {
+                                value = '/' + value;
+                            }
+                            handleOnChange({ name: 'name', value });
+                        }}
                     />
                 </Grid>
-                { api.type === 'WS' && (
-                    <Grid item xs={12}>
-                        <FormGroup row>
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        name='checkPublish'
-                                        color='primary'
-                                        onChange={(e) => {
-                                            handleOnChange({
-                                                name: 'isPublish',
-                                                value: e.target.checked,
-                                            });
-                                        }}
-                                    />
-                                )}
-                                label='Publish'
-                            />
-                            <FormControlLabel
-                                control={(
-                                    <Checkbox
-                                        name='checkSubscribe'
-                                        color='primary'
-                                        onChange={(e) => handleOnChange({
-                                            name: 'isSubscribe',
-                                            value: e.target.checked,
-                                        })}
-                                    />
-                                )}
-                                label='Subscribe'
-                            />
-                        </FormGroup>
-                    </Grid>
-                )}
                 <Grid container direction='row' justify='flex-start' alignItems='center' spacing={2}>
                     <Grid item>
                         <Button

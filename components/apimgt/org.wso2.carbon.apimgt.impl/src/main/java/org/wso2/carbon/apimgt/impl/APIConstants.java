@@ -1716,8 +1716,9 @@ public final class APIConstants {
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
     public static final String TIME_UNIT_MINUTE = "min";
-    public static final String TIME_UNIT_HOUR = "hour";
-    public static final String TIME_UNIT_DAY = "day";
+    public static final String TIME_UNIT_HOUR = "hours";
+    public static final String TIME_UNIT_DAY = "days";
+    public static final String TIME_UNIT_MONTH = "months";
 
     public static final String SUBSCRIPTION_TIERS = "availableTiers";
 
@@ -1737,11 +1738,35 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
 
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "AsyncWHBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "AsyncWHUnlimited";
+
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC = "Allows 50000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC = "Allows 25000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC = "Allows 5000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC = "Allows unlimited events";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC = "Allows 10000 events per month and " +
+            "1000 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC = "Allows 5000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC = "Allows 1000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC = "Allows unlimited events and " +
+            "unlimited active subscriptions";
 
     public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
@@ -2005,7 +2030,7 @@ public final class APIConstants {
     public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
-    public static final String[] WS_SUPPORTED_METHODS = { "subscribe", "publish" };
+    public static final String[] WS_SUPPORTED_METHODS = { "subscribe" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
@@ -2304,6 +2329,7 @@ public final class APIConstants {
 
     public static final String CLONED_ITERATION_INDEX_PROPERTY = "CLONED_ITERATION_INDEX";
     public static final String TENANT_DOMAIN_INFO_PROPERTY = "tenant.info.domain";
+    public static final String TENANT_ID_INFO_PROPERTY = "tenant.info.id";
 
     public static class CertificateReLoaderConfiguration {
 
@@ -2539,28 +2565,44 @@ public final class APIConstants {
     }
 
     public static class Webhooks {
-        public static final String API_UUID = "API_UUID";
-        public static final String APPLICATION_ID = "APPLICATION_ID";
-        public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
-        public static final String CALLBACK = "HUB_CALLBACK_URL";
-        public static final String SECRET = "HUB_SECRET";
-        public static final String TOPIC = "HUB_TOPIC";
-        public static final String MODE = "HUB_MODE";
-        public static final String WH_SUBSCRIPTION_ID = "WH_SUBSCRIPTION_ID";
+        public static final String API_UUID_COLUMN = "API_UUID";
+        public static final String APPLICATION_ID_COLUMN = "APPLICATION_ID";
+        public static final String CALLBACK_COLUMN = "HUB_CALLBACK_URL";
+        public static final String SECRET_COLUMN = "HUB_SECRET";
+        public static final String TOPIC_COLUMN = "HUB_TOPIC";
+        public static final String EXPIRY_AT_COLUMN = "EXPIRY_AT";
+        public static final String WH_SUBSCRIPTION_ID_COLUMN = "WH_SUBSCRIPTION_ID";
+        public static final String CONNECTIONS_COUNT_COLUMN = "CONNECTIONS_COUNT";
+        public static final String SUB_COUNT_COLUMN = "SUB_COUNT";
+        public static final String API_CONTEXT_COLUMN = "API_CONTEXT";
+        public static final String API_VERSION_COLUMN = "API_VERSION";
+        public static final String API_TIER_COLUMN = "API_TIER";
+        public static final String SUB_TIER_COLUMN = "SUB_TIER";
+        public static final String APPLICATION_TIER_COLUMN = "APPLICATION_TIER";
+        public static final String SUBSCRIBER_COLUMN = "SUBSCRIBER";
+        public static final String TENANT_ID_COLUMN = "TENANT_ID";
         public static final String SUBSCRIBE_MODE = "subscribe";
         public static final String UNSUBSCRIBE_MODE = "unsubscribe";
-        public static final String LEASE_SECONDS = "HUB_LEASE_SECONDS";
-        public static final String UPDATED_AT = "UPDATED_AT";
-        public static final String EXPIRY_AT = "EXPIRY_AT";
-        public static final String API_KEY_PROPERTY = "apiKey";
-        public static final String APP_ID_PROPERTY = "appID";
-        public static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
-        public static final String CALLBACK_PROPERTY = "callback";
-        public static final String TOPIC_PROPERTY = "topic";
-        public static final String MODE_PROPERTY = "mode";
-        public static final String SECRET_PROPERTY = "secret";
-        public static final String LEASE_SECONDS_PROPERTY = "leaseSeconds";
-        public static final String STATUS_PROPERTY = "status";
+        public static final String UPDATED_AT = "updatedAt";
+        public static final String EXPIRY_AT = "expireAt";
+        public static final String API_UUID = "apiUUID";
+        public static final String APP_ID = "appID";
+        public static final String TENANT_DOMAIN = "tenantDomain";
+        public static final String TENANT_ID = "tenantId";
+        public static final String CALLBACK = "callback";
+        public static final String TOPIC = "topic";
+        public static final String MODE = "mode";
+        public static final String SECRET = "secret";
+        public static final String LEASE_SECONDS = "leaseSeconds";
+        public static final String STATUS = "status";
+        public static final String TIER = "tier";
+        public static final String APPLICATION_TIER = "applicationTier";
+        public static final String API_TIER = "apiTier";
+        public static final String SUBSCRIBER_NAME = "subscriberName";
+        public static final String API_NAME = "apiName";
+        public static final String API_CONTEXT = "apiContext";
+        public static final String API_VERSION = "apiVersion";
+        public static final String IS_THROTTLED = "isThrottled";
         public static final String SUBSCRIPTION_EVENT_TYPE = "subscriptionEventType";
         public static final String DELIVERY_EVENT_TYPE = "diliveryStatusEventType";
         public static final String GET_SUBSCRIPTIONS_URL = "/webhooks-subscriptions";
@@ -2570,7 +2612,6 @@ public final class APIConstants {
         public static final String HUB_MODE_QUERY_PARAM = "hub.mode";
         public static final String HUB_LEASE_SECONDS_QUERY_PARAM = "hub.lease_seconds";
         public static final String TOPIC_QUERY_PARAM = "topic";
-        public static final String STATUS = "STATUS";
         public static final String SUBSCRIBERS_LIST_PROPERTY = "SUBSCRIBERS_LIST";
         public static final String SUBSCRIBERS_COUNT_PROPERTY = "SUBSCRIBERS_COUNT";
         public static final String SUBSCRIBER_CALLBACK_PROPERTY = "SUBSCRIBER_CALLBACK";

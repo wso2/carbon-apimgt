@@ -383,15 +383,17 @@ export default function ImportDefinition(props) {
 
     return (
         <>
-            <Button
-                size='small'
-                className={classes.button}
-                onClick={handleAPIDefinitionImportOpen}
-                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
-            >
-                <CloudUploadRounded className={classes.buttonIcon} />
-                {btnText}
-            </Button>
+            {!isAsyncAPI && (
+                <Button
+                    size='small'
+                    className={classes.button}
+                    onClick={handleAPIDefinitionImportOpen}
+                    disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
+                >
+                    <CloudUploadRounded className={classes.buttonIcon} />
+                    {btnText}
+                </Button>
+            )}
             {/* <Dialog
                 onBackdropClick={isWebSocket || isWebSub ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
                 open={isWebSocket || isWebSub ? asyncAPIDefinitionImport : openAPIDefinitionImport}
