@@ -20,9 +20,11 @@ import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -36,9 +38,12 @@ import org.wso2.carbon.apimgt.persistence.dto.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.dto.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBThumbnail;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_DEFAULT_ORG;
+import static org.wso2.carbon.apimgt.persistence.mongodb.MongoDBConstants.MONGODB_COLLECTION_SUR_FIX;
 
 public class MongoDBConnectionUtil {
 
@@ -78,9 +83,11 @@ public class MongoDBConnectionUtil {
                         ClassModel.builder(CORSConfiguration.class).enableDiscriminator(false).build();
                 ClassModel<APIDocumentation> apiDocumentation =
                         ClassModel.builder(APIDocumentation.class).enableDiscriminator(false).build();
+                ClassModel<MongoDBThumbnail> mongoDBThumbnail =
+                        ClassModel.builder(MongoDBThumbnail.class).enableDiscriminator(false).build();
                 CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder()
                         .register(publisherAPI, deploymentEnv, corsConfiguration, mongoDBAPIDocument,
-                                mongoDBDevPortalAPI, devPortalAPI, apiDocumentation).build());
+                                mongoDBDevPortalAPI, devPortalAPI, apiDocumentation, mongoDBThumbnail).build());
                 CodecRegistry codecRegistry = fromRegistries(MongoClientSettings
                         .getDefaultCodecRegistry(), pojoCodecRegistry);
 
@@ -113,5 +120,29 @@ public class MongoDBConnectionUtil {
         } else {
             return mongoClient.getDatabase(MongoDBConstants.MONGODB_DEFAULT_DATABASE);
         }
+    }
+
+    public static MongoCollection<MongoDBPublisherAPI> getPublisherCollection(String orgName) {
+        MongoDatabase database = getDatabase();
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        return database.getCollection(orgName + MONGODB_COLLECTION_SUR_FIX, MongoDBPublisherAPI.class);
+    }
+
+    public static MongoCollection<MongoDBDevPortalAPI> getDevPortalCollection(String orgName) {
+        MongoDatabase database = getDatabase();
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        return database.getCollection(orgName + MONGODB_COLLECTION_SUR_FIX, MongoDBDevPortalAPI.class);
+    }
+
+    public static MongoCollection<Document> getGenericCollection(String orgName) {
+        MongoDatabase database = getDatabase();
+        if (orgName == null) {
+            orgName = MONGODB_COLLECTION_DEFAULT_ORG;
+        }
+        return database.getCollection(orgName + MONGODB_COLLECTION_SUR_FIX, Document.class);
     }
 }

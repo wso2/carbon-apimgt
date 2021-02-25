@@ -22,6 +22,8 @@ import org.bson.types.ObjectId;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
@@ -37,6 +39,16 @@ public interface MongoAPIMapper {
 
     @Mapping(source = "mongodbUuId", target = "id")
     PublisherAPI toPublisherApi(MongoDBPublisherAPI api);
+
+    @Mapping(source = "mongodbUuId", target = "id")
+    @Mapping(source = "apiName", target = "name")
+    @Mapping(source = "providerName", target = "provider")
+    PublisherSearchContent toPublisherContentApi(MongoDBPublisherAPI api);
+
+    @Mapping(source = "mongodbUuId", target = "id")
+    @Mapping(source = "apiName", target = "name")
+    @Mapping(source = "providerName", target = "provider")
+    DevPortalSearchContent toDevportalContentApi(MongoDBDevPortalAPI api);
 
     @Mapping(source = "id", target = "mongodbUuId")
     MongoDBDevPortalAPI toMongoDBDevPortalApi(DevPortalAPI api);
