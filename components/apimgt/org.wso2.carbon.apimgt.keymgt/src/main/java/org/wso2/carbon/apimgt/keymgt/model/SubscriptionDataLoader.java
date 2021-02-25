@@ -119,6 +119,15 @@ public interface SubscriptionDataLoader {
     public ApplicationKeyMapping getKeyMapping(String consumerKey) throws DataLoadingException;
 
     /**
+     * Retrieve Key Mapping (Mapping between the Consumer Key and Application) from the Database
+     *
+     * @return A list of {@link ApplicationKeyMapping}s
+     * @throws DataLoadingException If any error
+     */
+    public ApplicationKeyMapping getKeyMapping(String consumerKey, String keyManager, String tenantDomain)
+            throws DataLoadingException;
+
+    /**
      * Retrieve {@link API} object.
      *
      * @param context context of the API
