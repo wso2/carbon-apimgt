@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
 
 public class MongoDBAPIMapperTestCase {
 
-
     @Test
     public void testPublisherAPIToMongoDBAPIAndBack() {
         PublisherAPI publisherAPI = new PublisherAPI();
@@ -153,4 +152,4 @@ public class MongoDBAPIMapperTestCase {
         Assert.assertEquals("Mapped api id does not match", mongoDBDevPortalAPI.getMongodbUuId().toHexString(),
                 devPortalSearchContent.getId());
     }
-    }
+}
