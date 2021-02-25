@@ -935,7 +935,7 @@ class Topics extends Component {
                         <Grid item>
                             <Typography variant='h4' align='left' className={classes.mainTitle}>
                                 <FormattedMessage
-                                    id='Apis.Details.Overview.Overview.topic.header'
+                                    id='Apis.Details.Overview.async.topic.header'
                                     defaultMessage='Topics'
                                 />
                             </Typography>
