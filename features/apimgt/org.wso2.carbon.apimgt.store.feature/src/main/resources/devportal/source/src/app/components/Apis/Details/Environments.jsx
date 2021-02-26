@@ -173,7 +173,19 @@ class Environments extends React.Component {
         const { urlCopied } = this.state;
 
         if (renderOnlyOne) {
-            const epUrlToRender = api.endpointURLs[0];
+            const epUrlToRender = (api.endpointURLs &&  api.endpointURLs.length > 0 ) ? api.endpointURLs[0] : null;
+
+            if (!epUrlToRender) {
+                return (
+                    <Typography variant='body2'>
+                        <FormattedMessage
+                            id='Apis.Details.InfoBar.default.gateway.urls.notfound'
+                            defaultMessage='No endpoints yet'
+                        />
+                    </Typography>
+                )
+            }
+
             return (
                 <>
                     {(epUrlToRender.URLs.https !== null ||

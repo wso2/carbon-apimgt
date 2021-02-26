@@ -25,18 +25,20 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIGatewayAdminClient.class, ServiceReferenceHolder.class, GatewayCertificateManager.class})
+@PrepareForTest({APIGatewayAdminClient.class, ServiceReferenceHolder.class, GatewayCertificateManager.class, APIUtil.class})
 public class GatewayCertificateManagerTest {
 
     private static final String PROD_1 = "PROD_1";
@@ -63,7 +65,7 @@ public class GatewayCertificateManagerTest {
     private static APIGatewayAdminClient apiGatewayAdminClient;
 
     @Before
-    public void init() {
+    public void init() throws APIManagementException {
         apiGatewayAdminClient = PowerMockito.mock(APIGatewayAdminClient.class);
         Map<String, Environment> environmentMap = getEnvironments();
 
@@ -77,6 +79,9 @@ public class GatewayCertificateManagerTest {
                 (apiManagerConfigurationService);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
         Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getEnvironments()).thenReturn(environmentMap);
         gatewayCertificateManager = GatewayCertificateManager.getInstance();
     }
 

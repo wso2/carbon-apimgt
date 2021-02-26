@@ -23,6 +23,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +32,9 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -58,6 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -116,6 +121,14 @@ public class APIManagerConfiguration {
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
+
+    public Map<String, ExtensionListener> getExtensionListenerMap() {
+
+        return extensionListenerMap;
+    }
+
+    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
+
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
         return realtimeNotifierProperties;
@@ -371,7 +384,14 @@ public class APIManagerConfiguration {
                         environment.setDefault(false);
                     }
                     environment.setName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName("Name")).getText()));
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_NAME)).getText()));
+                    environment.setDisplayName(APIUtil.replaceSystemProperty(
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+                    if (StringUtils.isEmpty(environment.getDisplayName())) {
+                        environment.setDisplayName(environment.getName());
+                    }
                     environment.setServerURL(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_SERVER_URL)).getText()));
@@ -401,6 +421,28 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setDescription("");
                     }
+                    environment.setReadOnly(true);
+                    List<VHost> vhosts = new LinkedList<>();
+                    environment.setVhosts(vhosts);
+                    environment.setEndpointsAsVhost();
+                    Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
+                            APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
+                                    APIConstants.API_GATEWAY_VIRTUAL_HOST);
+                    while (vhostIterator.hasNext()) {
+                        OMElement vhostElem = (OMElement) vhostIterator.next();
+                        String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
+                        String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
+                        String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
+                        String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+
+                        VHost vhost = VHost.fromEndpointUrls(new String[]{httpEp, httpsEp, wsEp, wssEp});
+                        vhosts.add(vhost);
+                    }
+
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {
@@ -541,6 +583,8 @@ public class APIManagerConfiguration {
                 setContainerMgtConfigurations(element);
             } else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
                 setSkipListConfigurations(element);
+            } else if (APIConstants.ExtensionListenerConstants.EXTENSION_LISTENERS.equals(localName)) {
+                setExtensionListenerConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1875,5 +1919,40 @@ public class APIManagerConfiguration {
 
     public static Map<String, String> getAnalyticsProperties() {
         return analyticsProperties;
+    }
+
+    /**
+     * Set Extension Listener Configurations.
+     *
+     * @param omElement XML Config
+     */
+    public void setExtensionListenerConfigurations(OMElement omElement) {
+
+        Iterator extensionListenersElement =
+                omElement.getChildrenWithLocalName(APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER);
+        while (extensionListenersElement.hasNext()) {
+            OMElement listenerElement = (OMElement) extensionListenersElement.next();
+            OMElement listenerTypeElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(APIConstants.ExtensionListenerConstants.EXTENSION_TYPE));
+            OMElement listenerClassElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(
+                                    APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER_CLASS_NAME));
+            if (listenerTypeElement != null && listenerClassElement != null) {
+                String listenerClass = listenerClassElement.getText();
+                try {
+                    ExtensionListener extensionListener = (ExtensionListener) APIUtil
+                            .getClassForName(listenerClass).newInstance();
+                    extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
+                } catch (InstantiationException e) {
+                    log.error("Error while instantiating class " + listenerClass, e);
+                } catch (IllegalAccessException e) {
+                    log.error(e);
+                } catch (ClassNotFoundException e) {
+                    log.error("Cannot find the class " + listenerClass + e);
+                }
+            }
+        }
     }
 }

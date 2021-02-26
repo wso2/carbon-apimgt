@@ -81,7 +81,7 @@ import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 
 public class Utils {
-    
+
     private static final Log log = LogFactory.getLog(Utils.class);
 
     public static void sendFault(MessageContext messageContext, int status) {
@@ -91,7 +91,7 @@ public class Utils {
         axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
         messageContext.setResponse(true);
         messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);        
+        messageContext.setTo(null);
         axis2MC.removeProperty("NO_ENTITY_BODY");
 
         // Always remove the ContentType - Let the formatter do its thing
@@ -104,7 +104,7 @@ public class Utils {
         }
         Axis2Sender.sendBack(messageContext);
     }
-    
+
     public static void setFaultPayload(MessageContext messageContext, OMElement payload) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -135,8 +135,8 @@ public class Utils {
             }
         }
     }
-    
-    public static void setSOAPFault(MessageContext messageContext, String code, 
+
+    public static void setSOAPFault(MessageContext messageContext, String code,
                                     String reason, String detail) {
         SOAPFactory factory = (messageContext.isSOAP11() ?
                 OMAbstractFactory.getSOAP11Factory() : OMAbstractFactory.getSOAP12Factory());
@@ -155,7 +155,7 @@ public class Utils {
             faultCode.setText(new QName(fault.getNamespace().getNamespaceURI(), code));
         } else {
             SOAPFaultValue value = factory.createSOAPFaultValue(faultCode);
-            value.setText(new QName(fault.getNamespace().getNamespaceURI(), code));            
+            value.setText(new QName(fault.getNamespace().getNamespaceURI(), code));
         }
         fault.setCode(faultCode);
 
@@ -166,14 +166,14 @@ public class Utils {
             SOAPFaultText text = factory.createSOAPFaultText();
             text.setText(reason);
             text.setLang("en");
-            faultReason.addSOAPText(text);            
+            faultReason.addSOAPText(text);
         }
         fault.setReason(faultReason);
 
         SOAPFaultDetail soapFaultDetail = factory.createSOAPFaultDetail();
         soapFaultDetail.setText(detail);
         fault.setDetail(soapFaultDetail);
-        
+
         // set the all headers of original SOAP Envelope to the Fault Envelope
         if (messageContext.getEnvelope() != null) {
             SOAPHeader soapHeader = messageContext.getEnvelope().getHeader();

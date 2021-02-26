@@ -198,10 +198,14 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager) {
 
         username = getUserName(username, userStoreManager);
-        APIManagerConfiguration config = getApiManagerConfiguration();
 
-        if (config.getApiGatewayEnvironments().size() <= 0) {
-            return true;
+        try {
+            if (APIUtil.getEnvironments().size() <= 0) {
+                return true;
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while reading configured gateway environments", e);
+            return false;
         }
 
         ApiMgtDAO apiMgtDAO = getDAOInstance();
@@ -357,5 +361,41 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         }
         return removedGatewayCache;
     }
+    @Override
+    public boolean doPostSetUserClaimValue(String userName, UserStoreManager userStoreManager)
+            throws org.wso2.carbon.user.core.UserStoreException {
 
+        boolean isAccountLocked = isAccountLock(userName, userStoreManager);
+        if (isAccountLocked) {
+            removeGatewayKeyCache(userName, userStoreManager);
+        }
+        return super.doPostSetUserClaimValue(userName, userStoreManager);
+    }
+
+    @Override
+    public boolean doPostSetUserClaimValues(String userName, Map<String, String> claims, String profileName,
+                                            UserStoreManager userStoreManager)
+            throws org.wso2.carbon.user.core.UserStoreException {
+
+        boolean isAccountLocked = isAccountLock(userName, userStoreManager);
+        if (isAccountLocked) {
+            removeGatewayKeyCache(userName, userStoreManager);
+        }
+        return super.doPostSetUserClaimValues(userName, claims, profileName, userStoreManager);
+    }
+
+    private boolean isAccountLock(String userName, UserStoreManager userStoreManager) {
+
+        String accountLockedClaim;
+        try {
+            Map<String, String> values = userStoreManager.getUserClaimValues(userName, new String[]{
+                    APIConstants.ACCOUNT_LOCKED_CLAIM}, UserCoreConstants.DEFAULT_PROFILE);
+            accountLockedClaim = values.get(APIConstants.ACCOUNT_LOCKED_CLAIM);
+            return Boolean.parseBoolean(accountLockedClaim);
+        } catch (UserStoreException e) {
+            log.error("Error occurred while retrieving " + APIConstants.ACCOUNT_LOCKED_CLAIM
+                    + " claim value", e);
+        }
+        return false;
+    }
 }

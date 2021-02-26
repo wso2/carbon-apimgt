@@ -354,6 +354,45 @@ class Utils {
             }, 100);
         }
     }
+
+    /**
+     * Force service definition download in browser
+     *
+     * @static
+     * @param {*} response
+     * @memberof Utils
+     */
+    static downloadServiceDefinition(response) {
+        const fileName = 'service-definition';
+        const contentType = 'application/yaml';
+        const blob = new Blob([JSON.stringify(response)], {
+            type: contentType,
+        });
+        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+            window.navigator.msSaveBlob(blob, fileName);
+        } else {
+            const URL = window.URL || window.webkitURL;
+            const downloadUrl = URL.createObjectURL(blob);
+
+            if (fileName) {
+                const aTag = document.createElement('a');
+                if (typeof aTag.download === 'undefined') {
+                    window.location = downloadUrl;
+                } else {
+                    aTag.href = downloadUrl;
+                    aTag.download = fileName;
+                    document.body.appendChild(aTag);
+                    aTag.click();
+                }
+            } else {
+                window.location = downloadUrl;
+            }
+
+            setTimeout(() => {
+                URL.revokeObjectURL(downloadUrl);
+            }, 100);
+        }
+    }
 }
 
 Utils.CONST = {

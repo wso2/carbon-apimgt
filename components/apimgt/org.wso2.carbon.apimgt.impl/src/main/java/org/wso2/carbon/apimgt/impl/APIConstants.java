@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.wso2.carbon.apimgt.api.model.VHost;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,6 +104,8 @@ public final class APIConstants {
     public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
 
     public static final String APPLICATION_WSDL_MEDIA_TYPE = "application/wsdl";
+
+    public static final String APPLICATION_XML_SOAP_MEDIA_TYPE = "application/soap+xml";
 
     public static final String WSDL_NAMESPACE_URI = "http://www.w3.org/2005/08/addressing";
 
@@ -422,6 +426,7 @@ public final class APIConstants {
     public static final String ACCESS_TOKEN_USER_TYPE_APPLICATION = "APPLICATION";
     public static final String USER_TYPE_END_USER = "END_USER";
     public static final String FIELD_API_NAME = "API_NAME";
+    public static final String FIELD_API_VERSION = "API_VERSION";
     public static final String FIELD_CONSUMER_KEY = "CONSUMER_KEY";
     public static final String FIELD_API_PUBLISHER = "API_PROVIDER";
 
@@ -674,6 +679,8 @@ public final class APIConstants {
     }
 
     public static final String API_GATEWAY = "APIGateway.";
+    public static final String API_GATEWAY_NAME = "Name";
+    public static final String API_GATEWAY_DISPLAY_NAME = "DisplayName";
     public static final String API_GATEWAY_SERVER_URL = "ServerURL";
     public static final String API_GATEWAY_USERNAME = "Username";
     public static final String API_GATEWAY_PASSWORD = "Password";
@@ -681,6 +688,12 @@ public final class APIConstants {
     public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
+    public static final String API_GATEWAY_VIRTUAL_HOST = "VirtualHost";
+    public static final String API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT = "HttpEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT = "HttpsEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT = "WsEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT = "WssEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
@@ -1005,6 +1018,8 @@ public final class APIConstants {
     public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tenants";
     public static final String NO_PERMISSION_ERROR = "noPermissions";
     public static final String JSON_PARSE_ERROR = "parseErrors";
+
+    public static final String ACCOUNT_LOCKED_CLAIM = "http://wso2.org/claims/identity/accountLocked";
 
     //TODO: move this to a common place (& Enum) to be accessible by all components
     public static class KeyValidationStatus {
@@ -1625,6 +1640,8 @@ public final class APIConstants {
     public static final String WS_PROTOCOL_URL_PREFIX = "ws://";
     public static final String WSS_PROTOCOL = "wss";
     public static final String WSS_PROTOCOL_URL_PREFIX = "wss://";
+    public static final int WSS_PROTOCOL_PORT = 8099;
+    public static final int WS_PROTOCOL_PORT = 9099;
 
     public static final String EMAIL_TRANSPORT = "mailto";
 
@@ -2078,6 +2095,7 @@ public final class APIConstants {
 
     public static final String APPLICATION_GZIP = "application/gzip";
     public static final String APPLICATION_ZIP = "application/zip";
+    public static final String APPLICATION_X_ZIP_COMPRESSED = "application/x-zip-compressed";
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String JSON_FILENAME_EXTENSION = ".json";
     public static final String JSON_GZIP_FILENAME_EXTENSION = ".json.gz";
@@ -2688,5 +2706,13 @@ public final class APIConstants {
         public static final String SERVER_APIKEYSIGN_KEYSTORE_KEY_ALIAS = "Security.KeyStoreName.KeyAlias";
         public static final String SERVER_APIKEYSIGN_KEYSTORE_TYPE = "Security.KeyStoreName.Type";
         public static final String SERVER_APIKEYSIGN_PRIVATE_KEY_PASSWORD = "Security.KeyStoreName.KeyPassword";
+    }
+
+    public static class ExtensionListenerConstants {
+
+        public static final String EXTENSION_LISTENERS = "ExtensionListeners";
+        public static final String EXTENSION_LISTENER = "ExtensionListener";
+        public static final String EXTENSION_TYPE = "Type";
+        public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
     }
 }

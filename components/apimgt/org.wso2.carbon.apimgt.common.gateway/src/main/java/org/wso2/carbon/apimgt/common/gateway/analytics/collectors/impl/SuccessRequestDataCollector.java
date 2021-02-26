@@ -18,8 +18,10 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.Constants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.RequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.RequestDataPublisher;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
@@ -48,7 +50,7 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         this(provider, new SuccessRequestDataPublisher());
     }
 
-    public void collectData() {
+    public void collectData() throws AnalyticsException {
         log.debug("Handling success analytics types");
 
         long requestInTime = provider.getRequestTime();
@@ -68,6 +70,11 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         Latencies latencies = provider.getLatencies();
         MetaInfo metaInfo = provider.getMetaInfo();
         String userAgent = provider.getUserAgentHeader();
+        String userIp = provider.getEndUserIP();
+        if (userIp == null) {
+            userIp = Constants.UNKNOWN_VALUE;
+        }
+
         event.setApi(api);
         event.setOperation(operation);
         event.setTarget(target);
@@ -77,6 +84,8 @@ public class SuccessRequestDataCollector extends CommonRequestDataCollector impl
         event.setRequestTimestamp(offsetDateTime);
         event.setMetaInfo(metaInfo);
         event.setUserAgentHeader(userAgent);
+        event.setUserIp(userIp);
+
         this.processor.publish(event);
     }
 

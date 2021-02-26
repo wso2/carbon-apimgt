@@ -20,10 +20,11 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.RequestDataPublisher;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultEventType;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.FaultyRequestDataPublisher;
 
 /**
@@ -32,17 +33,17 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.FaultyReq
 public class AuthFaultDataCollector extends AbstractFaultDataCollector {
     private static final Log log = LogFactory.getLog(AuthFaultDataCollector.class);
 
-    public AuthFaultDataCollector(AnalyticsDataProvider provider, FaultEventType subType,
+    public AuthFaultDataCollector(AnalyticsDataProvider provider, FaultCategory subType,
             RequestDataPublisher processor) {
         super(provider, subType, processor);
     }
 
     public AuthFaultDataCollector(AnalyticsDataProvider provider) {
-        this(provider, FaultEventType.AUTH, new FaultyRequestDataPublisher());
+        this(provider, FaultCategory.AUTH, new FaultyRequestDataPublisher());
     }
 
     @Override
-    public void collectFaultData(Event faultyEvent) {
+    public void collectFaultData(Event faultyEvent) throws AnalyticsException {
         log.debug("handling auth failure analytics events");
 
         Application application = getUnknownApp();

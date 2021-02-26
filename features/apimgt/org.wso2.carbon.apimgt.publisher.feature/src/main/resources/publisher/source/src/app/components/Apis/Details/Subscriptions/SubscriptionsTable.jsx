@@ -277,24 +277,7 @@ class SubscriptionsTable extends Component {
         this.fetchSubscriptionData();
     }
 
-    /**
-     * handleChangePage handle change in selected page
-     *
-     * @param page selected page
-     * */
-    handleChangePage(page) {
-        this.setState({ page }, this.fetchSubscriptionData);
-    }
-
-    /**
-     * handleChangeRowsPerPage handle change in rows per page
-     *
-     * @param event rows per page change event
-     * */
-    handleChangeRowsPerPage(event) {
-        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
-    }
-
+    // TODO: This is a React anti-pattern, have to move this to a component ~tmkb
     /**
      * Returns the set of action buttons based on the current subscription state
      *
@@ -438,6 +421,24 @@ class SubscriptionsTable extends Component {
                 </dev>
             );
         }
+    }
+
+    /**
+     * handleChangePage handle change in selected page
+     *
+     * @param page selected page
+     * */
+    handleChangePage(page) {
+        this.setState({ page }, this.fetchSubscriptionData);
+    }
+
+    /**
+     * handleChangeRowsPerPage handle change in rows per page
+     *
+     * @param event rows per page change event
+     * */
+    handleChangeRowsPerPage(event) {
+        this.setState({ rowsPerPage: event.target.value, page: 0 }, this.fetchSubscriptionData);
     }
 
     /**

@@ -41,9 +41,8 @@ const config = {
     },
     watch: false,
     watchOptions: {
-        aggregateTimeout: 200,
-        poll: true,
-        ignored: ['files/**/*.js', 'node_modules/**'],
+        poll: 1000,
+        ignored: ['files/**/*.js', 'node_modules'],
     },
     devtool: 'source-map', // todo: Commented out the source
     // mapping in case need to speed up the build time & reduce size
