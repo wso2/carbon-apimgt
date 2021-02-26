@@ -218,5 +218,7 @@ public class APIMgtGatewayConstants {
     public static final String AUTHENTICATION_ENDPOINT_CONTEXT = "/authenticationendpoint";
     public static final String LOGIN_CONTEXT = "/logincontext";
     public static final String OAUTH2_CONTEXT = "/oauth2";
+
+    public static final String CUSTOM_PROPERTY = "customProperty";
 }
 

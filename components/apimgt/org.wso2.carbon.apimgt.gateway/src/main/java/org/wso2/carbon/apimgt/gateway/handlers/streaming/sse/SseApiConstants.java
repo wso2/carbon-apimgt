@@ -20,6 +20,12 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
 
 public class SseApiConstants {
 
-    public static final String SSE_THROTTLE_DTO = "SSE_THROTTLE_DTO";
+    public static final String SSE_THROTTLE_DTO = "sse_throttle_dto";
+    public static final String THROTTLED_MESSAGE =
+            ": request is throttled out by the server, try again at later point of time\n";
+    public static final String SSE_CONTENT_TYPE = "text/event-stream";
+    SseApiConstants() {
+        // nothing to implement
+    }
 
 }

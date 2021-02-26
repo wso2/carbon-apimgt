@@ -40,6 +40,8 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_RATE_LIMIT_TIME_UNIT = "RATE_LIMIT_TIME_UNIT";
 
+    public static final String COLUMN_CONNECTION_COUNT = "CONNECTIONS_COUNT";
+
     public static final String COLUMN_QUOTA_POLICY_TYPE = "QUOTA_TYPE";
 
     public static final String COLUMN_QUOTA = "QUOTA";

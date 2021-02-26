@@ -46,14 +46,18 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
         WebhooksSubscriptionEvent subscriptionEvent = new Gson().fromJson(event, WebhooksSubscriptionEvent.class);
         Properties properties = populateProperties(subscriptionEvent);
+        boolean isSuccess = true;
         if (APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(subscriptionEvent.getMode())) {
-            WebhooksDAO.getInstance().addSubscription(properties);
+            isSuccess = WebhooksDAO.getInstance().addSubscription(properties);
         } else if (APIConstants.Webhooks.UNSUBSCRIBE_MODE.equalsIgnoreCase(subscriptionEvent.getMode())) {
             WebhooksDAO.getInstance().updateUnSubscription(properties);
         } else {
             throw new APIManagementException("Error while processing subscription request: Wrong subscription mode");
         }
-        sendSubscriptionNotificationOnRealtime(subscriptionEvent);
+        sendSubscriptionNotificationOnRealtime(subscriptionEvent, isSuccess);
+        if (!isSuccess) {
+            throw new APIManagementException("Throttled out");
+        }
         return true;
     }
 
@@ -65,9 +69,10 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
      */
     private Properties populateProperties(WebhooksSubscriptionEvent subscriptionEvent) throws APIManagementException {
         Properties properties = new Properties();
-        properties.put(APIConstants.Webhooks.API_UUID, subscriptionEvent.getApiKey());
-        properties.put(APIConstants.Webhooks.APPLICATION_ID, subscriptionEvent.getAppID());
+        properties.put(APIConstants.Webhooks.API_UUID, subscriptionEvent.getApiUUID());
+        properties.put(APIConstants.Webhooks.APP_ID, subscriptionEvent.getAppID());
         properties.put(APIConstants.Webhooks.TENANT_DOMAIN, subscriptionEvent.getTenantDomain());
+        properties.put(APIConstants.Webhooks.TENANT_ID, subscriptionEvent.getTenantId());
         properties.put(APIConstants.Webhooks.CALLBACK, subscriptionEvent.getCallback());
         properties.put(APIConstants.Webhooks.TOPIC, subscriptionEvent.getTopic());
         putIfNotNull(properties, APIConstants.Webhooks.SECRET, subscriptionEvent.getSecret());
@@ -89,6 +94,7 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
         }
         subscriptionEvent.setExpiryTime(expiryTime);
         properties.put(APIConstants.Webhooks.EXPIRY_AT, "" + expiryTime);
+        properties.put(APIConstants.Webhooks.TIER, "" + subscriptionEvent.getTier());
         return properties;
     }
 
@@ -102,9 +108,13 @@ public class WebhooksSubscriptionEventHandler implements EventHandler {
      *
      * @param event realtime notification data read from the event
      */
-    private void sendSubscriptionNotificationOnRealtime(WebhooksSubscriptionEvent event) {
-        Object[] objects = new Object[]{event.getApiKey(), event.getAppID(), event.getTenantDomain(),
-                event.getCallback(), event.getTopic(), event.getMode(), event.getSecret(), event.getExpiryTime()};
+    private void sendSubscriptionNotificationOnRealtime(WebhooksSubscriptionEvent event,
+                                                        boolean isSuccess) {
+        Object[] objects = new Object[]{event.getApiUUID(), event.getApiName(), event.getApiContext(),
+                event.getApiVersion(), event.getAppID(), event.getTenantDomain(), event.getTenantId(),
+                event.getCallback(), event.getTopic(), event.getMode(), event.getSecret(), event.getExpiryTime(),
+                event.getSubscriberName(), event.getApplicationTier(), event.getTier(), event.getApiTier(),
+                !isSuccess};
         Event notificationMessage = new Event(APIConstants.WEBHOOKS_SUBSCRIPTION_STREAM_ID,
                 System.currentTimeMillis(), null, null, objects);
         NotificationUtil.publishEventToStreamService(notificationMessage);

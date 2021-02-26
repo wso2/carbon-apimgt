@@ -38,10 +38,12 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
@@ -74,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -192,6 +195,104 @@ public class APIAdminImpl implements APIAdmin {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException {
+        List<Environment> dynamicEnvs = apiMgtDAO.getAllEnvironments(tenantDomain);
+        // gateway environment name should be unique, ignore environments defined in api-manager.xml with the same name
+        // if a dynamic (saved in database) environment exists.
+        List<String> dynamicEnvNames = dynamicEnvs.stream().map(Environment::getName).collect(Collectors.toList());
+        List<Environment> allEnvs = new ArrayList<>(dynamicEnvs.size() + APIUtil.getReadOnlyEnvironments().size());
+        // add read only environments first and dynamic environments later
+        APIUtil.getReadOnlyEnvironments().values().stream().filter(env -> !dynamicEnvNames.contains(env.getName())).forEach(allEnvs::add);
+        allEnvs.addAll(dynamicEnvs);
+        return allEnvs;
+    }
+
+    @Override
+    public Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException {
+        // priority for configured environments over dynamic environments
+        // name is the UUID of environments configured in api-manager.xml
+        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
+        if (env == null) {
+            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+            if (env == null) {
+                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. Environment not found",
+                        uuid);
+                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                        ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
+                );
+            }
+        }
+        return env;
+    }
+
+    @Override
+    public Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
+        if (getAllEnvironments(tenantDomain).stream()
+                .anyMatch(e -> StringUtils.equals(e.getName(), environment.getName()))) {
+            String errorMessage = String.format("Failed to add Environment. An Environment named %s already exists",
+                    environment.getName());
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.EXISTING_GATEWAY_ENVIRONMENT_FOUND,
+                            String.format("name '%s'", environment.getName())));
+        }
+        validateForUniqueVhostNames(environment);
+        return apiMgtDAO.addEnvironment(tenantDomain, environment);
+    }
+
+    @Override
+    public void deleteEnvironment(String tenantDomain, String uuid) throws APIManagementException {
+        // check if the VHost exists in the tenant domain with given UUID, throw error if not found
+        Environment existingEnv = getEnvironment(tenantDomain, uuid);
+        if (existingEnv.isReadOnly()) {
+            String errorMessage = String.format("Failed to delete Environment with UUID '%s'. Environment is read only",
+                    uuid);
+            throw new APIMgtResourceNotFoundException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT, String.format("UUID '%s'", uuid)));
+        }
+        apiMgtDAO.deleteEnvironment(uuid);
+    }
+
+    @Override
+    public Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
+        // check if the VHost exists in the tenant domain with given UUID, throw error if not found
+        Environment existingEnv = getEnvironment(tenantDomain, environment.getUuid());
+        if (existingEnv.isReadOnly()) {
+            String errorMessage = String.format("Failed to update Environment with UUID '%s'. Environment is read only",
+                    environment.getUuid());
+            throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT, String.format("UUID '%s'", environment.getUuid()))
+            );
+        }
+
+        if (!existingEnv.getName().equals(environment.getName())) {
+            String errorMessage = String.format("Failed to update Environment with UUID '%s'. Environment name " +
+                            "can not be changed",
+                    environment.getUuid());
+            throw new APIMgtResourceNotFoundException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT_NAME));
+        }
+
+        validateForUniqueVhostNames(environment);
+        environment.setId(existingEnv.getId());
+        return apiMgtDAO.updateEnvironment(environment);
+    }
+
+    private void validateForUniqueVhostNames(Environment environment) throws APIManagementException {
+        List<String> hosts = new ArrayList<>(environment.getVhosts().size());
+        boolean isDuplicateVhosts = environment.getVhosts().stream().map(VHost::getHost).anyMatch(host -> {
+            boolean exist = hosts.contains(host);
+            hosts.add(host);
+            return exist;
+        });
+        if (isDuplicateVhosts) {
+            String errorMessage = String.format("Failed to add Environment. Virtual Host %s is duplicated",
+                    hosts.get(hosts.size() - 1));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND));
+        }
     }
 
     @Override

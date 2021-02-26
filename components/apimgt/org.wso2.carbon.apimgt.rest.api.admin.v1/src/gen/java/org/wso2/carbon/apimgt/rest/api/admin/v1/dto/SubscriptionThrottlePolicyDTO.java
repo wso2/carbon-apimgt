@@ -35,6 +35,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     private MonetizationInfoDTO monetization = null;
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
+    private Integer subscriberCount = null;
     private List<CustomAttributeDTO> customAttributes = new ArrayList<CustomAttributeDTO>();
     private Boolean stopOnQuotaReach = false;
     private String billingPlan = null;
@@ -150,6 +151,24 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
   }
 
   /**
+   * Number of subscriptions allowed
+   **/
+  public SubscriptionThrottlePolicyDTO subscriberCount(Integer subscriberCount) {
+    this.subscriberCount = subscriberCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "10", value = "Number of subscriptions allowed")
+  @JsonProperty("subscriberCount")
+  public Integer getSubscriberCount() {
+    return subscriberCount;
+  }
+  public void setSubscriberCount(Integer subscriberCount) {
+    this.subscriberCount = subscriberCount;
+  }
+
+  /**
    * Custom attributes added to the Subscription Throttling Policy 
    **/
   public SubscriptionThrottlePolicyDTO customAttributes(List<CustomAttributeDTO> customAttributes) {
@@ -238,6 +257,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
         Objects.equals(monetization, subscriptionThrottlePolicy.monetization) &&
         Objects.equals(rateLimitCount, subscriptionThrottlePolicy.rateLimitCount) &&
         Objects.equals(rateLimitTimeUnit, subscriptionThrottlePolicy.rateLimitTimeUnit) &&
+        Objects.equals(subscriberCount, subscriptionThrottlePolicy.subscriberCount) &&
         Objects.equals(customAttributes, subscriptionThrottlePolicy.customAttributes) &&
         Objects.equals(stopOnQuotaReach, subscriptionThrottlePolicy.stopOnQuotaReach) &&
         Objects.equals(billingPlan, subscriptionThrottlePolicy.billingPlan) &&
@@ -246,7 +266,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
 
   @Override
   public int hashCode() {
-    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, customAttributes, stopOnQuotaReach, billingPlan, permissions);
+    return Objects.hash(graphQLMaxComplexity, graphQLMaxDepth, defaultLimit, monetization, rateLimitCount, rateLimitTimeUnit, subscriberCount, customAttributes, stopOnQuotaReach, billingPlan, permissions);
   }
 
   @Override
@@ -260,6 +280,7 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO  {
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
     sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
+    sb.append("    subscriberCount: ").append(toIndentedString(subscriberCount)).append("\n");
     sb.append("    customAttributes: ").append(toIndentedString(customAttributes)).append("\n");
     sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
     sb.append("    billingPlan: ").append(toIndentedString(billingPlan)).append("\n");

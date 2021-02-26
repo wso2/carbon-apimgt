@@ -4320,6 +4320,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
             apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+            apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
@@ -4379,6 +4380,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                 apiRevisionDeployment.setRevisionUUID(revisionId);
                 apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
                 apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
                 apiRevisionDeployments.add(apiRevisionDeployment);
             }
@@ -4535,14 +4537,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
 
-        //validate websocket url and change type of the API in APIDTO
-        /*if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
-            apiDTOFromProperties.setType(APIDTO.TypeEnum.WS);
+        //validate websocket url and change transport types
+        if (PublisherCommonUtils.isValidWSAPI(apiDTOFromProperties)){
             ArrayList<String> websocketTransports = new ArrayList<>();
             websocketTransports.add(APIConstants.WS_PROTOCOL);
             websocketTransports.add(APIConstants.WSS_PROTOCOL);
             apiDTOFromProperties.setTransport(websocketTransports);
-        }*/
+        }
 
         //Only WS type APIs should be allowed
         /*if (!APIDTO.TypeEnum.WS.equals(apiDTOFromProperties.getType())){

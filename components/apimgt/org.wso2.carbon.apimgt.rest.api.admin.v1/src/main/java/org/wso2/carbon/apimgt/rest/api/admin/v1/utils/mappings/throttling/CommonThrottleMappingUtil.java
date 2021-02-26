@@ -23,9 +23,11 @@ import org.wso2.carbon.apimgt.api.UnsupportedThrottleConditionTypeException;
 import org.wso2.carbon.apimgt.api.UnsupportedThrottleLimitTypeException;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.JWTClaimsCondition;
+import org.wso2.carbon.apimgt.api.model.policy.Limit;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -36,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConditionalGroupDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EventCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.HeaderConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.IPConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.JWTClaimsConditionDTO;
@@ -300,6 +303,17 @@ public class CommonThrottleMappingUtil {
                     }
                     break;
                 }
+                case EVENTCOUNTLIMIT: {
+                   if (dto.getEventCount() != null) {
+                       quotaPolicy.setLimit(fromDTOToEventCountLimit(dto.getEventCount()));
+                   } else {
+                       errorMessage =
+                               RestApiAdminUtils.constructMissingThrottleObjectErrorMessage(
+                                       ThrottleLimitDTO.TypeEnum.EVENTCOUNTLIMIT) + dto.toString();
+                       throw new UnsupportedThrottleLimitTypeException(errorMessage);
+                   }
+                   break;
+                }
             }
             quotaPolicy.setType(mapQuotaPolicyTypeFromDTOToModel(dto.getType()));
         } else {
@@ -328,6 +342,10 @@ public class CommonThrottleMappingUtil {
             BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
             defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT);
             defaultLimitType.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
+        } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
+            EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
+            defaultLimitType.setType(ThrottleLimitDTO.TypeEnum.EVENTCOUNTLIMIT);
+            defaultLimitType.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
         } else {
             String msg = "Throttle limit type " + quotaPolicy.getType() + " is not supported";
             throw new UnsupportedThrottleLimitTypeException(msg);
@@ -364,6 +382,14 @@ public class CommonThrottleMappingUtil {
         return requestCountLimit;
     }
 
+    private static EventCountLimit fromDTOToEventCountLimit(EventCountLimitDTO dto) {
+        EventCountLimit eventCountLimit = new EventCountLimit();
+        eventCountLimit.setTimeUnit(dto.getTimeUnit());
+        eventCountLimit.setUnitTime(dto.getUnitTime());
+        eventCountLimit.setEventCount(dto.getEventCount());
+        return eventCountLimit;
+    }
+
     /**
      * Converts a Bandwidth Limit model object into a Bandwidth Limit DTO object
      *
@@ -390,6 +416,14 @@ public class CommonThrottleMappingUtil {
         dto.setTimeUnit(requestCountLimit.getTimeUnit());
         dto.setUnitTime(requestCountLimit.getUnitTime());
         dto.setRequestCount(requestCountLimit.getRequestCount());
+        return dto;
+    }
+
+    public static EventCountLimitDTO fromEventCountLimitToDTO(EventCountLimit eventCountLimit) {
+        EventCountLimitDTO dto = new EventCountLimitDTO();
+        dto.setTimeUnit(eventCountLimit.getTimeUnit());
+        dto.setUnitTime(eventCountLimit.getUnitTime());
+        dto.setEventCount(eventCountLimit.getEventCount());
         return dto;
     }
 
@@ -602,6 +636,8 @@ public class CommonThrottleMappingUtil {
                 return PolicyConstants.BANDWIDTH_TYPE;
             case REQUESTCOUNTLIMIT:
                 return PolicyConstants.REQUEST_COUNT_TYPE;
+            case EVENTCOUNTLIMIT:
+                return PolicyConstants.EVENT_COUNT_TYPE;
             default:
                 return null;
         }

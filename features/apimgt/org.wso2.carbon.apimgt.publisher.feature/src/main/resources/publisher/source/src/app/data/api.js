@@ -2528,6 +2528,18 @@ class API extends Resource {
         });
     }
 
+    static policiesByQuotaType(quotaType) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            return client.apis['Throttling Policies'].getSubscriptionThrottlingPolicies(
+                {
+                    tierQuotaType: quotaType,
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
     /**
      * Get all the endpoint certificates.
      * */

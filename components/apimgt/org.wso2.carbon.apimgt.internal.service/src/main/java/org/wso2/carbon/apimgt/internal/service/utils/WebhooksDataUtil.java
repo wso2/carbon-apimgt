@@ -43,12 +43,20 @@ public class WebhooksDataUtil {
 
     private static WebhooksSubscriptionDTO fromSubscriptionModelToSubscriptionDto(Subscription model) {
         WebhooksSubscriptionDTO webhooksSubscriptionDTO = new WebhooksSubscriptionDTO();
-        webhooksSubscriptionDTO.setApiKey(model.getApiKey());
+        webhooksSubscriptionDTO.setApiUUID(model.getApiUuid());
         webhooksSubscriptionDTO.setAppID(model.getAppID());
         webhooksSubscriptionDTO.setCallbackURL(model.getCallback());
         webhooksSubscriptionDTO.setTopicName(model.getTopic());
         webhooksSubscriptionDTO.setSecret(model.getSecret());
         webhooksSubscriptionDTO.setExpiryTime(model.getExpiryTime());
+        webhooksSubscriptionDTO.setApiContext(model.getApiContext());
+        webhooksSubscriptionDTO.setApiVersion(model.getApiVersion());
+        webhooksSubscriptionDTO.setTenantDomain(model.getTenantDomain());
+        webhooksSubscriptionDTO.setTenantId(model.getTenantId());
+        webhooksSubscriptionDTO.setTier(model.getTier());
+        webhooksSubscriptionDTO.setApiTier(model.getApiTier());
+        webhooksSubscriptionDTO.setApplicationTier(model.getApplicationTier());
+        webhooksSubscriptionDTO.setSubscriberName(model.getSubscriberName());
         return webhooksSubscriptionDTO;
     }
 

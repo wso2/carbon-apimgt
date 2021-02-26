@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
@@ -919,6 +920,12 @@ public class SubscriptionValidationDAO {
                 bandLimit.setDataAmount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
                 bandLimit.setDataUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_QUOTA_UNIT));
                 quotaPolicy.setLimit(bandLimit);
+            } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
+                EventCountLimit eventCountLimit = new EventCountLimit();
+                eventCountLimit.setEventCount(resultSet.getInt(prefix+ThrottlePolicyConstants.COLUMN_QUOTA));
+                eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
+                eventCountLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
+                quotaPolicy.setLimit(eventCountLimit);
             }
             policy.setQuotaPolicy(quotaPolicy);
         }
