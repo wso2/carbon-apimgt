@@ -68,23 +68,31 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
             allowedResourcePathsMap = RestApiUtil.getAllowedURIsToMethodsMap();
             Enumeration<URITemplate> uriTemplateSet = allowedResourcePathsMap.keys();
 
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            ArrayList requestedTenantDomain = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
+                    .get(RestApiConstants.HEADER_X_WSO2_TENANT);
+            String tenantDomain = null;
+            if (requestedTenantDomain != null) {
+                tenantDomain = RestApiUtil.getRequestedTenantDomain(requestedTenantDomain.get(0).toString());
+            }
+            if (StringUtils.isEmpty(tenantDomain)) {
+                tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            }
             while (uriTemplateSet.hasMoreElements()) {
                 URITemplate uriTemplate = uriTemplateSet.nextElement();
                 if (uriTemplate.matches(path, new HashMap<String, String>())) {
                     List<String> allowedVerbs = allowedResourcePathsMap.get(uriTemplate);
                     if (allowedVerbs.contains(httpMethod)) {
-                        if (StringUtils.startsWith((String) message.get(RestApiConstants.MESSAGE_BASE_PATH),
-                                RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL)) {
+                        if (StringUtils.startsWith((String) message.get(Message.BASE_PATH),
+                                "/" + RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT)) {
                             // Authentication will be skipped for /swagger.yaml, /settings, /tenants resources of
-                            // the store REST API
+                            // the devportal REST API
                             boolean doSkipAuthentication = StringUtils.equals(path,
-                                    RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL
+                                    "/" + RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT
                                             + RestApiConstants.RESOURCE_PATH_SWAGGER) || StringUtils.equals(path,
-                                    RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL
-                                            + RestApiConstants.REST_API_STORE_RESOURCE_PATH_SETTINGS) || StringUtils
-                                    .equals(path, RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT_FULL
-                                            + RestApiConstants.REST_API_STORE_RESOURCE_PATH_TENANTS);
+                                    "/" + RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT
+                                            + RestApiConstants.REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_SETTINGS) || StringUtils
+                                    .equals(path, "/" + RestApiConstants.REST_API_DEVELOPER_PORTAL_CONTEXT
+                                            + RestApiConstants.REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_TENANTS);
                             if (!doSkipAuthentication) {
                                 message.put(RestApiConstants.AUTHENTICATION_REQUIRED,
                                         !RestApiUtil.isDevPortalAnonymousEnabled(tenantDomain));

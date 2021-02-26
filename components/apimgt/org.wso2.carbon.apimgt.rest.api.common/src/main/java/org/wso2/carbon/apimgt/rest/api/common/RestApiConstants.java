@@ -33,7 +33,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String APPLICATION_XML = "application/xml";
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
-    public static final String MESSAGE_BASE_PATH = "org.apache.cxf.message.Message.BASE_PATH";
+    public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
 
     public static final String REQUEST_AUTHENTICATION_SCHEME = "request_authentication_scheme";
     public static final String OAUTH2_AUTHENTICATION = "oauth2";
@@ -148,8 +148,8 @@ public final class RestApiConstants {
     public static final String REST_API_DEVELOPER_PORTAL_VERSION ="v2";
     public static final String REST_API_STORE_CONTEXT="/api/am/store/";
     public static final String REST_API_DEVELOPER_PORTAL_CONTEXT = "api/am/devportal";
-    public static final String REST_API_STORE_RESOURCE_PATH_SETTINGS = "/settings";
-    public static final String REST_API_STORE_RESOURCE_PATH_TENANTS = "/tenants";
+    public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_SETTINGS = "/settings";
+    public static final String REST_API_DEVELOPER_PORTAL_RESOURCE_PATH_TENANTS = "/tenants";
     public static final String REST_API_STORE_CONTEXT_FULL_0 = REST_API_STORE_CONTEXT + REST_API_STORE_VERSION_0;
     public static final String REST_API_DEVELOPER_PORTAL_CONTEXT_FULL = REST_API_DEVELOPER_PORTAL_CONTEXT +
             REST_API_DEVELOPER_PORTAL_VERSION;
