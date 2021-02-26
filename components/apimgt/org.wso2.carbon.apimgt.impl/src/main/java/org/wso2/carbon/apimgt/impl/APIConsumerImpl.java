@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -27,6 +29,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -165,22 +176,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -2949,10 +2945,83 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiContext = api.getContext();
         }
 
+        // get already subscribed APIs
+        Application application = apiMgtDAO.getApplicationById(applicationId);
+        Subscriber subscriber = new Subscriber(username);
+        Set<SubscribedAPI> subscriptions;
+        List<SubscribedAPI> subscribedAPIList;
+        subscriptions = getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+        subscribedAPIList = new ArrayList<>(subscriptions);
+
         WorkflowResponse workflowResponse = null;
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
         int subscriptionId;
         if (APIConstants.PUBLISHED.equals(state)) {
+
+            assert api != null;
+            if (APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(api.getType()) ||
+                    APIConstants.API_TYPE_SSE.equalsIgnoreCase(api.getType()) || APIConstants.API_TYPE_WS.equalsIgnoreCase(api.getType())) {
+
+                final String solaceProviderName = "Solace Message Broker";
+                boolean allExistingAPIsAreSolaceAPIs = false;
+                int numberOfExistingApisInApplication = subscribedAPIList.size();
+                boolean doesNewApiHasSolaceEnv = false;
+                boolean deployAsSolaceApplication = false;
+
+                doesNewApiHasSolaceEnv = api.getEnvironments().contains(solaceProviderName);
+
+                ArrayList<String> solaceApiProducts = new ArrayList<>();
+                if (doesNewApiHasSolaceEnv) {
+                    solaceApiProducts.add(generateApiProductNameForSolaceBroker(api));
+                }
+
+                // check whether all APIs are solace APIs
+                if (numberOfExistingApisInApplication == 0) {
+                    deployAsSolaceApplication = doesNewApiHasSolaceEnv;
+                } else {
+                    int numberOfSolaceApisInApplication = 0;
+                    for (SubscribedAPI subscribedAPI : subscribedAPIList) {
+                        APIIdentifier identifier1 = subscribedAPI.getApiId();
+                        API api1 = getAPI(identifier1);
+                        if (api1.getEnvironments().contains(solaceProviderName)) {
+                            numberOfSolaceApisInApplication++;
+                            solaceApiProducts.add(generateApiProductNameForSolaceBroker(api1));
+                        }
+                    }
+                    allExistingAPIsAreSolaceAPIs = (numberOfExistingApisInApplication == numberOfSolaceApisInApplication);
+                    deployAsSolaceApplication = allExistingAPIsAreSolaceAPIs && doesNewApiHasSolaceEnv;
+                }
+
+                // check whether new API already registered and exists as an API product
+                boolean alreadyApiDeployedInSolace = false;
+                if (deployAsSolaceApplication) {
+                    try {
+                        alreadyApiDeployedInSolace = checkApiAndApiProductAlreadyDeployedInSolace(api);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Cannot deploy APIs that don't have Solace as an environment");
+                }
+
+                boolean appDeployedInSolace = false;
+                if (alreadyApiDeployedInSolace) {
+                    try {
+                        appDeployedInSolace = deployApplicationToSolaceBroker(application, solaceApiProducts);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("Cannot deploy applications with API products that don't exist in Solace broker");
+                }
+
+                if (appDeployedInSolace) {
+                    System.out.println("App deployed successfully....");
+                } else {
+                    throw new APIManagementException("Error caused while deploying application to Solace Broker");
+                }
+            }
+
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId,
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
@@ -6523,5 +6592,137 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return hostsWithSchemes;
+    }
+
+    private String generateApiProductNameForSolaceBroker(API api) {
+        String[] apiContextParts = api.getContext().split("/");
+        return api.getId().getName() + "_" + apiContextParts[1] + "_" + apiContextParts[2];
+    }
+
+    private boolean checkApiAndApiProductAlreadyDeployedInSolace(API api) throws IOException {
+        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
+        String organization = "MyOrg";
+        String environment = "devEnv";
+        String developerUserName = "dev-1";
+        String apiNameWithContext = generateApiProductNameForSolaceBroker(api);
+        String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1";
+        String encoding = Base64.getEncoder().encodeToString(("api-user:Solace123!").getBytes());
+        HttpClient httpClient = HttpClients.createDefault();
+
+        // check whether API is registered in solace broker
+        // HttpGet request1 = new HttpGet(baseUrl + "/" + organization + "/apis/" + aai20Document.info.title);
+        // request1.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        // HttpResponse response1 = httpClient.execute(request1);
+
+        // api registered - if
+        // if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+            // check whether API product is created in Solace broker
+            HttpGet request2 = new HttpGet(baseUrl + "/" + organization + "/apiProducts/" + apiNameWithContext);
+            request2.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+            HttpResponse response2 = httpClient.execute(request2);
+
+            // api product created - if
+            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                return true;
+            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                System.out.println("API product not found in Solace broker");
+            } else {
+                System.out.println("Error retrieving API product");
+            }
+
+        // } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+        //     System.out.println("API not registered in Solace broker");
+        // } else {
+        //    System.out.println("Error retrieving API");
+        //}
+        return false;
+    }
+
+    private boolean deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts) throws IOException {
+
+        String organization = "MyOrg";
+        String environment = "devEnv";
+        String developerUserName = "dev-1";
+        String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1";
+        String encoding = Base64.getEncoder().encodeToString(("api-user:Solace123!").getBytes());
+        String urlForOrganizations = baseUrl + "/organizations";
+        HttpClient httpClient = HttpClients.createDefault();
+
+        // 1. Check whether developer exists
+        HttpGet request1 = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName);
+        request1.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        HttpResponse response1 = httpClient.execute(request1);
+
+        // developer - if
+        if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+            // 2. check whether application already exists
+            HttpGet request2 = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getName());
+            request2.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+            HttpResponse response2 = httpClient.execute(request2);
+
+            // application - if
+            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+                HttpPatch request3 = new HttpPatch(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getName());
+                request3.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                request3.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+                org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application.getName(), apiProducts);
+                System.out.println(requestBody.toString());
+                StringEntity params = new StringEntity(requestBody.toString());
+                request3.setEntity(params);
+                HttpResponse response3 = httpClient.execute(request3);
+
+                return response3.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+
+            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+
+                HttpPost request4 = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
+                request4.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+                request4.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+                org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application.getName(), apiProducts);
+                System.out.println(requestBody.toString());
+                StringEntity params = new StringEntity(requestBody.toString());
+                request4.setEntity(params);
+                HttpResponse response4 = httpClient.execute(request4);
+
+                return response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED;
+
+            } else {
+                System.out.println("Problem on retrieving application");
+            }
+
+        } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+            System.out.println("developer not found");
+        } else {
+            System.out.println("Problem on finding developer");
+        }
+        return false;
+    }
+
+    private org.json.JSONObject buildRequestBodyForCreatingApp(String appName, ArrayList<String> apiProducts) {
+        org.json.JSONObject requestBody = new org.json.JSONObject();
+
+        requestBody.put("name", appName);
+        requestBody.put("expiresIn", -1);
+
+        //add api products
+        org.json.JSONArray apiProductsArray = new org.json.JSONArray();
+        for (String x : apiProducts) {
+            apiProductsArray.put(x);
+        }
+        requestBody.put("apiProducts", apiProductsArray);
+
+        //add credentials
+        org.json.JSONObject credentialsBody = new org.json.JSONObject();
+        credentialsBody.put("expiresAt", -1);
+        org.json.JSONObject credentialsSecret = new org.json.JSONObject();
+        credentialsSecret.put("consumerKey", "elevator-app-key");
+        credentialsSecret.put("consumerSecret", "elevator-app-secret");
+        credentialsBody.put("secret", credentialsSecret);
+        requestBody.put("credentials", credentialsBody);
+
+        return requestBody;
     }
 }
