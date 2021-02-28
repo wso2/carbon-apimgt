@@ -19,14 +19,18 @@
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 
 /**
  * Handler to publish WebSocket analytics data to analytics cloud.
  */
 public class WebSocketAnalyticsMetricsHandler {
+    private static final Log log = LogFactory.getLog(WebSocketAnalyticsMetricsHandler.class);
     private static final String HANDSHAKE = "HANDSHAKE";
     private static final String PUBLISH = "PUBLISH";
     private static final String SUBSCRIBE = "SUBSCRIBE";
@@ -49,6 +53,10 @@ public class WebSocketAnalyticsMetricsHandler {
     private void collectData(ChannelHandlerContext ctx) {
         AnalyticsDataProvider provider = new WebSocketAnalyticsDataProvider(ctx);
         GenericRequestDataCollector collector = new GenericRequestDataCollector(provider);
-        collector.collectData();
+        try {
+            collector.collectData();
+        } catch (AnalyticsException e) {
+            log.error("Error Occurred when collecting analytics data", e);
+        }
     }
 }

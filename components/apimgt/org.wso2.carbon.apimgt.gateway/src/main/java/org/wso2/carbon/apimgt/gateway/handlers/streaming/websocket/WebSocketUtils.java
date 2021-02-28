@@ -66,6 +66,15 @@ public class WebSocketUtils {
         return null; // Ideally we won't reach here
     }
 
+    public static Object getPropertyFromChannel(String key, ChannelHandlerContext ctx) {
+        Object prop = ctx.channel().attr(WSO2_PROPERTIES).get();
+        if (prop != null) {
+            Map<String, Object> properties = (Map<String, Object>) prop;
+            return properties.get(key);
+        }
+        return null;
+    }
+
     public static Map<String, Object> getApiProperties(ChannelHandlerContext ctx) {
         Object prop = ctx.channel().attr(WSO2_PROPERTIES).get();
         if (prop != null) {

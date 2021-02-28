@@ -24,12 +24,23 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.*;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.FaultCodeClassifier;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
@@ -50,17 +61,8 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         this.ctx = ctx;
     }
 
-    private Object getPropertyFromCtx(String key) {
-        Object prop = ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).get();
-        if (prop != null) {
-            Map<String, Object> properties = (Map<String, Object>) prop;
-            return properties.get(key);
-        }
-        return null;
-    }
-
     private AuthenticationContext getAuthenticationContext()  {
-        Object authContext = getPropertyFromCtx(APISecurityUtils.API_AUTH_CONTEXT);
+        Object authContext = WebSocketUtils.getPropertyFromChannel(APISecurityUtils.API_AUTH_CONTEXT, ctx);
         if (authContext != null) {
             return (AuthenticationContext) authContext;
         }
@@ -68,13 +70,30 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public boolean isSuccessRequest() {
+    public EventCategory getEventCategory() {
+        if (isSuccessRequest()) {
+            return EventCategory.SUCCESS;
+        } else if (isFaultRequest()) {
+            return EventCategory.FAULT;
+        } else {
+            return EventCategory.INVALID;
+        }
+    }
+
+    private boolean isSuccessRequest() {
         return getAuthenticationContext() != null && getErrorCode() == -1;
     }
 
-    @Override
-    public boolean isFaultRequest() {
+    private boolean isFaultRequest() {
         return getErrorCode() > -1;
+    }
+
+    private int getErrorCode() {
+        Object errorCode = WebSocketUtils.getPropertyFromChannel(SynapseConstants.ERROR_CODE, ctx);
+        if (errorCode != null) {
+            return (int) errorCode;
+        }
+        return -1;
     }
 
     @Override
@@ -90,38 +109,37 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public boolean isAuthFaultRequest() {
+    public FaultCategory getFaultType() {
+        if (isAuthFaultRequest()) {
+            return FaultCategory.AUTH;
+        } else if (isThrottledFaultRequest()) {
+            return FaultCategory.THROTTLED;
+        } else if (isTargetFaultRequest()) {
+            return FaultCategory.TARGET_CONNECTIVITY;
+        }
+        return FaultCategory.OTHER;
+    }
+
+    private boolean isAuthFaultRequest() {
         int errorCode = getErrorCode();
         return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
                 && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
     }
 
-    @Override
-    public boolean isThrottledFaultRequest() {
+    private boolean isThrottledFaultRequest() {
         int errorCode = getErrorCode();
         return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
                 && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
     }
 
-    @Override
-    public boolean isTargetFaultRequest() {
-        return false;
-    }
-
-    @Override
-    public boolean isResourceNotFound() {
-        return getErrorCode() == Constants.RESOURCE_NOT_FOUND_ERROR_CODE;
-    }
-
-    @Override
-    public boolean isMethodNotAllowed() {
+    private boolean isTargetFaultRequest() {
         return false;
     }
 
     @Override
     public API getApi() {
-        String apiContext = (String) getPropertyFromCtx(RESTConstants.REST_API_CONTEXT);
-        String apiVersion = (String) getPropertyFromCtx(RESTConstants.SYNAPSE_REST_API_VERSION);
+        String apiContext = (String) WebSocketUtils.getPropertyFromChannel(RESTConstants.REST_API_CONTEXT, ctx);
+        String apiVersion = (String) WebSocketUtils.getPropertyFromChannel(RESTConstants.SYNAPSE_REST_API_VERSION, ctx);
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -149,25 +167,25 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Application getApplication() {
+    public Application getApplication() throws DataNotFoundException {
         AuthenticationContext authContext = getAuthenticationContext();
-        if (authContext != null) {
-            Application application = new Application();
-            application.setApplicationId(authContext.getApplicationUUID());
-            application.setApplicationName(authContext.getApplicationName());
-            application.setApplicationOwner(authContext.getSubscriber());
-            application.setKeyType(authContext.getKeyType());
-            return application;
+        if (authContext == null) {
+            throw new DataNotFoundException("Error occurred when getting Application information");
         }
-        return null;
+        Application application = new Application();
+        application.setApplicationId(authContext.getApplicationUUID());
+        application.setApplicationName(authContext.getApplicationName());
+        application.setApplicationOwner(authContext.getSubscriber());
+        application.setKeyType(authContext.getKeyType());
+        return application;
     }
 
     @Override
     public Operation getOperation() {
         Operation operation = new Operation();
-        String method = (String) getPropertyFromCtx(APIMgtGatewayConstants.HTTP_METHOD);
+        String method = (String) WebSocketUtils.getPropertyFromChannel(APIMgtGatewayConstants.HTTP_METHOD, ctx);
         operation.setApiMethod(method);
-        String matchingResource = (String) getPropertyFromCtx(APIConstants.API_ELECTED_RESOURCE);
+        String matchingResource = (String) WebSocketUtils.getPropertyFromChannel(APIConstants.API_ELECTED_RESOURCE, ctx);
         operation.setApiResourceTemplate(matchingResource);
         return operation;
     }
@@ -180,14 +198,15 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         target.setResponseCacheHit(false);
         target.setTargetResponseCode(0);
 
-        String endpointAddress = (String) getPropertyFromCtx(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
+        String endpointAddress = (String) WebSocketUtils.getPropertyFromChannel(
+                APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS, ctx);
         target.setDestination(endpointAddress);
         return target;
     }
 
     @Override
     public Latencies getLatencies() {
-        // Not applicable for WS API
+        // Not applicable
         return new Latencies();
     }
 
@@ -195,9 +214,18 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     public MetaInfo getMetaInfo() {
         MetaInfo metaInfo = new MetaInfo();
         metaInfo.setCorrelationId(UUID.randomUUID().toString());
-        metaInfo.setDeploymentId(Constants.DEPLOYMENT_ID);
         metaInfo.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-        metaInfo.setRegionId(Constants.REGION_ID);
+        Map<String, String> configMap = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
+                .getAPIAnalyticsConfiguration().getReporterProperties();
+        String region;
+        if (System.getProperties().containsKey(Constants.REGION_ID_PROP)) {
+            region = System.getProperty(Constants.REGION_ID_PROP);
+        } else if (configMap != null && configMap.containsKey(Constants.REGION_ID_PROP)) {
+            region = configMap.get(Constants.REGION_ID_PROP);
+        } else {
+            region = Constants.DEFAULT_REGION_ID;
+        }
+        metaInfo.setRegionId(region);
         return metaInfo;
     }
 
@@ -213,7 +241,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public long getRequestTime() {
-        Object requestStartTime = getPropertyFromCtx(Constants.REQUEST_START_TIME_PROPERTY);
+        Object requestStartTime = WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx);
         if (requestStartTime != null) {
             return (long) requestStartTime;
         }
@@ -221,29 +249,28 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     @Override
-    public Error getError() {
+    public Error getError(FaultCategory faultCategory) {
         int errorCode = getErrorCode();
-        Object errorMessage = getPropertyFromCtx(SynapseConstants.ERROR_MESSAGE);
-        if (errorCode > -1 && errorMessage != null) {
-            Error error = new Error();
-            error.setErrorCode(errorCode);
-            error.setErrorMessage((String) errorMessage);
-            return error;
-        }
-        return null;
+        FaultCodeClassifier faultCodeClassifier = new WebSocketFaultCodeClassifier(ctx);
+        FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory, errorCode);
+        Error error = new Error();
+        error.setErrorCode(errorCode);
+        error.setErrorMessage(faultSubCategory);
+        return error;
     }
 
     @Override
     public String getUserAgentHeader() {
-        return (String) getPropertyFromCtx(Constants.USER_AGENT_PROPERTY);
+        return (String) WebSocketUtils.getPropertyFromChannel(Constants.USER_AGENT_PROPERTY, ctx);
     }
 
-    private int getErrorCode() {
-        Object errorCode = getPropertyFromCtx(SynapseConstants.ERROR_CODE);
-        if (errorCode != null) {
-            return (int) errorCode;
+    @Override
+    public String getEndUserIP() {
+        Object userIp = WebSocketUtils.getPropertyFromChannel(Constants.USER_IP_PROPERTY, ctx);
+        if (userIp != null) {
+            return (String) userIp;
         }
-        return -1;
+        return null;
     }
 
 }

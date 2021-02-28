@@ -128,6 +128,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             WebSocketUtils.setApiPropertyToChannel(ctx,
                     org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_START_TIME_PROPERTY,
                     System.currentTimeMillis());
+            WebSocketUtils.setApiPropertyToChannel(ctx,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_IP_PROPERTY, getRemoteIP(ctx));
         }
 
         //check if the request is a handshake
