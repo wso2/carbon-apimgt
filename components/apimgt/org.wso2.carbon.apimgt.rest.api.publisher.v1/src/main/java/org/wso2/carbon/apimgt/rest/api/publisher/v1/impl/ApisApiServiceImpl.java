@@ -3772,8 +3772,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response generateInternalAPIKey(String apiId, String ifNoneMatch, MessageContext messageContext)
-            throws APIManagementException {
+    public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);

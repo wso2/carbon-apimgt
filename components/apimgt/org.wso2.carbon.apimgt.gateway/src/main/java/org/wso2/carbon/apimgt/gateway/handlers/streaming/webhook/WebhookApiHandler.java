@@ -31,7 +31,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -70,7 +69,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     @Override
     public boolean handleRequest(MessageContext synCtx) {
 
-        if (GatewayUtils.isAPIStatusProtoType(synCtx)) {
+        if (GatewayUtils.isAPIStatusPrototype(synCtx)) {
             return true;
         }
         String requestSubPath = getRequestSubPath(synCtx);

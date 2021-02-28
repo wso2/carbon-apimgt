@@ -27,7 +27,6 @@ import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
@@ -47,7 +46,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (GatewayUtils.isAPIStatusProtoType(messageContext)) {
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
             return true;
         }
         messageContext.setProperty(APIMgtGatewayConstants.API_UUID_PROPERTY, apiUUID);

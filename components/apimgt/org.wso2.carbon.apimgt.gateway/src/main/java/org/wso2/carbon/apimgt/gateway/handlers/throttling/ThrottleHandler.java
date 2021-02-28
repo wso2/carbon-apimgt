@@ -509,7 +509,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (GatewayUtils.isAPIStatusProtoType(messageContext)) {
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
             return true;
         }
 

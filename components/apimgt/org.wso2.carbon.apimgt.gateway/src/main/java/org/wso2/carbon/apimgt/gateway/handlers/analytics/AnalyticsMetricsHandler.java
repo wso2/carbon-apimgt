@@ -17,7 +17,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractExtendedSynapseHandler;
@@ -48,7 +47,7 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
 
-        if (GatewayUtils.isAPIStatusProtoType(messageContext)) {
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
             return true;
         }
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());

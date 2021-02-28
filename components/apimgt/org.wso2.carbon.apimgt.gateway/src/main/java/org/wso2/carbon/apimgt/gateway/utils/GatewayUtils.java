@@ -1232,7 +1232,7 @@ public class GatewayUtils {
         return null;
     }
 
-    public static boolean isAPIStatusProtoType(org.apache.synapse.MessageContext messageContext) {
+    public static boolean isAPIStatusPrototype(org.apache.synapse.MessageContext messageContext) {
 
         return APIConstants.PROTOTYPED.equals(getStatus(messageContext));
     }

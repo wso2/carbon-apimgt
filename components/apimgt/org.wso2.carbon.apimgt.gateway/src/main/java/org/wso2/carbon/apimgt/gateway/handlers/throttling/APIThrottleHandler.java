@@ -161,7 +161,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext messageContext) {
 
-        if (GatewayUtils.isAPIStatusProtoType(messageContext)) {
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
             return true;
         }
         Timer timer = getTimer();

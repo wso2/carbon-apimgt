@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.opensaml.xml.signature.G;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -263,7 +262,7 @@ public class GatewayUtilsTestCase {
         MessageContext messageContext = Mockito.mock(MessageContext.class);
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.CREATED);
         Assert.assertEquals(GatewayUtils.getStatus(messageContext),APIConstants.CREATED);
-        Assert.assertFalse(GatewayUtils.isAPIStatusProtoType(messageContext));
+        Assert.assertFalse(GatewayUtils.isAPIStatusPrototype(messageContext));
         Mockito.verify(messageContext, Mockito.times(2)).getProperty(APIMgtGatewayConstants.API_STATUS);
         Mockito.verify(messageContext, Mockito.times(0)).getProperty(APIMgtGatewayConstants.API_OBJECT);
         Mockito.verify(messageContext, Mockito.times(0)).setProperty(APIMgtGatewayConstants.API_STATUS,
@@ -277,7 +276,7 @@ public class GatewayUtilsTestCase {
         MessageContext messageContext = Mockito.mock(MessageContext.class);
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
         Assert.assertEquals(GatewayUtils.getStatus(messageContext), APIConstants.PROTOTYPED);
-        Assert.assertTrue(GatewayUtils.isAPIStatusProtoType(messageContext));
+        Assert.assertTrue(GatewayUtils.isAPIStatusPrototype(messageContext));
         Mockito.verify(messageContext, Mockito.times(2)).getProperty(APIMgtGatewayConstants.API_STATUS);
         Mockito.verify(messageContext, Mockito.times(2)).getProperty(APIMgtGatewayConstants.API_OBJECT);
         Mockito.verify(messageContext, Mockito.times(2)).setProperty(APIMgtGatewayConstants.API_STATUS,

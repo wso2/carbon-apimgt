@@ -71,8 +71,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
     @MethodStats
     @Override
-	public boolean handleRequest(MessageContext msgCtx) {
-        if (GatewayUtils.isAPIStatusProtoType(msgCtx)) {
+    public boolean handleRequest(MessageContext msgCtx) {
+        if (GatewayUtils.isAPIStatusPrototype(msgCtx)) {
             return true;
         }
         TracingSpan span = null;
@@ -127,7 +127,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 if (Util.tracingEnabled()) {
                     Util.inject(span, tracer, tracerSpecificCarrier);
                     if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
-                        Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                        Map headers =
+                                (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
                                 org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                         headers.putAll(tracerSpecificCarrier);
                         org.apache.axis2.context.MessageContext.getCurrentMessageContext()
