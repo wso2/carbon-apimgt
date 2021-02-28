@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
-import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtl;
+import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 
@@ -34,7 +34,7 @@ public class SubscribersLoader extends AbstractMediator {
     @Override
     public boolean mediate(MessageContext messageContext) {
         try {
-            List<WebhooksDTO> subscribers = WebhooksUtl.getSubscribersListFromInMemoryMap(messageContext);
+            List<WebhooksDTO> subscribers = WebhooksUtils.getSubscribersListFromInMemoryMap(messageContext);
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBERS_LIST_PROPERTY, subscribers);
             if (subscribers != null) {
                 messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBERS_COUNT_PROPERTY, subscribers.size());

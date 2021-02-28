@@ -587,6 +587,10 @@ paths:
           description: 'Event Received success'
           schema:
             type: object
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -1011,9 +1015,21 @@ definitions:
   #-----------------------------------------------------
   webhooksSubscription:
     properties:
-      apiKey:
+      apiUUID:
         type: string
-        description: The API key
+        description: The API UUID
+      apiContext:
+        type: string
+        description: The API context.
+      apiVersion:
+        type: string
+        description: The API version.
+      tenantDomain:
+        type: string
+        description: The tenant domain.
+      tenantId:
+        type: integer
+        description: The tenant id.
       appID:
         type: string
         description: The application ID of the subscription.
@@ -1030,6 +1046,18 @@ definitions:
         type: integer
         format: int64
         description: the expiry time in millis
+      tier:
+        type: string
+        description: the subscription tier.
+      applicationTier:
+        type: string
+        description: the application tier.
+      apiTier:
+        type: string
+        description: the API tier.
+      subscriberName:
+        type: string
+        description: the subscriber name.
 
 
   #---------------------  --------------------------------
@@ -1292,6 +1320,8 @@ definitions:
         $ref: '#/definitions/RequestCountLimit'
       bandwidth:
         $ref: '#/definitions/BandwidthLimit'
+      eventCount:
+        $ref: '#/definitions/EventCountLimit'
 
   #-----------------------------------------------------
   # The Throttling Bandwidth Limit resource
@@ -1329,4 +1359,21 @@ definitions:
             format: int64
             description: Maximum number of requests allowed
             example: 1000
+
+  #-----------------------------------------------------
+  # The Throttling Event Count Limit resource
+  #-----------------------------------------------------
+  EventCountLimit:
+    title: Event Count Limit object
+    allOf:
+      - $ref: '#/components/schemas/ThrottleLimitBase'
+      - required:
+          - eventCount
+        type: object
+        properties:
+          eventCount:
+            type: integer
+            description: Maximum number of events allowed
+            format: int64
+            example: 3000
 

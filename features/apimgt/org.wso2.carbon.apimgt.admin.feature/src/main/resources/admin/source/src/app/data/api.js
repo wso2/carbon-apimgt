@@ -445,6 +445,60 @@ class API extends Resource {
     }
 
     /**
+     * Get a list of available Gateway Environments
+     */
+    getGatewayEnvironmentList() {
+        return this.client.then((client) => {
+            return client.apis["Environment Collection"].get_environments(
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Delete a Gateway Environment
+     */
+    deleteGatewayEnvironment(id) {
+        return this.client.then((client) => {
+            return client.apis['Environment'].delete_environments__environmentId_(
+                { environmentId: id },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Add a Gateway Environment
+     */
+    addGatewayEnvironment(name, displayName, description, vhosts,  callback = null) {
+        return this.client.then((client) => {
+            const data = { name, displayName, description, vhosts };
+            const payload = {
+                'Content-Type': 'application/json',
+            };
+            return client.apis['Environment'].post_environments(
+                payload,
+                { requestBody: data },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
+     * Update a Gateway Environment
+     */
+    updateGatewayEnvironment(id, name, displayName, description, vhosts,  callback = null) {
+        return this.client.then((client) => {
+            const data = { name, displayName, description, vhosts };
+            return client.apis['Environment'].put_environments__environmentId_(
+                { environmentId: id },
+                { requestBody: data },
+                this._requestMetaData(),
+            );
+        });
+    }
+
+    /**
      * Get a list of available Microgateway labels
      */
     getMicrogatewayLabelList() {

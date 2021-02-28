@@ -34,7 +34,7 @@ public class WebhooksDeliveryEventHandler implements EventHandler {
     @Override
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
         WebhooksDeliveryEvent deliveryEvent = new Gson().fromJson(event, WebhooksDeliveryEvent.class);
-        WebhooksDAO.getInstance().updateDeliveryStatus(deliveryEvent.getApiKey(), deliveryEvent.getAppID(),
+        WebhooksDAO.getInstance().updateDeliveryStatus(deliveryEvent.getApiUUID(), deliveryEvent.getAppID(),
                 deliveryEvent.getTenantDomain(), deliveryEvent.getCallback(), deliveryEvent.getTopic(),
                 deliveryEvent.getStatus());
         return true;

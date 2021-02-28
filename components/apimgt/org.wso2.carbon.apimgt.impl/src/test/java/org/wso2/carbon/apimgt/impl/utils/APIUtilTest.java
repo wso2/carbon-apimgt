@@ -373,68 +373,81 @@ public class APIUtilTest {
 
     @Test
     public void testGetAPIInformation() throws Exception {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
+            Registry registry = Mockito.mock(Registry.class);
+            Resource resource = Mockito.mock(Resource.class);
 
-        GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
-        Registry registry = Mockito.mock(Registry.class);
-        Resource resource = Mockito.mock(Resource.class);
+            API expectedAPI = getUniqueAPI();
 
-        API expectedAPI = getUniqueAPI();
+            String artifactPath = "";
+            PowerMockito.mockStatic(GovernanceUtils.class);
+            Mockito.when(GovernanceUtils.getArtifactPath(registry, expectedAPI.getUUID())).thenReturn(artifactPath);
+            Mockito.when(registry.get(artifactPath)).thenReturn(resource);
+            Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
 
-        String artifactPath = "";
-        PowerMockito.mockStatic(GovernanceUtils.class);
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, expectedAPI.getUUID())).thenReturn(artifactPath);
-        Mockito.when(registry.get(artifactPath)).thenReturn(resource);
-        Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
+            DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy", Locale.US);
+            Date createdTime = df.parse(expectedAPI.getCreatedTime());
+            Mockito.when(resource.getCreatedTime()).thenReturn(createdTime);
 
-        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy", Locale.US);
-        Date createdTime = df.parse(expectedAPI.getCreatedTime());
-        Mockito.when(resource.getCreatedTime()).thenReturn(createdTime);
+            ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
+            APIManagerConfiguration apimConfiguration = holderMockCreator.getConfigurationServiceMockCreator().
+                    getConfigurationMockCreator().getMock();
 
-        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
-        APIManagerConfiguration apimConfiguration = holderMockCreator.getConfigurationServiceMockCreator().
-                getConfigurationMockCreator().getMock();
+            CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
 
-        CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
+            Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
+                    thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
+            Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
+                    thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
+            Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
+                    thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
-                thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
-                thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
-        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
-                thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).
+                    thenReturn(expectedAPI.getId().getProviderName());
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).
+                    thenReturn(expectedAPI.getId().getApiName());
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).
+                    thenReturn(expectedAPI.getId().getVersion());
+            Mockito.when(artifact.getId()).thenReturn(expectedAPI.getUUID());
 
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).
-                thenReturn(expectedAPI.getId().getProviderName());
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).
-                thenReturn(expectedAPI.getId().getApiName());
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).
-                thenReturn(expectedAPI.getId().getVersion());
-        Mockito.when(artifact.getId()).thenReturn(expectedAPI.getUUID());
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                    .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
+            API api = APIUtil.getAPIInformation(artifact, registry);
 
-        API api = APIUtil.getAPIInformation(artifact, registry);
+            Assert.assertEquals(expectedAPI.getId(), api.getId());
+            Assert.assertEquals(expectedAPI.getUUID(), api.getUUID());
 
-        Assert.assertEquals(expectedAPI.getId(), api.getId());
-        Assert.assertEquals(expectedAPI.getUUID(), api.getUUID());
-
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_NAME);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VERSION);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getLifecycleState();
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_OWNER);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY);
-        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_NAME);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VERSION);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getLifecycleState();
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_OWNER);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY);
+            Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     @Test
@@ -962,25 +975,39 @@ public class APIUtilTest {
     @Test
     public void testCreateSwaggerJSONContent() throws Exception {
 
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
-                .class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Environment environment = Mockito.mock(Environment.class);
-        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
-        environmentMap.put("Production", environment);
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                    .class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Environment environment = Mockito.mock(Environment.class);
+            Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+            environmentMap.put("Production", environment);
 
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
-                (apiManagerConfigurationService);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
-        Mockito.when(environment.getApiGatewayEndpoint()).thenReturn("");
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
+                    (apiManagerConfigurationService);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+            Mockito.when(environment.getApiGatewayEndpoint()).thenReturn("");
 
-        String swaggerJSONContent = APIUtil.createSwaggerJSONContent(getUniqueAPI());
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                    .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
+            String swaggerJSONContent = APIUtil.createSwaggerJSONContent(getUniqueAPI());
 
-        Assert.assertNotNull(swaggerJSONContent);
+            Assert.assertNotNull(swaggerJSONContent);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     @Test
@@ -1876,25 +1903,43 @@ public class APIUtilTest {
     @Test
     public void testGetGatewayEndpoint() throws Exception {
 
-        Environment environment = new Environment();
-        environment.setType("Production");
-        environment.setName("Production");
-        environment.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
-        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
-        environmentMap.put("Production", environment);
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
 
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        APIManagerConfigurationService apiManagerConfigurationService =
-                Mockito.mock(APIManagerConfigurationService.class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
-                .thenReturn(apiManagerConfigurationService);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
-        String gatewayEndpoint = APIUtil.getGatewayEndpoint("http,https", "Production", "Production");
-        Assert.assertEquals("https://localhost:8243", gatewayEndpoint);
+            Environment environment = new Environment();
+            environment.setType("Production");
+            environment.setName("Production");
+            environment.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+            Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+            environmentMap.put("Production", environment);
+
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                    .thenReturn(apiManagerConfigurationService);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                    .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
+            String gatewayEndpoint = APIUtil.getGatewayEndpoint("http,https", "Production", "Production");
+            Assert.assertEquals("https://localhost:8243", gatewayEndpoint);
+        } catch (APIManagementException ex) {
+            Assert.assertTrue(ex.getMessage().contains("Failed to create API for :"));
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     @Test
@@ -2457,25 +2502,39 @@ public class APIUtilTest {
     @Test
     public void testGetTokenEndpointsByType() throws Exception {
 
-        Environment environment = new Environment();
-        environment.setType("production");
-        environment.setName("Production");
-        environment.setDefault(true);
-        environment.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
-        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
-        environmentMap.put("Production", environment);
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            Environment environment = new Environment();
+            environment.setType("production");
+            environment.setName("Production");
+            environment.setDefault(true);
+            environment.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+            Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+            environmentMap.put("Production", environment);
 
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        APIManagerConfigurationService apiManagerConfigurationService =
-                Mockito.mock(APIManagerConfigurationService.class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
-                .thenReturn(apiManagerConfigurationService);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
-        String tokenEndpointType = APIUtil.getTokenEndpointsByType("production");
-        Assert.assertEquals("https://localhost:8243", tokenEndpointType);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            APIManagerConfigurationService apiManagerConfigurationService =
+                    Mockito.mock(APIManagerConfigurationService.class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                    .thenReturn(apiManagerConfigurationService);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                    .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
+            String tokenEndpointType = APIUtil.getTokenEndpointsByType("production");
+            Assert.assertEquals("https://localhost:8243", tokenEndpointType);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 }

@@ -123,6 +123,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Limit;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
@@ -289,6 +290,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -2378,14 +2380,11 @@ public final class APIUtil {
      * @return {@link String} - Gateway URL
      */
 
-    public static String getGatewayendpoint(String transports) {
+    public static String getGatewayendpoint(String transports) throws APIManagementException {
 
         String gatewayURLs;
 
-        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()
-                .getApiGatewayEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments();
         if (gatewayEnvironments.size() > 1) {
             for (Environment environment : gatewayEnvironments.values()) {
                 if (APIConstants.GATEWAY_ENV_TYPE_HYBRID.equals(environment.getType())) {
@@ -2431,8 +2430,7 @@ public final class APIUtil {
         String gatewayURLs;
         String gatewayEndpoint = "";
 
-        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments();
         Environment environment = gatewayEnvironments.get(environmentName);
         if (environment.getType().equals(environmentType)) {
             gatewayURLs = environment.getApiGatewayEndpoint();
@@ -5399,11 +5397,7 @@ public final class APIUtil {
     public static String createSwaggerJSONContent(API api) throws APIManagementException {
 
         APIIdentifier identifier = api.getId();
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-
-        Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
+        Environment environment = (Environment) getEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
         String[] endpointsSet = endpoints.split(",");
         String apiContext = api.getContext();
@@ -6844,13 +6838,11 @@ public final class APIUtil {
      * @param environments environments values in json format
      * @return set of environments that Published
      */
-    public static Set<String> extractEnvironmentsForAPI(String environments) {
+    public static Set<String> extractEnvironmentsForAPI(String environments) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet = new HashSet<String>(
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            environmentStringSet = new HashSet<>(getEnvironments().keySet());
         } else {
             //handle not to publish to any of the gateways
             if (APIConstants.API_GATEWAY_NONE.equals(environments)) {
@@ -6864,9 +6856,7 @@ public final class APIUtil {
             }
             //handle to publish to any of the gateways when api creating stage
             else if ("".equals(environments)) {
-                environmentStringSet = new HashSet<String>(
-                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                environmentStringSet = new HashSet<>(getEnvironments().keySet());
             }
         }
 
@@ -6945,12 +6935,9 @@ public final class APIUtil {
      *
      * @param api API object with the attributes value
      */
-    public static List<Environment> getEnvironmentsOfAPI(API api) {
+    public static List<Environment> getEnvironmentsOfAPI(API api) throws APIManagementException {
 
-        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()
-                .getApiGatewayEnvironments();
+        Map<String, Environment> gatewayEnvironments = getEnvironments();
         Set<String> apiEnvironments = api.getEnvironments();
         List<Environment> returnEnvironments = new ArrayList<Environment>();
 
@@ -8168,6 +8155,68 @@ public final class APIUtil {
             }
         }
 
+        //Adding Event based subscription level policies for async policies (WS & SSE)
+        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, Integer.MAX_VALUE};
+        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+        String[] eventCountSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
+
+        for (int i = 0; i < eventCountSubPolicyNames.length; i++) {
+            policyName = eventCountSubPolicyNames[i];
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+                subscriptionPolicy.setDisplayName(policyName);
+                subscriptionPolicy.setDescription(eventCountSubPolicyDescriptions[i]);
+                subscriptionPolicy.setTenantId(tenantId);
+                subscriptionPolicy.setDeployed(true);
+                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+                EventCountLimit eventCountLimit = new EventCountLimit();
+                eventCountLimit.setEventCount(eventCountSubPolicyValues[i]);
+                eventCountLimit.setUnitTime(1);
+                eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_DAY);
+                defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
+                defaultQuotaPolicy.setLimit(eventCountLimit);
+                subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                subscriptionPolicy.setStopOnQuotaReach(true);
+                subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+            }
+        }
+
+        //Adding Event based Webhooks API specific policies (WEBSUB)
+        long[] eventCountWHSubPolicyValues = new long[]{10000, 5000, 1000, Integer.MAX_VALUE};
+        int[] subscriptionCountValues = new int[]{1000, 500, 100, Integer.MAX_VALUE};
+        String[] eventCountWHSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
+        String[] eventCountWHSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC};
+
+        for (int i = 0; i < eventCountWHSubPolicyNames.length; i++) {
+            policyName = eventCountWHSubPolicyNames[i];
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+                subscriptionPolicy.setDisplayName(policyName);
+                subscriptionPolicy.setDescription(eventCountWHSubPolicyDescriptions[i]);
+                subscriptionPolicy.setTenantId(tenantId);
+                subscriptionPolicy.setDeployed(true);
+                QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+                EventCountLimit eventCountLimit = new EventCountLimit();
+                eventCountLimit.setEventCount(eventCountWHSubPolicyValues[i]);
+                eventCountLimit.setUnitTime(1);
+                eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MONTH);
+                defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
+                defaultQuotaPolicy.setLimit(eventCountLimit);
+                subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+                subscriptionPolicy.setStopOnQuotaReach(true);
+                subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+                subscriptionPolicy.setSubscriberCount(subscriptionCountValues[i]);
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+            }
+        }
+
         //Adding Resource level policies
         String[] apiPolicies = new String[]{
                 APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
@@ -8317,16 +8366,94 @@ public final class APIUtil {
             if (needDeployment) {
                 if (!APIConstants.DEFAULT_SUB_POLICY_UNLIMITED.equalsIgnoreCase(policyName)) {
                     SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
-                    SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(
-                            UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
-                            retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
-                            retrievedPolicy.getPolicyName(), retrievedPolicy.getDefaultQuotaPolicy().getType(),
-                            retrievedPolicy.getRateLimitCount(), retrievedPolicy.getRateLimitTimeUnit(),
-                            retrievedPolicy.isStopOnQuotaReach(),
-                            retrievedPolicy.getGraphQLMaxDepth(), retrievedPolicy.getGraphQLMaxComplexity());
-                    APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
+                    deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
                 }
+            }
+        }
+
+        //Adding Event based subscription level policies for async policies (WS & SSE)
+        long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, Integer.MAX_VALUE};
+        String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+        String[] eventCountSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC};
+
+        for (int i = 0; i < eventCountSubPolicyNames.length; i++) {
+            policyName = eventCountSubPolicyNames[i];
+            boolean needDeployment = false;
+            SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+            subscriptionPolicy.setDisplayName(policyName);
+            subscriptionPolicy.setDescription(eventCountSubPolicyDescriptions[i]);
+            subscriptionPolicy.setTenantId(tenantId);
+            subscriptionPolicy.setDeployed(true);
+            QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+            EventCountLimit eventCountLimit = new EventCountLimit();
+            eventCountLimit.setEventCount(eventCountSubPolicyValues[i]);
+            eventCountLimit.setUnitTime(1);
+            eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_DAY);
+            defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
+            defaultQuotaPolicy.setLimit(eventCountLimit);
+            subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+            subscriptionPolicy.setStopOnQuotaReach(true);
+            subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+                needDeployment = true;
+            }
+
+            if (!apiMgtDAO.isPolicyDeployed(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                needDeployment = true;
+            }
+
+            if (needDeployment) {
+                SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
+                deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
+            }
+        }
+
+        //Adding Event based Webhooks API specific policies (WEBSUB)
+        long[] eventCountWHSubPolicyValues = new long[]{10000, 5000, 1000, Integer.MAX_VALUE};
+        int[] subscriptionCountValues = new int[]{1000, 500, 100, Integer.MAX_VALUE};
+        String[] eventCountWHSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
+        String[] eventCountWHSubPolicyDescriptions = new String[]{
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC};
+
+        for (int i = 0; i < eventCountWHSubPolicyNames.length; i++) {
+            policyName = eventCountWHSubPolicyNames[i];
+            boolean needDeployment = false;
+            SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(policyName);
+            subscriptionPolicy.setDisplayName(policyName);
+            subscriptionPolicy.setDescription(eventCountWHSubPolicyDescriptions[i]);
+            subscriptionPolicy.setTenantId(tenantId);
+            subscriptionPolicy.setDeployed(true);
+            QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
+            EventCountLimit eventCountLimit = new EventCountLimit();
+            eventCountLimit.setEventCount(eventCountWHSubPolicyValues[i]);
+            eventCountLimit.setUnitTime(1);
+            eventCountLimit.setTimeUnit(APIConstants.TIME_UNIT_MONTH);
+            defaultQuotaPolicy.setType(PolicyConstants.EVENT_COUNT_TYPE);
+            defaultQuotaPolicy.setLimit(eventCountLimit);
+            subscriptionPolicy.setDefaultQuotaPolicy(defaultQuotaPolicy);
+            subscriptionPolicy.setStopOnQuotaReach(true);
+            subscriptionPolicy.setBillingPlan(APIConstants.BILLING_PLAN_FREE);
+            subscriptionPolicy.setSubscriberCount(subscriptionCountValues[i]);
+
+            if (!apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                apiMgtDAO.addSubscriptionPolicy(subscriptionPolicy);
+                needDeployment = true;
+            }
+
+            if (!apiMgtDAO.isPolicyDeployed(PolicyConstants.POLICY_LEVEL_SUB, tenantId, policyName)) {
+                needDeployment = true;
+            }
+
+            if (needDeployment) {
+                SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
+                deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
             }
         }
 
@@ -8390,6 +8517,20 @@ public final class APIUtil {
                 }
             }
         }
+    }
+
+    private static void deployRetrievedSubscriptionPolicy(int tenantId, SubscriptionPolicy retrievedPolicy) {
+
+        SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(
+                UUID.randomUUID().toString(),
+                System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId,
+                retrievedPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                retrievedPolicy.getPolicyName(), retrievedPolicy.getDefaultQuotaPolicy().getType(),
+                retrievedPolicy.getRateLimitCount(), retrievedPolicy.getRateLimitTimeUnit(),
+                retrievedPolicy.isStopOnQuotaReach(),
+                retrievedPolicy.getGraphQLMaxDepth(), retrievedPolicy.getGraphQLMaxComplexity(),
+                retrievedPolicy.getSubscriberCount());
+        APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
     }
 
     /**
@@ -8472,11 +8613,15 @@ public final class APIUtil {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
                     tier.setRequestCount(countLimit.getRequestCount());
-                } else {
+                } else if (limit instanceof BandwidthLimit){
                     BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
+                } else {
+                    EventCountLimit eventCountLimit = (EventCountLimit) limit;
+                    tier.setRequestCount(eventCountLimit.getEventCount());
+                    tier.setRequestsPerMin(eventCountLimit.getEventCount());
                 }
                 if (PolicyConstants.POLICY_LEVEL_SUB.equalsIgnoreCase(policyLevel)) {
                     tier.setTierPlan(((SubscriptionPolicy) policy).getBillingPlan());
@@ -9823,13 +9968,11 @@ public final class APIUtil {
      * @param environments environments values in json format
      * @return set of environments that need to Publish
      */
-    public static Set<String> extractEnvironmentsForAPI(List<String> environments) {
+    public static Set<String> extractEnvironmentsForAPI(List<String> environments) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
-            environmentStringSet = new HashSet<String>(
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+            environmentStringSet = new HashSet<>(getEnvironments().keySet());
         } else {
             //handle not to publish to any of the gateways
             if (environments.size() == 1 && APIConstants.API_GATEWAY_NONE.equals(environments.get(0))) {
@@ -9842,9 +9985,7 @@ public final class APIUtil {
             }
             //handle to publish to any of the gateways when api creating stage
             else if (environments.size() == 0) {
-                environmentStringSet = new HashSet<String>(
-                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                environmentStringSet = new HashSet<>(getEnvironments().keySet());
             }
         }
         return environmentStringSet;
@@ -9870,8 +10011,23 @@ public final class APIUtil {
                 getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_URL);
     }
 
-    public static Map<String, Environment> getEnvironments() {
+    public static Map<String, Environment> getEnvironments() throws APIManagementException {
+        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        // get dynamic gateway environments read from database
+        Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(tenantDomain).stream()
+                .map(Environment::newFromModel).collect(Collectors.toMap(Environment::getName, env -> env));
 
+        // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
+        Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
+        allEnvironments.putAll(envFromDB);
+        return allEnvironments;
+    }
+
+    /**
+     * Get gateway environments defined in the configuration: api-manager.xml
+     * @return map of configured environments against environment name
+     */
+    public static Map<String, Environment> getReadOnlyEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
@@ -11283,11 +11439,9 @@ public final class APIUtil {
         return keyManagerConfigurationDTO;
     }
 
-    public static String getTokenEndpointsByType(String type) {
+    public static String getTokenEndpointsByType(String type) throws APIManagementException {
 
-        APIManagerConfiguration config =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
+        Map<String, Environment> environments = getEnvironments();
         Map<String, String> map = new HashMap<>();
 
         String productionUrl = "";
@@ -11890,6 +12044,7 @@ public final class APIUtil {
         if (environment != null) {
             return environment;
         }
+        // TODO: (renuka) Do we need to check for following label lookup
         Label label =
                 ApiMgtDAO.getInstance().getLabelDetailByLabelAndTenantDomain(name, tenantDomain);
         if (label != null) {

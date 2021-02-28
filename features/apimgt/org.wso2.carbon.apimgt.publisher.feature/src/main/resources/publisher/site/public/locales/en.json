@@ -493,6 +493,39 @@
   "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.name.helper.text": {
     "defaultMessage": "Provide the name of the technical owner"
   },
+  "Apis.Details.Comments.Comment.something.went.wrong": {
+    "defaultMessage": "Something went wrong while deleting comment"
+  },
+  "Apis.Details.Comments.CommentAdd.btn.add.comment": {
+    "defaultMessage": "Comment"
+  },
+  "Apis.Details.Comments.CommentAdd.btn.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Comments.CommentAdd.write.comment.help": {
+    "defaultMessage": "Write a comment"
+  },
+  "Apis.Details.Comments.CommentAdd.write.comment.label": {
+    "defaultMessage": "Write a comment"
+  },
+  "Apis.Details.Comments.CommentOptions.delete": {
+    "defaultMessage": "Delete"
+  },
+  "Apis.Details.Comments.CommentOptions.reply": {
+    "defaultMessage": "Reply"
+  },
+  "Apis.Details.Comments.load.previous.comments": {
+    "defaultMessage": "Show More"
+  },
+  "Apis.Details.Comments.no.comments": {
+    "defaultMessage": "No Comments Yet"
+  },
+  "Apis.Details.Comments.no.comments.content": {
+    "defaultMessage": "No comments available for this API yet"
+  },
+  "Apis.Details.Comments.title": {
+    "defaultMessage": "Comments"
+  },
   "Apis.Details.Configurartion.components.QueryAnalysis": {
     "defaultMessage": "Query Analysis"
   },
@@ -733,11 +766,23 @@
   "Apis.Details.Configuration.components.KeyManager.more.than.one.info": {
     "defaultMessage": "Select one or more Key Managers"
   },
-  "Apis.Details.Configuration.components.MarkdownEditor.add.description.button": {
-    "defaultMessage": "Add Description"
+  "Apis.Details.Configuration.components.MarkdownEditor.add.content.button": {
+    "defaultMessage": "Add Content"
   },
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.button": {
-    "defaultMessage": "Edit Description"
+  "Apis.Details.Configuration.components.MarkdownEditor.cancel.button": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.content.button": {
+    "defaultMessage": "Edit Content"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.of": {
+    "defaultMessage": "Edit Description of"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of": {
+    "defaultMessage": "Edit Overview of"
+  },
+  "Apis.Details.Configuration.components.MarkdownEditor.update.content.button": {
+    "defaultMessage": "Update Content"
   },
   "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": {
     "defaultMessage": "Maximum backend transactions per second in integers"
@@ -1085,10 +1130,10 @@
     "defaultMessage": "Edit Content"
   },
   "Apis.Details.Documents.MarkdownEditor.edit.content.of": {
-    "defaultMessage": "Edit Description of"
+    "defaultMessage": "Edit Content of"
   },
   "Apis.Details.Documents.MarkdownEditor.update.content.button": {
-    "defaultMessage": "Update Description"
+    "defaultMessage": "Update Content"
   },
   "Apis.Details.Documents.MarkdownEditor.update.success.message": {
     "defaultMessage": "updated successfully."
@@ -2883,6 +2928,9 @@
   },
   "Apis.Details.index.business.info": {
     "defaultMessage": "business info"
+  },
+  "Apis.Details.index.comments": {
+    "defaultMessage": "Comments"
   },
   "Apis.Details.index.design.configs": {
     "defaultMessage": "Basic info"

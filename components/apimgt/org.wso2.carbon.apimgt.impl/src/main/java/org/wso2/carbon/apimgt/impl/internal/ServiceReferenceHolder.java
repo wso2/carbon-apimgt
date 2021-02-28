@@ -21,7 +21,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
-import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;

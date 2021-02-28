@@ -22,6 +22,7 @@ public class APIRevisionDeploymentDTO   {
   
     private String revisionUuid = null;
     private String name = null;
+    private String vhost = null;
     private Boolean displayOnDevportal = null;
     private java.util.Date deployedTime = null;
 
@@ -50,13 +51,30 @@ public class APIRevisionDeploymentDTO   {
   }
 
   
-  @ApiModelProperty(example = "production and sandbox", value = "")
+  @ApiModelProperty(example = "default", value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public APIRevisionDeploymentDTO vhost(String vhost) {
+    this.vhost = vhost;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "mg.wso2.com", value = "")
+  @JsonProperty("vhost")
+ @Pattern(regexp="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$") @Size(min=1,max=255)  public String getVhost() {
+    return vhost;
+  }
+  public void setVhost(String vhost) {
+    this.vhost = vhost;
   }
 
   /**
@@ -105,13 +123,14 @@ public class APIRevisionDeploymentDTO   {
     APIRevisionDeploymentDTO apIRevisionDeployment = (APIRevisionDeploymentDTO) o;
     return Objects.equals(revisionUuid, apIRevisionDeployment.revisionUuid) &&
         Objects.equals(name, apIRevisionDeployment.name) &&
+        Objects.equals(vhost, apIRevisionDeployment.vhost) &&
         Objects.equals(displayOnDevportal, apIRevisionDeployment.displayOnDevportal) &&
         Objects.equals(deployedTime, apIRevisionDeployment.deployedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUuid, name, displayOnDevportal, deployedTime);
+    return Objects.hash(revisionUuid, name, vhost, displayOnDevportal, deployedTime);
   }
 
   @Override
@@ -121,6 +140,7 @@ public class APIRevisionDeploymentDTO   {
     
     sb.append("    revisionUuid: ").append(toIndentedString(revisionUuid)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
     sb.append("    displayOnDevportal: ").append(toIndentedString(displayOnDevportal)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
     sb.append("}");

@@ -218,7 +218,7 @@ function Overview(props) {
             const promisedServiceDefinition = ServiceCatalog.getServiceDefinition(serviceId);
             promisedServiceDefinition.then((data) => {
                 if (service.definitionType !== 'GRAPHQL_SDL') {
-                    setServiceDefinition(YAML.safeDump(YAML.safeLoad(data)));
+                    setServiceDefinition(YAML.safeDump(YAML.safeLoad(JSON.stringify(data))));
                     setFormat('yaml');
                 } else {
                     setServiceDefinition(data.obj.schemaDefinition);

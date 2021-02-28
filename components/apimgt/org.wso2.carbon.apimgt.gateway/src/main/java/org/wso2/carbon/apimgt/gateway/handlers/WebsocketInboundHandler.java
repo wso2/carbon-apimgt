@@ -67,19 +67,14 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.gateway.handlers.ws.DataPublisherUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -413,19 +408,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             remoteIP = remoteIP.substring(1, remoteIP.indexOf(":"));
         }
         JSONObject jsonObMap = new JSONObject();
-        if (remoteIP != null && remoteIP.length() > 0) {
-            try {
-                InetAddress address = APIUtil.getAddress(remoteIP);
-                if (address instanceof Inet4Address) {
-                    jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
-                } else if (address instanceof Inet6Address) {
-                    jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(remoteIP));
-                }
-            } catch (UnknownHostException e) {
-                //ignore the error and log it
-                log.error("Error while parsing host IP " + remoteIP, e);
-            }
-        }
+        Utils.setRemoteIp(jsonObMap, remoteIP);
         jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, msg.content().capacity());
         try {
             PrivilegedCarbonContext.startTenantFlow();

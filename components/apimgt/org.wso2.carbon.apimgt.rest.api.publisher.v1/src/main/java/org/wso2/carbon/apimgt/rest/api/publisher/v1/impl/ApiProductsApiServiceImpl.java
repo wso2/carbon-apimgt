@@ -826,6 +826,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
             apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+            apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
@@ -928,6 +929,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                 apiRevisionDeployment.setRevisionUUID(revisionId);
                 apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
                 apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
                 apiRevisionDeployments.add(apiRevisionDeployment);
             }

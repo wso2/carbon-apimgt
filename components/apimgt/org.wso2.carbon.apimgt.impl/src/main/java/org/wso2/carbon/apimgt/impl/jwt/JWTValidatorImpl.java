@@ -28,12 +28,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.jwt.transformer.DefaultJWTTransformer;
-import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.DefaultJWTTransformer;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.JWTUtil;
 
@@ -60,7 +62,7 @@ public class JWTValidatorImpl implements JWTValidator {
             state = validateSignature(signedJWTInfo.getSignedJWT());
             if (state) {
                 JWTClaimsSet jwtClaimsSet = signedJWTInfo.getJwtClaimsSet();
-                state = signedJWTInfo.isValidCertificateBoundAccessToken();
+                state = isValidCertificateBoundAccessToken(signedJWTInfo);
                 if (state) {
                     state = validateTokenExpiry(jwtClaimsSet);
                     if (state) {
@@ -87,11 +89,36 @@ public class JWTValidatorImpl implements JWTValidator {
                 jwtValidationInfo.setValidationCode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
                 return jwtValidationInfo;
             }
-        } catch (ParseException e) {
+        } catch (ParseException | JWTGeneratorException e) {
             throw new APIManagementException("Error while parsing JWT", e);
         }
     }
+    private boolean isValidCertificateBoundAccessToken(SignedJWTInfo signedJWTInfo) { //Holder of Key token
 
+        if (isCertificateBoundAccessTokenEnabled()) {
+            if (signedJWTInfo.getX509ClientCertificate() == null ||
+                    StringUtils.isEmpty(signedJWTInfo.getX509ClientCertificateHash())) {
+                return true; // If cnf is not available - 200 success
+            }
+            if (signedJWTInfo.getX509ClientCertificateHash().equals(signedJWTInfo.getCertificateThumbprint())) {
+                return true; // if cnf matches with truststore cert - 200 success
+            }
+            return false; // if cert is not in truststore or thumbprint does not match with the cert
+        }
+        return true; /// if config is not enabled - 200 success
+    }
+
+    private boolean isCertificateBoundAccessTokenEnabled() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (config != null) {
+            String firstProperty = config
+                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
+            return Boolean.parseBoolean(firstProperty);
+        }
+        return false;
+    }
     @Override
     public void loadTokenIssuerConfiguration(TokenIssuerDto tokenIssuerConfigurations) {
 
@@ -154,22 +181,22 @@ public class JWTValidatorImpl implements JWTValidator {
         return exp == null || DateUtils.isAfter(exp, now, timestampSkew);
     }
 
-    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected JWTClaimsSet transformJWTClaims(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.transform(jwtClaimsSet);
     }
 
-    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected String getConsumerKey(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedConsumerKey(jwtClaimsSet);
     }
 
-    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected List<String> getScopes(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedScopes(jwtClaimsSet);
     }
 
-    protected Boolean getIsAppToken(JWTClaimsSet jwtClaimsSet) throws APIManagementException {
+    protected Boolean getIsAppToken(JWTClaimsSet jwtClaimsSet) throws JWTGeneratorException {
 
         return jwtTransformer.getTransformedIsAppTokenType(jwtClaimsSet);
     }

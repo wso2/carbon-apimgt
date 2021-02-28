@@ -111,6 +111,7 @@ function reducer(state, newValue) {
         case 'description':
         case 'rateLimitCount':
         case 'rateLimitTimeUnit':
+        case 'subscriberCount':
         case 'billingPlan':
         case 'stopOnQuotaReach':
             return { ...state, [field]: value };
@@ -120,6 +121,7 @@ function reducer(state, newValue) {
         case 'timeUnit':
         case 'dataAmount':
         case 'unitTime':
+        case 'eventCount':
             return {
                 ...state,
                 defaultLimit: { ...state.defaultLimit, [field]: value },
@@ -177,6 +179,7 @@ function AddEdit(props) {
             type: 'REQUESTCOUNTLIMIT',
             dataAmount: '',
             dataUnit: 'KB',
+            eventCount: '',
         },
         rateLimitCount: '',
         rateLimitTimeUnit: 'sec',
@@ -198,6 +201,7 @@ function AddEdit(props) {
             maxComplexity: '',
             maxDepth: '',
         },
+        subscriberCount: '',
     });
 
     const [customAttributes, setCustomAttributes] = useState([]);
@@ -206,12 +210,15 @@ function AddEdit(props) {
     useEffect(() => {
         if (isEdit) {
             restApi.subscriptionThrottlingPolicyGet(params.id).then((result) => {
+                console.log('edit state');
+                console.log(result.body);
                 let requestCountEdit = '';
                 let dataAmountEdit = '';
                 let timeUnitEdit = 'min';
                 let unitTimeEdit = '';
                 let typeEdit = 'REQUESTCOUNTLIMIT';
                 let dataUnitEdit = 'KB';
+                let eventCountEdit = '';
                 if (result.body.defaultLimit.requestCount !== null) {
                     requestCountEdit = result.body.defaultLimit.requestCount.requestCount;
                     timeUnitEdit = result.body.defaultLimit.requestCount.timeUnit;
@@ -222,6 +229,11 @@ function AddEdit(props) {
                     dataUnitEdit = result.body.defaultLimit.bandwidth.dataUnit;
                     timeUnitEdit = result.body.defaultLimit.bandwidth.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.bandwidth.unitTime;
+                    typeEdit = result.body.defaultLimit.type;
+                } else {
+                    eventCountEdit = result.body.defaultLimit.eventCount.eventCount;
+                    unitTimeEdit = result.body.defaultLimit.eventCount.unitTime;
+                    timeUnitEdit = result.body.defaultLimit.eventCount.timeUnit;
                     typeEdit = result.body.defaultLimit.type;
                 }
                 setValidRoles(result.body.permissions.roles);
@@ -235,7 +247,9 @@ function AddEdit(props) {
                         type: typeEdit,
                         dataAmount: dataAmountEdit,
                         dataUnit: dataUnitEdit,
+                        eventCount: eventCountEdit,
                     },
+                    subscriberCount: (result.body.subscriberCount === 0) ? '' : result.body.subscriberCount,
                     rateLimitCount: (result.body.rateLimitCount === 0) ? '' : result.body.rateLimitCount,
                     rateLimitTimeUnit: (result.body.rateLimitCount === 0) ? 'sec' : result.body.rateLimitTimeUnit,
                     billingPlan: result.body.billingPlan,
@@ -272,6 +286,7 @@ function AddEdit(props) {
                 type: 'REQUESTCOUNTLIMIT',
                 dataAmount: '',
                 dataUnit: 'KB',
+                eventCount: '',
             },
             rateLimitCount: '',
             rateLimitTimeUnit: 'sec',
@@ -293,6 +308,7 @@ function AddEdit(props) {
                 maxComplexity: '',
                 maxDepth: '',
             },
+            subscriberCount: '',
         });
     }, []);
 
@@ -335,6 +351,13 @@ function AddEdit(props) {
                 }) : '';
                 setValidationError({ requestCount: error });
                 break;
+            case 'eventCount':
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Subscription.Policy.policy.event.count.empty.error.msg',
+                    defaultMessage: 'Event Count is Empty',
+                }) : '';
+                setValidationError({ eventCount: error });
+                break;
             case 'dataAmount':
                 error = value === '' ? intl.formatMessage({
                     id: 'Throttling.Subscription.Policy.policy.data.amount.empty.error.msg',
@@ -365,6 +388,7 @@ function AddEdit(props) {
             type,
             dataAmount,
             dataUnit,
+            eventCount,
         },
         rateLimitCount,
         rateLimitTimeUnit,
@@ -384,6 +408,7 @@ function AddEdit(props) {
             maxComplexity,
             maxDepth,
         },
+        subscriberCount,
     } = state;
 
     const onChange = (e) => {
@@ -398,13 +423,16 @@ function AddEdit(props) {
         let errorText = '';
         const policyNameErrors = validate('policyName', policyName);
         const requestCountErrors = validate('requestCount', requestCount);
+        const eventCountErrors = validate('eventCount', eventCount);
         const dataAmountErrors = validate('dataAmount', dataAmount);
         const unitTimeErrors = validate('unitTime', unitTime);
 
         if (type === 'BANDWIDTHLIMIT') {
             errorText += policyNameErrors + dataAmountErrors + unitTimeErrors;
-        } else {
+        } else if (type === 'REQUESTCOUNTLIMIT') {
             errorText += policyNameErrors + requestCountErrors + unitTimeErrors;
+        } else {
+            errorText += policyNameErrors + eventCountErrors + unitTimeErrors;
         }
         return errorText;
     };
@@ -451,7 +479,6 @@ function AddEdit(props) {
         }
         let subscriptionThrottlingPolicy;
         let promisedAddSubscriptionPolicy;
-
         if (type === 'REQUESTCOUNTLIMIT') {
             subscriptionThrottlingPolicy = {
                 policyName: state.policyName,
@@ -464,6 +491,42 @@ function AddEdit(props) {
                         unitTime: state.defaultLimit.unitTime,
                     },
                 },
+                subscriberCount: (state.subscriberCount === '') ? 0 : state.subscriberCount,
+                rateLimitCount: (state.rateLimitCount === '') ? 0 : state.rateLimitCount,
+                rateLimitTimeUnit: state.rateLimitTimeUnit,
+                billingPlan: state.billingPlan,
+                stopOnQuotaReach: state.stopOnQuotaReach,
+                customAttributes,
+                graphQLMaxComplexity: (state.graphQL.maxComplexity === '') ? 0 : state.graphQL.maxComplexity,
+                graphQLMaxDepth: (state.graphQL.maxDepth === '') ? 0 : state.graphQL.maxDepth,
+                monetization: {
+                    monetizationPlan: state.monetization.monetizationPlan,
+                    properties: {
+                        fixedPrice: state.monetization.fixedPrice,
+                        pricePerRequest: state.monetization.pricePerRequest,
+                        currencyType: state.monetization.currencyType,
+                        billingCycle: state.monetization.billingCycle,
+                    },
+                },
+                permissions: {
+                    permissionType: state.permissions.permissionStatus,
+                    roles: validRoles,
+                },
+            };
+        } else if (type === 'BANDWIDTHLIMIT') {
+            subscriptionThrottlingPolicy = {
+                policyName: state.policyName,
+                description: state.description,
+                defaultLimit: {
+                    type: state.defaultLimit.type,
+                    bandwidth: {
+                        dataAmount: state.defaultLimit.dataAmount,
+                        dataUnit: state.defaultLimit.dataUnit,
+                        timeUnit: state.defaultLimit.timeUnit,
+                        unitTime: state.defaultLimit.unitTime,
+                    },
+                },
+                subscriberCount: (state.subscriberCount === '') ? 0 : state.subscriberCount,
                 rateLimitCount: (state.rateLimitCount === '') ? 0 : state.rateLimitCount,
                 rateLimitTimeUnit: state.rateLimitTimeUnit,
                 billingPlan: state.billingPlan,
@@ -491,13 +554,13 @@ function AddEdit(props) {
                 description: state.description,
                 defaultLimit: {
                     type: state.defaultLimit.type,
-                    bandwidth: {
-                        dataAmount: state.defaultLimit.dataAmount,
-                        dataUnit: state.defaultLimit.dataUnit,
+                    eventCount: {
+                        eventCount: state.defaultLimit.eventCount,
                         timeUnit: state.defaultLimit.timeUnit,
                         unitTime: state.defaultLimit.unitTime,
                     },
                 },
+                subscriberCount: (state.subscriberCount === '') ? 0 : state.subscriberCount,
                 rateLimitCount: (state.rateLimitCount === '') ? 0 : state.rateLimitCount,
                 rateLimitTimeUnit: state.rateLimitTimeUnit,
                 billingPlan: state.billingPlan,
@@ -722,6 +785,11 @@ function AddEdit(props) {
                                     control={<Radio />}
                                     label='Request Bandwidth'
                                 />
+                                <FormControlLabel
+                                    value='EVENTCOUNTLIMIT'
+                                    control={<Radio />}
+                                    label='Event Based (Async API)'
+                                />
                             </RadioGroup>
                         </Box>
                         <Box component='div' m={1}>
@@ -791,6 +859,34 @@ function AddEdit(props) {
                                             <MenuItem value='MB'>MB</MenuItem>
                                         </Select>
                                     </FormControl>
+                                </Box>
+                            )}
+                            {type === 'EVENTCOUNTLIMIT' && (
+                                <Box display='flex' flexDirection='row'>
+                                    <TextField
+                                        margin='dense'
+                                        name='eventCount'
+                                        value={eventCount}
+                                        type='number'
+                                        onChange={onChange}
+                                        required
+                                        InputProps={{
+                                            id: 'eventCount',
+                                            onBlur: ({ target: { value } }) => {
+                                                validate('eventCount', value);
+                                            },
+                                        }}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Throttling.Subscription.AddEdit.form.eventCount.count'
+                                                defaultMessage='Event Count'
+                                            />
+                                        )}
+                                        fullWidth
+                                        error={validationError.eventCount}
+                                        helperText={validationError.eventCount || 'Number of events allowed'}
+                                        variant='outlined'
+                                    />
                                 </Box>
                             )}
                             <Box display='flex' flexDirection='row'>
@@ -960,6 +1056,56 @@ function AddEdit(props) {
                                                 <FormattedMessage
                                                     id='Throttling.Subscription.AddEdit.form.max.depth'
                                                     defaultMessage='Max Depth'
+                                                />
+                                            </span>
+                                        )}
+                                        fullWidth
+                                        variant='outlined'
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* Web Hooks */}
+                    <Grid item xs={12} md={12} lg={3}>
+                        <Box display='flex' flexDirection='row' alignItems='center'>
+                            <Box flex='1'>
+                                <Typography color='inherit' variant='subtitle2' component='div'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.Subscriber.Count'
+                                        defaultMessage='Webhooks'
+                                    />
+                                </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.subscription.count.add.description'
+                                        defaultMessage={'Maximum number of webhooks'
+                                        + ' allowed for a Webhooks API using this policy.'}
+                                    />
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <Box component='div' m={1}>
+                            <Box display='flex' flexDirection='row' alignItems='center'>
+                                <Box flex='1'>
+                                    <TextField
+                                        margin='dense'
+                                        name='subscriberCount'
+                                        value={subscriberCount}
+                                        type='number'
+                                        onChange={onChange}
+                                        label={(
+                                            <span>
+                                                <FormattedMessage
+                                                    id='Throttling.Subscription.AddEdit.form.max.webhooks.connections'
+                                                    defaultMessage='Max Subscriptions'
                                                 />
                                             </span>
                                         )}
