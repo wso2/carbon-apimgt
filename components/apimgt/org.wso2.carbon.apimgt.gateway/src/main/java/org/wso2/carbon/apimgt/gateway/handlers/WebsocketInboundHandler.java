@@ -33,7 +33,6 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
@@ -43,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.api.API;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.api.Resource;
@@ -59,21 +59,17 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestResponseStreamDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -84,12 +80,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import javax.cache.Cache;
 
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.DEFAULT_RESOURCE_NAME;
@@ -104,7 +98,6 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSoc
 public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
     private String tenantDomain;
-    private static APIMgtUsageDataPublisher usageDataPublisher;
     private String fullRequestPath;
     private String requestPath; // request path without query param section
     private String version;
@@ -116,33 +109,27 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private String apiName;
     private String keyType;
     private API api;
-    private static final AttributeKey<Map<String, Object>> WSO2_PROPERTIES = AttributeKey.valueOf("WSO2_PROPERTIES");
+    private AuthenticationContext authContext;
+    private WebSocketAnalyticsMetricsHandler metricsHandler;
 
     public WebsocketInboundHandler() {
         initializeDataPublisher();
     }
 
     private void initializeDataPublisher() {
-        if (APIUtil.isAnalyticsEnabled() && usageDataPublisher == null) {
-            String publisherClass = getApiManagerAnalyticsConfiguration().getPublisherClass();
-
-            try {
-                synchronized (this) {
-                    if (usageDataPublisher == null) {
-                        log.debug("Instantiating Web Socket Data Publisher");
-                        usageDataPublisher = new APIMgtUsageDataBridgeDataPublisher();
-                        usageDataPublisher.init();
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Cannot publish event. " + e.getMessage(), e);
-            }
+        if (APIUtil.isAnalyticsEnabled()) {
+            metricsHandler = new WebSocketAnalyticsMetricsHandler();
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_START_TIME_PROPERTY,
+                    System.currentTimeMillis());
+        }
 
         //check if the request is a handshake
         if (msg instanceof FullHttpRequest) {
@@ -161,12 +148,28 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             useragent = useragent != null ? useragent : "-";
             headers.add(HttpHeaders.USER_AGENT, useragent);
 
-            if (validateOAuthHeader(req, matchingResource)) {
-                setApiPropertiesToChannel(ctx);
+            boolean isOAuthHeaderValid;
+            try {
+                isOAuthHeaderValid = validateOAuthHeader(req, matchingResource);
+            } catch (APISecurityException e) {
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishHandshakeAuthErrorEvent(ctx, e.getMessage());
+                }
+                throw e;
+            }
+
+            if (isOAuthHeaderValid) {
+                setApiAuthPropertiesToChannel(ctx);
                 if (StringUtils.isNotEmpty(token)) {
                     ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
                 }
                 ctx.fireChannelRead(msg);
+                if (APIUtil.isAnalyticsEnabled()) {
+                    WebSocketUtils.setApiPropertyToChannel(ctx,
+                            org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_AGENT_PROPERTY, useragent);
+                    WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE, matchingResource);
+                    publishHandshakeEvent(ctx);
+                }
 
                 // publish google analytics data
                 GoogleAnalyticsData.DataBuilder gaData = new GoogleAnalyticsData.DataBuilder(null, null, null, null)
@@ -186,6 +189,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 httpResponse.headers().set("content-type", "text/plain; charset=UTF-8");
                 httpResponse.headers().set("content-length", httpResponse.content().readableBytes());
                 ctx.writeAndFlush(httpResponse);
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishHandshakeAuthErrorEvent(ctx, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Authentication Failure for the websocket context: " + apiContext);
                 }
@@ -204,10 +210,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 String clientIp = getRemoteIP(ctx);
                 // publish analytics events if analytics is enabled
                 if (APIUtil.isAnalyticsEnabled()) {
-                    publishRequestEvent(clientIp, true);
+                    publishPublishEvent(ctx);
                 }
             } else {
                 ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishPublishThrottledEvent(ctx);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Inbound Websocket frame is throttled. " + ctx.channel().toString());
                 }
@@ -337,6 +346,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
                     keyType = info.getType();
                     infoDTO = info;
+                    authContext = authenticationContext;
                     return authenticationContext.isAuthenticated();
                 } else {
                     log.debug("The token was identified as an OAuth token");
@@ -381,21 +391,25 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected void setApiPropertiesToChannel(ChannelHandlerContext ctx) {
-        Map<String, Object> apiPropertiesMap = new HashMap();
+        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
         apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API, apiName);
         apiPropertiesMap.put(RESTConstants.PROCESSED_API, api);
+        apiPropertiesMap.put(RESTConstants.REST_API_CONTEXT, apiContext);
+        apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
+    }
+
+    protected void setApiAuthPropertiesToChannel(ChannelHandlerContext ctx) {
+        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
         apiPropertiesMap.put(APIConstants.API_KEY_TYPE, keyType);
-        ctx.channel().attr(WSO2_PROPERTIES).set(apiPropertiesMap);
+        apiPropertiesMap.put(APISecurityUtils.API_AUTH_CONTEXT, authContext);
+        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
                                                                String apiVersion) throws APISecurityException {
 
         return new WebsocketWSClient().getAPIKeyData(apiContextUri, apiVersion, key, domain);
-    }
-
-    protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
-        return DataPublisherUtil.getApiManagerAnalyticsConfiguration();
     }
 
     /**
@@ -443,9 +457,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             boolean isThrottled = WebsocketUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
                                                             applicationLevelThrottleKey);
             if (isThrottled) {
-                if (APIUtil.isAnalyticsEnabled()) {
-                    publishThrottleEvent();
-                }
                 return false;
             }
         } finally {
@@ -478,98 +489,59 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @param isThrottledOut request is throttled out or not
      */
     public void publishRequestEvent(String clientIp, boolean isThrottledOut) {
-        long requestTime = System.currentTimeMillis();
-        String useragent = headers.get(HttpHeaders.USER_AGENT);
-
-        try {
-            String appOwner = infoDTO.getSubscriber();
-            String keyType = infoDTO.getType();
-            String correlationID = UUID.randomUUID().toString();
-
-            RequestResponseStreamDTO requestPublisherDTO = new RequestResponseStreamDTO();
-            requestPublisherDTO.setApiName(infoDTO.getApiName());
-            requestPublisherDTO.setApiCreator(infoDTO.getApiPublisher());
-            requestPublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
-            requestPublisherDTO.setApiVersion(infoDTO.getApiName() + ':' + version);
-            requestPublisherDTO.setApplicationId(infoDTO.getApplicationId());
-            requestPublisherDTO.setApplicationName(infoDTO.getApplicationName());
-            requestPublisherDTO.setApplicationOwner(appOwner);
-            requestPublisherDTO.setUserIp(clientIp);
-            requestPublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
-            //context will always be empty as this method will call only for WebSocketFrame and url is null
-            requestPublisherDTO.setApiContext(apiContext);
-            requestPublisherDTO.setThrottledOut(isThrottledOut);
-            requestPublisherDTO.setApiHostname(DataPublisherUtil.getHostAddress());
-            requestPublisherDTO.setApiMethod("-");
-            requestPublisherDTO.setRequestTimestamp(requestTime);
-            requestPublisherDTO.setApiResourcePath("-");
-            requestPublisherDTO.setApiResourceTemplate("-");
-            requestPublisherDTO.setUserAgent(useragent);
-            requestPublisherDTO.setUsername(infoDTO.getEndUserName());
-            requestPublisherDTO.setUserTenantDomain(tenantDomain);
-            requestPublisherDTO.setApiTier(infoDTO.getTier());
-            requestPublisherDTO.setApiVersion(version);
-            requestPublisherDTO.setMetaClientType(keyType);
-            requestPublisherDTO.setCorrelationID(correlationID);
-            requestPublisherDTO.setUserAgent(useragent);
-            requestPublisherDTO.setCorrelationID(correlationID);
-            requestPublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-            requestPublisherDTO.setLabel(APIMgtGatewayConstants.SYNAPDE_GW_LABEL);
-            requestPublisherDTO.setProtocol("WebSocket");
-            requestPublisherDTO.setDestination("-");
-            requestPublisherDTO.setBackendTime(0);
-            requestPublisherDTO.setResponseCacheHit(false);
-            requestPublisherDTO.setResponseCode(0);
-            requestPublisherDTO.setResponseSize(0);
-            requestPublisherDTO.setServiceTime(0);
-            requestPublisherDTO.setResponseTime(0);
-            ExecutionTimeDTO executionTime = new ExecutionTimeDTO();
-            executionTime.setBackEndLatency(0);
-            executionTime.setOtherLatency(0);
-            executionTime.setRequestMediationLatency(0);
-            executionTime.setResponseMediationLatency(0);
-            executionTime.setSecurityLatency(0);
-            executionTime.setThrottlingLatency(0);
-            requestPublisherDTO.setExecutionTime(executionTime);
-            usageDataPublisher.publishEvent(requestPublisherDTO);
-        } catch (Exception e) {
-            // flow should not break if event publishing failed
-            log.error("Cannot publish event. " + e.getMessage(), e);
-        }
-
+        //ignore data publishing
     }
 
-    /*
-     * Publish throttle events.
-     */
-    private void publishThrottleEvent() {
-        long requestTime = System.currentTimeMillis();
-        String correlationID = UUID.randomUUID().toString();
-        try {
-            ThrottlePublisherDTO throttlePublisherDTO = new ThrottlePublisherDTO();
-            throttlePublisherDTO.setKeyType(infoDTO.getType());
-            throttlePublisherDTO.setTenantDomain(tenantDomain);
-            //throttlePublisherDTO.setApplicationConsumerKey(infoDTO.getConsumerKey());
-            throttlePublisherDTO.setApiname(infoDTO.getApiName());
-            throttlePublisherDTO.setVersion(infoDTO.getApiName() + ':' + version);
-            throttlePublisherDTO.setContext(apiContext);
-            throttlePublisherDTO.setApiCreator(infoDTO.getApiPublisher());
-            throttlePublisherDTO.setApiCreatorTenantDomain(MultitenantUtils.getTenantDomain(infoDTO.getApiPublisher()));
-            throttlePublisherDTO.setApplicationName(infoDTO.getApplicationName());
-            throttlePublisherDTO.setApplicationId(infoDTO.getApplicationId());
-            throttlePublisherDTO.setSubscriber(infoDTO.getSubscriber());
-            throttlePublisherDTO.setThrottledTime(requestTime);
-            throttlePublisherDTO.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
-            throttlePublisherDTO.setThrottledOutReason("-");
-            throttlePublisherDTO.setUsername(infoDTO.getEndUserName());
-            throttlePublisherDTO.setCorrelationID(correlationID);
-            throttlePublisherDTO.setHostName(DataPublisherUtil.getHostAddress());
-            throttlePublisherDTO.setAccessToken("-");
-            usageDataPublisher.publishEvent(throttlePublisherDTO);
-        } catch (Exception e) {
-            // flow should not break if event publishing failed
-            log.error("Cannot publish event. " + e.getMessage(), e);
-        }
+    private void publishHandshakeEvent(ChannelHandlerContext ctx) {
+        metricsHandler.handleHandshake(ctx);
+    }
+
+    private void publishPublishEvent(ChannelHandlerContext ctx) {
+        metricsHandler.handlePublish(ctx);
+    }
+
+    public void publishSubscribeEvent(ChannelHandlerContext ctx) {
+        metricsHandler.handleSubscribe(ctx);
+    }
+
+    private void publishResourceNotFoundEvent(ChannelHandlerContext ctx) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESOURCE_NOT_FOUND_ERROR_CODE);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE,
+                "No matching resource found to dispatch the request");
+        metricsHandler.handleHandshake(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    private void publishHandshakeAuthErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
+        metricsHandler.handleHandshake(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    private void publishPublishThrottledEvent(ChannelHandlerContext ctx) {
+        addThrottledErrorPropertiesToChannel(ctx);
+        metricsHandler.handlePublish(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    public void publishSubscribeThrottledEvent(ChannelHandlerContext ctx) {
+        addThrottledErrorPropertiesToChannel(ctx);
+        metricsHandler.handleSubscribe(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    private void addThrottledErrorPropertiesToChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, "Message Throttled Out");
+    }
+
+    private void removeErrorPropertiesFromChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_CODE);
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
     }
 
     private void removeTokenFromQuery(Map<String, List<String>> parameters) {
@@ -647,11 +619,19 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 Resource resource = dispatcher.findResource(synCtx, acceptableResources);
                 if (resource != null) {
                     selectedResource = resource;
+                    if (APIUtil.isAnalyticsEnabled()) {
+                        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS,
+                                WebSocketUtils.getEndpointUrl(resource, synCtx));
+                    }
                     break;
                 }
             }
         }
+        setApiPropertiesToChannel(ctx);
         if (selectedResource == null) {
+            if (APIUtil.isAnalyticsEnabled()) {
+                publishResourceNotFoundEvent(ctx);
+            }
             handleError(ctx, "No matching resource found to dispatch the request");
         }
         String resource = selectedResource.getDispatcherHelper().getString();
