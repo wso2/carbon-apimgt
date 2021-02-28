@@ -17,23 +17,31 @@
  */
 package org.wso2.carbon.apimgt.gateway.utils;
 
-import org.apache.axis2.AxisFault;
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.Member;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.rest.RESTConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.opensaml.xml.signature.G;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
@@ -41,11 +49,8 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
-import javax.validation.constraints.AssertTrue;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.fail;
 
@@ -54,7 +59,7 @@ import static org.junit.Assert.fail;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({GatewayUtilsTestCase.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class,
-        RegistryServiceHolder.class, Base64.class})
+        RegistryServiceHolder.class, Base64.class, SubscriptionDataHolder.class})
 public class GatewayUtilsTestCase {
     private String apiProviderName = "admin";
     private String apiName = "PhoneVerify";
@@ -74,6 +79,7 @@ public class GatewayUtilsTestCase {
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(RegistryServiceHolder.class);
+        PowerMockito.mockStatic(SubscriptionDataHolder.class);
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         RegistryServiceHolder registryServiceHolder = Mockito.mock(RegistryServiceHolder.class);
@@ -85,6 +91,7 @@ public class GatewayUtilsTestCase {
         PowerMockito.when(RegistryServiceHolder.getInstance()).thenReturn(registryServiceHolder);
         Mockito.when(registryServiceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(privilegedCarbonContext.getTenantId()).thenReturn(tenantID);
+        Mockito.when(privilegedCarbonContext.getTenantDomain()).thenReturn("carbon.super");
         try {
             Mockito.when(registryService.getConfigSystemRegistry(tenantID)).thenReturn(userRegistry);
         } catch (RegistryException e) {
@@ -143,7 +150,8 @@ public class GatewayUtilsTestCase {
 
     @Test
     public void testGetJWTClaims() {
-        String jwt = "eyJhbGciOiJSUzI1NiIsIng1dCI6Ik5tSm1PR1V4TXpabFlqTTJaRFJoTlRabFlUQTFZemRoWlRSaU9XRTBOV0kyTTJKbU9UYzFaQSJ9.eyJodHRwOlwvXC93c28yLm9yZ1wvZ2F0ZXdheVwvYXBwbGljYXRpb25uYW1lIjoiT2F1dGg3IiwiZXhwIjoxNDUyNTk0ODkyLCJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJodHRwOlwvXC93c28yLm9yZ1wvZ2F0ZXdheVwvc3Vic2NyaWJlciI6ImFkbWluQGNhcmJvbi5zdXBlciIsImlzcyI6Imh0dHA6XC9cL3dzbzIub3JnXC9nYXRld2F5IiwiaHR0cDpcL1wvd3NvMi5vcmdcL2dhdGV3YXlcL2VuZHVzZXIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC9yb2xlIjoiYWRtaW4sQXBwbGljYXRpb25cL2Rld3ZkZXcsQXBwbGljYXRpb25cL09hdXRoNyxJbnRlcm5hbFwvZXZlcnlvbmUiLCJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC9lbWFpbGFkZHJlc3MiOiJhZG1pbkB3c28yLmNvbSIsImlhdCI6MTQ1MjU5MzI1NCwiaHR0cDpcL1wvd3NvMi5vcmdcL2NsYWltc1wvb3JnYW5pemF0aW9uIjoiV1NPMiJ9.WRo2p92f-pt1vH9xfLgmrPWNKJfmST2QSPYcth7gXKz64LdP9zAMUtfAk9DVRdHTIQR3gX0jF4Ohb4UbNN4Oo97a35oTL1iRxIRTKUkh8L1dpt3H03Z0Ze7Q2giHGZikMIQv3gavHRYKjNMoU_1MuB90jiK7";
+        String jwt =
+                "eyJhbGciOiJSUzI1NiIsIng1dCI6Ik5tSm1PR1V4TXpabFlqTTJaRFJoTlRabFlUQTFZemRoWlRSaU9XRTBOV0kyTTJKbU9UYzFaQSJ9.eyJodHRwOlwvXC93c28yLm9yZ1wvZ2F0ZXdheVwvYXBwbGljYXRpb25uYW1lIjoiT2F1dGg3IiwiZXhwIjoxNDUyNTk0ODkyLCJzdWIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJodHRwOlwvXC93c28yLm9yZ1wvZ2F0ZXdheVwvc3Vic2NyaWJlciI6ImFkbWluQGNhcmJvbi5zdXBlciIsImlzcyI6Imh0dHA6XC9cL3dzbzIub3JnXC9nYXRld2F5IiwiaHR0cDpcL1wvd3NvMi5vcmdcL2dhdGV3YXlcL2VuZHVzZXIiOiJhZG1pbkBjYXJib24uc3VwZXIiLCJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC9yb2xlIjoiYWRtaW4sQXBwbGljYXRpb25cL2Rld3ZkZXcsQXBwbGljYXRpb25cL09hdXRoNyxJbnRlcm5hbFwvZXZlcnlvbmUiLCJodHRwOlwvXC93c28yLm9yZ1wvY2xhaW1zXC9lbWFpbGFkZHJlc3MiOiJhZG1pbkB3c28yLmNvbSIsImlhdCI6MTQ1MjU5MzI1NCwiaHR0cDpcL1wvd3NvMi5vcmdcL2NsYWltc1wvb3JnYW5pemF0aW9uIjoiV1NPMiJ9.WRo2p92f-pt1vH9xfLgmrPWNKJfmST2QSPYcth7gXKz64LdP9zAMUtfAk9DVRdHTIQR3gX0jF4Ohb4UbNN4Oo97a35oTL1iRxIRTKUkh8L1dpt3H03Z0Ze7Q2giHGZikMIQv3gavHRYKjNMoU_1MuB90jiK7";
         AuthenticationContext authenticationContext = new AuthenticationContext();
         authenticationContext.setCallerToken(jwt);
         Assert.assertNotNull(GatewayUtils.getJWTClaims(authenticationContext));
@@ -172,5 +180,143 @@ public class GatewayUtilsTestCase {
         Assert.assertEquals(1, clusteringAgent.getMembers().size());
     }
 
+    @Test
+    public void testGetAPI() {
+        API api = new API();
+        api.setApiName("api1");
+        api.setApiVersion("1.0.0");
+        api.setApiProvider("admin");
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
+        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(subscriptionDataStore);
+        Mockito.when(subscriptionDataStore.getApiByContextAndVersion("/abc", "1.0.0")).thenReturn(api);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/abc");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
+        Assert.assertEquals(GatewayUtils.getAPI(messageContext), api);
+        Assert.assertEquals(GatewayUtils.getAPINameFromContextAndVersion(messageContext),"api1");
+        Assert.assertEquals(GatewayUtils.getApiProviderFromContextAndVersion(messageContext),"admin");
+        Mockito.verify(messageContext, Mockito.times(6)).getProperty(APIMgtGatewayConstants.API_OBJECT);
+        Mockito.verify(messageContext, Mockito.times(3)).getProperty(RESTConstants.REST_API_CONTEXT);
+        Mockito.verify(messageContext, Mockito.times(3)).getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        Mockito.verify(subscriptionDataStore, Mockito.times(3)).getApiByContextAndVersion("/abc", "1.0.0");
+    }
+
+    @Test
+    public void testGetAPIFromProperty() {
+        API api = Mockito.mock(API.class);
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
+        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(subscriptionDataStore);
+        Mockito.when(subscriptionDataStore.getApiByContextAndVersion("/abc", "1.0.0")).thenReturn(api);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/abc");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
+        Assert.assertEquals(GatewayUtils.getAPI(messageContext), api);
+        Mockito.verify(messageContext, Mockito.times(1)).getProperty(APIMgtGatewayConstants.API_OBJECT);
+        Mockito.verify(messageContext, Mockito.times(0)).getProperty(RESTConstants.REST_API_CONTEXT);
+        Mockito.verify(messageContext, Mockito.times(0)).getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        Mockito.verify(subscriptionDataStore, Mockito.times(0)).getApiByContextAndVersion("/abc", "1.0.0");
+    }
+
+    @Test
+    public void testGetAPIasNull() {
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
+        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(subscriptionDataStore);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/abc1");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
+        Assert.assertNull(GatewayUtils.getAPI(messageContext));
+        Assert.assertNull(GatewayUtils.getAPINameFromContextAndVersion(messageContext));
+        Assert.assertNull(GatewayUtils.getApiProviderFromContextAndVersion(messageContext));
+        Mockito.verify(messageContext, Mockito.times(0)).setProperty(Mockito.anyString(), Mockito.any());
+        Mockito.verify(messageContext, Mockito.times(6)).getProperty(APIMgtGatewayConstants.API_OBJECT);
+        Mockito.verify(messageContext, Mockito.times(3)).getProperty(RESTConstants.REST_API_CONTEXT);
+        Mockito.verify(messageContext, Mockito.times(3)).getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        Mockito.verify(subscriptionDataStore, Mockito.times(3)).getApiByContextAndVersion("/abc1", "1.0.0");
+    }
+
+    @Test
+    public void testGetAPIasNullWhenTenantSubscriptionStoreNull() {
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        SubscriptionDataHolder subscriptionDataHolder = Mockito.mock(SubscriptionDataHolder.class);
+        Mockito.when(SubscriptionDataHolder.getInstance()).thenReturn(subscriptionDataHolder);
+        SubscriptionDataStore subscriptionDataStore = Mockito.mock(SubscriptionDataStore.class);
+        Mockito.when(subscriptionDataHolder.getTenantSubscriptionStore("carbon.super")).thenReturn(null);
+        Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/abc1");
+        Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0.0");
+        Assert.assertNull(GatewayUtils.getAPI(messageContext));
+        Assert.assertNull(GatewayUtils.getStatus(messageContext));
+        Mockito.verify(messageContext, Mockito.times(0)).setProperty(Mockito.anyString(), Mockito.any());
+        Mockito.verify(messageContext, Mockito.times(4)).getProperty(APIMgtGatewayConstants.API_OBJECT);
+        Mockito.verify(messageContext, Mockito.times(2)).getProperty(RESTConstants.REST_API_CONTEXT);
+        Mockito.verify(messageContext, Mockito.times(2)).getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+        Mockito.verify(subscriptionDataStore, Mockito.times(0)).getApiByContextAndVersion("/abc1", "1.0.0");
+    }
+    @Test
+    public void testGetAPIStatusFromProperty() {
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.CREATED);
+        Assert.assertEquals(GatewayUtils.getStatus(messageContext),APIConstants.CREATED);
+        Assert.assertFalse(GatewayUtils.isAPIStatusProtoType(messageContext));
+        Mockito.verify(messageContext, Mockito.times(2)).getProperty(APIMgtGatewayConstants.API_STATUS);
+        Mockito.verify(messageContext, Mockito.times(0)).getProperty(APIMgtGatewayConstants.API_OBJECT);
+        Mockito.verify(messageContext, Mockito.times(0)).setProperty(APIMgtGatewayConstants.API_STATUS,
+                APIConstants.CREATED);
+    }
+
+    @Test
+    public void testGetAPIStatusFromAPIObject() {
+        API api = new API();
+        api.setStatus(APIConstants.PROTOTYPED);
+        MessageContext messageContext = Mockito.mock(MessageContext.class);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT)).thenReturn(api);
+        Assert.assertEquals(GatewayUtils.getStatus(messageContext), APIConstants.PROTOTYPED);
+        Assert.assertTrue(GatewayUtils.isAPIStatusProtoType(messageContext));
+        Mockito.verify(messageContext, Mockito.times(2)).getProperty(APIMgtGatewayConstants.API_STATUS);
+        Mockito.verify(messageContext, Mockito.times(2)).getProperty(APIMgtGatewayConstants.API_OBJECT);
+        Mockito.verify(messageContext, Mockito.times(2)).setProperty(APIMgtGatewayConstants.API_STATUS,
+                APIConstants.PROTOTYPED);
+    }
+
+    @Test
+    public void testapiKey(){
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
+                APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE).build();
+        Assert.assertTrue(GatewayUtils.isAPIKey(jwtClaimsSet));
+    }
+    @Test
+    public void testapiKeyWhenApplicationClaimAvailable(){
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().claim(APIConstants.JwtTokenConstants.APPLICATION,
+                APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE).build();
+        Assert.assertTrue(GatewayUtils.isAPIKey(jwtClaimsSet));
+    }
+    @Test
+    public void testNotAPIKey(){
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().build();
+        Assert.assertFalse(GatewayUtils.isAPIKey(jwtClaimsSet));
+    }
+    @Test
+    public void testIsInternalKey(){
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
+                APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE).build();
+        Assert.assertTrue(GatewayUtils.isInternalKey(jwtClaimsSet));
+    }
+    @Test
+    public void testIsNotInternalKey(){
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().build();
+        Assert.assertFalse(GatewayUtils.isInternalKey(jwtClaimsSet));
+    }
+    @Test
+    public void testIsNotInternalKeyWhenTokenTypeNotSame(){
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().claim(APIConstants.JwtTokenConstants.TOKEN_TYPE,
+                APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE).build();
+        Assert.assertFalse(GatewayUtils.isInternalKey(jwtClaimsSet));
+    }
 
 }

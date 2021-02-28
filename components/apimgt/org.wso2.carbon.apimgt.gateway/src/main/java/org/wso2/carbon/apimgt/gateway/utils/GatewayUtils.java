@@ -24,6 +24,8 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.proc.BadJWTException;
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.axiom.om.OMElement;
@@ -68,6 +70,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -1189,21 +1192,28 @@ public class GatewayUtils {
 
     public static API getAPI(org.apache.synapse.MessageContext messageContext) {
 
-        synchronized (messageContext) {
-            Object api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
-            if (api != null) {
-                return (API) api;
+        Object api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+        if (api != null) {
+            return (API) api;
+        } else {
+            synchronized (messageContext) {
+                api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+                if (api != null) {
+                    return (API) api;
+                }
+                String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+                SubscriptionDataStore tenantSubscriptionStore =
+                        SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+                if (tenantSubscriptionStore != null) {
+                    API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+                    if (api1 != null) {
+                        messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
+                        return api1;
+                    }
+                }
+                return null;
             }
-            String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-            String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            SubscriptionDataStore tenantSubscriptionStore =
-                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
-            if (tenantSubscriptionStore != null) {
-                API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
-                messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
-                return api1;
-            }
-            return null;
         }
     }
 
@@ -1216,7 +1226,7 @@ public class GatewayUtils {
         API api = getAPI(messageContext);
         if (api != null) {
             String apiStatus = api.getStatus();
-            messageContext.setProperty(APIMgtGatewayConstants.API_STATUS, status);
+            messageContext.setProperty(APIMgtGatewayConstants.API_STATUS, apiStatus);
             return apiStatus;
         }
         return null;
@@ -1257,6 +1267,33 @@ public class GatewayUtils {
         Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
         if (tokenTypeClaim != null) {
             return APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return false;
+    }
+    /**
+     * Check whether the jwt token is expired or not.
+     *
+     * @param payload The payload of the JWT token
+     * @return returns true if the JWT token is expired
+     */
+    public static boolean isJwtTokenExpired(JWTClaimsSet payload) {
+
+        int timestampSkew = (int) OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
+
+        DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
+        jwtClaimsSetVerifier.setMaxClockSkew(timestampSkew);
+        try {
+            jwtClaimsSetVerifier.verify(payload);
+            if (log.isDebugEnabled()) {
+                log.debug("Token is not expired. User: " + payload.getSubject());
+            }
+        } catch (BadJWTException e) {
+            if ("Expired JWT".equals(e.getMessage())) {
+                return true;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Token is not expired. User: " + payload.getSubject());
         }
         return false;
     }

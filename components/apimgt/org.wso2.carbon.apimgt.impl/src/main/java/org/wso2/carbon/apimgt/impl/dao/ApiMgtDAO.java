@@ -122,7 +122,6 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import sun.reflect.annotation.ExceptionProxy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

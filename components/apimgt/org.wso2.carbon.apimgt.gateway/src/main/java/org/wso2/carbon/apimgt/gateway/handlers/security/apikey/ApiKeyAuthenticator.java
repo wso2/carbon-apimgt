@@ -143,19 +143,10 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
-            try {
-                decodedHeader = JWSHeader.parse(new Base64URL(splitToken[0]));
                 signedJWT = SignedJWT.parse(apiKey);
                 payload = signedJWT.getJWTClaimsSet();
+                decodedHeader = signedJWT.getHeader();
                 tokenIdentifier = payload.getJWTID();
-            } catch (IllegalArgumentException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid Api Key. Api Key: " + GatewayUtils.getMaskedToken(splitToken[0]), e);
-                }
-                log.error("Invalid JWT token. Failed to decode the Api Key header.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE , e);
-            }
             // Check if the decoded header contains type as 'JWT'.
             if (!JOSEObjectType.JWT.equals(decodedHeader.getType())) {
                 if (log.isDebugEnabled()) {

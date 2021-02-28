@@ -18,9 +18,11 @@ package org.wso2.carbon.apimgt.gateway;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.axis2.saaj.SOAPEnvelopeImpl;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.Entry;
@@ -33,6 +35,8 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPFactory;
 import javax.xml.stream.XMLStreamException;
 import java.util.HashMap;
 import java.util.Map;

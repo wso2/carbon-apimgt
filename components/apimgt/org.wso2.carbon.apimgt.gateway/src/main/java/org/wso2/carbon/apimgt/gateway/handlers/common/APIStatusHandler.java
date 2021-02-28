@@ -42,6 +42,9 @@ public class APIStatusHandler extends AbstractHandler {
 
         API api = GatewayUtils.getAPI(messageContext);
         if (api != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("set the api.ut.status as " + api.getStatus());
+            }
             messageContext.setProperty(APIMgtGatewayConstants.API_STATUS, api.getStatus());
             if (APIConstants.BLOCKED.equals(api.getStatus())) {
                 handleBlockedAPIStatus(messageContext);
@@ -60,10 +63,17 @@ public class APIStatusHandler extends AbstractHandler {
     }
 
     private void handleBlockedAPIStatus(MessageContext messageContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Mediate from " + APISecurityConstants.API_BLOCKED_SEQUENCE);
+        }
 
         Mediator sequence = messageContext.getSequence(APISecurityConstants.API_BLOCKED_SEQUENCE);
         if (sequence != null) {
             sequence.mediate(messageContext);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(APISecurityConstants.API_BLOCKED_SEQUENCE + " sequence not available ");
+            }
         }
         Axis2Sender.sendBack(messageContext);
     }
