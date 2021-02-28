@@ -4875,12 +4875,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
 
             //load topics from AsyncAPI
-            if (APIDTO.TypeEnum.WEBSUB.equals(apiDTOFromProperties.getType())){
-                try {
-                    apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
-                } catch (FaultGatewaysException e) {
-                    e.printStackTrace();
-                }
+            try {
+                apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
+            } catch (FaultGatewaysException e) {
+                e.printStackTrace();
             }
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
         } catch (APIManagementException e) {

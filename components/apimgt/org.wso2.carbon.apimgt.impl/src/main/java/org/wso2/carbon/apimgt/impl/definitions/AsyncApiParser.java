@@ -1497,6 +1497,9 @@ public class AsyncApiParser extends APIDefinition {
         if (validationSuccess) {
             AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             ArrayList<String> endpoints = new ArrayList<>();
+            if (asyncApiDocument.getServers().size() == 1) {
+                protocol = asyncApiDocument.getServers().get(0).protocol;
+            }
             /*for (AaiServer x : asyncApiDocument.getServers()){
                 endpoints.add(x.url);
             }
