@@ -39,6 +39,7 @@ public class WebhooksDTO implements Serializable {
     private String apiTier;
     private String subscriberName;
     private String apiName;
+    private boolean isThrottled;
 
     public String getApiUUID() {
         return apiUUID;
@@ -158,5 +159,13 @@ public class WebhooksDTO implements Serializable {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public boolean isThrottled() {
+        return isThrottled;
+    }
+
+    public void setThrottled(boolean throttled) {
+        isThrottled = throttled;
     }
 }

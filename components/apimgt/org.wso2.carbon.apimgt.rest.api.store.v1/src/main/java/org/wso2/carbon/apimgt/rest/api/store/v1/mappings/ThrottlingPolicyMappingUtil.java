@@ -122,6 +122,7 @@ public class ThrottlingPolicyMappingUtil {
         dto.setRateLimitCount(throttlingPolicy.getRateLimitCount());
         dto.setRateLimitTimeUnit(throttlingPolicy.getRateLimitTimeUnit());
         dto.setStopOnQuotaReach(throttlingPolicy.isStopOnQuotaReached());
+        dto.setDataUnit(throttlingPolicy.getBandwidthDataUnit());
         dto.setPolicyLevel(ThrottlingPolicyDTO.PolicyLevelEnum.valueOf(tierLevel.toUpperCase()));
         dto = setTierPermissions(dto, throttlingPolicy);
         if (throttlingPolicy.getQuotaPolicyType() != null) {

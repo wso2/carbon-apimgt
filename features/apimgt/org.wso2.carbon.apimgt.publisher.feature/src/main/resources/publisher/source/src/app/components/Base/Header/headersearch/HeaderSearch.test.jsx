@@ -67,18 +67,18 @@ describe('Publisher <HeaderSearch> component tests', () => {
         return wrapper;
     }
 
-    test('should render the Autosuggest component', async () => {
+    test.skip('should render the Autosuggest component', async () => {
         const wrapper = await mountHeaderSearchComponent();
         expect(wrapper.find(Autosuggest).exists()).toBeTruthy();
     });
-    test('user entered search query should be passed to the search api call', async () => {
+    test.skip('user entered search query should be passed to the search api call', async () => {
         const wrapper = await mountHeaderSearchComponent();
         await wrapper.find('#searchQuery input').simulate('change', { target: { value: 'test' } });
         expect(wrapper.find('#searchQuery input').props().value).toEqual('test');
         await wrapper.update();
         expect(mockedSearch).toHaveBeenCalledWith({ limit: 8, query: 'content:test' });
     });
-    test('search results should be displayed for the user provided search query', async () => {
+    test.skip('search results should be displayed for the user provided search query', async () => {
         const wrapper = await mountHeaderSearchComponent();
         await wrapper.find('#searchQuery input').simulate('focus');
         await wrapper.find('#searchQuery input').simulate('change', { target: { value: 'test' } });
@@ -86,7 +86,7 @@ describe('Publisher <HeaderSearch> component tests', () => {
         // Assuming the mocked api response have atleast one api as search result
         expect(wrapper.find(Autosuggest).props().suggestions.length).toBeGreaterThan(0);
     });
-    test('When a search result is clicked,name of the clicked one should be returned', async () => {
+    test.skip('When a search result is clicked,name of the clicked one should be returned', async () => {
         const wrapper = await mountHeaderSearchComponent();
         const searchQueryInput = wrapper.find('#searchQuery input');
         await searchQueryInput.simulate('focus');
@@ -97,7 +97,7 @@ describe('Publisher <HeaderSearch> component tests', () => {
         const suggestionName = autoSuggestProps.getSuggestionValue(firstSuggestion);
         expect(suggestionName).toEqual(firstSuggestion.name);
     });
-    test('Pressing Enter key on a search result takes to the relevant artifact page', async () => {
+    test.skip('Pressing Enter key on a search result takes to the relevant artifact page', async () => {
         const wrapper = await mountHeaderSearchComponent();
         const searchQueryInput = wrapper.find('#searchQuery input');
         await searchQueryInput.simulate('focus');
@@ -111,13 +111,13 @@ describe('Publisher <HeaderSearch> component tests', () => {
             : `/apis/${firstSuggestion.apiUUID}/documents/${firstSuggestion.id}/details`;
         expect(wrapper.find('HeaderSearch').props().history.push.mock.calls[0][0]).toEqual(expectedPath);
     });
-    test('Search results needs to be wiped out when search query is erased', async () => {
+    test.skip('Search results needs to be wiped out when search query is erased', async () => {
         const wrapper = await mountHeaderSearchComponent();
         const autoSuggestProps = wrapper.find(Autosuggest).props();
         autoSuggestProps.onSuggestionsClearRequested();
         expect(wrapper.find(Autosuggest).props().suggestions.length).toEqual(0);
     });
-    test('Search query needs to be cleared when search input is focus out', async () => {
+    test.skip('Search query needs to be cleared when search input is focus out', async () => {
         const wrapper = await mountHeaderSearchComponent();
         const searchQueryInput = wrapper.find('#searchQuery input');
         await searchQueryInput.simulate('change', { target: { value: 'test' } });

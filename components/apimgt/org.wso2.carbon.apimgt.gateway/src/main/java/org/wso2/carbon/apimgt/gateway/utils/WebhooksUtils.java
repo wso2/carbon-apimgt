@@ -127,7 +127,7 @@ public class WebhooksUtils {
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain).
-                getApiByContextAndVersion(context, apiVersion );
+                getApiByContextAndVersion(context, apiVersion);
         return api.getUuid();
     }
 

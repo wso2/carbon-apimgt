@@ -115,6 +115,33 @@ class HeaderSearch extends React.Component {
     }
 
     /**
+     * On enter pressed after giving a search text
+     * @param event
+     */
+    onKeyDown(event) {
+        if (event.key === 'Enter' && !this.suggestionSelected) {
+            const { history } = this.props;
+            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
+        }
+        this.suggestionSelected = false;
+    }
+
+    /**
+     * To provide accessibility for Enter key upon suggestion selection
+     * @param {React.SyntheticEvent} event event
+     * @param {Object} suggestion This is either API object or document coming from search API call
+     */
+    onSuggestionSelected(event, { suggestion }) {
+        const { history } = this.props;
+        this.suggestionSelected = true;
+        if (event.key === 'Enter') {
+            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview`
+                : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
+            history.push(path);
+        }
+    }
+
+    /**
      * On change search input element
      *
      * @param {React.SyntheticEvent} event ReactDOM event
@@ -149,33 +176,6 @@ class HeaderSearch extends React.Component {
         this.setState({
             suggestions: [],
         });
-    }
-
-    /**
-     * On enter pressed after giving a search text
-     * @param event
-     */
-    onKeyDown(event) {
-        if (event.key === 'Enter' && !this.suggestionSelected) {
-            const { history } = this.props;
-            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
-        }
-        this.suggestionSelected = false;
-    }
-
-    /**
-     * To provide accessibility for Enter key upon suggestion selection
-     * @param {React.SyntheticEvent} event event
-     * @param {Object} suggestion This is either API object or document coming from search API call
-     */
-    onSuggestionSelected(event, { suggestion }) {
-        const { history } = this.props;
-        this.suggestionSelected = true;
-        if (event.key === 'Enter') {
-            const path = suggestion.type === 'API' ? `/apis/${suggestion.id}/overview`
-                : `/apis/${suggestion.apiUUID}/documents/${suggestion.id}/details`;
-            history.push(path);
-        }
     }
 
     /**

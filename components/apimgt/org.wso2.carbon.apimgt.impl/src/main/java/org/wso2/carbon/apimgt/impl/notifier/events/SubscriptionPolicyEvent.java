@@ -30,6 +30,7 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
     private int policyId;
     private String policyName;
     private String quotaType;
+    private int subscriberCount;
     private int rateLimitCount;
     private String rateLimitTimeUnit;
     private boolean stopOnQuotaReach;
@@ -38,7 +39,7 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
 
     public SubscriptionPolicyEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain, int policyId,
                                    String policyName, String quotaType, int rateLimitCount, String rateLimitTimeUnit,
-                                   boolean stopOnQuotaReach, int graphQLMaxDepth, int graphQLMaxComplexity) {
+                                   boolean stopOnQuotaReach, int graphQLMaxDepth, int graphQLMaxComplexity, int subscriberCount) {
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -53,6 +54,7 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
         this.graphQLMaxDepth = graphQLMaxDepth;
         this.tenantDomain = tenantDomain;
         this.policyType = PolicyType.SUBSCRIPTION;
+        this.subscriberCount = subscriberCount;
     }
 
     @Override
@@ -71,6 +73,7 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
                 ", type='" + type + '\'' +
                 ", tenantId=" + tenantId + '\'' +
                 ", tenantDomain=" + tenantDomain +
+                ", subscriberCount=" + subscriberCount +
                 '}';
     }
 
@@ -86,7 +89,8 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
                 getQuotaType().equals(that.getQuotaType()) &&
                 getRateLimitTimeUnit().equals(that.getRateLimitTimeUnit()) &&
                 getGraphQLMaxDepth() == that.getGraphQLMaxDepth() &&
-                getGraphQLMaxComplexity() == that.getGraphQLMaxComplexity();
+                getGraphQLMaxComplexity() == that.getGraphQLMaxComplexity() &&
+                getSubscriberCount() == that.getSubscriberCount();
 
     }
 
@@ -150,4 +154,12 @@ public class SubscriptionPolicyEvent extends PolicyEvent {
     public int getGraphQLMaxComplexity() { return graphQLMaxComplexity; }
 
     public void setGraphQLMaxComplexity(int graphQLMaxComplexity) { this.graphQLMaxComplexity = graphQLMaxComplexity; }
+
+    public int getSubscriberCount() {
+        return subscriberCount;
+    }
+
+    public void setSubscriberCount(int subscriberCount) {
+        this.subscriberCount = subscriberCount;
+    }
 }

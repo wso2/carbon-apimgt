@@ -94,6 +94,8 @@ public class Md5HashGenerator {
                     } catch (NoSuchAlgorithmException | IOException e) {
                         RestApiUtil.handleInternalServerError("Failed to generate MD5 Hash due to " +
                                 e.getMessage(), log);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        RestApiUtil.handleBadRequest("Required metadata.yaml or definition.yaml is missing", log);
                     }
                 }
             }

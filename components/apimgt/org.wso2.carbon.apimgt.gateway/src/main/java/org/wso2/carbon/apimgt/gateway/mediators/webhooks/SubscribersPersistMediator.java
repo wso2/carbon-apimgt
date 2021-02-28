@@ -19,30 +19,20 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
-import org.apache.axis2.AxisFault;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.util.EntityUtils;
-import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -98,7 +88,12 @@ public class SubscribersPersistMediator extends AbstractMediator {
                     APIConstants.Webhooks.SUBSCRIPTION_EVENT_TYPE);
             handleResponse(httpResponse, messageContext);
         } catch (URISyntaxException | InterruptedException | IOException e) {
-            handleException("Error while publishing event data ", e, messageContext);
+            if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
+                Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(HttpStatus.SC_INTERNAL_SERVER_ERROR,
+                        "Error while persisting request", "Check the request format"));
+            }
+            //dataCollector.collectData(messageContext);
+            WebhooksUtils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
         return true;
     }

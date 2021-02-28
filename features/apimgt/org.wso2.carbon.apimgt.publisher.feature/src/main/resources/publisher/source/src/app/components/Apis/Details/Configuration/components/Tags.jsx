@@ -61,7 +61,7 @@ export default function Tags(props) {
                     <FormattedMessage
                         defaultMessage={
                             'The tag contains one or more illegal characters '
-                                + '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
+                            + '( ~ ! @ # ; % ^ & * + = { } | < > , \' " \\\\ / ) .'
                         }
                     />
                 )}

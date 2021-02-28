@@ -17,14 +17,17 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.analytics;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
@@ -48,7 +51,11 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
         //Set user agent in request flow
         if (!messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             String userAgent = getUserAgent(messageContext);
+            String userIp = DataPublisherUtil.getEndUserIP(messageContext);
             messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);
+            if (userIp != null) {
+                messageContext.setProperty(Constants.USER_IP_PROPERTY, userIp);
+            }
         }
         return true;
     }
@@ -78,7 +85,11 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
       
         AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        dataCollector.collectData();
+        try {
+            dataCollector.collectData();
+        } catch (AnalyticsException e) {
+            log.error("Error Occurred when collecting data", e);
+        }
         return true;
     }
 

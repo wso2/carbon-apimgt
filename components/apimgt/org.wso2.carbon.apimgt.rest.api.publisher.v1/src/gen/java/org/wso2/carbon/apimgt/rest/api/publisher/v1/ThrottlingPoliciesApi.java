@@ -55,7 +55,7 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     }
 
     @GET
-    @Path("/subscription/")
+    @Path("/streaming/subscription")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Get subscription throttling policies based on quota type", notes = "This operation can be used to list the available subscription policies for a given tenent ID based on the given quota type. Quota Type should be provide as a query parameters and supported Quota types are \"requestCount\" ,\"bandwidthVolume\" and \"eventCount\" ", response = ThrottlingPolicyListDTO.class, authorizations = {

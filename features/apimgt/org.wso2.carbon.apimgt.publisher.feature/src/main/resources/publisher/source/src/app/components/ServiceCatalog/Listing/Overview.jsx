@@ -23,7 +23,7 @@ import React, {
     Suspense,
 } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -41,13 +41,14 @@ import Container from '@material-ui/core/Container';
 import Utils from 'AppData/Utils';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
-import Listing from 'AppComponents/ServiceCatalog/Listing/Listing';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import SwapHorizontalCircle from '@material-ui/icons/SwapHorizontalCircle';
+import SwaggerUI from 'AppComponents/Apis/Details/APIDefinition/swaggerUI/SwaggerUI';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import Slide from '@material-ui/core/Slide';
 import YAML from 'js-yaml';
 import Box from '@material-ui/core/Box';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -140,6 +141,14 @@ const useStyles = makeStyles((theme) => ({
     downloadButtonSpacing: {
         marginLeft: theme.spacing(1),
     },
+    editorPane: {
+        width: '50%',
+        height: '100%',
+        overflow: 'scroll',
+    },
+    editorRoot: {
+        height: '100%',
+    },
 }));
 
 /**
@@ -154,86 +163,66 @@ function Overview(props) {
     const { match, history } = props;
     const serviceId = match.params.service_uuid;
     const [service, setService] = useState(null);
-    const [notFound, setNotFound] = useState(true);
-    const [serviceDefinition, setServiceDefinition] = useState({});
+    const [notFound, setNotFound] = useState(false);
+    const [serviceDefinition, setServiceDefinition] = useState(null);
     const [openReadOnlyDefinition, setOpenReadOnlyDefinition] = useState(false);
     const [format, setFormat] = useState('yaml');
-    const [convertTo, setConvertTo] = useState(null);
+    const theme = useTheme();
+    const {
+        graphqlIcon,
+        restApiIcon,
+        soapApiIcon,
+        streamingApiIcon,
+    } = theme.custom.landingPageIcons;
 
     // Get Service Details
     const getService = () => {
         const promisedService = ServiceCatalog.getServiceById(serviceId);
         promisedService.then((data) => {
             setService(data);
-            setNotFound(false);
-        }).catch(() => {
+        }).catch((error) => {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error while loading service',
                 id: 'ServiceCatalog.Listing.Overview.error.loading.service',
             }));
+            const { status } = error;
+            if (status === 404) {
+                setNotFound(true);
+            }
         });
         return null;
     };
 
     /**
-     * Export Service as a zipped archive
-     * @param {string} serviceName The name of the service
-     * @param {string} serviceVersion Version of the service
-     * @returns {zip} Zip file containing the Service.
+     * Download Service Definition
+     * @param {string} serviceKey The service id.
+     * @returns {Object} Service Definition File.
      */
-    function exportService(serviceName, serviceVersion) {
-        return ServiceCatalog.exportService(serviceName, serviceVersion).then((zipFile) => {
-            return Utils.forceDownload(zipFile);
+    function downloadServiceDefinition(serviceKey) {
+        return ServiceCatalog.getServiceDefinition(serviceKey).then((file) => {
+            return Utils.downloadServiceDefinition(file);
         }).catch((error) => {
             if (error.response) {
                 Alert.error(error.response.body.description);
             } else {
                 Alert.error(intl.formatMessage({
-                    id: 'ServiceCatalog.Listing.Overview.download.service.zip.error',
-                    defaultMessage: 'Something went wrong while downloading the Service.',
+                    id: 'ServiceCatalog.Listing.Overview.download.service.error',
+                    defaultMessage: 'Something went wrong while downloading the Service Definition.',
                 }));
             }
         });
     }
 
-    /**
-     * Toggle the format of the service definition.
-     * JSON -> YAML, YAML -> JSON
-     */
-    const onChangeFormatClick = () => {
-        let formattedString = '';
-        if (convertTo === 'json') {
-            formattedString = JSON.stringify(YAML.load(serviceDefinition), null, 1);
-        } else {
-            formattedString = YAML.safeDump(YAML.safeLoad(serviceDefinition));
-        }
-        setServiceDefinition(formattedString);
-        const tmpConvertTo = convertTo;
-        setConvertTo(format);
-        setFormat(tmpConvertTo);
-    };
-
-    const getConvertToFormat = (value) => {
-        return value === 'json' ? 'yaml' : 'json';
-    };
-
     const showServiceDefinition = () => {
-        if (openReadOnlyDefinition) {
-            setOpenReadOnlyDefinition(false);
-            setConvertTo(null);
-            setServiceDefinition({});
-            setFormat('yaml');
-        } else {
+        if (!serviceDefinition) {
             const promisedServiceDefinition = ServiceCatalog.getServiceDefinition(serviceId);
             promisedServiceDefinition.then((data) => {
                 if (service.definitionType !== 'GRAPHQL_SDL') {
-                    setServiceDefinition(YAML.safeDump(YAML.safeLoad(data)));
+                    setServiceDefinition(YAML.safeDump(YAML.safeLoad(JSON.stringify(data))));
                     setFormat('yaml');
-                    setConvertTo(getConvertToFormat(format));
                 } else {
                     setServiceDefinition(data.obj.schemaDefinition);
                     setFormat('txt');
-                    setConvertTo(null);
                 }
                 setOpenReadOnlyDefinition(true);
             }).catch((error) => {
@@ -247,12 +236,27 @@ function Overview(props) {
                 }
             });
         }
-        return null;
     };
 
     useEffect(() => {
         getService();
     }, []);
+
+    /**
+     * Sets the state to close the swagger-editor drawer.
+     * */
+    function closeEditor() {
+        setOpenReadOnlyDefinition(false);
+    }
+
+    /**
+     * Handles the transition of the drawer.
+     * @param {object} props1 list of props
+     * @return {object} The Slide transition component
+     * */
+    function transition(props1) {
+        return <Slide direction='up' {...props1} />;
+    }
 
     const listingRedirect = () => {
         history.push('/service-catalog');
@@ -285,43 +289,17 @@ function Overview(props) {
     }
 
     const getDefinitionTypeDisplayName = (definitionType) => {
-        switch (definitionType) {
-            case 'OAS2':
-                return Listing.CONST.OAS2;
-            case 'OAS3':
-                return Listing.CONST.OAS3;
-            case 'WSDL1':
-                return Listing.CONST.WSDL1;
-            case 'WSDL2':
-                return Listing.CONST.WSDL2;
-            case 'GRAPHQL_SDL':
-                return Listing.CONST.GRAPHQL_SDL;
-            case 'ASYNC_API':
-                return Listing.CONST.ASYNC_API;
-            default:
-                return definitionType;
-        }
+        return Configurations.serviceCatalogDefinitionTypes[definitionType] || definitionType;
     };
 
     const getSecurityTypeDisplayName = (securityType) => {
-        switch (securityType) {
-            case 'BASIC':
-                return Listing.CONST.BASIC;
-            case 'DIGEST':
-                return Listing.CONST.DIGEST;
-            case 'OAUTH2':
-                return Listing.CONST.OAUTH2;
-            case 'NONE':
-                return Listing.CONST.NONE;
-            default:
-                return securityType;
-        }
+        return Configurations.serviceCatalogSecurityTypes[securityType] || securityType;
     };
 
     let serviceTypeIcon = (
         <img
             className={classes.preview}
-            src={Configurations.app.context + '/site/public/images/restAPIIcon.png'}
+            src={Configurations.app.context + restApiIcon}
             alt='Type API'
         />
     );
@@ -338,7 +316,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/swaggerIcon.svg'}
+                    src={Configurations.app.context + restApiIcon}
                     alt='Type Rest API'
                 />
             </Tooltip>
@@ -356,7 +334,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/graphqlIcon.svg'}
+                    src={Configurations.app.context + graphqlIcon}
                     alt='Type GraphQL API'
                 />
             </Tooltip>
@@ -374,7 +352,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/asyncAPIIcon.jpeg'}
+                    src={Configurations.app.context + streamingApiIcon}
                     alt='Type Async API'
                 />
             </Tooltip>
@@ -392,7 +370,7 @@ function Overview(props) {
             >
                 <img
                     className={classes.preview}
-                    src={Configurations.app.context + '/site/public/images/restAPIIcon.png'}
+                    src={Configurations.app.context + soapApiIcon}
                     alt='Type SOAP API'
                 />
             </Tooltip>
@@ -428,54 +406,54 @@ function Overview(props) {
                 </Box>
                 <Paper elevation={1} className={classes.paperStyle}>
                     <Box px={8} py={5}>
-                        <div>
-                            <Grid container spacing={1}>
-                                <Grid item md={10}>
-                                    <div className={classes.contentTopBarStyle}>
-                                        {serviceTypeIcon}
-                                        <div className={classes.topBarDetailsSectionStyle}>
-                                            <div className={classes.versionBarStyle}>
-                                                <Typography className={classes.heading} variant='h5'>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.display.name'
-                                                        defaultMessage='{serviceDisplayName}'
-                                                        values={{ serviceDisplayName: service.displayName }}
-                                                    />
-                                                </Typography>
-                                            </div>
-                                            <div className={classes.versionBarStyle}>
-                                                <LocalOfferOutlinedIcon />
-                                                <Typography className={classes.versionStyle}>
-                                                    <FormattedMessage
-                                                        id='ServiceCatalog.Listing.Overview.service.version'
-                                                        defaultMessage='{serviceVersion}'
-                                                        values={{ serviceVersion: service.version }}
-                                                    />
-                                                </Typography>
-                                            </div>
-                                            <Usages
-                                                usageNumber={service.usage}
-                                                serviceDisplayName={service.displayName}
-                                                serviceId={service.id}
-                                                isOverview
-                                                classes={classes}
-                                            />
+                        <Grid container spacing={1}>
+                            <Grid item md={10}>
+                                <div className={classes.contentTopBarStyle}>
+                                    {serviceTypeIcon}
+                                    <div className={classes.topBarDetailsSectionStyle}>
+                                        <div className={classes.versionBarStyle}>
+                                            <Typography className={classes.heading} variant='h5'>
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Overview.display.name'
+                                                    defaultMessage='{serviceDisplayName}'
+                                                    values={{ serviceDisplayName: service.name }}
+                                                />
+                                            </Typography>
                                         </div>
-                                    </div>
-                                </Grid>
-                                <Grid item md={2}>
-                                    <Box display='flex' flexDirection='column'>
-                                        <CreateApi
-                                            history={history}
+                                        <div className={classes.versionBarStyle}>
+                                            <LocalOfferOutlinedIcon />
+                                            <Typography className={classes.versionStyle}>
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.Listing.Overview.service.version'
+                                                    defaultMessage='{serviceVersion}'
+                                                    values={{ serviceVersion: service.version }}
+                                                />
+                                            </Typography>
+                                        </div>
+                                        <Usages
+                                            usageNumber={service.usage}
+                                            serviceDisplayName={service.name}
                                             serviceId={service.id}
-                                            serviceDisplayName={service.displayName}
-                                            definitionType={service.definitionType}
                                             isOverview
+                                            classes={classes}
                                         />
-                                    </Box>
-                                </Grid>
+                                    </div>
+                                </div>
                             </Grid>
-                        </div>
+                            <Grid item md={2}>
+                                <Box display='flex' flexDirection='column'>
+                                    <CreateApi
+                                        history={history}
+                                        serviceId={service.id}
+                                        serviceKey={service.serviceKey}
+                                        serviceDisplayName={service.name}
+                                        serviceVersion={service.version}
+                                        serviceUrl={service.serviceUrl}
+                                        isOverview
+                                    />
+                                </Box>
+                            </Grid>
+                        </Grid>
                         <div className={classes.bodyStyle}>
                             <Grid container spacing={1}>
                                 { (service.description && service.description !== '') && (
@@ -544,9 +522,8 @@ function Overview(props) {
                                                     <div className={classes.downloadServiceGroup}>
                                                         <Button
                                                             onClick={
-                                                                () => exportService(
-                                                                    service.displayName,
-                                                                    service.version,
+                                                                () => downloadServiceDefinition(
+                                                                    service.id,
                                                                 )
                                                             }
                                                             color='primary'
@@ -563,8 +540,8 @@ function Overview(props) {
                                                             onClick={showServiceDefinition}
                                                             color='primary'
                                                             endIcon={
-                                                                openReadOnlyDefinition
-                                                                    ? (<ExpandLessIcon />) : (<ExpandMoreIcon />)
+                                                                !openReadOnlyDefinition
+                                                                && <OpenInNewIcon />
                                                             }
                                                         >
                                                             <FormattedMessage
@@ -573,37 +550,53 @@ function Overview(props) {
                                                             />
                                                         </Button>
                                                     </div>
-                                                    { service.definitionType !== 'GRAPHQL_SDL' && convertTo && (
-                                                        <div>
-                                                            <Button
-                                                                size='small'
-                                                                className={classes.button}
-                                                                onClick={onChangeFormatClick}
-                                                            >
-                                                                <SwapHorizontalCircle className={classes.buttonIcon} />
-                                                                <FormattedMessage
-                                                                    id='ServiceCatalog.Listing.Overview.convert.to'
-                                                                    defaultMessage='Convert to'
-                                                                />
-                                                                {' '}
-                                                                {convertTo}
-                                                            </Button>
-                                                        </div>
-                                                    )}
                                                 </div>
-                                                {openReadOnlyDefinition && (
-                                                    <Suspense fallback={<Progress />}>
-                                                        <MonacoEditor
-                                                            language={format}
-                                                            width={(service.definitionType !== 'GRAPHQL_SDL')
-                                                                ? 'calc(100% + 55px)' : 'calc(100% + 120px)'}
-                                                            height='calc(75vh - 200px)'
-                                                            theme='vs-dark'
-                                                            value={serviceDefinition}
-                                                            options={editorOptions}
-                                                        />
+                                                <Dialog
+                                                    fullScreen
+                                                    open={openReadOnlyDefinition}
+                                                    onClose={closeEditor}
+                                                    TransitionComponent={transition}
+                                                >
+                                                    <Paper square className={classes.popupHeader}>
+                                                        <IconButton
+                                                            className={classes.button}
+                                                            color='inherit'
+                                                            onClick={closeEditor}
+                                                            aria-label={(
+                                                                <FormattedMessage
+                                                                    id='ServiceCatalog.Listing.Overview.close.btn'
+                                                                    defaultMessage='Close'
+                                                                />
+                                                            )}
+                                                        >
+                                                            <Icon>close</Icon>
+                                                        </IconButton>
+                                                    </Paper>
+                                                    <Suspense
+                                                        fallback={(
+                                                            <Progress />
+                                                        )}
+                                                    >
+                                                        <Grid container spacing={2} className={classes.editorRoot}>
+                                                            <Grid item className={classes.editorPane}>
+                                                                <MonacoEditor
+                                                                    language={format}
+                                                                    width='100%'
+                                                                    height='calc(100vh - 51px)'
+                                                                    theme='vs-dark'
+                                                                    value={serviceDefinition}
+                                                                    options={editorOptions}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item className={classes.editorPane}>
+                                                                <SwaggerUI
+                                                                    url={'data:text/' + format + ','
+                                                                    + encodeURIComponent(serviceDefinition)}
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
                                                     </Suspense>
-                                                )}
+                                                </Dialog>
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>

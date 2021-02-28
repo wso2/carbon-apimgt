@@ -21,6 +21,8 @@ import javax.validation.Valid;
 public class APIServiceInfoDTO   {
   
     private String key = null;
+    private String name = null;
+    private String version = null;
     private Boolean outdated = null;
 
   /**
@@ -38,6 +40,40 @@ public class APIServiceInfoDTO   {
   }
   public void setKey(String key) {
     this.key = key;
+  }
+
+  /**
+   **/
+  public APIServiceInfoDTO name(String name) {
+    this.name = name;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PetStore", value = "")
+  @JsonProperty("name")
+  public String getName() {
+    return name;
+  }
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  /**
+   **/
+  public APIServiceInfoDTO version(String version) {
+    this.version = version;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1.0.0", value = "")
+  @JsonProperty("version")
+  public String getVersion() {
+    return version;
+  }
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   /**
@@ -68,12 +104,14 @@ public class APIServiceInfoDTO   {
     }
     APIServiceInfoDTO apIServiceInfo = (APIServiceInfoDTO) o;
     return Objects.equals(key, apIServiceInfo.key) &&
+        Objects.equals(name, apIServiceInfo.name) &&
+        Objects.equals(version, apIServiceInfo.version) &&
         Objects.equals(outdated, apIServiceInfo.outdated);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(key, outdated);
+    return Objects.hash(key, name, version, outdated);
   }
 
   @Override
@@ -82,6 +120,8 @@ public class APIServiceInfoDTO   {
     sb.append("class APIServiceInfoDTO {\n");
     
     sb.append("    key: ").append(toIndentedString(key)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    outdated: ").append(toIndentedString(outdated)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -49,7 +49,6 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
                       workflowDTO.getWorkflowReference());
         }
         complete(workflowDTO);
-        super.publishEvents(workflowDTO);
 		return new GeneralWorkflowResponse();
     }
 

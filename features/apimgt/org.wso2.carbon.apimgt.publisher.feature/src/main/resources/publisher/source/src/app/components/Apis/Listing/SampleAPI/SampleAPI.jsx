@@ -25,7 +25,7 @@ import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import AuthManager from 'AppData/AuthManager';
 import APICreateMenu from 'AppComponents/Apis/Listing/components/APICreateMenu';
-import getSampleSwagger from './SamplePetStore.js';
+import getSampleSwagger from './SamplePizzaShack.js';
 /**
  * Show Initial Welcome card if no APIs are available to list
  * Handle deploying a sample API (Create and Publish)
@@ -83,16 +83,24 @@ class SampleAPI extends Component {
                         const revisionId = api1.body.id;
                         const envList = settings.environment.map((env) => env.name);
                         const body1 = [];
+                        const getFirstVhost = (envName) => {
+                            const env = settings.environment.find(
+                                (ev) => ev.name === envName && ev.vhosts.length > 0,
+                            );
+                            return env && env.vhosts[0].host;
+                        };
                         if (envList && envList.length > 0) {
-                            if (envList.includes('Default')) {
+                            if (envList.includes('Default') && getFirstVhost('Default')) {
                                 body1.push({
                                     name: 'Default',
                                     displayOnDevportal: true,
+                                    vhost: getFirstVhost('Default'),
                                 });
-                            } else {
+                            } else if (getFirstVhost(envList[0])) {
                                 body1.push({
                                     name: envList[0],
                                     displayOnDevportal: true,
+                                    vhost: getFirstVhost(envList[0]),
                                 });
                             }
                         }

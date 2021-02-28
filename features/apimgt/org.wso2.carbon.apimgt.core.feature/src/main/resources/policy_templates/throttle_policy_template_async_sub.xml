@@ -13,8 +13,8 @@
 		INSERT INTO EligibilityStream;
 
 		#if($quotaPolicy != "")
-		FROM EligibilityStream[isEligible==true]#throttler:asyncTimeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0, $quotaPolicy.getLimit().getEventCount())
-		select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getEventCount()) as isThrottled, expiryTimeStamp group by throttleKey
+		FROM EligibilityStream[isEligible==true]#throttler:timeLength($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0, $quotaPolicy.getLimit().getEventCount())
+		select throttleKey, isThrottled, expiryTimeStamp group by throttleKey
 		INSERT ALL EVENTS into ResultStream;
 		#end
 

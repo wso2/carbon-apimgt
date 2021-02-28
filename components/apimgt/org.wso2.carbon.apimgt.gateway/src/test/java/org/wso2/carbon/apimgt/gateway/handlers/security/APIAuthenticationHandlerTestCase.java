@@ -33,34 +33,38 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
-import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.caching.impl.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
-/*
-* Test class for APIAuthenticationhandler
-* */
+/**
+ * Test class for APIAuthenticationhandler.
+ */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class, GatewayUtils.class})
+@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class, GatewayUtils.class,
+        ServiceReferenceHolder.class})
 public class APIAuthenticationHandlerTestCase {
+
     private Timer.Context context;
     private SynapseEnvironment synapseEnvironment;
     private MessageContext messageContext;
     private org.apache.axis2.context.MessageContext axis2MsgCntxt;
-
-
+    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
     @Before
-    public void setup(){
+    public void setup() {
         PowerMockito.mockStatic(GatewayUtils.class);
         synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
         messageContext = Mockito.mock(Axis2MessageContext.class);
@@ -70,6 +74,17 @@ public class APIAuthenticationHandlerTestCase {
 
         PowerMockito.mockStatic(Timer.Context.class);
         context = Mockito.mock(Timer.Context.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                .class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
+                (apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getExtensionListenerMap()).thenReturn(extensionListenerMap);
     }
 
     /*

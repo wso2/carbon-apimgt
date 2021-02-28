@@ -239,9 +239,6 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
                         , properties);
 
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
-                        , Collections.<String, String>emptyMap());
-
                 properties = new HashMap<String, String>();
                 properties.put("configKey", APIConstants.GA_CONF_KEY);
                 vtb.addHandler(
@@ -388,9 +385,6 @@ public class TemplateBuilderUtil {
         if (!APIUtil.isStreamingApi(apiProduct)) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
                     , properties);
-
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler"
-                    , Collections.<String, String>emptyMap());
 
             properties = new HashMap<String, String>();
             properties.put("configKey", APIConstants.GA_CONF_KEY);

@@ -295,7 +295,9 @@ export default function Environments() {
     const [allDeployments, setAllDeployments] = useState([]);
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
-    const [selectedRevision, setRevision] = useState(null);
+    const [selectedRevision, setRevision] = useState([]);
+    const [selectedVhost, setVhost] = useState([]);
+    const [selectedVhostDeploy, setVhostDeploy] = useState([]);
     const [extraRevisionToDelete, setExtraRevisionToDelete] = useState(null);
     const [description, setDescription] = useState('');
     const [mgLabels, setMgLabels] = useState([]);
@@ -386,7 +388,21 @@ export default function Environments() {
     };
 
     const handleSelect = (event) => {
-        setRevision(event.target.value);
+        const revisions = selectedRevision.filter((r) => r.env !== event.target.name);
+        revisions.push({ env: event.target.name, revision: event.target.value });
+        setRevision(revisions);
+    };
+
+    const handleVhostSelect = (event) => {
+        const vhosts = selectedVhost.filter((v) => v.env !== event.target.name);
+        vhosts.push({ env: event.target.name, vhost: event.target.value });
+        setVhost(vhosts);
+    };
+
+    const handleVhostDeploySelect = (event) => {
+        const vhosts = selectedVhostDeploy.filter((v) => v.env !== event.target.name);
+        vhosts.push({ env: event.target.name, vhost: event.target.value });
+        setVhostDeploy(vhosts);
     };
 
     const handleClose = () => {
@@ -648,10 +664,11 @@ export default function Environments() {
       * Handles deploy a revision
       * @memberof Revisions
       */
-    function deployRevision(revisionId, envName) {
+    function deployRevision(revisionId, envName, vhost) {
         const body = [{
             name: envName,
             displayOnDevportal: true,
+            vhost,
         }];
         if (api.apiType !== API.CONSTS.APIProduct) {
             restApi.deployRevision(api.id, revisionId, body)
@@ -690,7 +707,7 @@ export default function Environments() {
       * Handles adding a new revision and deploy
       * @memberof Revisions
       */
-    function createDeployRevision(envList) {
+    function createDeployRevision(envList, vhostList) {
         const body = {
             description,
         };
@@ -702,6 +719,7 @@ export default function Environments() {
                     for (let i = 0; i < envList.length; i++) {
                         body1.push({
                             name: envList[i],
+                            vhost: vhostList.find((v) => v.env === envList[i]).vhost,
                             displayOnDevportal: true,
                         });
                     }
@@ -772,16 +790,17 @@ export default function Environments() {
     /**
      * Handles creating and deploying a new revision
      * @param {Object} envList the environment list
+     * @param {Array} vhostList the vhost list
      * @param {Object} length the length of the list
      */
-    function handleCreateAndDeployRevision(envList) {
+    function handleCreateAndDeployRevision(envList, vhostList) {
         if (extraRevisionToDelete) {
             deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
                 .then(() => {
-                    createDeployRevision(envList);
+                    createDeployRevision(envList, vhostList);
                 }).finally(() => setExtraRevisionToDelete(null));
         } else {
-            createDeployRevision(envList);
+            createDeployRevision(envList, vhostList);
         }
     }
 
@@ -1221,6 +1240,56 @@ export default function Environments() {
             );
         }
     }
+
+    const allEnvDeployments = [];
+    settings.environment.forEach((env) => {
+        const revision = allEnvRevision && allEnvRevision.find(
+            (r) => r.deploymentInfo.some((e) => e.name === env.name),
+        );
+        const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
+        const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+        allEnvDeployments[env.name] = { revision, vhost };
+    });
+
+    /**
+     * Get gateway access URL from vhost
+     * @param vhost VHost object
+     * @param type URL type WS or HTTP
+     * @returns {{secondary: string, primary: string}}
+     */
+    function getGatewayAccessUrl(vhost, type) {
+        const endpoints = { primary: '', secondary: '', combined: '' };
+        if (vhost == null) {
+            return endpoints;
+        }
+
+        if (type === 'WS') {
+            endpoints.primary = 'ws://' + vhost.host + ':' + vhost.wsPort;
+            endpoints.secondary = 'wss://' + vhost.host + ':' + vhost.wssPort;
+            endpoints.combined = endpoints.secondary + ' ' + endpoints.primary;
+            return endpoints;
+        }
+
+        const httpContext = vhost.httpContext ? '/' + vhost.httpContext.replace(/^\//g, '') : '';
+        endpoints.primary = 'http://' + vhost.host
+            + (vhost.httpPort === 80 ? '' : ':' + vhost.httpPort) + httpContext;
+        endpoints.secondary = 'https://' + vhost.host
+            + (vhost.httpsPort === 443 ? '' : ':' + vhost.httpsPort) + httpContext;
+        endpoints.combined = endpoints.secondary + ' ' + endpoints.primary;
+        return endpoints;
+    }
+
+    function getVhostHelperText(env) {
+        const selected = selectedVhost.find((v) => v.env === env);
+        if (selected) {
+            const vhost = settings.environment.find((e) => e.name === env).vhosts.find(
+                (v) => v.host === selected.vhost,
+            );
+            return getGatewayAccessUrl(vhost, api.isWebSocket() ? 'WS' : 'HTTP').combined;
+        }
+        return '';
+    }
+
     return (
         <>
             <Grid md={12}>
@@ -1425,6 +1494,41 @@ export default function Environments() {
                                                         direction='column'
                                                         spacing={2}
                                                     >
+                                                        <Grid item xs={12}>
+                                                            <TextField
+                                                                id='vhost-selector'
+                                                                select
+                                                                label={(
+                                                                    <FormattedMessage
+                                                                        id='Apis.Details.Environments.create.vhost'
+                                                                        defaultMessage='VHost'
+                                                                    />
+                                                                )}
+                                                                SelectProps={{
+                                                                    MenuProps: {
+                                                                        anchorOrigin: {
+                                                                            vertical: 'bottom',
+                                                                            horizontal: 'left',
+                                                                        },
+                                                                        getContentAnchorEl: null,
+                                                                    },
+                                                                }}
+                                                                name={row.name}
+                                                                onChange={handleVhostDeploySelect}
+                                                                margin='dense'
+                                                                variant='outlined'
+                                                                fullWidth
+                                                                helperText={getVhostHelperText(row.name)}
+                                                            >
+                                                                {row.vhosts.map(
+                                                                    (vhost) => (
+                                                                        <MenuItem value={vhost.host}>
+                                                                            {vhost.host}
+                                                                        </MenuItem>
+                                                                    ),
+                                                                )}
+                                                            </TextField>
+                                                        </Grid>
                                                         <Grid item>
                                                             {allEnvRevision
                                                                 && allEnvRevision.filter(
@@ -1574,7 +1678,7 @@ export default function Environments() {
                             type='submit'
                             variant='contained'
                             onClick={
-                                () => handleCreateAndDeployRevision(SelectedEnvironment)
+                                () => handleCreateAndDeployRevision(SelectedEnvironment, selectedVhostDeploy)
                             }
                             color='primary'
                             disabled={SelectedEnvironment.length === 0
@@ -1792,14 +1896,8 @@ export default function Environments() {
                                 </TableCell>
                                 <TableCell align='left'>
                                     <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.api.gateways.type'
-                                        defaultMessage='Type'
-                                    />
-                                </TableCell>
-                                <TableCell align='left'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.gateway.endpoints'
-                                        defaultMessage='Endpoints'
+                                        id='Apis.Details.Environments.Environments.gateway.accessUrl'
+                                        defaultMessage='Gateway Access URL'
                                     />
                                 </TableCell>
                                 {api && api.isDefaultVersion !== true
@@ -1831,72 +1929,94 @@ export default function Environments() {
                             {settings.environment.map((row) => (
                                 <TableRow key={row.name}>
                                     <TableCell component='th' scope='row'>
-                                        {row.name}
+                                        {row.displayName}
                                     </TableCell>
-                                    <TableCell align='left'>{row.type}</TableCell>
-                                    {api.isWebSocket() ? (
+                                    {allEnvDeployments[row.name].revision != null ? (
                                         <>
-                                            <TableCell
-                                                align='left'
-                                                className={classes.primaryEndpoint}
-                                            >
-                                                {row.endpoints.ws}
+                                            <TableCell align='left'>
+                                                <div className={classes.primaryEndpoint}>
+                                                    {api.isWebSocket()
+                                                        ? getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'WS')
+                                                            .primary : getGatewayAccessUrl(
+                                                            allEnvDeployments[row.name].vhost, 'HTTP',
+                                                        ).primary}
+                                                </div>
                                                 <div className={classes.secondaryEndpoint}>
-                                                    {row.endpoints.wss}
+                                                    {api.isWebSocket()
+                                                        ? getGatewayAccessUrl(allEnvDeployments[row.name].vhost, 'WS')
+                                                            .secondary : getGatewayAccessUrl(
+                                                            allEnvDeployments[row.name].vhost, 'HTTP',
+                                                        ).secondary}
                                                 </div>
                                             </TableCell>
                                         </>
                                     ) : (
                                         <>
-                                            <TableCell align='left' className={classes.primaryEndpoint}>
-                                                {row.endpoints.http}
-                                                <div className={classes.secondaryEndpoint}>
-                                                    {row.endpoints.https}
-                                                </div>
+                                            <TableCell align='left'>
+                                                <Tooltip title={getVhostHelperText(row.name)} placement='bottom'>
+                                                    <TextField
+                                                        id='vhost-selector'
+                                                        select
+                                                        label={(
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.Environments.select.vhost'
+                                                                defaultMessage='Select Access URL'
+                                                            />
+                                                        )}
+                                                        SelectProps={{
+                                                            MenuProps: {
+                                                                anchorOrigin: {
+                                                                    vertical: 'bottom',
+                                                                    horizontal: 'left',
+                                                                },
+                                                                getContentAnchorEl: null,
+                                                            },
+                                                        }}
+                                                        name={row.name}
+                                                        onChange={handleVhostSelect}
+                                                        margin='dense'
+                                                        variant='outlined'
+                                                        style={{ width: '50%' }}
+                                                        disabled={api.isRevision
+                                                        || !allRevisions || allRevisions.length === 0}
+                                                        helperText={getVhostHelperText(row.name)}
+                                                    >
+                                                        {row.vhosts.map(
+                                                            (vhost) => (
+                                                                <MenuItem value={vhost.host}>
+                                                                    {vhost.host}
+                                                                </MenuItem>
+                                                            ),
+                                                        )}
+                                                    </TextField>
+                                                </Tooltip>
                                             </TableCell>
                                         </>
                                     )}
                                     <TableCell align='left'>
-                                        {allEnvRevision && allEnvRevision.filter(
-                                            (o1) => {
-                                                if (o1.deploymentInfo.filter(
-                                                    (o2) => o2.name === row.name,
-                                                ).length > 0) {
-                                                    return o1;
-                                                }
-                                                return null;
-                                            },
-                                        ).length !== 0 ? (
-                                                allEnvRevision && allEnvRevision.filter(
-                                                    (o1) => {
-                                                        if (o1.deploymentInfo.filter(
-                                                            (o2) => o2.name === row.name,
-                                                        ).length > 0) {
-                                                            return o1;
-                                                        }
-                                                        return null;
-                                                    },
-                                                ).map((o3) => (
-                                                    <div>
-                                                        <Chip
-                                                            label={o3.displayName}
-                                                            style={{ backgroundColor: '#15B8CF' }}
+                                        {allEnvDeployments[row.name].revision != null
+                                            ? (
+                                                <div>
+                                                    <Chip
+                                                        label={allEnvDeployments[row.name].revision.displayName}
+                                                        style={{ backgroundColor: '#15B8CF' }}
+                                                    />
+                                                    <Button
+                                                        className={classes.button1}
+                                                        variant='outlined'
+                                                        disabled={api.isRevision}
+                                                        onClick={() => undeployRevision(
+                                                            allEnvDeployments[row.name].revision.id, row.name,
+                                                        )}
+                                                        size='small'
+                                                    >
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Environments.Environments.undeploy.btn'
+                                                            defaultMessage='Undeploy'
                                                         />
-                                                        <Button
-                                                            className={classes.button1}
-                                                            variant='outlined'
-                                                            disabled={api.isRevision}
-                                                            onClick={() => undeployRevision(o3.id, row.name)}
-                                                            size='small'
-                                                        >
-                                                            <FormattedMessage
-                                                                id='Apis.Details.Environments.Environments.undeploy.btn'
-                                                                defaultMessage='Undeploy'
-                                                            />
-                                                        </Button>
-                                                    </div>
-                                                ))) : (
-                                                // eslint-disable-next-line react/jsx-indent
+                                                    </Button>
+                                                </div>
+                                            ) : (
                                                 <div>
                                                     <TextField
                                                         id='revision-selector'
@@ -1916,7 +2036,7 @@ export default function Environments() {
                                                                 getContentAnchorEl: null,
                                                             },
                                                         }}
-                                                        name='selectRevision'
+                                                        name={row.name}
                                                         onChange={handleSelect}
                                                         margin='dense'
                                                         variant='outlined'
@@ -1934,9 +2054,17 @@ export default function Environments() {
                                                     </TextField>
                                                     <Button
                                                         className={classes.button2}
-                                                        disabled={api.isRevision || !selectedRevision}
+                                                        disabled={api.isRevision || !selectedRevision.some(
+                                                            (r) => r.env === row.name && r.revision,
+                                                        ) || !selectedVhost.some(
+                                                            (v) => v.env === row.name && v.vhost,
+                                                        )}
                                                         variant='outlined'
-                                                        onClick={() => deployRevision(selectedRevision, row.name)}
+                                                        onClick={() => deployRevision(selectedRevision.find(
+                                                            (r) => r.env === row.name,
+                                                        ).revision, row.name, selectedVhost.find(
+                                                            (v) => v.env === row.name,
+                                                        ).vhost)}
 
                                                     >
                                                         <FormattedMessage
