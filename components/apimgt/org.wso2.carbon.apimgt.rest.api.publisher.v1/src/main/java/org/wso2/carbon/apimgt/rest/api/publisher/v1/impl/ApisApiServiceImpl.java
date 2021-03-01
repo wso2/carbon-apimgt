@@ -59,6 +59,7 @@ import org.json.XML;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -103,6 +104,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
@@ -138,6 +140,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.MediationMap
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
@@ -3766,6 +3769,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError("Error while exporting " + RestApiConstants.RESOURCE_API, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException {
+
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
+        String token = apiProvider.generateApiKey(apiId);
+        APIKeyDTO apiKeyDTO = new APIKeyDTO();
+        apiKeyDTO.setApikey(token);
+        apiKeyDTO.setValidityTime(60 * 1000);
+        return Response.ok().entity(apiKeyDTO).build();
     }
 
     /**

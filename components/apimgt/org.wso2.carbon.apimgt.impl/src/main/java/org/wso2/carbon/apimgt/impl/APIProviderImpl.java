@@ -110,7 +110,6 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -141,7 +140,9 @@ import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -167,7 +168,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
+import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
+import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
@@ -10154,6 +10157,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.error("Error while deleting Runtime artifacts from artifact Store", e);
             }
         }
+    }
+
+    @Override
+    public String generateApiKey(String apiId) throws APIManagementException {
+
+        SubscribedApiDTO apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        if (apiInfo == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
+        jwtTokenInfoDTO.setEndUserName(username);
+        jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(apiInfo));
+        jwtTokenInfoDTO.setExpirationTime(60*1000);
+        ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
+        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
 
 

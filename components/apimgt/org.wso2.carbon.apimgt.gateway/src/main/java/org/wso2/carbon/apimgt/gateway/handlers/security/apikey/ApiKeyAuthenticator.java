@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -142,20 +143,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
-            try {
-                decodedHeader = JWSHeader.parse(new Base64URL(splitToken[0]));
                 signedJWT = SignedJWT.parse(apiKey);
-                tokenIdentifier = signedJWT.getJWTClaimsSet().getJWTID();
-            } catch (IllegalArgumentException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid Api Key. Api Key: " + GatewayUtils.getMaskedToken(splitToken[0]), e);
-                }
-                log.error("Invalid JWT token. Failed to decode the Api Key header.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE , e);
-            }
+                payload = signedJWT.getJWTClaimsSet();
+                decodedHeader = signedJWT.getHeader();
+                tokenIdentifier = payload.getJWTID();
             // Check if the decoded header contains type as 'JWT'.
-            if (!decodedHeader.getType().equals(JOSEObjectType.JWT)) {
+            if (!JOSEObjectType.JWT.equals(decodedHeader.getType())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid Api Key token type. Api Key: " + GatewayUtils.getMaskedToken(splitToken[0]));
                 }
@@ -163,7 +156,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
+            if (!GatewayUtils.isAPIKey(payload)) {
+                log.error("Invalid Api Key. Internal Key Sent");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
 
+            }
             if (decodedHeader.getKeyID() == null) {
                 if (log.isDebugEnabled()){
                     log.debug("Invalid Api Key. Could not find alias in header. Api Key: " +

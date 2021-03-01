@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.commons.throttle.core.AccessInformation;
 import org.apache.synapse.commons.throttle.core.ThrottleException;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -33,6 +34,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.gateway.TestUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
