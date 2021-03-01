@@ -46,12 +46,7 @@ public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
 
     @Override
     public Latencies getLatencies() {
-        Latencies latencies = new Latencies();
-        latencies.setResponseLatency(0L);
-        latencies.setBackendLatency(0L);
-        latencies.setRequestMediationLatency(0L);
-        latencies.setResponseMediationLatency(0L);
-        return latencies;
+        return new Latencies();
     }
 
     @Override

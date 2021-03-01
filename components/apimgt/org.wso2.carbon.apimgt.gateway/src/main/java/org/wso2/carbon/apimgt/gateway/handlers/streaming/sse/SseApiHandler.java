@@ -86,8 +86,9 @@ public class SseApiHandler extends APIAuthenticationHandler {
 
         if (isAuthenticated && isThrottled(axisCtx, synCtx)) {
             return false;
+        } else {
+            return isAuthenticated;
         }
-        return isAuthenticated;
     }
 
     private boolean isThrottled(org.apache.axis2.context.MessageContext axisCtx, MessageContext synCtx) {
