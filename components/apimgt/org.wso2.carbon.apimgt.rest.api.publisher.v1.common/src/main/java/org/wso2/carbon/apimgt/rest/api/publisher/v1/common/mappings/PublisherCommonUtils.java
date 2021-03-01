@@ -782,8 +782,7 @@ public class PublisherCommonUtils {
         return sb.toString();
     }
 
-    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) throws
-            APIManagementException {
+    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) {
         switch (definitionType) {
             case WSDL1:
             case WSDL2:
@@ -791,10 +790,6 @@ public class PublisherCommonUtils {
             case GRAPHQL_SDL:
                 return APIDTO.TypeEnum.GRAPHQL;
             case ASYNC_API:
-                if (StringUtils.isEmpty(protocol)) {
-                    throw new APIManagementException("Missing protocol in Async API Definition",
-                            ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION);
-                }
                 return APIDTO.TypeEnum.fromValue(protocol.toUpperCase());
             default:
                 return APIDTO.TypeEnum.HTTP;
