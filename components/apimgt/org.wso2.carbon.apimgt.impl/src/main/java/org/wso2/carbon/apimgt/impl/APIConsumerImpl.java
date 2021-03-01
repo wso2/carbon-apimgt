@@ -2378,6 +2378,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
 
+    @Deprecated
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
             boolean isLazyLoad) throws APIManagementException {
@@ -6076,7 +6077,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        return result ;
+        if (APIUtil.isAllowDisplayMultipleVersions()) {
+            return result;
+        }
+        return filterMultipleVersionedAPIs(result);
     }
 
     @Override

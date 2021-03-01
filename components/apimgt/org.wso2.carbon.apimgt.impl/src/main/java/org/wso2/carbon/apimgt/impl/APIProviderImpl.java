@@ -3203,6 +3203,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
                 existingAPI.getId().getApiName(), newVersion);
+        existingAPI.setUuid(null);
         existingAPI.setId(newApiId);
         existingAPI.setStatus(APIConstants.CREATED);
         existingAPI.setDefaultVersion(isDefaultVersion);
@@ -3261,6 +3262,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // update old api
         // revert back to old values before update.
+        existingAPI.setUuid(existingApiId);
         existingAPI.setStatus(existingAPIStatus);
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
@@ -9247,7 +9249,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organizationId), uuid, docId,
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while adding content to doc " + docId);
+            throw new APIManagementException("Error while adding content to doc " + docId, e);
         }
     }
 

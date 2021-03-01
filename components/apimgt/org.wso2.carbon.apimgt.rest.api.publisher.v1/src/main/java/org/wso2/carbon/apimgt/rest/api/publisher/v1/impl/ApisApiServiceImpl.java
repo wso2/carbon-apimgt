@@ -3633,7 +3633,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto, null,
                         service, organizationId);
             } else {
-                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
+                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organizationId);
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             }
             //This URI used to set the location header of the POST response
