@@ -24,6 +24,8 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.proc.BadJWTException;
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.axiom.om.OMElement;
@@ -39,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -68,6 +71,7 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -602,6 +606,31 @@ public class GatewayUtils {
     }
 
     public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
+                                                                      JSONObject api, String apiLevelPolicy)
+            throws java.text.ParseException {
+
+        AuthenticationContext authContext = new AuthenticationContext();
+        authContext.setAuthenticated(true);
+        authContext.setApiKey(tokenSignature);
+        authContext.setUsername(payload.getSubject());
+        if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
+            authContext.setKeyType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
+        } else {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        }
+
+        authContext.setApiTier(apiLevelPolicy);
+        if (api != null) {
+            authContext.setTier(APIConstants.UNLIMITED_TIER);
+            authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
+            authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
+
+        }
+        return authContext;
+    }
+
+
+    public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
                                                                       JSONObject api,
                                                                       String apiLevelPolicy, String endUserToken,
                                                                       org.apache.synapse.MessageContext synCtx)
@@ -766,9 +795,8 @@ public class GatewayUtils {
             // Subscription validation
             JSONArray subscribedAPIs =
                     (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
-            for (int i = 0; i < subscribedAPIs.size(); i++) {
-                JSONObject subscribedAPIsJSONObject =
-                        (JSONObject) subscribedAPIs.get(i);
+            for (Object subscribedAPI : subscribedAPIs) {
+                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
@@ -1163,42 +1191,112 @@ public class GatewayUtils {
         return axis2MsgCtx;
     }
 
-    public static String getAPINameFromContextAndVersion(String apiContext, String apiVersion, String tenantDomain) {
-
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        if (tenantSubscriptionStore != null) {
-            API api = tenantSubscriptionStore.getApiByContextAndVersion(apiContext, apiVersion);
-            if (api != null) {
-                return api.getApiName();
-            }
-        }
-        return null;
-    }
-
-    public static String getApiProviderFromContextAndVersion(String context, String apiVersion, String tenantDomain) {
-
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
-        if (tenantSubscriptionStore != null) {
-            API api = tenantSubscriptionStore.getApiByContextAndVersion(context, apiVersion);
-            if (api != null) {
-                return api.getApiProvider();
-            }
-        }
-        return null;
-    }
-
     public static API getAPI(org.apache.synapse.MessageContext messageContext) {
 
-        String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
-        if (tenantSubscriptionStore != null) {
-            return tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+        Object api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+        if (api != null) {
+            return (API) api;
+        } else {
+            synchronized (messageContext) {
+                api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+                if (api != null) {
+                    return (API) api;
+                }
+                String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+                SubscriptionDataStore tenantSubscriptionStore =
+                        SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+                if (tenantSubscriptionStore != null) {
+                    API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+                    if (api1 != null) {
+                        messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
+                        return api1;
+                    }
+                }
+                return null;
+            }
+        }
+    }
+
+    public static String getStatus(org.apache.synapse.MessageContext messageContext) {
+
+        Object status = messageContext.getProperty(APIMgtGatewayConstants.API_STATUS);
+        if (status != null) {
+            return (String) status;
+        }
+        API api = getAPI(messageContext);
+        if (api != null) {
+            String apiStatus = api.getStatus();
+            messageContext.setProperty(APIMgtGatewayConstants.API_STATUS, apiStatus);
+            return apiStatus;
         }
         return null;
+    }
+
+    public static boolean isAPIStatusPrototype(org.apache.synapse.MessageContext messageContext) {
+
+        return APIConstants.PROTOTYPED.equals(getStatus(messageContext));
+    }
+
+    public static String getAPINameFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
+
+        API api = getAPI(messageContext);
+        if (api != null) {
+            return api.getApiName();
+        }
+        return null;
+    }
+
+    public static String getApiProviderFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
+
+        API api = getAPI(messageContext);
+        if (api != null) {
+            return api.getApiProvider();
+        }
+        return null;
+    }
+
+    public static boolean isAPIKey(JWTClaimsSet jwtClaimsSet) {
+        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (tokenTypeClaim != null) {
+            return APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null;
+    }
+
+    public static boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {
+        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (tokenTypeClaim != null) {
+            return APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return false;
+    }
+    /**
+     * Check whether the jwt token is expired or not.
+     *
+     * @param payload The payload of the JWT token
+     * @return returns true if the JWT token is expired
+     */
+    public static boolean isJwtTokenExpired(JWTClaimsSet payload) {
+
+        int timestampSkew = (int) OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
+
+        DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
+        jwtClaimsSetVerifier.setMaxClockSkew(timestampSkew);
+        try {
+            jwtClaimsSetVerifier.verify(payload);
+            if (log.isDebugEnabled()) {
+                log.debug("Token is not expired. User: " + payload.getSubject());
+            }
+        } catch (BadJWTException e) {
+            if ("Expired JWT".equals(e.getMessage())) {
+                return true;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Token is not expired. User: " + payload.getSubject());
+        }
+        return false;
     }
 
     public static void setRequestDestination(org.apache.synapse.MessageContext messageContext) {

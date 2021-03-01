@@ -135,8 +135,11 @@ public class APIHandlerServiceComponent {
         CacheProvider.createInvalidUsernameCache();
         CacheProvider.createGatewayApiKeyCache();
         CacheProvider.createGatewayApiKeyDataCache();
-        CacheProvider.getInvalidGatewayApiKeyCache();
+        CacheProvider.createInvalidGatewayApiKeyCache();
         CacheProvider.createParsedSignJWTCache();
+        CacheProvider.createGatewayInternalKeyCache();
+        CacheProvider.createGatewayInternalKeyDataCache();
+        CacheProvider.createInvalidInternalKeyCache();
     }
 
     @Deactivate

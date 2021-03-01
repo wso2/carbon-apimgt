@@ -29,6 +29,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -161,8 +162,7 @@ public class APIAuthenticationHandlerTestCase {
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        PowerMockito.when(GatewayUtils.getApiProviderFromContextAndVersion(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(Mockito.anyString());
+        PowerMockito.when(GatewayUtils.getApiProviderFromContextAndVersion(messageContext)).thenReturn(Mockito.anyString());
         APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler() {
             @Override
             protected AuthenticationContext getAuthenticationContext(MessageContext messageContext) {

@@ -101,6 +101,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -5690,6 +5691,7 @@ public class ApiMgtDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants.UPDATE_API_STATUS)) {
             preparedStatement.setString(1, updatedStatus);
             preparedStatement.setInt(2, apiId);
+            preparedStatement.executeUpdate();
             connection.commit();
         }
     }
@@ -9409,6 +9411,30 @@ public class ApiMgtDAO {
                         "APPLICATION_ID = " + applicationId + " and KEY_TYPE = " + keyType, e);
             }
         }
+    }
+
+    public SubscribedApiDTO getAPIInfoByUUID(String apiId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            String sql = "SELECT API_PROVIDER,API_NAME,API_VERSION,CONTEXT FROM AM_API WHERE API_UUID = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, apiId);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()){
+                        SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
+                        subscribedApiDTO.setName(resultSet.getString("API_NAME"));
+                        subscribedApiDTO.setVersion(resultSet.getString("API_VERSION"));
+                        subscribedApiDTO.setPublisher(resultSet.getString("API_PROVIDER"));
+                        subscribedApiDTO.setContext(resultSet.getString("CONTEXT"));
+                        return subscribedApiDTO;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return null;
     }
 
     private class SubscriptionInfo {
