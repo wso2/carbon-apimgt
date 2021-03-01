@@ -7611,7 +7611,7 @@ public class ApiMgtDAO {
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
         //Check If the API is a Revision
-        if (checkAPIUUIDIsARevisionUUID(identifier.getUUID()).getApiUUID() != null) {
+        if (checkAPIUUIDIsARevisionUUID(identifier.getUUID()) != null) {
             try (Connection conn = APIMgtDBUtil.getConnection();
                  PreparedStatement ps = conn.prepareStatement(SQLConstants.GET_URL_TEMPLATES_OF_API_REVISION_SQL)) {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -9427,6 +9427,24 @@ public class ApiMgtDAO {
                         subscribedApiDTO.setPublisher(resultSet.getString("API_PROVIDER"));
                         subscribedApiDTO.setContext(resultSet.getString("CONTEXT"));
                         return subscribedApiDTO;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return null;
+    }
+
+    public String getAPIStatusFromAPIUUID(String uuid) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT STATUS FROM AM_API WHERE " +
+                    "API_UUID = ?")) {
+                preparedStatement.setString(1,uuid);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()){
+                        return resultSet.getString("STATUS");
                     }
                 }
             }
@@ -15096,7 +15114,7 @@ public class ApiMgtDAO {
         int productId = getAPIProductId(productIdentifier);
         List<APIProductResource> productResourceList = new ArrayList<>();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            if (checkAPIUUIDIsARevisionUUID(productIdentifier.getUUID()).getApiUUID() == null) {
+            if (checkAPIUUIDIsARevisionUUID(productIdentifier.getUUID()) == null) {
                 String sql = SQLConstants.GET_RESOURCES_OF_PRODUCT;
                 try (PreparedStatement ps = connection.prepareStatement(sql)) {
                     ps.setInt(1, productId);
@@ -16809,22 +16827,23 @@ public class ApiMgtDAO {
      * @throws APIManagementException if an error occurs while checking revision table
      */
     public APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
-        APIRevision apiRevision = new APIRevision();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_REVISION_APIID_BY_REVISION_UUID)) {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    apiRevision.setApiUUID(rs.getString(1));
-                    apiRevision.setId(rs.getInt(2));
+                if (rs.next()) {
+                    APIRevision apiRevision = new APIRevision();
+                    apiRevision.setApiUUID(rs.getString("API_UUID"));
+                    apiRevision.setId(rs.getInt("ID"));
                     apiRevision.setRevisionUUID(apiUUID);
+                    return apiRevision;
                 }
             }
         } catch (SQLException e) {
             handleException("Failed to search UUID: " + apiUUID + " in the revision db table", e);
         }
-        return apiRevision;
+        return null;
     }
 
     /**
