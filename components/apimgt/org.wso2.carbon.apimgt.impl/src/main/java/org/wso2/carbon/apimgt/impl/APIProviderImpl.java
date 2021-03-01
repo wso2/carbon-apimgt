@@ -9684,7 +9684,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             apiRevision.getRevisionUUID(), tenantDomain, artifact);
                 }
             } catch (APIImportExportException | ArtifactSynchronizerException e) {
-                throw new APIManagementException("Error while Store the Revision Artifact",
+                throw new APIManagementException("Error while Store the Revision Artifact", e,
                         ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
             }
         }
