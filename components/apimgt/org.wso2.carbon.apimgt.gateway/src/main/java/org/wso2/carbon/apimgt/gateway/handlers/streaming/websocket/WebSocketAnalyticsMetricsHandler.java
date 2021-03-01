@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataP
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
  * Handler to publish WebSocket analytics data to analytics cloud.
@@ -37,7 +38,15 @@ public class WebSocketAnalyticsMetricsHandler {
 
     public void handleHandshake(ChannelHandlerContext ctx) {
         WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.HTTP_METHOD, HANDSHAKE);
+        String electedResource = (String) WebSocketUtils.getPropertyFromChannel(APIConstants.API_ELECTED_RESOURCE, ctx);
+        /*
+        Prefix electedResource with APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE only when collecting data for
+        handshake, then remove it. Events after handshake will use the un-prefixed electedResource.
+        */
+        WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE,
+                APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE + electedResource);
         collectData(ctx);
+        WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE, electedResource);
     }
 
     public void handlePublish(ChannelHandlerContext ctx) {

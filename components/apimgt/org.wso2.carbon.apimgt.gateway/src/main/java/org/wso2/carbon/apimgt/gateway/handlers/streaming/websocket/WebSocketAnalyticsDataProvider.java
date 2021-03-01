@@ -231,11 +231,17 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public int getProxyResponseCode() {
+        if (isSuccessRequest()) {
+            return 200;
+        }
         return 0;
     }
 
     @Override
     public int getTargetResponseCode() {
+        if (isSuccessRequest()) {
+            return 200;
+        }
         return 0;
     }
 
