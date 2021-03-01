@@ -72,6 +72,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
+import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -999,7 +1000,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
         addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
         addURITemplates(apiId, api, tenantId);
-        String serviceKey = api.getServiceInfo("serviceKey");
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
@@ -1554,14 +1554,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!APIConstants.CREATED.equals(api.getStatus()) && !APIConstants.RETIRED
                     .equals(api.getStatus())) {
                 if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                    api.setEnvironments(
-                            ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                    api.setEnvironments(APIUtil.getEnvironments().keySet());
                 }
                 if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                    api.setEnvironments(
-                            ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                    api.setEnvironments(APIUtil.getEnvironments().keySet());
                 }
             }
 
@@ -3207,6 +3203,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         APIIdentifier newApiId = new APIIdentifier(existingAPI.getId().getProviderName(),
                 existingAPI.getId().getApiName(), newVersion);
+        existingAPI.setUuid(null);
         existingAPI.setId(newApiId);
         existingAPI.setStatus(APIConstants.CREATED);
         existingAPI.setDefaultVersion(isDefaultVersion);
@@ -3265,6 +3262,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // update old api
         // revert back to old values before update.
+        existingAPI.setUuid(existingApiId);
         existingAPI.setStatus(existingAPIStatus);
         existingAPI.setId(existingAPIId);
         existingAPI.setContext(existingContext);
@@ -6577,7 +6575,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
                     subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
-                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity());
+                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity(),subPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6861,7 +6859,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
                     subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
-                    subPolicy.getGraphQLMaxComplexity());
+                    subPolicy.getGraphQLMaxComplexity(), subPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6941,7 +6939,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     subscriptionPolicy.getPolicyName(), subscriptionPolicy.getDefaultQuotaPolicy().getType(),
                     subscriptionPolicy.getRateLimitCount(), subscriptionPolicy.getRateLimitTimeUnit(),
                     subscriptionPolicy.isStopOnQuotaReach(), subscriptionPolicy.getGraphQLMaxDepth(),
-                    subscriptionPolicy.getGraphQLMaxComplexity());
+                    subscriptionPolicy.getGraphQLMaxComplexity(), subscriptionPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
@@ -8107,10 +8105,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(message);
             }
 
-            APIManagerConfiguration config = getAPIManagerConfiguration();
-            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
-            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             deleteAPIProductRevisions(apiProduct.getUuid());
@@ -9166,6 +9160,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return result ;
     }
 
+    @Override
+    public String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException {
+        return apiMgtDAO.addComment(identifier, comment, user);
+    }
+
+    @Override
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException {
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
+    }
+
+    @Override
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID)
+            throws APIManagementException {
+        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID);
+    }
+
+    @Override
+    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+            APIManagementException{
+        return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
+    }
+
+    @Override
+    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+        return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
+    }
+
     /**
      * Get minimal details of API by registry artifact id
      *
@@ -9227,7 +9249,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             DocumentContent doc = apiPersistenceInstance.addDocumentationContent(new Organization(organizationId), uuid, docId,
                     mappedContent);
         } catch (DocumentationPersistenceException e) {
-            throw new APIManagementException("Error while adding content to doc " + docId);
+            throw new APIManagementException("Error while adding content to doc " + docId, e);
         }
     }
 
@@ -9664,7 +9686,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             apiRevision.getRevisionUUID(), tenantDomain, artifact);
                 }
             } catch (APIImportExportException | ArtifactSynchronizerException e) {
-                throw new APIManagementException("Error while Store the Revision Artifact",
+                throw new APIManagementException("Error while Store the Revision Artifact", e,
                         ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
             }
         }

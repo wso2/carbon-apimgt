@@ -1124,9 +1124,9 @@ public class APIConsumerImplTest {
         Comment comment = new Comment();
         Comment[] comments = new Comment[] { comment };
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.getComments(identifier)).thenReturn(comments);
-        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier).length, 1);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(identifier);
+        Mockito.when(apiMgtDAO.getComments(identifier, null)).thenReturn(comments);
+        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier, null).length, 1);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(identifier, null);
     }
 
     @Test

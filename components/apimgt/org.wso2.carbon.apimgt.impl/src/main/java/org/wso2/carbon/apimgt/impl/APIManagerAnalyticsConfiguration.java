@@ -75,7 +75,7 @@ public class APIManagerAnalyticsConfiguration {
             this.reporterClass = config.getFirstProperty(APIConstants.API_ANALYTICS_PROPERTIES);
             this.reporterProperties = config.getAnalyticsProperties();
 
-            datacenterId = System.getProperty("datacenterId");
+
         }
     }
 

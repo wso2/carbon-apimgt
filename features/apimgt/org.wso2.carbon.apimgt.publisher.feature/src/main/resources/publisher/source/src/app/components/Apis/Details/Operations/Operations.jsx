@@ -177,6 +177,37 @@ class Operations extends React.Component {
 
     /**
      *
+     * @param {*} event
+     */
+    setFilterByKeyWord(event) {
+        this.setState({ filterKeyWord: event.target.value.toLowerCase() });
+    }
+
+    /**
+     * @memberof Operations
+     */
+    getAllSharedScopes() {
+        Api.getAllScopes()
+            .then((response) => {
+                if (response.body && response.body.list) {
+                    const sharedScopesList = [];
+                    const sharedScopesByNameList = {};
+                    const shared = true;
+                    for (const scope of response.body.list) {
+                        const modifiedScope = {};
+                        modifiedScope.scope = scope;
+                        modifiedScope.shared = shared;
+                        sharedScopesList.push(modifiedScope);
+                        sharedScopesByNameList[scope.name] = modifiedScope;
+                    }
+                    this.setState({ sharedScopesByName: sharedScopesByNameList });
+                    this.setState({ sharedScopes: sharedScopesList });
+                }
+            });
+    }
+
+    /**
+     *
      *
      * @param {*} throttlePolicy
      * @memberof Operations
@@ -207,37 +238,6 @@ class Operations extends React.Component {
         }
         this.setState({ apiScopesByName });
         this.setState({ operations: updatedList });
-    }
-
-    /**
-     *
-     * @param {*} event
-     */
-    setFilterByKeyWord(event) {
-        this.setState({ filterKeyWord: event.target.value.toLowerCase() });
-    }
-
-    /**
-     * @memberof Operations
-     */
-    getAllSharedScopes() {
-        Api.getAllScopes()
-            .then((response) => {
-                if (response.body && response.body.list) {
-                    const sharedScopesList = [];
-                    const sharedScopesByNameList = {};
-                    const shared = true;
-                    for (const scope of response.body.list) {
-                        const modifiedScope = {};
-                        modifiedScope.scope = scope;
-                        modifiedScope.shared = shared;
-                        sharedScopesList.push(modifiedScope);
-                        sharedScopesByNameList[scope.name] = modifiedScope;
-                    }
-                    this.setState({ sharedScopesByName: sharedScopesByNameList });
-                    this.setState({ sharedScopes: sharedScopesList });
-                }
-            });
     }
 
     /**

@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsagePublisherConstants;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -108,8 +107,8 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
         } catch (XMLStreamException e) {
             fail(e.getMessage());
         }
-        Mockito.when(entryvalue.getFirstChildWithName(new QName(
-                APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED))).thenReturn(entryvalue);
+        Mockito.when(entryvalue.getFirstChildWithName(new QName(Constants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED)))
+                .thenReturn(entryvalue);
         Mockito.when(entryvalue.getText()).thenReturn("true");
         // Test exception thrown from trackPageView
 
@@ -129,7 +128,7 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
 
         //test when HOST and X_FORWARDED_FOR_HEADER are set
         transportHeaders.put(HttpHeaders.HOST, "localhost:18080");
-        transportHeaders.put(APIMgtUsagePublisherConstants.X_FORWARDED_FOR_HEADER, "192.168.0.34");
+        transportHeaders.put(Constants.X_FORWARDED_FOR_HEADER, "192.168.0.34");
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(messageContext));
 
     }

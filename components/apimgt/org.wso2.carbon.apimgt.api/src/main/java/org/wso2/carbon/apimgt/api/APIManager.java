@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.api;
 
-
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;

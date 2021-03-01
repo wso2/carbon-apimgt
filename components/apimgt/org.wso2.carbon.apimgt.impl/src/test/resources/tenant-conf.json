@@ -273,6 +273,10 @@
       {
         "Name": "apim:scope_manage",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:role_manage",
+        "Roles": "admin"
       }
     ]
   },

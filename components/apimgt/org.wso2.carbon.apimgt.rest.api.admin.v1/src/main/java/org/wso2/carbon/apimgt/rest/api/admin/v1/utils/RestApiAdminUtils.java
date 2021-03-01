@@ -186,6 +186,9 @@ public class RestApiAdminUtils {
         if (typeEnum.equals(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT)) {
             propertyName = "bandwidth";
         }
+        if (typeEnum.equals(ThrottleLimitDTO.TypeEnum.EVENTCOUNTLIMIT)) {
+            propertyName = "eventCount";
+        }
         return propertyName + " object corresponding to type " + typeEnum + " not provided\n";
     }
 

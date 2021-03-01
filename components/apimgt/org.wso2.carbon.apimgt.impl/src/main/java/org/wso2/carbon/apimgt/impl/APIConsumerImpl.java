@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
@@ -165,6 +166,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2376,6 +2378,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
 
+    @Deprecated
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
             boolean isLazyLoad) throws APIManagementException {
@@ -3553,20 +3556,27 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier)
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(APIIdentifier identifier, String parentCommentID)
             throws APIManagementException {
-        return apiMgtDAO.getComments(identifier);
+        return apiMgtDAO.getComments(identifier, parentCommentID);
     }
 
     @Override
-    public Comment getComment(Identifier identifier, String commentId) throws APIManagementException {
-        return apiMgtDAO.getComment(identifier, commentId);
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException {
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper)
+    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID)
             throws APIManagementException {
-        return apiMgtDAO.getComments(apiTypeWrapper);
+        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID);
+    }
+
+    @Override
+    public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
+            APIManagementException{
+        return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
     }
 
     @Override
@@ -3574,6 +3584,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiMgtDAO.deleteComment(identifier, commentId);
     }
 
+    @Override
+    public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
+        return apiMgtDAO.deleteComment(apiTypeWrapper, commentId);
+    }
     /**
      * Add a new Application from the store.
      * @param application - {@link org.wso2.carbon.apimgt.api.model.Application}
@@ -6063,7 +6077,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        return result ;
+        if (APIUtil.isAllowDisplayMultipleVersions()) {
+            return result;
+        }
+        return filterMultipleVersionedAPIs(result);
     }
 
     @Override
@@ -6364,6 +6381,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
         return super.getAsyncAPIDefinition(apiId);
+    }
+
+    @Override
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiUUID);
     }
 
     /**

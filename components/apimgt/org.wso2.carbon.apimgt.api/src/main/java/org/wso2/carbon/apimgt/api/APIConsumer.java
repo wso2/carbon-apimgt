@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -445,27 +446,41 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param identifier Api identifier
+     * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(APIIdentifier identifier) throws APIManagementException;
+    Comment[] getComments(APIIdentifier identifier, String parentCommentID) throws APIManagementException;
 
     /**
      * This method is to get a comment of an API.
      *
-     * @param identifier API identifier
+     * @param apiTypeWrapper Api Type Wrapper
      * @param commentId Comment ID
+     * @param limit
+     * @param offset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(Identifier identifier, String commentId) throws APIManagementException;
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException;
 
     /**
      * @param apiTypeWrapper Api type wrapper
+     * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException;
+
+    /**
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId comment ID
+     * @param comment Comment object
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException;
 
     /**
      * This method is to delete a comment.
@@ -475,6 +490,16 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to delete comment for identifier
      */
     void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @return boolean
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
 
     /**
      * Adds an application
@@ -1050,4 +1075,13 @@ public interface APIConsumer extends APIManager {
      */
     String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName)
             throws APIManagementException;
+
+    /**
+     * Get an API Revisions Deployment mapping details of API by providing API uuid
+     *
+     * @param apiUUID API UUID
+     * @return List<APIRevisionDeployment> Object
+     * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
+     */
+    List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException;
 }

@@ -52,7 +52,6 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workflowDTO);
-        super.publishEvents(workflowDTO);
         return new GeneralWorkflowResponse();
     }
 

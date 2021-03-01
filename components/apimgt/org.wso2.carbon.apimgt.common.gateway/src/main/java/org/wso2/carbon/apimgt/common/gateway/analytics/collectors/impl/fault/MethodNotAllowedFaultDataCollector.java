@@ -20,29 +20,22 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.RequestDataPublisher;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultEventType;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.FaultyRequestDataPublisher;
 
 /**
  * Method not allowed faulty request data collector
  */
-public class MethodNotAllowedFaultDataCollector extends AbstractFaultDataCollector {
+public class MethodNotAllowedFaultDataCollector extends UnclassifiedFaultDataCollector {
     private static final Log log = LogFactory.getLog(MethodNotAllowedFaultDataCollector.class);
 
-    public MethodNotAllowedFaultDataCollector(AnalyticsDataProvider provider, FaultEventType subType,
-            RequestDataPublisher processor) {
-        super(provider, subType, processor);
-    }
-
     public MethodNotAllowedFaultDataCollector(AnalyticsDataProvider provider) {
-        this(provider, FaultEventType.METHOD_NOT_ALLOWED, new FaultyRequestDataPublisher());
+        super(provider);
     }
 
     @Override
-    public void collectFaultData(Event faultyEvent) {
+    public void collectFaultData(Event faultyEvent) throws AnalyticsException {
         log.debug("handling method not allowed failure analytics events");
         Application application = getUnknownApp();
         faultyEvent.setApplication(application);
