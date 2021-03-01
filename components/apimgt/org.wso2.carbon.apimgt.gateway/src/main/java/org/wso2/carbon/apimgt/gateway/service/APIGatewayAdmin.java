@@ -674,10 +674,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (gatewayAPIDTO.getLocalEntriesToBeAdd() != null) {
             for (GatewayContentDTO localEntry : gatewayAPIDTO.getLocalEntriesToBeAdd()) {
                 if (localEntryServiceProxy.isEntryExists(localEntry.getName())) {
-                    if (gatewayAPIDTO.isOverride()) {
-                        localEntryServiceProxy.deleteEntry(localEntry.getName());
-                        localEntryServiceProxy.addLocalEntry(localEntry.getContent());
-                    }
+                    localEntryServiceProxy.deleteEntry(localEntry.getName());
+                    localEntryServiceProxy.addLocalEntry(localEntry.getContent());
                 } else {
                     localEntryServiceProxy.addLocalEntry(localEntry.getContent());
                 }
@@ -692,10 +690,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (gatewayAPIDTO.getEndpointEntriesToBeAdd() != null) {
             for (GatewayContentDTO endpointEntry : gatewayAPIDTO.getEndpointEntriesToBeAdd()) {
                 if (endpointAdminServiceProxy.isEndpointExist(endpointEntry.getName())) {
-                    if (gatewayAPIDTO.isOverride()) {
-                        endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
-                        endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
-                    }
+                    endpointAdminServiceProxy.deleteEndpoint(endpointEntry.getName());
+                    endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
                 } else {
                     endpointAdminServiceProxy.addEndpoint(endpointEntry.getContent());
                 }
@@ -723,10 +719,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 try {
                     String encryptedValue = mediationSecurityAdminServiceProxy.doEncryption(certificate.getPassword());
                     if (mediationSecurityAdminServiceProxy.isAliasExist(certificate.getAlias())) {
-                        if (gatewayAPIDTO.isOverride()) {
-                            setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(),
-                                    encryptedValue);
-                        }
+                        setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(),
+                                encryptedValue);
                     } else {
                         setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
                     }
@@ -753,10 +747,8 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                     throw new AxisFault(e.getMessage());
                 }
                 if (sequenceAdminServiceProxy.isExistingSequence(sequence.getName())) {
-                    if (gatewayAPIDTO.isOverride()) {
-                        sequenceAdminServiceProxy.deleteSequence(sequence.getName());
-                        sequenceAdminServiceProxy.addSequence(element);
-                    }
+                    sequenceAdminServiceProxy.deleteSequence(sequence.getName());
+                    sequenceAdminServiceProxy.addSequence(element);
                 } else {
                     sequenceAdminServiceProxy.addSequence(element);
                 }
