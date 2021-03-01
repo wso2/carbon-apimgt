@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsExcep
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Map;
@@ -74,12 +75,13 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        AnalyticsDataProvider provider;
         Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
         if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
-            return true;
+            provider = new AsyncAnalyticsDataProvider(messageContext);
+        } else {
+            provider = new SynapseAnalyticsDataProvider(messageContext);
         }
-      
-        AnalyticsDataProvider provider = new SynapseAnalyticsDataProvider(messageContext);
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();
