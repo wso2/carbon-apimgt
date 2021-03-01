@@ -66,7 +66,8 @@ public class APIAuthenticationAdminClient {
 
         JSONArray tokenArray = new JSONArray();
         tokenArray.addAll(activeTokens);
-        Object[] objectData = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME, tokenArray.toJSONString()};
+        Object[] objectData = new Object[]{APIConstants.GATEWAY_KEY_CACHE_NAME,
+                StringEscapeUtils.escapeJava(tokenArray.toJSONString())};
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
         APIUtil.publishEventToEventHub(null, event);
@@ -91,7 +92,8 @@ public class APIAuthenticationAdminClient {
 
         JSONArray userArray = new JSONArray();
         userArray.addAll(Arrays.asList(username_list));
-        Object[] objectData = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME, userArray.toJSONString()};
+        Object[] objectData = new Object[]{APIConstants.GATEWAY_USERNAME_CACHE_NAME,
+                StringEscapeUtils.escapeJava(userArray.toJSONString())};
         Event event = new Event(APIConstants.CACHE_INVALIDATION_STREAM_ID, System.currentTimeMillis(),
                 null, null, objectData);
         APIUtil.publishEventToEventHub(null, event);
