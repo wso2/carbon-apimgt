@@ -29,14 +29,17 @@ import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+
 public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
 
+    private String apiType;
     private MessageContext messageContext;
-    String apiType;
 
     public AsyncAnalyticsDataProvider(MessageContext messageContext) {
         super(messageContext);
-        org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axisCtx =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         apiType = (String) axisCtx.getProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE);
         this.messageContext = messageContext;
     }
@@ -55,7 +58,11 @@ public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
     public Operation getOperation() throws DataNotFoundException {
 
         Operation operation = super.getOperation();
-        String eventName = ""; // // todo get this from smg ctx
+        String eventName = "";
+        Object eventPrefix = messageContext.getProperty(ASYNC_MESSAGE_TYPE);
+        if (eventPrefix != null) {
+            eventName = eventPrefix.toString();
+        }
         if (!eventName.isEmpty()) {
             operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
         }

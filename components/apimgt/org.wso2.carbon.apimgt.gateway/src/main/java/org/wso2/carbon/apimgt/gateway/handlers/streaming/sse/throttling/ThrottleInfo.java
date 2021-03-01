@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse;
+package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.throttling;
 
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
