@@ -39,7 +39,7 @@ public class ServiceEntry {
     private String description = null;
 
     public enum SecurityType {
-        BASIC, DIGEST, OAUTH2, NONE
+        BASIC, DIGEST, OAUTH2, NONE, X509
     }
     private SecurityType securityType = SecurityType.NONE;
     private boolean mutualSSLEnabled = false;
