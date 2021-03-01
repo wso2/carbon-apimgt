@@ -18,7 +18,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
@@ -71,7 +70,7 @@ const styles = theme => ({
         marginTop: theme.spacing(0.2),
     },
     loadMoreLink: {
-        textDecoration: 'underline',
+        textDecoration: 'none',
     },
     genericMessageWrapper: {
         marginTop: theme.spacing(2),
@@ -276,21 +275,22 @@ class Comments extends Component {
                         {!showLatest && (
                             <div className={classes.root}>
                                 <Typography variant='h4' className={classes.titleSub}>
+                                    {totalComments + (' ')}
                                     <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                                 </Typography>
                             </div>
                         )}
                         {!showLatest && AuthManager.getUser() &&
                         !this.isCrossTenant(api.provider, AuthManager.getUser()) && (
-                            <Paper className={classes.paper}>
+                            <div className={classes.paper}>
                                 <CommentAdd
                                     apiId={api.id}
                                     commentsUpdate={this.updateCommentList}
                                     allComments={allComments}
-                                    parentCommentId={null}
+                                    replyTo={null}
                                     cancelButton
                                 />
-                            </Paper>
+                            </div>
                         )}
                         {!allComments && (
                             <Paper className={classes.paperProgress}>
@@ -333,27 +333,14 @@ class Comments extends Component {
                                             >
                                                 <FormattedMessage
                                                     id='Apis.Details.Comments.load.previous.comments'
-                                                    defaultMessage='Load Previous Comments'
+                                                    defaultMessage='Show More'
                                                 />
                                             </a>
                                         </Typography>
                                     </Grid>
-                                    <Grid>
-                                        <Icon
-                                            onClick={this.handleLoadMoreComments}
-                                            className={classes.link + ' ' + classes.verticalSpace}
-                                        >
-                                            arrow_drop_down
-                                        </Icon>
-                                    </Grid>
                                     <Grid item>
                                         <Typography className={classes.verticalSpace} variant='body1'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Comments.showing.comments'
-                                                defaultMessage='Showing comments '
-                                            />
-
-                                            {totalComments - startCommentsToDisplay + ' of ' + totalComments}
+                                            { '(' + (totalComments - startCommentsToDisplay) + ' of ' + totalComments + ')'}
                                         </Typography>
                                     </Grid>
                                 </Grid>

@@ -323,7 +323,14 @@ public class GatewayArtifactsMgtDAO {
                     apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                     apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
                     InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
-                    apiRuntimeArtifactDto.setArtifact(artifact);
+                    if (artifact != null) {
+                        byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                        try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                            apiRuntimeArtifactDto.setArtifact(newArtifact);
+                        } catch (IOException e) {
+                            handleException("Error occurred retrieving input stream from byte array.", e);
+                        }
+                    }
                     apiRuntimeArtifactDto.setFile(true);
                     apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
                 }
@@ -361,7 +368,14 @@ public class GatewayArtifactsMgtDAO {
                     apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                     apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
                     InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
-                    apiRuntimeArtifactDto.setArtifact(artifact);
+                    if (artifact != null) {
+                        byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                        try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                            apiRuntimeArtifactDto.setArtifact(newArtifact);
+                        } catch (IOException e) {
+                            handleException("Error occurred retrieving input stream from byte array.", e);
+                        }
+                    }
                     apiRuntimeArtifactDto.setFile(true);
                     apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
                 }
@@ -393,7 +407,14 @@ public class GatewayArtifactsMgtDAO {
                     apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                     apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
                     InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
-                    apiRuntimeArtifactDto.setArtifact(artifact);
+                    if (artifact != null) {
+                        byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);
+                        try (InputStream newArtifact = new ByteArrayInputStream(artifactByte)) {
+                            apiRuntimeArtifactDto.setArtifact(newArtifact);
+                        } catch (IOException e) {
+                            handleException("Error occurred retrieving input stream from byte array.", e);
+                        }
+                    }
                     apiRuntimeArtifactDto.setFile(true);
                     apiRuntimeArtifactDtoList.add(apiRuntimeArtifactDto);
                 }

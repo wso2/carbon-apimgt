@@ -41,4 +41,11 @@ public class JWTConstants {
 
     public static final String REST_API_CONTEXT = "REST_API_CONTEXT";
     public static final String SYNAPSE_REST_API_VERSION = "SYNAPSE_REST_API_VERSION";
+
+    public static final String CONSUMER_KEY = "consumerKey";
+    public static final String AUTHORIZED_PARTY = "azp";
+    public static final String SCOPE = "scope";
+    public static final String SCOPE_DELIMITER = " ";
+    public static final String OAUTH2_DEFAULT_SCOPE = "default";
+    public static final String AUTHORIZED_USER_TYPE = "aut";
 }

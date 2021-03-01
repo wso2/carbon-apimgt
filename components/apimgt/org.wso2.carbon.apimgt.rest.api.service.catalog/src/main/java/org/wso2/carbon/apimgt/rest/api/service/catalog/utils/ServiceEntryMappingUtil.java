@@ -26,11 +26,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
@@ -56,7 +58,7 @@ import java.util.Objects;
  */
 public class ServiceEntryMappingUtil {
 
-    private static final Log log = LogFactory.getLog(Md5HashGenerator.class);
+    private static final Log log = LogFactory.getLog(ServiceEntryMappingUtil.class);
 
     /**
      * Converts a single metadata file content into a ServiceEntry model
@@ -195,6 +197,7 @@ public class ServiceEntryMappingUtil {
             serviceDTO.setMutualSSLEnabled(service.isMutualSSLEnabled());
             serviceDTO.setCreatedTime(String.valueOf(service.getCreatedTime()));
             serviceDTO.setLastUpdatedTime(String.valueOf(service.getLastUpdatedTime()));
+            serviceDTO.setUsage(service.getUsage());
         }
         return serviceDTO;
     }
@@ -286,6 +289,16 @@ public class ServiceEntryMappingUtil {
         }
         PaginationDTO paginationDTO = getPaginationDTO(limit, offset, size, paginatedNext, paginatedPrevious);
         serviceListDTO.setPagination(paginationDTO);
+    }
+
+    public static APIInfoDTO fromAPIToAPIInfoDTO(API api) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setName(api.getId().getApiName());
+        apiInfoDTO.setVersion(api.getId().getVersion());
+        apiInfoDTO.setContext(api.getContext());
+        apiInfoDTO.setId(api.getUuid());
+        apiInfoDTO.setProvider(api.getId().getProviderName());
+        return apiInfoDTO;
     }
 
     private static String getServiceSortByField(String sortBy) {

@@ -30,11 +30,13 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIType;
@@ -58,7 +60,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
@@ -434,6 +438,75 @@ public class APIMappingUtil {
         } else {
             return fromAPItoDTO(model.getApi(), tenantDomain);
         }
+    }
+
+    public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(
+            APIDTO apidto,
+            List<APIRevisionDeployment> revisionDeployments) throws APIManagementException {
+
+        Map<String, Environment> environments = APIUtil.getEnvironments();
+        return revisionDeployments.stream().filter(APIRevisionDeployment::isDisplayOnDevportal)
+                .map(r -> fromAPIRevisionToEndpoints(apidto, r, environments))
+                .collect(Collectors.toList());
+    }
+
+    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto,
+                                                                 APIRevisionDeployment revisionDeployment,
+                                                                 Map<String, Environment> environments) {
+        // Deployed environment
+        Environment environment = environments.get(revisionDeployment.getDeployment());
+        // If there are any inconstancy (if VHost not found) use default VHost
+        VHost defaultVhost = new VHost();
+        defaultVhost.setHost(revisionDeployment.getVhost());
+        defaultVhost.setHttpContext("");
+        defaultVhost.setHttpsPort(APIConstants.HTTPS_PROTOCOL_PORT);
+        defaultVhost.setHttpPort(APIConstants.HTTP_PROTOCOL_PORT);
+        defaultVhost.setWsPort(APIConstants.WS_PROTOCOL_PORT);
+        defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
+
+        // Deployed VHost
+        VHost vHost;
+        if (revisionDeployment.getVhost() == null && environment.getVhosts().size() > 0) {
+            // VHost is NULL set first Vhost (set in deployment toml)
+            vHost = environment.getVhosts().get(0);
+        } else {
+            vHost = environment.getVhosts().stream()
+                    .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
+                    .findAny()
+                    .orElse(defaultVhost);
+        }
+
+        APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
+        apiEndpointURLsDTO.setEnvironmentName(environment.getName());
+        apiEndpointURLsDTO.setEnvironmentType(environment.getType());
+
+        APIURLsDTO apiurLsDTO = new APIURLsDTO();
+        String context = apidto.getContext();
+        boolean isWs = apidto.getEndpointURLs().size() > 0
+                && apidto.getEndpointURLs().get(0).getUrLs().getWs() != null;
+        if (!isWs) {
+            apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
+            apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
+        } else {
+            apiurLsDTO.setWs(vHost.getWsUrl() + context);
+            apiurLsDTO.setWss(vHost.getWssUrl() + context);
+        }
+        apiEndpointURLsDTO.setUrLs(apiurLsDTO);
+
+        APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
+        if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
+            String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
+            if (!isWs) {
+                apiDefaultVersionURLsDTO.setHttp(vHost.getHttpUrl() + defaultContext);
+                apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
+            } else {
+                apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
+                apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
+            }
+        }
+        apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
+
+        return apiEndpointURLsDTO;
     }
 
     /**

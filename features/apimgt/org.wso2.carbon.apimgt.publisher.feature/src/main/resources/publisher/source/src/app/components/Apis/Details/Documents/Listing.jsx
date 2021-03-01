@@ -138,7 +138,8 @@ class Listing extends React.Component {
             const apiProduct = new APIProduct();
             const docs = apiProduct.getDocuments(api.id);
             docs.then((response) => {
-                this.setState({ docs: response.obj.list });
+                const documentList = response.body.list.filter((item) => item.otherTypeName !== '_overview');
+                this.setState({ docs: documentList });
             }).catch((errorResponse) => {
                 const errorData = JSON.parse(errorResponse.message);
                 const messageTxt =
@@ -153,7 +154,8 @@ class Listing extends React.Component {
             const newApi = new API();
             const docs = newApi.getDocuments(this.props.api.id);
             docs.then((response) => {
-                this.setState({ docs: response.obj.list });
+                const documentList = response.body.list.filter((item) => item.otherTypeName !== '_overview');
+                this.setState({ docs: documentList });
             }).catch((errorResponse) => {
                 const errorData = JSON.parse(errorResponse.message);
                 const messageTxt =

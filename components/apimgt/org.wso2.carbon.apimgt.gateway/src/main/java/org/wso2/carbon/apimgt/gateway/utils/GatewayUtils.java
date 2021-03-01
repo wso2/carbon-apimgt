@@ -66,8 +66,6 @@ import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
-import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
@@ -482,32 +480,6 @@ public class GatewayUtils {
         }
     }
 
-    /**
-     * Build execution time related information using message context
-     *
-     * @param messageContext
-     * @return
-     */
-    public static ExecutionTimeDTO getExecutionTime(org.apache.synapse.MessageContext messageContext) {
-
-        Object securityLatency = messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY);
-        Object throttleLatency = messageContext.getProperty(APIMgtGatewayConstants.THROTTLING_LATENCY);
-        Object reqMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY);
-        Object resMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY);
-        Object otherLatency = messageContext.getProperty(APIMgtGatewayConstants.OTHER_LATENCY);
-        Object backendLatency = messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY);
-        ExecutionTimeDTO executionTime = new ExecutionTimeDTO();
-        executionTime.setBackEndLatency(backendLatency == null ? 0 : ((Number) backendLatency).longValue());
-        executionTime.setOtherLatency(otherLatency == null ? 0 : ((Number) otherLatency).longValue());
-        executionTime.setRequestMediationLatency(
-                reqMediationLatency == null ? 0 : ((Number) reqMediationLatency).longValue());
-        executionTime.setResponseMediationLatency(
-                resMediationLatency == null ? 0 : ((Number) resMediationLatency).longValue());
-        executionTime.setSecurityLatency(securityLatency == null ? 0 : ((Number) securityLatency).longValue());
-        executionTime.setThrottlingLatency(throttleLatency == null ? 0 : ((Number) throttleLatency).longValue());
-        return executionTime;
-    }
-
     public static String extractResource(org.apache.synapse.MessageContext mc) {
 
         Pattern resourcePattern = Pattern.compile("^/.+?/.+?([/?].+)$");
@@ -521,7 +493,7 @@ public class GatewayUtils {
 
     public static String getHostName(org.apache.synapse.MessageContext messageContext) {
 
-        String hostname = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDatacenterId();
+        String hostname = System.getProperty("datacenterId");
         if (hostname == null) {
             hostname = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_NAME);
         }

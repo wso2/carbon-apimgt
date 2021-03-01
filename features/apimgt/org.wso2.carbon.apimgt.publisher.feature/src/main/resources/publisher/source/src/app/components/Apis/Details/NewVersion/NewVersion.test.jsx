@@ -85,7 +85,7 @@ describe('Unit test for CreateNewVersion component', () => {
 
         await mountedNewVersion.find('#createBtn button').simulate('click');
         await mountedNewVersion.update();
-        expect(createNewAPIVersion).toHaveBeenCalledWith('v3.0.1', false);
+        expect(createNewAPIVersion).toHaveBeenCalledWith('v3.0.1', false, null);
 
         expect(mountedNewVersion.find('CreateNewVersion').state().redirectToReferrer).toBeTruthy();
         expect(mountedNewVersion.find(Redirect).props().to).toEqual('/apis/' + newVersionResponse.id + '/overview');
@@ -109,7 +109,7 @@ describe('Unit test for CreateNewVersion component', () => {
 
         await mountedNewVersion.find('#createBtn button').simulate('click');
         await mountedNewVersion.update();
-        expect(createNewAPIVersion).toHaveBeenCalledWith('v5.0.1', true);
+        expect(createNewAPIVersion).toHaveBeenCalledWith('v5.0.1', true, null);
 
         expect(mountedNewVersion.find('CreateNewVersion').state().redirectToReferrer).toBeTruthy();
         expect(mountedNewVersion.find(Redirect).props().to).toEqual('/apis/' + newVersionResponse.id + '/overview');
@@ -134,7 +134,7 @@ describe('Unit test for CreateNewVersion component', () => {
 
         await mountedNewVersion.find('#createBtn button').simulate('click');
         await mountedNewVersion.update();
-        expect(createNewAPIVersion).toHaveBeenCalledWith('v5.0.1', false);
+        expect(createNewAPIVersion).toHaveBeenCalledWith('v5.0.1', false, null);
         expect(mountedNewVersion.find('CreateNewVersion').state().valid.version.alreadyExists).toBeTruthy();
         expect(mountedNewVersion.find('CreateNewVersion').state().redirectToReferrer).toBeFalsy();
         expect(mountedNewVersion.text().indexOf('already exists')).toBeGreaterThanOrEqual(0);

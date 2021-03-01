@@ -201,16 +201,36 @@ class Topics extends Component {
         this.handleDeleteTopic = this.handleDeleteTopic.bind(this);
 
         this.handleAddProperty = this.handleAddProperty.bind(this);
-        // this.handleSaveProperty = this.handleSaveProperty.bind(this);
-        // this.handleCancelSaveProperty = this.handleCancelSaveProperty.bind(this);
-        // this.handleEditProperty = this.handleEditProperty.bind(this);
-        // this.handleDeleteProperty = this.handleDeleteProperty.bind(this);
         this.renderEditableProperty = this.renderEditableProperty.bind(this);
         this.loadTopics = this.loadTopics.bind(this);
         this.getSortedOperations = this.getSortedOperations.bind(this);
         this.getAsyncAPIDefinition = this.getAsyncAPIDefinition.bind(this);
         this.loadTopicMetaData = this.loadTopicMetaData.bind(this);
         this.renderSchemaForTopic = this.renderSchemaForTopic.bind(this);
+    }
+
+    getAsyncAPIDefinition() {
+        const result = this.props.api.getAsyncAPIDefinition();
+        result.then(async (response) => {
+            $RefParser.dereference(response.body, (err) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    this.setState({
+                        // eslint-disable-next-line react/no-unused-state
+                        definition: response.body,
+                    });
+                }
+            });
+            const doc = await parse(response.body);
+            this.setState({ asyncAPI: doc }, this.loadTopicMetaData);
+        });
+    }
+
+    getSortedOperations() {
+        const operations = [...this.props.api.operations];
+        operations.sort((a, b) => ((a.target + a.verb > b.target + b.verb) ? 1 : -1));
+        return operations;
     }
 
     handleCancelSave() {
@@ -251,30 +271,6 @@ class Topics extends Component {
             new: true,
         });
         this.setState({ topics: topicsCopy });
-    }
-
-    getAsyncAPIDefinition() {
-        const result = this.props.api.getAsyncAPIDefinition();
-        result.then(async (response) => {
-            $RefParser.dereference(response.body, (err) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    this.setState({
-                        // eslint-disable-next-line react/no-unused-state
-                        definition: response.body,
-                    });
-                }
-            });
-            const doc = await parse(response.body);
-            this.setState({ asyncAPI: doc }, this.loadTopicMetaData);
-        });
-    }
-
-    getSortedOperations() {
-        const operations = [...this.props.api.operations];
-        operations.sort((a, b) => ((a.target + a.verb > b.target + b.verb) ? 1 : -1));
-        return operations;
     }
 
     loadTopics() {
