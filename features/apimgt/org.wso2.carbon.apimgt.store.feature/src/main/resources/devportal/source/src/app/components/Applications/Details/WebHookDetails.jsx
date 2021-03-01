@@ -33,7 +33,10 @@ import Grid from '@material-ui/core/Grid';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import _ from 'lodash'
-import moment from 'moment'
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
+
 import CopyToClipboard from 'react-copy-to-clipboard'
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -165,7 +168,7 @@ export default function WebHookDetails(props) {
     }
 
     function getRelativeTIme(standardTime) {
-        return moment(standardTime, "YYYY-MM-DD HH:mm:ss").fromNow();
+        return dayjs(standardTime).fromNow()
     }
 
     useEffect(() => {

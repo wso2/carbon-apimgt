@@ -538,13 +538,6 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.api</artifactId>
@@ -1843,6 +1836,11 @@
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
+                <artifactId>swagger-request-validator-core</artifactId>
+                <version>${org.wso2.orbit.atlassian.oai.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1949,7 +1947,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v203</synapse.version>
+	    <synapse.version>2.1.7-wso2v205</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -2107,8 +2105,10 @@
         <version.checkstyle>8.34</version.checkstyle>
         <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
         <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
-        <analytics.event.publisher.client.version>0.4.0</analytics.event.publisher.client.version>
-        <analytics.event.publisher.client.version.range>[0.4.0,1.0.0)</analytics.event.publisher.client.version.range>
+        <analytics.event.publisher.client.version>1.0.0-ALPHA2</analytics.event.publisher.client.version>
+        <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
+        <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v1</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
+        <skip.aspectj>false</skip.aspectj>
     </properties>
 </project>

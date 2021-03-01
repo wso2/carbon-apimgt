@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -66,6 +67,53 @@ public interface APIAdmin  {
      * @throws APIManagementException if failed to update label
      */
     Label updateLabel(String tenantDomain, Label label) throws APIManagementException;
+
+    /**
+     * Returns environments of a given tenant
+     *
+     * @param tenantDomain tenant domain
+     * @return List of environments related to the given tenant
+     */
+    List<Environment> getAllEnvironments(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns environment of a given uuid
+     *
+     * @param tenantDomain tenant domain
+     * @return List of environments related to the given tenant
+     */
+    Environment getEnvironment(String tenantDomain, String uuid) throws APIManagementException;
+
+    /**
+     * Creates a new environment in the tenant
+     *
+     * @param tenantDomain tenant domain
+     * @param environment  content to add
+     * @return Added environment
+     * @throws APIManagementException if failed add environment
+     */
+    Environment addEnvironment(String tenantDomain, Environment environment) throws APIManagementException;
+
+    /**
+     * Delete an existing environment
+     *
+     * @param tenantDomain tenant domain
+     * @param uuid         Environment identifier
+     * @throws APIManagementException If failed to delete environment
+     */
+    void deleteEnvironment(String tenantDomain, String uuid) throws APIManagementException;
+
+    /**
+     * Updates the details of the given Environment.
+     *
+     * @param tenantDomain tenant domain
+     * @param environment  content to update
+     * @return updated environment
+     * @throws APIManagementException if failed to update environment
+     */
+    Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException;
+
+
 
     Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
 

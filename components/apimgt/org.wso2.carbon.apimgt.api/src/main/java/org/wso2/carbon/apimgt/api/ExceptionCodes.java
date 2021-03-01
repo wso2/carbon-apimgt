@@ -127,9 +127,19 @@ public enum ExceptionCodes implements ErrorHandler {
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
     BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
-    GATEWAY_ENVIRONMENT_NOT_FOUND(900504, "Invalid Gateway Environment", 400, "Gateway Environment with name '%s' not found"),
+    INVALID_GATEWAY_ENVIRONMENT(900504, "Invalid Gateway Environment", 400, "Gateway Environment with name '%s' not found"),
     NO_GATEWAY_ENVIRONMENTS_ADDED(900505, "No Gateway Environments Available", 400, "No gateway environments " +
             "available for the API : %s."),
+    GATEWAY_ENVIRONMENT_NOT_FOUND(900506, "Gateway Environment not found", 404,
+            "Gateway Environment with %s not found"),
+    EXISTING_GATEWAY_ENVIRONMENT_FOUND(900507, "Gateway Environment already exists", 400,
+            "A Gateway Environment with %s already exists"),
+    READONLY_GATEWAY_ENVIRONMENT(900508, "Gateway Environment is read only", 400,
+            "A Gateway Environment with %s is read only"),
+    GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND(900509, "Gateway Environment with duplicate virtual hosts",
+            400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
+    READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",
+            400, "Name of the gateway is read only"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -425,7 +435,10 @@ public enum ExceptionCodes implements ErrorHandler {
     ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
 
     GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
-            "Gateway type not found available Gateway types : " + "%s");
+            "Gateway type not found available Gateway types : " + "%s"),
+
+    SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE(900910, "Service import is failed" , 412, "Cannot update existing services " +
+                                                    "when overwrite is false");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

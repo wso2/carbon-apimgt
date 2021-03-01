@@ -145,6 +145,7 @@ public class TestUtil {
         subscriptionPolicy.setRateLimitCount(0);
         subscriptionPolicy.setRateLimitTimeUnit(null);
         subscriptionPolicy.setStopOnQuotaReach(true);
+        subscriptionPolicy.setSubscriberCount(0);
 
         return subscriptionPolicy;
     }

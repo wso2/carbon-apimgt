@@ -100,10 +100,6 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
         </dependency>
@@ -249,9 +245,6 @@
                                 <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
                                 <bundleDef>commons-codec:commons-codec</bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}
                                 </bundleDef>
                                 <bundleDef>
@@ -309,6 +302,7 @@
                                 <bundleDef>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jedis:${servicemix.bundles.jedis.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger.v3:swagger-parser:${swagger.parser.v3.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.atlassian.oai:swagger-request-validator-core:${org.wso2.orbit.atlassian.oai.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

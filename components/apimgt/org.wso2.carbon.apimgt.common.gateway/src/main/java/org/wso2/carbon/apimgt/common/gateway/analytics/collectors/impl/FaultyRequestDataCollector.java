@@ -24,13 +24,12 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataP
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.FaultDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.RequestDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault.AuthFaultDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault.MethodNotAllowedFaultDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault.ResourceNotFoundFaultDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault.TargetFaultDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault.ThrottledFaultDataCollector;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.fault.UnclassifiedFaultDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
@@ -43,8 +42,6 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
     private FaultDataCollector authDataCollector;
     private FaultDataCollector throttledDataCollector;
     private FaultDataCollector targetDataCollector;
-    private FaultDataCollector resourceNotFoundDataCollector;
-    private FaultDataCollector methodNotAllowedDataCollector;
     private FaultDataCollector unclassifiedFaultDataCollector;
     private AnalyticsDataProvider provider;
 
@@ -54,55 +51,30 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         this.authDataCollector = new AuthFaultDataCollector(provider);
         this.throttledDataCollector = new ThrottledFaultDataCollector(provider);
         this.targetDataCollector = new TargetFaultDataCollector(provider);
-        this.resourceNotFoundDataCollector = new ResourceNotFoundFaultDataCollector(provider);
-        this.methodNotAllowedDataCollector = new MethodNotAllowedFaultDataCollector(provider);
         this.unclassifiedFaultDataCollector = new UnclassifiedFaultDataCollector(provider);
     }
 
-    public void collectData() {
+    public void collectData() throws AnalyticsException {
         log.debug("Handling faulty analytics types");
         Event faultyEvent = getFaultyEvent();
 
-        if (provider.isAuthFaultRequest()) {
-            handleAuthFaultRequest(faultyEvent);
-        } else if (provider.isThrottledFaultRequest()) {
-            handleThrottledFaultRequest(faultyEvent);
-        } else if (provider.isTargetFaultRequest()) {
-            handleTargetFaultRequest(faultyEvent);
-        } else if (provider.isResourceNotFound()) {
-            handleResourceNotFoundFaultRequest(faultyEvent);
-        } else if (provider.isMethodNotAllowed()) {
-            handleMethodNotAllowedFaultRequest(faultyEvent);
-        } else {
-            handleOtherFaultRequest(faultyEvent);
+        switch (provider.getFaultType()) {
+        case AUTH:
+            authDataCollector.collectFaultData(faultyEvent);
+            break;
+        case THROTTLED:
+            throttledDataCollector.collectFaultData(faultyEvent);
+            break;
+        case TARGET_CONNECTIVITY:
+            targetDataCollector.collectFaultData(faultyEvent);
+            break;
+        case OTHER:
+            unclassifiedFaultDataCollector.collectFaultData(faultyEvent);
+            break;
         }
     }
 
-    private void handleAuthFaultRequest(Event faultyEvent) {
-        authDataCollector.collectFaultData(faultyEvent);
-    }
-
-    private void handleThrottledFaultRequest(Event faultyEvent) {
-        throttledDataCollector.collectFaultData(faultyEvent);
-    }
-
-    private void handleTargetFaultRequest(Event faultyEvent) {
-        targetDataCollector.collectFaultData(faultyEvent);
-    }
-
-    private void handleResourceNotFoundFaultRequest(Event faultyEvent) {
-        resourceNotFoundDataCollector.collectFaultData(faultyEvent);
-    }
-
-    private void handleMethodNotAllowedFaultRequest(Event faultyEvent) {
-        methodNotAllowedDataCollector.collectFaultData(faultyEvent);
-    }
-
-    private void handleOtherFaultRequest(Event faultyEvent) {
-        unclassifiedFaultDataCollector.collectFaultData(faultyEvent);
-    }
-
-    private Event getFaultyEvent() {
+    private Event getFaultyEvent() throws DataNotFoundException {
         long requestInTime = provider.getRequestTime();
         String offsetDateTime = getTimeInISO(requestInTime);
 
@@ -111,12 +83,11 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         Target target = new Target();
         target.setTargetResponseCode(Constants.UNKNOWN_INT_VALUE);
         MetaInfo metaInfo = provider.getMetaInfo();
-        Error error = provider.getError();
+
         event.setApi(api);
         event.setTarget(target);
         event.setProxyResponseCode(provider.getProxyResponseCode());
         event.setRequestTimestamp(offsetDateTime);
-        event.setError(error);
         event.setMetaInfo(metaInfo);
 
         return event;

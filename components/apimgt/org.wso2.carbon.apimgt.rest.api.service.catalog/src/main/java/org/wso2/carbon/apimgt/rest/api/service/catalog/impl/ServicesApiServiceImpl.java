@@ -27,6 +27,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,6 +37,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.ServicesApiService;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceDTO;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.ServiceInfoDTO;
@@ -61,7 +65,8 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private static final Log log = LogFactory.getLog(ServicesApiServiceImpl.class);
     private static final ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
 
-    public Response createService(ServiceDTO catalogEntry, InputStream definitionFileInputStream,
+    @Override
+    public Response addService(ServiceDTO catalogEntry, InputStream definitionFileInputStream,
                                   Attachment definitionFileDetail, MessageContext messageContext) {
         ErrorDTO errorObject = new ErrorDTO();
         Response.Status status = Response.Status.NOT_IMPLEMENTED;
@@ -71,10 +76,16 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         return Response.status(status).entity(errorObject).build();
     }
 
+    @Override
     public Response deleteService(String serviceId, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
+            List<API> usedAPIs = serviceCatalog.getServiceUsage(serviceId, tenantId);
+            if (usedAPIs != null && usedAPIs.size() > 0 ) {
+                String message = "Cannot remove the Service as it is used by one or more APIs";
+                RestApiUtil.handleConflict(message, log);
+            }
             serviceCatalog.deleteService(serviceId, tenantId);
             return Response.noContent().build();
         } catch (APIManagementException e) {
@@ -84,6 +95,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         return null;
     }
 
+    @Override
     public Response exportService(String name, String version, MessageContext messageContext) {
         File exportedServiceArchiveFile = null;
         // creates a directory in default temporary-file directory
@@ -123,6 +135,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         return null;
     }
 
+    @Override
     public Response getServiceById(String serviceId, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
@@ -141,13 +154,38 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         return null;
     }
 
+    @Override
     public Response getServiceDefinition(String serviceId, MessageContext messageContext) {
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+        String user = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(user);
+        String contentType = StringUtils.EMPTY;
+        try {
+            ServiceEntry service = serviceCatalog.getServiceByUUID(serviceId, tenantId);
+            if (ServiceDTO.DefinitionTypeEnum.OAS3.equals(ServiceDTO.DefinitionTypeEnum.fromValue(service
+                    .getDefinitionType().name())) || ServiceDTO.DefinitionTypeEnum.OAS2.equals(ServiceDTO
+                    .DefinitionTypeEnum.fromValue(service.getDefinitionType().name())) || ServiceDTO.DefinitionTypeEnum
+                    .ASYNC_API.equals(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType().name()))) {
+                contentType = "application/yaml";
+            }
+            InputStream serviceDefinition = service.getEndpointDef();
+            if (serviceDefinition == null) {
+                RestApiUtil.handleResourceNotFoundError("Service definition not found for service with ID: "
+                        + serviceId, log);
+            } else {
+                return Response.ok(serviceDefinition).type(contentType).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the definition" +
+                        " of service with ID: " + serviceId, e, log);
+            } else{
+                RestApiUtil.handleInternalServerError("Error when retrieving the endpoint definition of service " +
+                        "with id " + serviceId, e, log);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -203,8 +241,20 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         } else {
             List<ServiceEntry> importedServiceList = new ArrayList<>();
             List<ServiceEntry> retrievedServiceList = new ArrayList<>();
-            if (serviceListToImport.size() > 0) {
-                importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName);
+            try {
+                if (serviceListToImport.size() > 0) {
+                    importedServiceList = serviceCatalog.importServices(serviceListToImport, tenantId, userName,
+                            overwrite);
+                }
+            } catch (APIManagementException e) {
+                if (ExceptionCodes.SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE.getErrorCode() == e.getErrorHandler()
+                        .getErrorCode()) {
+                    RestApiUtil.handleBadRequest("Cannot update existing services when overwrite is false", log);
+                }
+            }
+            if (importedServiceList == null) {
+                RestApiUtil.handleBadRequest("Cannot update the version or key or definition type of an existing " +
+                        "service", log);
             }
             for (ServiceEntry service : importedServiceList) {
                 retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
@@ -241,6 +291,32 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         return null;
     }
 
+    @Override
+    public Response getServiceUsage(String serviceId, MessageContext messageContext) {
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        try {
+            List<API> apiList = serviceCatalog.getServiceUsage(serviceId, tenantId);
+            if (apiList != null) {
+                APIListDTO apiListDTO = new APIListDTO();
+                List<APIInfoDTO> apiInfoDTOList = new ArrayList<>();
+                for (API api : apiList) {
+                    apiInfoDTOList.add(ServiceEntryMappingUtil.fromAPIToAPIInfoDTO(api));
+                }
+                apiListDTO.setList(apiInfoDTOList);
+                apiListDTO.setCount(apiList.size());
+                return Response.ok().entity(apiListDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, log);
+            }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API usage of service";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    @Override
     public Response updateService(String serviceId, ServiceDTO catalogEntry, InputStream definitionFileInputStream,
                                   Attachment definitionFileDetail, MessageContext messageContext) {
         ErrorDTO errorObject = new ErrorDTO();
@@ -257,12 +333,19 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         for (int i = 0; i < verifierArray.length() ; i++) {
             JSONObject verifierJson = verifierArray.getJSONObject(i);
             ServiceEntry service = serviceCatalog.getServiceByKey(verifierJson.get("key").toString(), tenantId);
-            if (service.getMd5().equals(verifierJson.get("md5").toString())) {
-                validationResults.put(service.getKey(), true);
-            } else {
-                validationResults.put(service.getKey(), false);
+            if (service != null) {
+                if (service.getMd5().equals(verifierJson.get("md5").toString())) {
+                    validationResults.put(service.getKey(), true);
+                } else {
+                    validationResults.put(service.getKey(), false);
+                }
             }
         }
         return validationResults;
+    }
+
+    private boolean isAuthorizationFailure(Exception e) {
+        String errorMessage = e.getMessage();
+        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }

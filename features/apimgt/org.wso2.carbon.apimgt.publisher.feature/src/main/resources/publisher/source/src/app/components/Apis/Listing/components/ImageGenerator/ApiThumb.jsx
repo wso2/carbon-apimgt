@@ -286,17 +286,10 @@ class APIThumb extends Component {
 
                             <div className={classes.thumbRight}>
                                 <Typography variant='caption' gutterBottom align='right' className={classes.context}>
-                                    {api.type === 'WS' ? (
-                                        <FormattedMessage
-                                            defaultMessage='Channel'
-                                            id='Apis.Listing.ApiThumb.channel'
-                                        />
-                                    ) : (
-                                        <FormattedMessage
-                                            defaultMessage='Context'
-                                            id='Apis.Listing.ApiThumb.context'
-                                        />
-                                    )}
+                                    <FormattedMessage
+                                        defaultMessage='Context'
+                                        id='Apis.Listing.ApiThumb.context'
+                                    />
                                 </Typography>
                             </div>
                         </div>
@@ -327,6 +320,14 @@ class APIThumb extends Component {
                             className={classes.thumbRightBy}
                             label='WEBSUB'
                             color='primary'
+                        />
+                    )}
+                    {(api.type === 'SSE') && (
+                        <Chip
+                            className={classes.thumbRightBy}
+                            label='SSE'
+                            color='primary'
+                            style={{ width: '100%' }}
                         />
                     )}
                     <DeleteApiButton onClick={this.handleApiDelete} api={api} />

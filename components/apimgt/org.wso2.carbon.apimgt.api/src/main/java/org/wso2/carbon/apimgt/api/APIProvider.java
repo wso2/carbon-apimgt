@@ -42,6 +42,57 @@ import java.util.Set;
 public interface APIProvider extends APIManager {
 
     /**
+     * This method is to add a comment.
+     *
+     * @param identifier Api identifier
+     * @param comment comment object
+     * @param user Username of the comment author
+     * @throws APIManagementException if failed to add comment for API
+     */
+    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+
+    /**
+     * This method is to get a comment of an API.
+     *
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId Comment ID
+     * @param limit
+     * @param offset
+     * @return Comment
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+            APIManagementException;
+
+    /**
+     * @param apiTypeWrapper Api type wrapper
+     * @param parentCommentID
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException;
+
+    /**
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId comment ID
+     * @param comment Comment object
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId Comment ID
+     * @return boolean
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
+
+
+    /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>

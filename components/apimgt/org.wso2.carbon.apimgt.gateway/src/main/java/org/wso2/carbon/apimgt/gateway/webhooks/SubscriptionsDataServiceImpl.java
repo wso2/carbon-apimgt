@@ -31,21 +31,12 @@ public class SubscriptionsDataServiceImpl implements SubscriptionsDataService {
      * This method is used to add subscription to the data store.
      *
      * @param apiKey            the api key to uniquely identify the API.
-     * @param appID             the application ID of the subscriber.
-     * @param tenantDomain      the tenant domain.
-     * @param callback          the subscriber's callback url.
      * @param topicName         the subscriber's topic name.
-     * @param secret            the subscriber's secret key.
-     * @param expiredAt         the expiry timestamp in millis.
+     * @param tenantDomain      the tenant domain.
+     * @param subscriber        the webhooks subscriber.
      */
-    public void addSubscription(String apiKey, String appID, String tenantDomain, String callback, String secret,
-                                String topicName, long expiredAt) {
+    public void addSubscription(String apiKey, String topicName, String tenantDomain, WebhooksDTO subscriber) {
         String subscriptionKey = apiKey + "_" + topicName;
-        WebhooksDTO subscriber = new WebhooksDTO();
-        subscriber.setAppID(appID);
-        subscriber.setCallbackURL(callback);
-        subscriber.setSecret(secret);
-        subscriber.setExpiryTime(expiredAt);
         SubscriptionDataStore dataStore = WebhooksDataHolder.getInstance()
                 .getTenantSubscriptionStore(tenantDomain);
         dataStore.addSubscriber(subscriptionKey, subscriber);
@@ -55,19 +46,12 @@ public class SubscriptionsDataServiceImpl implements SubscriptionsDataService {
      * This method is used to remove subscription from the datastore.
      *
      * @param apiKey            the api key to uniquely identify the API.
-     * @param appID             the application ID of the subscriber.
      * @param tenantDomain      the tenant domain.
-     * @param callback          the subscriber's callback url.
      * @param topicName         the subscriber's topic name.
-     * @param secret            the subscriber's secret key.
+     * @param subscriber        the webhooks subscriber.
      */
-    public void removeSubscription(String apiKey, String appID, String tenantDomain, String callback, String secret,
-                                   String topicName) {
+    public void removeSubscription(String apiKey, String topicName, String tenantDomain, WebhooksDTO subscriber) {
         String subscriptionKey = apiKey + "_" + topicName;
-        WebhooksDTO subscriber = new WebhooksDTO();
-        subscriber.setCallbackURL(callback);
-        subscriber.setAppID(appID);
-        subscriber.setSecret(secret);
         SubscriptionDataStore dataStore = WebhooksDataHolder.getInstance()
                 .getTenantSubscriptionStore(tenantDomain);
         dataStore.removeSubscriber(subscriptionKey, subscriber);
@@ -84,5 +68,35 @@ public class SubscriptionsDataServiceImpl implements SubscriptionsDataService {
         SubscriptionDataStore dataStore = WebhooksDataHolder.getInstance()
                 .getTenantSubscriptionStore(tenantDomain);
         return dataStore.getSubscribers(apiKey);
+    }
+
+    /**
+     * This method is used to update throttling status.
+     *
+     * @param appID             the application ID.
+     * @param apiUUID           the API UUID.
+     * @param tenantDomain      the tenant domain.
+     * @param status            the status
+     */
+    public void updateThrottleStatus(String appID, String apiUUID, String tenantDomain, boolean status) {
+        SubscriptionDataStore dataStore = WebhooksDataHolder.getInstance()
+                .getTenantSubscriptionStore(tenantDomain);
+        String throttleKey = appID + "_" + apiUUID;
+        dataStore.updateThrottleStatus(throttleKey, status);
+    }
+
+    /**
+     * This method is used to update throttling status.
+     *
+     * @param appID             the application ID.
+     * @param apiUUID           the API UUID.
+     * @param tenantDomain      the tenant domain.
+     * return throttling status
+     */
+    public boolean getThrottleStatus(String appID, String apiUUID, String tenantDomain) {
+        SubscriptionDataStore dataStore = WebhooksDataHolder.getInstance()
+                .getTenantSubscriptionStore(tenantDomain);
+        String throttleKey = appID + "_" + apiUUID;
+        return dataStore.getThrottleStatus(throttleKey);
     }
 }

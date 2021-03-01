@@ -150,6 +150,52 @@ class EditScope extends React.Component {
     }
 
     /**
+     * Get scope
+     * @memberof EditScope
+     */
+    getScope() {
+        const { location } = this.props;
+        const { scopeId } = location.state;
+        const restAPI = new API();
+        if (scopeId) {
+            const scopePromise = restAPI.getSharedScopeDetails(scopeId);
+            scopePromise
+                .then((doc) => {
+                    this.setState({
+                        sharedScope: doc.body,
+                        validRoles: doc.body.bindings,
+                    });
+                })
+                .catch((error) => {
+                    const { response } = error;
+                    if (response.body) {
+                        const { description } = response.body;
+                        Alert.error(description);
+                    }
+                });
+        }
+    }
+
+
+    /**
+     * Hadnling role deletion.
+     * @param {any} role The role that needs to be deleted.
+     * @memberof EditScope
+     */
+    handleRoleDeletion = (role) => {
+        const { validRoles, invalidRoles } = this.state;
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
+            this.setState({ invalidRoles: invalidRolesArray });
+            if (invalidRolesArray.length === 0) {
+                this.setState({ roleValidity: true });
+            }
+        } else {
+            this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
+        }
+    };
+
+    /**
      * Hadnling role addition.
      * @param {any} role The role that needs to be added.
      * @memberof EditScope
@@ -207,51 +253,6 @@ class EditScope extends React.Component {
     handleScopeDisplayNameInput({ target: { id, value } }) {
         this.validateScopeDisplayName(id, value);
     }
-
-    /**
-     * Get scope
-     * @memberof EditScope
-     */
-    getScope() {
-        const { location } = this.props;
-        const { scopeId } = location.state;
-        const restAPI = new API();
-        if (scopeId) {
-            const scopePromise = restAPI.getSharedScopeDetails(scopeId);
-            scopePromise
-                .then((doc) => {
-                    this.setState({
-                        sharedScope: doc.body,
-                        validRoles: doc.body.bindings,
-                    });
-                })
-                .catch((error) => {
-                    const { response } = error;
-                    if (response.body) {
-                        const { description } = response.body;
-                        Alert.error(description);
-                    }
-                });
-        }
-    }
-
-    /**
-     * Hadnling role deletion.
-     * @param {any} role The role that needs to be deleted.
-     * @memberof EditScope
-     */
-    handleRoleDeletion = (role) => {
-        const { validRoles, invalidRoles } = this.state;
-        if (invalidRoles.includes(role)) {
-            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
-            this.setState({ invalidRoles: invalidRolesArray });
-            if (invalidRolesArray.length === 0) {
-                this.setState({ roleValidity: true });
-            }
-        } else {
-            this.setState({ validRoles: validRoles.filter((existingRole) => existingRole !== role) });
-        }
-    };
 
     /**
      * Update scope

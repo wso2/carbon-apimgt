@@ -34,15 +34,20 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.user.core.tenant.TenantManager;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.wsdl.Definition;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, APIUtil.class})
+@PrepareForTest({ServiceReferenceHolder.class, APIUtil.class, ApiMgtDAO.class})
 
 public class APIMWSDLReaderTest {
     private static ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
@@ -116,6 +121,7 @@ public class APIMWSDLReaderTest {
         APIMWSDLReader wsdlReader = new APIMWSDLReader("");
         byte[] content = IOUtils.toByteArray(Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("wsdls/wsdl2-sample.wsdl"));
+
         OMElement element = wsdlReader.updateWSDL2(content, getAPIForTesting());
         Assert.assertFalse("Endpoints are not properly replaced",
                 element.toString().contains("address = \"http://yoursite.com/MyService\""));
@@ -176,25 +182,40 @@ public class APIMWSDLReaderTest {
         }
     }
 
-    public static void doMockStatics() {
-        Map<String, Environment> gatewayEnvironments = new HashMap<String, Environment>();
-        Environment env1 = new Environment();
-        env1.setType("hybrid");
-        env1.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
-        gatewayEnvironments.put("e1", env1);
+    public static void doMockStatics() throws APIManagementException {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            Map<String, Environment> gatewayEnvironments = new HashMap<String, Environment>();
+            Environment env1 = new Environment();
+            env1.setType("hybrid");
+            env1.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+            gatewayEnvironments.put("e1", env1);
 
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()).thenReturn(apimConfigService);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()).thenReturn(apimConfig);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
+            PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            PowerMockito.when(ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService()).thenReturn(apimConfigService);
+            PowerMockito.when(ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration()).thenReturn(apimConfig);
 
-        PowerMockito.when(ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()
-                .getApiGatewayEnvironments()).thenReturn(gatewayEnvironments);
+            PowerMockito.when(ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration()
+                    .getApiGatewayEnvironments()).thenReturn(gatewayEnvironments);
+
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAllEnvironments(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
+                    .thenReturn(new ArrayList<org.wso2.carbon.apimgt.api.model.Environment>());
+            PowerMockito.when(APIUtil.getEnvironments()).thenReturn(gatewayEnvironments);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
     
     public static API getAPIForTesting() {
