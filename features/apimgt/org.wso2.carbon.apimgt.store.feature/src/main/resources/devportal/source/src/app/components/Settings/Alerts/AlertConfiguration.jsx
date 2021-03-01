@@ -41,12 +41,14 @@ import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import base64url from 'base64url';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import Settings from 'Settings';
 
 const alertPropertyMap = {
     AbnormalRequestsPerMin: 'requestCount',
 };
 
-const styles = theme => ({
+const styles = (theme) => ({
     addBtn: {
         display: 'flex',
         alignItems: 'center',
@@ -83,7 +85,7 @@ const AlertConfiguration = (props) => {
     const [alertConfiguration, setAlertConfiguration] = useState([]);
     const [apis, setApis] = useState();
     const [selectedAPIName, setSelectedAPIName] = useState();
-    const [apiNames, setAPINames] = useState(new Set());
+    const [apiNames, setAPINames] = useState();
     const [apiVersions, setAPIVersions] = useState([]);
     const [applications, setApplications] = useState([]);
     const [selectedAPIVersion, setSelectedAPIVersion] = useState();
@@ -94,15 +96,12 @@ const AlertConfiguration = (props) => {
 
     useEffect(() => {
         const alertConfigPromise = api.getAlertConfigurations(alertType);
-        const apisPromise = api.getAllAPIs();
+        const apisPromise = api.getAllAPIs({ limit: Settings.app.alertMaxAPIGetLimit });
         Promise.all([alertConfigPromise, apisPromise])
             .then((response) => {
                 const apisList = response[1].body.list;
-                const apiNamesSet = new Set();
-                apisList.forEach((tmpApi) => {
-                    apiNamesSet.add(tmpApi.name);
-                });
-                setAPINames(apiNamesSet);
+                const apiNameList = apisList.map((apiResp) => { return { label: apiResp.name }; });
+                setAPINames(apiNameList);
                 setApis(apisList);
                 setAlertConfiguration(response[0].body);
             })
@@ -119,7 +118,7 @@ const AlertConfiguration = (props) => {
      * */
     const handleAPINameSelect = (name) => {
         setSelectedAPIName(name);
-        const availableVersions = apis.filter(tmpApi => tmpApi.name === name);
+        const availableVersions = apis.filter((tmpApi) => tmpApi.name === name);
         setAPIVersions(availableVersions);
     };
 
@@ -223,8 +222,8 @@ const AlertConfiguration = (props) => {
         return <CircularProgress />;
     }
     return (
-        <React.Fragment>
-            <React.Fragment>
+        <>
+            <>
                 <Button onClick={() => setCollapseOpen(!collapseOpen)} color='primary'>
                     <Typography className={classes.addBtn}>
                         <Icon color='primary'>
@@ -239,38 +238,34 @@ const AlertConfiguration = (props) => {
                 <Collapse in={collapseOpen} className={classes.configWrapper}>
                     <Grid container spacing={1}>
                         <Grid item xs>
-                            <TextField
-                                id='outlined-select-api-name'
-                                select
-                                fullWidth
-                                required
-                                label={<FormattedMessage
-                                    id='Settings.Alerts.AlertConfiguration.api.name.label'
-                                    defaultMessage='API Name'
-                                />}
+                            <Autocomplete
+                                id='combo-box-demo'
+                                options={apiNames}
+                                getOptionLabel={(option) => option.label}
                                 className={classes.textField}
                                 value={selectedAPIName}
-                                onChange={event => handleAPINameSelect(event.target.value)}
-                                SelectProps={{
-                                    MenuProps: {
-                                        className: classes.menu,
-                                    },
-                                }}
-                                helperText={
-                                    <FormattedMessage
-                                        id='Settings.Alerts.AlertConfiguration.select.api.helper'
-                                        defaultMessage='Select the API Name'
+                                onChange={(event, { label }) => handleAPINameSelect(label)}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        fullWidth
+                                        required
+                                        label={(
+                                            <FormattedMessage
+                                                id='Settings.Alerts.AlertConfiguration.api.name.label'
+                                                defaultMessage='API Name'
+                                            />
+                                        )}
+                                        helperText={(
+                                            <FormattedMessage
+                                                id='Settings.Alerts.AlertConfiguration.select.api.helper'
+                                                defaultMessage='Select the API Name'
+                                            />
+                                        )}
+                                        variant='outlined'
                                     />
-                                }
-                                variant='outlined'
-                            >
-                                {apiNames && Array.from(apiNames).map((name) => {
-                                    return (
-                                        <MenuItem key={name} value={name}>
-                                            {name}
-                                        </MenuItem>);
-                                })}
-                            </TextField>
+                                )}
+                            />
                         </Grid>
                         <Grid item xs>
                             <TextField
@@ -278,24 +273,26 @@ const AlertConfiguration = (props) => {
                                 select
                                 fullWidth
                                 required
-                                label={<FormattedMessage
-                                    id='Settings.Alerts.AlertConfiguration.api.version.label'
-                                    defaultMessage='API Version'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Settings.Alerts.AlertConfiguration.api.version.label'
+                                        defaultMessage='API Version'
+                                    />
+                                )}
                                 className={classes.textField}
                                 value={selectedAPIVersion}
-                                onChange={event => handleApiVersionSelect(event.target.value)}
+                                onChange={(event) => handleApiVersionSelect(event.target.value)}
                                 SelectProps={{
                                     MenuProps: {
                                         className: classes.menu,
                                     },
                                 }}
-                                helperText={
+                                helperText={(
                                     <FormattedMessage
                                         id='Settings.Alerts.AlertConfiguration.select.version.helper'
                                         defaultMessage='Select API Version'
                                     />
-                                }
+                                )}
                                 variant='outlined'
                             >
                                 {apiVersions && apiVersions.map((selected) => {
@@ -313,24 +310,26 @@ const AlertConfiguration = (props) => {
                                 select
                                 fullWidth
                                 required
-                                label={<FormattedMessage
-                                    id='Settings.Alerts.AlertConfiguration.applications.label'
-                                    defaultMessage='Application'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Settings.Alerts.AlertConfiguration.applications.label'
+                                        defaultMessage='Application'
+                                    />
+                                )}
                                 className={classes.textField}
                                 value={selectedApplicationName}
-                                onChange={event => setSelectedApplicationName(event.target.value)}
+                                onChange={(event) => setSelectedApplicationName(event.target.value)}
                                 SelectProps={{
                                     MenuProps: {
                                         className: classes.menu,
                                     },
                                 }}
-                                helperText={
+                                helperText={(
                                     <FormattedMessage
                                         id='Settings.Alerts.AlertConfiguration.select.application.helper'
                                         defaultMessage='Select Application'
                                     />
-                                }
+                                )}
                                 variant='outlined'
                             >
                                 {applications && applications.map((applicationInfo) => {
@@ -348,19 +347,23 @@ const AlertConfiguration = (props) => {
                                 type='number'
                                 fullWidth
                                 required
-                                label={<FormattedMessage
-                                    id='Settings.Alerts.AlertConfiguration.request.count.label'
-                                    defaultMessage='Request Count.'
-                                />}
+                                label={(
+                                    <FormattedMessage
+                                        id='Settings.Alerts.AlertConfiguration.request.count.label'
+                                        defaultMessage='Request Count.'
+                                    />
+                                )}
                                 className={classes.textField}
                                 value={value}
-                                onChange={event => setValue(event.target.value)}
+                                onChange={(event) => setValue(event.target.value)}
                                 variant='outlined'
                                 endAdornment={<InputAdornment position='end'>ms</InputAdornment>}
-                                helperText={<FormattedMessage
-                                    id='Settings.Alerts.AlertConfiguration.threshold.value.helper'
-                                    defaultMessage='Enter Request Count.'
-                                />}
+                                helperText={(
+                                    <FormattedMessage
+                                        id='Settings.Alerts.AlertConfiguration.threshold.value.helper'
+                                        defaultMessage='Enter Request Count.'
+                                    />
+                                )}
                             />
                         </Grid>
                         <Grid item className={classes.configAddBtnContainer}>
@@ -378,8 +381,9 @@ const AlertConfiguration = (props) => {
                         </Grid>
                     </Grid>
                 </Collapse>
-            </React.Fragment>
-            <React.Fragment>
+
+            </>
+            <>
                 <Typography className={classes.configNameHeading}>
                     <FormattedMessage
                         id='Settings.Alerts.AlertConfiguration.configuration'
@@ -393,70 +397,73 @@ const AlertConfiguration = (props) => {
                             <Typography>
                                 <FormattedMessage
                                     id='Settings.Alerts.AlertConfiguration.no.config.message'
-                                    defaultMessage={'You do not have any configurations. Click on {newConfig} button' +
-                                    ' to add a configuration.'}
+                                    defaultMessage={'You do not have any configurations. Click on {newConfig} button'
+                                    + ' to add a configuration.'}
                                     values={{
                                         newConfig: <b>New Configuration</b>,
                                     }}
                                 />
                             </Typography>
                         </div>
-                    </InlineMessage>) :
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>
-                                    <FormattedMessage
-                                        id='Settings.Alerts.AlertConfiguration.api.name'
-                                        defaultMessage='API Name'
-                                    />
-                                </TableCell>
-                                <TableCell>
-                                    <FormattedMessage
-                                        id='Settings.Alerts.AlertConfiguration.api.version'
-                                        defaultMessage='API Version'
-                                    />
-                                </TableCell>
-                                <TableCell>
-                                    <FormattedMessage
-                                        id='Settings.Alerts.AlertConfiguration.app.name'
-                                        defaultMessage='Application Name'
-                                    />
-                                </TableCell>
-                                <TableCell>{alertName}</TableCell>
-                                <TableCell />
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {alertConfiguration.map((configuration) => {
-                                return (
-                                    <TableRow id={configuration.configurationId} key={configuration.configurationId}>
-                                        <TableCell>{configuration.configuration.apiName}</TableCell>
-                                        <TableCell>{configuration.configuration.apiVersion}</TableCell>
-                                        <TableCell>{configuration.configuration.applicationName}</TableCell>
-                                        <TableCell>
-                                            {configuration.configuration[alertPropertyMap[alertType]]}
-                                        </TableCell>
-                                        <TableCell>
-                                            <IconButton
-                                                onClick={() => handleDeleteConfiguration(configuration.configurationId)}
-                                            >
-                                                {isProcessing.delete === configuration.configurationId ?
-                                                    <CircularProgress size={15} /> :
-                                                    <Icon>
+                    </InlineMessage>
+                )
+                    : (
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Settings.Alerts.AlertConfiguration.api.name'
+                                            defaultMessage='API Name'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Settings.Alerts.AlertConfiguration.api.version'
+                                            defaultMessage='API Version'
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <FormattedMessage
+                                            id='Settings.Alerts.AlertConfiguration.app.name'
+                                            defaultMessage='Application Name'
+                                        />
+                                    </TableCell>
+                                    <TableCell>{alertName}</TableCell>
+                                    <TableCell />
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {alertConfiguration.map((configuration) => {
+                                    return (
+                                        <TableRow id={configuration.configurationId} key={configuration.configurationId}>
+                                            <TableCell>{configuration.configuration.apiName}</TableCell>
+                                            <TableCell>{configuration.configuration.apiVersion}</TableCell>
+                                            <TableCell>{configuration.configuration.applicationName}</TableCell>
+                                            <TableCell>
+                                                {configuration.configuration[alertPropertyMap[alertType]]}
+                                            </TableCell>
+                                            <TableCell>
+                                                <IconButton
+                                                    onClick={() => handleDeleteConfiguration(configuration.configurationId)}
+                                                >
+                                                    {isProcessing.delete === configuration.configurationId
+                                                        ? <CircularProgress size={15} />
+                                                        : (
+                                                            <Icon>
                                                         delete
-                                                    </Icon>
-                                                }
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                }
-            </React.Fragment>
-        </React.Fragment>
+                                                            </Icon>
+                                                        )}
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    )}
+            </>
+        </>
     );
 };
 
