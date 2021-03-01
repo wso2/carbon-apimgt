@@ -310,6 +310,16 @@ export default function Environments() {
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
     const [lastRevisionCount, setLastRevisionCount] = useState(0);
 
+    const allEnvDeployments = [];
+    settings.environment.forEach((env) => {
+        const revision = allEnvRevision && allEnvRevision.find(
+            (r) => r.deploymentInfo.some((e) => e.name === env.name),
+        );
+        const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
+        const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+        allEnvDeployments[env.name] = { revision, vhost };
+    });
+
     const extractLastRevisionNumber = (list, lastRev) => {
         if (lastRev !== null) {
             setLastRevisionCount(lastRev);
@@ -389,8 +399,37 @@ export default function Environments() {
 
     const handleSelect = (event) => {
         const revisions = selectedRevision.filter((r) => r.env !== event.target.name);
-        revisions.push({ env: event.target.name, revision: event.target.value });
+        const theRevision = selectedRevision.find((r) => r.env === event.target.name);
+        let displayOnDevPortal = true;
+        if (theRevision) {
+            displayOnDevPortal = theRevision.displayOnDevPortal;
+        }
+        revisions.push({ env: event.target.name, revision: event.target.value, displayOnDevPortal });
         setRevision(revisions);
+    };
+
+    const handleDisplayOnDevPortal = (event, env) => {
+        const revisions = selectedRevision.filter((r) => r.env !== env);
+        const theRevision = selectedRevision.find((r) => r.env === env);
+        revisions.push({
+            env: theRevision.env,
+            revision: theRevision.revision,
+            displayOnDevPortal: event.target.checked,
+        });
+        setRevision(revisions);
+    };
+
+    const isDisplayOnDevPortalChecked = (env) => {
+        if (allEnvDeployments[env].revision) {
+            return allEnvDeployments[env].revision.deploymentInfo.find((r) => r.name === env).displayOnDevportal;
+        }
+
+        const theRevision = selectedRevision.find((r) => r.env === env);
+        let displayOnDevPortal = true;
+        if (theRevision) {
+            displayOnDevPortal = theRevision.displayOnDevPortal;
+        }
+        return displayOnDevPortal;
     };
 
     const handleVhostSelect = (event) => {
@@ -664,10 +703,10 @@ export default function Environments() {
       * Handles deploy a revision
       * @memberof Revisions
       */
-    function deployRevision(revisionId, envName, vhost) {
+    function deployRevision(revisionId, envName, vhost, displayOnDevportal) {
         const body = [{
             name: envName,
-            displayOnDevportal: true,
+            displayOnDevportal,
             vhost,
         }];
         if (api.apiType !== API.CONSTS.APIProduct) {
@@ -1240,16 +1279,6 @@ export default function Environments() {
             );
         }
     }
-
-    const allEnvDeployments = [];
-    settings.environment.forEach((env) => {
-        const revision = allEnvRevision && allEnvRevision.find(
-            (r) => r.deploymentInfo.some((e) => e.name === env.name),
-        );
-        const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
-        const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
-        allEnvDeployments[env.name] = { revision, vhost };
-    });
 
     /**
      * Get gateway access URL from vhost
@@ -2082,7 +2111,9 @@ export default function Environments() {
                                                             (r) => r.env === row.name,
                                                         ).revision, row.name, selectedVhosts.find(
                                                             (v) => v.env === row.name,
-                                                        ).vhost)}
+                                                        ).vhost, selectedRevision.find(
+                                                            (r) => r.env === row.name,
+                                                        ).displayOnDevPortal)}
 
                                                     >
                                                         <FormattedMessage
@@ -2095,10 +2126,10 @@ export default function Environments() {
                                     </TableCell>
                                     <TableCell align='left'>
                                         <Switch
-                                            checked={row.showInApiConsole}
-                                            onChange={handleChange}
+                                            checked={isDisplayOnDevPortalChecked(row.name)}
+                                            onChange={(e) => handleDisplayOnDevPortal(e, row.name)}
                                             disabled={api.isRevision}
-                                            name='checkedA'
+                                            name='displayOnDevPortal'
                                         />
                                     </TableCell>
                                 </TableRow>
