@@ -44,8 +44,8 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public String updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
-        return catalogDAO.updateServiceCatalog(serviceEntry, tenantId, user);
+    public void updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
+        catalogDAO.updateService(serviceEntry, tenantId, user);
     }
 
     @Override

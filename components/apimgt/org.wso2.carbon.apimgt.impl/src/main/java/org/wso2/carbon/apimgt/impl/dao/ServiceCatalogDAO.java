@@ -205,13 +205,11 @@ public class ServiceCatalogDAO {
      * @return serviceCatalogId
      * throws APIManagementException if failed to create service catalog
      */
-    public String updateServiceCatalog(ServiceEntry serviceEntry, int tenantID, String userName)
+    public void updateService(ServiceEntry serviceEntry, int tenantID, String userName)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.UPDATE_SERVICE_BY_KEY)) {
-            boolean initialAutoCommit = connection.getAutoCommit();
-
             try {
                 connection.setAutoCommit(false);
                 setUpdateServiceParams(ps, serviceEntry, tenantID, userName);
@@ -220,14 +218,11 @@ public class ServiceCatalogDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Failed to rollback updating endpoint information", e);
-            } finally {
-                APIMgtDBUtil.setAutoCommit(connection, initialAutoCommit);
             }
         } catch (SQLException e) {
             handleException("Failed to update service catalog of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantID), e);
         }
-        return serviceEntry.getKey();
     }
 
     /**

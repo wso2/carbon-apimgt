@@ -53,10 +53,9 @@ public interface ServiceCatalog {
      * @param serviceEntry ServiceCatalogInfo
      * @param tenantId     Tenant Identifier
      * @param user         Logged in user name
-     * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException;
+    void updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException;
 
     /**
      * Returns details of an Service Catalog

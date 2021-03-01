@@ -355,14 +355,32 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     }
 
     @Override
-    public Response updateService(String serviceId, ServiceDTO catalogEntry, InputStream definitionFileInputStream,
+    public Response updateService(String serviceId, ServiceDTO serviceDTO, InputStream definitionFileInputStream,
                                   Attachment definitionFileDetail, MessageContext messageContext) {
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented for updating services");
-        return Response.status(status).entity(errorObject).build();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        int tenantId = APIUtil.getTenantId(userName);
+        if (StringUtils.isEmpty(serviceId)) {
+            RestApiUtil.handleBadRequest("The service Id should not be empty", log);
+        }
+        try {
+            byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            ServiceEntry service = ServiceCatalogUtils.createServiceFromDTO(serviceDTO, definitionFileByteArray);
+            if (!validateAndRetrieveServiceDefinition(definitionFileByteArray, serviceDTO.getServiceUrl(),
+                    service.getDefinitionType()).isValid()) {
+                String errorMsg = "The Service import has been failed as invalid service definition provided";
+                return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
+                        .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, StringUtils.EMPTY)).build();
+            }
+            service.setUuid(serviceId);
+            serviceCatalog.updateService(service, tenantId, userName);
+            ServiceEntry createdService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
+            return Response.ok().entity(ServiceEntryMappingUtil.fromServiceToDTO(createdService, false)).build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError("Error when reading the file content", log);
+        }
+        return null;
     }
 
     private Map<String, Boolean> validateVerifier(String verifier, int tenantId) throws APIManagementException {
