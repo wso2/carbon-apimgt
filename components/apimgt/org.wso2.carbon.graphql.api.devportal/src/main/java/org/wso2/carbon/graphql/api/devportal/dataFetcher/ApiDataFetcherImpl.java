@@ -1,6 +1,9 @@
 package org.wso2.carbon.graphql.api.devportal.dataFetcher;
 
 //import org.wso2.carbon.graphql.api.devportal.data.*;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 import org.wso2.carbon.graphql.api.devportal.service.ApiService;
 import org.wso2.carbon.graphql.api.devportal.mapping.ApiListingMapping;
@@ -14,6 +17,7 @@ import org.wso2.carbon.graphql.api.devportal.service.TierService;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ApiDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.LabelNameDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.TierNameDTO;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.*;
 
@@ -105,9 +109,15 @@ public class ApiDataFetcherImpl {
 //
 //    };
 
-    public List<ContextDTO> Data()  {
+    public List<ContextDTO> ContextDTOData()  {
         List<ContextDTO> test = apiService.getApiTimeDetails();
         return test;
+    }
+
+    public Map<String , Tier> getAllTiers() throws APIManagementException {
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        return definedTiers;
     }
 
     public DataFetcher getCreatedTime(){

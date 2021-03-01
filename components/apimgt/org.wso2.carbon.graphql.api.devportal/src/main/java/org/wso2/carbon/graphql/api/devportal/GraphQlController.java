@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.graphql.api.devportal.dataFetcher.ApiDataFetcherImpl;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 
@@ -23,12 +24,12 @@ public class GraphQlController {
         private GraphQL graphql;
 
 
-        private final ApiDataFetcherImpl apiService;
+        private final ApiDataFetcherImpl apiDataFetcher;
 
 
-        public GraphQlController(GraphQL graphql, ApiDataFetcherImpl apiService) {
+        public GraphQlController(GraphQL graphql, ApiDataFetcherImpl apiDataFetcher) {
                 this.graphql = graphql;
-                this.apiService = apiService;
+                this.apiDataFetcher = apiDataFetcher;
         }
 
         @PostMapping(value="graphql", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,9 +49,15 @@ public class GraphQlController {
 //                executionInputBuilder.dataLoaderRegistry(dataLoaderRegistry);
                 //executionInputBuilder.context(dataLoaderRegistry);
 
-                List<ContextDTO> contextDTOList = apiService.Data();
-                executionInputBuilder.context(contextDTOList);
-                executionInputBuilder.context("");
+                if(body.getQuery().contains("lastUpdate") | body.getQuery().contains("createdTime")|body.getQuery().contains("operationInformation")) {
+                        List<ContextDTO> contextDTOList = apiDataFetcher.ContextDTOData();
+                        executionInputBuilder.context(contextDTOList);
+                }
+//                try {
+//                        executionInputBuilder.context(apiService.getAllTiers());
+//                } catch (APIManagementException e) {
+//                        e.printStackTrace();
+//                }
                 ExecutionInput executionInput = executionInputBuilder.build();
 
                 return graphql.execute(executionInput);
