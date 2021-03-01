@@ -10,9 +10,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { app } from 'Settings';
 import Api from 'AppData/api';
 import DeleteApiButton from 'AppComponents/Apis/Details/components/DeleteApiButton';
+import Configurations from 'Config';
 
 import getIcon from './ImageUtils';
 
@@ -147,7 +147,13 @@ function APIThumbPlain(props) {
                 <Box display='flex'>
                     <Box>
                         {!thumbnail.defaultApiImage && ImageView}
-                        {thumbnail.defaultApiImage && <img src={app.context + thumbnail.defaultApiImage} alt='img' />}
+                        {thumbnail.defaultApiImage
+                        && (
+                            <img
+                                src={Configurations.app.context + thumbnail.defaultApiImage}
+                                alt='img'
+                            />
+                        )}
                     </Box>
                 </Box>
 
@@ -163,7 +169,7 @@ function APIThumbPlain(props) {
                             <Box>
                                 {!thumbnail.defaultApiImage && ImageView}
                                 {thumbnail.defaultApiImage
-                                && <img src={app.context + thumbnail.defaultApiImage} alt='img' />}
+                                && <img src={Configurations.app.context + thumbnail.defaultApiImage} alt='img' />}
                             </Box>
                             <Typography
                                 variant='h5'
