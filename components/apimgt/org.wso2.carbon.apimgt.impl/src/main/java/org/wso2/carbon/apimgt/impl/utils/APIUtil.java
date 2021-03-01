@@ -10547,6 +10547,19 @@ public final class APIUtil {
         return alias;
     }
 
+    public static String getInternalApiKeyAlias() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String alias = config.getFirstProperty(APIConstants.API_PUBLISHER_INTERNAL_API_KEY_ALIAS);
+        if (alias == null) {
+            log.warn("The configurations related to Api Key alias in API Publisher " +
+                    "are missing in api-manager.xml. Hence returning the default value.");
+            return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+        }
+        return alias;
+    }
+
     public static String getApiKeyGeneratorImpl() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();

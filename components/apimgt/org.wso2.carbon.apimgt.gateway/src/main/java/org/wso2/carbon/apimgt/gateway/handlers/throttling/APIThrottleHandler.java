@@ -160,6 +160,10 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+            return true;
+        }
         Timer timer = getTimer();
         Timer.Context context = timer.start();
         long executionStartTime = System.nanoTime();

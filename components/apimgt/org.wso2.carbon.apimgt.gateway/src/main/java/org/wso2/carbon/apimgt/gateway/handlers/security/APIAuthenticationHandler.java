@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.InternalAPIKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -278,29 +279,30 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         // Set authenticators
-        Authenticator authenticator;
         if (isMutualSSLProtected) {
-            authenticator = new MutualSSLAuthenticator(apiLevelPolicy, isMutualSSLMandatory, certificateInformation);
+            Authenticator  authenticator = new MutualSSLAuthenticator(apiLevelPolicy, isMutualSSLMandatory, certificateInformation);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isOAuthProtected) {
-            authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
+            Authenticator authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
                     removeOAuthHeadersFromOutMessage, keyManagersList);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isBasicAuthProtected) {
-            authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
+            Authenticator authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isApiKeyProtected) {
-            authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
+            Authenticator authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
-
+        Authenticator authenticator = new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY);
+        authenticator.init(synapseEnvironment);
+        authenticators.add(authenticator);
         authenticators.sort(new Comparator<Authenticator>() {
             @Override
             public int compare(Authenticator o1, Authenticator o2) {
@@ -313,6 +315,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+            return true;
+        }
 
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
@@ -669,11 +675,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
         //if publisher is null,extract the publisher from the api_version
         if (apiPublisher == null) {
-            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(context, version,
-                    GatewayUtils.getTenantDomain());
+            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(messageContext);
         }
 
-        String api = GatewayUtils.getAPINameFromContextAndVersion(context,version,GatewayUtils.getTenantDomain());
+        String api = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         String resource = extractResource(messageContext);
         String method = (String) (axis2MsgContext.getProperty(
                 Constants.Configuration.HTTP_METHOD));

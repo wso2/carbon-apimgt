@@ -50,7 +50,7 @@ public class SignedJWTInfo implements Serializable {
     private JWTClaimsSet jwtClaimsSet;
     private ValidationStatus validationStatus = ValidationStatus.NOT_VALIDATED;
     private String certificateThumbprint; //holder of key certificate bound access token
-    private X509Certificate X509ClientCertificate; //holder of key certificate cnf
+    private X509Certificate x509ClientCertificate; //holder of key certificate cnf
     private String x509ClientCertificateHash; //holder of key certificate cnf
     private static final Log log = LogFactory.getLog(JWTValidator.class);
 
@@ -109,7 +109,7 @@ public class SignedJWTInfo implements Serializable {
 
     public void setX509ClientCertificate(X509Certificate x509ClientCertificate) {
 
-        X509ClientCertificate = x509ClientCertificate;
+        this.x509ClientCertificate = x509ClientCertificate;
         if (x509ClientCertificate != null) {
             byte[] encoded = new byte[0];
             try {
@@ -143,28 +143,8 @@ public class SignedJWTInfo implements Serializable {
         return x509ClientCertificateHash;
     }
 
-    public boolean isValidCertificateBoundAccessToken() { //Holder of Key token
+    public X509Certificate getX509ClientCertificate() {
 
-        if (isCertificateBoundAccessTokenEnabled()) {
-            if (X509ClientCertificate == null || StringUtils.isEmpty(getX509ClientCertificateHash()))
-                return false;
-            if (getX509ClientCertificateHash().equals(getCertificateThumbprint())) {
-                return true;
-            }
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isCertificateBoundAccessTokenEnabled() {
-
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        if (config != null) {
-            String firstProperty = config
-                    .getFirstProperty(APIConstants.ENABLE_CERTIFICATE_BOUND_ACCESS_TOKEN);
-            return Boolean.parseBoolean(firstProperty);
-        }
-        return false;
+        return x509ClientCertificate;
     }
 }

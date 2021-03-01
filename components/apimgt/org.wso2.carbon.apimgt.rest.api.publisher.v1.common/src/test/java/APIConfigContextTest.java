@@ -30,7 +30,5 @@ public class APIConfigContextTest {
         api.setStatus(APIConstants.BLOCKED);
         api.setContextTemplate("/");
         APIConfigContext configContext = new APIConfigContext(api);
-        boolean isBlocked = (Boolean) configContext.getContext().get("apiIsBlocked");
-        Assert.assertTrue(isBlocked);
     }
 }
