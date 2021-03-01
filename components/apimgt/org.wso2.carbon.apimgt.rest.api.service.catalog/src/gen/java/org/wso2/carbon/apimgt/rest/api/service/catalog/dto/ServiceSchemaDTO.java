@@ -22,26 +22,26 @@ import javax.validation.Valid;
 
 public class ServiceSchemaDTO   {
   
-    private ServiceDTO catalogEntry = null;
+    private ServiceDTO serviceMetadata = null;
     private File definitionFile = null;
 
   /**
    **/
-  public ServiceSchemaDTO catalogEntry(ServiceDTO catalogEntry) {
-    this.catalogEntry = catalogEntry;
+  public ServiceSchemaDTO serviceMetadata(ServiceDTO serviceMetadata) {
+    this.serviceMetadata = serviceMetadata;
     return this;
   }
 
   
   @ApiModelProperty(required = true, value = "")
       @Valid
-  @JsonProperty("catalogEntry")
+  @JsonProperty("serviceMetadata")
   @NotNull
-  public ServiceDTO getCatalogEntry() {
-    return catalogEntry;
+  public ServiceDTO getServiceMetadata() {
+    return serviceMetadata;
   }
-  public void setCatalogEntry(ServiceDTO catalogEntry) {
-    this.catalogEntry = catalogEntry;
+  public void setServiceMetadata(ServiceDTO serviceMetadata) {
+    this.serviceMetadata = serviceMetadata;
   }
 
   /**
@@ -72,13 +72,13 @@ public class ServiceSchemaDTO   {
       return false;
     }
     ServiceSchemaDTO serviceSchema = (ServiceSchemaDTO) o;
-    return Objects.equals(catalogEntry, serviceSchema.catalogEntry) &&
+    return Objects.equals(serviceMetadata, serviceSchema.serviceMetadata) &&
         Objects.equals(definitionFile, serviceSchema.definitionFile);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(catalogEntry, definitionFile);
+    return Objects.hash(serviceMetadata, definitionFile);
   }
 
   @Override
@@ -86,7 +86,7 @@ public class ServiceSchemaDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class ServiceSchemaDTO {\n");
     
-    sb.append("    catalogEntry: ").append(toIndentedString(catalogEntry)).append("\n");
+    sb.append("    serviceMetadata: ").append(toIndentedString(serviceMetadata)).append("\n");
     sb.append("    definitionFile: ").append(toIndentedString(definitionFile)).append("\n");
     sb.append("}");
     return sb.toString();

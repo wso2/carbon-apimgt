@@ -200,7 +200,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceKey'
+        - $ref: '#/components/parameters/serviceId'
       requestBody:
         content:
           multipart/form-data:
@@ -604,7 +604,9 @@ components:
       required:
         - name
         - version
-        - serviceType
+        - definitionType
+        - displayName
+        - serviceUrl
       properties:
         id:
           type: string
@@ -652,6 +654,7 @@ components:
             - X509
             - API_KEY
             - NONE
+          default: NONE
         mutualSSLEnabled:
           type: boolean
           description: Whether Mutual SSL is enabled for the endpoint
@@ -743,10 +746,10 @@ components:
       type: object
       title: The Service Schema object
       required:
-        - catalogEntry
+        - serviceMetadata
         - definitionFile
       properties:
-        catalogEntry:
+        serviceMetadata:
           $ref: '#/components/schemas/Service'
         definitionFile:
           type: string

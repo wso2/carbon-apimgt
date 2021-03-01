@@ -768,7 +768,8 @@ public class PublisherCommonUtils {
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
         StringBuilder sb = new StringBuilder();
         String endpoint_type = APIDTO.TypeEnum.HTTP.value().toLowerCase();
-        if (APIDTO.TypeEnum.SSE.equals(protocol.toUpperCase()) || APIDTO.TypeEnum.WS.equals(protocol.toUpperCase())) {
+        if (StringUtils.isNotEmpty(protocol) && (APIDTO.TypeEnum.SSE.equals(protocol.toUpperCase())
+                || APIDTO.TypeEnum.WS.equals(protocol.toUpperCase()))) {
             endpoint_type = "ws";
         }
         if (StringUtils.isNotEmpty(serviceUrl)) {

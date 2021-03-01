@@ -70,22 +70,23 @@ public class ServiceCatalogDAO {
     }
 
     /**
-     * Add a new serviceCatalog
+     * Add a new service to Service Catalog
      *
-     * @param serviceEntry ServiceCatalogInfo
+     * @param serviceEntry Service
      * @param tenantID     ID of the owner's tenant
      * @param username     Logged in user name
-     * @return serviceCatalogId
+     * @return UUID of the added service
      * throws APIManagementException if failed to create service catalog
      */
-    public String addServiceEntry(ServiceEntry serviceEntry, int tenantID, String username)
+    public String addService(ServiceEntry serviceEntry, int tenantID, String username)
             throws APIManagementException {
+        String uuid = StringUtils.EMPTY;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps = connection
                      .prepareStatement(SQLConstants.ServiceCatalogConstants.ADD_SERVICE)) {
             try {
                 connection.setAutoCommit(false);
-                setServiceParams(ps, serviceEntry, tenantID, username);
+                uuid = setServiceParams(ps, serviceEntry, tenantID, username);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -96,7 +97,7 @@ public class ServiceCatalogDAO {
             handleException("Failed to add service catalog of tenant "
                     + APIUtil.getTenantDomainFromTenantId(tenantID), e);
         }
-        return null;
+        return uuid;
     }
 
     /**
@@ -632,7 +633,7 @@ public class ServiceCatalogDAO {
         ps.setInt(15, tenantId);
     }
 
-    private void setServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
+    private String setServiceParams(PreparedStatement ps, ServiceEntry service, int tenantId, String username)
             throws SQLException {
         String uuid = UUID.randomUUID().toString();
         ps.setString(1, uuid);
@@ -654,6 +655,7 @@ public class ServiceCatalogDAO {
         ps.setString(17, username);
         ps.setBinaryStream(18, service.getEndpointDef());
         ps.setBinaryStream(19, service.getMetadata());
+        return uuid;
     }
 
     private ServiceEntry getServiceParams(ResultSet resultSet, boolean shrink) throws APIManagementException {

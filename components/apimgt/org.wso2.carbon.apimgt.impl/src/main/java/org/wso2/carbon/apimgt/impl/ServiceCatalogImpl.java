@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 
 import java.util.List;
-import java.util.UUID;
 
 public class ServiceCatalogImpl implements ServiceCatalog {
 
@@ -35,9 +34,7 @@ public class ServiceCatalogImpl implements ServiceCatalog {
 
     @Override
     public String addService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
-        String uuid = UUID.randomUUID().toString();
-        catalogDAO.addServiceEntry(serviceEntry, tenantId, user);
-        return uuid;
+        return catalogDAO.addService(serviceEntry, tenantId, user);
     }
 
     @Override

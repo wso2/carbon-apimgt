@@ -98,7 +98,7 @@ return null;
 return null;
         }
     }
-    private SecurityTypeEnum securityType = null;
+    private SecurityTypeEnum securityType = SecurityTypeEnum.NONE;
     private Boolean mutualSSLEnabled = false;
     private Integer usage = null;
     private String createdTime = null;
@@ -149,8 +149,9 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Pizzashack-Endpoint", value = "")
+  @ApiModelProperty(example = "Pizzashack-Endpoint", required = true, value = "")
   @JsonProperty("displayName")
+  @NotNull
  @Pattern(regexp="^[^\\*]+$")  public String getDisplayName() {
     return displayName;
   }
@@ -218,8 +219,9 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "http://localhost/pizzashack", value = "")
+  @ApiModelProperty(example = "http://localhost/pizzashack", required = true, value = "")
   @JsonProperty("serviceUrl")
+  @NotNull
   public String getServiceUrl() {
     return serviceUrl;
   }
@@ -236,8 +238,9 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "OAS3", value = "The type of the provided API definition")
+  @ApiModelProperty(example = "OAS3", required = true, value = "The type of the provided API definition")
   @JsonProperty("definitionType")
+  @NotNull
   public DefinitionTypeEnum getDefinitionType() {
     return definitionType;
   }

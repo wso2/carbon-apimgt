@@ -144,5 +144,19 @@ public class Md5HashGenerator {
         return sb.toString();
     }
 
+    static String calculateMD5Hash(byte[] content) {
+        try {
+            MessageDigest md5Digest = MessageDigest.getInstance("MD5");
+            byte[] md5Bytes = md5Digest.digest(content);
+            StringBuilder sb = new StringBuilder();
+            for (byte md5byte : md5Bytes) {
+                sb.append(Integer.toString((md5byte & 0xff) + 0x100, 16).substring(1));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            RestApiUtil.handleInternalServerError("Error when calculating the MD5 hash", log);
+            return null;
+        }
+    }
 
 }

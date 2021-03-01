@@ -55,8 +55,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response addService(@Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
-        return delegate.addService(catalogEntry, definitionFileInputStream, definitionFileDetail, securityContext);
+    public Response addService(@Multipart(value = "serviceMetadata")  ServiceDTO serviceMetadata,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
+        return delegate.addService(serviceMetadata, definitionFileInputStream, definitionFileDetail, securityContext);
     }
 
     @DELETE
@@ -205,7 +205,7 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateService(@ApiParam(value = "service key of the service",required=true) @PathParam("serviceKey") String serviceKey, @Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
-        return delegate.updateService(serviceKey, catalogEntry, definitionFileInputStream, definitionFileDetail, securityContext);
+    public Response updateService(@ApiParam(value = "uuid of the service",required=true) @PathParam("serviceId") String serviceId, @Multipart(value = "serviceMetadata")  ServiceDTO serviceMetadata,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
+        return delegate.updateService(serviceId, serviceMetadata, definitionFileInputStream, definitionFileDetail, securityContext);
     }
 }
