@@ -49,16 +49,16 @@ import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.utils.SseUti
 /**
  * This is used for handling throttling, and analytics event publishing of sse apis (subset of streaming apis).
  */
-public class SseStreamInterceptor extends DefaultStreamInterceptor {
+public class SseResponseStreamInterceptor extends DefaultStreamInterceptor {
 
-    private static final Log log = LogFactory.getLog(SseStreamInterceptor.class);
+    private static final Log log = LogFactory.getLog(SseResponseStreamInterceptor.class);
     private static final String SSE_STREAM_DELIMITER = "\n\n";
     private static final int DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS = 100;
     private String charset = StandardCharsets.UTF_8.name();
     private ExecutorService throttlePublisherService;
     private int noOfExecutorThreads = DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS;
 
-    public SseStreamInterceptor() {
+    public SseResponseStreamInterceptor() {
         throttlePublisherService = Executors.newFixedThreadPool(noOfExecutorThreads);
     }
 
