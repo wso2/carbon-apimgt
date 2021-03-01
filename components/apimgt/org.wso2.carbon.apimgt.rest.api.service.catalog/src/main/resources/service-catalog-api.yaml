@@ -78,12 +78,6 @@ paths:
               - WSDL2
               - GRAPHQL_SDL
               - ASYNC_API
-        - name: displayName
-          in: query
-          description: |
-            Filter services by the display name
-          schema:
-            type: string
         - name: key
           in: query
           description: |
@@ -496,22 +490,6 @@ components:
           items:
             $ref: '#/components/schemas/ServiceInfo'
           
-    ServicesStatusList:
-      title: Services List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            MD5 hashes of services returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceCRUDStatus'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          
     ServiceListExpanded:
       title: Services List
       type: object
@@ -605,7 +583,6 @@ components:
         - name
         - version
         - definitionType
-        - displayName
         - serviceUrl
       properties:
         id:
@@ -613,10 +590,6 @@ components:
           example: 01234567-0123-0123-0123-012345678901
           readOnly: true
         name:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        displayName:
           type: string
           pattern: '^[^\*]+$'
           example: Pizzashack-Endpoint
@@ -678,44 +651,6 @@ components:
         definitionUrl:
           type: string
           example: https://petstore.swagger.io/v2/swagger.json
-          
-    #-----------------------------------------------------
-    # Status of CRUD operations of Service model
-    #-----------------------------------------------------
-    ServiceCRUDStatus:
-      type: object
-      title: The Service object
-      required:
-        - entryName
-        - version
-        - serviceType
-      properties:
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-          readOnly: true
-        name:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        displayName:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        version:
-          type: string
-          example: v1
-        serviceUrl:
-          type: string
-          example: http://localhost/pizzashack
-        createdTime:
-          type: string
-          readOnly: true
-          example: '2020-02-20T13:57:16.229'
-        lastUpdatedTime:
-          type: string
-          readOnly: true
-          example: '2020-02-20T13:57:16.229'
     
     ServiceInfo:
       type: object

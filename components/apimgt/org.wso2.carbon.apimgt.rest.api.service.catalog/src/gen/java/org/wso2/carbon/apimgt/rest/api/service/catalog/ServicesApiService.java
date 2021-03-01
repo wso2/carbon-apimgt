@@ -32,6 +32,6 @@ public interface ServicesApiService {
       public Response getServiceDefinition(String serviceId, MessageContext messageContext) throws APIManagementException;
       public Response getServiceUsage(String serviceId, MessageContext messageContext) throws APIManagementException;
       public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite, String verifier, MessageContext messageContext) throws APIManagementException;
-      public Response searchServices(String name, String version, String definitionType, String displayName, String key, Boolean shrink, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
+      public Response searchServices(String name, String version, String definitionType, String key, Boolean shrink, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response updateService(String serviceId, ServiceDTO serviceMetadata, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
 }

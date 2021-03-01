@@ -85,11 +85,6 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public ServiceEntry getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException {
-        return catalogDAO.getServiceResourcesByKey(key, tenantId);
-    }
-
-    @Override
     public ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException {
         return catalogDAO.getServiceByKey(key, tenantId);
     }

@@ -304,15 +304,15 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     }
 
     @Override
-    public Response searchServices(String name, String version, String definitionType, String displayName,
-                                   String key, Boolean shrink, String sortBy, String sortOrder, Integer limit,
-                                   Integer offset, MessageContext messageContext) throws APIManagementException {
+    public Response searchServices(String name, String version, String definitionType, String key, Boolean shrink,
+                                   String sortBy, String sortOrder, Integer limit, Integer offset,
+                                   MessageContext messageContext) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
             List<ServiceDTO> serviceDTOList = new ArrayList<>();
-            ServiceFilterParams filterParams = ServiceEntryMappingUtil.getServiceFilterParams(name, version, definitionType,
-                    displayName, key, sortBy, sortOrder, limit, offset);
+            ServiceFilterParams filterParams = ServiceEntryMappingUtil.getServiceFilterParams(name, version,
+                    definitionType, key, sortBy, sortOrder, limit, offset);
             List<ServiceEntry> services = serviceCatalog.getServices(filterParams, tenantId, shrink);
             for (ServiceEntry service : services) {
                 serviceDTOList.add(ServiceEntryMappingUtil.fromServiceToDTO(service, shrink));

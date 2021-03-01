@@ -115,16 +115,6 @@ public interface ServiceCatalog {
     String getMD5HashByKey(String key, int tenantId) throws APIManagementException;
 
     /**
-     * Get metadata and endpoint definition resources of a service endpoint
-     *
-     * @param key Service key unique to each tenant
-     * @param tenantId Tenant Identifier
-     * @return EndPointInfo Endpoint resources
-     * @throws APIManagementException if failed to add ServiceCatalogInfo
-     */
-    ServiceEntry getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
-
-    /**
      * Get information of a service endpoint by key
      *
      * @param key Service key unique to each tenant
