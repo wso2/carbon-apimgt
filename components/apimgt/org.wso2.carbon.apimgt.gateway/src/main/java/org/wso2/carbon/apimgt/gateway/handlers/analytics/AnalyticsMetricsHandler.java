@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsExcep
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
 import java.util.Map;
 
@@ -48,11 +49,13 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     public boolean handleRequestInFlow(MessageContext messageContext) {
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
-        String userAgent = getUserAgent(messageContext);
-        String userIp = DataPublisherUtil.getEndUserIP(messageContext);
-        messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);
-        if (userIp != null) {
-            messageContext.setProperty(Constants.USER_IP_PROPERTY, userIp);
+        if (!messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
+            String userAgent = getUserAgent(messageContext);
+            String userIp = DataPublisherUtil.getEndUserIP(messageContext);
+            messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);
+            if (userIp != null) {
+                messageContext.setProperty(Constants.USER_IP_PROPERTY, userIp);
+            }
         }
         return true;
     }
@@ -74,6 +77,9 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
+            return true;
+        }
         AnalyticsDataProvider provider;
         Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
         if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {

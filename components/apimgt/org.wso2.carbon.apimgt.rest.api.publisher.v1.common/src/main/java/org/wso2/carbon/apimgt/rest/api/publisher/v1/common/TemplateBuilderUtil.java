@@ -688,10 +688,10 @@ public class TemplateBuilderUtil {
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
-        String sandboxEndpointUrl =
-                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
-        String productionEndpointUrl =
-                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
+        String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url") : null;
+        String productionEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url") : null;
 
         Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
         for (APIOperationsDTO operation : apidto.getOperations()) {
@@ -699,8 +699,12 @@ public class TemplateBuilderUtil {
             String mapping = operation.getUriMapping() == null ? "" :
                     Paths.get("/", operation.getUriMapping()).toString();
             Map<String, String> endpoints = new HashMap<>();
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
+            if (sandboxEndpointUrl != null) {
+                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
+            }
+            if (productionEndpointUrl != null) {
+                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
+            }
             perTopicMappings.put(key, endpoints);
         }
 
