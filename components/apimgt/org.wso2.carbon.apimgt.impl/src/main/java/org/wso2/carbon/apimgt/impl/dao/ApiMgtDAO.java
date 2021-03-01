@@ -9439,8 +9439,8 @@ public class ApiMgtDAO {
 
     public String getAPIStatusFromAPIUUID(String uuid) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT STATUS FROM AM_API WHERE " +
-                    "API_UUID = ?")) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.RETRIEVE_API_STATUS_FROM_UUID)) {
                 preparedStatement.setString(1,uuid);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()){
@@ -14771,6 +14771,7 @@ public class ApiMgtDAO {
             prepStmtAddAPIProduct.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
             prepStmtAddAPIProduct.setString(8, APIConstants.API_PRODUCT);
             prepStmtAddAPIProduct.setString(9, apiProduct.getUuid());
+            prepStmtAddAPIProduct.setString(10, apiProduct.getState());
             prepStmtAddAPIProduct.execute();
 
             rs = prepStmtAddAPIProduct.getGeneratedKeys();
