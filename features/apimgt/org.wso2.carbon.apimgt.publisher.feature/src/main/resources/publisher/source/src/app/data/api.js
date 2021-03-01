@@ -2543,10 +2543,14 @@ class API extends Resource {
     /**
      * Get all the endpoint certificates.
      * */
-    static getEndpointCertificates() {
+    static getEndpointCertificates(params) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            if(params) {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates(params);
+            } else {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            }
         });
     }
 
