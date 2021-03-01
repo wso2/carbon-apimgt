@@ -506,7 +506,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Generate internal API Key to invoke APIS.", notes = "This operation can be used to generate internal api key which used to invoke API. ", response = APIKeyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_generate_key", description = "")
+            @AuthorizationScope(scope = "apim:api_generate_key", description = "Generate Internal Key")
         })
     }, tags={ "APIs",  })
     @ApiResponses(value = { 
