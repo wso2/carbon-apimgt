@@ -126,7 +126,12 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
 
     private void publishAnalyticsData(int eventCount, MessageContext axi2Ctx) throws AnalyticsException {
 
-        SseResponseEventDataProvider provider = (SseResponseEventDataProvider) axi2Ctx.getProperty(SSE_ANALYTICS_INFO);
+        Object responseEventProvider = axi2Ctx.getProperty(SSE_ANALYTICS_INFO);
+        if (responseEventProvider == null) {
+            log.error("SSE Analytics event provider is null.");
+            return;
+        }
+        SseResponseEventDataProvider provider = (SseResponseEventDataProvider) responseEventProvider;
         provider.setResponseCode((int) axi2Ctx.getProperty(SynapseConstants.HTTP_SC));
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         int count = 1;

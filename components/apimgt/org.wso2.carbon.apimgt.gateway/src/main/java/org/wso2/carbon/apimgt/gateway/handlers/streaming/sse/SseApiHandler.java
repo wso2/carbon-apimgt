@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -83,29 +84,36 @@ public class SseApiHandler extends APIAuthenticationHandler {
         boolean isAuthenticated = super.handleRequest(synCtx);
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
 
-        if (isAuthenticated) {
-            AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(synCtx);
-            ThrottleInfo throttleInfo = getThrottlingInfo(authenticationContext, synCtx);
-            boolean isThrottled = SseUtils.isRequestBlocked(authenticationContext, throttleInfo.getApiContext(),
-                                                            throttleInfo.getApiVersion(),
-                                                            throttleInfo.getAuthorizedUser(),
-                                                            throttleInfo.getRemoteIp(),
-                                                            throttleInfo.getSubscriberTenantDomain());
-            if (!isThrottled) {
-                // do throttling if request is not blocked by global conditions
-                isThrottled = SseUtils.isThrottled(throttleInfo.getSubscriberTenantDomain(),
-                                                   throttleInfo.getResourceLevelThrottleKey(),
-                                                   throttleInfo.getSubscriptionLevelThrottleKey(),
-                                                   throttleInfo.getApplicationLevelThrottleKey());
-            }
-            if (isThrottled) {
-                handleThrottledOut(synCtx);
-                return false;
-            }
+        if (isAuthenticated && isThrottled(axisCtx, synCtx)) {
+            return false;
+        }
+        return isAuthenticated;
+    }
+
+    private boolean isThrottled(org.apache.axis2.context.MessageContext axisCtx, MessageContext synCtx) {
+
+        AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(synCtx);
+        ThrottleInfo throttleInfo = getThrottlingInfo(authenticationContext, synCtx);
+        boolean isThrottled = SseUtils.isRequestBlocked(authenticationContext, throttleInfo.getApiContext(),
+                                                        throttleInfo.getApiVersion(), throttleInfo.getAuthorizedUser(),
+                                                        throttleInfo.getRemoteIp(),
+                                                        throttleInfo.getSubscriberTenantDomain());
+        if (!isThrottled) {
+            // do throttling if request is not blocked by global conditions only
+            isThrottled = SseUtils.isThrottled(throttleInfo.getSubscriberTenantDomain(),
+                                               throttleInfo.getResourceLevelThrottleKey(),
+                                               throttleInfo.getSubscriptionLevelThrottleKey(),
+                                               throttleInfo.getApplicationLevelThrottleKey());
+        }
+        if (isThrottled) {
+            handleThrottledOut(synCtx);
+            return true;
+        }
+        if (APIUtil.isAnalyticsEnabled()) {
             AnalyticsDataProvider provider = new SseResponseEventDataProvider(synCtx);
             axisCtx.setProperty(SSE_ANALYTICS_INFO, provider);
         }
-        return isAuthenticated;
+        return false;
     }
 
     private ThrottleInfo getThrottlingInfo(AuthenticationContext authenticationContext, MessageContext synCtx) {
