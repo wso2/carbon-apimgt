@@ -695,6 +695,7 @@ public class OAS3Parser extends APIDefinition {
      * securitySchemes in provided definition.
      *
      * @param swaggerContent OpenAPI Definition content
+     * @return updated OpenAPI Definition content as String
      */
     private String processSecuritySchemes(String swaggerContent) {
         OpenAPI openAPI = getOpenAPI(swaggerContent);
