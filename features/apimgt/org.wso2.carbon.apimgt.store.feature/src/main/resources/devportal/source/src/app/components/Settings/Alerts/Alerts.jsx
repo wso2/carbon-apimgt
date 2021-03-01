@@ -74,9 +74,6 @@ const styles = theme => ({
     listItem: {
         marginLeft: theme.spacing(1),
     },
-    dialog: {
-        width: '100%',
-    },
 });
 
 /**
