@@ -4,7 +4,7 @@ package org.wso2.carbon.graphql.api.devportal.modules.api;
 import java.util.List;
 
 public class ApiDTO {
-   private String id;
+   private String uuid;
     private String name;
     private String description;
     private String context;
@@ -40,8 +40,8 @@ public class ApiDTO {
 
     //private BusinessDetails test;
 
-    public ApiDTO(String id, String name, String description, String context, String version, String provider, String type, String transport, boolean hasthumbnail, String environments, String wsdUrl, String status, boolean isSubscriptionAvailable, boolean isDefault, String authorizationHeader, String apiSecurity, boolean isMonetizationEnabled , String throttlingPolicies, String thumbnailUrl, String categories, String keyManagers, BusinessInformationDTO businessInformation, AdvertiseDTO advertiseInfo, List<APIEndpointURLsDTO> apiEndPointInformation, List<TierNameDTO> tierInformation, List<LabelNameDTO> label, List<IngressUrlDTO> ingressUrl) {
-        this.id = id;
+    public ApiDTO(String uuid, String name, String description, String context, String version, String provider, String type, String transport, boolean hasthumbnail, String environments, String wsdUrl, String status, boolean isSubscriptionAvailable, boolean isDefault, String authorizationHeader, String apiSecurity, boolean isMonetizationEnabled , String throttlingPolicies, String thumbnailUrl, String categories, String keyManagers, BusinessInformationDTO businessInformation, AdvertiseDTO advertiseInfo, List<APIEndpointURLsDTO> apiEndPointInformation, List<TierNameDTO> tierInformation, List<LabelNameDTO> label, List<IngressUrlDTO> ingressUrl) {
+        this.uuid = uuid;
         this.name = name;
         this.description = description;
         this.context = context;
@@ -82,9 +82,8 @@ public class ApiDTO {
 
     }
 
-    public String getId() {
-        return id;
+    public String getUuid() {
+        return uuid;
     }
-
 
 }

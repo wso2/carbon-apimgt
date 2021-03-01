@@ -11,12 +11,12 @@ import java.util.*;
 
 public class ScopesService {
 
-    public List<ScopesDTO> getScopesDetails(String Id) throws APIManagementException{
+    public List<ScopesDTO> getScopesDetails(String uuid) throws APIManagementException{
 
 
         String username = "wso2.anonymous.user";
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        List<Scope> scopeList = apiConsumer.getScopeDataDromDAO(Id);//new ArrayList<>(scopes);
+        List<Scope> scopeList = apiConsumer.getScopeDataDromDAO(uuid);//new ArrayList<>(scopes);
 
         ScopesMapping scopesMapping = new ScopesMapping();
         List<ScopesDTO> scopeData = scopesMapping.fromScopeToScopeDTO(scopeList);

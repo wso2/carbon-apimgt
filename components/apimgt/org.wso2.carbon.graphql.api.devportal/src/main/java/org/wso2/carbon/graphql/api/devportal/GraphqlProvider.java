@@ -72,6 +72,8 @@ public class GraphqlProvider {
                 .type(ScopeInformationDataFetcher())
                 .type(QueryApiListing())
                 .type(ApiTimeDetailsDataFetcher())
+                .type(c())
+                .type(u())
                 .build();
     }
 
@@ -122,6 +124,16 @@ public class GraphqlProvider {
     private TypeRuntimeWiring.Builder ScopeInformationDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("scope",apiDataFetcher.getScopeInformation());
+    }
+
+    private TypeRuntimeWiring.Builder c(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("createdTime",apiDataFetcher.getCreatedTime());
+    }
+
+    private TypeRuntimeWiring.Builder u(){
+        return TypeRuntimeWiring.newTypeWiring("Api")
+                .dataFetcher("lastUpdate",apiDataFetcher.getLastUpdate());
     }
 
 

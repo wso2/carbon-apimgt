@@ -1,5 +1,5 @@
 type Api{
-    id:String!
+    uuid:String!
     name:String!
     description:String
     context:String!
@@ -33,6 +33,8 @@ type Api{
     keyManagers:String!
     businessInformation:BusinessInformation
     advertiseInfo:Advertise
+    createdTime:String
+    lastUpdate:String
     timeDetails:TimeDetails
 }
 type TimeDetails{
@@ -147,6 +149,4 @@ type Query{
     getApi(id:String):Api
     getApis(start:Int,offset:Int):[Api]
     getTags:[Tag]
-    getApisCount(start:Int,offset:Int):Int
-    getPagination(offset:Int,limit:Int):Pagination
 }

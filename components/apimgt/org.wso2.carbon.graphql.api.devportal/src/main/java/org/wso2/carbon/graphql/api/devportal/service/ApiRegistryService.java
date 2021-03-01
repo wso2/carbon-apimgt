@@ -53,19 +53,19 @@ public class ApiRegistryService {
         }
      return apiDTOList;
     }
-    public String getApiDefinition(String Id) throws OASPersistenceException {
+    public String getApiDefinition(String uuid) throws OASPersistenceException {
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance(properties);
         String TenantDomain = RestApiUtil.getRequestedTenantDomain(null);
         Organization org = new Organization(TenantDomain);
-        String apiDefinition = apiPersistenceInstance.getOASDefinition(org, Id); //
+        String apiDefinition = apiPersistenceInstance.getOASDefinition(org, uuid); //
         return apiDefinition;
     }
-    public ApiDTO getApi(String Id) throws APIManagementException, APIPersistenceException {
+    public ApiDTO getApi(String uuid) throws APIManagementException, APIPersistenceException {
 
         RegistryPersistenceService artifactData = new RegistryPersistenceService();
-        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(Id);
+        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(uuid);
         ApiMapping apiMapping = new ApiMapping();
         return  apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI);
     }

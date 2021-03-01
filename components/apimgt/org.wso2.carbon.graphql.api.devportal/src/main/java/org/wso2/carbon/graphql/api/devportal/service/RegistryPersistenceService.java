@@ -41,13 +41,13 @@ public class RegistryPersistenceService {
         return list;
     }
 
-    public DevPortalAPI getApiFromUUID(String Id) throws APIPersistenceException {
+    public DevPortalAPI getApiFromUUID(String uuid) throws APIPersistenceException {
         Organization org = new Organization("carbon.super");
         Properties properties = new Properties();
         properties.put(APIConstants.ALLOW_MULTIPLE_STATUS, APIUtil.isAllowDisplayAPIsWithMultipleStatus());
         apiPersistenceInstance = PersistenceManager.getPersistenceInstance(properties);
 
-        DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org , Id);
+        DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org , uuid);
 
         return devPortalApi;
     }

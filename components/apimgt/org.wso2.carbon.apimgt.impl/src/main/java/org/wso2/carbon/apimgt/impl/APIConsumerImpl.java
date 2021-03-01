@@ -328,7 +328,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 .getTenantId(tenantDomainName);
 
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
-
         return definedTiers;
     }
 

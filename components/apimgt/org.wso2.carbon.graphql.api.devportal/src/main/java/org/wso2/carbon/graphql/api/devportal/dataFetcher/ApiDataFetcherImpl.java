@@ -1,8 +1,7 @@
 package org.wso2.carbon.graphql.api.devportal.dataFetcher;
 
-import org.dataloader.BatchLoader;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 //import org.wso2.carbon.graphql.api.devportal.data.*;
+import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 import org.wso2.carbon.graphql.api.devportal.service.ApiService;
 import org.wso2.carbon.graphql.api.devportal.mapping.ApiListingMapping;
 import org.wso2.carbon.graphql.api.devportal.service.ApiRegistryService;
@@ -17,26 +16,21 @@ import org.wso2.carbon.graphql.api.devportal.modules.api.LabelNameDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.TierNameDTO;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 @Component
 public class ApiDataFetcherImpl {
 
-    ApiRegistryService apiRegistry = new ApiRegistryService();
-    TierService tierDAO = new TierService();
-    ScopesService scopesDAO = new ScopesService();
-    OperationService operationDAO = new OperationService();
-    LabelService labelDAO = new LabelService();
-    ApiService apiDAO = new ApiService();
+    ApiRegistryService apiRegistryService = new ApiRegistryService();
+    TierService tierService = new TierService();
+    ScopesService scopesService = new ScopesService();
+    OperationService operationService = new OperationService();
+    LabelService labelService = new LabelService();
+    ApiService apiService = new ApiService();
     ApiListingMapping apiListingMapping = new ApiListingMapping();
-
-
 
 
     public DataFetcher getApiListing(){
         return env-> {
-           // env.getContext();
             int start = env.getArgument("start");
             int offset = env.getArgument("offset");
             return apiListingMapping.getApiListing(start,offset);
@@ -46,89 +40,141 @@ public class ApiDataFetcherImpl {
     public DataFetcher getApiDefinition(){
         return env->{
             ApiDTO api = env.getSource();
-            return apiRegistry.getApiDefinition(api.getId());
-
+            return apiRegistryService.getApiDefinition(api.getUuid());
         };
     }
 
     public DataFetcher getApiFromArtifact(){
         return env->{
-            String Id = env.getArgument("id");
-            return apiRegistry.getApi(Id);
-
+            String uuid = env.getArgument("id");
+            return apiRegistryService.getApi(uuid);
         };
     }
     public DataFetcher getApiTimeDetails(){
         return env->{
             ApiDTO api = env.getSource();
-            //env.getVariables().put("name", 12);
-
-//            DataLoaderRegistry dataLoaderRegistry = env.getContext();
-//            DataLoader<String , Object> timeDetailsLoader = dataLoaderRegistry.getDataLoader("times");
-
-            //return timeDetailsLoader.load(api.getId());
-            return apiDAO.getApiTimeDetailsFromDAO(api.getId());
-
+            return apiService.getApiTimeDetailsFromDAO(api.getUuid());
         };
     }
-    public BatchLoader<String, Object> timeBatchLoader = new BatchLoader<String, Object>() {
-        @Override
-        public CompletionStage<List<Object>> load(List<String> Ids)  {
-            return  CompletableFuture.supplyAsync(()-> {
-                List<Object> timeDetails = new ArrayList<>();
+//    public BatchLoader<String, ContextDTO> timeBatchLoader = new BatchLoader<String, ContextDTO>() {
+//        @Override
+//        public CompletionStage<List<ContextDTO>> load(List<String> Ids)  {
+//            return  CompletableFuture.supplyAsync(()-> {
+//                List<ContextDTO> timeDetails = new ArrayList<>();
+//
+//                for(int i = 0;i<Ids.size();i++){
+//                   // try {
+//                        String username = "wso2.anonymous.user";
+//                        APIConsumer apiConsumer = null;
+//                        try {
+//                            apiConsumer = RestApiCommonUtil.getConsumer(username);
+//                        } catch (APIManagementException e) {
+//                            e.printStackTrace();
+//                        }
+//                        Time time = apiConsumer.getTimeDetailsFromDAO(Ids.get(i));
+//                        ContextDTO test = new ContextDTO();
+//                        String createTime = time.getCreatedTime();
+//                        test.setCreatedTime(createTime);
+//                        String lastUpdate = time.getLastUpdate();
+//                        test.setLastUpdate(lastUpdate);
+//                        timeDetails.add(test);
+//                }
+//
+//                return timeDetails;
+//            });
+//        }
+//
+//    };
+//    public BatchLoader<String, Object> timeBatchLoader = new BatchLoader<String, Object>() {
+//        @Override
+//        public CompletionStage<List<Object>> load(List<String> Ids)  {
+//            return  CompletableFuture.supplyAsync(()-> {
+//                List<Object> timeDetails = new ArrayList<>();
+//
+//                for(int i = 0;i<Ids.size();i++){
+//                    try {
+//                        timeDetails.add(apiDAO.getApiTimeDetailsFromDAO(Ids.get(i)));
+//                    } catch (APIManagementException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//                return timeDetails;
+//            });
+//        }
+//
+//    };
 
-                for(int i = 0;i<Ids.size();i++){
-                    try {
-                        timeDetails.add(apiDAO.getApiTimeDetailsFromDAO(Ids.get(i)));
-                    } catch (APIManagementException e) {
-                        e.printStackTrace();
-                    }
+    public List<ContextDTO> Data()  {
+        List<ContextDTO> test = apiService.getApiTimeDetails();
+        return test;
+    }
+
+    public DataFetcher getCreatedTime(){
+        return env->{
+            ApiDTO api = env.getSource();
+            List<ContextDTO> contextDTOList = env.getContext();
+            String createdTime = null;
+            for(int i = 0 ;i< contextDTOList.size();i++){
+                if (contextDTOList.get(i).getId().equals(api.getUuid())){
+                    createdTime = contextDTOList.get(i).getCreatedTime();
                 }
+            }
+            return createdTime;
+        };
+    }
 
-                return timeDetails;
-            });
-        }
-
-    };
-
-
+    public DataFetcher getLastUpdate(){
+        return env->{
+            ApiDTO api = env.getSource();
+            List<ContextDTO> contextDTOList = env.getContext();
+            String lastUpdate = null;
+            for(int i = 0 ;i< contextDTOList.size();i++){
+                if (contextDTOList.get(i).getId().equals(api.getUuid())){
+                    lastUpdate = contextDTOList.get(i).getLastUpdate();
+                }
+            }
+            return lastUpdate;
+        };
+    }
     public DataFetcher  getApiRating(){
         return env->{
             ApiDTO api = env.getSource();
-            return apiDAO.getApiRatingFromDAO(api.getId());
+            return apiService.getApiRatingFromDAO(api.getUuid());
         };
     }
     public DataFetcher getTierDetails(){
         return env->{
             TierNameDTO tierNameDTO = env.getSource();
 
-            return tierDAO.getTierDetailsFromDAO(tierNameDTO.getApiId(),tierNameDTO.getName());
+            return tierService.getTierDetailsFromDAO(tierNameDTO.getApiId(),tierNameDTO.getName());
         };
     }
     public DataFetcher getMonetizationLabel(){
         return env->{
             ApiDTO api = env.getSource();
-            return apiDAO.getMonetizationLabel(api.getId());
+            return apiService.getMonetizationLabel(api.getUuid());
         };
     }
 
     public DataFetcher getOperationInformation(){
         return env->{
             ApiDTO api = env.getSource();
-            return operationDAO.getOperationDetails(api.getId());
+            List<ContextDTO> contextDTOList = env.getContext();
+            return operationService.getOperationDetails(contextDTOList, api.getUuid());
 
         };
     }
     public DataFetcher getLabelsDetails(){
         return env->{
             LabelNameDTO labelNameDTO = env.getSource();
-            return labelDAO.getLabelDetails(labelNameDTO.getName());
+            return labelService.getLabelDetails(labelNameDTO.getName());
         };
     }
     public DataFetcher getScopeInformation(){
         return env->{
             ApiDTO api = env.getSource();
-            return scopesDAO.getScopesDetails(api.getId());
+            return scopesService.getScopesDetails(api.getUuid());
         };
     }
 

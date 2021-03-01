@@ -4,14 +4,15 @@ package org.wso2.carbon.graphql.api.devportal;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import org.dataloader.DataLoader;
-import org.dataloader.DataLoaderRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.wso2.carbon.graphql.api.devportal.dataFetcher.ApiDataFetcherImpl;
+import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
+
+import java.util.List;
 //import reactor.core.publisher.Mono;
 
 
@@ -23,6 +24,7 @@ public class GraphQlController {
 
 
         private final ApiDataFetcherImpl apiService;
+
 
         public GraphQlController(GraphQL graphql, ApiDataFetcherImpl apiService) {
                 this.graphql = graphql;
@@ -38,14 +40,17 @@ public class GraphQlController {
                         .query(body.getQuery())
                         .operationName(body.getOperationName());
 
-                DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
-                DataLoader<String, Object> timeDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
-                //DataLoader<String, Object> tierDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
-                dataLoaderRegistry.register("times", timeDataLoader);
-                //dataLoaderRegistry.register("tierdata", tierDataLoader);
+//                DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
+//                DataLoader<String, Test> timeDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
+//                //DataLoader<String, Object> tierDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
+//                dataLoaderRegistry.register("times", timeDataLoader);
+//                //dataLoaderRegistry.register("tierdata", tierDataLoader);
+//                executionInputBuilder.dataLoaderRegistry(dataLoaderRegistry);
+                //executionInputBuilder.context(dataLoaderRegistry);
 
-                executionInputBuilder.dataLoaderRegistry(dataLoaderRegistry);
-                executionInputBuilder.context(dataLoaderRegistry);
+                List<ContextDTO> contextDTOList = apiService.Data();
+                executionInputBuilder.context(contextDTOList);
+                executionInputBuilder.context("");
                 ExecutionInput executionInput = executionInputBuilder.build();
 
                 return graphql.execute(executionInput);

@@ -2,7 +2,7 @@ package org.wso2.carbon.graphql.api.devportal.modules.api;
 
 public class BusinessInformationDTO {
 
-    private String id;
+    private String uuid;
     private String businessOwner;
     private String businessOwnerEmail;
     private String technicalOwner;
@@ -17,7 +17,7 @@ public class BusinessInformationDTO {
     }
 
     public String getId() {
-        return id;
+        return uuid;
     }
 
 }

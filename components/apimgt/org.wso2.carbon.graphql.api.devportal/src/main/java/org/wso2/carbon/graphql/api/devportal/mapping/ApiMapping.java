@@ -43,7 +43,7 @@ import java.util.Set;
 public class ApiMapping {
 
     public ApiDTO fromDevpotralApiTOApiDTO(DevPortalAPI devPortalAPI) throws APIManagementException, APIPersistenceException {
-        String id = devPortalAPI.getId();
+        String uuid = devPortalAPI.getId();
 
 
         String name = devPortalAPI.getApiName();
@@ -108,7 +108,7 @@ public class ApiMapping {
 
         List<IngressUrlDTO> ingressUrlDTOS = getIngressUrlData(devPortalAPI);
 
-        return new ApiDTO(id,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation,labelNameDTO,ingressUrlDTOS);
+        return new ApiDTO(uuid,name,description,context,version,provider,type,transport,hasthumbnail,environments,wsdUrl,status,isSubscriptionAvailable,isDefault,authorizationHeader,apiSecurity,isMonetizationEnabled,throttlingPolicies,thumbnailUrl,categories,allkeyManagers,businessInformation,advertiseInfo,apiEndPointInformation,tierInformation,labelNameDTO,ingressUrlDTOS);
     }
 
     public String getThrottlingPoliciesData(Set<String> tierNames)  {
@@ -215,7 +215,7 @@ public class ApiMapping {
 
     public List<APIEndpointURLsDTO> apiEndpointURLsDTO(DevPortalAPI devPortalAPI) throws APIManagementException {
 
-        String Id = devPortalAPI.getId();
+        String uuid = devPortalAPI.getId();
         String tenantDomain = RestApiUtil.getRequestedTenantDomain(null);
 
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -295,7 +295,7 @@ public class ApiMapping {
                     }
                 }
 
-                apiEndpointURLsDTOS.add(new APIEndpointURLsDTO(Id,envName, environmentType, apiurLsDTO,defaultAPIURLsDTO));
+                apiEndpointURLsDTOS.add(new APIEndpointURLsDTO(uuid,envName, environmentType, apiurLsDTO,defaultAPIURLsDTO));
 
             }
         }
