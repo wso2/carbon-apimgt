@@ -427,7 +427,7 @@ const Alerts = (props) => {
                             </React.Fragment>}
                     </React.Fragment>}
             </div>
-            <Dialog open={openDialog.open}>
+            <Dialog fullWidth maxWidth="md" open={openDialog.open}>
                 <DialogTitle>
                     <FormattedMessage
                         id='Settings.Alerts.Alerts.configure.alert'
