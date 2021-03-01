@@ -26,6 +26,8 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -33,6 +35,8 @@ import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.List;
@@ -51,36 +55,9 @@ public class SubscriberInfoLoader extends AbstractMediator {
         int index = (Integer) messageContext.getProperty(APIConstants.CLONED_ITERATION_INDEX_PROPERTY);
         WebhooksDTO subscriber = subscribersList.get(index - 1);
         if (subscriber != null) {
-            if (subscriber.isThrottled()) {
+            boolean canProceed = handleThrottle(subscriber, messageContext);
+            if (!canProceed) {
                 return false;
-            }
-            if (doThrottle(subscriber, messageContext)) {
-                messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_CALLBACK_PROPERTY,
-                        subscriber.getCallbackURL());
-                String errorMessage = "Message throttled out";
-                String errorDescription = "You have exceeded your quota";
-                int errorCode = APIThrottleConstants.EVENTS_COUNT_THROTTLE_OUT_ERROR_CODE;
-                int httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
-                messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
-                messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
-                messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
-                messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, httpErrorCode);
-                org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                        getAxis2MessageContext();
-                // This property need to be set to avoid sending the content in pass-through pipe (request message)
-                // as the response.
-                axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
-                try {
-                    RelayUtils.consumeAndDiscardMessage(axis2MC);
-                } catch (AxisFault axisFault) {
-                    //In case of an error it is logged and the process is continued because we're setting a fault message
-                    // in the payload.
-                    log.error("Error occurred while consuming and discarding the message", axisFault);
-                }
-
-                if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-                    Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(errorCode, errorMessage, errorDescription));
-                }
             }
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_CALLBACK_PROPERTY, subscriber.getCallbackURL());
             messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_SECRET_PROPERTY, subscriber.getSecret());
@@ -89,7 +66,65 @@ public class SubscriberInfoLoader extends AbstractMediator {
         return true;
     }
 
-    private boolean doThrottle(WebhooksDTO subscriber, MessageContext messageContext) {
+    private boolean handleThrottle(WebhooksDTO subscriber, MessageContext messageContext) {
+        AuthenticationContext authContext = new AuthenticationContext();
+        populateAuthContext(subscriber.getTenantDomain(), Integer.parseInt(subscriber.getAppID()), authContext);
+        messageContext.setProperty(APISecurityUtils.API_AUTH_CONTEXT, authContext);
+        if (subscriber.isThrottled()) {
+            if (APIUtil.isAnalyticsEnabled()) {
+                String errorMessage = "Message throttled out";
+                String errorDescription = "You have exceeded your quota";
+                int errorCode = APIThrottleConstants.EVENTS_COUNT_THROTTLE_OUT_ERROR_CODE;
+                messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
+                messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+                messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
+                messageContext.setProperty(Constants.BACKEND_RESPONSE_CODE,
+                        APIThrottleConstants.SC_TOO_MANY_REQUESTS);
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                        setProperty(SynapseConstants.HTTP_SC, APIThrottleConstants.SC_TOO_MANY_REQUESTS);
+                WebhooksUtils.publishAnalyticsData(messageContext);
+            }
+            return false;
+        }
+        if (doThrottle(subscriber, messageContext, authContext)) {
+            messageContext.setProperty(APIConstants.Webhooks.SUBSCRIBER_CALLBACK_PROPERTY,
+                    subscriber.getCallbackURL());
+            String errorMessage = "Message throttled out";
+            String errorDescription = "You have exceeded your quota";
+            int errorCode = APIThrottleConstants.EVENTS_COUNT_THROTTLE_OUT_ERROR_CODE;
+            int httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+            messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
+            messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, httpErrorCode);
+            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                    getAxis2MessageContext();
+            // This property need to be set to avoid sending the content in pass-through pipe (request message)
+            // as the response.
+            axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+            try {
+                RelayUtils.consumeAndDiscardMessage(axis2MC);
+            } catch (AxisFault axisFault) {
+                //In case of an error it is logged and the process is continued because we're setting a fault message
+                // in the payload.
+                log.error("Error occurred while consuming and discarding the message", axisFault);
+            }
+            if (APIUtil.isAnalyticsEnabled()) {
+                messageContext.setProperty(Constants.BACKEND_RESPONSE_CODE, httpErrorCode);
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                        setProperty(SynapseConstants.HTTP_SC, APIThrottleConstants.SC_TOO_MANY_REQUESTS);
+                WebhooksUtils.publishAnalyticsData(messageContext);
+            }
+
+            if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
+                Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(errorCode, errorMessage,
+                        errorDescription));
+            }
+        }
+        return true;
+    }
+
+    private boolean doThrottle(WebhooksDTO subscriber, MessageContext messageContext, AuthenticationContext authContext) {
         String applicationLevelTier = subscriber.getApplicationTier();
         String apiLevelTier = subscriber.getApiTier();
         String subscriptionLevelTier = subscriber.getTier();
@@ -109,13 +144,9 @@ public class SubscriberInfoLoader extends AbstractMediator {
         String apiLevelThrottleKey = apiContext + ":" + apiVersion;
         String resourceLevelThrottleKey = apiLevelThrottleKey;
         String subscriptionLevelThrottleKey = appId + ":" + apiContext + ":" + apiVersion;
-        AuthenticationContext authContext = new AuthenticationContext();
         boolean isThrottled = WebhooksUtils.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
                 applicationLevelThrottleKey);
         if (isThrottled) {
-            if (APIUtil.isAnalyticsEnabled()) {
-                //dataCollector.collectData();
-            }
             subscriber.setThrottled(true);
             return true;
         }
@@ -128,8 +159,16 @@ public class SubscriberInfoLoader extends AbstractMediator {
                         apiVersion, appTenant, apiTenant,
                         appId,
                         messageContext, authContext);
-        //dataCollector.collectData();
         return false;
+    }
+
+    private void populateAuthContext(String tenantDomain, int appId, AuthenticationContext authContext) {
+        Application app = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain).
+                getApplicationById(appId);
+        authContext.setApplicationUUID(app.getUUID());
+        authContext.setApplicationName(app.getName());
+        authContext.setSubscriber(app.getSubName());
+        authContext.setKeyType(app.getTokenType());
     }
 
 }

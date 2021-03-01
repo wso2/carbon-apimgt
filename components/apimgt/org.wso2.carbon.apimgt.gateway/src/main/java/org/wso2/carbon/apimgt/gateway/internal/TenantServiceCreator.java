@@ -63,6 +63,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTP = "WebhookServer";
+    private String webHookFaultSequenceName = "webhooksFaultSequence";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
@@ -239,6 +240,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + threatFaultSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + threatFaultSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + webHookFaultSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + webHookFaultSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + webSocketInboundEp + ".xml"), new File(
                         synapseConfigDir.getAbsolutePath() + File.separator
                                 + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator

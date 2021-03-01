@@ -26,11 +26,14 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.util.EntityUtils;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -42,6 +45,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE;
 
 /**
  * This mediator would persist webhooks subscription data.
@@ -58,6 +64,11 @@ public class SubscribersPersistMediator extends AbstractMediator {
     public boolean mediate(MessageContext messageContext) {
         try {
             populateQueryParamData(messageContext);
+            messageContext.setProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING, true);
+            org.apache.axis2.context.MessageContext axisCtx =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
+            messageContext.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
             if (StringUtils.isEmpty(callback)) {
                 handleException("Callback URL cannot be empty", messageContext);
             }
@@ -92,7 +103,6 @@ public class SubscribersPersistMediator extends AbstractMediator {
                 Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(HttpStatus.SC_INTERNAL_SERVER_ERROR,
                         "Error while persisting request", "Check the request format"));
             }
-            //dataCollector.collectData(messageContext);
             WebhooksUtils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
         return true;
@@ -110,12 +120,13 @@ public class SubscribersPersistMediator extends AbstractMediator {
      */
     private void handleResponse(HttpResponse httpResponse, MessageContext messageContext) throws IOException {
         int statusCode = httpResponse.getStatusLine().getStatusCode();
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                setProperty(SynapseConstants.HTTP_SC, statusCode);
         if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
             if (log.isDebugEnabled()) {
                 log.debug("Successfully submitted the request for persist subscription with status code: "
                         + statusCode);
             }
-            //dataCollector.collectData(messageContext);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Failed to submit the request for persist subscription with status code: " + statusCode);
@@ -127,7 +138,6 @@ public class SubscribersPersistMediator extends AbstractMediator {
             if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
                 Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(statusCode, response, response));
             }
-            //dataCollector.collectData(messageContext);
             WebhooksUtils.sendFault(messageContext, statusCode);
         }
     }

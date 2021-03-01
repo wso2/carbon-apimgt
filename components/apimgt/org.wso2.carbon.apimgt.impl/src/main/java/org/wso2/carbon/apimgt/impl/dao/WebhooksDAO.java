@@ -294,6 +294,7 @@ public class WebhooksDAO {
                         subscription.setApiTier(rs.getString(APIConstants.Webhooks.API_TIER_COLUMN));
                         subscription.setApplicationTier(rs.getString(APIConstants.Webhooks.APPLICATION_TIER_COLUMN));
                         subscription.setSubscriberName(rs.getString(APIConstants.Webhooks.SUBSCRIBER_COLUMN));
+                        subscription.setTenantDomain(tenantDomain);
                         subscriptionsList.add(subscription);
                     }
                 }
