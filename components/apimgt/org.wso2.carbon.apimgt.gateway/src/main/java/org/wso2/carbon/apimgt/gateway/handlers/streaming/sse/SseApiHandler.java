@@ -74,23 +74,25 @@ public class SseApiHandler extends APIAuthenticationHandler {
         axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_SSE);
         synCtx.setProperty(org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.SKIP_DEFAULT_METRICS_PUBLISHING,
                            true);
+        synCtx.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
         GatewayUtils.setRequestDestination(synCtx);
+
+        // set http verb for authentication
         Object httpVerb = axisCtx.getProperty(HTTP_METHOD);
         axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         boolean isAuthenticated = super.handleRequest(synCtx);
-        // reset http verb after authentication for mediation
         axisCtx.setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
-        synCtx.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
+
         if (isAuthenticated) {
             AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(synCtx);
             ThrottleInfo throttleInfo = getThrottlingInfo(authenticationContext, synCtx);
-            boolean isThrottled;
-            isThrottled = SseUtils.isRequestBlocked(authenticationContext, throttleInfo.getApiContext(),
-                                                    throttleInfo.getApiVersion(), throttleInfo.getAuthorizedUser(),
-                                                    throttleInfo.getRemoteIp(),
-                                                    throttleInfo.getSubscriberTenantDomain());
+            boolean isThrottled = SseUtils.isRequestBlocked(authenticationContext, throttleInfo.getApiContext(),
+                                                            throttleInfo.getApiVersion(),
+                                                            throttleInfo.getAuthorizedUser(),
+                                                            throttleInfo.getRemoteIp(),
+                                                            throttleInfo.getSubscriberTenantDomain());
             if (!isThrottled) {
-                // do throttling is request is not blocked
+                // do throttling if request is not blocked by global conditions
                 isThrottled = SseUtils.isThrottled(throttleInfo.getSubscriberTenantDomain(),
                                                    throttleInfo.getResourceLevelThrottleKey(),
                                                    throttleInfo.getSubscriptionLevelThrottleKey(),

@@ -33,12 +33,13 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TY
 
 public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
 
+    private String apiType;
     private MessageContext messageContext;
-    String apiType;
 
     public AsyncAnalyticsDataProvider(MessageContext messageContext) {
         super(messageContext);
-        org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axisCtx =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         apiType = (String) axisCtx.getProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE);
         this.messageContext = messageContext;
     }
