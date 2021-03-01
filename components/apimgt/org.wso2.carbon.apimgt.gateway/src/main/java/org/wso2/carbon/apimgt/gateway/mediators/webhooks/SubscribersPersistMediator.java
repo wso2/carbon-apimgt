@@ -46,6 +46,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE;
+
 /**
  * This mediator would persist webhooks subscription data.
  */
@@ -65,6 +68,7 @@ public class SubscribersPersistMediator extends AbstractMediator {
             org.apache.axis2.context.MessageContext axisCtx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
+            messageContext.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
             if (StringUtils.isEmpty(callback)) {
                 handleException("Callback URL cannot be empty", messageContext);
             }
