@@ -613,6 +613,8 @@ public final class APIConstants {
             = "overview_websubSubscriptionConfiguration";
     public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
     public static final String API_TYPE_WS = "WS";
+    public static final String GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME = "gatewayInternalKeyDataCache";
+    public static final String GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME = "gatewayInvalidInternalKeyCache";
 
     public static class TokenStatus {
 
@@ -816,6 +818,7 @@ public final class APIConstants {
             + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
+    public static final String API_PUBLISHER_INTERNAL_API_KEY_ALIAS = API_PUBLISHER + "InternalKeyAlias";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -1053,6 +1056,7 @@ public final class APIConstants {
     public static final String GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME = "gatewayBasicAuthResourceCache";
     public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_API_KEY_CACHE_NAME = "gatewayApiKeyCache";
+    public static final String GATEWAY_INTERNAL_KEY_CACHE_NAME = "gatewayInternalKeyCache";
     public static final String GATEWAY_API_KEY_DATA_CACHE_NAME = "gatewayApiKeyKeyCache";
     public static final String GATEWAY_INVALID_API_KEY_CACHE_NAME = "gatewayInvalidApiKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
@@ -1985,7 +1989,6 @@ public final class APIConstants {
         public static final String EXPIRY_TIME = "exp";
         public static final String JWT_KID = "kid";
         public static final String SIGNATURE_ALGORITHM = "alg";
-        public static final String TOKEN_TYPE = "typ";
         public static final String BACKEND_TOKEN = "backendJwt";
         public static final String SUBSCRIBED_APIS = "subscribedAPIs";
         public static final String API_CONTEXT = "context";
@@ -2001,6 +2004,9 @@ public final class APIConstants {
         public static final String AUTHORIZED_USER_TYPE = "aut";
         public static final String ISSUER_IDENTIFIER = "iss";
         public static final String END_USERNAME = "sub";
+        public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
+        public static final String TOKEN_TYPE = "token_type";
+        public static final String API_KEY_TOKEN_TYPE = "apiKey";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";

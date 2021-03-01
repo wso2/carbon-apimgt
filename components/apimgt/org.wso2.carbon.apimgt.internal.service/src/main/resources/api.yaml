@@ -776,6 +776,10 @@ definitions:
         type: string
         description: Type of the API.
         example: APIProduct
+      status:
+        type: string
+        description: Type of the API.
+        example: APIProduct
       isDefaultVersion:
         type: boolean
         description: Whether this is the default version of the API.

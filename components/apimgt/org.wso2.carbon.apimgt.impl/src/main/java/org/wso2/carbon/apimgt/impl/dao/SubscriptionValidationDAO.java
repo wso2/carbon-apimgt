@@ -383,7 +383,7 @@ public class SubscriptionValidationDAO {
     public List<API> getAllApis(String organization) {
 
         String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
                 "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
                 "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
                 "AM_DEPLOYMENT_REVISION_MAPPING " +
@@ -414,6 +414,7 @@ public class SubscriptionValidationDAO {
                         api.setApiType(apiType);
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
+                        api.setStatus(resultSet.getString("STATUS"));
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (APIConstants.API_PRODUCT.equals(apiType)) {
@@ -988,10 +989,9 @@ public class SubscriptionValidationDAO {
     public List<API> getAllApis(String organization, String deployment) {
 
         String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
-                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
-                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
-                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS " +
+                "REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME FROM AM_API LEFT JOIN " +
+                "AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING " +
                 "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID ";
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("WHERE AM_API.CONTEXT NOT LIKE '/t/%'");
@@ -1015,6 +1015,7 @@ public class SubscriptionValidationDAO {
                         api.setProvider(provider);
                         api.setName(name);
                         api.setApiType(apiType);
+                        api.setStatus(resultSet.getString("STATUS"));
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
                         String revision = resultSet.getString("REVISION_UUID");
@@ -1074,7 +1075,7 @@ public class SubscriptionValidationDAO {
     public API getAPIByContextAndVersion(String context, String version, String deployment) {
 
         String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
                 "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
                 "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
                 "AM_DEPLOYMENT_REVISION_MAPPING " +
@@ -1100,6 +1101,7 @@ public class SubscriptionValidationDAO {
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
                         String revision = resultSet.getString("REVISION_UUID");
+                        api.setStatus(resultSet.getString("STATUS"));
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (APIConstants.API_PRODUCT.equals(apiType)) {
                             attachURlMappingDetailsOfApiProduct(connection, api);
@@ -1175,7 +1177,7 @@ public class SubscriptionValidationDAO {
 
 
         String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
                 "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
                 "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
                 "AM_DEPLOYMENT_REVISION_MAPPING " +
@@ -1211,6 +1213,7 @@ public class SubscriptionValidationDAO {
                         api.setApiType(apiType);
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
+                        api.setStatus(resultSet.getString("STATUS"));
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (APIConstants.API_PRODUCT.equals(apiType)) {

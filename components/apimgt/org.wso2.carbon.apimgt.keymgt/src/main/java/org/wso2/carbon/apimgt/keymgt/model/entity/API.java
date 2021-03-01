@@ -36,6 +36,7 @@ public class API implements CacheableEntity<String> {
     private String context = null;
     private String policy = null;
     private String apiType = null;
+    private String status;
     private boolean isDefaultVersion = false;
 
     private List<URLMapping> urlMappings = new ArrayList<>();
@@ -132,9 +133,20 @@ public class API implements CacheableEntity<String> {
 
     @Override
     public String toString() {
-        return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
-                + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + ", urlMappings="
-                + urlMappings + "]";
+
+        return "API{" +
+                "uuid='" + uuid + '\'' +
+                ", apiId=" + apiId +
+                ", provider='" + provider + '\'' +
+                ", name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                ", context='" + context + '\'' +
+                ", policy='" + policy + '\'' +
+                ", apiType='" + apiType + '\'' +
+                ", status='" + status + '\'' +
+                ", isDefaultVersion=" + isDefaultVersion +
+                ", urlMappings=" + urlMappings +
+                '}';
     }
 
     public boolean isDefaultVersion() {
@@ -153,5 +165,15 @@ public class API implements CacheableEntity<String> {
     public void setUuid(String uuid) {
 
         this.uuid = uuid;
+    }
+
+    public String getStatus() {
+
+        return status;
+    }
+
+    public void setStatus(String status) {
+
+        this.status = status;
     }
 }

@@ -426,13 +426,13 @@ paths:
   /apis/{apiId}/topics:
     put:
       tags:
-      - APIs
+        - APIs
       summary: Update Topics
       description: This operation can be used to update topics of an existing API.
       operationId: updateTopics
       parameters:
-      - $ref: '#/components/parameters/apiId'
-      - $ref: '#/components/parameters/If-Match'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: API object that needs to be added
         content:
@@ -688,6 +688,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
+
 
   /apis/{apiId}/generated-mock-scripts:
     get:
@@ -1120,26 +1121,26 @@ paths:
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
       parameters:
-      - name: newVersion
-        in: query
-        description: Version of the new API.
-        required: true
-        schema:
-          maxLength: 30
-          type: string
-      - name: defaultVersion
-        in: query
-        description: Specifies whether new API should be added as default version.
-        schema:
-          type: boolean
-          default: false
-      - name: serviceVersion
-        in: query
-        description: Version of the Service that will used in creating new version
-        schema:
-          type: string
-        required: false
-      - $ref: '#/components/parameters/apiId-Q'
+        - name: newVersion
+          in: query
+          description: Version of the new API.
+          required: true
+          schema:
+            maxLength: 30
+            type: string
+        - name: defaultVersion
+          in: query
+          description: Specifies whether new API should be added as default version.
+          schema:
+            type: boolean
+            default: false
+        - name: serviceVersion
+          in: query
+          description: Version of the Service that will used in creating new version
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/apiId-Q'
       responses:
         201:
           description: |
@@ -4086,6 +4087,37 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/publish-to-external-stores?externalStoreId=Store123#"'
       x-examples:
         $ref: docs/examples/external-stores/external_stores.yaml#/publishToExternalStore
+
+  /apis/{apiId}/generate-key:
+    post:
+      tags:
+        - APIs
+      summary: Generate internal API Key to invoke APIS.
+      description: |
+        This operation can be used to generate internal api key which used to invoke API.
+      operationId: generateInternalAPIKey
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            apikey generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_generate_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-key"'
 
   /apis/export:
     get:
@@ -8044,9 +8076,9 @@ components:
     Topic:
       title: Topic object
       required:
-      - name
-      - mode
-      - description
+        - name
+        - mode
+        - description
       type: object
       properties:
         id:
@@ -10977,6 +11009,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyManagerInfo'
+    APIKey:
+      title: API Key details to invoke APIs
+      type: object
+      properties:
+        apikey:
+          type: string
+          description: API Key
+          example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
+        validityTime:
+          type: integer
+          format: int32
+          example: 3600
     DeploymentList:
       title: Deployment List
       type: object
@@ -11674,3 +11718,4 @@ components:
             apim:app_import_export: Import and export applications related operations
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related operations
+            apim:api_generate_key: Generate Internal Key

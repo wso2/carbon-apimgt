@@ -1902,4 +1902,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to delete APIRevision
      */
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
+
+    String generateApiKey(String apiId) throws APIManagementException;
 }
