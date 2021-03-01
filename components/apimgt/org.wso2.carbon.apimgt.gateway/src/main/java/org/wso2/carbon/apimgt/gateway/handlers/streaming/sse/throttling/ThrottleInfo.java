@@ -26,42 +26,45 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
  */
 public class ThrottleInfo {
 
-    private String applicationTier;
-    private String subscriber;
+    private String apiName;
+    private String apiVersion;
+    private String apiContext;
+
     private String tier;
-    private String type;
     private String apiTier;
     private String resourceTier;
-    private String applicationId;
-    private String applicationName;
-    private String subscriberTenantDomain;
-    private String apiVersion;
 
-    private String apiName;
-    private String apiContext;
-    private String remoteIp;
-    private String resourceLevelThrottleKey;
-    private String authorizedUser;
     private String subscriptionLevelThrottleKey;
     private String applicationLevelThrottleKey;
     private String apiLevelThrottleKey;
+    private String resourceLevelThrottleKey;
+
+    private String applicationName;
+    private String applicationId;
+    private String applicationTier;
+
+    private String subscriberTenantDomain;
+    private String authorizedUser;
+    private String subscriber;
+    private String type;
+
+    private String remoteIp;
 
     public ThrottleInfo(AuthenticationContext context, String apiContext, String version,
                         String resourceLevelThrottleKey, String resourceTier, String remoteIp) {
 
-        this.applicationTier = context.getApplicationTier();
-        this.tier = context.getTier();
-        this.subscriberTenantDomain = context.getSubscriberTenantDomain();
-        this.subscriber = context.getSubscriber();
         this.apiName = context.getApiName();
-        this.applicationId = context.getApplicationId();
-        this.type = context.getKeyType();
-        this.applicationName = context.getApplicationName();
-        this.apiTier = context.getApiTier();
         this.apiVersion = version;
         this.apiContext = apiContext;
-        this.resourceLevelThrottleKey = resourceLevelThrottleKey;
+        this.tier = context.getTier();
+        this.apiTier = context.getApiTier();
         this.resourceTier = resourceTier;
+        this.applicationName = context.getApplicationName();
+        this.applicationId = context.getApplicationId();
+        this.applicationTier = context.getApplicationTier();
+        this.subscriberTenantDomain = context.getSubscriberTenantDomain();
+        this.subscriber = context.getSubscriber();
+        this.type = context.getKeyType();
         this.remoteIp = remoteIp;
         this.authorizedUser = subscriber;
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(subscriberTenantDomain)) {
@@ -70,6 +73,7 @@ public class ThrottleInfo {
         this.subscriptionLevelThrottleKey = applicationId + ":" + apiContext + ":" + apiVersion;
         this.applicationLevelThrottleKey = applicationId + ":" + authorizedUser;
         this.apiLevelThrottleKey = apiContext + ":" + apiVersion;
+        this.resourceLevelThrottleKey = resourceLevelThrottleKey;
     }
 
     public String getApplicationTier() {
@@ -80,24 +84,12 @@ public class ThrottleInfo {
         return subscriber;
     }
 
-    public void setSubscriber(String subscriber) {
-        this.subscriber = subscriber;
-    }
-
     public String getTier() {
         return tier;
     }
 
-    public void setTier(String tier) {
-        this.tier = tier;
-    }
-
     public String getType() {
         return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getApiTier() {
@@ -108,16 +100,8 @@ public class ThrottleInfo {
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
     public String getApplicationName() {
         return applicationName;
-    }
-
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
     }
 
     public String getSubscriberTenantDomain() {
@@ -128,24 +112,12 @@ public class ThrottleInfo {
         return apiVersion;
     }
 
-    public void setApiVersion(String apiVersion) {
-        this.apiVersion = apiVersion;
-    }
-
     public String getApiName() {
         return apiName;
     }
 
-    public void setApiName(String apiName) {
-        this.apiName = apiName;
-    }
-
     public String getApiContext() {
         return apiContext;
-    }
-
-    public void setApiContext(String apiContext) {
-        this.apiContext = apiContext;
     }
 
     public String getRemoteIp() {

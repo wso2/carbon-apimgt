@@ -29,6 +29,8 @@ import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.SynapseAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+
 public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
 
     private MessageContext messageContext;
@@ -55,7 +57,11 @@ public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
     public Operation getOperation() throws DataNotFoundException {
 
         Operation operation = super.getOperation();
-        String eventName = ""; // // todo get this from smg ctx
+        String eventName = "";
+        Object eventPrefix = messageContext.getProperty(ASYNC_MESSAGE_TYPE);
+        if (eventPrefix != null) {
+            eventName = eventPrefix.toString();
+        }
         if (!eventName.isEmpty()) {
             operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
         }

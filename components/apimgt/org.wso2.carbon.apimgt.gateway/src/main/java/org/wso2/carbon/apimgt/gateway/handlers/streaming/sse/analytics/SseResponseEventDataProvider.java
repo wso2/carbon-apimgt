@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics;
 import org.apache.synapse.MessageContext;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**

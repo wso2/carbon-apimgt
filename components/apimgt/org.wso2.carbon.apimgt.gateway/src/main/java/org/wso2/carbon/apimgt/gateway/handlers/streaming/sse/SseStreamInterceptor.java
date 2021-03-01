@@ -28,6 +28,7 @@ import org.apache.synapse.transport.passthru.DefaultStreamInterceptor;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics.SseResponseEventDataProvider;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.throttling.ThrottleInfo;
@@ -110,7 +111,11 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
             throttlePublisherService.execute(
                     () -> SseUtils.publishNonThrottledEvent(eventCount, messageId, throttleInfo, propertiesMap));
             if (APIUtil.isAnalyticsEnabled()) {
-                publishAnalyticsData(eventCount, axi2Ctx);
+                try {
+                    publishAnalyticsData(eventCount, axi2Ctx);
+                } catch (AnalyticsException e) {
+                    log.error("Error while publishing analytics data", e);
+                }
             }
             return true;
         } else {
@@ -119,7 +124,7 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
         return true;
     }
 
-    private void publishAnalyticsData(int eventCount, MessageContext axi2Ctx) {
+    private void publishAnalyticsData(int eventCount, MessageContext axi2Ctx) throws AnalyticsException {
 
         SseResponseEventDataProvider provider = (SseResponseEventDataProvider) axi2Ctx.getProperty(SSE_ANALYTICS_INFO);
         provider.setResponseCode((int) axi2Ctx.getProperty(SynapseConstants.HTTP_SC));
