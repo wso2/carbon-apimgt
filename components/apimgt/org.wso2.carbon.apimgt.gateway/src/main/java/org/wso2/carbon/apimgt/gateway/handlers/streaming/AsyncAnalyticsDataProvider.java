@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
@@ -51,7 +52,7 @@ public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
     }
 
     @Override
-    public Operation getOperation() {
+    public Operation getOperation() throws DataNotFoundException {
 
         Operation operation = super.getOperation();
         String eventName = ""; // // todo get this from smg ctx
