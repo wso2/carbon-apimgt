@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.service.catalog.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +28,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
@@ -33,6 +38,8 @@ import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -53,6 +60,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -199,6 +207,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         HashMap<String, String> newResourcesHash;
         List<ServiceEntry> serviceListToImport = new ArrayList<>();
         List<ServiceEntry> serviceListToIgnore = new ArrayList<>();
+        List<ServiceEntry> servicesWithInvalidDefinition = new ArrayList<>();
 
         // unzip the uploaded zip
         try {
@@ -219,6 +228,16 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             String key = entry.getKey();
             serviceEntries.get(key).setMd5(newResourcesHash.get(key));
             ServiceEntry service = serviceEntries.get(key);
+            if (ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType()) || ServiceEntry.DefinitionType
+                    .OAS2.equals(service.getDefinitionType())) {
+                if (!validateOpenAPIDefinition(service.getDefUrl(), service.getEndpointDef()).isValid()) {
+                    servicesWithInvalidDefinition.add(service);
+                }
+            } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
+                if (!validateAsyncAPISpecification(service.getDefUrl(), service.getEndpointDef()).isValid()) {
+                    servicesWithInvalidDefinition.add(service);
+                }
+            }
             if (overwrite) {
                 if (StringUtils.isNotEmpty(verifier) && validationResults
                         .containsKey(service.getKey()) && !validationResults.get(service.getKey())) {
@@ -230,14 +249,18 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 serviceListToImport.add(service);
             }
         }
+        if (servicesWithInvalidDefinition.size() > 0) {
+            serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(servicesWithInvalidDefinition);
+            String errorMsg = "The Service import has been failed as invalid service definition provided";
+            return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
+            .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, new JSONArray(serviceList).toString())).build();
+        }
         if (serviceListToIgnore.size() > 0) {
             serviceList = ServiceEntryMappingUtil.fromServiceListToDTOList(serviceListToIgnore);
-            ErrorDTO errorObject = new ErrorDTO();
-            Response.Status status = Response.Status.BAD_REQUEST;
-            errorObject.setCode((long) status.getStatusCode());
-            errorObject.setMessage(new JSONArray(serviceList).toString());
-            errorObject.setDescription("The Service import has been failed since to verifier validation fails");
-            return Response.status(status).entity(errorObject).build();
+            String errorMsg = "The Service import has been failed since to verifier validation fails";
+
+            return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
+            .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, new JSONArray(serviceList).toString())).build();
         } else {
             List<ServiceEntry> importedServiceList = new ArrayList<>();
             List<ServiceEntry> retrievedServiceList = new ArrayList<>();
@@ -347,5 +370,66 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     private boolean isAuthorizationFailure(Exception e) {
         String errorMessage = e.getMessage();
         return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
+    }
+
+    /**
+     * Validate the ASYNC API definition provided
+     * @param url Service Definition URL
+     * @param fileInputStream Service Definition File
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException
+     */
+    private APIDefinitionValidationResponse validateAsyncAPISpecification(String url, InputStream fileInputStream)
+            throws APIManagementException {
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        String schemaToBeValidated = null;
+        if (fileInputStream != null){
+            //validate file
+            try {
+                //convert .yml or .yaml to JSON for validation
+                ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+                Object obj = yamlReader.readValue(fileInputStream, Object.class);
+                ObjectMapper jsonWriter = new ObjectMapper();
+                schemaToBeValidated = jsonWriter.writeValueAsString(obj);
+                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated, true);
+            } catch (IOException e){
+                RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
+            }
+        } else if (url != null) {
+            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, true);
+        }
+        return validationResponse;
+    }
+
+    /**
+     * Validate the Open API definition provided
+     * @param url Service Definition URL
+     * @param fileInputStream Service Definition File
+     * @return APIDefinitionValidationResponse
+     * @throws APIManagementException
+     */
+    private APIDefinitionValidationResponse validateOpenAPIDefinition(String url, InputStream fileInputStream)
+            throws APIManagementException {
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        if (fileInputStream != null) {
+            try {
+                String openAPIContent = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
+                validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, true);
+            }  catch (IOException e) {
+                RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
+            }
+        } if (url != null) {
+            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, true);
+        }
+        return validationResponse;
+    }
+
+    private static ErrorDTO getErrorDTO(String message, Long code, String description, String info){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(code);
+        errorDTO.setMessage(message);
+        errorDTO.setMoreInfo(info);
+        errorDTO.setDescription(description);
+        return errorDTO;
     }
 }
