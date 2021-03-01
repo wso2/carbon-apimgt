@@ -39,6 +39,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhooksAnalyticsDataProvider;
@@ -244,6 +245,10 @@ public class WebhooksUtils {
         axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
         WebhooksAnalyticsDataProvider provider = new WebhooksAnalyticsDataProvider(messageContext);
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        dataCollector.collectData();
+        try {
+            dataCollector.collectData();
+        } catch (AnalyticsException e) {
+            log.error("Error occurred when collecting data", e);
+        }
     }
 }
