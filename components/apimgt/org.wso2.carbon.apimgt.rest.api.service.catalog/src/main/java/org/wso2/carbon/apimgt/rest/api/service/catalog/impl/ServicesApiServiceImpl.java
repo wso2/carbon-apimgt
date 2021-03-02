@@ -293,6 +293,9 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 if (ExceptionCodes.SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE.getErrorCode() == e.getErrorHandler()
                         .getErrorCode()) {
                     RestApiUtil.handleBadRequest("Cannot update existing services when overwrite is false", log);
+                } else {
+                    RestApiUtil.handleInternalServerError("Error when importing services to service catalog",
+                            e, log);
                 }
             }
             if (importedServiceList == null) {
