@@ -235,7 +235,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isSuccessRequest()) {
             return HttpURLConnection.HTTP_OK;
         }
-        return -1;
+        return Constants.UNKNOWN_INT_VALUE;
     }
 
     @Override
@@ -243,7 +243,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         if (isSuccessRequest()) {
             return HttpURLConnection.HTTP_OK;
         }
-        return -1;
+        return Constants.UNKNOWN_INT_VALUE;
     }
 
     @Override
