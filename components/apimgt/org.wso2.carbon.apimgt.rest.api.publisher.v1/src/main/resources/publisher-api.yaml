@@ -10558,6 +10558,7 @@ components:
                 - INLINE
                 - URL
                 - FILE
+                - MARKDOWN
             sourceUrl:
               type: string
               example: ""
