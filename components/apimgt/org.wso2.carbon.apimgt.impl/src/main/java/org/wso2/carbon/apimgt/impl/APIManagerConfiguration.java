@@ -1322,6 +1322,12 @@ public class APIManagerConfiguration {
                     }
                 }
             }
+            OMElement tenantBasedSigningEnableElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASED_JWT_SIGNING));
+            if (tenantBasedSigningEnableElement != null) {
+                jwtConfigurationDto
+                        .setTenantBasedSigningEnabled(Boolean.parseBoolean(tenantBasedSigningEnableElement.getText()));
+            }
         }
     }
 
