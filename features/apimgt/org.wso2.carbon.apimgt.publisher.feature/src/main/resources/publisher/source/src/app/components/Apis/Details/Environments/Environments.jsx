@@ -399,10 +399,10 @@ export default function Environments() {
 
     const handleSelect = (event) => {
         const revisions = selectedRevision.filter((r) => r.env !== event.target.name);
-        const theRevision = selectedRevision.find((r) => r.env === event.target.name);
+        const oldRevision = selectedRevision.find((r) => r.env === event.target.name);
         let displayOnDevPortal = true;
-        if (theRevision) {
-            displayOnDevPortal = theRevision.displayOnDevPortal;
+        if (oldRevision) {
+            displayOnDevPortal = oldRevision.displayOnDevPortal;
         }
         revisions.push({ env: event.target.name, revision: event.target.value, displayOnDevPortal });
         setRevision(revisions);
@@ -410,10 +410,10 @@ export default function Environments() {
 
     const handleDisplayOnDevPortal = (event, env) => {
         const revisions = selectedRevision.filter((r) => r.env !== env);
-        const theRevision = selectedRevision.find((r) => r.env === env);
+        const oldRevision = selectedRevision.find((r) => r.env === env);
         revisions.push({
-            env: theRevision.env,
-            revision: theRevision.revision,
+            env: oldRevision.env,
+            revision: oldRevision.revision,
             displayOnDevPortal: event.target.checked,
         });
         setRevision(revisions);
@@ -424,10 +424,10 @@ export default function Environments() {
             return allEnvDeployments[env].revision.deploymentInfo.find((r) => r.name === env).displayOnDevportal;
         }
 
-        const theRevision = selectedRevision.find((r) => r.env === env);
+        const oldRevision = selectedRevision.find((r) => r.env === env);
         let displayOnDevPortal = true;
-        if (theRevision) {
-            displayOnDevPortal = theRevision.displayOnDevPortal;
+        if (oldRevision) {
+            displayOnDevPortal = oldRevision.displayOnDevPortal;
         }
         return displayOnDevPortal;
     };
