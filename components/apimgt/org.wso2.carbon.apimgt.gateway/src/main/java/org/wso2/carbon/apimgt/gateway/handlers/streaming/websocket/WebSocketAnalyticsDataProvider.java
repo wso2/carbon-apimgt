@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -232,17 +233,17 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public int getProxyResponseCode() {
         if (isSuccessRequest()) {
-            return 200;
+            return HttpURLConnection.HTTP_OK;
         }
-        return 0;
+        return Constants.UNKNOWN_INT_VALUE;
     }
 
     @Override
     public int getTargetResponseCode() {
         if (isSuccessRequest()) {
-            return 200;
+            return HttpURLConnection.HTTP_OK;
         }
-        return 0;
+        return Constants.UNKNOWN_INT_VALUE;
     }
 
     @Override
