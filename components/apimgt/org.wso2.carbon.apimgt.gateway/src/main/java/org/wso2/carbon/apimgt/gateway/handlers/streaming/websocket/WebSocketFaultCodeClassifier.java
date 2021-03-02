@@ -28,7 +28,7 @@ import java.util.Map;
  * Classifies faulty codes for WebSocket APIs.
  */
 public class WebSocketFaultCodeClassifier extends FaultCodeClassifier {
-    ChannelHandlerContext ctx;
+    private ChannelHandlerContext ctx;
 
     public WebSocketFaultCodeClassifier(ChannelHandlerContext ctx) {
         super(null); // MessageContext is not used in WebSocket fault code classifying

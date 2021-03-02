@@ -56,7 +56,7 @@ import java.util.UUID;
 public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
     private static final Log log = LogFactory.getLog(WebSocketAnalyticsDataProvider.class);
 
-    ChannelHandlerContext ctx;
+    private ChannelHandlerContext ctx;
 
     public WebSocketAnalyticsDataProvider(ChannelHandlerContext ctx) {
         this.ctx = ctx;
