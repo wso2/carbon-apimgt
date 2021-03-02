@@ -22,6 +22,7 @@ public class ServiceDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String description = null;
     private String version = null;
     private String serviceKey = null;
@@ -138,6 +139,24 @@ return null;
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   **/
+  public ServiceDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Pizzashack-Endpoint", required = true, value = "")
+  @JsonProperty("displayName")
+  @NotNull
+ @Pattern(regexp="^[^\\*]+$")  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -363,6 +382,7 @@ return null;
     ServiceDTO service = (ServiceDTO) o;
     return Objects.equals(id, service.id) &&
         Objects.equals(name, service.name) &&
+        Objects.equals(displayName, service.displayName) &&
         Objects.equals(description, service.description) &&
         Objects.equals(version, service.version) &&
         Objects.equals(serviceKey, service.serviceKey) &&
@@ -379,7 +399,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, version, serviceKey, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
+    return Objects.hash(id, name, displayName, description, version, serviceKey, serviceUrl, definitionType, securityType, mutualSSLEnabled, usage, createdTime, lastUpdatedTime, md5, definitionUrl);
   }
 
   @Override
@@ -389,6 +409,7 @@ return null;
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    serviceKey: ").append(toIndentedString(serviceKey)).append("\n");

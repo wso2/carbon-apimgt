@@ -87,6 +87,11 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
                         .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, StringUtils.EMPTY)).build();
             }
+            ServiceEntry existingService = serviceCatalog.getServiceByKey(service.getKey(), tenantId);
+            if (existingService != null) {
+                String errorMessage = "Service already exists with key - " + service.getKey();
+                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
+            }
             String serviceId = serviceCatalog.addService(service, tenantId, userName);
             ServiceEntry createdService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             return Response.ok().entity(ServiceEntryMappingUtil.fromServiceToDTO(createdService, false)).build();
@@ -304,15 +309,15 @@ public class ServicesApiServiceImpl implements ServicesApiService {
     }
 
     @Override
-    public Response searchServices(String name, String version, String definitionType, String key, Boolean shrink,
-                                   String sortBy, String sortOrder, Integer limit, Integer offset,
-                                   MessageContext messageContext) throws APIManagementException {
+    public Response searchServices(String name, String version, String definitionType, String displayName,
+                                   String key, Boolean shrink, String sortBy, String sortOrder, Integer limit,
+                                   Integer offset, MessageContext messageContext) throws APIManagementException {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
             List<ServiceDTO> serviceDTOList = new ArrayList<>();
-            ServiceFilterParams filterParams = ServiceEntryMappingUtil.getServiceFilterParams(name, version,
-                    definitionType, key, sortBy, sortOrder, limit, offset);
+            ServiceFilterParams filterParams = ServiceEntryMappingUtil.getServiceFilterParams(name, version, definitionType,
+                    displayName, key, sortBy, sortOrder, limit, offset);
             List<ServiceEntry> services = serviceCatalog.getServices(filterParams, tenantId, shrink);
             for (ServiceEntry service : services) {
                 serviceDTOList.add(ServiceEntryMappingUtil.fromServiceToDTO(service, shrink));

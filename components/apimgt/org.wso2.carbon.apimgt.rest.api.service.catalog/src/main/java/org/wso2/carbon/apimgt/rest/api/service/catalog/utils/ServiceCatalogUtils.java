@@ -41,6 +41,7 @@ public class ServiceCatalogUtils {
         service.setName(serviceDTO.getName());
         service.setVersion(serviceDTO.getVersion());
         service.setDescription(serviceDTO.getDescription());
+        service.setDisplayName(serviceDTO.getDisplayName());
         service.setDefUrl(serviceDTO.getDefinitionUrl());
         service.setServiceUrl(serviceDTO.getServiceUrl());
         service.setDefinitionType(ServiceEntry.DefinitionType.valueOf(serviceDTO.getDefinitionType().value()));

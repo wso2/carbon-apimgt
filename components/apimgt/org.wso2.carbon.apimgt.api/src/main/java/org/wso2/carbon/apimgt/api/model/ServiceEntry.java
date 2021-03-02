@@ -28,6 +28,7 @@ public class ServiceEntry {
     private String md5 = null;
     private String name = null;
     private String version = null;
+    private String displayName = null;
     private String serviceUrl = null;
     private int usage = 0;
 
@@ -120,6 +121,14 @@ public class ServiceEntry {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getServiceUrl() {
