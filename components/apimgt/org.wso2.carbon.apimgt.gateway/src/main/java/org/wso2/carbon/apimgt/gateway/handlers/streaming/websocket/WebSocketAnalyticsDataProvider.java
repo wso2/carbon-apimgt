@@ -156,7 +156,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
                 throw new RuntimeException("Error occurred when getting API information", e);
             }
         }
-        if(apiObj != null) {
+        if (apiObj != null) {
             api.setApiId(apiObj.getUuid());
             api.setApiType(apiObj.getApiType());
             api.setApiName(apiObj.getApiName());
