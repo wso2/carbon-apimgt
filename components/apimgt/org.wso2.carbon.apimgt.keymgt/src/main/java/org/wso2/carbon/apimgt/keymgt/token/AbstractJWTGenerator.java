@@ -92,11 +92,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         if (dialectURI == null) {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
         }
-        signatureAlgorithm = jwtConfigurationDto.getSignatureAlgorithm();
-        if (signatureAlgorithm == null || !(NONE.equals(signatureAlgorithm)
-                                            || SHA256_WITH_RSA.equals(signatureAlgorithm))) {
-            signatureAlgorithm = SHA256_WITH_RSA;
-        }
 
         String claimsRetrieverImplClass = jwtConfigurationDto.getClaimRetrieverImplClass();
 
