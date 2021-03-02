@@ -711,6 +711,19 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
     }
 
     @Override
+    public Map<String, API> getAllAPIsByContextList() {
+        Map<String, API> apiContextAPIMap = new HashMap<>();
+        for (API api : apiMap.values()) {
+            apiContextAPIMap.put(api.getContext(), api);
+            if (api.isDefaultVersion()) {
+                String context = api.getContext().replace("/" + api.getApiVersion(), "");
+                apiContextAPIMap.put(context, api);
+            }
+        }
+        return apiContextAPIMap;
+    }
+
+    @Override
     public void addOrUpdateAPIRevisionWithUrlTemplates(DeployAPIInGatewayEvent event) {
 
         try {

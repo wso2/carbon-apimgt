@@ -234,7 +234,6 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         gatewayAPIDTOStub.setProvider(gatewayAPIDTO.getProvider());
         gatewayAPIDTOStub.setTenantDomain(gatewayAPIDTO.getTenantDomain());
         gatewayAPIDTOStub.setApiDefinition(gatewayAPIDTO.getApiDefinition());
-        gatewayAPIDTOStub.setDefaultAPIDefinition(gatewayAPIDTO.getDefaultAPIDefinition());
         gatewayAPIDTOStub.setOverride(gatewayAPIDTO.isOverride());
         if (gatewayAPIDTO.getClientCertificatesToBeAdd() != null) {
             for (GatewayContentDTO clientCertificate : gatewayAPIDTO.getClientCertificatesToBeAdd()) {

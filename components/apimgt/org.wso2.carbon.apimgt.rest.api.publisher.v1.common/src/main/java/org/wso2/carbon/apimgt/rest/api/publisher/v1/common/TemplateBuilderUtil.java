@@ -668,11 +668,6 @@ public class TemplateBuilderUtil {
                 }
             }
         }
-
-        if (api.isDefaultVersion()) {
-            String defaultAPIConfig = builder.getConfigStringForDefaultAPITemplate(api.getId().getVersion());
-            gatewayAPIDTO.setDefaultAPIDefinition(defaultAPIConfig);
-        }
         setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
         return gatewayAPIDTO;
     }
