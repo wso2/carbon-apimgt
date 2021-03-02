@@ -353,7 +353,9 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
-                updateSwagger(value);
+                if (api.type !== 'GRAPHQL') {
+                    updateSwagger(value);
+                }
                 if (environmentObject) {
                     const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
                     setURLs(urls);
