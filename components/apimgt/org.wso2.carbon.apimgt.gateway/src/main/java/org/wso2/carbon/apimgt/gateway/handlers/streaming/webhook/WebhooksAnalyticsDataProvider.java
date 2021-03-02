@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class WebhooksAnalyticsDataProvider extends AsyncAnalyticsDataProvider {
 
-    MessageContext messageContext;
+    private MessageContext messageContext;
 
     public WebhooksAnalyticsDataProvider(MessageContext messageContext) {
         super(messageContext);
