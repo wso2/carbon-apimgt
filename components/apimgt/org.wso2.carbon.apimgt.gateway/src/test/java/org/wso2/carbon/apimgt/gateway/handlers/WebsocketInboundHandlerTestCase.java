@@ -24,6 +24,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
@@ -41,6 +43,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
@@ -64,6 +67,8 @@ import java.io.InputStream;
 import java.net.SocketAddress;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Cache;
 import javax.cache.CacheBuilder;
@@ -516,6 +521,48 @@ public class WebsocketInboundHandlerTestCase {
         Channel channel = Mockito.mock(Channel.class);
         SocketAddress socketAddress = Mockito.mock(SocketAddress.class);
         Mockito.when(channelHandlerContext.channel()).thenReturn(channel);
+        Attribute<Map<String, Object>> properties = new Attribute<Map<String, Object>>() {
+            @Override
+            public AttributeKey<Map<String, Object>> key() {
+                return AttributeKey.valueOf("WSO2_PROPERTIES");
+            }
+
+            @Override
+            public Map<String, Object> get() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public void set(Map<String, Object> stringObjectMap) {
+                // Ignore
+            }
+
+            @Override
+            public Map<String, Object> getAndSet(Map<String, Object> stringObjectMap) {
+                return new HashMap<>();
+            }
+
+            @Override
+            public Map<String, Object> setIfAbsent(Map<String, Object> stringObjectMap) {
+                return new HashMap<>();
+            }
+
+            @Override
+            public Map<String, Object> getAndRemove() {
+                return new HashMap<>();
+            }
+
+            @Override
+            public boolean compareAndSet(Map<String, Object> stringObjectMap, Map<String, Object> t1) {
+                return true;
+            }
+
+            @Override
+            public void remove() {
+                // Ignore
+            }
+        };
+        Mockito.when(channelHandlerContext.channel().attr(WebSocketUtils.WSO2_PROPERTIES)).thenReturn(properties);
         Mockito.when(channel.remoteAddress()).thenReturn(socketAddress);
         String configKey = "/apimgt/statistics/ga-config.xml";
         UserRegistry userRegistry = Mockito.mock(UserRegistry.class);

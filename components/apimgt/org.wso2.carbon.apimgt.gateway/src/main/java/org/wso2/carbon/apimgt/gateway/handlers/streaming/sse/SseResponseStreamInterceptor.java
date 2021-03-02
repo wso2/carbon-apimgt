@@ -23,11 +23,18 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.transport.passthru.DefaultStreamInterceptor;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.analytics.SseResponseEventDataProvider;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.throttling.ThrottleInfo;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.utils.SseUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -35,22 +42,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_ANALYTICS_INFO;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiConstants.SSE_THROTTLE_DTO;
-import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseUtils.isThrottled;
+import static org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.utils.SseUtils.isThrottled;
 
 /**
  * This is used for handling throttling, and analytics event publishing of sse apis (subset of streaming apis).
  */
-public class SseStreamInterceptor extends DefaultStreamInterceptor {
+public class SseResponseStreamInterceptor extends DefaultStreamInterceptor {
 
-    private static final Log log = LogFactory.getLog(SseStreamInterceptor.class);
+    private static final Log log = LogFactory.getLog(SseResponseStreamInterceptor.class);
     private static final String SSE_STREAM_DELIMITER = "\n\n";
     private static final int DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS = 100;
     private String charset = StandardCharsets.UTF_8.name();
     private ExecutorService throttlePublisherService;
     private int noOfExecutorThreads = DEFAULT_NO_OF_THROTTLE_PUBLISHER_EXECUTORS;
 
-    public SseStreamInterceptor() {
+    public SseResponseStreamInterceptor() {
         throttlePublisherService = Executors.newFixedThreadPool(noOfExecutorThreads);
     }
 
@@ -102,11 +110,33 @@ public class SseStreamInterceptor extends DefaultStreamInterceptor {
             }
             throttlePublisherService.execute(
                     () -> SseUtils.publishNonThrottledEvent(eventCount, messageId, throttleInfo, propertiesMap));
+            if (APIUtil.isAnalyticsEnabled()) {
+                try {
+                    publishAnalyticsData(eventCount, axi2Ctx);
+                } catch (AnalyticsException e) {
+                    log.error("Error while publishing analytics data", e);
+                }
+            }
             return true;
         } else {
             log.error("Throttle object cannot be null.");
         }
         return true;
+    }
+
+    private void publishAnalyticsData(int eventCount, MessageContext axi2Ctx) throws AnalyticsException {
+
+        Object responseEventProvider = axi2Ctx.getProperty(SSE_ANALYTICS_INFO);
+        if (responseEventProvider == null) {
+            log.error("SSE Analytics event provider is null.");
+            return;
+        }
+        SseResponseEventDataProvider provider = (SseResponseEventDataProvider) responseEventProvider;
+        provider.setResponseCode((int) axi2Ctx.getProperty(SynapseConstants.HTTP_SC));
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        for (int count = 0; count < eventCount; count++) {
+            dataCollector.collectData();
+        }
     }
 
     public void setCharset(String charset) {
