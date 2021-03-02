@@ -17,12 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
-import graphql.language.Definition;
-import graphql.language.Document;
-import graphql.language.Field;
-import graphql.language.OperationDefinition;
-import graphql.language.OperationDefinition.Operation;
-import graphql.language.Selection;
+import graphql.language.*;
 import graphql.parser.InvalidSyntaxException;
 import graphql.parser.Parser;
 import graphql.schema.GraphQLSchema;
@@ -32,7 +27,6 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.validation.ValidationError;
 import graphql.validation.Validator;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -52,17 +46,13 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.*;
 
-import static org.apache.axis2.Constants.Configuration.*;
+import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
 
 public class GraphQLAPIHandler extends AbstractHandler {
 
@@ -166,12 +156,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     /**
      * This method used to extract operation List
+     *
      * @param messageContext messageContext
-     * @param operation operation
+     * @param operation      operation
      * @return operationList
      */
-    private String getOperationList(MessageContext messageContext,OperationDefinition operation) {
-        String operationList = "";
+    private String getOperationList(MessageContext messageContext, OperationDefinition operation) {
+        String operationList;
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         ArrayList<String> operationArray = new ArrayList<>();
 
@@ -186,12 +177,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     /**
      * This method support to extracted nested level operations
-     * @param selectionList selection List
+     *
+     * @param selectionList   selection List
      * @param supportedFields supportedFields
-     * @param operationArray operationArray
+     * @param operationArray  operationArray
      */
     public void getNestedLevelOperations(List<Selection> selectionList, ArrayList<String> supportedFields,
-                                ArrayList<String> operationArray) {
+                                         ArrayList<String> operationArray) {
         for (Selection selection : selectionList) {
             Field levelField = (Field) selection;
             if (!operationArray.contains(levelField.getName()) &&
@@ -209,12 +201,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     /**
      * This method helps to extract only supported operation names
+     *
      * @param list URITemplates
      * @return supported Fields
      */
     private ArrayList<String> getSupportedFields(List<URITemplate> list) {
         ArrayList<String> supportedFields = new ArrayList<>();
-        for(URITemplate template: list) {
+        for (URITemplate template : list) {
             supportedFields.add(template.getUriTemplate());
         }
         return supportedFields;
@@ -240,50 +233,52 @@ public class GraphQLAPIHandler extends AbstractHandler {
         if (schema != null) {
             Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
             for (GraphQLType additionalType : additionalTypes) {
-                String[] additionalTypeNameArray = additionalType.getName().split("_", 2);
-                if (additionalTypeNameArray.length > 1) {
-                    String additionalTypeName = additionalTypeNameArray[1];
-                    String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
-                    for (GraphQLType type : additionalType.getChildren()) {
-                        if (additionalType.getName().contains(APIConstants.SCOPE_ROLE_MAPPING)) {
-                            String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            roleArrayList = new ArrayList<>();
-                            roleArrayList.add(base64DecodedURLRole);
-                        } else if (additionalType.getName().contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
-                            String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Added operation " + base64DecodedAdditionalType + "with scope "
-                                        + base64DecodedURLScope);
-                            }
-                        } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
-                            String base64DecodedURLThrottlingTier = new String(Base64.getUrlDecoder().decode(type.getName()));
-                            operationThrottlingMappingList.put(base64DecodedAdditionalType, base64DecodedURLThrottlingTier);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Added operation " + base64DecodedAdditionalType + "with throttling "
-                                        + base64DecodedURLThrottlingTier);
-                            }
+                if (additionalType.getName().startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX)) {
+                    String[] additionalTypeNameArray = additionalType.getName().split("_", 2);
+                    if (additionalTypeNameArray.length > 1) {
+                        String additionalTypeName = additionalTypeNameArray[1];
+                        String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
+                        for (GraphQLType type : additionalType.getChildren()) {
+                            if (additionalType.getName().contains(APIConstants.SCOPE_ROLE_MAPPING)) {
+                                String base64DecodedURLRole = new String(Base64.getUrlDecoder().decode(type.getName()));
+                                roleArrayList = new ArrayList<>();
+                                roleArrayList.add(base64DecodedURLRole);
+                            } else if (additionalType.getName().contains(APIConstants.SCOPE_OPERATION_MAPPING)) {
+                                String base64DecodedURLScope = new String(Base64.getUrlDecoder().decode(type.getName()));
+                                operationScopeMappingList.put(base64DecodedAdditionalType, base64DecodedURLScope);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Added operation " + base64DecodedAdditionalType + "with scope "
+                                            + base64DecodedURLScope);
+                                }
+                            } else if (additionalType.getName().contains(APIConstants.OPERATION_THROTTLING_MAPPING)) {
+                                String base64DecodedURLThrottlingTier = new String(Base64.getUrlDecoder().decode(type.getName()));
+                                operationThrottlingMappingList.put(base64DecodedAdditionalType, base64DecodedURLThrottlingTier);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Added operation " + base64DecodedAdditionalType + "with throttling "
+                                            + base64DecodedURLThrottlingTier);
+                                }
 
-                        } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
-                            boolean isSecurityEnabled = true;
-                            if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
-                                isSecurityEnabled = false;
-                            }
-                            operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
-                            if (log.isDebugEnabled()) {
-                                log.debug("Added operation " + base64DecodedAdditionalType + "with security "
-                                        + isSecurityEnabled);
-                            }
+                            } else if (additionalType.getName().contains(APIConstants.OPERATION_AUTH_SCHEME_MAPPING)) {
+                                boolean isSecurityEnabled = true;
+                                if (APIConstants.OPERATION_SECURITY_DISABLED.equalsIgnoreCase(type.getName())) {
+                                    isSecurityEnabled = false;
+                                }
+                                operationAuthSchemeMappingList.put(base64DecodedAdditionalType, isSecurityEnabled);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Added operation " + base64DecodedAdditionalType + "with security "
+                                            + isSecurityEnabled);
+                                }
 
-                        } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
-                            graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            } else if (additionalType.getName().contains(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY)) {
+                                graphQLAccessControlPolicy = new String(Base64.getUrlDecoder().decode(type.getName()));
+                            }
                         }
-                    }
-                    if (!roleArrayList.isEmpty()) {
-                        scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Added scope " + base64DecodedAdditionalType + "with role list "
-                                    + String.join(",", roleArrayList));
+                        if (!roleArrayList.isEmpty()) {
+                            scopeRoleMappingList.put(base64DecodedAdditionalType, roleArrayList);
+                            if (log.isDebugEnabled()) {
+                                log.debug("Added scope " + base64DecodedAdditionalType + "with role list "
+                                        + String.join(",", roleArrayList));
+                            }
                         }
                     }
                 }
