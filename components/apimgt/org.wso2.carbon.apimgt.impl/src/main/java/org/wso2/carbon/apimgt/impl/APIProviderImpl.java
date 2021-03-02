@@ -9073,6 +9073,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 /////////////////// Do processing on the data object//////////
                 populateAPIInformation(uuid, requestedTenantDomain, org, api);
                 loadMediationPoliciesToAPI(api, requestedTenantDomain);
+                populateRevisionInformation(api, uuid);
+                populateAPIStatus(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -9087,6 +9089,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private void populateRevisionInformation(API api, String revisionUUID) throws APIManagementException {
+        APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(revisionUUID);
+        if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
+            api.setRevision(true);
+            api.setRevisionedApiId(apiRevision.getApiUUID());
+            api.setRevisionId(apiRevision.getId());
+        }
+    }
+    private void populateRevisionInformation(APIProduct apiProduct, String revisionUUID) throws APIManagementException {
+        APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(revisionUUID);
+        if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
+            apiProduct.setRevision(true);
+            apiProduct.setRevisionedApiProductId(apiRevision.getApiUUID());
+            apiProduct.setRevisionId(apiRevision.getId());
+        }
+    }
+
+    private void populateAPIStatus(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getRevisionedApiId()));
+        } else {
+            api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
+        }
+    }
+
+    private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
+        if (apiProduct.isRevision()) {
+            apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getRevisionedApiProductId()));
+        } else {
+            apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getUuid()));
+        }
+    }
+
     public APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Organization org = new Organization(requestedTenantDomain);
@@ -9098,6 +9133,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
                         product.getAccessControlRoles());
                 populateAPIProductInformation(uuid, requestedTenantDomain, org, product);
+                populateRevisionInformation(product, uuid);
+                populateAPIStatus(product);
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
@@ -9134,6 +9171,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<Object> apiList = new ArrayList<>();
                 for (PublisherAPIInfo publisherAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateAPIStatus(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
