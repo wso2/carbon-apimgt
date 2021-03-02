@@ -38,6 +38,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+
 /**
  * This mediator would persist delivery status of the callback urls of the subscriptions.
  */
@@ -70,7 +72,8 @@ public class DeliveryStatusUpdater extends AbstractMediator {
             String applicationID = (String) messageContext.getProperty(APIConstants.Webhooks.
                     SUBSCRIBER_APPLICATION_ID_PROPERTY);
             String requestBody = generateRequestBody(apiKey, applicationID, tenantDomain, callback, topicName, status);
-            if (APIUtil.isAnalyticsEnabled()) {
+            boolean isSubscribeRequest = messageContext.getProperty(ASYNC_MESSAGE_TYPE) != null;
+            if (APIUtil.isAnalyticsEnabled() && !isSubscribeRequest) {
                 WebhooksUtils.publishAnalyticsData(messageContext);
             }
             WebhooksUtils.persistData(requestBody, deliveryDataPersisRetries, APIConstants.Webhooks.DELIVERY_EVENT_TYPE);

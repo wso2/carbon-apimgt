@@ -142,7 +142,7 @@ public class WebhooksUtils {
      */
     public static List<WebhooksDTO> getSubscribersListFromInMemoryMap(MessageContext messageContext)
             throws URISyntaxException {
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+        String tenantDomain = (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY);
         String apiKey = WebhooksUtils.generateAPIKey(messageContext, tenantDomain);
         String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(APIConstants.TRANSPORT_URL_IN);

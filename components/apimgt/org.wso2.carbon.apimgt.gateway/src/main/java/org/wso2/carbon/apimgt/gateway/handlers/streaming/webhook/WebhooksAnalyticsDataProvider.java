@@ -18,9 +18,9 @@
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook;
 
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -42,7 +42,7 @@ public class WebhooksAnalyticsDataProvider extends AsyncAnalyticsDataProvider {
 
     @Override
     public Operation getOperation() {
-        String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+        String httpMethod = (String) messageContext.getProperty(RESTConstants.REST_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.Webhooks.
                 SUBSCRIBER_TOPIC_PROPERTY);
         Operation operation = new Operation();
