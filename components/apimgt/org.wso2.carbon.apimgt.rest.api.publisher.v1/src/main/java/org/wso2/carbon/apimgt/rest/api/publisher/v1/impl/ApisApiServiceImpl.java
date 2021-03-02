@@ -4727,7 +4727,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
             }
             String protocol = validationResponse.getProtocol();
-            if (!APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(protocol)) {
+            if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
                 api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
                         protocol));
             }
@@ -4876,7 +4876,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .getServiceUrl(), protocol));
                 }
             }
-            API addedAPI = apiProvider.addAPI(apiToAdd);
+            apiProvider.addAPI(apiToAdd);
             apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
 
             //load topics from AsyncAPI
@@ -4885,8 +4885,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } catch (FaultGatewaysException e) {
                 e.printStackTrace();
             }
-            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
-            return APIMappingUtil.fromAPItoDTO(addedAPI);
+            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();

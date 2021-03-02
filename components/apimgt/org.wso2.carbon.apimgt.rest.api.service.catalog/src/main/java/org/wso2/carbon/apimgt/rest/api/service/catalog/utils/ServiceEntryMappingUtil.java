@@ -187,7 +187,6 @@ public class ServiceEntryMappingUtil {
         serviceDTO.setMd5(service.getMd5());
         serviceDTO.setServiceKey(service.getKey());
         if (!shrink) {
-            serviceDTO.setDisplayName(service.getDisplayName());
             serviceDTO.setServiceUrl(service.getServiceUrl());
             serviceDTO.setDefinitionType(ServiceDTO.DefinitionTypeEnum.fromValue(service.getDefinitionType()
                     .toString()));
@@ -246,8 +245,8 @@ public class ServiceEntryMappingUtil {
      * @return
      */
     public static ServiceFilterParams getServiceFilterParams(String name, String version, String definitionType,
-                                                             String displayName, String key, String sortBy,
-                                                             String sortOrder, Integer limit, Integer offset) {
+                                                             String key, String sortBy, String sortOrder, Integer limit,
+                                                             Integer offset) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -256,14 +255,12 @@ public class ServiceEntryMappingUtil {
         name = name != null ? name : StringUtils.EMPTY;
         version = version != null ? version : StringUtils.EMPTY;
         definitionType = definitionType != null ? definitionType : StringUtils.EMPTY;
-        displayName = displayName != null ? displayName : StringUtils.EMPTY;
         key = key != null ? key : StringUtils.EMPTY;
 
         ServiceFilterParams filterParams = new ServiceFilterParams();
         filterParams.setName(name);
         filterParams.setVersion(version);
         filterParams.setDefinitionType(definitionType);
-        filterParams.setDisplayName(displayName);
         filterParams.setKey(key);
         filterParams.setSortBy(sortBy);
         filterParams.setSortOrder(sortOrder);

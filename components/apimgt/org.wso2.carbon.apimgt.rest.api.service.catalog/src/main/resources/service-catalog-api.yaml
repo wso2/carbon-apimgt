@@ -78,12 +78,6 @@ paths:
               - WSDL2
               - GRAPHQL_SDL
               - ASYNC_API
-        - name: displayName
-          in: query
-          description: |
-            Filter services by the display name
-          schema:
-            type: string
         - name: key
           in: query
           description: |
@@ -113,8 +107,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         401:
           $ref: '#/components/responses/Unauthorized'
-        409:
-          $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalServerError'
 
@@ -591,7 +583,6 @@ components:
         - name
         - version
         - definitionType
-        - displayName
         - serviceUrl
       properties:
         id:
@@ -599,10 +590,6 @@ components:
           example: 01234567-0123-0123-0123-012345678901
           readOnly: true
         name:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        displayName:
           type: string
           pattern: '^[^\*]+$'
           example: Pizzashack-Endpoint
