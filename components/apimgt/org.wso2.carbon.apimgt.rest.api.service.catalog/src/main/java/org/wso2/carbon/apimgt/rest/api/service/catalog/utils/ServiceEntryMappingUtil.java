@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -73,6 +74,7 @@ public class ServiceEntryMappingUtil {
         }
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             service = mapper.readValue(file, ServiceEntry.class);
             if (StringUtils.isBlank(service.getKey())) {
                 service.setKey(generateServiceKey(service));

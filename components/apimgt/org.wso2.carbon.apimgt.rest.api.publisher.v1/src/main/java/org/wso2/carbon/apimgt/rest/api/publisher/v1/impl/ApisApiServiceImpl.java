@@ -4727,7 +4727,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
             }
             String protocol = validationResponse.getProtocol();
-            if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
+            if (!APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(protocol)) {
                 api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
                         protocol));
             }

@@ -4110,7 +4110,6 @@ public class SQLConstants {
                 "   SERVICE_KEY," +
                 "   MD5," +
                 "   SERVICE_NAME," +
-                "   DISPLAY_NAME," +
                 "   SERVICE_VERSION," +
                 "   SERVICE_URL," +
                 "   DEFINITION_TYPE," +

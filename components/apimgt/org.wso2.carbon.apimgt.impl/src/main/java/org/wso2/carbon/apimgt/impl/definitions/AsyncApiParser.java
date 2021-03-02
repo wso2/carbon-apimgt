@@ -1468,8 +1468,7 @@ public class AsyncApiParser extends APIDefinition {
             //AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             /*//Checking whether it is a websocket
             validationErrorMessages = new ArrayList<>();
-            if (asyncApiDocument.getServers().size() == 1) {
-                protocol = asyncApiDocument.getServers().get(0).protocol;
+            if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
                 if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(protocol)) {
                     isWebSocket = true;
                 }
