@@ -55,9 +55,9 @@ public class CommentMappingUtil {
         }
         commentDTO.setCategory(comment.getCategory());
         commentDTO.setParentCommentId(comment.getParentCommentID());
-        if (comment.getEntryPoint().equals("devPortal")){
+        if (comment.getEntryPoint().equals("DEVPORTAL")){
             commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.DEVPORTAL);
-        } else if (comment.getEntryPoint().equals("publisher")){
+        } else if (comment.getEntryPoint().equals("PUBLISHER")){
             commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.PUBLISHER);
         }
         commentDTO.setReplies(fromCommentListToDTO(comment.getReplies().toArray(

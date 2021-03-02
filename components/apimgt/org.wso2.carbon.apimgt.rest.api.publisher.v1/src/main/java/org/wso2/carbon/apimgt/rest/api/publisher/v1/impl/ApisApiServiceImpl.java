@@ -345,7 +345,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
             comment.setParentCommentID(replyTo);
-            comment.setEntryPoint("publisher");
+            comment.setEntryPoint("PUBLISHER");
             comment.setUser(username);
             comment.setApiId(apiId);
             String createdCommentId = apiProvider.addComment(identifier, comment, username);
