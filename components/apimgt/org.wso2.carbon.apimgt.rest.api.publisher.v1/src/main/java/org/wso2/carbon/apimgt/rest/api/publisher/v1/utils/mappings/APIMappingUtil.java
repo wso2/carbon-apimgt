@@ -1934,7 +1934,11 @@ public class APIMappingUtil {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             try {
                 Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                defaultThrottlingPolicy = tierMap.keySet().toArray()[0].toString();
+                if (tierMap.size() > 0) {
+                    defaultThrottlingPolicy = tierMap.keySet().toArray()[0].toString();
+                } else {
+                    log.error("No throttle policies available in the tenant " + tenantDomain);
+                }
             } catch (APIManagementException e) {
                 log.error("Error while getting throttle policies for tenant " + tenantDomain);
             }
