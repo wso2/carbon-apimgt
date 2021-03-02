@@ -1928,11 +1928,28 @@ public class APIMappingUtil {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
 
+        String defaultThrottlingPolicy = APIConstants.UNLIMITED_TIER;
+        if (!APIUtil.isEnabledUnlimitedTier()) {
+            // Set an available value if the Unlimited policy is disabled
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            try {
+                Map<String, Tier> tierMap = APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                if (tierMap.size() > 0) {
+                    defaultThrottlingPolicy = tierMap.keySet().toArray()[0].toString();
+                } else {
+                    log.error("No throttle policies available in the tenant " + tenantDomain);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while getting throttle policies for tenant " + tenantDomain);
+            }
+
+        }
+
         for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             operationsDTO.setTarget("/*");
             operationsDTO.setVerb(verb);
-            operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
+            operationsDTO.setThrottlingPolicy(defaultThrottlingPolicy);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);
         }
