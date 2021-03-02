@@ -53,13 +53,9 @@ public class AsyncAnalyticsDataProvider extends SynapseAnalyticsDataProvider {
     public Operation getOperation() throws DataNotFoundException {
 
         Operation operation = super.getOperation();
-        String eventName = "";
         Object eventPrefix = messageContext.getProperty(ASYNC_MESSAGE_TYPE);
         if (eventPrefix != null) {
-            eventName = eventPrefix.toString();
-        }
-        if (!eventName.isEmpty()) {
-            operation.setApiResourceTemplate(eventName + operation.getApiResourceTemplate());
+            operation.setApiResourceTemplate(eventPrefix.toString() + operation.getApiResourceTemplate());
         }
         return operation;
     }

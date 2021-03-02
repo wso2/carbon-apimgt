@@ -134,10 +134,8 @@ public class SseResponseStreamInterceptor extends DefaultStreamInterceptor {
         SseResponseEventDataProvider provider = (SseResponseEventDataProvider) responseEventProvider;
         provider.setResponseCode((int) axi2Ctx.getProperty(SynapseConstants.HTTP_SC));
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
-        int count = 1;
-        while (count <= eventCount) {
+        for (int count = 0; count < eventCount; count++) {
             dataCollector.collectData();
-            count++;
         }
     }
 
