@@ -463,7 +463,8 @@ public class APIGatewayManager {
                 String secureVaultAlias = api.getId().getProviderName() + "--" + api.getId().getApiName() +
                         api.getId().getVersion();
                 //for production endpoints
-                if (isProductionEndpointSecured) {
+                if (isProductionEndpointSecured && !productionEndpointSecurity.isNull("type")
+                        && "BASIC".equals(productionEndpointSecurity.getString("type"))) {
                     CredentialDto credentialDto = new CredentialDto();
                     credentialDto.setAlias(secureVaultAlias.concat("--").concat(APIConstants.
                             ENDPOINT_SECURITY_PRODUCTION));
@@ -477,7 +478,8 @@ public class APIGatewayManager {
                     }
                 }
                 // for sandbox endpoints
-                if (isSandboxEndpointSecured) {
+                if (isSandboxEndpointSecured && !sandboxEndpointSecurity.isNull("type")
+                        && "BASIC".equals(sandboxEndpointSecurity.getString("type"))) {
                     CredentialDto credentialDto = new CredentialDto();
                     credentialDto.setAlias(secureVaultAlias.concat("--").concat(APIConstants.
                             ENDPOINT_SECURITY_SANDBOX));
