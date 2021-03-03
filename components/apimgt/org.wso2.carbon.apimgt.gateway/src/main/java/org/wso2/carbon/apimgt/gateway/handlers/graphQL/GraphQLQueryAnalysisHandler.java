@@ -35,12 +35,9 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
-import org.bouncycastle.eac.EACException;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +103,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             }
         } catch (Exception e) {
             String errorMessage = "Policy definition parsing failed. ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            handleFailure(APISecurityConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);
         }
         return false;
     }
