@@ -154,6 +154,7 @@ public class APIGatewayManagerTest {
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
         apiIdentifier = new APIIdentifier(provider, apiName, version);
         TestUtils.initConfigurationContextService(false);
+        PowerMockito.when(APIUtil.getEnvironments()).thenReturn(environments);
         gatewayManager = APIGatewayManager.getInstance();
 
         Map<String, Environment> environmentList = config.getApiGatewayEnvironments();

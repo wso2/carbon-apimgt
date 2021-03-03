@@ -52,12 +52,13 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
@@ -71,7 +72,6 @@ import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -99,6 +99,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     private static final String HANDLE_THROTTLE_OUT = "HANDLE_THROTTLE_OUT";
     private static final String RESOURCE_THROTTLE = "RESOURCE_THROTTLE";
     private static final String BLOCKED_TEST = "BLOCKED_TEST";
+    private final String type = ExtensionType.THROTTLING.toString();
 
     /**
      * The key for getting the throttling policy - key refers to a/an [registry] Resource entry
@@ -500,13 +501,18 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
 
     /**
-     * HAndle incoming requests and call throttling method to perform throttling.
+     * Handle incoming requests and call throttling method to perform throttling.
      *
      * @param messageContext message context object which contains message details.
      * @return return true if message flow need to continue and pass requests to next handler in chain. Else return
      * false to notify error with handler
      */
     public boolean handleRequest(MessageContext messageContext) {
+
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+            return true;
+        }
+
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
                     "has not been initialised");
@@ -524,8 +530,15 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             throttleLatencySpan = Util.startSpan(APIMgtGatewayConstants.THROTTLE_LATENCY, responseLatencySpan, tracer);
         }
         long executionStartTime = System.currentTimeMillis();
+        if (!ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
+            return false;
+        }
         try {
-            return doThrottle(messageContext);
+            boolean throttleResponse = doThrottle(messageContext);
+            if (!ExtensionListenerUtil.postProcessRequest(messageContext, type)) {
+                return false;
+            }
+            return throttleResponse;
         } catch (Exception e) {
             if (Util.tracingEnabled() && throttleLatencySpan != null) {
                 Util.setTag(throttleLatencySpan, APIMgtGatewayConstants.ERROR,
@@ -553,7 +566,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
      */
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
-        return true;
+
+        if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            return ExtensionListenerUtil.postProcessResponse(messageContext, type);
+        }
+        return false;
     }
 
 
@@ -987,7 +1004,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 key = key.replaceAll("\\$appTenant", appTenant);
                 key = key.replaceAll("\\$apiTenant", apiTenant);
                 key = key.replaceAll("\\$appId", appId);
-                if (clientIp != null){
+                if (clientIp != null) {
                     key = key.replaceAll("\\$clientIp", APIUtil.ipToBigInteger(clientIp).toString());
                 }
                 if (getThrottleDataHolder().isThrottled(key)) {

@@ -25,9 +25,11 @@ import java.util.Date;
  * This class represents the model for webhook subscriptions
  */
 public class Subscription implements Serializable {
-    private String apiKey;
     private String tenantDomain;
+    private int tenantId;
     private String apiUuid;
+    private String apiContext;
+    private String apiVersion;
     private String appID;
     private String callback;
     private String topic;
@@ -36,6 +38,10 @@ public class Subscription implements Serializable {
     private long expiryTime;
     private Date lastDelivery;
     private int lastDeliveryState;
+    private String tier;
+    private String applicationTier;
+    private String apiTier;
+    private String subscriberName;
 
     public String getAppID() {
         return appID;
@@ -123,13 +129,59 @@ public class Subscription implements Serializable {
         this.apiUuid = apiUuid;
     }
 
-    public String getApiKey() {
-
-        return apiKey;
+    public int getTenantId() {
+        return tenantId;
     }
 
-    public void setApiKey(String apiKey) {
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
 
-        this.apiKey = apiKey;
+    public String getApiContext() {
+        return apiContext;
+    }
+
+    public void setApiContext(String apiContext) {
+        this.apiContext = apiContext;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+    }
+
+    public String getTier() {
+        return tier;
+    }
+
+    public void setTier(String tier) {
+        this.tier = tier;
+    }
+
+    public String getApplicationTier() {
+        return applicationTier;
+    }
+
+    public void setApplicationTier(String applicationTier) {
+        this.applicationTier = applicationTier;
+    }
+
+    public String getApiTier() {
+        return apiTier;
+    }
+
+    public void setApiTier(String apiTier) {
+        this.apiTier = apiTier;
+    }
+
+    public String getSubscriberName() {
+        return subscriberName;
+    }
+
+    public void setSubscriberName(String subscriberName) {
+        this.subscriberName = subscriberName;
     }
 }

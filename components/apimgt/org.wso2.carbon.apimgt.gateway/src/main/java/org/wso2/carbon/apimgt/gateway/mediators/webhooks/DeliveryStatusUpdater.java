@@ -21,14 +21,24 @@ package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtl;
+import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhooksAnalyticsDataProvider;
+import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
 
 /**
  * This mediator would persist delivery status of the callback urls of the subscriptions.
@@ -42,8 +52,9 @@ public class DeliveryStatusUpdater extends AbstractMediator {
         try {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext();
-            int status = 0;
+            int status = 2;
             Object statusCode = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
+            messageContext.setProperty(Constants.BACKEND_RESPONSE_CODE, statusCode);
             if (statusCode != null) {
                 String responseStatus = statusCode.toString();
                 if (responseStatus.startsWith("2")) {
@@ -57,11 +68,15 @@ public class DeliveryStatusUpdater extends AbstractMediator {
             if (tenantDomain == null) {
                 tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
             }
-            String apiKey = WebhooksUtl.generateAPIKey(messageContext, tenantDomain);
+            String apiKey = WebhooksUtils.generateAPIKey(messageContext, tenantDomain);
             String applicationID = (String) messageContext.getProperty(APIConstants.Webhooks.
                     SUBSCRIBER_APPLICATION_ID_PROPERTY);
             String requestBody = generateRequestBody(apiKey, applicationID, tenantDomain, callback, topicName, status);
-            WebhooksUtl.persistData(requestBody, deliveryDataPersisRetries, APIConstants.Webhooks.DELIVERY_EVENT_TYPE);
+            boolean isSubscribeRequest = messageContext.getProperty(ASYNC_MESSAGE_TYPE) != null;
+            if (APIUtil.isAnalyticsEnabled() && !isSubscribeRequest) {
+                WebhooksUtils.publishAnalyticsData(messageContext);
+            }
+            WebhooksUtils.persistData(requestBody, deliveryDataPersisRetries, APIConstants.Webhooks.DELIVERY_EVENT_TYPE);
         } catch (InterruptedException | IOException e) {
             log.error("Error while persisting delivery status", e);
         }
@@ -83,12 +98,13 @@ public class DeliveryStatusUpdater extends AbstractMediator {
                                        String topicName, int status) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();
-        node.put(APIConstants.Webhooks.API_KEY_PROPERTY, apiKey);
-        node.put(APIConstants.Webhooks.APP_ID_PROPERTY,applicationID);
-        node.put(APIConstants.Webhooks.TENANT_DOMAIN_PROPERTY, tenantDomain);
-        node.put(APIConstants.Webhooks.CALLBACK_PROPERTY, callback);
-        node.put(APIConstants.Webhooks.TOPIC_PROPERTY, topicName);
-        node.put(APIConstants.Webhooks.STATUS_PROPERTY, status);
+        node.put(APIConstants.Webhooks.API_UUID, apiKey);
+        node.put(APIConstants.Webhooks.APP_ID,applicationID);
+        node.put(APIConstants.Webhooks.TENANT_DOMAIN, tenantDomain);
+        node.put(APIConstants.Webhooks.CALLBACK, callback);
+        node.put(APIConstants.Webhooks.TOPIC, topicName);
+        node.put(APIConstants.Webhooks.STATUS, status);
         return node.toString();
     }
+
 }

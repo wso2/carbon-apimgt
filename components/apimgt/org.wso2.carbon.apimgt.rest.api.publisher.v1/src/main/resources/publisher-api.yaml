@@ -426,13 +426,13 @@ paths:
   /apis/{apiId}/topics:
     put:
       tags:
-      - APIs
+        - APIs
       summary: Update Topics
       description: This operation can be used to update topics of an existing API.
       operationId: updateTopics
       parameters:
-      - $ref: '#/components/parameters/apiId'
-      - $ref: '#/components/parameters/If-Match'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: API object that needs to be added
         content:
@@ -688,6 +688,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
+
 
   /apis/{apiId}/generated-mock-scripts:
     get:
@@ -1120,26 +1121,26 @@ paths:
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
       parameters:
-      - name: newVersion
-        in: query
-        description: Version of the new API.
-        required: true
-        schema:
-          maxLength: 30
-          type: string
-      - name: defaultVersion
-        in: query
-        description: Specifies whether new API should be added as default version.
-        schema:
-          type: boolean
-          default: false
-      - name: serviceVersion
-        in: query
-        description: Version of the Service that will used in creating new version
-        schema:
-          type: string
-        required: false
-      - $ref: '#/components/parameters/apiId-Q'
+        - name: newVersion
+          in: query
+          description: Version of the new API.
+          required: true
+          schema:
+            maxLength: 30
+            type: string
+        - name: defaultVersion
+          in: query
+          description: Specifies whether new API should be added as default version.
+          schema:
+            type: boolean
+            default: false
+        - name: serviceVersion
+          in: query
+          description: Version of the Service that will used in creating new version
+          schema:
+            type: string
+          required: false
+        - $ref: '#/components/parameters/apiId-Q'
       responses:
         201:
           description: |
@@ -4105,6 +4106,37 @@ paths:
       x-examples:
         $ref: docs/examples/external-stores/external_stores.yaml#/publishToExternalStore
 
+  /apis/{apiId}/generate-key:
+    post:
+      tags:
+        - APIs
+      summary: Generate internal API Key to invoke APIS.
+      description: |
+        This operation can be used to generate internal api key which used to invoke API.
+      operationId: generateInternalAPIKey
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            apikey generated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_generate_key
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-key"'
+
   /apis/export:
     get:
       tags:
@@ -4562,6 +4594,56 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v2/throttling-policies/api"'
+
+  ######################################################
+  # The "Subscription Throttling Based on Quota Type" resource APIs
+  ######################################################
+  /throttling-policies/streaming/subscription:
+    get:
+      tags:
+        - Throttling Policies
+      summary: Get subscription throttling policies based on quota type
+      description: |
+        This operation can be used to list the available subscription policies for a given tenent ID based on the given quota type.
+        Quota Type should be provide as a query parameters and supported Quota types are "requestCount" ,"bandwidthVolume" and "eventCount"
+      operationId: getSubscriptionThrottlingPolicies
+      parameters:
+        - $ref: '#/components/parameters/tierQuotaType'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            List of subscription policies returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThrottlingPolicyList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+          content: {}
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/throttling-policies/subscription?tierQuotaType=RequestCountLimit"'
 
   ######################################################
   # The "Individual Throttling Tier" resource APIs
@@ -8574,7 +8656,14 @@ components:
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
         name:
           type: string
-          example: production and sandbox
+          example: default
+        vhost:
+          maxLength: 255
+          minLength: 1
+          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
+          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+          type: string
+          example: mg.wso2.com
         displayOnDevportal:
           type: boolean
           example: true
@@ -9489,7 +9578,10 @@ components:
       properties:
         name:
           type: string
-          example: Production and Sandbox
+          example: default
+        displayName:
+          type: string
+          example: Default
         type:
           type: string
           example: hybrid
@@ -9501,6 +9593,10 @@ components:
           example: true
         endpoints:
           $ref: '#/components/schemas/EnvironmentEndpoints'
+        vhosts:
+          type: array
+          items:
+            $ref: '#/components/schemas/VHost'
     EnvironmentList:
       title: Environment List
       type: object
@@ -9534,6 +9630,28 @@ components:
           type: string
           description: WSS environment URL
           example: https://localhost:8099
+    VHost:
+      title: Virtual Host
+      type: object
+      properties:
+        host:
+          type: string
+          example: mg.wso2.com
+        httpContext:
+          type: string
+          example: pets
+        httpPort:
+          type: integer
+          example: 80
+        httpsPort:
+          type: integer
+          example: 443
+        wsPort:
+          type: integer
+          example: 9099
+        wssPort:
+          type: integer
+          example: 8099
     FileInfo:
       title: File Information including meta data
       type: object
@@ -10915,6 +11033,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/KeyManagerInfo'
+    APIKey:
+      title: API Key details to invoke APIs
+      type: object
+      properties:
+        apikey:
+          type: string
+          description: API Key
+          example: eyJoZWxsbyI6IndvcmxkIn0=.eyJ3c28yIjoiYXBpbSJ9.eyJ3c28yIjoic2lnbmF0dXJlIn0=
+        validityTime:
+          type: integer
+          format: int32
+          example: 3600
     DeploymentList:
       title: Deployment List
       type: object
@@ -11077,6 +11207,9 @@ components:
             asyncAPIVersion:
               type: string
               example: 2.0
+            protocol:
+              type: string
+              example: WEBSUB
             endpoints:
               type: array
               description:
@@ -11563,6 +11696,12 @@ components:
       required: true
       schema:
         type: string
+    tierQuotaType:
+      name: tierQuotaType
+      description: Filter the subscription base on tier quota type
+      in: query
+      schema:
+        type: string
   requestBodies:
     threatProtectionPolicy:
       description: |
@@ -11606,3 +11745,4 @@ components:
             apim:app_import_export: Import and export applications related operations
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related operations
+            apim:api_generate_key: Generate Internal Key

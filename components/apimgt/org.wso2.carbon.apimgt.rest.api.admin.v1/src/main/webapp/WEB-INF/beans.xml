@@ -50,6 +50,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.BotDetectionDataApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.RolesApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

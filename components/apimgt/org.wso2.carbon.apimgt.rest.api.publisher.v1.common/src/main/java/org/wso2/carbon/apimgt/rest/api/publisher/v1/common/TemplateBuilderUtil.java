@@ -118,7 +118,8 @@ public class TemplateBuilderUtil {
                     }
                     if (allowHeaders.length() != 0) {
                         allowHeaders.deleteCharAt(allowHeaders.length() - 1);
-                        corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE, allowHeaders.toString());
+                        corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE,
+                                allowHeaders.toString());
                     }
                 }
                 if (corsConfiguration.getAccessControlAllowOrigins() != null) {
@@ -128,7 +129,8 @@ public class TemplateBuilderUtil {
                     }
                     if (allowOrigins.length() != 0) {
                         allowOrigins.deleteCharAt(allowOrigins.length() - 1);
-                        corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE, allowOrigins.toString());
+                        corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE,
+                                allowOrigins.toString());
                     }
                 }
                 if (corsConfiguration.getAccessControlAllowMethods() != null) {
@@ -138,7 +140,8 @@ public class TemplateBuilderUtil {
                     }
                     if (allowedMethods.length() != 0) {
                         allowedMethods.deleteCharAt(allowedMethods.length() - 1);
-                        corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE, allowedMethods.toString());
+                        corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE,
+                                allowedMethods.toString());
                     }
                 }
                 if (corsConfiguration.isAccessControlAllowCredentials()) {
@@ -152,9 +155,91 @@ public class TemplateBuilderUtil {
                         , corsProperties);
             }
         }
-        if (APIConstants.PROTOTYPED.equals(api.getStatus())) {
+        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
+        Map<String, String> clientCertificateObject = null;
+        CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+        if (clientCertificateDTOS != null) {
+            clientCertificateObject = new HashMap<>();
+            for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
+                clientCertificateObject.put(certificateMgtUtils
+                                .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
+                        clientCertificateDTO.getTierName());
+            }
+        }
+
+        Map<String, String> authProperties = new HashMap<>();
+        if (!StringUtils.isBlank(authorizationHeader)) {
+            authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        }
+        String apiSecurity = api.getApiSecurity();
+        String apiLevelPolicy = api.getApiLevelPolicy();
+        authProperties.put(APIConstants.API_SECURITY, apiSecurity);
+        authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+        if (clientCertificateObject != null) {
+            authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
+        }
+        //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
+        String removeHeaderFromOutMessage = APIUtil
+                .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+        if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
+            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
+        } else {
+            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
+                    APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
+        }
+        authProperties.put(APIConstants.API_UUID, api.getUUID());
+        authProperties.put("keyManagers", String.join(",", api.getKeyManagers()));
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            Map<String, String> apiUUIDProperty = new HashMap<String, String>();
+            apiUUIDProperty.put(APIConstants.API_UUID, api.getUUID());
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
+                    apiUUIDProperty);
+        }
+
+        if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
+            authProperties.put(APIConstants.WebHookProperties.EVENT_RECEIVING_RESOURCE_PATH,
+                    APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH);
+            authProperties.put(APIConstants.WebHookProperties.TOPIC_QUERY_PARAM_NAME,
+                    APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME);
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhookApiHandler",
+                    authProperties);
+        } else if (APIConstants.APITransportType.SSE.toString().equals(api.getType())) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiHandler",
+                    authProperties);
+        } else if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
+                    authProperties);
+        }
+
+        if (APIConstants.GRAPHQL_API.equals(api.getType())) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler",
+                    Collections.<String, String>emptyMap());
+        }
+
+        if (!APIUtil.isStreamingApi(api)) {
+            Map<String, String> properties = new HashMap<String, String>();
+
+            if (api.getProductionMaxTps() != null) {
+                properties.put("productionMaxCount", api.getProductionMaxTps());
+            }
+
+            if (api.getSandboxMaxTps() != null) {
+                properties.put("sandboxMaxCount", api.getSandboxMaxTps());
+            }
+
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
+                    , properties);
+
+
+
+            properties = new HashMap<String, String>();
+            properties.put("configKey", APIConstants.GA_CONF_KEY);
+            vtb.addHandler(
+                    "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
+                    , properties);
+
             String extensionHandlerPosition = getExtensionHandlerPosition(tenantDomain);
-            if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
+            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.<String, String>emptyMap(), 0);
@@ -162,100 +247,6 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.<String, String>emptyMap());
             }
-        }
-        if (!APIConstants.PROTOTYPED.equals(api.getStatus())) {
-
-            Map<String, String> clientCertificateObject = null;
-            CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
-            if (clientCertificateDTOS != null) {
-                clientCertificateObject = new HashMap<>();
-                for (ClientCertificateDTO clientCertificateDTO : clientCertificateDTOS) {
-                    clientCertificateObject.put(certificateMgtUtils
-                                    .getUniqueIdentifierOfCertificate(clientCertificateDTO.getCertificate()),
-                            clientCertificateDTO.getTierName());
-                }
-            }
-
-            Map<String, String> authProperties = new HashMap<>();
-            if (!StringUtils.isBlank(authorizationHeader)) {
-                authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
-            }
-            String apiSecurity = api.getApiSecurity();
-            String apiLevelPolicy = api.getApiLevelPolicy();
-            authProperties.put(APIConstants.API_SECURITY, apiSecurity);
-            authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
-            if (clientCertificateObject != null) {
-                authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
-            }
-            //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
-            String removeHeaderFromOutMessage = APIUtil
-                    .getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
-            if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
-                authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
-            } else {
-                authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE,
-                        APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE_DEFAULT);
-            }
-            authProperties.put(APIConstants.API_UUID, api.getUUID());
-            authProperties.put("keyManagers", String.join(",", api.getKeyManagers()));
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                Map<String, String> apiUUIDProperty = new HashMap<String, String>();
-                apiUUIDProperty.put(APIConstants.API_UUID, api.getUUID());
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLAPIHandler",
-                        apiUUIDProperty);
-            }
-
-            if (APIConstants.APITransportType.WEBSUB.toString().equals(api.getType())) {
-                authProperties.put(APIConstants.WebHookProperties.EVENT_RECEIVING_RESOURCE_PATH,
-                        APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH);
-                authProperties.put(APIConstants.WebHookProperties.TOPIC_QUERY_PARAM_NAME,
-                        APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME);
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhookApiHandler",
-                        authProperties);
-            } else if (APIConstants.APITransportType.SSE.toString().equals(api.getType())) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiHandler",
-                        authProperties);
-            } else if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
-                        authProperties);
-            }
-
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler",
-                        Collections.<String, String>emptyMap());
-            }
-
-            if (!APIUtil.isStreamingApi(api)) {
-                Map<String, String> properties = new HashMap<String, String>();
-
-                if (api.getProductionMaxTps() != null) {
-                    properties.put("productionMaxCount", api.getProductionMaxTps());
-                }
-
-                if (api.getSandboxMaxTps() != null) {
-                    properties.put("sandboxMaxCount", api.getSandboxMaxTps());
-                }
-
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
-                        , properties);
-
-                properties = new HashMap<String, String>();
-                properties.put("configKey", APIConstants.GA_CONF_KEY);
-                vtb.addHandler(
-                        "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler"
-                        , properties);
-
-                String extensionHandlerPosition = getExtensionHandlerPosition(tenantDomain);
-                if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
-                    vtb.addHandlerPriority(
-                            "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                            Collections.<String, String>emptyMap(), 0);
-                } else {
-                    vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                            Collections.<String, String>emptyMap());
-                }
-            }
-
         }
 
         return vtb;
@@ -688,10 +679,10 @@ public class TemplateBuilderUtil {
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
-        String sandboxEndpointUrl =
-                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
-        String productionEndpointUrl =
-                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
+        String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url") : null;
+        String productionEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url") : null;
 
         Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
         for (APIOperationsDTO operation : apidto.getOperations()) {
@@ -699,8 +690,12 @@ public class TemplateBuilderUtil {
             String mapping = operation.getUriMapping() == null ? "" :
                     Paths.get("/", operation.getUriMapping()).toString();
             Map<String, String> endpoints = new HashMap<>();
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
+            if (sandboxEndpointUrl != null) {
+                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
+            }
+            if (productionEndpointUrl != null) {
+                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
+            }
             perTopicMappings.put(key, endpoints);
         }
 

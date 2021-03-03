@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
@@ -5929,29 +5930,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getKeyMappingFromApplicationIdAndKeyMappingId(applicationId, keyMappingId);
     }
 
-    /**
-     * To check whether the DevPortal Anonymous Mode is enabled. It can be either enabled globally or tenant vice.
-     *
-     * @param tenantDomain Tenant domain
-     * @return whether devportal anonymous mode is enabled or not
-     */
-
-    public boolean isDevPortalAnonymousEnabled(String tenantDomain) {
-
-        try {
-            org.json.simple.JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
-            Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE);
-            if (value != null) {
-                return Boolean.parseBoolean(value.toString());
-            } else {
-                return APIUtil.isDevPortalAnonymous();
-            }
-        } catch (APIManagementException e) {
-            log.error("Error while retrieving Anonymous config from registry", e);
-        }
-        return true;
-    }
-
     @Override
     public Set<Topic> getTopics(String apiId) throws APIManagementException {
         return apiMgtDAO.getAPITopics(apiId);
@@ -6057,6 +6035,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
+                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getId()));
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -6373,6 +6352,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
         return super.getAsyncAPIDefinition(apiId);
+    }
+
+    @Override
+    public List<APIRevisionDeployment> getAPIRevisionDeploymentListOfAPI(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getAPIRevisionDeploymentByApiUUID(apiUUID);
     }
 
     /**

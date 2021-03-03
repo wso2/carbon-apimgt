@@ -19,7 +19,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>6.8.246-SNAPSHOT</version>
+        <version>9.0.19-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>bundle</packaging>
@@ -104,21 +104,8 @@
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>Low</threshold>
-                    <xmlOutput>true</xmlOutput>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>

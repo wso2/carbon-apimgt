@@ -31,13 +31,14 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -45,6 +46,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE;
 
 /**
  * Handler used for web hook apis. This handler retrieves the topic name, to which subscription request is coming and
@@ -69,6 +72,9 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     @Override
     public boolean handleRequest(MessageContext synCtx) {
 
+        if (GatewayUtils.isAPIStatusPrototype(synCtx)) {
+            return true;
+        }
         String requestSubPath = getRequestSubPath(synCtx);
         // all other requests are assumed to be for subscription as there will be only 2 resources for web hook api
         if (!requestSubPath.startsWith(eventReceiverResourcePath)) {
@@ -82,6 +88,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
             axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
             synCtx.setProperty(APIConstants.API_TYPE, APIConstants.API_TYPE_WEBSUB);
             synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, topicName);
+            synCtx.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
             boolean authenticationResolved = super.handleRequest(synCtx);
             ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                     setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
@@ -98,6 +105,8 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
                     payload = synCtx.getEnvelope().getBody().getFirstElement().toString();
                 }
                 synCtx.setProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY, payload);
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+                synCtx.setProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY, tenantDomain);
                 return true;
             } catch (IOException | XMLStreamException e) {
                 log.error("Error while building the message", e);

@@ -42,9 +42,12 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.MutualSSLAuthenticator;
+import org.wso2.carbon.apimgt.gateway.handlers.security.authenticator.InternalAPIKeyAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -97,6 +100,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     private OpenAPI openAPI;
     private String keyManagers;
     private List<String> keyManagersList = new ArrayList<>();
+    private final String type = ExtensionType.AUTHENTICATION.toString();
+
     public String getApiUUID() {
         return apiUUID;
     }
@@ -274,29 +279,30 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         // Set authenticators
-        Authenticator authenticator;
         if (isMutualSSLProtected) {
-            authenticator = new MutualSSLAuthenticator(apiLevelPolicy, isMutualSSLMandatory, certificateInformation);
+            Authenticator  authenticator = new MutualSSLAuthenticator(apiLevelPolicy, isMutualSSLMandatory, certificateInformation);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isOAuthProtected) {
-            authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
+            Authenticator authenticator = new OAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory,
                     removeOAuthHeadersFromOutMessage, keyManagersList);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isBasicAuthProtected) {
-            authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
+            Authenticator authenticator = new BasicAuthAuthenticator(authorizationHeader, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
         if (isApiKeyProtected) {
-            authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
+            Authenticator authenticator = new ApiKeyAuthenticator(APIConstants.API_KEY_HEADER_QUERY_PARAM, apiLevelPolicy, isOAuthBasicAuthMandatory);
             authenticator.init(synapseEnvironment);
             authenticators.add(authenticator);
         }
-
+        Authenticator authenticator = new InternalAPIKeyAuthenticator(APIMgtGatewayConstants.INTERNAL_KEY);
+        authenticator.init(synapseEnvironment);
+        authenticators.add(authenticator);
         authenticators.sort(new Comparator<Authenticator>() {
             @Override
             public int compare(Authenticator o1, Authenticator o2) {
@@ -309,6 +315,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+
+        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+            return true;
+        }
+
         TracingSpan keySpan = null;
         if (Util.tracingEnabled()) {
             TracingSpan responseLatencySpan =
@@ -334,49 +345,51 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
 
-            if (authenticators.isEmpty()) {
-                initializeAuthenticators();
-            }
-            try {
-                if (isAuthenticate(messageContext)) {
-                    setAPIParametersToMessageContext(messageContext);
-                    return true;
+            if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
+                if (authenticators.isEmpty()) {
+                    initializeAuthenticators();
                 }
-            } catch (APIManagementException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Authentication of message context failed", e);
+                try {
+                    if (isAuthenticate(messageContext)) {
+                        setAPIParametersToMessageContext(messageContext);
+                        return ExtensionListenerUtil.postProcessRequest(messageContext, type);
+                    }
+                } catch (APIManagementException e) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Authentication of message context failed", e);
+                    }
                 }
             }
-        } catch (APISecurityException  e) {
+        } catch (APISecurityException e) {
 
             if (Util.tracingEnabled() && keySpan != null) {
                 Util.setTag(keySpan, APIMgtGatewayConstants.ERROR, APIMgtGatewayConstants.KEY_SPAN_ERROR);
             }
             if (log.isDebugEnabled()) {
-                // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
-                // to all the gateway calls that is happening.
-                endTime = System.nanoTime();
-                difference = (endTime - startTime) / 1000000;
-                String messageDetails = logMessageDetails(messageContext);
-                log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
-                        difference / 1000000);
-            }
-
-            String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
-
-            if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
-                log.error("API authentication failure due to "
-                        + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
-            } else {
-                // We do not need to log known authentication failures as errors since these are not product errors.
-                log.warn("API authentication failure due to " + errorMessage);
-
-                if (log.isDebugEnabled()) {
-                    log.debug("API authentication failed with error " + e.getErrorCode(), e);
+                    // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
+                    // to all the gateway calls that is happening.
+                    endTime = System.nanoTime();
+                    difference = (endTime - startTime) / 1000000;
+                    String messageDetails = logMessageDetails(messageContext);
+                    log.debug("Call to Key Manager : " + messageDetails + ", elapsedTimeInMilliseconds=" +
+                            difference / 1000000);
                 }
-            }
 
-            handleAuthFailure(messageContext, e);
+                String errorMessage = APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode());
+
+                if (APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE.equals(errorMessage)) {
+                    log.error("API authentication failure due to "
+                            + APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE, e);
+                } else {
+                    // We do not need to log known authentication failures as errors since these are not product errors.
+                    log.warn("API authentication failure due to " + errorMessage);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("API authentication failed with error " + e.getErrorCode(), e);
+                    }
+                }
+
+                handleAuthFailure(messageContext, e);
         } finally {
             if (Util.tracingEnabled()) {
                 Util.finishSpan(keySpan);
@@ -386,7 +399,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             stopMetricTimer(context);
 
         }
-
         return false;
     }
 
@@ -478,7 +490,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
-        return true;
+
+        if (ExtensionListenerUtil.preProcessResponse(messageContext, type)) {
+            return ExtensionListenerUtil.postProcessResponse(messageContext, type);
+        }
+        return false;
+
     }
 
     private void handleAuthFailure(MessageContext messageContext, APISecurityException e) {
@@ -658,11 +675,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
         //if publisher is null,extract the publisher from the api_version
         if (apiPublisher == null) {
-            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(context, version,
-                    GatewayUtils.getTenantDomain());
+            apiPublisher = GatewayUtils.getApiProviderFromContextAndVersion(messageContext);
         }
 
-        String api = GatewayUtils.getAPINameFromContextAndVersion(context,version,GatewayUtils.getTenantDomain());
+        String api = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         String resource = extractResource(messageContext);
         String method = (String) (axis2MsgContext.getProperty(
                 Constants.Configuration.HTTP_METHOD));

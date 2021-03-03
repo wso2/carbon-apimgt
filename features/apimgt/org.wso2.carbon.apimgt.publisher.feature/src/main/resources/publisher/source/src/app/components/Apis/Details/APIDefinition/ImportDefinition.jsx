@@ -127,7 +127,7 @@ export default function ImportDefinition(props) {
         promisedResponse
             .then(() => {
                 Alert.success(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.oas.updated.successfully',
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
                 setOpenAPIDefinitionImport(false);
@@ -141,7 +141,7 @@ export default function ImportDefinition(props) {
             .catch((error) => {
                 console.error(error);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.import.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
                 }));
             }).finally(() => setIsImporting(false));
@@ -172,7 +172,7 @@ export default function ImportDefinition(props) {
         promisedResponse
             .then(() => {
                 Alert.success(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.async.api.import.definition.updated.successfully',
                     defaultMessage: 'API Definition Updated Successfully',
                 }));
                 setAsyncAPIDefinitionImport(false);
@@ -186,7 +186,7 @@ export default function ImportDefinition(props) {
             .catch((error) => {
                 console.error(error);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.import.async.api.definition',
                     defaultMessage: 'Error while updating the API Definition',
                 }));
             }).finally(() => setIsImporting(false));
@@ -383,15 +383,17 @@ export default function ImportDefinition(props) {
 
     return (
         <>
-            <Button
-                size='small'
-                className={classes.button}
-                onClick={handleAPIDefinitionImportOpen}
-                disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
-            >
-                <CloudUploadRounded className={classes.buttonIcon} />
-                {btnText}
-            </Button>
+            {!isAsyncAPI && (
+                <Button
+                    size='small'
+                    className={classes.button}
+                    onClick={handleAPIDefinitionImportOpen}
+                    disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
+                >
+                    <CloudUploadRounded className={classes.buttonIcon} />
+                    {btnText}
+                </Button>
+            )}
             {/* <Dialog
                 onBackdropClick={isWebSocket || isWebSub ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
                 open={isWebSocket || isWebSub ? asyncAPIDefinitionImport : openAPIDefinitionImport}

@@ -826,6 +826,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
             apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+            apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
@@ -928,6 +929,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                 apiRevisionDeployment.setRevisionUUID(revisionId);
                 apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
                 apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
                 apiRevisionDeployments.add(apiRevisionDeployment);
             }
@@ -946,12 +948,6 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProduct api = apiProvider.getAPIProductbyUUID(apiProductId, tenantDomain);
-            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiProductId);
-            if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
-                api.setRevision(true);
-                api.setRevisionedApiProductId(apiRevision.getApiUUID());
-                api.setRevisionId(apiRevision.getId());
-            }
             return APIMappingUtil.fromAPIProducttoDTO(api);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need

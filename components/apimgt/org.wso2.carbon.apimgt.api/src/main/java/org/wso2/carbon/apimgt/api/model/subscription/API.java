@@ -36,6 +36,7 @@ public class API implements CacheableEntity<String> {
     private String apiType = null;
     private Boolean isDefaultVersion = false;
     private String environment;
+    private String status;
     private String revision;
 
     public String getRevision() {
@@ -178,5 +179,15 @@ public class API implements CacheableEntity<String> {
     public void setApiUUID(String apiUUID) {
 
         this.apiUUID = apiUUID;
+    }
+
+    public String getStatus() {
+
+        return status;
+    }
+
+    public void setStatus(String status) {
+
+        this.status = status;
     }
 }

@@ -20,10 +20,12 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,9 +62,11 @@ public class GatewayCertificateManager {
     }
 
     private GatewayCertificateManager() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        environmentMap = config.getApiGatewayEnvironments();
+        try {
+            environmentMap = APIUtil.getEnvironments();
+        } catch (APIManagementException e) {
+            log.error("Error when reading configured Gateway Environments", e);
+        }
     }
 
     /**

@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.commons.throttle.core.AccessInformation;
 import org.apache.synapse.commons.throttle.core.ThrottleException;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -27,24 +28,38 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.gateway.TestUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
+
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Test cases for for ThrottleHandler
+ * Test cases for for ThrottleHandler.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class})
 public class ThrottleHandlerTest {
+
     private Timer timer;
     private Timer.Context context;
     private ThrottleConditionEvaluator throttleEvaluator;
@@ -66,6 +81,7 @@ public class ThrottleHandlerTest {
     private static final String blockedUserWithTenantDomain = "blockedUser@carbon.super";
     private static final String userWithTenantDomain = "user@carbon.super";
     private static final String blockedUserWithOutTenantDomain = "blockedUser";
+    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
     @Before
     public void init() {
@@ -88,6 +104,19 @@ public class ThrottleHandlerTest {
 
         apiLevelThrottleKey = apiContext + ":" + apiVersion;
         resourceLevelThrottleKey = apiContext + "/" + apiVersion + resourceUri + ":" + httpVerb;
+
+        org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder serviceReferenceHolder =
+                Mockito.mock(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.class);
+        Mockito.when(org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder
+                .getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                .class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn
+                (apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getExtensionListenerMap()).thenReturn(extensionListenerMap);
 
     }
 

@@ -412,7 +412,7 @@ function Overview(props) {
                         </Box>
                         <Box>
                             <Divider />
-                            <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
+                            <Link to={'/apis/' + api.id + '/sdk'} className={classes.button}>
                                 <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.sdk.generation.show.more'

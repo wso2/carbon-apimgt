@@ -239,7 +239,7 @@ public class PolicyUtilTest {
                 policy.getTenantDomain(), policy.getId(),
                 policy.getName(), policy.getDefaultLimit().getQuotaType(),
                 policy.getRateLimitCount(), policy.getRateLimitTimeUnit(), policy.isStopOnQuotaReach(),
-                policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity());
+                policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policy.getSubscriberCount());
 
         PolicyUtil.deployPolicy(policy, policyEvent);
         Mockito.verify(eventProcessorService,
@@ -258,7 +258,7 @@ public class PolicyUtilTest {
                 policy.getTenantDomain(), policy.getId(),
                 policy.getName(), policy.getDefaultLimit().getQuotaType(),
                 policy.getRateLimitCount(), policy.getRateLimitTimeUnit(), policy.isStopOnQuotaReach(),
-                policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity());
+                policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policy.getSubscriberCount());
         PolicyUtil.deployPolicy(policy, policyEvent);
         Mockito.verify(eventProcessorService,
                 Mockito.times(1)).editActiveExecutionPlan(Mockito.anyString(), Mockito.anyString());
@@ -272,7 +272,7 @@ public class PolicyUtilTest {
                 policy.getTenantDomain(), policy.getId(),
                 policy.getName(), policy.getDefaultLimit().getQuotaType(),
                 policy.getRateLimitCount(), policy.getRateLimitTimeUnit(), policy.isStopOnQuotaReach(),
-                policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity());
+                policy.getGraphQLMaxDepth(), policy.getGraphQLMaxComplexity(), policy.getSubscriberCount());
         Mockito.when(eventProcessorService.getActiveExecutionPlan(policy.getTenantDomain() + "_" +
                 PolicyConstants.POLICY_LEVEL_SUB +
                 "_" + policy.getName()))

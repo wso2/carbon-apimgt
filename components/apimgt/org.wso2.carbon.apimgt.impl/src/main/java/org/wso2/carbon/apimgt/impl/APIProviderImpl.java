@@ -92,7 +92,6 @@ import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -123,7 +122,9 @@ import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -149,7 +150,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
+import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
+import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
@@ -1554,14 +1557,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!APIConstants.CREATED.equals(api.getStatus()) && !APIConstants.RETIRED
                     .equals(api.getStatus())) {
                 if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                    api.setEnvironments(
-                            ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                    api.setEnvironments(APIUtil.getEnvironments().keySet());
                 }
                 if ("MARKDOWN".equals(api.getImplementation()) && api.getEnvironments().isEmpty()) {
-                    api.setEnvironments(
-                            ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                    .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
+                    api.setEnvironments(APIUtil.getEnvironments().keySet());
                 }
             }
 
@@ -6569,7 +6568,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
                     subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
-                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity());
+                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity(),subPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6853,7 +6852,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
                     subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
-                    subPolicy.getGraphQLMaxComplexity());
+                    subPolicy.getGraphQLMaxComplexity(), subPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -6933,7 +6932,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     subscriptionPolicy.getPolicyName(), subscriptionPolicy.getDefaultQuotaPolicy().getType(),
                     subscriptionPolicy.getRateLimitCount(), subscriptionPolicy.getRateLimitTimeUnit(),
                     subscriptionPolicy.isStopOnQuotaReach(), subscriptionPolicy.getGraphQLMaxDepth(),
-                    subscriptionPolicy.getGraphQLMaxComplexity());
+                    subscriptionPolicy.getGraphQLMaxComplexity(), subscriptionPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policyLevel)) {
             GlobalPolicy globalPolicy = apiMgtDAO.getGlobalPolicy(policyName);
@@ -8098,10 +8097,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 throw new APIManagementException(message);
             }
 
-            APIManagerConfiguration config = getAPIManagerConfiguration();
-            boolean gatewayExists = !config.getApiGatewayEnvironments().isEmpty();
-            String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-
             // gatewayType check is required when API Management is deployed on
             // other servers to avoid synapse
             deleteAPIProductRevisions(apiProduct.getUuid());
@@ -9078,6 +9073,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 /////////////////// Do processing on the data object//////////
                 populateAPIInformation(uuid, requestedTenantDomain, org, api);
                 loadMediationPoliciesToAPI(api, requestedTenantDomain);
+                populateRevisionInformation(api, uuid);
+                populateAPIStatus(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -9092,6 +9089,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private void populateRevisionInformation(API api, String revisionUUID) throws APIManagementException {
+        APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(revisionUUID);
+        if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
+            api.setRevision(true);
+            api.setRevisionedApiId(apiRevision.getApiUUID());
+            api.setRevisionId(apiRevision.getId());
+        }
+    }
+    private void populateRevisionInformation(APIProduct apiProduct, String revisionUUID) throws APIManagementException {
+        APIRevision apiRevision = apiMgtDAO.checkAPIUUIDIsARevisionUUID(revisionUUID);
+        if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
+            apiProduct.setRevision(true);
+            apiProduct.setRevisionedApiProductId(apiRevision.getApiUUID());
+            apiProduct.setRevisionId(apiRevision.getId());
+        }
+    }
+
+    private void populateAPIStatus(API api) throws APIManagementException {
+        if (api.isRevision()) {
+            api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getRevisionedApiId()));
+        } else {
+            api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
+        }
+    }
+
+    private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
+        if (apiProduct.isRevision()) {
+            apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getRevisionedApiProductId()));
+        } else {
+            apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getUuid()));
+        }
+    }
+
     public APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Organization org = new Organization(requestedTenantDomain);
@@ -9103,6 +9133,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkAccessControlPermission(userNameWithoutChange, product.getAccessControl(),
                         product.getAccessControlRoles());
                 populateAPIProductInformation(uuid, requestedTenantDomain, org, product);
+                populateRevisionInformation(product, uuid);
+                populateAPIStatus(product);
                 return product;
             } else {
                 String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + uuid
@@ -9139,6 +9171,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 List<Object> apiList = new ArrayList<>();
                 for (PublisherAPIInfo publisherAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
+                    populateAPIStatus(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -10134,5 +10167,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.error("Error while deleting Runtime artifacts from artifact Store", e);
             }
         }
+    }
+
+    @Override
+    public String generateApiKey(String apiId) throws APIManagementException {
+
+        SubscribedApiDTO apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        if (apiInfo == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
+        jwtTokenInfoDTO.setEndUserName(username);
+        jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(apiInfo));
+        jwtTokenInfoDTO.setExpirationTime(60*1000);
+        ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
+        return apiKeyGenerator.generateToken(jwtTokenInfoDTO);
     }
 }

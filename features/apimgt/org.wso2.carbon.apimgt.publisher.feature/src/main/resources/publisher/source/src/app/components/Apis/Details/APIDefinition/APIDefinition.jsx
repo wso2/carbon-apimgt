@@ -410,7 +410,7 @@ class APIDefinition extends React.Component {
             } catch (err) {
                 console.log(err);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.parsing.api.definition',
                     defaultMessage: 'Error occurred while updating the API Definition',
                 }));
                 return;
@@ -475,7 +475,7 @@ class APIDefinition extends React.Component {
             } catch (err) {
                 console.log(err);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.async.api.definition',
                     defaultMessage: 'Error occurred while updating the API Definition',
                 }));
                 return;
@@ -490,7 +490,7 @@ class APIDefinition extends React.Component {
                 } */
                 if (response) {
                     Alert.success(intl.formatMessage({
-                        id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
+                        id: 'Apis.Details.APIDefinition.APIDefinition.async.api.definition.updated.successfully',
                         defaultMessage: 'API Definition updated successfully',
                     }));
                     if (specFormat && toFormat) {
@@ -513,7 +513,7 @@ class APIDefinition extends React.Component {
                     Alert.error(`${message} ${description}`);
                 } else {
                     Alert.error(intl.formatMessage({
-                        id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                        id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.async.api.definition',
                         defaultMessage: 'Error occurred while updating the API Definition',
                     }));
                 }

@@ -22,18 +22,18 @@ package org.wso2.carbon.apimgt.notification.event;
  */
 public class WebhooksDeliveryEvent extends Event {
 
-    private String apiKey;
+    private String apiUUID;
     private String appID;
     private String callback;
     private String topic;
     private int status;
 
-    public String getApiKey() {
-        return apiKey;
+    public String getApiUUID() {
+        return apiUUID;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void setApiUUID(String apiUUID) {
+        this.apiUUID = apiUUID;
     }
 
     public String getAppID() {

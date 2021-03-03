@@ -333,20 +333,8 @@ class Details extends Component {
                     </>
                 );
             case 'WS':
-                return (
-                    <>
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.asyncApi.definition',
-                                defaultMessage: 'AsyncAPI Definition',
-                            })}
-                            route='asyncApi definition'
-                            to={pathPrefix + 'asyncApi definition'}
-                            Icon={<CodeIcon />}
-                        />
-                    </>
-                );
             case 'WEBSUB':
+            case 'SSE':
                 return (
                     <>
                         <LeftMenuItem
@@ -724,7 +712,7 @@ class Details extends Component {
                             && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'PUBLISHED' && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
-                                    id: 'Apis.Details.index.Tryout',
+                                    id: 'Apis.Details.index.Tryout.menu.name',
                                     defaultMessage: 'test console',
                                 })}
                                 to={pathPrefix + 'test-console'}

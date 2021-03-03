@@ -132,8 +132,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1799,6 +1797,7 @@ public class APIMappingUtil {
                 infoDTO.setContext(modelInfo.getContext());
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
+                infoDTO.setProtocol(model.getProtocol());
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {
@@ -2016,7 +2015,8 @@ public class APIMappingUtil {
             APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
 
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
-                String uriMapping = api.getWsUriMapping().get(operationsDTO.getVerb() + "_" + operationsDTO.getTarget());
+                String uriMapping = api.getWsUriMapping().get(
+                        operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
                 operationsDTO.setUriMapping(uriMapping);
             }
             operationsDTOList.add(operationsDTO);
@@ -2987,6 +2987,7 @@ public class APIMappingUtil {
     public static APIRevisionDeploymentDTO fromAPIRevisionDeploymenttoDTO(APIRevisionDeployment model) throws APIManagementException {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = new APIRevisionDeploymentDTO();
         apiRevisionDeploymentDTO.setName(model.getDeployment());
+        apiRevisionDeploymentDTO.setVhost(model.getVhost());
         if (model.getRevisionUUID() != null) {
             apiRevisionDeploymentDTO.setRevisionUuid(model.getRevisionUUID());
         }

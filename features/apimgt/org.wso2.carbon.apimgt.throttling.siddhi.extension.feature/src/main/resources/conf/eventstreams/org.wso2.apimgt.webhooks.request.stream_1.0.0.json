@@ -5,36 +5,72 @@
   "description": "",
   "payloadData": [
     {
-      "name": "API_UUID",
+      "name": "apiUUID",
       "type": "STRING"
     },
     {
-      "name": "APPLICATION_ID",
+      "name": "apiName",
       "type": "STRING"
     },
     {
-      "name": "TENANT_DOMAIN",
+      "name": "apiContext",
       "type": "STRING"
     },
     {
-      "name": "HUB_CALLBACK_URL",
+      "name": "apiVersion",
       "type": "STRING"
     },
     {
-      "name": "HUB_TOPIC",
+      "name": "appID",
       "type": "STRING"
     },
     {
-      "name": "HUB_MODE",
+      "name": "tenantDomain",
       "type": "STRING"
     },
     {
-      "name": "HUB_SECRET",
-      "type": "STRING"
-    },   
+      "name": "tenantId",
+      "type": "int"
+    },
     {
-      "name": "EXPIRY_AT",
+      "name": "callback",
+      "type": "STRING"
+    },
+    {
+      "name": "topic",
+      "type": "STRING"
+    },
+    {
+      "name": "mode",
+      "type": "STRING"
+    },
+    {
+      "name": "secret",
+      "type": "STRING"
+    },
+    {
+      "name": "expireAt",
       "type": "long"
+    },
+    {
+      "name": "subscriberName",
+      "type": "STRING"
+    },
+    {
+      "name": "applicationTier",
+      "type": "STRING"
+    },
+    {
+      "name": "tier",
+      "type": "STRING"
+    },
+    {
+      "name": "apiTier",
+      "type": "STRING"
+    },
+    {
+      "name": "isThrottled",
+      "type": "boolean"
     }
   ]
 }
