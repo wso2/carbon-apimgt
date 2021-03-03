@@ -861,9 +861,6 @@ public class OAS2Parser extends APIDefinition {
                 scopeBindings.put(scope.getKey(), roles);
             }
             oAuth2Definition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
-        } else {
-            // prevent showing 'missing scopes' critical validation errors in Swagger validators i.e.42Crunch
-            oAuth2Definition.addScope(null, null);
         }
         swagger.addSecurityDefinition(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY, oAuth2Definition);
         if (swagger.getSecurity() == null) {
