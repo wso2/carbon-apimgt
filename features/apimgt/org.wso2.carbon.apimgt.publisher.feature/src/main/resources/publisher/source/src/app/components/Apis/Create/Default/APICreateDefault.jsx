@@ -250,12 +250,11 @@ function APICreateDefault(props) {
                                 Alert.error(error.response.body.description);
                                 setPageError(error.response.body);
                             } else {
-                                const message = 'Something went wrong while deploying the API Revision';
                                 Alert.error(intl.formatMessage({
                                     id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.deploy.revision',
-                                    defaultMessage: message,
+                                    defaultMessage: 'Something went wrong while deploying the API Revision',
                                 }));
-                                setPageError(message);
+                                setPageError('Something went wrong while deploying the API Revision');
                             }
                             console.error(error);
                         })
@@ -268,12 +267,11 @@ function APICreateDefault(props) {
                         Alert.error(error.response.body.description);
                         setPageError(error.response.body);
                     } else {
-                        const message = 'Something went wrong while creating the API Revision';
                         Alert.error(intl.formatMessage({
                             id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.create.revision',
-                            defaultMessage: message,
+                            defaultMessage: 'Something went wrong while creating the API Revision',
                         }));
-                        setPageError(message);
+                        setPageError('Something went wrong while creating the API Revision');
                     }
                     console.error(error);
                 })
@@ -302,12 +300,11 @@ function APICreateDefault(props) {
                         Alert.error(error.response.body.description);
                         setPageError(error.response.body);
                     } else {
-                        const message = 'Something went wrong while publishing the API';
                         Alert.error(intl.formatMessage({
                             id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.publish',
-                            defaultMessage: message,
+                            defaultMessage: 'Something went wrong while publishing the API',
                         }));
-                        setPageError(message);
+                        setPageError('Something went wrong while publishing the API');
                     }
                     console.error(error);
                 })

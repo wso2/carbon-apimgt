@@ -34,7 +34,7 @@ import { IntlProvider, intlShape, useIntl } from 'react-intl';
 import { mount, shallow } from 'enzyme';
 
 // You can pass your messages to the IntlProvider. Optional: remove if not needed.
-const messages = require('../../../site/public/locales/en.json'); // en.json
+const messages = require('../../../site/public/locales/raw.en.json'); // en.json
 
 // Create the IntlProvider to retrieve context for wrapping around.
 const IntlProviderWithMessages = new IntlProvider({ locale: 'en', messages }, {});

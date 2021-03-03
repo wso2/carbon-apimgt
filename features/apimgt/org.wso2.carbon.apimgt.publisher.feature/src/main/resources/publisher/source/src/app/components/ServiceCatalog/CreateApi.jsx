@@ -279,12 +279,11 @@ function CreateApi(props) {
                 Alert.error(error.response.body.description);
                 setPageError(error.response.body);
             } else {
-                const message = 'Error while creating API from service';
                 Alert.error(intl.formatMessage({
-                    defaultMessage: message,
+                    defaultMessage: 'Error while creating API from service',
                     id: 'ServiceCatalog.CreateApi.error.create.api',
                 }));
-                setPageError(message);
+                setPageError('ServiceCatalog.CreateApi.error.create.api');
             }
             console.error(error);
         });

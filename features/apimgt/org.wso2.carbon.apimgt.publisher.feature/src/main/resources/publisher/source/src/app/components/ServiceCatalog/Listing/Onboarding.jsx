@@ -105,7 +105,7 @@ function Onboarding(props) {
                     <Box textAlign='center' mb={2}>
                         <Typography variant='h6'>
                             <FormattedMessage
-                                id='Apis.Listing.SampleAPI.SampleAPI.create.new'
+                                id='ServiceCatalog.Listing.onboarding.create.new'
                                 defaultMessage='Service Catalog'
                             />
                         </Typography>
@@ -115,7 +115,7 @@ function Onboarding(props) {
                     <Box textAlign='center'>
                         <Typography variant='body2'>
                             <FormattedMessage
-                                id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
+                                id='ServiceCatalog.Listing.onboarding.description'
                                 defaultMessage='Enabling API-first Integration'
                             />
                         </Typography>
