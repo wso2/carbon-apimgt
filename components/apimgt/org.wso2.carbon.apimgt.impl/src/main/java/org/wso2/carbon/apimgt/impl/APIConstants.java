@@ -2692,7 +2692,6 @@ public final class APIConstants {
         public static final String SERVICE_KEY = "SERVICE_KEY";
         public static final String MD5 = "MD5";
         public static final String SERVICE_VERSION = "SERVICE_VERSION";
-        public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
         public static final String SERVICE_URL = "SERVICE_URL";
         public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
         public static final String DEFINITION_URL = "DEFINITION_URL";
