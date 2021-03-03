@@ -3434,6 +3434,8 @@ public class SQLConstants {
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
     public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
+    public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
+            "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
 
     /** Throttle related constants**/
 
@@ -4056,6 +4058,9 @@ public class SQLConstants {
                 "FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = 'Current API'";
         public static final String REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID =
                 "DELETE FROM AM_API_URL_MAPPING WHERE URL_MAPPING_ID = ?";
+        public static final String CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID = "SELECT 1 FROM " +
+                "AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID IN  (SELECT REVISION_UUID FROM AM_REVISION WHERE " +
+                "API_UUID = ?)";
     }
 
     /**

@@ -1,13 +1,11 @@
 package org.wso2.carbon.apimgt.gateway.handlers;
 
-import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
@@ -47,20 +45,7 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
                                         selectedAPI.getContext());
                                 axis2MessageContext.setProperty(APIConstants.TRANSPORT_URL_IN, updatedTransportInUrl);
                             }
-                            EndpointReference to = axis2MessageContext.getTo();
-                            String address = to.getAddress();
-                            address = address.replaceFirst(defaultContext, selectedAPI.getContext());
-                            axis2MessageContext.setTo(new EndpointReference(address));
-                            Object restUrlPostFix =
-                                    axis2MessageContext.getProperty(PassThroughConstants.REST_URL_POSTFIX);
-                            if (restUrlPostFix instanceof String && StringUtils.isNotEmpty((String) restUrlPostFix)) {
-                                String updatedRestUrlPostFix =
-                                        ((String) restUrlPostFix).replaceFirst(defaultContext.replace("/", ""),
-                                                selectedAPI.getContext().replace("/", ""));
-                                axis2MessageContext.setProperty(PassThroughConstants.REST_URL_POSTFIX,
-                                        updatedRestUrlPostFix);
-                            }
-                            messageContext.setProperty(RESTConstants.REST_FULL_REQUEST_PATH, null);
+                            messageContext.getPropertyKeySet().remove(RESTConstants.REST_FULL_REQUEST_PATH);
                         }
                     }
                 }

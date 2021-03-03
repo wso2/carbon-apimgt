@@ -519,13 +519,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.applyTag(artifactPath, tag);
                 }
             }
-            if (api.isDefaultVersion()) {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
-            } else {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
-            }
-
-
             artifactManager.updateGenericArtifact(updateApiArtifact);
 
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)

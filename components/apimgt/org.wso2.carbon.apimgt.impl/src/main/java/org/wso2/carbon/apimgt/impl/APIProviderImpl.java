@@ -109,7 +109,6 @@ import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
-import org.wso2.carbon.apimgt.impl.certificatemgt.GatewayCertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
@@ -1465,20 +1464,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
                         previousDefaultVersion);
-                if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
-                    // happen
-                    // Remove the previous default API entry from the Registry
-                    updateDefaultAPIInRegistry(defaultAPIId, false);
-                    if (!api.isDefaultVersion()) {// default api tick is removed
-                        // todo: if it is ok, these two variables can be put to the top of the function to remove
-                        // duplication
-                        String gatewayType = getAPIManagerConfiguration()
-                                .getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-                        if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                            removeDefaultAPIFromGateway(api);
-                        }
-                    }
-                }
             }
 
             //Update WSDL in the registry
@@ -1545,7 +1530,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.API, apiLogObject.toString(),
                     APIConstants.AuditLogConstants.UPDATED, this.username);
             API apiPublished = getAPI(api.getId());
-            apiPublished.setAsDefaultVersion(api.isDefaultVersion());
+            apiPublished.setDefaultVersion(api.isDefaultVersion());
             if (api.getId().getVersion().equals(previousDefaultVersion) && !api.isDefaultVersion()) {
                 // default version tick has been removed so a default api for current should not be
                 // added/updated
@@ -1627,10 +1612,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (oldApi.getStatus().equals(api.getStatus())) {
 
-            String previousDefaultVersion = getDefaultVersion(api.getId());
-            String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
-
-            updateOtherAPIversionsForNewDefautlAPIChange(api, previousDefaultVersion);
 
             updateEndpointSecurity(oldApi, api);
 
@@ -1703,29 +1684,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
         return api;
-    }
-
-    private void updateOtherAPIversionsForNewDefautlAPIChange(API api, String previousDefaultVersion)
-            throws APIManagementException {
-
-        if (previousDefaultVersion != null) {
-
-            APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
-                    previousDefaultVersion);
-            if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { // A change has
-                // happen
-                // Remove the previous default API entry from the Registry
-                updateDefaultAPIInRegistry(defaultAPIId, false);
-                if (!api.isDefaultVersion()) {// default api tick is removed
-                    // todo: if it is ok, these two variables can be put to the top of the function to remove
-                    // duplication
-                    String gatewayType = getAPIManagerConfiguration().getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-                    if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
-                        removeDefaultAPIFromGateway(api);
-                    }
-                }
-            }
-        }
     }
 
     private void updateDocumentPermissions(API api, API oldApi) throws APIManagementException {
@@ -2047,11 +2005,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (String tag : tagSet) {
                     registry.applyTag(artifactPath, tag);
                 }
-            }
-            if (api.isDefaultVersion()) {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
-            } else {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
             }
 
             if (updateMetadata && api.getEndpointConfig() != null && !api.getEndpointConfig().isEmpty()) {
@@ -2468,10 +2421,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     updateApiArtifact(api, false, false);
 
-                    if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
-                        // to be changed
-                        apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, newStatus);
-                    }
                 }
                 isSuccess = true;
             } else {
@@ -2572,10 +2521,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         handleException("Error while persisting the updated API ", e);
                     }
 
-                    if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
-                        // to be changed
-                        apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, newStatus);
-                    }
                 }
                 isSuccess = true;
             } else {
@@ -2670,10 +2615,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     updateApiArtifact(api, false, false);
 
-                    if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
-                        // to be changed
-                        apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, newStatus);
-                    }
                 }
                 isSuccess = true;
             } else {
@@ -3111,35 +3052,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public Map<String, String> removeDefaultAPIFromGateway(API api) {
-        String tenantDomain = null;
-        if (api.getId().getProviderName().contains("AT")) {
-            String provider = api.getId().getProviderName().replace("-AT-", "@");
-            tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        } else {
-            tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        }
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        return gatewayManager.removeDefaultAPIFromGateway(api, tenantDomain);
-
-    }
-
-
-    public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value) throws APIManagementException {
-        try {
-            String apiId = apiMgtDAO.getUUIDFromIdentifier(apiIdentifier);
-            Organization org = new Organization(CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
-
-            PublisherAPI api = apiPersistenceInstance.getPublisherAPI(org , apiId);
-            api.setDefaultVersion(value);
-            apiPersistenceInstance.updateAPI(org, api);
-        } catch (APIPersistenceException e) {
-            String msg = "Failed to update default API version : " + apiIdentifier.getVersion() + " of : "
-                    + apiIdentifier.getApiName();
-            handleException(msg, e);
-        }
-    }
 
     /**
      * Add a file to a document of source type FILE
@@ -3334,21 +3246,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.CREATED);
             }
 
-            if (api.isDefaultVersion()) {
-                artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
-                //Check whether an existing API is set as default version.
-                String defaultVersion = getDefaultVersion(api.getId());
-
-                //if so, change its DefaultAPIVersion attribute to false
-
-                if (defaultVersion != null) {
-                    APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(),
-                            defaultVersion);
-                    updateDefaultAPIInRegistry(defaultAPIId, false);
-                }
-            } else {
-                artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
-            }
             //Check whether the existing api has its own thumbnail resource and if yes,add that image
             //thumb to new API                                       thumbnail path as well.
             String thumbUrl = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -3450,9 +3347,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             if (api.isDefaultVersion()) {
-                newAPI.setAsDefaultVersion(true);
+                newAPI.setDefaultVersion(true);
             } else {
-                newAPI.setAsDefaultVersion(false);
+                newAPI.setDefaultVersion(false);
             }
 
             for (Documentation doc : docs) {
@@ -7378,13 +7275,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public int updateCertificate(String certificateString, String alias) throws APIManagementException {
-
         ResponseCode responseCode = certificateManager.updateCertificate(certificateString, alias);
-
-        if (ResponseCode.SUCCESS == responseCode) {
-            GatewayCertificateManager gatewayCertificateManager = GatewayCertificateManager.getInstance();
-            gatewayCertificateManager.removeFromGateways(alias);
-            gatewayCertificateManager.addToGateways(certificateString, alias);
+        if (responseCode != null && responseCode.getResponseCode() == ResponseCode.SUCCESS.getResponseCode()) {
+            CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_UPDATE.toString(),
+                    tenantDomain, alias);
+            APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         }
         return responseCode != null ? responseCode.getResponseCode() :
                 ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode();
@@ -8981,6 +8877,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 loadMediationPoliciesToAPI(api, requestedTenantDomain);
                 populateRevisionInformation(api, uuid);
                 populateAPIStatus(api);
+                populateDefaultVersion(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -9018,6 +8915,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
         }
+    }
+    private void populateDefaultVersion(API api) throws APIManagementException{
+        apiMgtDAO.setDefaultVersion(api);
     }
 
     private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
@@ -9078,6 +8978,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 for (PublisherAPIInfo publisherAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(publisherAPIInfo);
                     populateAPIStatus(mappedAPI);
+                    populateDefaultVersion(mappedAPI);
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -9737,6 +9638,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (environmentsToAdd.size() > 0) {
             gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
         }
+        apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
     }
 
     private API getAPIbyUUID(String apiId, APIRevision apiRevision)

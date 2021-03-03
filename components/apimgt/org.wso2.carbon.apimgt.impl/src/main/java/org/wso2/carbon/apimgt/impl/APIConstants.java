@@ -2513,6 +2513,7 @@ public final class APIConstants {
         SCOPE_UPDATE,
         SCOPE_DELETE,
         ENDPOINT_CERTIFICATE_ADD,
+        ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
         GA_CONFIG_UPDATE
     }
