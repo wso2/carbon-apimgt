@@ -18,15 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.wso2.carbon.apimgt.api.model.VHost;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.namespace.QName;
 
 /**
@@ -2559,6 +2556,11 @@ public final class APIConstants {
 
     }
 
+    public static class AsyncApi {
+        public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
+        public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "init-request:";
+    }
+
     public static class TopicNames {
 
         //APIM default topic names
@@ -2690,7 +2692,6 @@ public final class APIConstants {
         public static final String SERVICE_KEY = "SERVICE_KEY";
         public static final String MD5 = "MD5";
         public static final String SERVICE_VERSION = "SERVICE_VERSION";
-        public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
         public static final String SERVICE_URL = "SERVICE_URL";
         public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
         public static final String DEFINITION_URL = "DEFINITION_URL";

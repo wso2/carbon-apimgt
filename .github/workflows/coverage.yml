@@ -32,15 +32,14 @@ jobs:
         repository: wso2/product-apim
         ref: refs/heads/master
     - name: Build Product-Apim with Tests
+      continue-on-error: true
       run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file ../product-apim/pom.xml
     - name: Upload unit test coverage to Codecov
       uses: codecov/codecov-action@v1.2.1
-      if: always()
       with:
         flags: unit_tests
     - name: Upload integration test coverage to Codecov
       uses: codecov/codecov-action@v1.2.1
-      if: always()
       with:
         flags: integration_tests
         directory: ../product-apim/

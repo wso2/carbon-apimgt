@@ -438,7 +438,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Gateway type not found available Gateway types : " + "%s"),
 
     SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE(900910, "Service import is failed" , 412, "Cannot update existing services " +
-                                                    "when overwrite is false");
+                                                    "when overwrite is false"),
+    MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION(900911, "Missing protocol in Async API Definition", 400,
+            "Missing protocol in Async API Definition");
+
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

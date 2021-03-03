@@ -32,6 +32,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
@@ -51,9 +52,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -1296,5 +1297,18 @@ public class GatewayUtils {
             log.debug("Token is not expired. User: " + payload.getSubject());
         }
         return false;
+    }
+
+    public static void setRequestDestination(org.apache.synapse.MessageContext messageContext) {
+
+        String requestDestination = null;
+        EndpointReference objectTo =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext().getOptions().getTo();
+        if (objectTo != null) {
+            requestDestination = objectTo.getAddress();
+        }
+        if (requestDestination != null) {
+            messageContext.setProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS, requestDestination);
+        }
     }
 }

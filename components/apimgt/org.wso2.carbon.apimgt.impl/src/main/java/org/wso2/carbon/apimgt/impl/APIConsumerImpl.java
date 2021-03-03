@@ -6104,6 +6104,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
+                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getId()));
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);

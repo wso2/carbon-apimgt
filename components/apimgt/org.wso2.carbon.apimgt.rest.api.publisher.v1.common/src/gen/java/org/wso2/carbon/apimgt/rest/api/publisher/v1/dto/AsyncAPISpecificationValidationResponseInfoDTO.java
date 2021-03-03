@@ -30,6 +30,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     private String context = null;
     private String description = null;
     private String asyncAPIVersion = null;
+    private String protocol = null;
     private List<String> endpoints = new ArrayList<String>();
 
   /**
@@ -118,6 +119,23 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
   }
 
   /**
+   **/
+  public AsyncAPISpecificationValidationResponseInfoDTO protocol(String protocol) {
+    this.protocol = protocol;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "WEBSUB", value = "")
+  @JsonProperty("protocol")
+  public String getProtocol() {
+    return protocol;
+  }
+  public void setProtocol(String protocol) {
+    this.protocol = protocol;
+  }
+
+  /**
    * contains host/servers specified in the AsyncAPI file/URL
    **/
   public AsyncAPISpecificationValidationResponseInfoDTO endpoints(List<String> endpoints) {
@@ -150,12 +168,13 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
         Objects.equals(context, asyncAPISpecificationValidationResponseInfo.context) &&
         Objects.equals(description, asyncAPISpecificationValidationResponseInfo.description) &&
         Objects.equals(asyncAPIVersion, asyncAPISpecificationValidationResponseInfo.asyncAPIVersion) &&
+        Objects.equals(protocol, asyncAPISpecificationValidationResponseInfo.protocol) &&
         Objects.equals(endpoints, asyncAPISpecificationValidationResponseInfo.endpoints);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, context, description, asyncAPIVersion, endpoints);
+    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints);
   }
 
   @Override
@@ -168,6 +187,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    asyncAPIVersion: ").append(toIndentedString(asyncAPIVersion)).append("\n");
+    sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("}");
     return sb.toString();

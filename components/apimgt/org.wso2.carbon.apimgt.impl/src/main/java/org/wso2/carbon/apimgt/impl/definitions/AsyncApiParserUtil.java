@@ -199,7 +199,7 @@ public class AsyncApiParserUtil {
         return apiDocContent;
     }
 
-    public static Set<URITemplate> loadTopicsFromAsyncAPIDefinition(API api, String definitionJSON) {
+    public static API loadTopicsFromAsyncAPIDefinition(API api, String definitionJSON) {
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         uriTemplates.clear();
 
@@ -246,6 +246,7 @@ public class AsyncApiParserUtil {
             }
         }
 
-        return uriTemplates;
+        api.setUriTemplates(uriTemplates);
+        return api;
     }
 }

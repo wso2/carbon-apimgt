@@ -1797,6 +1797,7 @@ public class APIMappingUtil {
                 infoDTO.setContext(modelInfo.getContext());
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
+                infoDTO.setProtocol(model.getProtocol());
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {

@@ -3269,7 +3269,7 @@ public class SQLConstants {
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
-            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID) VALUES (?,?,?,?,?,?,?,?,?)";
+            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID,STATUS) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
@@ -3433,6 +3433,7 @@ public class SQLConstants {
                     " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID AND " +
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
+    public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
 
     /** Throttle related constants**/
 
@@ -4063,15 +4064,14 @@ public class SQLConstants {
     public static class ServiceCatalogConstants {
 
         public static final String ADD_SERVICE = "INSERT INTO AM_SERVICE_CATALOG " +
-                "(UUID, SERVICE_KEY, MD5, SERVICE_NAME, DISPLAY_NAME, SERVICE_VERSION, TENANT_ID, SERVICE_URL, " +
+                "(UUID, SERVICE_KEY, MD5, SERVICE_NAME, SERVICE_VERSION, TENANT_ID, SERVICE_URL, " +
                 "DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, " +
                 "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, " +
-                "SERVICE_DEFINITION, METADATA) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "SERVICE_DEFINITION) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         public static final String UPDATE_SERVICE_BY_KEY = "UPDATE AM_SERVICE_CATALOG SET " +
                 "MD5 = ?," +
                 "SERVICE_NAME = ?," +
-                "DISPLAY_NAME = ?," +
                 "TENANT_ID = ?," +
                 "SERVICE_URL = ?," +
                 "DEFINITION_URL = ?," +
@@ -4080,8 +4080,7 @@ public class SQLConstants {
                 "MUTUAL_SSL_ENABLED = ?," +
                 "LAST_UPDATED_TIME = ?," +
                 "UPDATED_BY = ?," +
-                "SERVICE_DEFINITION = ?," +
-                "METADATA = ? " +
+                "SERVICE_DEFINITION = ?" +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String DELETE_SERVICE_BY_SERVICE_ID = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "AND TENANT_ID = ?";
@@ -4112,7 +4111,6 @@ public class SQLConstants {
                 "   SERVICE_KEY," +
                 "   MD5," +
                 "   SERVICE_NAME," +
-                "   DISPLAY_NAME," +
                 "   SERVICE_VERSION," +
                 "   SERVICE_URL," +
                 "   DEFINITION_TYPE," +
