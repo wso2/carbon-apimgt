@@ -432,6 +432,67 @@ public class APIMgtDAOTest {
             assertEquals("V1.0.0", apiId.getVersion());
         }
     }
+
+    @Test
+    public void testForwardingBlockedAndProdOnlyBlockedSubscriptionsToNewAPIVersion() throws APIManagementException {
+        Subscriber subscriber = new Subscriber("new_sub_user1");
+        subscriber.setEmail("newuser1@wso2.com");
+        subscriber.setSubscribedDate(new Date());
+        subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscriber(subscriber, null);
+
+        Application application = new Application("SUB_FORWARD_APP", subscriber);
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+
+        // Add the first version of the API
+        APIIdentifier apiId1 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V1.0.0");
+        apiId1.setTier("T20");
+        API api = new API(apiId1);
+        api.setContext("/subForward");
+        api.setContextTemplate("/subForward/{version}");
+        apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
+
+        // Add a subscription and update state to BLOCKED
+        int subscriptionId = apiMgtDAO.addSubscription(
+                apiId1, api.getContext(), applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
+        apiMgtDAO.updateSubscriptionStatus(subscriptionId, APIConstants.SubscriptionStatus.BLOCKED);
+
+        // Add the second version of the API
+        APIIdentifier apiId2 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V2.0.0");
+        API api2 = new API(apiId2);
+        api2.setContext("/context1");
+        api2.setContextTemplate("/context1/{version}");
+        apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID);
+
+        apiMgtDAO.makeKeysForwardCompatible(
+                apiId1.getProviderName(), apiId1.getApiName(), apiId1.getVersion(), "V2.0.0", api.getContext());
+
+        List<SubscribedAPI> subscriptionsOfAPI2 =
+                apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V2.0.0", apiId1.getProviderName());
+        assertEquals(1, subscriptionsOfAPI2.size());
+        SubscribedAPI blockedSubscription = subscriptionsOfAPI2.get(0);
+        assertEquals(APIConstants.SubscriptionStatus.BLOCKED, blockedSubscription.getSubStatus());
+
+        // update the BLOCKED subscription of the second API version to PROD_ONLY_BLOCKED
+        apiMgtDAO.updateSubscription(apiId2, APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, applicationId);
+
+        // Add the third version of the API
+        APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V3.0.0");
+        API api3 = new API(apiId3);
+        api3.setContext("/context1");
+        api3.setContextTemplate("/context1/{version}");
+        apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID);
+
+        apiMgtDAO.makeKeysForwardCompatible(
+                apiId2.getProviderName(), apiId2.getApiName(), apiId2.getVersion(), "V3.0.0", api.getContext());
+
+        List<SubscribedAPI> subscriptionsOfAPI3 =
+                apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V3.0.0", apiId1.getProviderName());
+        assertEquals(1, subscriptionsOfAPI3.size());
+        SubscribedAPI prodOnlyBlockedSubscription = subscriptionsOfAPI3.get(0);
+        assertEquals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, prodOnlyBlockedSubscription.getSubStatus());
+    }
+
     @Test
     public void testInsertApplicationPolicy() throws APIManagementException {
         String policyName = "TestInsertAppPolicy";
