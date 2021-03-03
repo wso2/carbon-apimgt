@@ -451,10 +451,11 @@ public class APIMgtDAOTest {
         api.setContext("/subForward");
         api.setContextTemplate("/subForward/{version}");
         apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
 
         // Add a subscription and update state to BLOCKED
         int subscriptionId = apiMgtDAO.addSubscription(
-                apiId1, api.getContext(), applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
+                apiTypeWrapper, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
         apiMgtDAO.updateSubscriptionStatus(subscriptionId, APIConstants.SubscriptionStatus.BLOCKED);
 
         // Add the second version of the API
@@ -463,12 +464,12 @@ public class APIMgtDAOTest {
         api2.setContext("/context1");
         api2.setContextTemplate("/context1/{version}");
         apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID);
+        ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
 
-        apiMgtDAO.makeKeysForwardCompatible(
-                apiId1.getProviderName(), apiId1.getApiName(), apiId1.getVersion(), "V2.0.0", api.getContext());
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, apiId1.getVersion());
 
         List<SubscribedAPI> subscriptionsOfAPI2 =
-                apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V2.0.0", apiId1.getProviderName());
+                apiMgtDAO.getSubscriptionsOfAPI(apiId2.getApiName(), "V2.0.0", apiId2.getProviderName());
         assertEquals(1, subscriptionsOfAPI2.size());
         SubscribedAPI blockedSubscription = subscriptionsOfAPI2.get(0);
         assertEquals(APIConstants.SubscriptionStatus.BLOCKED, blockedSubscription.getSubStatus());
@@ -482,9 +483,9 @@ public class APIMgtDAOTest {
         api3.setContext("/context1");
         api3.setContextTemplate("/context1/{version}");
         apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID);
+        ApiTypeWrapper apiTypeWrapper3 = new ApiTypeWrapper(api3);
 
-        apiMgtDAO.makeKeysForwardCompatible(
-                apiId2.getProviderName(), apiId2.getApiName(), apiId2.getVersion(), "V3.0.0", api.getContext());
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, apiId2.getVersion());
 
         List<SubscribedAPI> subscriptionsOfAPI3 =
                 apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V3.0.0", apiId1.getProviderName());
