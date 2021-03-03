@@ -13,7 +13,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.graphql.api.devportal.dataFetcher.ApiDataFetcherImpl;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 //import reactor.core.publisher.Mono;
 
 
@@ -40,24 +42,9 @@ public class GraphQlController {
                 ExecutionInput.Builder executionInputBuilder = ExecutionInput.newExecutionInput()
                         .query(body.getQuery())
                         .operationName(body.getOperationName());
+                Map<String, ContextDTO> contextDTOMap = new HashMap<>();
+                executionInputBuilder.context(contextDTOMap);
 
-//                DataLoaderRegistry dataLoaderRegistry = new DataLoaderRegistry();
-//                DataLoader<String, Test> timeDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
-//                //DataLoader<String, Object> tierDataLoader = DataLoader.newDataLoader(apiService.timeBatchLoader);
-//                dataLoaderRegistry.register("times", timeDataLoader);
-//                //dataLoaderRegistry.register("tierdata", tierDataLoader);
-//                executionInputBuilder.dataLoaderRegistry(dataLoaderRegistry);
-                //executionInputBuilder.context(dataLoaderRegistry);
-
-                if(body.getQuery().contains("lastUpdate") | body.getQuery().contains("createdTime")|body.getQuery().contains("operationInformation")) {
-                        List<ContextDTO> contextDTOList = apiDataFetcher.ContextDTOData();
-                        executionInputBuilder.context(contextDTOList);
-                }
-//                try {
-//                        executionInputBuilder.context(apiService.getAllTiers());
-//                } catch (APIManagementException e) {
-//                        e.printStackTrace();
-//                }
                 ExecutionInput executionInput = executionInputBuilder.build();
 
                 return graphql.execute(executionInput);

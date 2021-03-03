@@ -10,7 +10,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 
 import java.util.*;
 
-public class RegistryPersistenceService {
+public class PersistenceService {
 
     //protected String username;
     APIPersistence apiPersistenceInstance;

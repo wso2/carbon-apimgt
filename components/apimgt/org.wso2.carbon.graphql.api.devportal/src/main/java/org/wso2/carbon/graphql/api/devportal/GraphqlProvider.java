@@ -71,7 +71,7 @@ public class GraphqlProvider {
                 .type(LabelDetailsDataFetcher())
                 .type(ScopeInformationDataFetcher())
                 .type(QueryApiListing())
-                .type(ApiTimeDetailsDataFetcher())
+                //.type(ApiTimeDetailsDataFetcher())
                 .type(c())
                 .type(u())
                 .build();
@@ -90,10 +90,10 @@ public class GraphqlProvider {
         return TypeRuntimeWiring.newTypeWiring("Query")
                 .dataFetcher("getTags", tagDataFetcher.getTagsData());
     }
-    private TypeRuntimeWiring.Builder ApiTimeDetailsDataFetcher(){
-        return TypeRuntimeWiring.newTypeWiring("Api")
-                .dataFetcher("timeDetails",apiDataFetcher.getApiTimeDetails());
-    }
+//    private TypeRuntimeWiring.Builder ApiTimeDetailsDataFetcher(){
+//        return TypeRuntimeWiring.newTypeWiring("Api")
+//                .dataFetcher("timeDetails",apiDataFetcher.getApiTimeDetails());
+//    }
     private TypeRuntimeWiring.Builder ApiDefinitionDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("apiDefinition",apiDataFetcher.getApiDefinition());

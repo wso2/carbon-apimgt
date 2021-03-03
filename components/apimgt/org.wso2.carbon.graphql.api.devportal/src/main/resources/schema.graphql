@@ -35,7 +35,6 @@ type Api{
     advertiseInfo:Advertise
     createdTime:String
     lastUpdate:String
-    timeDetails:TimeDetails
 }
 type TimeDetails{
     createdTime:String

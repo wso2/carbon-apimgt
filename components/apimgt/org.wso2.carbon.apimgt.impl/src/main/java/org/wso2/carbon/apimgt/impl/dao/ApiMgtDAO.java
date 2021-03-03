@@ -149,6 +149,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.GET_API_TIME_DETAILS;
+
 /**
  * This class represent the ApiMgtDAO.
  */
@@ -229,20 +231,26 @@ public class ApiMgtDAO {
         return type;
     }
     public Time getApiTimeDetails(String Id){
+        String uuid = null;
         String createTime = null;
         String lastUpdate = null;
+        String type = null;
         Time time = new Time();
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_API_TIME_DETAILS)) {
+             PreparedStatement statement = connection.prepareStatement(GET_API_TIME_DETAILS)) {
             statement.setString(1, Id);
 
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
+                uuid =  resultSet.getString("API_UUID");
+                time.setUuid(uuid);
                 createTime = resultSet.getString("CREATED_TIME");
                 time.setCreatedTime(createTime);
                 lastUpdate = resultSet.getString("UPDATED_TIME");
                 time.setLastUpdate(lastUpdate);
+                type = resultSet.getString("API_TYPE");
+                time.setType(type);
             }
         } catch (SQLException e) {
 

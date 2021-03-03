@@ -1,15 +1,11 @@
 package org.wso2.carbon.graphql.api.devportal.service;
 
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.Time;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
@@ -21,30 +17,21 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.graphql.api.devportal.mapping.ApiMapping;
-import org.wso2.carbon.graphql.api.devportal.modules.api.APIEndpointURLsDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.APIURLsDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.AdvertiseDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ApiDTO;
-import org.apache.commons.lang3.StringUtils;
-import org.wso2.carbon.graphql.api.devportal.modules.api.BusinessInformationDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.DefaultAPIURLsDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.DeploymentClusterInfoDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.IngressUrlDTO;
-import org.wso2.carbon.graphql.api.devportal.modules.api.LabelNameDTO;
+import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.Pagination;
-import org.wso2.carbon.graphql.api.devportal.modules.api.TierNameDTO;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.*;
 
 
-public class ApiRegistryService {
+public class ApiService {
 
 
     APIPersistence apiPersistenceInstance;
 
     public List<ApiDTO> getAllApis(int start, int offset) throws APIPersistenceException, APIManagementException {
-        RegistryPersistenceService artifactData = new RegistryPersistenceService();
+        PersistenceService artifactData = new PersistenceService();
         List<ApiDTO> apiDTOList = new ArrayList<ApiDTO>();
         List<DevPortalAPI> list = artifactData.getDevportalAPIS(start,offset);
         for (DevPortalAPI devPortalAPI: list){
@@ -64,13 +51,13 @@ public class ApiRegistryService {
     }
     public ApiDTO getApi(String uuid) throws APIManagementException, APIPersistenceException {
 
-        RegistryPersistenceService artifactData = new RegistryPersistenceService();
+        PersistenceService artifactData = new PersistenceService();
         DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(uuid);
         ApiMapping apiMapping = new ApiMapping();
         return  apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI);
     }
     public Pagination getPaginationData(int offset, int limit) throws APIPersistenceException, APIManagementException {
-        RegistryPersistenceService artifactData = new RegistryPersistenceService();
+        PersistenceService artifactData = new PersistenceService();
         int size = artifactData.apiCount(offset, limit);
         String paginatedPrevious = "";
         String paginatedNext = "";
@@ -90,5 +77,66 @@ public class ApiRegistryService {
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
         return new Pagination(offset,limit,size,paginatedNext,paginatedPrevious);
+    }
+
+    public ContextDTO getApiTimeDetails(String uuid){
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = null;
+        try {
+            apiConsumer = RestApiCommonUtil.getConsumer(username);
+        } catch (APIManagementException e) {
+            e.printStackTrace();
+        }
+        Time time = apiConsumer.getTimeDetailsFromDAO(uuid);
+        ContextDTO contextDTO = new ContextDTO(time.getUuid(),time.getCreatedTime(),time.getLastUpdate(), time.getType());
+        return contextDTO;
+
+
+    }
+
+    //    public TimeDTO getApiTimeDetailsFromDAO(String uuid) throws APIManagementException {
+//        String username = "wso2.anonymous.user";
+//        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+//        Time time = apiConsumer.getTimeDetailsFromDAO(uuid);
+//        String createTime = time.getCreatedTime();
+//        String lastUpdate = time.getLastUpdate();
+//        return new TimeDTO(createTime,lastUpdate);
+//    }
+    public Float getApiRatingFromDAO(String uuid) throws APIManagementException {
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        Float rating  = apiConsumer.getRatingFromDAO(uuid);
+        return rating;
+    }
+    public String getMonetizationLabel(String uuid) throws APIManagementException, UserStoreException, APIPersistenceException {
+
+        PersistenceService persistenceService = new PersistenceService();
+        DevPortalAPI devPortalAPI = persistenceService.getApiFromUUID(uuid);
+
+        Set<String> tiers = devPortalAPI.getAvailableTierNames();
+
+        String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+
+        Map<String, Tier> definedTiers = apiConsumer.getTierDetailsFromDAO(uuid);
+
+        String monetizationLabel = null;
+        int free = 0, commercial = 0;
+        for(String name: tiers){
+            Tier definedTier = definedTiers.get(name);
+            if (definedTier.getTierPlan().equalsIgnoreCase(APIConstants.API_CATEGORY_FREE)) {
+                free = free + 1;
+            } else if (definedTier.getTierPlan().equalsIgnoreCase(APIConstants.COMMERCIAL_TIER_PLAN)) {
+                commercial = commercial + 1;
+            }
+        }
+        if (free > 0 && commercial == 0) {
+            monetizationLabel= APIConstants.API_CATEGORY_FREE;
+        } else if (free == 0 && commercial > 0) {
+            monetizationLabel = APIConstants.API_CATEGORY_PAID;
+        } else if (free > 0 && commercial > 0) {
+            monetizationLabel = APIConstants.API_CATEGORY_FREEMIUM;
+        }
+        return monetizationLabel;
     }
 }

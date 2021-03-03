@@ -28,7 +28,7 @@ import org.wso2.carbon.graphql.api.devportal.modules.api.LabelNameDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.Pagination;
 import org.wso2.carbon.graphql.api.devportal.modules.api.TierNameDTO;
 import org.wso2.carbon.graphql.api.devportal.service.LabelService;
-import org.wso2.carbon.graphql.api.devportal.service.RegistryPersistenceService;
+import org.wso2.carbon.graphql.api.devportal.service.PersistenceService;
 import org.wso2.carbon.graphql.api.devportal.service.TierService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -149,7 +149,7 @@ public class ApiMapping {
 
     public String getEnvironmentList(String Id) throws APIPersistenceException {
 
-        RegistryPersistenceService artifactData = new RegistryPersistenceService();
+        PersistenceService artifactData = new PersistenceService();
         Set<String> environmentset = artifactData.getApiFromUUID(Id).getEnvironments();
         String environments = null;
         if(environmentset!=null){
@@ -358,7 +358,7 @@ public class ApiMapping {
         return apiDeployedIngressURLs;
     }
     public Pagination getPaginationData(int offset, int limit) throws APIPersistenceException, APIManagementException {
-        RegistryPersistenceService artifactData = new RegistryPersistenceService();
+        PersistenceService artifactData = new PersistenceService();
         int size = artifactData.apiCount(offset, limit);
         String paginatedPrevious = "";
         String paginatedNext = "";
