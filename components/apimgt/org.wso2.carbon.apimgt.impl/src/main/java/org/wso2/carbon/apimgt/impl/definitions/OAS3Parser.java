@@ -691,38 +691,6 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Include authorizationUrl and scopes, mandatory elements to the OpenAPI definition if not present under
-     * securitySchemes in provided definition.
-     *
-     * @param swaggerContent OpenAPI Definition content
-     * @return updated OpenAPI Definition content as String
-     */
-    private String processSecuritySchemes(String swaggerContent) {
-        OpenAPI openAPI = getOpenAPI(swaggerContent);
-        Components components = openAPI.getComponents();
-        if (components != null) {
-            Map<String, SecurityScheme> securitySchemes = components.getSecuritySchemes();
-            if (securitySchemes != null) {
-                SecurityScheme defaultSecurityScheme = openAPI.getComponents().getSecuritySchemes()
-                        .get(OPENAPI_SECURITY_SCHEMA_KEY);
-                if (defaultSecurityScheme != null) {
-                    OAuthFlow oAuthFlow = defaultSecurityScheme.getFlows().getImplicit();
-                    String authUrl = oAuthFlow.getAuthorizationUrl();
-                    if (StringUtils.isBlank(authUrl)) {
-                        oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
-                    }
-                    Scopes scopes = oAuthFlow.getScopes();
-                    if (scopes == null) {
-                        Scopes newScopes = new Scopes();
-                        oAuthFlow.setScopes(newScopes);
-                    }
-                }
-            }
-        }
-        return Json.pretty(openAPI);
-    }
-
-    /**
      * This method validates the given OpenAPI definition by content
      *
      * @param apiDefinition     OpenAPI Definition content
@@ -736,7 +704,6 @@ public class OAS3Parser extends APIDefinition {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         ParseOptions options = new ParseOptions();
         options.setResolve(true);
-        apiDefinition = processSecuritySchemes(apiDefinition);
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, options);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             validationResponse.setValid(false);
