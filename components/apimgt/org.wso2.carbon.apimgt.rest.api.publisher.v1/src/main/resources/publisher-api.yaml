@@ -505,6 +505,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/ecb5b300-422d-4ee8-88d2-364a0a122238/reimport-service"'
 
   /apis/{apiId}/swagger:
     get:
@@ -1725,6 +1732,7 @@ paths:
           schema:
             type: string
           description: ID of service that should be imported from Service Catalog
+          example: Pizzashack-1.0.0
       requestBody:
         content:
           application/json:
@@ -1755,6 +1763,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-service?serviceKey=Pizzashack-1.0.0"'
 
   /apis/{apiId}/comments:
     get:
