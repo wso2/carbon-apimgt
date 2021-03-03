@@ -161,6 +161,10 @@ public class ServiceCatalogDAO {
                     isValid = false;
                     break;
                 }
+                if (!existingService.getName().equals(service.getName())) {
+                    isValid = false;
+                    break;
+                }
                 if (!existingService.getMd5().equals(service.getMd5())) {
                     serviceListToUpdate.add(service);
                 }
@@ -357,9 +361,7 @@ public class ServiceCatalogDAO {
             ps.setInt(3, tenantId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    ServiceEntry serviceEntry = new ServiceEntry();
-                    serviceEntry.setUuid(rs.getString("UUID"));
-                    serviceEntry.setEndpointDef(rs.getBinaryStream("SERVICE_DEFINITION"));
+                    ServiceEntry serviceEntry = getServiceParams(rs, false);
                     return serviceEntry;
                 }
             }
