@@ -809,13 +809,15 @@ components:
       title: The Service Schema object
       required:
         - serviceMetadata
-        - definitionFile
       properties:
         serviceMetadata:
           $ref: '#/components/schemas/Service'
         definitionFile:
           type: string
           format: binary
+        inlineContent:
+          type: string
+          description: Inline content of the document
 
     #-----------------------------------------------------
     # The settings resource

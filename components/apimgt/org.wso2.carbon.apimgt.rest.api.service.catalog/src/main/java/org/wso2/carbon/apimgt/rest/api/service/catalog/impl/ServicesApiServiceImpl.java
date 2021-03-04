@@ -75,16 +75,25 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
     @Override
     public Response addService(ServiceDTO serviceDTO, InputStream definitionFileInputStream,
-                                  Attachment definitionFileDetail, MessageContext messageContext) {
+                               Attachment definitionFileDetail, String inlineContent, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
+            if (inlineContent == null && definitionFileDetail == null) {
+                RestApiUtil.handleBadRequest("Either inline definition or file should be provided to create service",
+                        log);
+            }
             ServiceEntry existingService = serviceCatalog.getServiceByKey(serviceDTO.getServiceKey(), tenantId);
             if (existingService != null) {
                 RestApiUtil.handleResourceAlreadyExistsError("Error while adding Service : A service already "
                         + "exists with key: " + serviceDTO.getServiceKey(), log);
             }
-            byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            byte[] definitionFileByteArray;
+            if (definitionFileInputStream != null) {
+                definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            } else {
+                definitionFileByteArray = inlineContent.getBytes();
+            }
             ServiceEntry service = ServiceCatalogUtils.createServiceFromDTO(serviceDTO, definitionFileByteArray);
             if (!validateAndRetrieveServiceDefinition(definitionFileByteArray, serviceDTO.getServiceUrl(),
                     service.getDefinitionType()).isValid()) {
@@ -364,15 +373,24 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
     @Override
     public Response updateService(String serviceId, ServiceDTO serviceDTO, InputStream definitionFileInputStream,
-                                  Attachment definitionFileDetail, MessageContext messageContext) {
+                              Attachment definitionFileDetail, String inlineContent, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         if (StringUtils.isEmpty(serviceId)) {
             RestApiUtil.handleBadRequest("The service Id should not be empty", log);
         }
+        if (inlineContent == null && definitionFileDetail == null) {
+            RestApiUtil.handleBadRequest("Either inline definition or file should be provided when updating service",
+                    log);
+        }
         try {
             ServiceEntry existingService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
-            byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            byte[] definitionFileByteArray;
+            if (definitionFileInputStream != null) {
+                definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            } else {
+                definitionFileByteArray = inlineContent.getBytes();
+            }
             ServiceEntry service = ServiceCatalogUtils.createServiceFromDTO(serviceDTO, definitionFileByteArray);
             if (!validateAndRetrieveServiceDefinition(definitionFileByteArray, serviceDTO.getServiceUrl(),
                     service.getDefinitionType()).isValid()) {
