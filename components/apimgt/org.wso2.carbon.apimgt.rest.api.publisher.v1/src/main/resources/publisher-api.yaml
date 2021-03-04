@@ -10558,6 +10558,7 @@ components:
                 - INLINE
                 - URL
                 - FILE
+                - MARKDOWN
             sourceUrl:
               type: string
               example: ""
@@ -11183,6 +11184,9 @@ components:
             asyncAPIVersion:
               type: string
               example: 2.0
+            protocol:
+              type: string
+              example: WEBSUB
             endpoints:
               type: array
               description:

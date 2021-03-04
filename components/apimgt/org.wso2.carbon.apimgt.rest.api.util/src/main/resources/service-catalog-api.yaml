@@ -78,12 +78,6 @@ paths:
               - WSDL2
               - GRAPHQL_SDL
               - ASYNC_API
-        - name: displayName
-          in: query
-          description: |
-            Filter services by the display name
-          schema:
-            type: string
         - name: key
           in: query
           description: |
@@ -200,7 +194,7 @@ paths:
       tags:
         - Services
       parameters:
-        - $ref: '#/components/parameters/serviceKey'
+        - $ref: '#/components/parameters/serviceId'
       requestBody:
         content:
           multipart/form-data:
@@ -240,7 +234,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/serviceId'
       responses:
-        "204":
+        204:
           description: |
             Successfully deleted the catalog entry.
         400:
@@ -249,6 +243,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
         500:
           $ref: '#/components/responses/InternalServerError'
 
@@ -494,22 +490,6 @@ components:
           items:
             $ref: '#/components/schemas/ServiceInfo'
           
-    ServicesStatusList:
-      title: Services List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            MD5 hashes of services returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/ServiceCRUDStatus'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-          
     ServiceListExpanded:
       title: Services List
       type: object
@@ -602,17 +582,14 @@ components:
       required:
         - name
         - version
-        - serviceType
+        - definitionType
+        - serviceUrl
       properties:
         id:
           type: string
           example: 01234567-0123-0123-0123-012345678901
           readOnly: true
         name:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        displayName:
           type: string
           pattern: '^[^\*]+$'
           example: Pizzashack-Endpoint
@@ -650,6 +627,7 @@ components:
             - X509
             - API_KEY
             - NONE
+          default: NONE
         mutualSSLEnabled:
           type: boolean
           description: Whether Mutual SSL is enabled for the endpoint
@@ -673,44 +651,6 @@ components:
         definitionUrl:
           type: string
           example: https://petstore.swagger.io/v2/swagger.json
-          
-    #-----------------------------------------------------
-    # Status of CRUD operations of Service model
-    #-----------------------------------------------------
-    ServiceCRUDStatus:
-      type: object
-      title: The Service object
-      required:
-        - entryName
-        - version
-        - serviceType
-      properties:
-        id:
-          type: string
-          example: 01234567-0123-0123-0123-012345678901
-          readOnly: true
-        name:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        displayName:
-          type: string
-          pattern: '^[^\*]+$'
-          example: Pizzashack-Endpoint
-        version:
-          type: string
-          example: v1
-        serviceUrl:
-          type: string
-          example: http://localhost/pizzashack
-        createdTime:
-          type: string
-          readOnly: true
-          example: '2020-02-20T13:57:16.229'
-        lastUpdatedTime:
-          type: string
-          readOnly: true
-          example: '2020-02-20T13:57:16.229'
     
     ServiceInfo:
       type: object
@@ -741,10 +681,10 @@ components:
       type: object
       title: The Service Schema object
       required:
-        - catalogEntry
+        - serviceMetadata
         - definitionFile
       properties:
-        catalogEntry:
+        serviceMetadata:
           $ref: '#/components/schemas/Service'
         definitionFile:
           type: string
@@ -878,6 +818,19 @@ components:
             code: 404
             message: Not Found
             description: The specified resource does not exist
+            moreInfo: ""
+            error: []
+
+    Conflict:
+      description: Conflict. Specified resource already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Conflict
+            description: Specified resource already exists
             moreInfo: ""
             error: []
 
