@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
 import graphql.language.OperationTypeDefinition;
+import graphql.language.SchemaDefinition;
 import graphql.language.TypeDefinition;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -71,10 +72,11 @@ public class GraphQLSchemaDefinition {
         List<URITemplate> operationArray = new ArrayList<>();
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
-        List<OperationTypeDefinition> operationTypeList = typeRegistry.schemaDefinition().get().getOperationTypeDefinitions();
         Map<java.lang.String, TypeDefinition> operationList = typeRegistry.types();
         for (Map.Entry<String, TypeDefinition> entry : operationList.entrySet()) {
-            if (operationTypeList != null && operationTypeList.size() > 0) {
+            Optional<SchemaDefinition> schemaDefinition = typeRegistry.schemaDefinition();
+            if (schemaDefinition.isPresent()) {
+                List<OperationTypeDefinition> operationTypeList = schemaDefinition.get().getOperationTypeDefinitions();
                 for (OperationTypeDefinition operationTypeDefinition : operationTypeList) {
                     if (entry.getValue().getName().equalsIgnoreCase(operationTypeDefinition.getTypeName().getName())) {
                         if (type == null) {
