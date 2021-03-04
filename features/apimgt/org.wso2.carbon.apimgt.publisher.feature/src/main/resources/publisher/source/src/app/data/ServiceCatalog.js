@@ -114,6 +114,24 @@ class ServiceCatalog {
     }
 
     /**
+     * Get details of Service by key
+     * @returns {promise} Service Entry promise.
+     */
+    static searchServiceByKey(key) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+        const promisedServices = serviceCatalog.then(client => {
+            return client.apis['Services'].searchServices(
+                {
+                    key: key,
+                },
+                this._requestMetaData()
+            );
+        });
+        return promisedServices.then(response => response.body);
+    }
+
+    /**
      * Check Existence of a Service
      * @param id {string} UUID of the service.
      * @returns {promise} Promise.
