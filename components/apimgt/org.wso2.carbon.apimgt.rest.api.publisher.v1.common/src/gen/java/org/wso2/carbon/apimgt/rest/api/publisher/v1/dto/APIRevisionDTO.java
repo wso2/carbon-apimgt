@@ -75,7 +75,7 @@ public class APIRevisionDTO   {
   
   @ApiModelProperty(example = "removed a post resource", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(min=0,max=255)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
