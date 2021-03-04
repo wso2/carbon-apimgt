@@ -79,10 +79,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
-            if (inlineContent == null && definitionFileDetail == null) {
-                RestApiUtil.handleBadRequest("Either inline definition or file should be provided to create service",
-                        log);
-            }
+            validateInputParams(definitionFileInputStream, definitionFileDetail, inlineContent);
             ServiceEntry existingService = serviceCatalog.getServiceByKey(serviceDTO.getServiceKey(), tenantId);
             if (existingService != null) {
                 RestApiUtil.handleResourceAlreadyExistsError("Error while adding Service : A service already "
@@ -379,10 +376,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         if (StringUtils.isEmpty(serviceId)) {
             RestApiUtil.handleBadRequest("The service Id should not be empty", log);
         }
-        if (inlineContent == null && definitionFileDetail == null) {
-            RestApiUtil.handleBadRequest("Either inline definition or file should be provided when updating service",
-                    log);
-        }
+        validateInputParams(definitionFileInputStream, definitionFileDetail, inlineContent);
         try {
             ServiceEntry existingService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             byte[] definitionFileByteArray;
@@ -506,5 +500,16 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         ByteArrayOutputStream definitionFileOutputByteStream = new ByteArrayOutputStream();
         IOUtils.copy(definitionFileInputStream, definitionFileOutputByteStream);
         return definitionFileOutputByteStream.toByteArray();
+    }
+
+    private void validateInputParams(InputStream definitionInputStream, Attachment fileDetail, String inlineContent) {
+        boolean isFileSpecified = definitionInputStream != null && fileDetail != null &&
+                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null;
+        if (inlineContent == null && !isFileSpecified) {
+            RestApiUtil.handleBadRequest("Either inline definition or file should be provided", log);
+        }
+        if (inlineContent != null && isFileSpecified) {
+            RestApiUtil.handleBadRequest("Only one of inline definition or file should be provided", log);
+        }
     }
 }
