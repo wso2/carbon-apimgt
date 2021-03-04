@@ -1432,8 +1432,29 @@ public class OAS3Parser extends APIDefinition {
             openAPI = injectOtherScopesToDefaultScheme(openAPI);
             openAPI = injectOtherResourceScopesToDefaultScheme(openAPI);
             return Json.pretty(openAPI);
+        } else {
+            Components components = openAPI.getComponents();
+            if (components != null) {
+                Map<String, SecurityScheme> securitySchemes = components.getSecuritySchemes();
+                if (securitySchemes != null) {
+                    SecurityScheme defaultSecurityScheme = openAPI.getComponents().getSecuritySchemes()
+                            .get(OPENAPI_SECURITY_SCHEMA_KEY);
+                    if (defaultSecurityScheme != null) {
+                        OAuthFlow oAuthFlow = defaultSecurityScheme.getFlows().getImplicit();
+                        String authUrl = oAuthFlow.getAuthorizationUrl();
+                        if (StringUtils.isBlank(authUrl)) {
+                            oAuthFlow.setAuthorizationUrl(OPENAPI_DEFAULT_AUTHORIZATION_URL);
+                        }
+                        Scopes scopes = oAuthFlow.getScopes();
+                        if (scopes == null) {
+                            Scopes newScopes = new Scopes();
+                            oAuthFlow.setScopes(newScopes);
+                        }
+                    }
+                }
+            }
         }
-        return swaggerContent;
+        return Json.pretty(openAPI);
     }
 
     /**

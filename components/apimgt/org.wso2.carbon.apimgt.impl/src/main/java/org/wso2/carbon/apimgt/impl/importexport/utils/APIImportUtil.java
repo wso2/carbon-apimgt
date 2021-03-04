@@ -263,6 +263,9 @@ public final class APIImportUtil {
             if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(importedApi.getType())) {
                 String swaggerContent = APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive);
 
+                //preProcess swagger definition
+                swaggerContent = OASParserUtil.preProcess(swaggerContent);
+
                 // Check whether any of the resources should be removed from the API when updating,
                 // that has already been used in API Products
                 List<APIResource> resourcesToRemove = apiProvider.getResourcesToBeRemovedFromAPIProducts(importedApi.getId(),
@@ -272,8 +275,6 @@ public final class APIImportUtil {
                     throw new APIImportExportException("Cannot remove following resource paths " +
                             resourcesToRemove.toString() + " because they are used by one or more API Products");
                 }
-                //preProcess swagger definition
-                swaggerContent = OASParserUtil.preProcess(swaggerContent);
 
                 addSwaggerDefinition(importedApi.getId(), swaggerContent, apiProvider);
                 APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerContent);
