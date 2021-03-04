@@ -90,7 +90,7 @@ info:
     Navigate through the API descriptions to find the required API, obtain an access token as described above and invoke the API with the authentication header.
     If you use a different authentication mechanism, this process may change.
 
-  version: '1.0'
+  version: '0.9'
 servers:
   - url: 'https://apis.wso2.com/api/service-catalog/v0'
   - url: 'http://apis.wso2.com/api/service-catalog/v0'
@@ -111,36 +111,6 @@ paths:
         using the name, version, definitionType and key of the service.
         Search based on the definition type and key of the service will always be an exact search. If you want to
         execute an exact search for either name or version the parameter should be given inside double quotation.
-
-        `Exact search on name`
-        ```
-        curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22' -H
-        'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'
-        ```
-
-        `Matching search on name`
-        ```
-        curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=Pet%20Service' -H
-        'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'
-        ```
-
-        `Exact search on version`
-        ```
-        curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?version=%221.0.0%22' -H
-        'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'
-        ```
-
-        `Matching search on name`
-        ```
-        curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?version=1.0.0' -H
-        'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'
-        ```
-
-        `Get all versions of a given service`
-        ```
-        curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22' -H
-        'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'
-        ```
       operationId: searchServices
       security:
         - OAuth2Security:
@@ -205,8 +175,25 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       x-code-samples:
         - lang: Curl
+          label: Exact search by name
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services"'
+                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22"'
+        - lang: Curl
+          label: Matching search by name
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=Pet%20Service"'
+        - lang: Curl
+          label: Exact search by version
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?version=%221.0.0%22"'
+        - lang: Curl
+          label: Matching search by version
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?version=1.0.0"'
+        - lang: Curl
+          label: Get all versions of a service
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                    "https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22"'
 
     #-----------------------------------------------------
     # Adds new service to the service catalog
