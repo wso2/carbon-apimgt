@@ -471,8 +471,8 @@ function CreateApi(props) {
                                             select
                                             label={(
                                                 <FormattedMessage
-                                                    id='Apis.Details.NewVersion.NewVersion.service.version1'
-                                                    defaultMessage='Service Version'
+                                                    id='ServiceCatalog.CreateApi.select.protocol'
+                                                    defaultMessage='Select Protocol'
                                                 />
                                             )}
                                             name='selectType'
@@ -481,9 +481,18 @@ function CreateApi(props) {
                                             margin='dense'
                                             variant='outlined'
                                             fullWidth
+                                            SelectProps={{
+                                                MenuProps: {
+                                                    anchorOrigin: {
+                                                        vertical: 'bottom',
+                                                        horizontal: 'left',
+                                                    },
+                                                    getContentAnchorEl: null,
+                                                },
+                                            }}
                                         >
                                             {protocols.map((protocol) => (
-                                                <MenuItem value={protocol.value}>
+                                                <MenuItem value={protocol.value} native>
                                                     {protocol.value}
                                                 </MenuItem>
                                             ))}

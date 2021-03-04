@@ -578,12 +578,9 @@ class SubscriptionsTable extends Component {
         const promisedSubscriptions = api.subscriptions(this.api.id, page * rowsPerPage, rowsPerPage, searchQuery);
         promisedSubscriptions
             .then((response) => {
-                this.setState({
-                    subscriptions: response.body.list,
-                    totalSubscription: response.body.pagination.total,
-                });
                 for (let i = 0; i < response.body.list.length; i++) {
                     const { subscriptionId } = response.body.list[i];
+                    response.body.list[i].name = response.body.list[i].applicationInfo.name;
                     const promisedInfo = api.getSubscriberInfo(subscriptionId);
                     promisedInfo
                         .then((resp) => {
@@ -602,6 +599,10 @@ class SubscriptionsTable extends Component {
                             }));
                         });
                 }
+                this.setState({
+                    subscriptions: response.body.list,
+                    totalSubscription: response.body.pagination.total,
+                });
             })
             .catch((errorMessage) => {
                 console.error(errorMessage);
@@ -775,7 +776,7 @@ class SubscriptionsTable extends Component {
                 },
             },
             {
-                name: 'applicationInfo.name',
+                name: 'name',
                 label: (
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.Listing.column.header.application'
