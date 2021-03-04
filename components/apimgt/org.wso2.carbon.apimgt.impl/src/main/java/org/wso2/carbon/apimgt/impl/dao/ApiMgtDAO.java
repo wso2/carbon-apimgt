@@ -5710,12 +5710,18 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
-            String defaultVersion = getDefaultVersion(conn, identifier);
-            if (identifier.getVersion().equals(defaultVersion)) {
+            try {
                 conn.setAutoCommit(false);
-                setPublishedDefVersion(identifier, conn, identifier.getVersion());
+                String defaultVersion = getDefaultVersion(conn, identifier);
+                if (identifier.getVersion().equals(defaultVersion)) {
+                    setPublishedDefVersion(identifier, conn, identifier.getVersion());
+                }
                 conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
+
         } catch (SQLException e) {
             handleException("Failed to update published default API state change", e);
         }
@@ -9481,6 +9487,33 @@ public class ApiMgtDAO {
             throw new APIManagementException("Error while retrieving apimgt connection", e,
                     ExceptionCodes.INTERNAL_ERROR);
         }
+    }
+
+    public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER)) {
+                preparedStatement.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                preparedStatement.setString(2, apiIdentifier.getName());
+                preparedStatement.setString(3, apiIdentifier.getVersion());
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        apiIdentifier.setId(resultSet.getInt("API_ID"));
+                        API api = new API(apiIdentifier);
+                        api.setUuid(resultSet.getString("API_UUID"));
+                        api.setContext(resultSet.getString("CONTEXT"));
+                        api.setType(resultSet.getString("API_TYPE"));
+                        api.setStatus(resultSet.getNString("STATUS"));
+                        return api;
+                    }
+                }
+
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apimgt connection", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
+        return null;
     }
 
     private class SubscriptionInfo {
