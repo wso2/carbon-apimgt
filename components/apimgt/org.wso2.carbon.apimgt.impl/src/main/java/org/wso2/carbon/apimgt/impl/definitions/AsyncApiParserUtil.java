@@ -27,6 +27,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +37,7 @@ public class AsyncApiParserUtil {
     
     private static final APIDefinition asyncApiParser = new AsyncApiParser();
     private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
+    private static final String PATH_SEPARATOR = "/";
 
     public static APIDefinitionValidationResponse validateAsyncAPISpecification(
             String schemaToBeValidated, boolean returnJSONContent) throws APIManagementException {
@@ -237,6 +239,7 @@ public class AsyncApiParserUtil {
 
                 if (definition.channels.get(topic).subscribe != null) {
                     URITemplate uriTemplate = new URITemplate();
+                    topic = Paths.get(PATH_SEPARATOR, topic).toString();
                     uriTemplate.setUriTemplate(topic);
                     uriTemplate.setHTTPVerb("SUBSCRIBE");
                     uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
