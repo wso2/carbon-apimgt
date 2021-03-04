@@ -145,7 +145,7 @@ paths:
             name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
 
             Supported attribute modifiers are [**version, context, name, status,
-            description, subcontext, doc, provider, label**]
+            description, doc, provider, label**]
 
             If no advanced attribute modifier has been specified,  the API names containing
             the search term will be returned as a result.

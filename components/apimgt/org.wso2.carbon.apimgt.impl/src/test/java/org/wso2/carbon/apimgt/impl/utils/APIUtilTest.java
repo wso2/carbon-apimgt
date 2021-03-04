@@ -2489,7 +2489,7 @@ public class APIUtilTest {
     public void testConstructApisGetQuery4() {
 
         String searchQuery = "status:PUBLISHED doc:wso2";
-        String expectedError = "Invalid query. AND based search is not supported for doc and subcontext prefixes";
+        String expectedError = "Invalid query. AND based search is not supported for doc prefix";
         APIManagementException exception = null;
         try {
             APIUtil.constructApisGetQuery(searchQuery);
