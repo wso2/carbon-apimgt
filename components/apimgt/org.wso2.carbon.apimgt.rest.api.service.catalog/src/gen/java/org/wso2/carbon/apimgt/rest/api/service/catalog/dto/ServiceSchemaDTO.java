@@ -24,6 +24,7 @@ public class ServiceSchemaDTO   {
   
     private ServiceDTO serviceMetadata = null;
     private File definitionFile = null;
+    private String inlineContent = null;
 
   /**
    **/
@@ -52,14 +53,31 @@ public class ServiceSchemaDTO   {
   }
 
   
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("definitionFile")
-  @NotNull
   public File getDefinitionFile() {
     return definitionFile;
   }
   public void setDefinitionFile(File definitionFile) {
     this.definitionFile = definitionFile;
+  }
+
+  /**
+   * Inline content of the document
+   **/
+  public ServiceSchemaDTO inlineContent(String inlineContent) {
+    this.inlineContent = inlineContent;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Inline content of the document")
+  @JsonProperty("inlineContent")
+  public String getInlineContent() {
+    return inlineContent;
+  }
+  public void setInlineContent(String inlineContent) {
+    this.inlineContent = inlineContent;
   }
 
 
@@ -73,12 +91,13 @@ public class ServiceSchemaDTO   {
     }
     ServiceSchemaDTO serviceSchema = (ServiceSchemaDTO) o;
     return Objects.equals(serviceMetadata, serviceSchema.serviceMetadata) &&
-        Objects.equals(definitionFile, serviceSchema.definitionFile);
+        Objects.equals(definitionFile, serviceSchema.definitionFile) &&
+        Objects.equals(inlineContent, serviceSchema.inlineContent);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(serviceMetadata, definitionFile);
+    return Objects.hash(serviceMetadata, definitionFile, inlineContent);
   }
 
   @Override
@@ -88,6 +107,7 @@ public class ServiceSchemaDTO   {
     
     sb.append("    serviceMetadata: ").append(toIndentedString(serviceMetadata)).append("\n");
     sb.append("    definitionFile: ").append(toIndentedString(definitionFile)).append("\n");
+    sb.append("    inlineContent: ").append(toIndentedString(inlineContent)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -25,7 +25,7 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ServicesApiService {
-      public Response addService(ServiceDTO serviceMetadata, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
+      public Response addService(ServiceDTO serviceMetadata, InputStream definitionFileInputStream, Attachment definitionFileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response deleteService(String serviceId, MessageContext messageContext) throws APIManagementException;
       public Response exportService(String name, String version, MessageContext messageContext) throws APIManagementException;
       public Response getServiceById(String serviceId, MessageContext messageContext) throws APIManagementException;
@@ -33,5 +33,5 @@ public interface ServicesApiService {
       public Response getServiceUsage(String serviceId, MessageContext messageContext) throws APIManagementException;
       public Response importService(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite, String verifier, MessageContext messageContext) throws APIManagementException;
       public Response searchServices(String name, String version, String definitionType, String key, Boolean shrink, String sortBy, String sortOrder, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
-      public Response updateService(String serviceId, ServiceDTO serviceMetadata, InputStream definitionFileInputStream, Attachment definitionFileDetail, MessageContext messageContext) throws APIManagementException;
+      public Response updateService(String serviceId, ServiceDTO serviceMetadata, InputStream definitionFileInputStream, Attachment definitionFileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
 }
