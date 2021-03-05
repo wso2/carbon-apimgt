@@ -202,6 +202,12 @@ public class ImportUtils {
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE);
 
+            // Retrieve the default API version if there is any to be used after the API lifecycle status change
+            // to update the new default API version
+            String previousDefaultAPIVersion = apiProvider.getDefaultVersion(
+                    new APIIdentifier(importedApiDTO.getProvider(), importedApiDTO.getName(),
+                            importedApiDTO.getVersion()));
+
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
                 log.info("Existing API found, attempting to update it...");
@@ -279,6 +285,15 @@ public class ImportUtils {
                 apiProvider.changeLifeCycleStatus(importedApi.getId(), lifecycleAction);
             }
             importedApi.setStatus(targetStatus);
+
+            // This is already handled when overwriting APIs earlier, inside the method PublisherCommonUtils.updateApi
+            // Hence here the overwrite=FALSE path will be considered
+            if (Boolean.FALSE.equals(overwrite) && importedApiDTO.isIsDefaultVersion()) {
+                apiProvider.updateOtherAPIVersionsForNewDefaultAPIChange(importedApi, previousDefaultAPIVersion);
+                apiProvider.updateDefaultAPIInRegistry(importedApi.getId(), true);
+                apiProvider.addUpdateAPIAsDefaultVersion(importedApi);
+            }
+
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             if (deploymentInfoArray == null) {
                 //If the params have not overwritten the deployment environments, yaml file will be read
@@ -595,6 +610,11 @@ public class ImportUtils {
             apiVersion = configObject.get(ImportExportConstants.VERSION_ELEMENT).getAsString();
         } else {
             apiVersion = ImportExportConstants.DEFAULT_API_PRODUCT_VERSION;
+        }
+
+        // Check whether the isDefaultVersion field exists. If not, add it with false value
+        if (!configObject.has(ImportExportConstants.IS_DEFAULT_VERSION)) {
+            configObject.addProperty(ImportExportConstants.IS_DEFAULT_VERSION, false);
         }
 
         // Remove spaces of API Name/version if present

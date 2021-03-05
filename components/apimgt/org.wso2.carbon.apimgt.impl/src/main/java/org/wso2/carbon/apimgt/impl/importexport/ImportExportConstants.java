@@ -102,6 +102,8 @@ public final class ImportExportConstants {
     // Name of the API version element tag of the api.json file
     public static final String VERSION_ELEMENT = "version";
 
+    public static final String IS_DEFAULT_VERSION = "isDefaultVersion";
+
     public static final String WSDL_URL = "wsdlUrl";
 
     // Swagger definition version of the imported API

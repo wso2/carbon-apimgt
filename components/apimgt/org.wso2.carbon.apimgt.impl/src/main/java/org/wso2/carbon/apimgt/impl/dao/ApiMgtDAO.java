@@ -6235,6 +6235,14 @@ public class ApiMgtDAO {
         return publishedDefaultVersion;
     }
 
+    public void addUpdateAPIAsDefaultVersion(API api) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            addUpdateAPIAsDefaultVersion(api, connection);
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while setting default API version of ", e);
+        }
+    }
+
     public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws APIManagementException {
         String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
         removeAPIFromDefaultVersion(api.getId(), connection);

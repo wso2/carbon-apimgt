@@ -443,6 +443,33 @@ public interface APIProvider extends APIManager {
             throws DuplicateAPIException, APIManagementException;
 
     /**
+     * Disable the default API version in other APIs and update the current API as the default version
+     *
+     * @param api                    API
+     * @param previousDefaultVersion API ID of the previous default version
+     * @throws APIManagementException
+     */
+    void updateOtherAPIVersionsForNewDefaultAPIChange(API api, String previousDefaultVersion)
+            throws APIManagementException;
+
+    /**
+     * Update the default API in the registry.
+     *
+     * @param apiIdentifier Identifier of the default API
+     * @param value         Whether the API is the default version or not
+     * @throws APIManagementException if an error occurs while updating the default API version of the API in registry
+     */
+    void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier, boolean value) throws APIManagementException;
+
+    /**
+     * Add/update the default API version of an API.
+     *
+     * @param api API
+     * @throws APIManagementException if an error occurs while adding/updating the default API version of the API
+     */
+    void addUpdateAPIAsDefaultVersion(API api) throws APIManagementException;
+
+    /**
      * Retrieve the Key of the Service used in the API
      * @param apiId Unique Identifier of the API
      * @param tenantId Logged-in tenant domain
