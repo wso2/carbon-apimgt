@@ -22,15 +22,20 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.APIInfoDTO;
@@ -225,11 +230,20 @@ public class ServiceEntryMappingUtil {
      */
     public static String generateServiceFiles(ServiceEntry serviceEntry) {
         String pathToCreateFiles = FileBasedServicesImportExportManager.createDir(RestApiConstants.JAVA_IO_TMPDIR);
-        fromInputStreamToFile(serviceEntry.getMetadata(), pathToCreateFiles + File.separator +
-                APIConstants.METADATA_FILE);
-        fromInputStreamToFile(serviceEntry.getEndpointDef(), pathToCreateFiles + File.separator +
-                APIConstants.DEFINITION_FILE);
-
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String metadataString = gson.toJson(serviceEntry);
+            JSONParser jsonParser = new JSONParser();
+            org.json.simple.JSONObject metadataJson = (org.json.simple.JSONObject) jsonParser.parse(metadataString);
+            metadataJson.remove("endpointDef");
+            metadataString = CommonUtil.jsonToYaml(gson.toJson(metadataJson));
+            fromInputStreamToFile(new ByteArrayInputStream(metadataString.getBytes()), pathToCreateFiles
+                    + File.separator + APIConstants.METADATA_FILE);
+            fromInputStreamToFile(serviceEntry.getEndpointDef(), pathToCreateFiles + File.separator +
+                    APIConstants.DEFINITION_FILE);
+        } catch (ParseException | IOException e) {
+            RestApiUtil.handleInternalServerError("Error while generating the zip file", log);
+        }
         return pathToCreateFiles;
     }
 
@@ -238,7 +252,6 @@ public class ServiceEntryMappingUtil {
      * @param name Service name
      * @param version Service version
      * @param definitionType Service Definition Type
-     * @param displayName Service Display name
      * @param key Service key
      * @param sortBy Sort By
      * @param sortOrder Sort Order

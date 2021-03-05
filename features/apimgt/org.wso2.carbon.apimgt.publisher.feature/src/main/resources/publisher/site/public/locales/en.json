@@ -189,6 +189,12 @@
       "value": "Version"
     }
   ],
+  "Apis.Create.Components.NewTopic.topic.name": [
+    {
+      "type": 0,
+      "value": "Topic Name"
+    }
+  ],
   "Apis.Create.Components.SelectPolicies.business.plans": [
     {
       "type": 0,
@@ -3927,7 +3933,7 @@
       "value": "Undeploy"
     }
   ],
-  "Apis.Details.Environments.create.vhost": [
+  "Apis.Details.Environments.deploy.vhost": [
     {
       "type": 0,
       "value": "VHost"
@@ -6469,6 +6475,18 @@
       "value": "Version"
     }
   ],
+  "Apis.Listing.ApiThumb.by": [
+    {
+      "type": 0,
+      "value": "By"
+    }
+  ],
+  "Apis.Listing.ApiThumb.by.colon": [
+    {
+      "type": 0,
+      "value": ":"
+    }
+  ],
   "Apis.Listing.ApiThumb.channel": [
     {
       "type": 0,
@@ -8207,12 +8225,6 @@
     {
       "type": 0,
       "value": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-    }
-  ],
-  "n8vnpP": [
-    {
-      "type": 0,
-      "value": "Topic Name"
     }
   ],
   "sIDiOO": [

@@ -505,6 +505,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v2/apis/ecb5b300-422d-4ee8-88d2-364a0a122238/reimport-service"'
 
   /apis/{apiId}/swagger:
     get:
@@ -1402,7 +1409,7 @@ paths:
     get:
       tags:
         - API Revisions
-      summary: List available revisions of an API
+      summary: List Revisions
       description: |
         List available revisions of an API
       operationId: getAPIRevisions
@@ -1425,12 +1432,13 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
 
     #--------------------------------------------
     # Create a new API revision
@@ -1438,7 +1446,7 @@ paths:
     post:
       tags:
         - API Revisions
-      summary: Create a new API revision
+      summary: Create API Revision
       description: |
         Create a new API revision
       operationId: createAPIRevision
@@ -1465,13 +1473,14 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: application/json" -d @data.json
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
 
   ######################################################
   # The "API Revisions" individual resource API
@@ -1484,7 +1493,7 @@ paths:
     get:
       tags:
         - API Revisions
-      summary: Retrieve a revision of an API
+      summary: Retrieve Revision
       description: |
         Retrieve a revision of an API
       operationId: getAPIRevision
@@ -1504,11 +1513,12 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
     #--------------------------------------------
     # Delete a revision
@@ -1516,7 +1526,7 @@ paths:
     delete:
       tags:
         - API Revisions
-      summary: Delete a revision of an API
+      summary: Delete Revision
       description: |
         Delete a revision of an API
       operationId: deleteAPIRevision
@@ -1540,22 +1550,22 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /apis/{apiId}/deploy-revision:
-
+  /apis/{apiId}/deployed-revision:
     #--------------------------------------------
     # List available deployed revision deployment details of an API
     #--------------------------------------------
     get:
       tags:
         - API Revisions
-      summary: List available deployed revision deployment details of an API
+      summary: List Deployments
       description: |
         List available deployed revision deployment details of an API
       operationId: getAPIRevisionDeployments
@@ -1574,19 +1584,21 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision"'
+                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployed-revision"'
 
+  /apis/{apiId}/deploy-revision:
     #--------------------------------------------
     # Deploy a revision
     #--------------------------------------------
     post:
       tags:
         - API Revisions
-      summary: Deploy a revision
+      summary: Deploy Revision
       description: |
         Deploy a revision
       operationId: deployAPIRevision
@@ -1619,11 +1631,12 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/undeploy-revision:
     #--------------------------------------------
@@ -1632,9 +1645,9 @@ paths:
     post:
       tags:
         - API Revisions
-      summary: Un-Deploy a revision
+      summary: UnDeploy Revision
       description: |
-        Un-Deploy a revision
+        UnDeploy a revision
       operationId: undeployAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -1671,24 +1684,25 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
             - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/{apiId}/restore-revision:
 
     #--------------------------------------------------------
-    # Restore a revision to the working copy of the API
+    # Restore a revision to the current API of the API
     #--------------------------------------------------------
     post:
       tags:
         - API Revisions
-      summary: Restore a revision
+      summary: Restore API Revision
       description: |
-        Restore a revision to the working copy of the API
+        Restore a revision to the current API of the API
       operationId: restoreAPIRevision
       parameters:
         - $ref: '#/components/parameters/apiId'
@@ -1706,11 +1720,12 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://127.0.0.1:9443/api/am/publisher/v1/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+            "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
   /apis/import-service:
     post:
@@ -1726,6 +1741,7 @@ paths:
           schema:
             type: string
           description: ID of service that should be imported from Service Catalog
+          example: Pizzashack-1.0.0
       requestBody:
         content:
           application/json:
@@ -1756,6 +1772,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v2/apis/import-service?serviceKey=Pizzashack-1.0.0"'
 
   /apis/{apiId}/comments:
     get:
@@ -6375,7 +6398,7 @@ paths:
     get:
       tags:
         - API Product Revisions
-      summary: List available revisions of an API Product
+      summary: List Revisions
       description: |
         List available revisions of an API Product
       operationId: getAPIProductRevisions
@@ -6398,6 +6421,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
             - apim:api_product_import_export
       x-code-samples:
@@ -6438,6 +6462,7 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6456,7 +6481,7 @@ paths:
     get:
       tags:
         - API Product Revisions
-      summary: Retrieve a revision of an API Product
+      summary: Retrieve Revision
       description: |
         Retrieve a revision of an API Product
       operationId: getAPIProductRevision
@@ -6476,6 +6501,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6488,7 +6514,7 @@ paths:
     delete:
       tags:
         - API Product Revisions
-      summary: Delete a revision of an API Product
+      summary: Delete Revision
       description: |
         Delete a revision of an API Product
       operationId: deleteAPIProductRevision
@@ -6512,21 +6538,21 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /api-products/{apiProductId}/deploy-revision:
-
+  /api-products/{apiProductId}/deployed-revision:
     #--------------------------------------------
     # List available deployed revision deployment details of an API Product
     #--------------------------------------------
     get:
       tags:
         - API Product Revisions
-      summary: List available deployed revision deployment details of an API Product
+      summary: List Deployments
       description: |
         List available deployed revision deployment details of an API Product
       operationId: getAPIProductRevisionDeployments
@@ -6545,21 +6571,23 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision"'
+                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployed-revision"'
 
+  /api-products/{apiProductId}/deploy-revision:
     #--------------------------------------------
     # Deploy a revision
     #--------------------------------------------
     post:
       tags:
         - API Product Revisions
-      summary: Deploy a revision
+      summary: Deploy Revision
       description: |
-        Deploy a revision
+        Deploy an API Product Revision
       operationId: deployAPIProductRevision
       parameters:
         - $ref: '#/components/parameters/apiProductId'
@@ -6590,6 +6618,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -6603,9 +6632,9 @@ paths:
     post:
       tags:
         - API Product Revisions
-      summary: Un-Deploy a revision
+      summary: UnDeploy Revision
       description: |
-        Un-Deploy a revision
+        UnDeploy an API Product Revision
       operationId: undeployAPIProductRevision
       parameters:
         - $ref: '#/components/parameters/apiProductId'
@@ -6642,6 +6671,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
             - apim:api_product_import_export
       x-code-samples:
@@ -6652,14 +6682,14 @@ paths:
   /api-products/{apiProductId}/restore-revision:
 
     #--------------------------------------------------------
-    # Restore a revision to the working copy of the API Product
+    # Restore a revision to the Current API of the API Product
     #--------------------------------------------------------
     post:
       tags:
         - API Product Revisions
-      summary: Restore a revision
+      summary: Restore Revision
       description: |
-        Restore a revision to the working copy of the API Product
+        Restore a revision to the Current API of the API Product
       operationId: restoreAPIProductRevision
       parameters:
         - $ref: '#/components/parameters/apiProductId'
@@ -6677,6 +6707,7 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_publish
       x-code-samples:
         - lang: Curl
@@ -8569,20 +8600,26 @@ components:
       properties:
         displayName:
           type: string
+          readOnly: true
           example: REVISION 1
         id:
           type: string
+          readOnly: true
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
         description:
+          maxLength: 255
+          minLength: 0
           type: string
           example: removed a post resource
         createdTime:
+          readOnly: true
           type: string
           format: date-time
         apiInfo:
           $ref: '#/components/schemas/APIRevisionAPIInfo'
         deploymentInfo:
           type: array
+          readOnly: true
           items:
             $ref: '#/components/schemas/APIRevisionDeployment'
 
@@ -8629,9 +8666,13 @@ components:
       title: APIRevisionDeployment Info object with basic API deployment details
       properties:
         revisionUuid:
+          maxLength: 255
+          minLength: 0
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
         name:
+          maxLength: 255
+          minLength: 1
           type: string
           example: default
         vhost:
@@ -8645,6 +8686,7 @@ components:
           type: boolean
           example: true
         deployedTime:
+          readOnly: true
           type: string
           format: date-time
 
@@ -10788,6 +10830,7 @@ components:
                 - INLINE
                 - URL
                 - FILE
+                - MARKDOWN
             sourceUrl:
               type: string
               example: ""

@@ -19,8 +19,8 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
-import MaterialIcons from 'MaterialIcons';
-import Background from './Background';
+import Background from '../Background';
+import { getIcon } from './ImageUtils';
 
 const styles = {
     icon: {},
@@ -57,24 +57,14 @@ class ImageGenerator extends PureComponent {
             category, key, color, backgroundIndex,
         } = fixedIcon;
 
-        let str = api;
-        if (typeof api === 'object') str = api.name;
-        let count;
+        let apiName = api.name;
         let colorPair;
         let randomBackgroundIndex;
-        let IconElement;
+        let IconElement = getIcon(key, category, theme, api);
         const colorPairs = theme.custom.thumbnail.backgrounds;
 
         // Creating the icon
-        if (key && category) {
-            IconElement = key;
-        } else if (api.type === 'DOC') {
-            IconElement = theme.custom.thumbnail.document.icon;
-        } else {
-            count = MaterialIcons.categories[0].icons.length;
-            const randomIconIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % count;
-            IconElement = MaterialIcons.categories[0].icons[randomIconIndex].id;
-        }
+       
 
         // Obtain or generate background color pair
         if (api.type === 'DOC') {
@@ -82,7 +72,7 @@ class ImageGenerator extends PureComponent {
         } else if (backgroundIndex && colorPairs.length > backgroundIndex) {
             colorPair = colorPairs[backgroundIndex];
         } else {
-            randomBackgroundIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % colorPairs.length;
+            randomBackgroundIndex = (apiName.charCodeAt(0) + apiName.charCodeAt(apiName.length - 1)) % colorPairs.length;
             colorPair = colorPairs[randomBackgroundIndex];
         }
         return (

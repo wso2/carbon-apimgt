@@ -23,6 +23,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
@@ -125,6 +126,7 @@ function CreateApi(props) {
         isOverview,
         serviceDisplayName,
         serviceKey,
+        definitionType,
         serviceVersion,
         serviceUrl,
     } = props;
@@ -132,7 +134,21 @@ function CreateApi(props) {
     const intl = useIntl();
     const [open, setOpen] = useState(false);
     const [pageError, setPageError] = useState(null);
-
+    const [type, setType] = useState('');
+    const protocols = [
+        {
+            displayName: 'WebSocket',
+            value: 'WS',
+        },
+        {
+            displayName: 'WebSub',
+            value: 'WEBSUB',
+        },
+        {
+            displayName: 'SSE',
+            value: 'SSE',
+        },
+    ];
     const [isFormValid, setIsFormValid] = useState(false);
 
     /**
@@ -164,6 +180,10 @@ function CreateApi(props) {
     };
     const handleClose = () => {
         setOpen(false);
+    };
+
+    const handleChangeType = (event) => {
+        setType(event.target.value);
     };
 
     const {
@@ -265,7 +285,7 @@ function CreateApi(props) {
     }
 
     const runAction = () => {
-        const promisedCreateApi = API.createApiFromService(serviceKey, state);
+        const promisedCreateApi = API.createApiFromService(serviceKey, state, type);
         promisedCreateApi.then((data) => {
             const apiInfo = data;
             Alert.info(intl.formatMessage({
@@ -444,6 +464,41 @@ function CreateApi(props) {
                                         onChange={handleChange}
                                     />
                                 </Grid>
+                                {definitionType === 'ASYNC_API' && (
+                                    <Grid item md={8} xs={6}>
+                                        <TextField
+                                            id='version-selector'
+                                            select
+                                            label={(
+                                                <FormattedMessage
+                                                    id='ServiceCatalog.CreateApi.select.protocol'
+                                                    defaultMessage='Select Protocol'
+                                                />
+                                            )}
+                                            name='selectType'
+                                            value={type}
+                                            onChange={handleChangeType}
+                                            margin='dense'
+                                            variant='outlined'
+                                            fullWidth
+                                            SelectProps={{
+                                                MenuProps: {
+                                                    anchorOrigin: {
+                                                        vertical: 'bottom',
+                                                        horizontal: 'left',
+                                                    },
+                                                    getContentAnchorEl: null,
+                                                },
+                                            }}
+                                        >
+                                            {protocols.map((protocol) => (
+                                                <MenuItem value={protocol.value} native>
+                                                    {protocol.value}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    </Grid>
+                                )}
                             </Grid>
                         </Grid>
                     </Grid>
@@ -507,6 +562,7 @@ CreateApi.defaultProps = {
 CreateApi.propTypes = {
     serviceKey: PropTypes.string.isRequired,
     serviceDisplayName: PropTypes.string.isRequired,
+    definitionType: PropTypes.string.isRequired,
     serviceVersion: PropTypes.string.isRequired,
     serviceUrl: PropTypes.string.isRequired,
     isOverview: PropTypes.bool,
