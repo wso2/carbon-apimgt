@@ -44,7 +44,7 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
 
         } catch (ParseException e) {
             String errorMessage = "Policy definition parsing failed. ";
-            handleFailure(APISecurityConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);
+            handleFailure(GraphQLConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);
         }
     }
 
@@ -98,7 +98,7 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
                                String errorMessage, String errorDescription) {
         OMElement payload = getFaultPayload(errorCodeValue, errorMessage, errorDescription);
         Utils.setFaultPayload(messageContext, payload);
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
