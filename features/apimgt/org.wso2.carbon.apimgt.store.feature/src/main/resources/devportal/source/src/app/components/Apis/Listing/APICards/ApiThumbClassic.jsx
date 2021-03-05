@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -28,9 +29,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
-import ImageGenerator from './APICards/ImageGenerator';
-import Api from '../../../data/api';
-import { ApiContext } from '../Details/ApiContext';
+import { app } from 'Settings';
+import ImageGenerator from './ImageGenerator';
+import Api from '../../../../data/api';
+import { ApiContext } from '../../Details/ApiContext';
 import classNames from 'classnames';
 
 /**
@@ -40,18 +42,21 @@ import classNames from 'classnames';
  */
 const styles = theme => ({
     card: {
-        margin: theme.spacing.unit * (3 / 2),
+        margin: theme.spacing(3 / 2),
         maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
+        position: 'relative',
     },
     apiDetails: {
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         background: theme.custom.thumbnail.contentBackgroundColor,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(1),
         color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
         '& a': {
             color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
         },
+        position: theme.custom.thumbnail.contentPictureOverlap ? 'absolute' : 'relative',
+        top: 0,
     },
     suppressLinkStyles: {
         textDecoration: 'none',
@@ -77,14 +82,23 @@ const styles = theme => ({
         'padding-left': '5px',
         'padding-right': '65px',
     },
+    thumbLeftAction: {
+        alignSelf: 'flex-start',
+        flex: 1,
+        width: '25%',
+        'padding-left': '5px',
+        'padding-right': '10px',
+    },
     thumbRight: {
-        alignSelf: 'flex-end',
+        display: 'flex',
+        alignItems: 'flex-start',
+        flexDirection: 'column',
     },
     thumbInfo: {
         display: 'flex',
     },
     thumbHeader: {
-        width: theme.custom.thumbnail.width - theme.spacing.unit,
+        width: theme.custom.thumbnail.width - theme.spacing(1),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -93,7 +107,7 @@ const styles = theme => ({
         'padding-left': '5px',
     },
     contextBox: {
-        width: parseInt((theme.custom.thumbnail.width - theme.spacing.unit) / 2, 10),
+        width: parseInt((theme.custom.thumbnail.width - theme.spacing(1)) / 2, 10),
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
@@ -106,10 +120,13 @@ const styles = theme => ({
         'padding-bottom': 1.5,
         textAlign: 'left',
     },
+    context: {
+        marginTop: 5,
+    },
     thumbWrapper: {
         position: 'relative',
         paddingTop: 20,
-        marginRight: theme.spacing.unit * 2,
+        marginRight: theme.spacing(2),
     },
     deleteIcon: {
         fill: 'red',
@@ -135,6 +152,15 @@ const styles = theme => ({
     ratingWrapper: {
         marginTop: '20px',
     },
+    textblock: {
+        color: theme.palette.text.secondary,
+        position: 'absolute',
+        bottom: '35px',
+        right: '10px',
+        background: theme.custom.thumbnail.contentBackgroundColor,
+        'padding-left': '10px',
+        'padding-right': '10px',
+    },
 });
 
 const windowURL = window.URL || window.webkitURL;
@@ -142,14 +168,14 @@ const windowURL = window.URL || window.webkitURL;
 /**
  *
  * Render API Card component in API listing card view,containing essential API information like name , version ect
- * @class RecommendedApiThumb
+ * @class APIThumb
  * @extends {Component}
  */
-class RecommendedApiThumb extends React.Component {
+class ApiThumbClassic extends React.Component {
     /**
-     *Creates an instance of RecommendedApiThumb.
+     *Creates an instance of APIThumb.
      * @param {*} props
-     * @memberof RecommendedApiThumb
+     * @memberof APIThumb
      */
     constructor(props) {
         super(props);
@@ -160,6 +186,7 @@ class RecommendedApiThumb extends React.Component {
             backgroundIndex: null,
             imageObj: null,
             isHover: false,
+            imageLoaded: false,
         };
         this.toggleMouseOver = this.toggleMouseOver.bind(this);
     }
@@ -167,7 +194,7 @@ class RecommendedApiThumb extends React.Component {
     /**
      *
      *
-     * @memberof RecommendedApiThumb
+     * @memberof ApiThumb
      */
     componentDidMount() {
         const { api } = this.props;
@@ -190,7 +217,9 @@ class RecommendedApiThumb extends React.Component {
                     this.setState({ imageObj: url });
                 }
             }
-        });
+        }).finally(() => {
+            this.setState({ imageLoaded: true })
+        })
     }
 
     /**
@@ -206,7 +235,7 @@ class RecommendedApiThumb extends React.Component {
      * Get Path Prefix depedning on the respective API Type being rendered
      *
      * @returns {String} path
-     * @memberof RecommendedApiThumb
+     * @memberof ApiThumb
      */
     getPathPrefix() {
         const path = '/apis/';
@@ -217,7 +246,7 @@ class RecommendedApiThumb extends React.Component {
      * Toggle mouse Hover state to set the card `raised` property
      *
      * @param {React.SyntheticEvent} event mouseover and mouseout
-     * @memberof RecommendedApiThumb
+     * @memberof APIThumb
      */
     toggleMouseOver(event) {
         this.setState({ isHover: event.type === 'mouseover' });
@@ -226,39 +255,44 @@ class RecommendedApiThumb extends React.Component {
     /**
      * @inheritdoc
      * @returns {React.Component} @inheritdoc
-     * @memberof RecommendedApiThumb
+     * @memberof APIThumb
      */
     render() {
         const {
-            imageObj, selectedIcon, color, backgroundIndex, category, isHover,
+            imageObj, selectedIcon, color, backgroundIndex, category, isHover, imageLoaded,
         } = this.state;
         const path = this.getPathPrefix();
+        const { isMonetizationEnabled } = this.context;
 
-        // const detailsLink = path + this.props.api.id;
         const detailsLink = path + this.props.api.id;
         const {
             api, classes, theme, customWidth, customHeight, showInfo,
         } = this.props;
-        const { thumbnail } = theme.custom;
+        const { custom: { thumbnail, social: { showRating } } } = theme;
         const { name, version, context } = api;
 
         let { provider } = api;
-        // if (
-        //     api.businessInformation &&
-        //     api.businessInformation.businessOwner &&
-        //     api.businessInformation.businessOwner.trim() !== ''
-        // ) {
-        //     provider = api.businessInformation.businessOwner;
-        // }
-        // if (!api.lifeCycleStatus) {
-        //     api.lifeCycleStatus = api.status;
-        // }
+        if (
+            api.businessInformation &&
+            api.businessInformation.businessOwner &&
+            api.businessInformation.businessOwner.trim() !== ''
+        ) {
+            provider = api.businessInformation.businessOwner;
+        }
+        if (!api.lifeCycleStatus) {
+            api.lifeCycleStatus = api.status;
+        }
         const imageWidth = customWidth || thumbnail.width;
         const imageHeight = customHeight || 140;
         const defaultImage = thumbnail.defaultApiImage;
 
         let ImageView;
-        if (imageObj) {
+        if (!imageLoaded) {
+            ImageView = (<div class="image-load-frame">
+                <div class="image-load-animation1"></div>
+                <div class="image-load-animation2"></div>
+            </div>)
+        } else if (imageObj) {
             ImageView = (
                 <img
                     height={imageHeight}
@@ -276,7 +310,7 @@ class RecommendedApiThumb extends React.Component {
                     api={api}
                     fixedIcon={{
                         key: selectedIcon,
-                        color,
+                        color: color || thumbnail.iconColor,
                         backgroundIndex,
                         category,
                         api,
@@ -293,10 +327,13 @@ class RecommendedApiThumb extends React.Component {
                 raised={isHover}
                 className={classNames('image-thumbnail', classes.card)}
             >
+                {isMonetizationEnabled && (
+                    <div className={classes.textblock}>{api.monetizationLabel}</div>
+                )}
                 <CardMedia>
-                    <Link to={detailsLink} className={classes.suppressLinkStyles}>
+                    <Link to={detailsLink} aria-hidden='true' className={classes.suppressLinkStyles}>
                         {!defaultImage && ImageView}
-                        {defaultImage && <img src={defaultImage} alt='img' />}
+                        {defaultImage && <img src={app.context + defaultImage} alt='img' />}
                     </Link>
                 </CardMedia>
                 {showInfo && (
@@ -312,10 +349,50 @@ class RecommendedApiThumb extends React.Component {
                                 {name}
                             </Typography>
                         </Link>
+                        <div className={classes.row}>
+                            <Typography variant='caption' gutterBottom align='left' className={classes.thumbBy}>
+                                <FormattedMessage defaultMessage='By' id='Apis.Listing.ApiThumb.by' />
+                                <FormattedMessage defaultMessage=' : ' id='Apis.Listing.ApiThumb.by.colon' />
+                                {provider}
+                            </Typography>
+                        </div>
                         <div className={classes.thumbInfo}>
-                            <div className={classes.thumbLeft}>
+                            <div className={classes.row}>
+                                <div className={classes.thumbLeft}>
+                                    <Typography variant='subtitle1' component='div'>{version}</Typography>
+                                    <Typography variant='caption' component='div' gutterBottom align='left'>
+                                        <FormattedMessage defaultMessage='Version' id='Apis.Listing.ApiThumb.version' />
+                                    </Typography>
+                                </div>
+                            </div>
+                            <div className={classes.row}>
+                                <div className={classes.thumbRight}>
+                                    <Typography
+                                        variant='subtitle1'
+                                        component='div'
+                                        align='right'
+                                        className={classes.contextBox}
+                                    >
+                                        {context}
+                                    </Typography>
+                                    <Typography
+                                        variant='caption'
+                                        gutterBottom
+                                        align='right'
+                                        className={classes.context}
+                                        Component='div'
+                                    >
+                                        <FormattedMessage defaultMessage='Context' id='Apis.Listing.ApiThumb.context' />
+                                    </Typography>
+                                </div>
+                            </div>
+                        </div>
+                        <div className={classes.thumbInfo}>
+                            {showRating && <div className={classes.thumbLeftAction}>
                                 <Typography
                                     variant='subtitle1'
+                                    component='div'
+                                    aria-label='API Rating'
                                     gutterBottom
                                     align='left'
                                     className={classNames('api-thumb-rating', classes.ratingWrapper)}
@@ -327,7 +404,7 @@ class RecommendedApiThumb extends React.Component {
                                         showSummary={false}
                                     />
                                 </Typography>
-                            </div>
+                            </div>}
                             <div className={classes.thumbRight}>
                                 <Typography
                                     variant='subtitle1'
@@ -341,6 +418,12 @@ class RecommendedApiThumb extends React.Component {
                                             color='primary'
                                         />
                                     )}
+                                    {(api.lifeCycleStatus === 'PROTOTYPED') && (
+                                        <Chip
+                                        label={api.apiType === 'APIProduct' ? api.state : api.lifeCycleStatus}
+                                        color='default'
+                                    />
+                                    )}
                                 </Typography>
                             </div>
                         </div>
@@ -350,12 +433,12 @@ class RecommendedApiThumb extends React.Component {
         );
     }
 }
-RecommendedApiThumb.defaultProps = {
+ApiThumbClassic.defaultProps = {
     customWidth: null,
     customHeight: null,
     showInfo: true,
 };
-RecommendedApiThumb.propTypes = {
+ApiThumbClassic.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
     customWidth: PropTypes.number,
@@ -363,7 +446,6 @@ RecommendedApiThumb.propTypes = {
     showInfo: PropTypes.bool,
 };
 
-RecommendedApiThumb.contextType = ApiContext;
- 
-export default withStyles(styles, { withTheme: true })(RecommendedApiThumb);
- 
+ApiThumbClassic.contextType = ApiContext;
+
+export default withStyles(styles, { withTheme: true })(ApiThumbClassic);
