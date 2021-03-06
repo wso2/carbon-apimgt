@@ -154,8 +154,8 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                         , corsProperties);
             }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
         }
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
         Map<String, String> clientCertificateObject = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         if (clientCertificateDTOS != null) {
@@ -239,7 +239,7 @@ public class TemplateBuilderUtil {
                     , properties);
 
             String extensionHandlerPosition = getExtensionHandlerPosition(tenantDomain);
-            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+            if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.<String, String>emptyMap(), 0);

@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Entity for keeping API related information.
