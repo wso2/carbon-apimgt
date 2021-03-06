@@ -219,6 +219,7 @@ class AppsTableContent extends Component {
                                         >
                                             <span>
                                             <IconButton
+                                                className="itest-application-delete-button"
                                                 disabled={app.deleting || !isAppOwner}
                                                 data-appid={app.applicationId}
                                                 onClick={toggleDeleteConfirmation}

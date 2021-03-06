@@ -564,7 +564,7 @@ class Layout extends React.Component {
                                 ) : (
                                         <div className={classes.linkWrapper}>
                                             <a href={app.context + '/services/configs'}>
-                                                <Button className={classes.userLink}>
+                                                <Button id="itest-devportal-sign-in" className={classes.userLink}>
                                                     <Icon>person</Icon>
                                                     <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
                                                 </Button>
