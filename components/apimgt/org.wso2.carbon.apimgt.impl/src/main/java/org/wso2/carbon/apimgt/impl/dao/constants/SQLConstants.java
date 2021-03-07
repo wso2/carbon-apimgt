@@ -2927,7 +2927,7 @@ public class SQLConstants {
                     "FROM " +
                     "   AM_POLICY_SUBSCRIPTION " +
                     " WHERE" +
-                    "   TENANT_ID =?";
+                    "   TENANT_ID =? AND QUOTA_TYPE =?";
 
     public static final String GET_SUBSCRIPTION_POLICIES_BY_POLICY_NAMES_PREFIX =
             " SELECT " +

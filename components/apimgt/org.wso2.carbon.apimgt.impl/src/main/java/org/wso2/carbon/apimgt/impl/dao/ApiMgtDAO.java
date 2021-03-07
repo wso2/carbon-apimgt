@@ -11810,6 +11810,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, tenantID);
+            ps.setString(2, PolicyConstants.REQUEST_COUNT_TYPE);
             rs = ps.executeQuery();
             while (rs.next()) {
                 SubscriptionPolicy subPolicy = new SubscriptionPolicy(

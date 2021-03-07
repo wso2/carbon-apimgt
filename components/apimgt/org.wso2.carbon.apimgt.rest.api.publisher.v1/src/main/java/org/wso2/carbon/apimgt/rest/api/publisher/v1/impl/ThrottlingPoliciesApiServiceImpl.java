@@ -56,13 +56,14 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      * Retrieves all the Tiers
      *
      * @param policyLevel tier level (api/application or resource)
+     * @param organizationId Identifier of an organization
      * @param limit       max number of objects returns
      * @param offset      starting index
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted tiers
      */
     @Override
-    public Response getAllThrottlingPolicies(String policyLevel, Integer limit, Integer offset,
+    public Response getAllThrottlingPolicies(String policyLevel, String organizationId, Integer limit, Integer offset,
                                              String ifNoneMatch, MessageContext messageContext) {
         //pre-processing
         //setting default limit and offset if they are null
@@ -167,8 +168,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      */
     public List<Tier> getThrottlingPolicyList(String policyLevel) {
         try {
-            List<Tier> tierList = new ArrayList<>();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            List<Tier> tierList = new ArrayList<>();
 
             if (StringUtils.isBlank(policyLevel)) {
                 RestApiUtil.handleBadRequest("policyLevel cannot be empty", log);
