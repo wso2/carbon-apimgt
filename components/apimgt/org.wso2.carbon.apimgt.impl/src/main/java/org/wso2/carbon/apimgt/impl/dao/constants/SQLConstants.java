@@ -2328,7 +2328,7 @@ public class SQLConstants {
                 "AND API.API_NAME = ? " +
                 "AND API.API_VERSION  = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
-                "AND PARENT_COMMENT_ID = ?";
+                "AND PARENT_COMMENT_ID = ? LIMIT ? OFFSET ?";
 
     public static final String GET_ROOT_COMMENTS_SQL =
             "SELECT " +
@@ -2341,6 +2341,32 @@ public class SQLConstants {
                 "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
                 "AM_API_COMMENTS.ENTRY_POINT, " +
                 "AM_API_COMMENTS.CATEGORY " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID IS NULL LIMIT ? OFFSET ?";
+
+    public static final String GET_REPLIES_COUNT_SQL =
+            "SELECT " +
+                "COUNT(AM_API_COMMENTS.COMMENT_ID) AS COMMENT_COUNT " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID = ?";
+
+    public static final String GET_ROOT_COMMENTS_COUNT_SQL =
+            "SELECT " +
+                "COUNT(AM_API_COMMENTS.COMMENT_ID) AS COMMENT_COUNT " +
             "FROM " +
                 "AM_API_COMMENTS, " +
                 "AM_API API " +

@@ -52,6 +52,8 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.Pagination;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
@@ -7900,7 +7902,7 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
 
         Identifier identifier;
@@ -7940,7 +7942,7 @@ public class ApiMgtDAO {
                         comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                         comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                         comment.setCategory(resultSet.getString("CATEGORY"));
-                        comment.setReplies(Arrays.asList(getComments(apiTypeWrapper, commentId)));
+                        comment.setReplies(getComments(identifier, commentId, replyLimit, replyOffset, connection));
                         return comment;
                     }
                 }
@@ -7960,8 +7962,8 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    public Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException {
-        Comment[] commentList = null;
+    public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit, Integer offset) throws APIManagementException {
+        CommentList commentList = null;
         try (Connection connection = APIMgtDBUtil.getConnection()){
             int id = -1;
             Identifier identifier;
@@ -7975,7 +7977,7 @@ public class ApiMgtDAO {
                 String msg = "Could not load API record for: " + identifier.getName();
                 throw new APIManagementException(msg);
             }
-            commentList = getComments( identifier,  parentCommentID,  connection);
+            commentList = getComments(identifier, parentCommentID, limit, offset, connection);
         } catch (SQLException e) {
             handleException("Failed to retrieve comments for  " + apiTypeWrapper.getName(), e);
         }
@@ -7990,44 +7992,83 @@ public class ApiMgtDAO {
      * @return Comment Array
      * @throws APIManagementException
      */
-    private Comment[] getComments(Identifier identifier, String parentCommentID, Connection connection) throws
+    private CommentList getComments(Identifier identifier, String parentCommentID, Integer limit, Integer offset, Connection connection) throws
             APIManagementException {
 
-        List<Comment> commentList = new ArrayList<Comment>();
+        List<Comment> list = new ArrayList<Comment>();
+        CommentList commentList = new CommentList();
+        Pagination pagination = new Pagination();
+        commentList.setPagination(pagination);
+        int total = 0;
         String sqlQuery;
+        String sqlQueryForCount;
         if (parentCommentID == null){
-            sqlQuery  = SQLConstants.GET_ROOT_COMMENTS_SQL;
+            sqlQueryForCount  = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
         }else {
-            sqlQuery  = SQLConstants.GET_REPLIES_SQL;
+            sqlQueryForCount  = SQLConstants.GET_REPLIES_COUNT_SQL;
         }
-        try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            prepStmt.setString(2, identifier.getName());
-            prepStmt.setString(3, identifier.getVersion());
+        try (PreparedStatement prepStmtForCount = connection.prepareStatement(sqlQueryForCount)) {
+            prepStmtForCount.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmtForCount.setString(2, identifier.getName());
+            prepStmtForCount.setString(3, identifier.getVersion());
             if (parentCommentID != null){
-                prepStmt.setString(4, parentCommentID);
+                prepStmtForCount.setString(4, parentCommentID);
             }
-            try (ResultSet resultSet = prepStmt.executeQuery()){
-                while (resultSet.next()) {
-                    Comment comment = new Comment();
-                    comment.setId(resultSet.getString("COMMENT_ID"));
-                    comment.setText(resultSet.getString("COMMENT_TEXT"));
-                    comment.setUser(resultSet.getString("CREATED_BY"));
-                    comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
-                    comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
-                    comment.setApiId(resultSet.getString("API_ID"));
-                    comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
-                    comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
-                    comment.setCategory(resultSet.getString("CATEGORY"));
-                    comment.setReplies(Arrays.asList(getComments(identifier, resultSet.getString("COMMENT_ID"),
-                            connection)));
-                    commentList.add(comment);
+            try (ResultSet resultSetForCount = prepStmtForCount.executeQuery()) {
+                while (resultSetForCount.next()) {
+                    total = resultSetForCount.getInt("COMMENT_COUNT");
+                }
+                if (total > 0) {
+                    if (parentCommentID == null) {
+                        sqlQuery = SQLConstants.GET_ROOT_COMMENTS_SQL;
+                    } else {
+                        sqlQuery = SQLConstants.GET_REPLIES_SQL;
+                    }
+                    try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
+                        prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                        prepStmt.setString(2, identifier.getName());
+                        prepStmt.setString(3, identifier.getVersion());
+                        if (parentCommentID != null) {
+                            prepStmt.setString(4, parentCommentID);
+                            prepStmt.setInt(5, limit);
+                            prepStmt.setInt(6, offset);
+                        } else {
+                            prepStmt.setInt(4, limit);
+                            prepStmt.setInt(5, offset);
+                        }
+                        try (ResultSet resultSet = prepStmt.executeQuery()) {
+                            while (resultSet.next()) {
+                                Comment comment = new Comment();
+                                comment.setId(resultSet.getString("COMMENT_ID"));
+                                comment.setText(resultSet.getString("COMMENT_TEXT"));
+                                comment.setUser(resultSet.getString("CREATED_BY"));
+                                comment.setCreatedTime(resultSet.getTimestamp("CREATED_TIME"));
+                                comment.setUpdatedTime(resultSet.getTimestamp("UPDATED_TIME"));
+                                comment.setApiId(resultSet.getString("API_ID"));
+                                comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
+                                comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
+                                comment.setCategory(resultSet.getString("CATEGORY"));
+                                comment.setReplies(getComments(identifier, resultSet.getString("COMMENT_ID"), 3, 0,
+                                        connection));
+                                list.add(comment);
+                            }
+                        }
+                    }
+                } else {
+                    commentList.getPagination().setTotal(total);
+                    commentList.setCount(total);
+                    return commentList;
                 }
             }
-        } catch (SQLException e) {
+        }catch (SQLException e) {
             handleException("Failed to retrieve comments for  " + identifier.getName(), e);
         }
-        return commentList.toArray(new Comment[commentList.size()]);
+        pagination.setLimit(limit);
+        pagination.setOffset(offset);
+        commentList.getPagination().setTotal(total);
+        commentList.setList(list);
+        commentList.setCount(list.size());
+        return commentList;
     }
 
     /**
@@ -8076,7 +8117,6 @@ public class ApiMgtDAO {
                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                 comment.setCategory(resultSet.getString("CATEGORY"));
-                comment.setReplies(Arrays.asList(getComments(identifier, resultSet.getString("COMMENT_ID"))));
                 commentList.add(comment);
             }
         } catch (SQLException e) {
