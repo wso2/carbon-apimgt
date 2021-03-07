@@ -4777,7 +4777,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // retrieving the added API for returning as the response
             // this would provide the updated templates
-            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
+            addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organizationId);
             return APIMappingUtil.fromAPItoDTO(addedAPI);
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
