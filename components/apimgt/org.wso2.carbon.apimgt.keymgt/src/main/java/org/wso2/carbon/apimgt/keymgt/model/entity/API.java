@@ -40,6 +40,36 @@ public class API implements CacheableEntity<String> {
     private String status;
     private boolean isDefaultVersion = false;
 
+    public API() {
+    }
+
+    /**
+     *
+     * @param uuid
+     * @param apiId
+     * @param provider
+     * @param name
+     * @param version
+     * @param context
+     * @param policy
+     * @param apiType
+     * @param status
+     * @param isDefaultVersion
+     */
+    public API(String uuid, Integer apiId, String provider, String name, String version, String context,
+               String policy, String apiType, String status, boolean isDefaultVersion) {
+        this.uuid = uuid;
+        this.apiId = apiId;
+        this.provider = provider;
+        this.name = name;
+        this.version = version;
+        this.context = context;
+        this.policy = policy;
+        this.apiType = apiType;
+        this.status = status;
+        this.isDefaultVersion = isDefaultVersion;
+    }
+
     private List<URLMapping> urlMappings = new ArrayList<>();
 
 

@@ -23,11 +23,15 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Default API Handler to handle Default Version.
@@ -41,22 +45,17 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         String path = ApiUtils.getFullRequestPath(messageContext);
-        List<API> selectedAPIS = Utils.getSelectedAPIList(path);
+        TreeMap<String, API> selectedAPIS = Utils.getSelectedAPIList(path, GatewayUtils.getTenantDomain());
         if (selectedAPIS.size() > 0) {
             Object transportInUrl = axis2MessageContext.getProperty(APIConstants.TRANSPORT_URL_IN);
-            if (selectedAPIS.size() == 1) {
-                API selectedAPI = selectedAPIS.get(0);
-                if (selectedAPI.isDefaultVersion()) {
-                    String defaultContext =
-                            selectedAPI.getContext().replace("/" + selectedAPI.getApiVersion(), "");
-                    if (transportInUrl instanceof String && StringUtils.isNotEmpty((String) transportInUrl)) {
-                        String updatedTransportInUrl = ((String) transportInUrl).replaceFirst(defaultContext,
-                                selectedAPI.getContext());
-                        axis2MessageContext.setProperty(APIConstants.TRANSPORT_URL_IN, updatedTransportInUrl);
-                    }
-                    messageContext.getPropertyKeySet().remove(RESTConstants.REST_FULL_REQUEST_PATH);
-                }
+            String selectedPath = selectedAPIS.firstKey();
+            API selectedAPI = selectedAPIS.get(selectedPath);
+            if (transportInUrl instanceof String && StringUtils.isNotEmpty((String) transportInUrl)) {
+                String updatedTransportInUrl = ((String) transportInUrl).replaceFirst(selectedPath,
+                        selectedAPI.getContext());
+                axis2MessageContext.setProperty(APIConstants.TRANSPORT_URL_IN, updatedTransportInUrl);
             }
+            messageContext.getPropertyKeySet().remove(RESTConstants.REST_FULL_REQUEST_PATH);
         }
         return true;
     }

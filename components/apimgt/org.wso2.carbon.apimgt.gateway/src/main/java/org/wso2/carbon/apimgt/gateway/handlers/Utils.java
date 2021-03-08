@@ -608,21 +608,31 @@ public class Utils {
         return jsonObMap;
     }
 
-    public static List<org.wso2.carbon.apimgt.keymgt.model.entity.API> getSelectedAPIList(String path) {
-        List<org.wso2.carbon.apimgt.keymgt.model.entity.API> selectedAPIS = new ArrayList<>();
+    public static TreeMap<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> getSelectedAPIList(String path,
+                                                                                          String tenantDomain) {
+        TreeMap<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> selectedAPIMap =
+                new TreeMap<>(new ContextLengthSorter());
         SubscriptionDataStore tenantSubscriptionStore =
-                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(GatewayUtils.getTenantDomain());
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
         if (tenantSubscriptionStore != null) {
             Map<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> contextAPIMap =
                     tenantSubscriptionStore.getAllAPIsByContextList();
             if (contextAPIMap != null) {
                 contextAPIMap.forEach((context, api) -> {
                     if (ApiUtils.matchApiPath(path, context)) {
-                        selectedAPIS.add(api);
+                        selectedAPIMap.put(context, api);
                     }
                 });
             }
         }
-        return selectedAPIS;
+
+        return selectedAPIMap;
+    }
+    private static class ContextLengthSorter implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            return o2.length() - o1.length();
+        }
     }
 }
