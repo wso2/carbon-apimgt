@@ -16,21 +16,20 @@
  * under the License.
  */
 
-import React, {useState, useEffect, useContext} from 'react';
-import {ApiContext} from "../ApiContext";
-import Api from "../../../../data/api";
+import React, { useState, useEffect, useContext } from 'react';
+import { ApiContext } from '../ApiContext';
+import Api from '../../../../data/api';
 import Progress from '../../../Shared/Progress';
 import WebhookSubscriptionUI from './WebhookSubscriptionUI';
 
 export default function AsyncApiUI(props) {
-
     const {
         authorizationHeader,
         URLs,
         securitySchemeType,
         accessTokenProvider,
     } = props;
-    const {api} = useContext(ApiContext);
+    const { api } = useContext(ApiContext);
     const [allTopics, setAllTopics] = useState('');
 
     useEffect(() => {
@@ -57,7 +56,9 @@ export default function AsyncApiUI(props) {
     }
 
     function generateGenericWHSubscriptionCurl(subscription) {
-        const {topic, callback, secret, mode, lease} = subscription;
+        const {
+            topic, callback, secret, mode, lease,
+        } = subscription;
         const token = generateAccessToken();
         const apiEndpointUrl = URLs.http;
         if (mode === 'subscribe') {
@@ -105,14 +106,15 @@ export default function AsyncApiUI(props) {
     }
 
     if (!allTopics) {
-        return <Progress/>;
+        return <Progress />;
     } else {
         return (
             <>
                 {api.type === 'WEBSUB' && allTopics.list.map((topic, index) => (
                     <WebhookSubscriptionUI
                         topic={topic}
-                        generateGenericWHSubscriptionCurl={generateGenericWHSubscriptionCurl}/>
+                        generateGenericWHSubscriptionCurl={generateGenericWHSubscriptionCurl}
+                    />
                 ))}
             </>
         );

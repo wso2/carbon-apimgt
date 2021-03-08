@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useState, useReducer} from 'react';
+import React, { useState, useReducer } from 'react';
 import Accordion from '@material-ui/core/ExpansionPanel';
 import AccordionDetails from '@material-ui/core/ExpansionPanelDetails';
 import AccordionSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -24,14 +24,15 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import AccordionActions from '@material-ui/core/ExpansionPanelActions';
 import Button from '@material-ui/core/Button';
-import CopyToClipboard from 'react-copy-to-clipboard'
+import CopyToClipboard from 'react-copy-to-clipboard';
 import TextField from '@material-ui/core/TextField';
 import Alert from 'AppComponents/Shared/Alert';
-import {makeStyles} from "@material-ui/core/styles/index";
+import { makeStyles } from '@material-ui/core/styles/index';
 import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
-import {RadioGroup} from '@material-ui/core';
+import { RadioGroup } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { injectIntl } from 'react-intl';
 
 const useStyles = makeStyles((theme) => (
     {
@@ -80,28 +81,27 @@ const useStyles = makeStyles((theme) => (
             borderColor: '#80bdff',
             '&$expanded': {
                 maxHeight: '40px',
-            }
+            },
         },
         subscription: {
-            paddingBottom: '10px'
-        }
+            paddingBottom: '10px',
+        },
     }
 ));
 
-function reducer(state, {field, value}) {
-    return {...state, [field]: value}
+function reducer(state, { field, value }) {
+    return { ...state, [field]: value };
 }
 
-export default function WebhookSubscriptionUI(props) {
-
+function WebhookSubscriptionUI(props) {
     const classes = useStyles();
-    const {generateGenericWHSubscriptionCurl, topic} = props;
+    const { generateGenericWHSubscriptionCurl, topic, intl } = props;
     const initialSubscriptionState = {
         topic: topic.name,
         secret: null,
         lease: 50000,
         mode: 'subscribe',
-        callback: null
+        callback: null,
     };
     const [curl, setCurl] = useState(generateGenericWHSubscriptionCurl(initialSubscriptionState));
     const [formError, setFormError] = useState(false);
@@ -117,7 +117,7 @@ export default function WebhookSubscriptionUI(props) {
     };
 
     const handleChange = (e) => {
-        dispatch({field: e.target.name, value: e.target.value});
+        dispatch({ field: e.target.name, value: e.target.value });
     };
 
     function onCopy(message) {
@@ -127,26 +127,43 @@ export default function WebhookSubscriptionUI(props) {
     return (
         <Accordion className={classes.subscription}>
             <AccordionSummary
-                expandIcon={<ExpandMoreIcon/>}
-                aria-controls="panel1bh-content"
-                id="panel1bh-header"
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls='panel1bh-content'
+                id='panel1bh-header'
                 className={classes.subscriptionSummary}
             >
                 <Typography>{topic.name}</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <Grid container direction="column" wrap={"nowrap"}>
+                <Grid container direction='column' wrap='nowrap'>
                     <Grid item xs={6}>
-                        <RadioGroup aria-label="mode" name="mode" value={state.mode} row onChange={handleChange}>
-                            <FormControlLabel value="subscribe" control={<Radio/>} label="Subscribe"/>
-                            <FormControlLabel value="unsubscribe" control={<Radio/>} label="Unsubscribe"/>
+                        <RadioGroup aria-label='mode' name='mode' value={state.mode} row onChange={handleChange}>
+                            <FormControlLabel
+                                value='subscribe'
+                                control={<Radio />}
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Subscribe',
+                                    id: 'Apis.Details.AsyncApiConsole.Webhooks.Subscribe',
+                                })}
+                            />
+                            <FormControlLabel
+                                value='unsubscribe'
+                                control={<Radio />}
+                                label={intl.formatMessage({
+                                    defaultMessage: 'Unsubscribe',
+                                    id: 'Apis.Details.AsyncApiConsole.Webhooks.Unsubscribe',
+                                })}
+                            />
                         </RadioGroup>
                     </Grid>
                     <Grid item xs={6}>
                         <TextField
                             name='callback'
-                            id="standard-full-width"
-                            label="Callback URL"
+                            id='standard-full-width'
+                            label={intl.formatMessage({
+                                defaultMessage: 'Callback URL',
+                                id: 'Apis.Details.AsyncApiConsole.Webhooks.callback',
+                            })}
                             error={formError}
                             required
                             placeholder='www.webhook.site'
@@ -169,8 +186,11 @@ export default function WebhookSubscriptionUI(props) {
                             <Grid item xs={6}>
                                 <TextField
                                     name='secret'
-                                    id="standard-full-width"
-                                    label="Secret"
+                                    id='standard-full-width'
+                                    label={intl.formatMessage({
+                                        defaultMessage: 'Secret',
+                                        id: 'Apis.Details.AsyncApiConsole.Webhooks.secret',
+                                    })}
                                     placeholder='secret'
                                     onChange={handleChange}
                                     fullWidth
@@ -189,8 +209,11 @@ export default function WebhookSubscriptionUI(props) {
                             <Grid item xs={6}>
                                 <TextField
                                     name='lease'
-                                    id="standard-full-width"
-                                    label="Lease Seconds"
+                                    id='standard-full-width'
+                                    label={intl.formatMessage({
+                                        defaultMessage: 'Lease Seconds',
+                                        id: 'Apis.Details.AsyncApiConsole.Webhooks.lease',
+                                    })}
                                     onChange={handleChange}
                                     defaultValue={50000}
                                     fullWidth
@@ -210,11 +233,14 @@ export default function WebhookSubscriptionUI(props) {
                     )}
                     <Grid item xs={12}>
                         <TextField
-                            label="cURL"
-                            defaultValue={''}
+                            label={intl.formatMessage({
+                                defaultMessage: 'cURL',
+                                id: 'Apis.Details.AsyncApiConsole.Webhooks.curl',
+                            })}
+                            defaultValue=''
                             value={curl}
                             fullWidth
-                            multiline={true}
+                            multiline
                             id='bootstrap-input'
                             InputProps={{
                                 disableUnderline: true,
@@ -231,12 +257,14 @@ export default function WebhookSubscriptionUI(props) {
                     </Grid>
                 </Grid>
             </AccordionDetails>
-            <AccordionActions style={{paddingRight: '18px'}}>
-                <Button size="small" onClick={handleClick}>Generate Curl</Button>
+            <AccordionActions style={{ paddingRight: '18px' }}>
+                <Button size='small' onClick={handleClick}>Generate Curl</Button>
                 <CopyToClipboard text={curl} onCopy={() => onCopy('cURL copied')}>
-                    <Button size="small">Copy Curl</Button>
+                    <Button size='small'>Copy Curl</Button>
                 </CopyToClipboard>
             </AccordionActions>
         </Accordion>
     );
 }
+
+export default injectIntl(WebhookSubscriptionUI);

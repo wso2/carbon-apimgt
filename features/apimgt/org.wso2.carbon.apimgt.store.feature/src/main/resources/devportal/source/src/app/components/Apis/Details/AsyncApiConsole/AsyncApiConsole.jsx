@@ -107,7 +107,7 @@ export default function AsyncApiConsole() {
                 if (process.env.NODE_ENV !== 'production') {
                     console.error(error);
                 }
-                const {status} = error;
+                const { status } = error;
                 if (status === 404) {
                     setNotFound(true);
                 }
@@ -180,10 +180,10 @@ export default function AsyncApiConsole() {
     }
 
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
-    return(
+    return (
         <>
             <Typography variant='h4' className={classes.titleSub}>
-                <FormattedMessage id='Apis.Details.WebhooksConsole.WebhooksConsole.title' defaultMessage='Webhooks'/>
+                <FormattedMessage id='Apis.Details.WebhooksConsole.WebhooksConsole.title' defaultMessage='Webhooks' />
             </Typography>
             <Paper className={classes.paper}>
                 <Grid container className={classes.grid}>
@@ -193,7 +193,7 @@ export default function AsyncApiConsole() {
                                 <Typography variant='h5' component='h3'>
                                     <Icon>warning</Icon>
                                     {' '}
-                                    <FormattedMessage id='notice' defaultMessage='Notice'/>
+                                    <FormattedMessage id='notice' defaultMessage='Notice' />
                                 </Typography>
                                 <Typography component='p'>
                                     <FormattedMessage
