@@ -52,6 +52,9 @@ const styles = (theme) => ({
         paddingTop: theme.spacing(0.6),
         paddingBottom: theme.spacing(0.6),
         paddingLeft: theme.spacing(1),
+        [theme.breakpoints.down('md')]: {
+            paddingLeft: 0,
+        },
         paddingRight: 0,
         fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
@@ -73,6 +76,11 @@ const styles = (theme) => ({
     },
     leftLInkText_NoText: {
         display: 'none',
+    },
+    leftLInkText_NoTextWhenSmall: {
+        [theme.breakpoints.down('md')]: {
+            display: 'none !important',
+        }
     },
     submenu: {
         paddingLeft: theme.spacing(4),
@@ -175,6 +183,7 @@ function LeftMenuItem(props) {
                             [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
                             [classes.leftLInkText_NoText]: leftMenu.style === 'no text',
                         },
+                        classes.leftLInkText_NoTextWhenSmall,
                         'leftLInkText',
                     )}
                 >
@@ -187,6 +196,7 @@ function LeftMenuItem(props) {
                         {
                             [classes.leftLInkText_IconLeft]: leftMenu.style === 'icon left',
                         },
+                        classes.leftLInkText_NoTextWhenSmall,
                         'leftLInkText',
                     )}
                 />

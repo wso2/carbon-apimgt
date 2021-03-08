@@ -167,6 +167,9 @@ const styles = (theme) => {
         infoWrapper: {
             display: 'flex',
             alignItems: 'center',
+            '& p': {
+                lineHeight: '15px',
+            }
         },
         avatarRoot: {
             width: 30,

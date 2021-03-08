@@ -25,6 +25,7 @@ import {
     Route, Switch, Redirect, Link, withRouter,
 } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
+import Hidden from '@material-ui/core/Hidden';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
@@ -125,6 +126,9 @@ const styles = (theme) => {
         },
         leftMenuVerticalLeft: {
             width: theme.custom.leftMenu.width,
+            [theme.breakpoints.down('md')]: {
+                width: 50,
+            },
             top: 0,
             left: 0,
             overflowY: 'auto', 
@@ -170,6 +174,10 @@ const styles = (theme) => {
             flexDirection: 'column',
             marginLeft: shiftToLeft,
             marginRight: shiftToRight,
+            [theme.breakpoints.down('md')]: {
+                marginLeft: shiftToLeft !== 0 && 50,
+                marginRight: shiftToRight !== 0 && 50,
+            },
             paddingBottom: theme.spacing(3),
             overflowX: 'hidden',
         },
