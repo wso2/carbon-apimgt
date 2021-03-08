@@ -445,19 +445,25 @@ public class APIMappingUtil {
             List<APIRevisionDeployment> revisionDeployments) throws APIManagementException {
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
-        return revisionDeployments.stream().filter(APIRevisionDeployment::isDisplayOnDevportal)
-                .map(r -> fromAPIRevisionToEndpoints(apidto, r, environments))
-                .collect(Collectors.toList());
+        List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
+        for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
+            if (revisionDeployment.isDisplayOnDevportal()) {
+                // Deployed environment
+                Environment environment = environments.get(revisionDeployment.getDeployment());
+                if (environment != null) {
+                    APIEndpointURLsDTO apiEndpointURLsDTO = fromAPIRevisionToEndpoints(apidto, environment,
+                            revisionDeployment.getVhost());
+                    endpointUrls.add(apiEndpointURLsDTO);
+                }
+            }
+        }
+        return endpointUrls;
     }
 
-    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto,
-                                                                 APIRevisionDeployment revisionDeployment,
-                                                                 Map<String, Environment> environments) {
-        // Deployed environment
-        Environment environment = environments.get(revisionDeployment.getDeployment());
+    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto, Environment environment, String host) {
         // If there are any inconstancy (if VHost not found) use default VHost
         VHost defaultVhost = new VHost();
-        defaultVhost.setHost(revisionDeployment.getVhost());
+        defaultVhost.setHost(host);
         defaultVhost.setHttpContext("");
         defaultVhost.setHttpsPort(APIConstants.HTTPS_PROTOCOL_PORT);
         defaultVhost.setHttpPort(APIConstants.HTTP_PROTOCOL_PORT);
@@ -466,12 +472,12 @@ public class APIMappingUtil {
 
         // Deployed VHost
         VHost vHost;
-        if (revisionDeployment.getVhost() == null && environment.getVhosts().size() > 0) {
+        if (host == null && environment.getVhosts().size() > 0) {
             // VHost is NULL set first Vhost (set in deployment toml)
             vHost = environment.getVhosts().get(0);
         } else {
             vHost = environment.getVhosts().stream()
-                    .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
+                    .filter(v -> StringUtils.equals(v.getHost(), host))
                     .findAny()
                     .orElse(defaultVhost);
         }
@@ -482,8 +488,7 @@ public class APIMappingUtil {
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
         String context = apidto.getContext();
-        boolean isWs = apidto.getEndpointURLs().size() > 0
-                && apidto.getEndpointURLs().get(0).getUrLs().getWs() != null;
+        boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
         if (!isWs) {
             apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
             apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
