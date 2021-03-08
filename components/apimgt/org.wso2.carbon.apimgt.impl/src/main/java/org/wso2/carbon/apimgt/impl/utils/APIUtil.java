@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -10030,6 +10031,24 @@ public final class APIUtil {
     public static Map<String, Environment> getReadOnlyEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
+
+    /**
+     * Get default (first) vhost of the given read only environment
+     * @param environmentName name of the read only environment
+     * @return default vhost of environment
+     */
+    public static VHost getDefaultVhostOfReadOnlyEnvironment(String environmentName) throws APIManagementException {
+        Map<String, Environment> readOnlyEnvironments = getReadOnlyEnvironments();
+        if (readOnlyEnvironments.get(environmentName) == null) {
+            throw new APIManagementException("Configured read only environment not found: "
+                    + environmentName);
+        }
+        if (readOnlyEnvironments.get(environmentName).getVhosts().isEmpty()) {
+            throw new APIManagementException("VHosts not found for the environment: "
+                    + environmentName);
+        }
+        return readOnlyEnvironments.get(environmentName).getVhosts().get(0);
     }
 
     private static QName getQNameWithIdentityNS(String localPart) {

@@ -16803,9 +16803,11 @@ public class ApiMgtDAO {
                     apiRevision.setDescription(rs.getString("DESCRIPTION"));
                     apiRevision.setCreatedTime(rs.getString("CREATED_TIME"));
                     apiRevision.setCreatedBy(rs.getString("CREATED_BY"));
-                    if (!StringUtils.isEmpty(rs.getString("NAME"))) {
-                        apiRevisionDeployment.setDeployment(rs.getString("NAME"));
-                        apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    String environmentName = rs.getString("NAME");
+                    if (!StringUtils.isEmpty(environmentName)) {
+                        apiRevisionDeployment.setDeployment(environmentName);
+                        String vhost = rs.getString("VHOST");
+                        apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
                         //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
                         apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                         apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16856,6 +16858,7 @@ public class ApiMgtDAO {
      */
     public void addAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
+        Map<String, org.wso2.carbon.apimgt.impl.dto.Environment> readOnlyEnvs = APIUtil.getReadOnlyEnvironments();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -16863,8 +16866,16 @@ public class ApiMgtDAO {
                 PreparedStatement statement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.ADD_API_REVISION_DEPLOYMENT_MAPPING);
                 for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+                    String envName = apiRevisionDeployment.getDeployment();
+                    String vhost = apiRevisionDeployment.getVhost();
+                    // set VHost as null, if it is the default vhost of the read only environment
+                    if (readOnlyEnvs.get(envName) != null
+                            && StringUtils.equalsIgnoreCase(vhost,
+                            APIUtil.getDefaultVhostOfReadOnlyEnvironment(envName).getHost())) {
+                        vhost = null;
+                    }
                     statement.setString(1, apiRevisionDeployment.getDeployment());
-                    statement.setString(2, apiRevisionDeployment.getVhost());
+                    statement.setString(2, vhost);
                     statement.setString(3, apiRevisionId);
                     statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
                     statement.addBatch();
@@ -16896,8 +16907,10 @@ public class ApiMgtDAO {
             statement.setString(1, name);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
-                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    String environmentName = rs.getString("NAME");
+                    String vhost = rs.getString("VHOST");
+                    apiRevisionDeployment.setDeployment(environmentName);
+                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16925,8 +16938,10 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
-                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    String environmentName = rs.getString("NAME");
+                    String vhost = rs.getString("VHOST");
+                    apiRevisionDeployment.setDeployment(environmentName);
+                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16956,8 +16971,10 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
-                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    String environmentName = rs.getString("NAME");
+                    String vhost = rs.getString("VHOST");
+                    apiRevisionDeployment.setDeployment(environmentName);
+                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16987,8 +17004,10 @@ public class ApiMgtDAO {
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
-                    apiRevisionDeployment.setDeployment(rs.getString("NAME"));
-                    apiRevisionDeployment.setVhost(rs.getString("VHOST"));
+                    String environmentName = rs.getString("NAME");
+                    String vhost = rs.getString("VHOST");
+                    apiRevisionDeployment.setDeployment(environmentName);
+                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -17807,5 +17826,19 @@ public class ApiMgtDAO {
             statement.setInt(3, apiId);
             statement.executeUpdate();
         }
+    }
+
+    /**
+     *
+     * @param environmentName Environment name
+     * @param vhost Host of the vhost
+     * @return Resolved vhost
+     * @throws APIManagementException if failed to find the read only environment
+     */
+    private String getResolvedVhost(String environmentName, String vhost) throws APIManagementException {
+        if (StringUtils.isEmpty(vhost)) {
+            return APIUtil.getDefaultVhostOfReadOnlyEnvironment(environmentName).getHost();
+        }
+        return vhost;
     }
 }
