@@ -614,7 +614,7 @@ public class ImportUtils {
 
         // Check whether the isDefaultVersion field exists. If not, add it with false value
         if (!configObject.has(ImportExportConstants.IS_DEFAULT_VERSION)) {
-            configObject.addProperty(ImportExportConstants.IS_DEFAULT_VERSION, false);
+            configObject.addProperty(ImportExportConstants.IS_DEFAULT_VERSION, Boolean.FALSE);
         }
 
         // Remove spaces of API Name/version if present
