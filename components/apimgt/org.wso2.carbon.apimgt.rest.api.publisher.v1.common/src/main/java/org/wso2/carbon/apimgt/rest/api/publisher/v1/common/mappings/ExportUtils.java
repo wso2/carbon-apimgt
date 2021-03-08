@@ -677,8 +677,8 @@ public class ExportUtils {
                 deploymentsArray.put(deploymentObject);
             }
             if (deploymentsArray.length() > 0) {
-                CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.DEPLOYMENT_INFO_LOCATION, exportFormat,
-                        deploymentsArray.toString());
+                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.DEPLOYMENT_INFO_LOCATION, exportFormat,
+                        ImportExportConstants.TYPE_DEPLOYMENT_ENVIRONMENTS, deploymentsArray);
             }
         } catch (APIImportExportException e) {
             throw new APIManagementException(
