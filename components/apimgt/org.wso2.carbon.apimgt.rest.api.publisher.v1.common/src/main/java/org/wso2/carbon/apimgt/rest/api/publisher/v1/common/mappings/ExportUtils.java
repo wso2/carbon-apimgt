@@ -668,15 +668,15 @@ public class ExportUtils {
 
         try {
             List<APIRevisionDeployment> deploymentsList = apiProvider.getAPIRevisionDeploymentList(apiID);
-            JSONArray deploymentsArray = new JSONArray();
+            JsonArray deploymentsArray = new JsonArray();
             for (APIRevisionDeployment deployment : deploymentsList) {
-                JSONObject deploymentObject = new JSONObject();
-                deploymentObject.put(ImportExportConstants.DEPLOYMENT_NAME, deployment.getDeployment());
-                deploymentObject
-                        .put(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION, deployment.isDisplayOnDevportal());
-                deploymentsArray.put(deploymentObject);
+                JsonObject deploymentObject = new JsonObject();
+                deploymentObject.addProperty(ImportExportConstants.DEPLOYMENT_NAME, deployment.getDeployment());
+                deploymentObject.addProperty(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION,
+                        deployment.isDisplayOnDevportal());
+                deploymentsArray.add(deploymentObject);
             }
-            if (deploymentsArray.length() > 0) {
+            if (deploymentsArray.size() > 0) {
                 CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.DEPLOYMENT_INFO_LOCATION, exportFormat,
                         ImportExportConstants.TYPE_DEPLOYMENT_ENVIRONMENTS, deploymentsArray);
             }
