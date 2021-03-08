@@ -3847,7 +3847,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIDTO apiInfo = getAPIByID(apiId, apiProvider, organizationId);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString());
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true);
 
         if (apiInfo != null ) {
             List<String> apiPolicies = apiInfo.getPolicies();
