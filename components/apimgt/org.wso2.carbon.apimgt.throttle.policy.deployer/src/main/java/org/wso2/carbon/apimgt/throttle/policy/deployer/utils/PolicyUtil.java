@@ -156,7 +156,7 @@ public class PolicyUtil {
             // Deploy all the policies retrieved from the database
             SubscriptionPolicyList subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
-                deployPolicy(subscriptionPolicy, null);
+                    deployPolicy(subscriptionPolicy, null);
             }
             ApplicationPolicyList applicationPolicies = policyRetriever.getAllApplicationPolicies();
             for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {

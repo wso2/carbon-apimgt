@@ -56,6 +56,22 @@ public class APISecurityUtils {
     }
 
     /**
+     * Add AuthenticationContext information into a validated request. This method does not
+     * allow overriding existing AuthenticationContext information on the request. Therefore
+     * this should only be used with newly validated requests. It shouldn't be used to modify
+     * already validated requests.
+     *
+     * @param synCtx        A newly authenticated request
+     * @param authContext   AuthenticationContext information to be added
+     */
+    public static void setAuthenticationContext(MessageContext synCtx,
+                                                AuthenticationContext authContext) {
+        synCtx.setProperty(API_AUTH_CONTEXT, authContext);
+        synCtx.setProperty(APIConstants.API_KEY_TYPE, authContext.getKeyType());
+    }
+
+
+    /**
      * Retrieve the AuthenticationContext information from the request. If the request hasn't
      * been validated yet, this method will return null.
      *

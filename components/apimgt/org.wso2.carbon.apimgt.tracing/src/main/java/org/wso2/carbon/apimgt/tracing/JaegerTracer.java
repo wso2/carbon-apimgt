@@ -65,9 +65,9 @@ public class JaegerTracer implements OpenTracer {
                 : TracingConstants.DEFAULT_REPORTER_BUFFER_SIZE;
 
         boolean tracerLogEnabled =
-                Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null ?
-                configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
-                : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
+                Boolean.parseBoolean(configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED) != null
+                        ? configuration.getFirstProperty(TracingConstants.CONFIG_TRACER_LOG_ENABLED)
+                        : TracingConstants.DEFAULT_TRACER_LOG_ENABLED);
 
         Configuration.SamplerConfiguration samplerConfig = new Configuration.SamplerConfiguration()
                 .withType(samplerType)

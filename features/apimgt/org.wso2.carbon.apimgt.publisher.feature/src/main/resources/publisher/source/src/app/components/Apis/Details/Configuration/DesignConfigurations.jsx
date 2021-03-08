@@ -16,7 +16,12 @@
  * under the License.
  */
 
-import React, { useReducer, useContext, useState } from 'react';
+import React, {
+    useReducer,
+    useContext,
+    useState,
+    useEffect,
+} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -25,14 +30,21 @@ import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import CONSTS from 'AppData/Constants';
 import Alert from 'AppComponents/Shared/Alert';
 
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import { isRestricted } from 'AppData/AuthManager';
 import API from 'AppData/api.js';
+import APIProduct from 'AppData/APIProduct';
 import DefaultVersion from './components/DefaultVersion';
 import MarkdownEditor from './components/MarkdownEditor';
 import AccessControl from './components/AccessControl';
@@ -195,24 +207,151 @@ export default function DesignConfigurations() {
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
     const classes = useStyles();
+    const [descriptionType, setDescriptionType] = useState('');
+    const [overview, setOverview] = useState('');
+    const [overviewDocument, setOverviewDocument] = useState(null);
 
     const invalidTagsExist = apiConfig.tags.find((tag) => {
         return (/([~!@#;%^&*+=|\\<>"'/,])/.test(tag));
     });
+    const handleChange = (event) => {
+        const type = event.target.value;
+        if (type === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
+            if (apiConfig.description === null) {
+                configDispatcher({ action: CONSTS.DESCRIPTION_TYPES.DESCRIPTION, value: overview });
+            }
+        } else if (type === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
+            if (overviewDocument === null) {
+                setOverview(apiConfig.description);
+            }
+        }
+        setDescriptionType(type);
+    };
+    const updateContent = (content) => {
+        if (descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
+            configDispatcher({ action: CONSTS.DESCRIPTION_TYPES.DESCRIPTION, value: content });
+        } else if (descriptionType === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
+            configDispatcher({ action: CONSTS.DESCRIPTION_TYPES.DESCRIPTION, value: null });
+            setOverview(content);
+        }
+    };
+    const loadContentForDoc = (documentId) => {
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
+        const docPromise = restApi.getInlineContentOfDocument(api.id, documentId);
+        docPromise
+            .then((doc) => {
+                let { text } = doc;
+                Object.keys(api).forEach((fieldName) => {
+                    const regex = new RegExp('___' + fieldName + '___', 'g');
+                    text = text.replace(regex, api[fieldName]);
+                });
+                setOverview(text);
+            });
+    };
+    const addDocument = async () => {
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
+        const docPromise = await restApi.addDocument(api.id, {
+            name: 'overview',
+            type: 'OTHER',
+            summary: 'overview',
+            sourceType: 'MARKDOWN',
+            visibility: 'API_LEVEL',
+            sourceUrl: '',
+            otherTypeName: CONSTS.DESCRIPTION_TYPES.OVERVIEW,
+            inlineContent: '',
+        }).then((response) => {
+            return response.body;
+        }).catch((error) => {
+            if (process.env.NODE_ENV !== 'production') {
+                console.log(error);
+            }
+        });
+        return docPromise;
+    };
+
+    const addDocumentContent = (document) => {
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
+        const docPromise = restApi.addInlineContentToDocument(api.id, document.documentId, 'MARKDOWN', overview);
+        docPromise
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    console.log(error);
+                }
+            });
+    };
+
+    const deleteOverviewDocument = () => {
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
+        const docPromise = restApi.deleteDocument(api.id, overviewDocument.documentId);
+        docPromise
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+            });
+    };
+
+    useEffect(() => {
+        const { apiType } = api.apiType;
+        const restApi = apiType === API.CONSTS.APIProduct ? new APIProduct() : new API();
+        const promisedApi = restApi.getDocuments(api.id);
+        promisedApi
+            .then((response) => {
+                const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
+                if (overviewDoc.length > 0) {
+                    const doc = overviewDoc[0];
+                    setOverviewDocument(doc);
+                    loadContentForDoc(doc.documentId);
+                    setDescriptionType(CONSTS.DESCRIPTION_TYPES.OVERVIEW); // Only one doc we can render
+                } else {
+                    setDescriptionType(CONSTS.DESCRIPTION_TYPES.DESCRIPTION);
+                }
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    Alert.error('Error occurred');
+                }
+            });
+    }, []);
 
     /**
      *
      * Handle the configuration view save button action
      */
-    function handleSave() {
+    async function handleSave() {
         setIsUpdating(true);
         updateAPI(apiConfig)
             .catch((error) => {
                 if (error.response) {
                     Alert.error(error.response.body.description);
                 }
-            })
-            .finally(() => setIsUpdating(false));
+            });
+        if (descriptionType === CONSTS.DESCRIPTION_TYPES.DESCRIPTION) {
+            if (overviewDocument) {
+                deleteOverviewDocument();
+            }
+        }
+
+        if (descriptionType === CONSTS.DESCRIPTION_TYPES.OVERVIEW) {
+            let document = overviewDocument;
+            if (document === null) {
+                document = await addDocument();
+            }
+            addDocumentContent(document);
+        }
+        setIsUpdating(false);
     }
 
     return (
@@ -260,7 +399,32 @@ export default function DesignConfigurations() {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} md={10}>
-                                                <MarkdownEditor api={apiConfig} configDispatcher={configDispatcher} />
+                                                <FormControl component='fieldset'>
+                                                    <FormLabel component='legend'>Description Type</FormLabel>
+                                                    <RadioGroup
+                                                        row
+                                                        aria-label='description-type'
+                                                        value={descriptionType}
+                                                        onChange={handleChange}
+                                                    >
+                                                        <FormControlLabel
+                                                            value={CONSTS.DESCRIPTION_TYPES.DESCRIPTION}
+                                                            control={<Radio />}
+                                                            label='Description'
+                                                        />
+                                                        <FormControlLabel
+                                                            value={CONSTS.DESCRIPTION_TYPES.OVERVIEW}
+                                                            control={<Radio />}
+                                                            label='Overview'
+                                                        />
+                                                    </RadioGroup>
+                                                </FormControl>
+                                                <MarkdownEditor
+                                                    api={apiConfig}
+                                                    updateContent={updateContent}
+                                                    descriptionType={descriptionType}
+                                                    overview={overview}
+                                                />
                                             </Grid>
                                         </Grid>
                                     </Box>
@@ -291,7 +455,7 @@ export default function DesignConfigurations() {
                                     <Box pt={2}>
                                         <Button
                                             disabled={
-                                                isUpdating || invalidTagsExist
+                                                isUpdating || api.isRevision || invalidTagsExist
                                                 || (apiConfig.visibility === 'RESTRICTED'
                                                     && apiConfig.visibleRoles.length === 0)
                                             }

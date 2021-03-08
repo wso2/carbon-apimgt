@@ -115,6 +115,18 @@ class HeaderSearch extends React.Component {
     }
 
     /**
+     * On enter pressed after giving a search text
+     * @param event
+     */
+    onKeyDown(event) {
+        if (event.key === 'Enter' && !this.suggestionSelected) {
+            const { history } = this.props;
+            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
+        }
+        this.suggestionSelected = false;
+    }
+
+    /**
      * To provide accessibility for Enter key upon suggestion selection
      * @param {React.SyntheticEvent} event event
      * @param {Object} suggestion This is either API object or document coming from search API call
@@ -128,19 +140,6 @@ class HeaderSearch extends React.Component {
             history.push(path);
         }
     }
-
-    /**
-     * On enter pressed after giving a search text
-     * @param event
-     */
-    onKeyDown(event) {
-        if (event.key === 'Enter' && !this.suggestionSelected) {
-            const { history } = this.props;
-            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
-        }
-        this.suggestionSelected = false;
-    }
-
 
     /**
      * On change search input element

@@ -57,6 +57,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String swaggerDefinition;
     private String contextTemplate;
     private String apiSecurity;
+    private String visibility;
+    private String visibleRoles;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -299,6 +301,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.swaggerDefinition = swaggerDefinition;
     }
 
+
+
     @Override
     public String toString() {
         return "DevPortalAPI [status=" + status + ", isDefaultVersion=" + isDefaultVersion + ", description="
@@ -308,12 +312,13 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", availableTierNames=" + getAvailableTierNames() + ", environments=" + environments + ", gatewayLabels="
-                + gatewayLabels + ", apiCategories=" + apiCategories + ", isMonetizationEnabled="
-                + isMonetizationEnabled + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
-                + deploymentEnvironments + ", tags=" + tags + ", additionalProperties=" + additionalProperties
-                + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly=" + advertisedOnly
-                + ", swaggerDefinition=" + swaggerDefinition + ", toString()=" + super.toString() + "]";
+                + ", environments=" + environments + ", gatewayLabels=" + gatewayLabels + ", apiCategories="
+                + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
+                + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
+                + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
+                + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate
+                + ", apiSecurity=" + apiSecurity + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
+                + "]";
     }
 
     public String getApiSecurity() {
@@ -322,6 +327,22 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setApiSecurity(String apiSecurity) {
         this.apiSecurity = apiSecurity;
+    }
+
+    public String getVisibleRoles() {
+        return visibleRoles;
+    }
+
+    public void setVisibleRoles(String visibleRoles) {
+        this.visibleRoles = visibleRoles;
+    }
+
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
     }
     
 

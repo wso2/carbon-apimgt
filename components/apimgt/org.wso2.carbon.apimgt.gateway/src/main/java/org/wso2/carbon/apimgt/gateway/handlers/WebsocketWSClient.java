@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.service.APIKeyValidationService;
 
 import java.util.Arrays;
@@ -40,6 +41,7 @@ public class WebsocketWSClient {
 	 * @param context
 	 * @param apiVersion
 	 * @param apiKey
+	 * @param tenantDomain
 	 * @return
 	 * @throws APISecurityException
 	 */
@@ -47,7 +49,8 @@ public class WebsocketWSClient {
 			throws APISecurityException {
 		try {
 			return apiKeyValidationService.validateKeyForHandshake(context, apiVersion, apiKey, tenantDomain,
-					Arrays.asList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
+			                                                       Arrays.asList(
+					                                                       APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
 			                               "Error while accessing backend services for API key validation", e);

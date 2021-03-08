@@ -173,7 +173,7 @@ const generateKeysStep = (props) => {
                 // Setting key request
                 try {
                     const newKeyRequest = { ...keyRequest };
-                    newKeyRequest.keyManager = selectedKeyManager.name;
+                    newKeyRequest.keyManager = selectedKeyManager.id;
                     newKeyRequest.supportedGrantTypes = selectedKeyManager.availableGrantTypes;
                     if (selectedKeyManager.availableGrantTypes.includes('implicit')
                         || selectedKeyManager.availableGrantTypes.includes('authorization_code')) {
@@ -280,7 +280,7 @@ const generateKeysStep = (props) => {
                                                 defaultMessage='Token Endpoint'
                                             />
                                         </TableCell>
-                                        <TableCell>{keyManager.additionalProperties['sandbox_token_endpoint'] || keyManager.tokenEndpoint}</TableCell>
+                                        <TableCell>{keyManager.tokenEndpoint}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell component='th' scope='row' className={classes.leftCol}>
@@ -289,7 +289,7 @@ const generateKeysStep = (props) => {
                                                 defaultMessage='Revoke Endpoint'
                                             />
                                         </TableCell>
-                                        <TableCell>{keyManager.additionalProperties['sandbox_revoke_endpoint'] || keyManager.revokeEndpoint}</TableCell>
+                                        <TableCell>{keyManager.revokeEndpoint}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                         <TableCell component='th' scope='row' className={classes.leftCol}>

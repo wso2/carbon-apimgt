@@ -353,7 +353,9 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
-                updateSwagger(value);
+                if (api.type !== 'GRAPHQL') {
+                    updateSwagger(value);
+                }
                 if (environmentObject) {
                     const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
                     setURLs(urls);
@@ -475,12 +477,6 @@ function TryOutController(props) {
                 <Box>
                     {securitySchemeType !== 'TEST' && (
                         <>
-                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
-                                <FormattedMessage
-                                    id='api.console.security.heading'
-                                    defaultMessage='Security'
-                                />
-                            </Typography>
                             <Box mb={1}>
                                 <Typography variant='body1'>
                                     <Box display='flex' alignItems='center'>
@@ -512,57 +508,65 @@ function TryOutController(props) {
                                     </Box>
                                 </Typography>
                             </Box>
+                        </>
+                    )}
+                    {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
+                        <>
+                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.heading'
+                                    defaultMessage='Security'
+                                />
+                            </Typography>
                             <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
                                 <FormattedMessage
                                     id='api.console.security.type.heading'
                                     defaultMessage='Security Type'
                                 />
                             </Typography>
+                            <FormControl component='fieldset'>
+                                <RadioGroup
+                                    name='securityScheme'
+                                    value={securitySchemeType}
+                                    onChange={handleChanges}
+                                    row
+                                >
+                                    <FormControlLabel
+                                        value='OAUTH'
+                                        disabled={!isOAuthEnabled}
+                                        control={<Radio />}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.security.scheme.oauth'
+                                                defaultMessage='OAuth'
+                                            />
+                                        )}
+                                    />
+                                    <FormControlLabel
+                                        value='API-KEY'
+                                        disabled={!isApiKeyEnabled}
+                                        control={<Radio />}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.security.scheme.apikey'
+                                                defaultMessage='API Key'
+                                            />
+                                        )}
+                                    />
+                                    <FormControlLabel
+                                        value='BASIC'
+                                        disabled={!isBasicAuthEnabled}
+                                        control={<Radio />}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.security.scheme.basic'
+                                                defaultMessage='Basic'
+                                            />
+                                        )}
+                                    />
+                                </RadioGroup>
+                            </FormControl>
                         </>
-                    )}
-                    {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
-                        <FormControl component='fieldset'>
-                            <RadioGroup
-                                name='securityScheme'
-                                value={securitySchemeType}
-                                onChange={handleChanges}
-                                row
-                            >
-                                <FormControlLabel
-                                    value='OAUTH'
-                                    disabled={!isOAuthEnabled}
-                                    control={<Radio />}
-                                    label={(
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiConsole.security.scheme.oauth'
-                                            defaultMessage='OAuth'
-                                        />
-                                    )}
-                                />
-                                <FormControlLabel
-                                    value='API-KEY'
-                                    disabled={!isApiKeyEnabled}
-                                    control={<Radio />}
-                                    label={(
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiConsole.security.scheme.apikey'
-                                            defaultMessage='API Key'
-                                        />
-                                    )}
-                                />
-                                <FormControlLabel
-                                    value='BASIC'
-                                    disabled={!isBasicAuthEnabled}
-                                    control={<Radio />}
-                                    label={(
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiConsole.security.scheme.basic'
-                                            defaultMessage='Basic'
-                                        />
-                                    )}
-                                />
-                            </RadioGroup>
-                        </FormControl>
                     )}
                 </Box>
             </Grid>
@@ -627,6 +631,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     margin='normal'
                                                     variant='outlined'
+                                                    id='username'
                                                     label={(
                                                         <FormattedMessage
                                                             id='username'
@@ -641,6 +646,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     margin='normal'
                                                     variant='outlined'
+                                                    id='input-password'
                                                     label={(
                                                         <FormattedMessage
                                                             id='password'
@@ -766,6 +772,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     fullWidth
                                                     select
+                                                    id='environment'
                                                     label={(
                                                         <FormattedMessage
                                                             defaultMessage='Environment'

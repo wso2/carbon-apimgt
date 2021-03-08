@@ -71,14 +71,8 @@ function ViewCurl(props) {
     const applyReal = () => {
         setShowReal(!showReal);
     };
-
-
     // Check for additional properties for token endpoint and revoke endpoints.
-    const { additionalProperties } = keyManagerConfig;
     let { tokenEndpoint } = keyManagerConfig;
-    const propPrefix = keyType.toLowerCase();
-    tokenEndpoint = additionalProperties[`${propPrefix}_token_endpoint`] || tokenEndpoint;
-
     return (
         <React.Fragment>
             <Typography>

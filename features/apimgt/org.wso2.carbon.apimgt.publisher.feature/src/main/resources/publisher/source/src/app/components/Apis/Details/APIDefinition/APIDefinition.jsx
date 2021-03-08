@@ -47,9 +47,11 @@ import { isRestricted } from 'AppData/AuthManager';
 import ResourceNotFound from '../../../Base/Errors/ResourceNotFound';
 import APISecurityAudit from './APISecurityAudit';
 import ImportDefinition from './ImportDefinition';
+import DefinitionOutdated from './DefinitionOutdated';
 
 const EditorDialog = lazy(() => import('./SwaggerEditorDrawer' /* webpackChunkName: "EditorDialog" */));
 const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
+const AsyncAPIEditor = lazy(() => import('./AsyncApiEditorDrawer'));
 
 const styles = (theme) => ({
     titleWrapper: {
@@ -63,6 +65,9 @@ const styles = (theme) => ({
     },
     buttonIcon: {
         marginRight: 10,
+    },
+    buttonWarningColor: {
+        color: theme.palette.warning.light,
     },
     topBar: {
         display: 'flex',
@@ -84,6 +89,14 @@ const styles = (theme) => ({
     },
     progressLoader: {
         marginLeft: theme.spacing(1),
+    },
+    updateApiWarning: {
+        marginLeft: theme.spacing(5),
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
+        borderColor: theme.custom.serviceCatalog.onboarding.buttonText,
+    },
+    warningIconStyle: {
+        color: theme.custom.serviceCatalog.onboarding.buttonText,
     },
 });
 /**
@@ -109,6 +122,9 @@ class APIDefinition extends React.Component {
             securityAuditProperties: [],
             isSwaggerValid: true,
             isUpdating: false,
+            asyncAPI: null,
+            asyncAPIModified: null,
+            isAsyncAPIValid: true,
         };
         this.handleNo = this.handleNo.bind(this);
         this.handleOk = this.handleOk.bind(this);
@@ -122,6 +138,8 @@ class APIDefinition extends React.Component {
         this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
         this.onChangeSwaggerContent = this.onChangeSwaggerContent.bind(this);
+        this.updateAsyncAPIDefinition = this.updateAsyncAPIDefinition.bind(this);
+        this.onChangeAsyncAPIContent = this.onChangeAsyncAPIContent.bind(this);
     }
 
     /**
@@ -133,6 +151,8 @@ class APIDefinition extends React.Component {
         let promisedApi;
         if (api.type === 'GRAPHQL') {
             promisedApi = api.getSchema(api.id);
+        } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
+            promisedApi = api.getAsyncAPIDefinition(api.id);
         } else {
             promisedApi = api.getSwagger(api.id);
         }
@@ -145,6 +165,13 @@ class APIDefinition extends React.Component {
                     this.setState({
                         graphQL: response.obj.schemaDefinition,
                         format: 'txt',
+                    });
+                } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
+                    this.setState({
+                        asyncAPI: YAML.safeDump(YAML.safeLoad(response.data)),
+                        asyncAPIModified: YAML.safeDump(YAML.safeLoad(response.data)),
+                        format: 'yaml',
+                        convertTo: this.getConvertToFormat('yaml'),
                     });
                 } else {
                     this.setState({
@@ -170,10 +197,25 @@ class APIDefinition extends React.Component {
 
 
     /**
-      * Set isAuditApiClicked to true when Audit API is clicked
-      */
-    onAuditApiClick() {
-        this.setState({ isAuditApiClicked: true });
+     * Method to handle asyncAPI content change
+     *
+     * @param {string} modifiedContent : The modified asyncAPI content.
+     * */
+    onChangeAsyncAPIContent(modifiedContent) {
+        const { format } = this.state;
+        /**
+         * Validate for the basic json/ yaml format.
+         * */
+        try {
+            if (format === 'json') {
+                JSON.parse(modifiedContent, null);
+            } else {
+                YAML.load(modifiedContent);
+            }
+            this.setState({ isAsyncAPIValid: true, asyncAPIModified: modifiedContent });
+        } catch (e) {
+            this.setState({ isAsyncAPIValid: false, asyncAPIModified: modifiedContent });
+        }
     }
 
     /**
@@ -181,19 +223,42 @@ class APIDefinition extends React.Component {
      * JSON -> YAML, YAML -> JSON
      */
     onChangeFormatClick() {
-        const { format, swagger, convertTo } = this.state;
+        const {
+            format, swagger, convertTo, asyncAPI,
+        } = this.state;
         let formattedString = '';
-        if (convertTo === 'json') {
-            formattedString = JSON.stringify(YAML.load(swagger), null, 1);
+        if (asyncAPI === null) {
+            if (convertTo === 'json') {
+                formattedString = JSON.stringify(YAML.load(swagger), null, 1);
+            } else {
+                formattedString = YAML.safeDump(YAML.safeLoad(swagger));
+            }
+            this.setState({
+                swagger: formattedString,
+                swaggerModified: formattedString,
+                format: convertTo,
+                convertTo: format,
+            });
         } else {
-            formattedString = YAML.safeDump(YAML.safeLoad(swagger));
+            if (convertTo === 'json') {
+                formattedString = JSON.stringify(YAML.load(asyncAPI), null, 1);
+            } else {
+                formattedString = YAML.safeDump(YAML.safeLoad(asyncAPI));
+            }
+            this.setState({
+                asyncAPI: formattedString,
+                asyncAPIModified: formattedString,
+                format: convertTo,
+                convertTo: format,
+            });
         }
-        this.setState({
-            swagger: formattedString,
-            swaggerModified: formattedString,
-            format: convertTo,
-            convertTo: format,
-        });
+    }
+
+    /**
+      * Set isAuditApiClicked to true when Audit API is clicked
+      */
+    onAuditApiClick() {
+        this.setState({ isAuditApiClicked: true });
     }
 
     /**
@@ -221,8 +286,17 @@ class APIDefinition extends React.Component {
     setSchemaDefinition = (schemaContent, contentType) => {
         const { api } = this.props;
         const isGraphql = api.isGraphql();
+        const isWebSocket = api.isWebSocket();
+        const isWebSub = api.isWebSub();
         if (isGraphql) {
             this.setState({ graphQL: schemaContent });
+        } else if (isWebSocket || isWebSub) {
+            this.setState({
+                asyncAPI: schemaContent,
+                asyncAPIModified: schemaContent,
+                convertTo: this.getConvertToFormat(contentType),
+                format: contentType,
+            });
         } else {
             this.setState({
                 swagger: schemaContent,
@@ -243,6 +317,25 @@ class APIDefinition extends React.Component {
     }
 
     /**
+     * Handles the No button action of the save api definition confirmation dialog box.
+     */
+    handleNo() {
+        this.setState({ openDialog: false });
+    }
+
+    /**
+     * Handles the yes button action of the save api definition confirmation dialog box.
+     */
+    handleOk() {
+        const { swaggerModified, asyncAPIModified } = this.state;
+        if (asyncAPIModified !== null) {
+            this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
+        } else {
+            this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+        }
+    }
+
+    /**
      * Checks whether the swagger content is json type.
      * @param {string} definition The swagger string.
      * @return {boolean} Whether the content is a json or not.
@@ -255,21 +348,6 @@ class APIDefinition extends React.Component {
         } catch (err) {
             return false;
         }
-    }
-
-    /**
-     * Handles the yes button action of the save api definition confirmation dialog box.
-     */
-    handleOk() {
-        const { swaggerModified } = this.state;
-        this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
-    }
-
-    /**
-     * Handles the No button action of the save api definition confirmation dialog box.
-     */
-    handleNo() {
-        this.setState({ openDialog: false });
     }
 
     /**
@@ -332,7 +410,7 @@ class APIDefinition extends React.Component {
             } catch (err) {
                 console.log(err);
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.parsing.api.definition',
                     defaultMessage: 'Error occurred while updating the API Definition',
                 }));
                 return;
@@ -380,14 +458,83 @@ class APIDefinition extends React.Component {
     }
 
     /**
+     * Updates asyncAPI definition of the API
+     * @param {string} asyncAPIContent The AsyncAPi file that needs to be updated.
+     * @param {string} specFormat The current format of the definition
+     * @param {string} toFormat The format it can be converted to.
+     */
+    updateAsyncAPIDefinition(asyncAPIContent, specFormat, toFormat) {
+        const { api, intl, updateAPI } = this.props;
+        this.setState({ isUpdating: true });
+        let parsedContent = {};
+        if (this.hasJsonStructure(asyncAPIContent)) {
+            parsedContent = JSON.parse(asyncAPIContent);
+        } else {
+            try {
+                parsedContent = YAML.load(asyncAPIContent);
+            } catch (err) {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.async.api.definition',
+                    defaultMessage: 'Error occurred while updating the API Definition',
+                }));
+                return;
+            }
+        }
+        const promise = api.updateAsyncAPIDefinition(parsedContent);
+        promise
+            .then((response) => {
+                /* const { endpointImplementationType } = api; */
+                /* if (endpointImplementationType === 'INLINE') {
+                    api.generateMockScripts(api.id);
+                } */
+                if (response) {
+                    Alert.success(intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.async.api.definition.updated.successfully',
+                        defaultMessage: 'API Definition updated successfully',
+                    }));
+                    if (specFormat && toFormat) {
+                        this.setState({ asyncAPI: asyncAPIContent, format: specFormat, convertTo: toFormat });
+                    } else {
+                        this.setState({ asyncAPI: asyncAPIContent });
+                    }
+                }
+                /*
+                 * updateAPI() will make a /GET call to get the latest api once the asyncAPI definition is updated.
+                 * Otherwise, we need to refresh the page to get changes.
+                 */
+                updateAPI();
+                this.setState({ isUpdating: false });
+            })
+            .catch((err) => {
+                console.log(err);
+                const { response: { body: { description, message } } } = err;
+                if (description && message) {
+                    Alert.error(`${message} ${description}`);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.async.api.definition',
+                        defaultMessage: 'Error occurred while updating the API Definition',
+                    }));
+                }
+                this.setState({ isUpdating: false });
+            });
+    }
+
+    /**
      * @inheritdoc
      */
     render() {
         const {
             swagger, graphQL, openEditor, openDialog, format, convertTo, notFound, isAuditApiClicked,
             securityAuditProperties, isSwaggerValid, swaggerModified, isUpdating,
+            asyncAPI, asyncAPIModified, isAsyncAPIValid,
         } = this.state;
-        const { classes, resourceNotFountMessage, api } = this.props;
+
+        const {
+            classes, resourceNotFountMessage, api,
+        } = this.props;
+
         let downloadLink;
         let fileName;
         let isGraphQL = 0;
@@ -396,6 +543,9 @@ class APIDefinition extends React.Component {
             downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(graphQL);
             fileName = api.provider + '-' + api.name + '-' + api.version + '.graphql';
             isGraphQL = 1;
+        } else if (asyncAPI !== null) {
+            downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(asyncAPI);
+            fileName = 'asyncapi.' + format;
         } else {
             downloadLink = 'data:text/' + format + ';charset=utf-8,' + encodeURIComponent(swagger);
             fileName = 'swagger.' + format;
@@ -410,7 +560,7 @@ class APIDefinition extends React.Component {
         if (notFound) {
             return <ResourceNotFound message={resourceNotFountMessage} />;
         }
-        if (!swagger && !graphQL && api === 'undefined') {
+        if (!swagger && !graphQL && !asyncAPI && api === 'undefined') {
             return <Progress />;
         }
 
@@ -419,10 +569,16 @@ class APIDefinition extends React.Component {
                 <div className={classes.topBar}>
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4'>
+                            {/* eslint-disable-next-line no-nested-ternary */}
                             {graphQL ? (
                                 <FormattedMessage
                                     id='Apis.Details.APIDefinition.APIDefinition.schema.definition'
                                     defaultMessage='Schema Definition'
+                                />
+                            ) : asyncAPI ? (
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.asyncAPI.definition'
+                                    defaultMessage='AsyncAPI Definition'
                                 />
                             ) : (
                                 <FormattedMessage
@@ -431,7 +587,7 @@ class APIDefinition extends React.Component {
                                 />
                             )}
                         </Typography>
-                        {!(graphQL || api.type === 'APIProduct') && (
+                        {asyncAPI ? (
                             <Button
                                 size='small'
                                 className={classes.button}
@@ -444,9 +600,30 @@ class APIDefinition extends React.Component {
                                     defaultMessage='Edit'
                                 />
                             </Button>
+                        ) : (
+                            !(graphQL || api.type === 'APIProduct') && (
+                                <Button
+                                    size='small'
+                                    className={classes.button}
+                                    onClick={this.openEditor}
+                                    disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
+                                >
+                                    <EditRounded className={classes.buttonIcon} />
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.APIDefinition.edit'
+                                        defaultMessage='Edit'
+                                    />
+                                </Button>
+                            )
                         )}
                         {api.type !== 'APIProduct' && (
                             <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
+                        )}
+                        {api.serviceInfo && api.serviceInfo.outdated && (
+                            <DefinitionOutdated
+                                api={api}
+                                classes={classes}
+                            />
                         )}
                         <a className={classes.downloadLink} href={downloadLink} download={fileName}>
                             <Button size='small' className={classes.button}>
@@ -503,7 +680,8 @@ class APIDefinition extends React.Component {
                                 width='100%'
                                 height='calc(100vh - 51px)'
                                 theme='vs-dark'
-                                value={swagger !== null ? swagger : graphQL}
+                                /* eslint-disable-next-line no-nested-ternary */
+                                value={swagger !== null ? swagger : asyncAPI !== null ? asyncAPI : graphQL}
                                 options={editorOptions}
                             />
                         )}
@@ -530,7 +708,7 @@ class APIDefinition extends React.Component {
                             variant='contained'
                             color='primary'
                             onClick={this.openUpdateConfirmation}
-                            disabled={!isSwaggerValid || isUpdating}
+                            disabled={(!isSwaggerValid || isUpdating) || (!isAsyncAPIValid || isUpdating)}
                         >
                             <FormattedMessage
                                 id='Apis.Details.APIDefinition.APIDefinition.documents.swagger.editor.update.content'
@@ -544,11 +722,19 @@ class APIDefinition extends React.Component {
                             <Progress />
                         )}
                     >
-                        <EditorDialog
-                            swagger={swaggerModified}
-                            language={format}
-                            onEditContent={this.onChangeSwaggerContent}
-                        />
+                        {swagger ? (
+                            <EditorDialog
+                                swagger={swaggerModified}
+                                language={format}
+                                onEditContent={this.onChangeSwaggerContent}
+                            />
+                        ) : (
+                            <AsyncAPIEditor
+                                asyncAPI={asyncAPIModified}
+                                language={format}
+                                onEditContent={this.onChangeAsyncAPIContent}
+                            />
+                        )}
                     </Suspense>
                 </Dialog>
                 <Dialog
@@ -617,10 +803,10 @@ APIDefinition.propTypes = {
         apiType: PropTypes.oneOf([API.CONSTS.API, API.CONSTS.APIProduct]),
     }).isRequired,
     history: PropTypes.shape({
-        push: PropTypes.object,
+        push: PropTypes.shape({}),
     }).isRequired,
     location: PropTypes.shape({
-        pathname: PropTypes.object,
+        pathname: PropTypes.shape({}),
     }).isRequired,
     resourceNotFountMessage: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,

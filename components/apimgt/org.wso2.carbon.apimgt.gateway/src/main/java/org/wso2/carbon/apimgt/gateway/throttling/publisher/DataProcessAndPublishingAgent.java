@@ -126,8 +126,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.appTenant = appTenant;
         this.apiTenant = apiTenant;
         this.appId = appId;
-        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-        this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
+        this.apiName = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         this.messageSizeInBytes = 0;
 
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);

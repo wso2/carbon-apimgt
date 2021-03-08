@@ -37,7 +37,6 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import APIRateLimiting from '../Resources/components/APIRateLimiting';
 import Operation from './Operation';
 
-
 const styles = (theme) => ({
     root: {
         flexGrow: 1,
@@ -394,7 +393,7 @@ class Operations extends React.Component {
                         <Button
                             variant='contained'
                             color='primary'
-                            disabled={isSaving}
+                            disabled={isSaving || api.isRevision}
                             className={classes.buttonMain}
                             onClick={this.updateOperations}
                         >
@@ -422,8 +421,8 @@ class Operations extends React.Component {
 Operations.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
-        operations: PropTypes.array,
-        scopes: PropTypes.array,
+        operations: PropTypes.arrayOf(PropTypes.shape({})),
+        scopes: PropTypes.arrayOf(PropTypes.string),
         updateOperations: PropTypes.func,
         policies: PropTypes.func,
         id: PropTypes.string,

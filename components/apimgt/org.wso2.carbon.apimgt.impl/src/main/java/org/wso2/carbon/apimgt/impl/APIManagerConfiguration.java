@@ -23,6 +23,7 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,21 +32,25 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
-import org.wso2.carbon.apimgt.impl.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
-import org.wso2.carbon.apimgt.impl.dto.JWKSConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -105,13 +111,23 @@ public class APIManagerConfiguration {
 
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
-    private JWTConfigurationDto jwtConfigurationDto = new JWTConfigurationDto();
+    private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
     private static JSONObject redisConfigProperties = new JSONObject();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
+    private static Map<String, String> analyticsProperties;
     private static String tokenRevocationClassName;
+    private static String certificateBoundAccessEnabled;
+    private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
+
+    public Map<String, ExtensionListener> getExtensionListenerMap() {
+
+        return extensionListenerMap;
+    }
+
+    private Map<String, ExtensionListener> extensionListenerMap = new HashMap<>();
 
     public static Properties getRealtimeTokenRevocationNotifierProperties() {
 
@@ -309,6 +325,17 @@ public class APIManagerConfiguration {
                     }
                 }
                 persistentNotifierProperties = properties;
+            } else if ("Analytics".equals(localName)) {
+                OMElement properties = element.getFirstChildWithName(new QName("Properties"));
+                Iterator analyticsPropertiesIterator = properties.getChildrenWithLocalName("Property");
+                Map<String, String> analyticsProps = new HashMap<>();
+                while (analyticsPropertiesIterator.hasNext()) {
+                    OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
+                    String name = propertyElem.getAttributeValue(new QName("name"));
+                    String value = propertyElem.getText();
+                    analyticsProps.put(name, value);
+                }
+                analyticsProperties = analyticsProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
                 OMElement redisPort = element.getFirstChildWithName(new QName("RedisPort"));
@@ -357,7 +384,14 @@ public class APIManagerConfiguration {
                         environment.setDefault(false);
                     }
                     environment.setName(APIUtil.replaceSystemProperty(
-                            environmentElem.getFirstChildWithName(new QName("Name")).getText()));
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_NAME)).getText()));
+                    environment.setDisplayName(APIUtil.replaceSystemProperty(
+                            environmentElem.getFirstChildWithName(new QName(
+                                    APIConstants.API_GATEWAY_DISPLAY_NAME)).getText()));
+                    if (StringUtils.isEmpty(environment.getDisplayName())) {
+                        environment.setDisplayName(environment.getName());
+                    }
                     environment.setServerURL(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_SERVER_URL)).getText()));
@@ -387,6 +421,28 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setDescription("");
                     }
+                    environment.setReadOnly(true);
+                    List<VHost> vhosts = new LinkedList<>();
+                    environment.setVhosts(vhosts);
+                    environment.setEndpointsAsVhost();
+                    Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
+                            APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
+                                    APIConstants.API_GATEWAY_VIRTUAL_HOST);
+                    while (vhostIterator.hasNext()) {
+                        OMElement vhostElem = (OMElement) vhostIterator.next();
+                        String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTP_ENDPOINT)).getText());
+                        String httpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT)).getText());
+                        String wsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
+                        String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+
+                        VHost vhost = VHost.fromEndpointUrls(new String[]{httpEp, httpsEp, wsEp, wssEp});
+                        vhosts.add(vhost);
+                    }
+
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {
@@ -525,9 +581,65 @@ public class APIManagerConfiguration {
                 setRuntimeArtifactsSyncGatewayConfig(element);
             } else if (APIConstants.ContainerMgtAttributes.CONTAINER_MANAGEMENT.equals(localName)) {
                 setContainerMgtConfigurations(element);
+            } else if (APIConstants.SkipListConstants.SKIP_LIST_CONFIG.equals(localName)) {
+                setSkipListConfigurations(element);
+            } else if (APIConstants.ExtensionListenerConstants.EXTENSION_LISTENERS.equals(localName)) {
+                setExtensionListenerConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
+        }
+    }
+
+    private void setSkipListConfigurations(OMElement element) {
+
+        OMElement skippedApis =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_APIS));
+        if (skippedApis != null) {
+            Iterator apiIterator =
+                    skippedApis.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_API);
+            if (apiIterator != null) {
+                while (apiIterator.hasNext()) {
+                    OMElement apiNode = (OMElement) apiIterator.next();
+                    gatewayCleanupSkipList.getApis().add(apiNode.getText());
+                }
+            }
+        }
+        OMElement skippedEndpoints =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_ENDPOINTS));
+        if (skippedEndpoints != null) {
+            Iterator endpoints =
+                    skippedEndpoints.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_ENDPOINT);
+            if (endpoints != null) {
+                while (endpoints.hasNext()) {
+                    OMElement endpointNode = (OMElement) endpoints.next();
+                    gatewayCleanupSkipList.getEndpoints().add(endpointNode.getText());
+                }
+            }
+        }
+        OMElement skippedSequences =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_SEQUENCES));
+        if (skippedEndpoints != null) {
+            Iterator sequences =
+                    skippedSequences.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_SEQUENCE);
+            if (sequences != null) {
+                while (sequences.hasNext()) {
+                    OMElement sequenceNode = (OMElement) sequences.next();
+                    gatewayCleanupSkipList.getSequences().add(sequenceNode.getText());
+                }
+            }
+        }
+        OMElement skippedLocalEntries =
+                element.getFirstChildWithName(new QName(APIConstants.SkipListConstants.SKIPPED_LOCAL_ENTRIES));
+        if (skippedEndpoints != null) {
+            Iterator localEntries =
+                    skippedLocalEntries.getChildrenWithLocalName(APIConstants.SkipListConstants.SKIPPED_LOCAL_ENTRY);
+            if (localEntries != null) {
+                while (localEntries.hasNext()) {
+                    OMElement localEntryNode = (OMElement) localEntries.next();
+                    gatewayCleanupSkipList.getLocalEntries().add(localEntryNode.getText());
+                }
+            }
         }
     }
 
@@ -1622,7 +1734,7 @@ public class APIManagerConfiguration {
         this.eventHubConfigurationDto = eventHubConfigurationDto;
     }
 
-    public JWTConfigurationDto getJwtConfigurationDto() {
+    public ExtendedJWTConfigurationDto getJwtConfigurationDto() {
 
         return jwtConfigurationDto;
     }
@@ -1797,6 +1909,50 @@ public class APIManagerConfiguration {
         }
         if (!containerMgt.isEmpty()) {
             containerMgtAttributes.add(containerMgt);
+        }
+    }
+
+    public GatewayCleanupSkipList getGatewayCleanupSkipList() {
+
+        return gatewayCleanupSkipList;
+    }
+
+    public static Map<String, String> getAnalyticsProperties() {
+        return analyticsProperties;
+    }
+
+    /**
+     * Set Extension Listener Configurations.
+     *
+     * @param omElement XML Config
+     */
+    public void setExtensionListenerConfigurations(OMElement omElement) {
+
+        Iterator extensionListenersElement =
+                omElement.getChildrenWithLocalName(APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER);
+        while (extensionListenersElement.hasNext()) {
+            OMElement listenerElement = (OMElement) extensionListenersElement.next();
+            OMElement listenerTypeElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(APIConstants.ExtensionListenerConstants.EXTENSION_TYPE));
+            OMElement listenerClassElement =
+                    listenerElement
+                            .getFirstChildWithName(new QName(
+                                    APIConstants.ExtensionListenerConstants.EXTENSION_LISTENER_CLASS_NAME));
+            if (listenerTypeElement != null && listenerClassElement != null) {
+                String listenerClass = listenerClassElement.getText();
+                try {
+                    ExtensionListener extensionListener = (ExtensionListener) APIUtil
+                            .getClassForName(listenerClass).newInstance();
+                    extensionListenerMap.put(listenerTypeElement.getText().toUpperCase(), extensionListener);
+                } catch (InstantiationException e) {
+                    log.error("Error while instantiating class " + listenerClass, e);
+                } catch (IllegalAccessException e) {
+                    log.error(e);
+                } catch (ClassNotFoundException e) {
+                    log.error("Cannot find the class " + listenerClass + e);
+                }
+            }
         }
     }
 }

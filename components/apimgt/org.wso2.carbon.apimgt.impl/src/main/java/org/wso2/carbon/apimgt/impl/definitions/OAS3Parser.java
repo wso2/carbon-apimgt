@@ -422,25 +422,33 @@ public class OAS3Parser extends APIDefinition {
                             template = OASParserUtil.setScopesToTemplate(template, opScopes, scopes);
                         }
                     }
-                    Map<String, Object> extensios = operation.getExtensions();
-                    if (extensios != null) {
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
-                            String scopeKey = (String) extensios.get(APIConstants.SWAGGER_X_AUTH_TYPE);
+                    Map<String, Object> extensions = operation.getExtensions();
+                    if (extensions != null) {
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AUTH_TYPE)) {
+                            String scopeKey = (String) extensions.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             template.setAuthType(scopeKey);
                             template.setAuthTypes(scopeKey);
                         } else {
                             template.setAuthType("Any");
                             template.setAuthTypes("Any");
                         }
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
-                            String throttlingTier = (String) extensios.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_THROTTLING_TIER)) {
+                            String throttlingTier = (String) extensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER);
                             template.setThrottlingTier(throttlingTier);
                             template.setThrottlingTiers(throttlingTier);
                         }
-                        if (extensios.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                            String mediationScript = (String) extensios.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                            String mediationScript = (String) extensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT);
                             template.setMediationScript(mediationScript);
                             template.setMediationScripts(template.getHTTPVerb(), mediationScript);
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME)) {
+                            template.setAmznResourceName((String)
+                                    extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+                        }
+                        if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
+                            template.setAmznResourceTimeout(((Long)
+                                    extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                         }
                     }
                     urlTemplates.add(template);
@@ -1480,6 +1488,64 @@ public class OAS3Parser extends APIDefinition {
             }
         }
         return Json.pretty(openAPI);
+    }
+
+    @Override
+    public String copyVendorExtensions(String existingOASContent, String updatedOASContent) {
+
+        OpenAPI existingOpenAPI = getOpenAPI(existingOASContent);
+        OpenAPI updatedOpenAPI = getOpenAPI(updatedOASContent);
+        Paths updatedPaths = updatedOpenAPI.getPaths();
+        Paths existingPaths = existingOpenAPI.getPaths();
+
+        // Merge Security Schemes
+        if (existingOpenAPI.getComponents().getSecuritySchemes() != null) {
+            if (updatedOpenAPI.getComponents() != null) {
+                updatedOpenAPI.getComponents().setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+            } else {
+                Components components = new Components();
+                components.setSecuritySchemes(existingOpenAPI.getComponents().getSecuritySchemes());
+                updatedOpenAPI.setComponents(components);
+            }
+        }
+
+        // Merge Operation specific vendor extensions
+        for (String pathKey : updatedPaths.keySet()) {
+            Map<PathItem.HttpMethod, Operation> operationsMap = updatedPaths.get(pathKey).readOperationsMap();
+            for (Map.Entry<PathItem.HttpMethod, Operation> updatedEntry : operationsMap.entrySet()) {
+                if (existingPaths.keySet().contains(pathKey)) {
+                    for (Map.Entry<PathItem.HttpMethod, Operation> existingEntry : existingPaths.get(pathKey)
+                            .readOperationsMap().entrySet()) {
+                        if (updatedEntry.getKey().equals(existingEntry.getKey())) {
+                            Map<String, Object> vendorExtensions = updatedEntry.getValue().getExtensions();
+                            Map<String, Object> existingExtensions = existingEntry.getValue().getExtensions();
+                            boolean extensionsAreEmpty = false;
+                            if (vendorExtensions == null) {
+                                vendorExtensions = new HashMap<>();
+                                extensionsAreEmpty = true;
+                            }
+                            OASParserUtil.copyOperationVendorExtensions(existingExtensions, vendorExtensions);
+                            if (extensionsAreEmpty) {
+                                updatedEntry.getValue().setExtensions(existingExtensions);
+                            }
+                            List<SecurityRequirement> securityRequirements = existingEntry.getValue().getSecurity();
+                            List<SecurityRequirement> updatedRequirements = new ArrayList<>();
+                            if (securityRequirements != null) {
+                                for (SecurityRequirement requirement : securityRequirements) {
+                                    List<String> scopes = requirement.get(OAS3Parser.OPENAPI_SECURITY_SCHEMA_KEY);
+                                    if (scopes != null) {
+                                        updatedRequirements.add(requirement);
+                                    }
+                                }
+                                updatedEntry.getValue().setSecurity(updatedRequirements);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return Json.pretty(updatedOpenAPI);
     }
 
     /**

@@ -138,7 +138,8 @@ class Listing extends React.Component {
             const apiProduct = new APIProduct();
             const docs = apiProduct.getDocuments(api.id);
             docs.then((response) => {
-                this.setState({ docs: response.obj.list });
+                const documentList = response.body.list.filter((item) => item.otherTypeName !== '_overview');
+                this.setState({ docs: documentList });
             }).catch((errorResponse) => {
                 const errorData = JSON.parse(errorResponse.message);
                 const messageTxt =
@@ -153,7 +154,8 @@ class Listing extends React.Component {
             const newApi = new API();
             const docs = newApi.getDocuments(this.props.api.id);
             docs.then((response) => {
-                this.setState({ docs: response.obj.list });
+                const documentList = response.body.list.filter((item) => item.otherTypeName !== '_overview');
+                this.setState({ docs: documentList });
             }).catch((errorResponse) => {
                 const errorData = JSON.parse(errorResponse.message);
                 const messageTxt =
@@ -432,11 +434,11 @@ class Listing extends React.Component {
                         />
                     </Typography>
                     {docs && docs.length > 0 && (
-                        <Link to={!isRestricted(['apim:api_create', 'apim:api_publish'], api) && url}>
+                        <Link to={!isRestricted(['apim:api_create', 'apim:api_publish'], api) && !api.isRevision && url}>
                             <Button
                                 size='small'
                                 className={classes.button}
-                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) || api.isRevision}
                             >
                                 <AddCircle className={classes.buttonIcon} />
                                 <FormattedMessage
@@ -492,12 +494,12 @@ class Listing extends React.Component {
                                 </Typography>
                                 }
                                 <div className={classes.actions}>
-                                    <Link to={!isRestricted(['apim:api_create', 'apim:api_publish'], api) && url}>
+                                    <Link to={!isRestricted(['apim:api_create', 'apim:api_publish'], api) && !api.isRevision && url}>
                                         <Button
                                             variant='contained'
                                             color='primary'
                                             className={classes.button}
-                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}
+                                            disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) || api.isRevision}
                                         >
                                             <FormattedMessage
                                                 id='Apis.Details.Documents.Listing.add.new.msg.button'

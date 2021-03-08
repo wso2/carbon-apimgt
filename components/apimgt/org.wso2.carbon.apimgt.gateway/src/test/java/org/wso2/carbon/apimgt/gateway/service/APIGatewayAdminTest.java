@@ -24,7 +24,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
-import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
 import org.wso2.carbon.rest.api.APIData;
@@ -36,8 +35,8 @@ public class APIGatewayAdminTest {
     String version = "1.0.0";
     String config = "abcdef";
     String tenantDomain = "carbon.super";
-    String apiName = provider + "--" + name + ":v" + version;
-    String apiDefaultName = provider + "--" + name;
+    String apiName = name + ":v" + version;
+    String apiDefaultName = name;
 
     @Test
     public void addApiForTenant() throws Exception {
@@ -101,7 +100,7 @@ public class APIGatewayAdminTest {
         restapiAdminServiceProxy.setTenantDomain(tenantDomain);
         Mockito.when(restapiAdminServiceProxy.getApi(apiName)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertNotNull(apiGatewayAdmin.getApiForTenant(provider, name, version, tenantDomain));
+        Assert.assertNotNull(apiGatewayAdmin.getApiForTenant(name, version, tenantDomain));
     }
 
     @Test
@@ -118,7 +117,7 @@ public class APIGatewayAdminTest {
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = Mockito.mock(RESTAPIAdminServiceProxy.class);
         Mockito.when(restapiAdminServiceProxy.getApi(apiName)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertNotNull(apiGatewayAdmin.getApi(provider, name, version));
+        Assert.assertNotNull(apiGatewayAdmin.getApi(name, version));
     }
 
     @Test
@@ -131,7 +130,7 @@ public class APIGatewayAdminTest {
         restapiAdminServiceProxy.setTenantDomain(tenantDomain);
         Mockito.when(restapiAdminServiceProxy.getApi(apiDefaultName)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertNotNull(apiGatewayAdmin.getDefaultApiForTenant(provider, name, version, tenantDomain));
+        Assert.assertNotNull(apiGatewayAdmin.getDefaultApiForTenant(name, version, tenantDomain));
     }
 
     @Test
@@ -143,7 +142,7 @@ public class APIGatewayAdminTest {
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = Mockito.mock(RESTAPIAdminServiceProxy.class);
         Mockito.when(restapiAdminServiceProxy.getApi(apiDefaultName)).thenReturn(apiData);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertNotNull(apiGatewayAdmin.getDefaultApi(provider, name, version));
+        Assert.assertNotNull(apiGatewayAdmin.getDefaultApi(name, version));
 
     }
 
@@ -153,7 +152,7 @@ public class APIGatewayAdminTest {
         restapiAdminServiceProxy.setTenantDomain(tenantDomain);
         Mockito.when(restapiAdminServiceProxy.updateApi(apiName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.updateApiForTenant(provider, name, version, config, tenantDomain));
+        Assert.assertTrue(apiGatewayAdmin.updateApiForTenant(name, version, config, tenantDomain));
     }
 
     @Test
@@ -161,7 +160,7 @@ public class APIGatewayAdminTest {
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = Mockito.mock(RESTAPIAdminServiceProxy.class);
         Mockito.when(restapiAdminServiceProxy.updateApi(apiName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.updateApi(provider, name, version, config));
+        Assert.assertTrue(apiGatewayAdmin.updateApi(name, version, config));
     }
 
     @Test
@@ -170,7 +169,7 @@ public class APIGatewayAdminTest {
         restapiAdminServiceProxy.setTenantDomain(tenantDomain);
         Mockito.when(restapiAdminServiceProxy.updateApi(apiName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.updateApiForInlineScriptForTenant(provider, name, version, config,
+        Assert.assertTrue(apiGatewayAdmin.updateApiForInlineScriptForTenant(name, version, config,
                 tenantDomain));
     }
 
@@ -179,7 +178,7 @@ public class APIGatewayAdminTest {
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = Mockito.mock(RESTAPIAdminServiceProxy.class);
         Mockito.when(restapiAdminServiceProxy.updateApi(apiName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.updateApiForInlineScript(provider, name, version, config));
+        Assert.assertTrue(apiGatewayAdmin.updateApiForInlineScript(name, version, config));
 
     }
 
@@ -189,7 +188,7 @@ public class APIGatewayAdminTest {
         restapiAdminServiceProxy.setTenantDomain(tenantDomain);
         Mockito.when(restapiAdminServiceProxy.updateApi(apiDefaultName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.updateDefaultApiForTenant(provider, name, version, config, tenantDomain));
+        Assert.assertTrue(apiGatewayAdmin.updateDefaultApiForTenant(name, version, config, tenantDomain));
     }
 
     @Test
@@ -197,7 +196,7 @@ public class APIGatewayAdminTest {
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = Mockito.mock(RESTAPIAdminServiceProxy.class);
         Mockito.when(restapiAdminServiceProxy.updateApi(apiDefaultName, config)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.updateDefaultApi(provider, name, version, config));
+        Assert.assertTrue(apiGatewayAdmin.updateDefaultApi(name, version, config));
     }
 
     @Test
@@ -223,7 +222,7 @@ public class APIGatewayAdminTest {
         restapiAdminServiceProxy.setTenantDomain(tenantDomain);
         Mockito.when(restapiAdminServiceProxy.deleteApi(apiDefaultName)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.deleteDefaultApiForTenant(provider, name, version, tenantDomain));
+        Assert.assertTrue(apiGatewayAdmin.deleteDefaultApiForTenant(name, version, tenantDomain));
     }
 
     @Test
@@ -231,7 +230,7 @@ public class APIGatewayAdminTest {
         RESTAPIAdminServiceProxy restapiAdminServiceProxy = Mockito.mock(RESTAPIAdminServiceProxy.class);
         Mockito.when(restapiAdminServiceProxy.deleteApi(apiDefaultName)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminServiceProxy, null,null);
-        Assert.assertTrue(apiGatewayAdmin.deleteDefaultApi(provider, name, version));
+        Assert.assertTrue(apiGatewayAdmin.deleteDefaultApi(name, version));
     }
 
     @Test

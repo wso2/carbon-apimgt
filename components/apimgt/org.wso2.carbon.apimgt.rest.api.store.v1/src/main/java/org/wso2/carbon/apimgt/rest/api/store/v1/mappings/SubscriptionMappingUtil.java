@@ -53,12 +53,13 @@ public class SubscriptionMappingUtil {
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription)
             throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
         APIProductIdentifier apiProdId = subscription.getProductId();
         if (apiId != null) {
-            API api = apiConsumer.getLightweightAPI(apiId);
+            API api = apiConsumer.getLightweightAPI(apiId, tenantDomain);
             subscriptionDTO.setApiId(api.getUUID());
             APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
             subscriptionDTO.setApiInfo(apiInfo);
@@ -129,8 +130,14 @@ public class SubscriptionMappingUtil {
             subscriptionListDTO.setList(subscriptionDTOs);
         }
 
-        for (SubscribedAPI subscription : subscriptions) {
+        //identifying the proper start and end indexes
+        int size = subscriptions.size();
+        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= size - 1 ? offset + limit -1 : size - 1;
+
+        for (int i = start; i <= end; i++) {
             try {
+                SubscribedAPI subscription = subscriptions.get(i);
                 subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
             } catch (APIManagementException e) {
                 log.error("Error while obtaining api metadata", e);

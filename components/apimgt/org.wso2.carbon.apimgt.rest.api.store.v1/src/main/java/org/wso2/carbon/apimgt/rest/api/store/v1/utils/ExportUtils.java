@@ -55,7 +55,9 @@ public class ExportUtils {
     /**
      * Retrieve all the details of an Application by name for a given user.
      *
-     * @param appName name of the application
+     * @param appName     name of the application
+     * @param username    User name
+     * @param apiConsumer API Consumer
      * @return {@link Application} instance
      * @throws APIManagementException if an error occurs while retrieving Application details
      */
@@ -78,6 +80,7 @@ public class ExportUtils {
      *
      * @param exportApplication Application{@link Application} to be exported
      * @param apiConsumer       API Consumer
+     * @param exportFormat      Format to export
      * @param withKeys          Export the Application with keys or not
      * @return Path to the exported directory with exported artifacts
      * @throws APIManagementException If an error occurs while exporting an application to a file system
@@ -118,6 +121,7 @@ public class ExportUtils {
      * @param application Application{@link Application} to be exported
      * @param apiConsumer API Consumer
      * @param withKeys    Export the Application with keys or not
+     * @return Exported application
      * @throws APIManagementException If an error occurs while retrieving subscribed APIs
      */
     private static ExportedApplication createApplicationDTOToExport(Application application, APIConsumer apiConsumer,
@@ -164,6 +168,9 @@ public class ExportUtils {
      * Create temporary directory for an Application in temporary location.
      * The format of the name of the directory would be {application_owner}_{application_name}
      *
+     * @param appName  Application name
+     * @param appOwner Application owner
+     * @return Temporary application directory
      * @throws APIImportExportException If an error occurs while creating temporary location
      */
     public static File createTempApplicationDirectory(String appName, String appOwner) throws APIImportExportException {

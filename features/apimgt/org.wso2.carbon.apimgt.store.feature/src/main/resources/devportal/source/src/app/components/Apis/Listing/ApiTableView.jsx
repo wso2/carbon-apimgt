@@ -35,9 +35,9 @@ import Alert from 'AppComponents/Shared/Alert';
 import Icon from '@material-ui/core/Icon';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import DefaultConfigurations from '../../../../defaultTheme';
-import ImageGenerator from './ImageGenerator';
+import ImageGenerator from './APICards/ImageGenerator';
 import ApiThumb from './ApiThumb';
-import DocThumb from './DocThumb';
+import DocThumb from './APICards/DocThumb';
 import { ApiContext } from '../Details/ApiContext';
 import NoApi from './NoApi';
 
@@ -406,7 +406,7 @@ class ApiTableView extends React.Component {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             if (
-                                tableMeta.rowData[9].businessOwner
+                                tableMeta.rowData[9] && tableMeta.rowData[9].businessOwner
                             ) {
                                 return (
                                     <>
@@ -419,10 +419,14 @@ class ApiTableView extends React.Component {
                             } else {
                                 return (
                                     <>
-                                        <div>{value}</div>
-                                        <Typography variant='caption'>
-                                            <FormattedMessage defaultMessage='(Provider)' id='Apis.Listing.ApiTableView.provider.caption' />
-                                        </Typography>
+                                        {value &&
+                                        <>
+                                            <div>{value}</div>
+                                            <Typography variant='caption'>
+                                                <FormattedMessage defaultMessage='(Provider)' id='Apis.Listing.ApiTableView.provider.caption' />
+                                            </Typography>
+                                        </>
+                                        }
                                     </>
                                 );
                             }

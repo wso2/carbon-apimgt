@@ -26,8 +26,7 @@ import java.util.Arrays;
  * This enum class holds error codes that we need to pass to upper level. For example, to the UI.
  * You have to define your custom error codes here.
  */
-public enum
-ExceptionCodes implements ErrorHandler {
+public enum ExceptionCodes implements ErrorHandler {
 
     // API, Application related codes
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
@@ -48,6 +47,8 @@ ExceptionCodes implements ErrorHandler {
             + "update the API"),
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
+    DOCUMENT_INVALID_SOURCE_TYPE(900319, "Invalid document source type", 500, "Source type of the document '%s' is invalid"),
+
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
@@ -58,6 +59,7 @@ ExceptionCodes implements ErrorHandler {
     RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
     RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
+    DOCUMENT_INVALID_VISIBILITY(900326, "Invalid document visibility type", 500, "Visibility type of the document '%s' is invalid"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
     COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
             "A Composite API already exists for this application"),
@@ -90,6 +92,16 @@ ExceptionCodes implements ErrorHandler {
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
     USER_ROLES_CANNOT_BE_NULL(900610, "User roles cannot be found", 400, "User roles cannot be found"),
+    API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
+    EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
+            "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),
+    EXISTING_API_REVISION_FOUND(900349, "Can not create API Revision ", 400, "API revision already exists with id: %s "),
+    API_REVISION_UUID_NOT_FOUND(900350, "Can not create API Revision ", 400, "Failed to retrieve revision uuid from revision registry artifact"),
+    MAXIMUM_REVISIONS_REACHED(900351, "Can not create API Revision ", 400, "Maximum number of revisions per API has reached." +
+            "Need to remove any revision to create a new Revision for API with API UUID: %s"),
+    ERROR_CREATING_API_REVISION(900352, "Can not create API Revision ", 400, "Failed to create API revision registry artifacts: %s "),
+    ERROR_DELETING_API_REVISION(900353, "Can not delete API Revision ", 400, "Failed to delete API revision registry artifacts: %s "),
+    ERROR_RESTORING_API_REVISION(900354, "Can not restore API Revision ", 400, "Failed to restore API revision registry artifacts: %s "),
 
 
     // Generic codes
@@ -118,9 +130,19 @@ ExceptionCodes implements ErrorHandler {
     TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
     GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
     BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
-    GATEWAY_ENVIRONMENT_NOT_FOUND(900504, "Invalid Gateway Environment", 400, "Gateway Environment with name '%s' not found"),
+    INVALID_GATEWAY_ENVIRONMENT(900504, "Invalid Gateway Environment", 400, "Gateway Environment with name '%s' not found"),
     NO_GATEWAY_ENVIRONMENTS_ADDED(900505, "No Gateway Environments Available", 400, "No gateway environments " +
             "available for the API : %s."),
+    GATEWAY_ENVIRONMENT_NOT_FOUND(900506, "Gateway Environment not found", 404,
+            "Gateway Environment with %s not found"),
+    EXISTING_GATEWAY_ENVIRONMENT_FOUND(900507, "Gateway Environment already exists", 400,
+            "A Gateway Environment with %s already exists"),
+    READONLY_GATEWAY_ENVIRONMENT(900508, "Gateway Environment is read only", 400,
+            "A Gateway Environment with %s is read only"),
+    GATEWAY_ENVIRONMENT_DUPLICATE_VHOST_FOUND(900509, "Gateway Environment with duplicate virtual hosts",
+            400, "A Gateway Environment cannot exists with duplicate virtual hosts"),
+    READONLY_GATEWAY_ENVIRONMENT_NAME(900510, "Names of Gateway Environment cannot be changed",
+            400, "Name of the gateway is read only"),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -407,7 +429,21 @@ ExceptionCodes implements ErrorHandler {
     ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
     ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
-            "Error while reading meta information from the api_params.yaml file");
+            "Error while reading meta information from the api_params.yaml file"),
+    NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
+            "No Api artifacts found for given criteria"),
+
+    //AsyncApi related error codes
+    ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
+    ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
+
+    GATEWAY_TYPE_NOT_FOUND(900903, "Gateway type not found", 404,
+            "Gateway type not found available Gateway types : " + "%s"),
+
+    SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE(900910, "Service import is failed" , 412, "Cannot update existing services " +
+                                                    "when overwrite is false"),
+    MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION(900911, "Missing protocol in Async API Definition", 400,
+            "Missing protocol in Async API Definition");
 
     private final long errorCode;
     private final String errorMessage;

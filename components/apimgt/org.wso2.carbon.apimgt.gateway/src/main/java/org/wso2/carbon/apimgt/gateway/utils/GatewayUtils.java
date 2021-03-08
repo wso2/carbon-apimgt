@@ -24,17 +24,24 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.proc.BadJWTException;
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.context.MessageContext;
+import org.apache.axis2.description.AxisService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -44,9 +51,11 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
-import org.wso2.carbon.apimgt.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -55,13 +64,14 @@ import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorCons
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.Util;
-import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimeDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
@@ -78,6 +88,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -474,32 +485,6 @@ public class GatewayUtils {
         }
     }
 
-    /**
-     * Build execution time related information using message context
-     *
-     * @param messageContext
-     * @return
-     */
-    public static ExecutionTimeDTO getExecutionTime(org.apache.synapse.MessageContext messageContext) {
-
-        Object securityLatency = messageContext.getProperty(APIMgtGatewayConstants.SECURITY_LATENCY);
-        Object throttleLatency = messageContext.getProperty(APIMgtGatewayConstants.THROTTLING_LATENCY);
-        Object reqMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY);
-        Object resMediationLatency = messageContext.getProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY);
-        Object otherLatency = messageContext.getProperty(APIMgtGatewayConstants.OTHER_LATENCY);
-        Object backendLatency = messageContext.getProperty(APIMgtGatewayConstants.BACKEND_LATENCY);
-        ExecutionTimeDTO executionTime = new ExecutionTimeDTO();
-        executionTime.setBackEndLatency(backendLatency == null ? 0 : ((Number) backendLatency).longValue());
-        executionTime.setOtherLatency(otherLatency == null ? 0 : ((Number) otherLatency).longValue());
-        executionTime.setRequestMediationLatency(
-                reqMediationLatency == null ? 0 : ((Number) reqMediationLatency).longValue());
-        executionTime.setResponseMediationLatency(
-                resMediationLatency == null ? 0 : ((Number) resMediationLatency).longValue());
-        executionTime.setSecurityLatency(securityLatency == null ? 0 : ((Number) securityLatency).longValue());
-        executionTime.setThrottlingLatency(throttleLatency == null ? 0 : ((Number) throttleLatency).longValue());
-        return executionTime;
-    }
-
     public static String extractResource(org.apache.synapse.MessageContext mc) {
 
         Pattern resourcePattern = Pattern.compile("^/.+?/.+?([/?].+)$");
@@ -513,21 +498,21 @@ public class GatewayUtils {
 
     public static String getHostName(org.apache.synapse.MessageContext messageContext) {
 
-        String hostname = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getDatacenterId();
+        String hostname = System.getProperty("datacenterId");
         if (hostname == null) {
             hostname = (String) messageContext.getProperty(APIMgtGatewayConstants.HOST_NAME);
         }
         return hostname;
     }
 
-    public static String getQualifiedApiName(String apiProviderName, String apiName, String version) {
+    public static String getQualifiedApiName(String apiName, String version) {
 
-        return apiProviderName + "--" + apiName + ":v" + version;
+        return apiName + ":v" + version;
     }
 
-    public static String getQualifiedDefaultApiName(String apiProviderName, String apiName) {
+    public static String getQualifiedDefaultApiName(String apiName) {
 
-        return apiProviderName + "--" + apiName;
+        return apiName;
     }
 
     /**
@@ -563,6 +548,7 @@ public class GatewayUtils {
             authContext.setApiTier(apiKeyValidationInfoDTO.getApiTier());
             authContext.setKeyType(apiKeyValidationInfoDTO.getType());
             authContext.setApplicationId(apiKeyValidationInfoDTO.getApplicationId());
+            authContext.setApplicationUUID(apiKeyValidationInfoDTO.getApplicationUUID());
             authContext.setApplicationName(apiKeyValidationInfoDTO.getApplicationName());
             authContext.setApplicationTier(apiKeyValidationInfoDTO.getApplicationTier());
             authContext.setSubscriber(apiKeyValidationInfoDTO.getSubscriber());
@@ -620,6 +606,31 @@ public class GatewayUtils {
     }
 
     public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
+                                                                      JSONObject api, String apiLevelPolicy)
+            throws java.text.ParseException {
+
+        AuthenticationContext authContext = new AuthenticationContext();
+        authContext.setAuthenticated(true);
+        authContext.setApiKey(tokenSignature);
+        authContext.setUsername(payload.getSubject());
+        if (payload.getClaim(APIConstants.JwtTokenConstants.KEY_TYPE) != null) {
+            authContext.setKeyType(payload.getStringClaim(APIConstants.JwtTokenConstants.KEY_TYPE));
+        } else {
+            authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        }
+
+        authContext.setApiTier(apiLevelPolicy);
+        if (api != null) {
+            authContext.setTier(APIConstants.UNLIMITED_TIER);
+            authContext.setApiName(api.getAsString(APIConstants.JwtTokenConstants.API_NAME));
+            authContext.setApiPublisher(api.getAsString(APIConstants.JwtTokenConstants.API_PUBLISHER));
+
+        }
+        return authContext;
+    }
+
+
+    public static AuthenticationContext generateAuthenticationContext(String tokenSignature, JWTClaimsSet payload,
                                                                       JSONObject api,
                                                                       String apiLevelPolicy, String endUserToken,
                                                                       org.apache.synapse.MessageContext synCtx)
@@ -644,6 +655,8 @@ public class GatewayUtils {
             authContext
                     .setApplicationId(
                             String.valueOf(applicationObj.getAsNumber(APIConstants.JwtTokenConstants.APPLICATION_ID)));
+            authContext.setApplicationUUID(
+                    String.valueOf(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_UUID)));
             authContext.setApplicationName(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_NAME));
             authContext.setApplicationTier(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_TIER));
             authContext.setSubscriber(applicationObj.getAsString(APIConstants.JwtTokenConstants.APPLICATION_OWNER));
@@ -704,9 +717,9 @@ public class GatewayUtils {
      * Validate whether the user is subscribed to the invoked API. If subscribed, return a JSON object containing
      * the API information.
      *
-     * @param apiContext API context
-     * @param apiVersion API version
-     * @param jwtValidationInfo    The payload of the JWT token
+     * @param apiContext        API context
+     * @param apiVersion        API version
+     * @param jwtValidationInfo The payload of the JWT token
      * @return an JSON object containing subscribed API information retrieved from token payload.
      * If the subscription information is not found, return a null object.
      * @throws APISecurityException if the user is not subscribed to the API
@@ -729,7 +742,7 @@ public class GatewayUtils {
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                       )) {
+                                )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -782,14 +795,13 @@ public class GatewayUtils {
             // Subscription validation
             JSONArray subscribedAPIs =
                     (JSONArray) payload.getClaim(APIConstants.JwtTokenConstants.SUBSCRIBED_APIS);
-            for (int i = 0; i < subscribedAPIs.size(); i++) {
-                JSONObject subscribedAPIsJSONObject =
-                        (JSONObject) subscribedAPIs.get(i);
+            for (Object subscribedAPI : subscribedAPIs) {
+                JSONObject subscribedAPIsJSONObject = (JSONObject) subscribedAPI;
                 if (apiContext
                         .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT)) &&
                         apiVersion
                                 .equals(subscribedAPIsJSONObject.getAsString(APIConstants.JwtTokenConstants.API_VERSION)
-                                       )) {
+                                )) {
                     api = subscribedAPIsJSONObject;
                     if (log.isDebugEnabled()) {
                         log.debug("User is subscribed to the API: " + apiContext + ", " +
@@ -824,8 +836,8 @@ public class GatewayUtils {
     /**
      * Verify the JWT token signature.
      *
-     * @param jwt SignedJwt Token
-     * @param alias      public certificate keystore alias
+     * @param jwt   SignedJwt Token
+     * @param alias public certificate keystore alias
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
@@ -860,8 +872,8 @@ public class GatewayUtils {
     /**
      * Verify the JWT token signature.
      *
-     * @param jwt SignedJwt Token
-     * @param publicKey      public certificate
+     * @param jwt       SignedJwt Token
+     * @param publicKey public certificate
      * @return whether the signature is verified or or not
      * @throws APISecurityException in case of signature verification failure
      */
@@ -929,7 +941,7 @@ public class GatewayUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        jwtInfoDto.setMessageContext(null);
+        //jwtInfoDto.setMessageContext(null);
         jwtInfoDto.setApicontext(apiContext);
         jwtInfoDto.setVersion(apiVersion);
         constructJWTContent(null, apiKeyValidationInfoDTO, jwtInfoDto);
@@ -987,7 +999,7 @@ public class GatewayUtils {
 
         JWTInfoDto jwtInfoDto = new JWTInfoDto();
         jwtInfoDto.setJwtValidationInfo(jwtValidationInfo);
-        jwtInfoDto.setMessageContext(synCtx);
+        //jwtInfoDto.setMessageContext(synCtx);
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         jwtInfoDto.setApicontext(apiContext);
@@ -1050,6 +1062,253 @@ public class GatewayUtils {
         Object endpoint = messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
         if (endpoint != null) {
             Util.setTag(tracingSpan, APIMgtGatewayConstants.SPAN_ENDPOINT, (String) endpoint);
+        }
+    }
+
+    public static List<String> retrieveDeployedSequences(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        try {
+            List<String> deployedSequences = new ArrayList<>();
+            String inSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+            String outSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+            String faultSequenceExtensionName =
+                    APIUtil.getSequenceExtensionName(apiName, version) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+            SequenceAdminServiceProxy sequenceAdminServiceProxy = new SequenceAdminServiceProxy(tenantDomain);
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            if (sequenceAdminServiceProxy.isExistingSequence(inSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(inSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            if (sequenceAdminServiceProxy.isExistingSequence(outSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(outSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            if (sequenceAdminServiceProxy.isExistingSequence(faultSequenceExtensionName)) {
+                OMElement sequence = sequenceAdminServiceProxy.getSequence(faultSequenceExtensionName);
+                deployedSequences.add(sequence.toString());
+            }
+            return deployedSequences;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving Deployed Sequences", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+    }
+
+    public static List<String> retrieveDeployedLocalEntries(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        try {
+            SubscriptionDataStore tenantSubscriptionStore =
+                    SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+            List<String> deployedLocalEntries = new ArrayList<>();
+            if (tenantSubscriptionStore != null) {
+                API retrievedAPI = tenantSubscriptionStore.getApiByNameAndVersion(apiName, version);
+                if (retrievedAPI != null) {
+                    MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+                    LocalEntryServiceProxy localEntryServiceProxy = new LocalEntryServiceProxy(tenantDomain);
+                    String localEntryKey = retrievedAPI.getUuid();
+                    if (APIConstants.GRAPHQL_API.equals(retrievedAPI.getApiType())) {
+                        localEntryKey = retrievedAPI.getUuid().concat(APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION);
+                    }
+                    if (localEntryServiceProxy.isEntryExists(localEntryKey)) {
+                        OMElement entry = localEntryServiceProxy.getEntry(localEntryKey);
+                        deployedLocalEntries.add(entry.toString());
+                    }
+                }
+            }
+            return deployedLocalEntries;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving LocalEntries", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+    }
+
+    public static List<String> retrieveDeployedEndpoints(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        List<String> deployedEndpoints = new ArrayList<>();
+        try {
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+            String productionEndpointKey = apiName.concat("--v").concat(version).concat("_APIproductionEndpoint");
+            String sandboxEndpointKey = apiName.concat("--v").concat(version).concat("_APIsandboxEndpoint");
+            if (endpointAdminServiceProxy.isEndpointExist(productionEndpointKey)) {
+                String entry = endpointAdminServiceProxy.getEndpoint(productionEndpointKey);
+                deployedEndpoints.add(entry);
+            }
+            if (endpointAdminServiceProxy.isEndpointExist(sandboxEndpointKey)) {
+                String entry = endpointAdminServiceProxy.getEndpoint(sandboxEndpointKey);
+                deployedEndpoints.add(entry);
+            }
+        } catch (AxisFault e) {
+            throw new APIManagementException("Error in fetching deployed endpoints from Synapse Configuration", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+
+        return deployedEndpoints;
+    }
+
+    public static String retrieveDeployedAPI(String apiName, String version, String tenantDomain)
+            throws APIManagementException {
+
+        try {
+            MessageContext.setCurrentMessageContext(createAxis2MessageContext());
+            RESTAPIAdminServiceProxy restapiAdminServiceProxy = new RESTAPIAdminServiceProxy(tenantDomain);
+            String qualifiedName = GatewayUtils.getQualifiedApiName(apiName, version);
+            OMElement api = restapiAdminServiceProxy.getApiContent(qualifiedName);
+            if (api != null) {
+                return api.toString();
+            }
+            return null;
+        } catch (AxisFault axisFault) {
+            throw new APIManagementException("Error while retrieving API Artifacts", axisFault,
+                    ExceptionCodes.INTERNAL_ERROR);
+        } finally {
+            MessageContext.destroyCurrentMessageContext();
+        }
+    }
+
+    public static org.apache.axis2.context.MessageContext createAxis2MessageContext() throws AxisFault {
+
+        AxisService axisService = new AxisService();
+        axisService.addParameter("adminService", true);
+        org.apache.axis2.context.MessageContext axis2MsgCtx = new org.apache.axis2.context.MessageContext();
+        axis2MsgCtx.setMessageID(UIDGenerator.generateURNString());
+        axis2MsgCtx.setConfigurationContext(ServiceReferenceHolder.getInstance()
+                .getConfigurationContextService().getServerConfigContext());
+        axis2MsgCtx.setProperty(org.apache.axis2.context.MessageContext.CLIENT_API_NON_BLOCKING, Boolean.TRUE);
+        axis2MsgCtx.setServerSide(true);
+        axis2MsgCtx.setAxisService(axisService);
+        return axis2MsgCtx;
+    }
+
+    public static API getAPI(org.apache.synapse.MessageContext messageContext) {
+
+        Object api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+        if (api != null) {
+            return (API) api;
+        } else {
+            synchronized (messageContext) {
+                api = messageContext.getProperty(APIMgtGatewayConstants.API_OBJECT);
+                if (api != null) {
+                    return (API) api;
+                }
+                String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+                String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+                SubscriptionDataStore tenantSubscriptionStore =
+                        SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(getTenantDomain());
+                if (tenantSubscriptionStore != null) {
+                    API api1 = tenantSubscriptionStore.getApiByContextAndVersion(context, version);
+                    if (api1 != null) {
+                        messageContext.setProperty(APIMgtGatewayConstants.API_OBJECT, api1);
+                        return api1;
+                    }
+                }
+                return null;
+            }
+        }
+    }
+
+    public static String getStatus(org.apache.synapse.MessageContext messageContext) {
+
+        Object status = messageContext.getProperty(APIMgtGatewayConstants.API_STATUS);
+        if (status != null) {
+            return (String) status;
+        }
+        API api = getAPI(messageContext);
+        if (api != null) {
+            String apiStatus = api.getStatus();
+            messageContext.setProperty(APIMgtGatewayConstants.API_STATUS, apiStatus);
+            return apiStatus;
+        }
+        return null;
+    }
+
+    public static boolean isAPIStatusPrototype(org.apache.synapse.MessageContext messageContext) {
+
+        return APIConstants.PROTOTYPED.equals(getStatus(messageContext));
+    }
+
+    public static String getAPINameFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
+
+        API api = getAPI(messageContext);
+        if (api != null) {
+            return api.getApiName();
+        }
+        return null;
+    }
+
+    public static String getApiProviderFromContextAndVersion(org.apache.synapse.MessageContext messageContext) {
+
+        API api = getAPI(messageContext);
+        if (api != null) {
+            return api.getApiProvider();
+        }
+        return null;
+    }
+
+    public static boolean isAPIKey(JWTClaimsSet jwtClaimsSet) {
+        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (tokenTypeClaim != null) {
+            return APIConstants.JwtTokenConstants.API_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.APPLICATION) != null;
+    }
+
+    public static boolean isInternalKey(JWTClaimsSet jwtClaimsSet) {
+        Object tokenTypeClaim = jwtClaimsSet.getClaim(APIConstants.JwtTokenConstants.TOKEN_TYPE);
+        if (tokenTypeClaim != null) {
+            return APIConstants.JwtTokenConstants.INTERNAL_KEY_TOKEN_TYPE.equals(tokenTypeClaim);
+        }
+        return false;
+    }
+    /**
+     * Check whether the jwt token is expired or not.
+     *
+     * @param payload The payload of the JWT token
+     * @return returns true if the JWT token is expired
+     */
+    public static boolean isJwtTokenExpired(JWTClaimsSet payload) {
+
+        int timestampSkew = (int) OAuthServerConfiguration.getInstance().getTimeStampSkewInSeconds();
+
+        DefaultJWTClaimsVerifier jwtClaimsSetVerifier = new DefaultJWTClaimsVerifier();
+        jwtClaimsSetVerifier.setMaxClockSkew(timestampSkew);
+        try {
+            jwtClaimsSetVerifier.verify(payload);
+            if (log.isDebugEnabled()) {
+                log.debug("Token is not expired. User: " + payload.getSubject());
+            }
+        } catch (BadJWTException e) {
+            if ("Expired JWT".equals(e.getMessage())) {
+                return true;
+            }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Token is not expired. User: " + payload.getSubject());
+        }
+        return false;
+    }
+
+    public static void setRequestDestination(org.apache.synapse.MessageContext messageContext) {
+
+        String requestDestination = null;
+        EndpointReference objectTo =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext().getOptions().getTo();
+        if (objectTo != null) {
+            requestDestination = objectTo.getAddress();
+        }
+        if (requestDestination != null) {
+            messageContext.setProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS, requestDestination);
         }
     }
 }

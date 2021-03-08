@@ -158,13 +158,11 @@ public class APIExportUtil {
             exportAPIMetaInformation(archivePath, apiToReturn, registry, exportFormat, provider);
             
             //export mTLS authentication related certificates
-            if(provider.isClientCertificateBasedAuthenticationConfigured()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Exporting client certificates.");
-                }
-                ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
-                APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Exporting client certificates.");
             }
+            ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiToReturn);
+            APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve API Documentation for API: " + apiIDToReturn.getApiName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + " : " + apiIDToReturn.getVersion();
@@ -500,9 +498,9 @@ public class APIExportUtil {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-            //If a web socket API is exported, it does not contain a swagger file.
+            //If a streaming API is exported, it does not contain a swagger file.
             //Therefore swagger export is only required for REST, Graphql or SOAP based APIs
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiToReturn.getType())) {
+            if (!APIUtil.isStreamingApi(apiToReturn)) {
                 //For Graphql APIs, the graphql schema definition, swagger and the serialized api object are exported.
                 //For Graphql APIs, the URI templates and scopes are not cleared from the API object. Because we cannot
                 //get graphql operation info from the swagger.
@@ -529,7 +527,8 @@ public class APIExportUtil {
                     apiToReturn.setUriTemplates(new LinkedHashSet<>());
                 }
                 APIIdentifier apiIdentifier = apiToReturn.getId();
-                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
+                String tenantDomain = MultitenantUtils.getTenantDomain(apiIdentifier.getProviderName());
+                String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
                 APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
                 String formattedSwaggerJson = parser.getOASDefinitionForPublisher(apiToReturn, apiSwagger);
 

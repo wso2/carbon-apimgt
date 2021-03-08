@@ -328,29 +328,6 @@ public class APIMgtDAOTest {
         this.checkSubscribersEqual(subscriber1, subscriber2);
     }
     @Test
-    public void testLifeCycleEvents() throws Exception {
-        APIIdentifier apiId = new APIIdentifier("hiranya", "WSO2Earth", "1.0.0");
-        API api = new API(apiId);
-        api.setContext("/wso2earth");
-        api.setContextTemplate("/wso2earth/{version}");
-        api.setUUID(UUID.randomUUID().toString());
-
-        apiMgtDAO.addAPI(api, -1234);
-
-        List<LifeCycleEvent> events = apiMgtDAO.getLifeCycleEvents(apiId);
-        assertEquals(1, events.size());
-        LifeCycleEvent event = events.get(0);
-        assertEquals(apiId, event.getApi());
-        assertNull(event.getOldStatus());
-        assertEquals(APIConstants.CREATED, event.getNewStatus());
-        assertEquals("hiranya", event.getUserId());
-
-        apiMgtDAO.recordAPILifeCycleEvent(apiId, APIStatus.CREATED, APIStatus.PUBLISHED, "admin", -1234);
-        apiMgtDAO.recordAPILifeCycleEvent(apiId, APIStatus.PUBLISHED, APIStatus.DEPRECATED, "admin", -1234);
-        events = apiMgtDAO.getLifeCycleEvents(apiId);
-        assertEquals(3, events.size());
-    }
-    @Test
     public void testAddGetApplicationByNameGroupIdNull() throws Exception {
         Subscriber subscriber = new Subscriber("LA_F_GROUP_ID_NULL");
         subscriber.setEmail("laf@wso2.com");
@@ -455,6 +432,68 @@ public class APIMgtDAOTest {
             assertEquals("V1.0.0", apiId.getVersion());
         }
     }
+
+    @Test
+    public void testForwardingBlockedAndProdOnlyBlockedSubscriptionsToNewAPIVersion() throws APIManagementException {
+        Subscriber subscriber = new Subscriber("new_sub_user1");
+        subscriber.setEmail("newuser1@wso2.com");
+        subscriber.setSubscribedDate(new Date());
+        subscriber.setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+        apiMgtDAO.addSubscriber(subscriber, null);
+
+        Application application = new Application("SUB_FORWARD_APP", subscriber);
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+
+        // Add the first version of the API
+        APIIdentifier apiId1 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V1.0.0");
+        apiId1.setTier("T20");
+        API api = new API(apiId1);
+        api.setContext("/subForward");
+        api.setContextTemplate("/subForward/{version}");
+        apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+
+        // Add a subscription and update state to BLOCKED
+        int subscriptionId = apiMgtDAO.addSubscription(
+                apiTypeWrapper, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
+        apiMgtDAO.updateSubscriptionStatus(subscriptionId, APIConstants.SubscriptionStatus.BLOCKED);
+
+        // Add the second version of the API
+        APIIdentifier apiId2 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V2.0.0");
+        API api2 = new API(apiId2);
+        api2.setContext("/context1");
+        api2.setContextTemplate("/context1/{version}");
+        apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID);
+        ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
+
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, apiId1.getVersion());
+
+        List<SubscribedAPI> subscriptionsOfAPI2 =
+                apiMgtDAO.getSubscriptionsOfAPI(apiId2.getApiName(), "V2.0.0", apiId2.getProviderName());
+        assertEquals(1, subscriptionsOfAPI2.size());
+        SubscribedAPI blockedSubscription = subscriptionsOfAPI2.get(0);
+        assertEquals(APIConstants.SubscriptionStatus.BLOCKED, blockedSubscription.getSubStatus());
+
+        // update the BLOCKED subscription of the second API version to PROD_ONLY_BLOCKED
+        apiMgtDAO.updateSubscription(apiId2, APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, applicationId);
+
+        // Add the third version of the API
+        APIIdentifier apiId3 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V3.0.0");
+        API api3 = new API(apiId3);
+        api3.setContext("/context1");
+        api3.setContextTemplate("/context1/{version}");
+        apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID);
+        ApiTypeWrapper apiTypeWrapper3 = new ApiTypeWrapper(api3);
+
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, apiId2.getVersion());
+
+        List<SubscribedAPI> subscriptionsOfAPI3 =
+                apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V3.0.0", apiId1.getProviderName());
+        assertEquals(1, subscriptionsOfAPI3.size());
+        SubscribedAPI prodOnlyBlockedSubscription = subscriptionsOfAPI3.get(0);
+        assertEquals(APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED, prodOnlyBlockedSubscription.getSubStatus());
+    }
+
     @Test
     public void testInsertApplicationPolicy() throws APIManagementException {
         String policyName = "TestInsertAppPolicy";
@@ -919,14 +958,6 @@ public class APIMgtDAOTest {
                 .getName(), subscriber.getName(), clientIdProduction, "Default", UUID.randomUUID().toString());
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(APIConstants.API_KEY_TYPE_SANDBOX, application
                 .getName(), subscriber.getName(), clientIdSandbox, "Default", UUID.randomUUID().toString());
-        int appIdProduction = insertConsumerApp(clientIdProduction, application.getName(), subscriber.getName());
-        int appIdSandBox = insertConsumerApp(clientIdSandbox, application.getName(), subscriber.getName());
-        String tokenProduction = UUID.randomUUID().toString();
-        String tokenSandBox = UUID.randomUUID().toString();
-        String tokenIdProduction = insertAccessTokenForApp(appIdProduction, subscriber.getName(), tokenProduction);
-        String tokenIdSandbox = insertAccessTokenForApp(appIdSandBox, subscriber.getName(), tokenSandBox);
-        insertTokenScope(tokenIdProduction, "default");
-        insertTokenScope(tokenIdSandbox, "default");
         assertTrue(apiMgtDAO.getSubscriptionCount(subscriber, application.getName(), null) > 0);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         Mockito.when(keyManager.retrieveApplication(clientIdProduction)).thenReturn(oAuthApplicationInfo);
@@ -939,9 +970,6 @@ public class APIMgtDAOTest {
         assertEquals(subscribedAPIFromUuid.getSubCreatedStatus(), APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
         assertEquals(subscribedAPIFromUuid.getApiId(), apiId);
         assertEquals(subscribedAPIFromUuid.getApplication().getId(), application.getId());
-        List<AccessTokenInfo> accessTokenInfoList = apiMgtDAO.getAccessTokenListForUser(subscriber.getName(),
-                application.getName(), subscriber.getName());
-        assertTrue(accessTokenInfoList.size()==2);
         apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
         String status = apiMgtDAO.getApplicationStatus("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry");
@@ -960,7 +988,7 @@ public class APIMgtDAOTest {
                 PolicyConstants.POLICY_LEVEL_APP));
         assertTrue(apiMgtDAO.hasSubscription(apiPolicy.getPolicyName(), subscriber.getName(),
                 PolicyConstants.POLICY_LEVEL_API));
-        assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId, null))));
+        assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);
         apiMgtDAO.updateDefaultAPIPublishedVersion(apiId, APIConstants.PUBLISHED, APIConstants.CREATED);
@@ -973,10 +1001,6 @@ public class APIMgtDAOTest {
                 -1234);
         apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(clientIdProduction);
         apiMgtDAO.deleteApplicationMappingByConsumerKey(clientIdSandbox);
-        deleteAccessTokenForApp(appIdProduction);
-        deleteAccessTokenForApp(appIdSandBox);
-        deleteConsumerApp(clientIdProduction);
-        deleteConsumerApp(clientIdSandbox);
         deleteSubscriber(subscriber.getId());
     }
 

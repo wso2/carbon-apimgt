@@ -23,6 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import Icon from '@material-ui/core/Icon';
 import Button from '@material-ui/core/Button';
 import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
 import ReactSafeHtml from 'react-safe-html';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { ApiContext } from '../ApiContext';
@@ -185,7 +186,7 @@ function View(props) {
                 </Typography>
             )}
 
-            {doc.sourceType === 'MARKDOWN' && <ReactMarkdown escapeHtml={false} source={code} />}
+            {doc.sourceType === 'MARKDOWN' && <ReactMarkdown plugins={[gfm]}  escapeHtml={false} children={code} />}
             {doc.sourceType === 'INLINE' && <ReactSafeHtml html={code} />}
             {doc.sourceType === 'URL' && (
                 <a className={classes.displayURL} href={doc.sourceUrl} target='_blank'>

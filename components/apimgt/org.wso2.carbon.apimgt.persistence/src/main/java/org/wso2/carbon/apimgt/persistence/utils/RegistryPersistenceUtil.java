@@ -37,10 +37,9 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
@@ -50,8 +49,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.PersistenceManagerComponent;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.base.ServerConfiguration;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -70,16 +67,13 @@ import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -93,9 +87,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -125,7 +117,7 @@ public class RegistryPersistenceUtil {
      * @param artifact initial governance artifact
      * @param api      API object with the attributes value
      * @return GenericArtifact
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to create API
+     * @throws APIManagementException if failed to create API
      */
     public static GenericArtifact createAPIArtifactContent(GenericArtifact artifact, API api)
                                     throws APIManagementException {
@@ -259,9 +251,23 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
                                             RegistryPersistenceUtil.getCorsConfigurationJsonFromDto(
                                                                             api.getCorsConfiguration()));
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
+                    RegistryPersistenceUtil.getWebsubSubscriptionJsonFromDto(api.getWebsubSubscriptionConfiguration()));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WS_URI_MAPPING,
+                    RegistryPersistenceUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
 
             //attaching micro-gateway labels to the API
-            attachLabelsToAPIArtifact(artifact, api, tenantDomain);
+            
+            //clear all the existing labels first
+            artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
+            //if there are labels attached to the API object, add them to the artifact
+            if (api.getGatewayLabels() != null) {
+                List<Label> labelList = api.getGatewayLabels();
+                for (Label label : labelList) {
+                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
+                }
+            }
 
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
@@ -292,7 +298,7 @@ public class RegistryPersistenceUtil {
             }
 
             //          set deployments selected
-            Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
+            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
             String json = new Gson().toJson(deploymentEnvironments);
             artifact.setAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS, json);
 
@@ -304,68 +310,8 @@ public class RegistryPersistenceUtil {
         return artifact;
     }
 
-    /**
-     * This method is used to attach micro-gateway labels to the given API
-     *
-     * @param artifact     genereic artifact
-     * @param api          API
-     * @param tenantDomain domain name of the tenant
-     * @throws APIManagementException if failed to attach micro-gateway labels
-     */
-    public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain)
-                                    throws APIManagementException {
-
-        //get all labels in the tenant
-        List<Label> gatewayLabelList = RegistryPersistenceUtil.getAllLabels(tenantDomain);
-        //validation is performed here to cover all actions related to API artifact updates
-        if (gatewayLabelList != null && !gatewayLabelList.isEmpty()) {
-            //put available gateway labels to a list for validation purpose
-            List<String> availableGatewayLabelListNames = new ArrayList<>();
-            for (Label x : gatewayLabelList) {
-                availableGatewayLabelListNames.add(x.getName());
-            }
-            try {
-                //clear all the existing labels first
-                artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
-                //if there are labels attached to the API object, add them to the artifact
-                if (api.getGatewayLabels() != null) {
-                    //validate and add each label to the artifact
-                    List<Label> candidateLabelsList = api.getGatewayLabels();
-                    for (Label label : candidateLabelsList) {
-                        String candidateLabel = label.getName();
-                        //validation step, add the label only if it exists in the available gateway labels
-                        if (availableGatewayLabelListNames.contains(candidateLabel)) {
-                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, candidateLabel);
-                        } else {
-                            log.warn("Label name : " + candidateLabel + " does not exist in the tenant : "
-                                                            + tenantDomain + ", hence skipping it.");
-                        }
-                    }
-                }
-            } catch (GovernanceException e) {
-                String msg = "Failed to add labels for API : " + api.getId().getApiName();
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
-            }
-        }
-    }
-
-    /**
-     * This method is used to get the labels in a given tenant space
-     *
-     * @param tenantDomain tenant domain name
-     * @return micro gateway labels in a given tenant space
-     * @throws APIManagementException if failed to fetch micro gateway labels
-     */
-    public static List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
-
-        //        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        //        return apiMgtDAO.getAllLabels(tenantDomain);
-        return null; //
+    private static String getWsUriMappingJsonFromDto(Map<String, String> wsUriMapping) {
+        return new Gson().toJson(wsUriMapping);
     }
 
     /**
@@ -377,6 +323,11 @@ public class RegistryPersistenceUtil {
     public static String getCorsConfigurationJsonFromDto(org.wso2.carbon.apimgt.api.model.CORSConfiguration corsConfiguration) {
 
         return new Gson().toJson(corsConfiguration);
+    }
+
+    public static String getWebsubSubscriptionJsonFromDto(org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+
+        return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
     /**
@@ -674,17 +625,17 @@ public class RegistryPersistenceUtil {
             String providerName = artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
-            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion, artifact.getId());
 
             api = new API(apiIdentifier);
             //set uuid
             api.setUuid(artifact.getId());
             // set rating
-            //String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
-                    + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
-                    + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
-                    + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+//            String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
+//                    + RegistryPersistenceUtil.replaceEmailDomain(api.getId().getProviderName())
+//                    + RegistryConstants.PATH_SEPARATOR + api.getId().getName() + RegistryConstants.PATH_SEPARATOR
+//                    + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_KEY;
             Resource apiResource = registry.get(artifactPath);
             api = setResourceProperties(api, apiResource, artifactPath);
             //set description
@@ -785,12 +736,15 @@ public class RegistryPersistenceUtil {
 
             api.setEnvironments(getEnvironments(artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS)));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+            api.setWebsubSubscriptionConfiguration(getWebsubSubscriptionConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
             //set data and status related to monetization
             api.setMonetizationEnabled(Boolean.parseBoolean(artifact.getAttribute
                     (APIConstants.Monetization.API_MONETIZATION_STATUS)));
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
+
+            api.setWsUriMapping(getWsUriMappingFromArtifact(artifact));
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
@@ -842,6 +796,13 @@ public class RegistryPersistenceUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
+    }
+
+    private static Map<String,String> getWsUriMappingFromArtifact(GovernanceArtifact artifact)
+            throws GovernanceException {
+        Map wsUriMapping = new Gson()
+                .fromJson(artifact.getAttribute(APIConstants.API_OVERVIEW_WS_URI_MAPPING), Map.class);
+        return wsUriMapping;
     }
 
     private static Set<String> getEnvironments(String environments) {
@@ -1159,67 +1120,6 @@ public class RegistryPersistenceUtil {
         }
     }
 
-
-    /**
-     * This is to get the registry resource's HTTP permlink path.
-     * Once this issue is fixed (https://wso2.org/jira/browse/REGISTRY-2110),
-     * we can remove this method, and get permlink from the resource.
-     *
-     * @param path - Registry resource path
-     * @return {@link String} -HTTP permlink
-     */
-    public static String getRegistryResourceHTTPPermlink(String path) {
-
-        String schemeHttp = APIConstants.HTTP_PROTOCOL;
-        String schemeHttps = APIConstants.HTTPS_PROTOCOL;
-
-        ConfigurationContextService contetxservice = ServiceReferenceHolder.getContextService();
-        //First we will try to generate http permalink and if its disabled then only we will consider https
-        int port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttp);
-        if (port == -1) {
-            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttp);
-        }
-        //getting https parameters if http is disabled. If proxy port is not present we will go for default port
-        if (port == -1) {
-            port = CarbonUtils.getTransportProxyPort(contetxservice.getServerConfigContext(), schemeHttps);
-        }
-        if (port == -1) {
-            port = CarbonUtils.getTransportPort(contetxservice.getServerConfigContext(), schemeHttps);
-        }
-
-        String webContext = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
-
-        if (webContext == null || "/".equals(webContext)) {
-            webContext = "";
-        }
-        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-        String version = "";
-        if (registryService == null) {
-            log.error("Registry Service has not been set.");
-        } else if (path != null) {
-            try {
-                String[] versions = registryService.getRegistry(CarbonConstants.REGISTRY_SYSTEM_USERNAME,
-                        CarbonContext.getThreadLocalCarbonContext().getTenantId()).getVersions(path);
-                if (versions != null && versions.length > 0) {
-                    version = versions[0].substring(versions[0].lastIndexOf(";version:"));
-                }
-            } catch (RegistryException e) {
-                log.error("An error occurred while determining the latest version of the "
-                        + "resource at the given path: " + path, e);
-            }
-        }
-        if (port != -1 && path != null) {
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
-            return webContext
-                    + ((tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain))
-                            ? "/" + MultitenantConstants.TENANT_AWARE_URL_PREFIX + "/" + tenantDomain
-                            : "")
-                    + "/registry/resource" + org.wso2.carbon.registry.app.Utils.encodeRegistryPath(path) + version;
-        }
-        return null;
-    }
-
-
     /**
      * Prepends the webcontextroot to a registry path.
      *
@@ -1241,22 +1141,6 @@ public class RegistryPersistenceUtil {
         return (state != null) ? state.toUpperCase() : null;
     }
 
-
-    /**
-     * This method is used to get the actual endpoint password of an API from the hidden property
-     * in the case where the handler APIEndpointPasswordRegistryHandler is enabled in registry.xml
-     *
-     * @param api      The API
-     * @param registry The registry object
-     * @return The actual password of the endpoint if exists
-     * @throws RegistryException Throws if the api resource doesn't exist
-     */
-    private static String getActualEpPswdFromHiddenProperty(API api, Registry registry) throws RegistryException {
-
-        String apiPath = getAPIPath(api.getId());
-        Resource apiResource = registry.get(apiPath);
-        return apiResource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY);
-    }
 
     /**
      * This method returns the categories attached to the API
@@ -1282,29 +1166,6 @@ public class RegistryPersistenceUtil {
         return categoryList;
     }
 
-    /**
-     * Helper method to get tenantDomain from tenantId
-     *
-     * @param tenantId tenant Id
-     * @return tenantId
-     */
-    public static String getTenantDomainFromTenantId(int tenantId) {
-
-        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
-        if (realmService == null) {
-            return MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        }
-
-        try {
-            return realmService.getTenantManager().getDomain(tenantId);
-        } catch (UserStoreException e) {
-            log.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-
     public static org.wso2.carbon.apimgt.api.model.CORSConfiguration getCorsConfigurationFromArtifact(
             GovernanceArtifact artifact) throws GovernanceException {
 
@@ -1312,6 +1173,15 @@ public class RegistryPersistenceUtil {
                 artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION),
                 org.wso2.carbon.apimgt.api.model.CORSConfiguration.class);
         return corsConfiguration;
+    }
+
+    public static org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationFromArtifact(
+            GovernanceArtifact artifact) throws GovernanceException {
+
+        org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration websubSubscriptionConfiguration = new Gson()
+                .fromJson(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION),
+                org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration.class);
+        return websubSubscriptionConfiguration;
     }
     
     /**
@@ -1400,51 +1270,6 @@ public class RegistryPersistenceUtil {
             }
         }
         return false;
-    }
-    
-
-    /**
-     * This method returns api definition json for given api
-     *
-     * @param apiIdentifier api identifier
-     * @param registry      user registry
-     * @return api definition json as json string
-     * @throws APIManagementException
-     */
-    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException {
-        String resourcePath = "";
-
-        if (apiIdentifier instanceof APIIdentifier) {
-            resourcePath = RegistryPersistenceUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(),
-                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
-        } else if (apiIdentifier instanceof APIProductIdentifier) {
-            resourcePath = RegistryPersistenceUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(),
-                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
-        }
-
-        JSONParser parser = new JSONParser();
-        String apiDocContent = null;
-        try {
-            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
-                apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                parser.parse(apiDocContent);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at "
-                            + resourcePath);
-                }
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                    + apiIdentifier.getVersion();
-            throw new APIManagementException(msg, e);
-        } catch (ParseException e) {
-            String msg = "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                    + apiIdentifier.getVersion() + " in " + resourcePath;
-            throw new APIManagementException(msg, e);
-        }
-        return apiDocContent;
     }
 
     public static String getOpenAPIDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
@@ -1586,6 +1411,11 @@ public class RegistryPersistenceUtil {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + replaceEmailDomain(apiProvider)
                 + RegistryConstants.PATH_SEPARATOR + apiName + RegistryConstants.PATH_SEPARATOR + apiVersion
                 + APIConstants.API_RESOURCE_NAME;
+    }
+
+    public static String getRevisionPath(String apiUUID, int revisionId) {
+        return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR + apiUUID +
+                RegistryConstants.PATH_SEPARATOR + revisionId + RegistryConstants.PATH_SEPARATOR;
     }
 
     public static String[] getAuthorizedRoles(String apiPath, String tenantDomain) throws UserStoreException {

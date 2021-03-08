@@ -18,6 +18,7 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
+import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**
@@ -203,13 +204,13 @@ class API extends Resource {
 
     /**
      * export an API Directory as A Zpi file
-     * @returns {promise} Promise Containing the ZPI file of the selected API 
+     * @returns {promise} Promise Containing the ZPI file of the selected API
      */
     exportApi(apiId) {
         const apiZip = this.client.then((client) => {
             return client.apis['Import Export'].exportAPI({
                 apiId: apiId
-            },  this._requestMetaData({ 
+            },  this._requestMetaData({
                     'accept': 'application/zip'
                 })
             );
@@ -315,6 +316,29 @@ class API extends Resource {
             const payload = {
                 'Content-Type': 'application/json',
                 openAPIVersion,
+            };
+            const requestBody = {
+                'requestBody': data,
+            };
+            return client.apis['APIs'].createAPI(payload, requestBody, this._requestMetaData());
+        });
+        return promisedAPIResponse.then(response => {
+            return new API(response.body);
+        });
+    }
+
+    saveStreamingAPI() {
+        const promisedAPIResponse = this.client.then(client => {
+            const properties = client.spec.components.schemas.API.properties;
+            const data = {};
+            Object.keys(this).forEach(apiAttribute => {
+                if (apiAttribute in properties) {
+                    data[apiAttribute] = this[apiAttribute];
+                }
+            });
+
+            const payload = {
+                'Content-Type': 'application/json',
             };
             const requestBody = {
                 'requestBody': data,
@@ -438,12 +462,13 @@ class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    createNewAPIVersion(version, isDefaultVersion, callback = null) {
+    createNewAPIVersion(version, isDefaultVersion, serviceVersion, callback = null) {
         const promise_copy_api = this.client.then(client => {
             return client.apis['APIs'].createNewAPIVersion(
                 {
                     apiId: this.id,
                     newVersion: version,
+                    serviceVersion: serviceVersion,
                     defaultVersion: isDefaultVersion,
                 },
                 this._requestMetaData(),
@@ -477,13 +502,13 @@ class API extends Resource {
     /**
      * Mock sample responses for Inline Prototyping
      * of a swagger OAS defintion
-     * 
+     *
      * @param id {String} The api id.
      */
     generateMockScripts(id=this.id) {
-        const promise_get = this.client.then(client => { 
+        const promise_get = this.client.then(client => {
             return client.apis['APIs'].generateMockScripts(
-                { 
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -495,13 +520,13 @@ class API extends Resource {
 
     /**
      * Resets sample responses for inline prototyping
-     * 
-     * @param {String} id 
+     *
+     * @param {String} id
      */
     getGeneratedMockScriptsOfAPI(id=this.id) {
-        const promise_get = this.client.then(client => { 
-            return client.apis['APIs'].getGeneratedMockScriptsOfAPI( 
-                { 
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].getGeneratedMockScriptsOfAPI(
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -747,6 +772,7 @@ class API extends Resource {
      * @deprecated
      */
     updateSwagger(id, swagger) {
+        alert('update swagger() invoked!');
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
@@ -1370,7 +1396,7 @@ class API extends Resource {
 
     /**
      * Downloads the WSDL of an API
-     * 
+     *
      * @param {string} apiId Id (UUID) of the API
      */
     getWSDL(apiId) {
@@ -1387,7 +1413,7 @@ class API extends Resource {
 
     /**
      * Get WSDL meta info of an API - indicates whether the WSDL is a ZIP or a single file.
-     * 
+     *
      * @param {string} apiId Id (UUID) of the API
      */
     getWSDLInfo(apiId) {
@@ -1404,8 +1430,8 @@ class API extends Resource {
 
     /**
      * Updates the API's WSDL with the WSDL of the provided URL
-     * 
-     * @param {string} apiId Id (UUID) of the API 
+     *
+     * @param {string} apiId Id (UUID) of the API
      * @param {string} url WSDL url
      */
     updateWSDLByUrl(apiId, url) {
@@ -1429,8 +1455,8 @@ class API extends Resource {
 
     /**
      * Updates the API's WSDL with the WSDL of the provided file (zip or .wsdl)
-     * 
-     * @param {string} apiId Id (UUID) of the API 
+     *
+     * @param {string} apiId Id (UUID) of the API
      * @param {*} file WSDL file (zip or .wsdl)
      */
     updateWSDLByFileOrArchive(apiId, file) {
@@ -1583,22 +1609,47 @@ class API extends Resource {
      * @param commentInfo comment text
      * * TODO: remove
      */
-    addComment(apiId, commentInfo, callback = null) {
-        let promise = this.client
-            .then(client => {
-                return client.apis['Comment (Individual)'].post_apis__apiId__comments(
-                    { apiId: apiId, body: commentInfo },
-                    this._requestMetaData(),
-                );
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
+    addComment(apiId, comment, replyTo, callback = null) {
+        // let promise = this.client
+        //     .then(client => {
+        //         return client.apis['Comment (Individual)'].post_apis__apiId__comments(
+        //             { apiId: apiId, body: commentInfo },
+        //             this._requestMetaData(),
+        //         );
+        //     })
+        //     .catch(error => {
+        //         console.error(error);
+        //     });
+        // if (callback) {
+        //     return promise.then(callback);
+        // } else {
+        //     return promise;
+        // }
+        const response = {
+            id: '01234567-0123-0123-0123-012345678901',
+            commenterInfo: {
+                firstName: "John",
+                lastName: "David",
+                fullName: "John David"
+            },
+            content: comment.content,
+            createdBy: 'admin',
+            createdTime: '2020-02-20T13:57:16.229Z',
+            replyTo: replyTo,
+            replies: {
+                count: 1,
+                list: [
+                ],
+                pagination: {
+                    offset: 0,
+                    limit: 1,
+                    total: 10,
+                    next: "string",
+                    previous: "string"
+                }
+            }
+        };
+        return Promise.resolve({ body: response });
     }
 
     /**
@@ -1607,21 +1658,171 @@ class API extends Resource {
      * * TODO: remove
      */
     getAllComments(apiId, callback = null) {
-        let promise_get = this.client
-            .then(client => {
-                return client.apis['Comment (Collection)'].get_apis__apiId__comments(
-                    { apiId: apiId },
-                    this._requestMetaData(),
-                );
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        if (callback) {
-            return promise_get.then(callback);
-        } else {
-            return promise_get;
-        }
+        // let promise_get = this.client
+        //     .then(client => {
+        //         return client.apis['Comment (Collection)'].get_apis__apiId__comments(
+        //             { apiId: apiId },
+        //             this._requestMetaData(),
+        //         );
+        //     })
+        //     .catch(error => {
+        //         console.error(error);
+        //     });
+        // if (callback) {
+        //     return promise_get.then(callback);
+        // } else {
+        //     return promise_get;
+        // }
+        return new Promise((resolve, reject) => {
+            resolve({
+                body: {
+                    count: 18,
+                    list: [
+                        {
+                            id: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
+                            content: "Information and user interface components must be presentable to users in ways they can perceive. This principle addresses the fundamentals of information and content presentation, such as compositional sequence, colors, contrasts, contextual relationships and display of text",
+                            createdTime: "2021-02-02 16:33:43.236",
+                            createdBy: "admin",
+                            category: "general",
+                            replyTo: null,
+                            entryPoint: "publisher",
+                            commenterInfo: {
+                                firstName: "John",
+                                lastName: "David",
+                                fullName: "John David"
+                            },
+                            replies: {
+                                count: 1,
+                                list: [
+                                    {
+                                        id: "953d3002-000c-42d3-a1b9-d6559f8a4d49",
+                                        content: "This is a child comment",
+                                        createdTime: "2021-02-04 16:33:43.236",
+                                        createdBy: "user1",
+                                        category: "general",
+                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
+                                        entryPoint: "devportal",
+                                        commenterInfo: {
+                                            firstName: "Jane",
+                                            lastName: "David",
+                                            fullName: "Jane David"
+                                        }
+                                    }
+                                ],
+                                pagination: {
+                                    offset: 0,
+                                    limit: 1,
+                                    total: 10,
+                                    next: "string",
+                                    previous: "string"
+                                }
+                            }
+                        },
+                        {
+                            id: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
+                            content: "This is a Parent comment",
+                            createdTime: "2021-02-02 16:33:43.236",
+                            createdBy: "admin",
+                            category: "general",
+                            replyTo: null,
+                            entryPoint: "publisher",
+                            commenterInfo: {
+                                firstName: "",
+                                lastName: "",
+                                fullName: ""
+                            },
+                            replies: {
+                                count: 1,
+                                list: [
+                                    {
+                                        id: "953d3002-000c-42d3-a1b9-d6559f8a5d50",
+                                        content: "This is a child comment",
+                                        createdTime: "2021-02-03 16:33:43.236",
+                                        createdBy: "user1",
+                                        category: "general",
+                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
+                                        entryPoint: "devportal",
+                                        commenterInfo: {
+                                            firstName: "John",
+                                            lastName: "David",
+                                            fullName: "John David"
+                                        }
+                                    }
+                                ],
+                                pagination: {
+                                    offset: 0,
+                                    limit: 1,
+                                    total: 10,
+                                    next: "string",
+                                    previous: "string"
+                                }
+                            }
+                        },
+                        {
+                            id: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
+                            content: "This is a Parent comment",
+                            createdTime: "2021-02-02 16:33:43.236",
+                            createdBy: "admin",
+                            category: "general",
+                            replyTo: null,
+                            entryPoint: "publisher",
+                            commenterInfo: {
+                                firstName: "John",
+                                lastName: "David",
+                                fullName: "John David"
+                            },
+                            replies: {
+                                count: 2,
+                                list: [
+                                    {
+                                        id: "953d3002-000c-42d3-a1b9-d6559f8a5d60",
+                                        content: "This is a child comment",
+                                        createdTime: "2021-02-03 16:33:43.236",
+                                        createdBy: "user1",
+                                        category: "general",
+                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
+                                        entryPoint: "devportal",
+                                        commenterInfo: {
+                                            firstName: "Jane",
+                                            lastName: "David",
+                                            fullName: "Jane David"
+                                        }
+                                    },
+                                    {
+                                        id: "953d3002-000c-42d3-a1b9-d6559f8a5d61",
+                                        content: "This is a child comment",
+                                        createdTime: "2021-02-04 16:33:43.236",
+                                        createdBy: "admin",
+                                        category: "general",
+                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
+                                        entryPoint: "devportal",
+                                        commenterInfo: {
+                                            firstName: "John",
+                                            lastName: "David",
+                                            fullName: "John David"
+                                        }
+                                    }
+                                ],
+                                pagination: {
+                                    offset: 0,
+                                    limit: 1,
+                                    total: 10,
+                                    next: "string",
+                                    previous: "string"
+                                }
+                            }
+                        },
+
+                    ],
+                    pagination: {
+                        offset: 0,
+                        limit: 1,
+                        total: 10,
+                        next: "string",
+                        previous: "string"
+                    }
+                }});
+        });
     }
 
     /**
@@ -1713,7 +1914,7 @@ class API extends Resource {
     /**
      * Get the complexity related details of an API
      */
-    
+
     getGraphqlPoliciesComplexity(id) {
         const promisePolicies = this.client.then(client => {
             return client.apis['GraphQL Policies'].getGraphQLPolicyComplexityOfAPI(
@@ -1725,7 +1926,7 @@ class API extends Resource {
         });
         return promisePolicies.then(response => response.body);
     }
-    
+
     /**
      * Update complexity related details of an API
      */
@@ -1759,7 +1960,7 @@ class API extends Resource {
         return promisePolicies.then(response => response.body);
     }
 
-    
+
 
     /**
      *
@@ -1975,7 +2176,7 @@ class API extends Resource {
         } else {
             return promisedAPI;
         }
-       
+
     }
 
     /**
@@ -2028,6 +2229,206 @@ class API extends Resource {
             return client.apis['Unified Search'].search(params, Resource._requestMetaData());
         });
     }
+
+    /**
+     * Get list of revisions.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisions(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisions( {
+                    apiId: apiId,
+                },
+            );
+        });
+    }
+
+    /**
+     * Get list of revisions with environments.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisionsWithEnv(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisions(
+                    {
+                        apiId: apiId,
+                        query: 'deployed:true',
+                    },
+            );
+        });
+    }
+
+    getRevisionsEnv(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+                return apiClient.then(client => {
+                   return client.apis['API Revisions'].getAPIRevisionDeployments( {
+                    apiId: apiId,
+                },
+            );
+        });
+    }
+
+    /**
+     * Add revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    createRevision(apiId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].createAPIRevision(
+                    {apiId: apiId},
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Delete revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deleteRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deleteAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Undeploy revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    undeployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].undeployAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+     /**
+     * Undeploy revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deployAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Restore revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    restoreRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].restoreAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Create API from service
+     * @returns {promise} Add response.
+     */
+    static createApiFromService(serviceKey, apiMetaData, type) {
+        if (type != '') {
+            apiMetaData['type'] = type;
+        }
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        const promisedServiceResponse = apiClient.then(client => {
+            return client.apis['APIs'].importServiceFromCatalog(
+                {
+                    serviceKey: serviceKey,
+                },
+                { requestBody: apiMetaData},
+                this._requestMetaData() 
+            );
+        });
+        return promisedServiceResponse.then(response => response.body);
+    }
+
+     /**
+     * Reimport service.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    static reimportService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {   
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+
+    /**
+     * Create new version service.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    static newVersionService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {   
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });    
+    }
+    
 
     /**
      * Get details of a given API
@@ -2130,13 +2531,29 @@ class API extends Resource {
         });
     }
 
+    static policiesByQuotaType(quotaType) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            return client.apis['Throttling Policies'].getSubscriptionThrottlingPolicies(
+                {
+                    tierQuotaType: quotaType,
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
     /**
      * Get all the endpoint certificates.
      * */
-    static getEndpointCertificates() {
+    static getEndpointCertificates(params) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            if(params) {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates(params);
+            } else {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            }
         });
     }
 
@@ -2638,6 +3055,232 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
+    }
+
+    static updateTopics(apiId, topics) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            const payload = {
+                'Content-Type': 'application/json',
+                apiId
+            };
+            const requestBody = {
+                'requestBody': topics,
+            };
+            return client.apis["APIs"].updateTopics(payload, requestBody, this._requestMetaData());
+        });
+    }
+
+    static validateAsyncAPIByFile(asyncAPIData){
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        let payload, promisedValidate;
+        payload = {
+            file: asyncAPIData,
+            'Content-Type': 'multipart/form-data',
+        };
+        const requestBody = {
+            requestBody: {
+                file: asyncAPIData
+            },
+        };
+        promisedValidate = apiClient.then(client => {
+            return client.apis.Validation.validateAsyncAPISpecification(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        return promisedValidate;
+    }
+
+    static validateAsyncAPIByUrl(url, params = {returnContent: false}) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        const payload = {
+            'Content-Type': 'multipart/form-data',
+            ...params
+        };
+        const requestBody = {
+            requestBody: {
+                url: url,
+            },
+        };
+        return apiClient.then(client => {
+            return client.apis['Validation'].validateAsyncAPISpecification(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+        });
+    }
+
+    importAsyncAPIByFile(asyncAPIData, callback = null) {
+        let payload, promisedCreate;
+        promisedCreate = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                requestBody: {
+                    file: asyncAPIData,
+                    additionalProperties: JSON.stringify(apiData),
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                null,
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promisedCreate;
+    }
+
+    importAsyncAPIByUrl(asyncAPIUrl) {
+        let payload, promise_create;
+
+        promise_create = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                requestBody: {
+                    url: asyncAPIUrl,
+                    additionalProperties: JSON.stringify(apiData),
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                null,
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_create;
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param id {String} UUID of the API in which the AsyncAPI definition is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise
+     */
+    getAsyncAPIDefinition(id = this.id, callback = null) {
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].get_apis__apiId__asyncapi(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promise_get;
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to gie the updated API object as the arguement.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    updateAsyncAPIDefinition(asyncAPI) {
+        const promised_update = this.client.then(client => {
+            const payload = {
+                apiId: this.id,
+                'Content-Type': 'multipart/form-data',
+            };
+            const requestBody = {
+                requestBody: {
+                    apiDefinition :JSON.stringify(asyncAPI)
+                }
+            };
+            return client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+        });
+        return promised_update;
+    }
+
+    /**
+     * Update AsyncAPI definition of a given API by URL content
+     * @param apiId         API Identifier
+     * @param AsyncAPIUrl    AsyncAPI definition content URL
+     * @returns {boolean|*}
+     */
+    updateAsyncAPIDefinitionByUrl(apiId, AsyncAPIUrl) {
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                apiId: apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    url: AsyncAPIUrl,
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_updated;
+    }
+
+    /**
+     * Update AsyncAPI definition of a given API by file content
+     * @param apiId         API Identifier
+     * @param AsyncAPIFile   AsyncAPI definition file content
+     * @returns {boolean|*}
+     */
+    updateAsyncAPIDefinitionByFile(apiId, AsyncAPIFile) {
+        console.log('hello');
+        console.log(apiId);
+        console.log(AsyncAPIFile);
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                apiId: apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    file: AsyncAPIFile,
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_updated;
     }
 }
 

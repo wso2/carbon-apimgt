@@ -26,6 +26,7 @@ import java.util.Map;
  */
 public class API implements CacheableEntity<String> {
 
+    private String apiUUID;
     private int apiId = -1;
     private String provider = null;
     private String name = null;
@@ -34,6 +35,30 @@ public class API implements CacheableEntity<String> {
     private String policy = null;
     private String apiType = null;
     private Boolean isDefaultVersion = false;
+    private String environment;
+    private String status;
+    private String revision;
+
+    public String getRevision() {
+
+        return revision;
+    }
+
+    public void setRevision(String revision) {
+
+        this.revision = revision;
+    }
+
+    public String getEnvironment() {
+
+        return environment;
+    }
+
+    public void setEnvironment(String environment) {
+
+        this.environment = environment;
+    }
+
 
     private Map<String, URLMapping> resources = new HashMap<>();
 
@@ -44,12 +69,11 @@ public class API implements CacheableEntity<String> {
     }
 
     public boolean removeResource(URLMapping urlMapping) {
+
         String key = urlMapping.getUrlPattern().concat(DELEM_PERIOD).concat(urlMapping.getHttpMethod());
         resources.remove(key);
         return true;
     }
-
-
 
     public int getApiId() {
 
@@ -127,6 +151,7 @@ public class API implements CacheableEntity<String> {
     }
 
     public URLMapping getResource(String urlPattern, String httpMethod) {
+
         String key = urlPattern.concat(DELEM_PERIOD).concat(httpMethod);
         return resources.get(key);
     }
@@ -137,10 +162,32 @@ public class API implements CacheableEntity<String> {
     }
 
     public Boolean isDefaultVersion() {
+
         return isDefaultVersion;
     }
 
     public void setIsDefaultVersion(Boolean defaultVersion) {
+
         isDefaultVersion = defaultVersion;
+    }
+
+    public String getApiUUID() {
+
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+
+        this.apiUUID = apiUUID;
+    }
+
+    public String getStatus() {
+
+        return status;
+    }
+
+    public void setStatus(String status) {
+
+        this.status = status;
     }
 }

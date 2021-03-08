@@ -93,6 +93,17 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         this.apiMgtDAO = apiMgtDAO;
     }
 
+    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
+                                     Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO, APIPersistence persistance)
+            throws APIManagementException {
+        this.genericArtifactManager = genericArtifactManager;
+        this.registry = registry;
+        this.tenantManager = tenantManager;
+        this.registryService = registryService;
+        this.apiMgtDAO = apiMgtDAO;
+        this.apiPersistenceInstance = persistance;
+    }
+
     @Override
     protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry, String keyType) throws
             APIManagementException {
@@ -111,9 +122,7 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
-    protected TenantManager getTenantManager() {
-        return tenantManager;
-    }
+    protected TenantManager getTenantManager() {return tenantManager;}
 
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
         try {

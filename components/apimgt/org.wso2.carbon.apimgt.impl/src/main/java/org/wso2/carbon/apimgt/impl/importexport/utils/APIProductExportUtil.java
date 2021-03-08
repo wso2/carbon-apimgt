@@ -109,13 +109,11 @@ public class APIProductExportUtil {
             exportDependentAPIs(archivePath, apiProductToReturn, exportFormat, provider, userName, isStatusPreserved);
 
             // Export mTLS authentication related certificates
-            if(provider.isClientCertificateBasedAuthenticationConfigured()) {
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Exporting client certificates.");
                 }
                 ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(apiProductToReturn);
                 APIAndAPIProductCommonUtil.exportClientCertificates(archivePath, apiTypeWrapper, tenantId, provider, exportFormat);
-            }
         } catch (APIManagementException e) {
             String errorMessage = "Unable to retrieve artifacts for API Product: " + apiProductIdentifier.getName()
                     + StringUtils.SPACE + APIConstants.API_DATA_VERSION + " : " + apiProductIdentifier.getVersion();

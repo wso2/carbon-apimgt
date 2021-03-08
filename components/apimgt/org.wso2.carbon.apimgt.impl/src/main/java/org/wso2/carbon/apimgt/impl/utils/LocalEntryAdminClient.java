@@ -26,11 +26,16 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.util.URL;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.localentry.stub.APILocalEntryAdminStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
@@ -42,11 +47,19 @@ import java.rmi.RemoteException;
  * from the APIManagerConfiguration.
  */
 public class LocalEntryAdminClient {
+
+    private static final Log log = LogFactory.getLog(LocalEntryAdminClient.class);
     private APILocalEntryAdminStub localEntryAdminServiceStub;
     private String tenantDomain;
 
     public LocalEntryAdminClient(Environment environment, String tenantDomain) throws AxisFault {
+
         this.tenantDomain = tenantDomain;
+        setupLocalEntryClient(environment);
+    }
+
+    private void setupLocalEntryClient(Environment environment) throws AxisFault {
+
         ConfigurationContext configurationContext = ServiceReferenceHolder.getContextService().getClientConfigContext();
         localEntryAdminServiceStub = new APILocalEntryAdminStub(configurationContext,
                 environment.getServerURL() + "APILocalEntryAdmin");
@@ -55,7 +68,29 @@ public class LocalEntryAdminClient {
                 localEntryAdminServiceStub._getServiceClient());
     }
 
-    protected final void setup(Stub stub, Environment environment, ConfigurationContext configurationContext) throws AxisFault {
+    public LocalEntryAdminClient(String tenantDomain) throws AxisFault {
+
+        this.tenantDomain = tenantDomain;
+        Environment environment = new Environment();
+        try {
+            UserRealm bootstrapRealm = ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm();
+            if (bootstrapRealm != null) {
+                environment.setServerURL("https://localhost:"
+                        + APIUtil.getCarbonTransportPort(APIConstants.HTTPS_PROTOCOL) + "/services/");
+                environment.setUserName(bootstrapRealm.getRealmConfiguration().getAdminUserName());
+                environment.setPassword(bootstrapRealm.getRealmConfiguration().getAdminPassword());
+                setupLocalEntryClient(environment);
+            }
+        } catch (UserStoreException e) {
+            String msg = "Failed to get the super admin credentials for the gateway " + e.getMessage();
+            log.error(msg);
+            throw new AxisFault(msg, e);
+        }
+    }
+
+    protected final void setup(Stub stub, Environment environment, ConfigurationContext configurationContext)
+            throws AxisFault {
+
         String cookie = gatewayLogin(environment, configurationContext);
         ServiceClient serviceClient = stub._getServiceClient();
         Options options = serviceClient.getOptions();
@@ -68,6 +103,7 @@ public class LocalEntryAdminClient {
     }
 
     private String gatewayLogin(Environment environment, ConfigurationContext configurationContext) throws AxisFault {
+
         String userName = environment.getUserName();
         String password = environment.getPassword();
         String serverURL = environment.getServerURL();
@@ -101,6 +137,7 @@ public class LocalEntryAdminClient {
      * @throws AxisFault If error occurs when adding Local Entry.
      */
     public void addLocalEntry(String content) throws AxisFault {
+
         try {
             localEntryAdminServiceStub.addLocalEntry(content, tenantDomain);
         } catch (RemoteException e) {
@@ -116,9 +153,9 @@ public class LocalEntryAdminClient {
      * @throws AxisFault If error occurs when retrieving Local Entry.
      */
     public Boolean localEntryExists(String key) throws AxisFault {
+
         try {
-            Object localEntryObject = localEntryAdminServiceStub.getEntry(key, tenantDomain);
-            return localEntryObject != null;
+            return localEntryAdminServiceStub.isLocalEntryExists(key, tenantDomain);
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while getting the Local Entry: ", e.getMessage(), e);
         }
@@ -132,10 +169,12 @@ public class LocalEntryAdminClient {
      * @throws AxisFault If error occurs when deleting the Local Entry.
      */
     public boolean deleteEntry(String key) throws AxisFault {
+
         try {
             return localEntryAdminServiceStub.deleteLocalEntry(key, tenantDomain);
         } catch (RemoteException e) {
             throw new AxisFault("Error occurred while deleting the Local Entry: ", e.getMessage(), e);
         }
     }
+
 }

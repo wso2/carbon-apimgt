@@ -25,8 +25,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,6 +54,7 @@ public class API implements Serializable {
     private String wadlUrl;
     private String swaggerDefinition;
     private String graphQLSchema;
+    private String asyncApiDefinition;
     private String type;
     private String context;
     private String contextTemplate;
@@ -114,6 +117,10 @@ public class API implements Serializable {
     private String subscriptionAvailableTenants;
     private CORSConfiguration corsConfiguration;
     private String endpointConfig;
+    private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
+    private WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration;
+
+    private Map<String, String> wsUriMapping;
 
     private String responseCache;
     private int cacheTimeout;
@@ -121,6 +128,16 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
+    
+    private List<SOAPToRestSequence> soapToRestSequences;
+
+    public List<SOAPToRestSequence> getSoapToRestSequences() {
+        return soapToRestSequences;
+    }
+
+    public void setSoapToRestSequences(List<SOAPToRestSequence> soapToRestSequences) {
+        this.soapToRestSequences = soapToRestSequences;
+    }
 
     //Custom authorization header specific to the API
     private String authorizationHeader;
@@ -129,6 +146,7 @@ public class API implements Serializable {
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion = false;
     private List<String> keyManagers = new ArrayList<>();
+    private JSONObject serviceInfo = new JSONObject();
     /**
      * Used to set the workflow status in lifecycle state change workflow
      */
@@ -181,6 +199,20 @@ public class API implements Serializable {
 
     private String testKey;
 
+    /**
+     * Property to indicate whether this is a revision.
+     */
+    private boolean isRevision = false;
+
+    /**
+     * Property to hold api id of a revision.
+     */
+    private String revisionedApiId;
+
+    /**
+     * Property to hold revision id
+     */
+    private int revisionId;
 
     public void setEnvironmentList(Set<String> environmentList) {
         this.environmentList = environmentList;
@@ -208,6 +240,19 @@ public class API implements Serializable {
         this.additionalProperties = properties;
     }
 
+    public JSONObject getServiceInfoObject() { return serviceInfo; }
+
+    public void setServiceInfo(String key, String value) { this.serviceInfo.put(key, value); }
+
+    public void setServiceInfo(JSONObject serviceInfo) { this.serviceInfo = serviceInfo; }
+
+    public String getServiceInfo(String key) {
+        if (serviceInfo != null && serviceInfo.get(key) != null) {
+            return serviceInfo.get(key).toString();
+        } else {
+            return null;
+        }
+    }
     /**
      * This method is used to get the properties related to monetization
      *
@@ -316,6 +361,14 @@ public class API implements Serializable {
 
     public String getGraphQLSchema() {
         return graphQLSchema;
+    }
+
+    public String getAsyncApiDefinition() {
+        return asyncApiDefinition;
+    }
+
+    public void setAsyncApiDefinition(String asyncApiDefinition) {
+        this.asyncApiDefinition = asyncApiDefinition;
     }
 
     public Set<String> getEnvironments() {
@@ -911,6 +964,30 @@ public class API implements Serializable {
         this.monetizationCategory = monetizationCategory;
     }
 
+    public WebsubSubscriptionConfiguration getWebsubSubscriptionConfiguration() {
+        return websubSubscriptionConfiguration;
+    }
+
+    public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
+        this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    }
+
+    public WebSocketTopicMappingConfiguration getWebSocketTopicMappingConfiguration() {
+        return webSocketTopicMappingConfiguration;
+    }
+
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+        this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
+    }
+
+    public Map<String, String> getWsUriMapping() {
+        return wsUriMapping;
+    }
+
+    public void setWsUriMapping(Map<String, String> wsUriMapping) {
+        this.wsUriMapping = wsUriMapping;
+    }
+
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
@@ -1116,7 +1193,6 @@ public class API implements Serializable {
     public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
         this.deploymentEnvironments = deploymentEnvironments;
     }
-
     
     public Mediation getInSequenceMediation() {
         return inSequenceMediation;
@@ -1142,6 +1218,30 @@ public class API implements Serializable {
         this.faultSequenceMediation = faultSequenceMediation;
     }
 
+    public boolean isRevision() {
+        return isRevision;
+    }
+
+    public void setRevision(boolean revision) {
+        isRevision = revision;
+    }
+
+    public String getRevisionedApiId() {
+        return revisionedApiId;
+    }
+
+    public void setRevisionedApiId(String revisionedApiId) {
+        this.revisionedApiId = revisionedApiId;
+    }
+
+    public int getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(int revisionId) {
+        this.revisionId = revisionId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
@@ -1156,5 +1256,9 @@ public class API implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public boolean isAsync() {
+        return "WS".equals(type) || "WEBSUB".equals(type) || "SSE".equals(type);
     }
 }

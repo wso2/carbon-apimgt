@@ -117,7 +117,9 @@ public final class APIConstants {
 
     //Overview constants for CORS configuration
     public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
-    
+    public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
+            = "overview_websubSubscriptionConfiguration";
+
     public static final String WSO2_ANONYMOUS_USER = "wso2.anonymous.user";
 
     /**
@@ -129,6 +131,7 @@ public final class APIConstants {
 
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
+    public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
 
     public static class Monetization {
         public static final String API_MONETIZATION_PROPERTIES = "monetizationProperties";
@@ -141,6 +144,8 @@ public final class APIConstants {
 
     public static final String API_APPLICATION_DATA_LOCATION = APIMGT_REGISTRY_LOCATION + "/applicationdata";
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
+
+    public static final String API_REVISION_LOCATION = API_APPLICATION_DATA_LOCATION + "/apis";
 
     public static final String API_LABELS_GATEWAY_LABELS = "labels_labelName";
 
@@ -297,7 +302,8 @@ public final class APIConstants {
     public static final String TYPE = "type";
     public static final String TYPE_SEARCH_TYPE_KEY = "type=";
 
-    public static final String[] API_SUPPORTED_TYPE_LIST = {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP"};
+    public static final String[] API_SUPPORTED_TYPE_LIST =
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB"};
 
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";
@@ -363,5 +369,9 @@ public final class APIConstants {
     public static final String GRAPHQL_SCHEMA_FILE_EXTENSION = ".graphql";
     public static final String GRAPHQL_LOCAL_ENTRY_EXTENSION = "_graphQL";
     public static final String GRAPHQL_SCHEMA_PROVIDER_SEPERATOR = "--";
+    public static final String ALLOW_MULTIPLE_STATUS = "allowMultipleStatus";
+    
+    public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
 
+    public static final String API_ASYNC_API_DEFINITION_RESOURCE_NAME = "asyncapi.json";
 }

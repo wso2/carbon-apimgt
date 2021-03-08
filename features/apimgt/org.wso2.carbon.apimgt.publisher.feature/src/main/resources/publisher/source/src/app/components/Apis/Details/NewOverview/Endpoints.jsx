@@ -37,7 +37,6 @@ const showEndpoint = (api, type) => {
     return null;
 };
 
-
 /**
  *
  *

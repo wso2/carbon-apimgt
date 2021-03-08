@@ -40,7 +40,7 @@ public class RegistrySearchUtilTestCase {
 
         String searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
 
-        String expected = "name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP)";
+        String expected = "name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
@@ -70,7 +70,7 @@ public class RegistrySearchUtilTestCase {
         
         String searchQuery = RegistrySearchUtil.getPublisherSearchQuery(inputQuery, ctx);
         String expected = "publisher_roles=(null OR internal\\/creator OR internal\\/publisher OR internal\\/everyone)"
-                + "&name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP)";
+                + "&name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
@@ -89,7 +89,7 @@ public class RegistrySearchUtilTestCase {
         properties.put("isAdmin", true);
         UserContext ctx = new UserContext("admin", organization, properties, new String[] { "admin" });
 
-        String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
 
         String expected = "name=*&enableStore=(true OR null)&lcState=(PUBLISHED OR PROTOTYPED)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
@@ -97,13 +97,13 @@ public class RegistrySearchUtilTestCase {
         // search for 'test' in description 
         inputQuery = "description:test";
         expected = "description=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
         
         // search for provider 'pubuser'
         inputQuery = "provider:pubuser";
         expected = "provider=*pubuser*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for provider search. ", expected, searchQuery);
     }
 
@@ -112,7 +112,7 @@ public class RegistrySearchUtilTestCase {
         // Normal dev portal api listing
         String inputQuery = "";
         UserContext ctx = new UserContext("wso2.anonymous.user", organization, null, anonymousRoles);
-        String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
 
         String expected = "store_view_roles=(null OR system\\/wso2.anonymous.role)&name=*&enableStore=(true OR null)"
                 + "&lcState=(PUBLISHED OR PROTOTYPED)";
@@ -122,21 +122,21 @@ public class RegistrySearchUtilTestCase {
         inputQuery = "description:test";
         expected = "store_view_roles=(null OR system\\/wso2.anonymous.role)&"
                 + "description=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
         
         // search for provider 'pubuser'
         inputQuery = "provider:pubuser";
         expected = "store_view_roles=(null OR system\\/wso2.anonymous.role)&"
                 + "provider=*pubuser*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for provider search. ", expected, searchQuery);
         
         // search for propertyname 'test'
         inputQuery = "property_name:test";
         expected =   "store_view_roles=(null OR system\\/wso2.anonymous.role)"
                 + "&api_meta.property_name=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for property search. ", expected, searchQuery);
         
 
@@ -147,7 +147,7 @@ public class RegistrySearchUtilTestCase {
         // Normal dev portal api listing
         String inputQuery = "";
         UserContext ctx = new UserContext("devUser", organization, null, devPortalRoles);
-        String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
 
         String expected = "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)&name=*"
                 + "&enableStore=(true OR null)&lcState=(PUBLISHED OR PROTOTYPED)";
@@ -157,21 +157,21 @@ public class RegistrySearchUtilTestCase {
         inputQuery = "description:test";
         expected = "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)&"
                 + "description=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
         
         // search for provider 'pubuser'
         inputQuery = "provider:pubuser";
         expected = "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)&"
                 + "provider=*pubuser*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for provider search. ", expected, searchQuery);
         
         // search for propertyname 'test'
         inputQuery = "property_name:test";
         expected =   "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)"
                 + "&api_meta.property_name=*test*&lcState=(PUBLISHED OR PROTOTYPED)";
-        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx);
+        searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false);
         Assert.assertEquals("Generated query mismatched for property search. ", expected, searchQuery);
     }
 }

@@ -179,6 +179,8 @@ public class APIConsumerImplTest {
             Object[] args = invocation.getArguments();
             return (String) args[0];
         });
+
+        PowerMockito.when(keyManagerConfigurationDTO.getTenantDomain()).thenReturn("carbon.super");
     }
 
     @Test
@@ -1050,7 +1052,7 @@ public class APIConsumerImplTest {
         try {
             apiConsumer
                     .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default");
+                            "api_view", "2", null, "default", null);
             Assert.fail("User store exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Unable to retrieve the tenant information of the current user"));
@@ -1069,7 +1071,7 @@ public class APIConsumerImplTest {
         try {
             apiConsumer
                     .requestApprovalForApplicationRegistration("1", "app1", "access", "identity.com/auth", null, "3600",
-                            "api_view", "2", null, "default");
+                            "api_view", "2", null, "default", null);
             Assert.fail("API management exception not thrown for invalid token type");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Invalid Token Type"));
@@ -1089,13 +1091,13 @@ public class APIConsumerImplTest {
                 .thenReturn(application);
         Map<String, Object> result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
-                        "identity.com/auth", null, "3600", "api_view", "2", null, "default");
+                        "identity.com/auth", null, "3600", "api_view", "2", null, "default", null);
         Assert.assertEquals(result.size(), 9);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
-                        "3600", "api_view", "2", null, "default");
+                        "3600", "api_view", "2", null, "default", null);
         Assert.assertEquals(result.size(), 9);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
@@ -1122,9 +1124,9 @@ public class APIConsumerImplTest {
         Comment comment = new Comment();
         Comment[] comments = new Comment[] { comment };
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        Mockito.when(apiMgtDAO.getComments(identifier)).thenReturn(comments);
-        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier).length, 1);
-        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(identifier);
+        Mockito.when(apiMgtDAO.getComments(identifier, null)).thenReturn(comments);
+        Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier, null).length, 1);
+        Mockito.verify(apiMgtDAO, Mockito.times(1)).getComments(identifier, null);
     }
 
     @Test
@@ -1273,8 +1275,11 @@ public class APIConsumerImplTest {
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyString());
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
+        keyManagerConfigurationsDto.setUuid(UUID.randomUUID().toString());
+        keyManagerConfigurationsDto.setEnabled(true);
         Mockito.when(apiMgtDAO.isKeyManagerConfigurationExistByName( "default","carbon.super"))
                 .thenReturn(true);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName("carbon.super", "default")).thenReturn(keyManagerConfigurationsDto);
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
@@ -1283,13 +1288,14 @@ public class APIConsumerImplTest {
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         try {
-            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT", "default");
+            apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh", "DEFAULT", "default", "carbon" +
+                    ".super");
             Assert.fail("Exception is not thrown when client id is already mapped to an application");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
         Assert.assertEquals(7, apiConsumer.mapExistingOAuthClient("", "admin", "1",
-                "app1", "refresh", "DEFAULT", "default").size());
+                "app1", "refresh", "DEFAULT", "default", "carbon.super").size());
     }
 
     @Test
@@ -1475,9 +1481,9 @@ public class APIConsumerImplTest {
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
 
+        Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1));
         assertEquals(apiConsumer.getApplicationKeys(1).size(),2);
-        Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1).iterator().next().getAccessToken());
     }
 }
