@@ -17,7 +17,7 @@ info:
   title: WSO2 API Manager - Admin
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Admin Portal**.
-    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/src/main/resources/admin-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
+    Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin.v1/src/main/resources/admin-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
     Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
@@ -27,7 +27,7 @@ info:
     in the payload. A sample payload is shown below.
     ```
       {
-      "callbackUrl":"www.google.lk",
+      "callbackUrl":"www.example.com",
       "clientName":"rest_api_admin",
       "owner":"admin",
       "grantType":"client_credentials password refresh_token",
@@ -51,11 +51,11 @@ info:
     {
     "clientId": "fOCi4vNJ59PpHucC2CAYfYuADdMa",
     "clientName": "rest_api_admin",
-    "callBackURL": "www.google.lk",
+    "callBackURL": "www.example.com",
     "clientSecret": "a4FwHlq0iCIKVs2MPIIDnepZnYMa",
     "isSaasApplication": true,
     "appOwner": "admin",
-    "jsonString": "{\"grant_types\":\"client_credentials password refresh_token\",\"redirect_uris\":\"www.google.lk\",\"client_name\":\"rest_api_admin\"}",
+    "jsonString": "{\"grant_types\":\"client_credentials password refresh_token\",\"redirect_uris\":\"www.example.com\",\"client_name\":\"rest_api_admin\"}",
     "jsonAppAttribute": "{}",
     "tokenType": null
     }
