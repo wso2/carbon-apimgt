@@ -1627,12 +1627,6 @@ public class AbstractAPIManagerTestCase {
                 0);
         documentationAPIMap.put(documentation, api);
         Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("doc=search", null, 0, 5, false).get("length"), 5);
-        Map<String, Object> contextApis = new HashMap<>();
-        contextApis.put("api2", new Object());
-        BDDMockito.when(APIUtil.searchAPIsByURLPattern(Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
-                Mockito.anyInt())).thenReturn(contextApis);
-        Assert.assertTrue(
-                abstractAPIManager.searchPaginatedAPIs("subcontext=search", null, 0, 5, false).containsKey("api2"));
 
         // Test related with searches with custom properties
         Map<String, Object> actualAPIs = abstractAPIManager

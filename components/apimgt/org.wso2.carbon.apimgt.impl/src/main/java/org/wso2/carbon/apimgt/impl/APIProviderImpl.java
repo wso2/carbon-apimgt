@@ -4318,6 +4318,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
 
+    @Deprecated
     public List<API> searchAPIs(String searchTerm, String searchType, String providerId) throws APIManagementException {
         List<API> foundApiList = new ArrayList<API>();
         String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
@@ -4351,16 +4352,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             foundApiList.add(api);
                         }
                     }
-                    if ("Subcontext".equalsIgnoreCase(searchType)) {
-                        Set<URITemplate> urls = api.getUriTemplates();
-                        for (URITemplate url : urls) {
-                            matcher = pattern.matcher(url.getUriTemplate());
-                            if (matcher.find()) {
-                                foundApiList.add(api);
-                                break;
-                            }
-                        }
-                    }
                 }
             } else {
                 foundApiList = searchAPIs(searchTerm, searchType);
@@ -4381,6 +4372,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
 
+    @Deprecated
     private List<API> searchAPIs(String searchTerm, String searchType) throws APIManagementException {
         List<API> apiList = new ArrayList<API>();
 
@@ -7591,92 +7583,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             registry.put(artifactPath, apiResource);
         }
-    }
-
-    @Override
-    protected Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
-            throws APIManagementException {
-        if (!isAccessControlRestrictionEnabled || APIUtil
-                .hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
-            return super.searchAPIsByURLPattern(registry, searchTerm, start, end);
-        }
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        List<API> apiList = new ArrayList<API>();
-        final String searchValue = searchTerm.trim();
-        Map<String, Object> result = new HashMap<String, Object>();
-        int totalLength = 0;
-        StringBuilder criteria = new StringBuilder();
-        List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
-        GenericArtifactManager artifactManager = null;
-        try {
-            artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-            if (artifactManager != null) {
-                for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
-                    // "url_template" entry stores in registry,unless we search in each API
-                    criteria = new StringBuilder(getUserRoleListQuery());
-                    criteria.append("&");
-                    criteria.append(APIConstants.API_URI_PATTERN).append(i).append("=").append(searchValue);
-                    List<GovernanceArtifact> governanceArtifactList = GovernanceUtils
-                            .findGovernanceArtifacts(criteria.toString(), registry, APIConstants.API_RXT_MEDIA_TYPE);
-                    if (governanceArtifactList != null && !governanceArtifactList.isEmpty()) {
-                        governanceArtifacts.addAll(governanceArtifactList);
-                    }
-                }
-                governanceArtifacts = GovernanceUtils
-                        .findGovernanceArtifacts(criteria.toString(), registry, APIConstants.API_RXT_MEDIA_TYPE);
-                if (governanceArtifacts == null || governanceArtifacts.isEmpty()) {
-                    result.put("apis", apiSet);
-                    result.put("length", 0);
-                    return result;
-                }
-                totalLength = governanceArtifacts.size();
-                StringBuilder apiNames = new StringBuilder();
-                for (GovernanceArtifact artifact : governanceArtifacts) {
-                    if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
-                        String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-                        if (isAllowDisplayAPIsWithMultipleStatus()) {
-                            if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                                API api = APIUtil.getAPI(artifact, registry);
-                                if (api != null) {
-                                    APIUtil.updateAPIProductDependencies(api, registry);
-                                    apiList.add(api);
-                                    apiNames.append(api.getId().getApiName());
-                                }
-                            }
-                        } else {
-                            if (APIConstants.PUBLISHED.equals(status)) {
-                                API api = APIUtil.getAPI(artifact, registry);
-                                if (api != null) {
-                                    APIUtil.updateAPIProductDependencies(api, registry);
-                                    apiList.add(api);
-                                    apiNames.append(api.getId().getApiName());
-                                }
-                            }
-                        }
-                    }
-                    totalLength = apiList.size();
-                }
-                if (totalLength <= ((start + end) - 1)) {
-                    end = totalLength;
-                }
-                for (int i = start; i < end; i++) {
-                    apiSet.add(apiList.get(i));
-                }
-            } else {
-                String errorMessage =
-                        "Failed to retrieve artifact manager when searching APIs by URL pattern " + searchTerm;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to search APIs with input url-pattern", e);
-        } catch (GovernanceException e) {
-            handleException("Failed to search APIs with input url-pattern", e);
-        }
-        result.put("apis", apiSet);
-        result.put("length", totalLength);
-        return result;
     }
 
     /**
