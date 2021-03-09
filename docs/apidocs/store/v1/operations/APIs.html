@@ -993,7 +993,7 @@ Each retrieved API is represented with a minimal amount of attributes. If you wa
 This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header &#x60;X-WSO2-Tenant&#x60;. If not specified super tenant&#39;s APIs will be retrieved. If you used an Authorization header, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
-* By default, this operation retrieves Published APIs. In order to retrieve Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**.
+* By default, this operation retrieves Published APIs and Prototyped APIs. In order to retrieve only Prototyped APIs, you need to use **query** parameter and specify **status:PROTOTYPED**. To retrieve Published APIs, use **query** parameter and specify **status:PUBLISHED**.
 * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles.
 </p>
 
