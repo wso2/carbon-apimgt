@@ -105,6 +105,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new API Product revision", notes = "Create a new API Product revision ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -156,8 +157,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/revisions/{revisionId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a revision of an API Product", notes = "Delete a revision of an API Product ", response = APIRevisionListDTO.class, authorizations = {
+    @ApiOperation(value = "Delete Revision", notes = "Delete a revision of an API Product ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -173,8 +175,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/deploy-revision")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Deploy a revision", notes = "Deploy a revision ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Deploy Revision", notes = "Deploy an API Product Revision ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -280,8 +283,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/revisions/{revisionId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve a revision of an API Product", notes = "Retrieve a revision of an API Product ", response = APIRevisionDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve Revision", notes = "Retrieve a revision of an API Product ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -293,11 +297,12 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiProductId}/deploy-revision")
+    @Path("/{apiProductId}/deployed-revision")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "List available deployed revision deployment details of an API Product", notes = "List available deployed revision deployment details of an API Product ", response = APIRevisionDeploymentListDTO.class, authorizations = {
+    @ApiOperation(value = "List Deployments", notes = "List available deployed revision deployment details of an API Product ", response = APIRevisionDeploymentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -312,8 +317,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/revisions")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "List available revisions of an API Product", notes = "List available revisions of an API Product ", response = APIRevisionListDTO.class, authorizations = {
+    @ApiOperation(value = "List Revisions", notes = "List available revisions of an API Product ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
@@ -419,8 +425,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/restore-revision")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Restore a revision", notes = "Restore a revision to the working copy of the API Product ", response = APIProductDTO.class, authorizations = {
+    @ApiOperation(value = "Restore Revision", notes = "Restore a revision to the Current API of the API Product ", response = APIProductDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -435,8 +442,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/undeploy-revision")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Un-Deploy a revision", notes = "Un-Deploy a revision ", response = Void.class, authorizations = {
+    @ApiOperation(value = "UnDeploy Revision", notes = "UnDeploy an API Product Revision ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })

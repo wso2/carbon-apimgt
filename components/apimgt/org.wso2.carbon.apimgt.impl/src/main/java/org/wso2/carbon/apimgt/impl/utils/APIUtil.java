@@ -1230,7 +1230,6 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(api.isDefaultVersion()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
@@ -6448,90 +6447,6 @@ public final class APIUtil {
         return apiDocMap;
     }
 
-    public static Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
-            throws APIManagementException {
-
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        List<API> apiList = new ArrayList<API>();
-        final String searchValue = searchTerm.trim();
-        Map<String, Object> result = new HashMap<String, Object>();
-        int totalLength = 0;
-        String criteria;
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        GenericArtifact[] genericArtifacts = new GenericArtifact[0];
-        GenericArtifactManager artifactManager = null;
-        try {
-            artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Artifact manager is null when searching APIs by URL pattern " + searchTerm;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-            if (artifactManager != null) {
-                for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
-                    // "url_template" entry stores in registry,unless we search in each API
-                    criteria = APIConstants.API_URI_PATTERN + i;
-                    listMap.put(criteria, new ArrayList<String>() {
-                        {
-                            add(searchValue);
-                        }
-                    });
-                    genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager
-                            .findGenericArtifacts(listMap));
-                }
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    result.put("apis", apiSet);
-                    result.put("length", 0);
-                    return result;
-                }
-                totalLength = genericArtifacts.length;
-                StringBuilder apiNames = new StringBuilder();
-                for (GenericArtifact artifact : genericArtifacts) {
-                    if (artifact == null) {
-                        log.error("Failed to retrieve an artifact when searching APIs by URL pattern : " + searchTerm +
-                                " , continuing with next artifact.");
-                        continue;
-                    }
-                    if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
-                        String status = APIUtil.getLcStateFromArtifact(artifact);
-                        if (isAllowDisplayAPIsWithMultipleStatus()) {
-                            if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                                API api = APIUtil.getAPI(artifact, registry);
-                                if (api != null) {
-                                    apiList.add(api);
-                                    apiNames.append(api.getId().getApiName());
-                                }
-                            }
-                        } else {
-                            if (APIConstants.PUBLISHED.equals(status)) {
-                                API api = APIUtil.getAPI(artifact, registry);
-                                if (api != null) {
-                                    apiList.add(api);
-                                    apiNames.append(api.getId().getApiName());
-                                }
-                            }
-                        }
-                    }
-                    totalLength = apiList.size();
-                }
-                if (totalLength <= ((start + end) - 1)) {
-                    end = totalLength;
-                }
-                for (int i = start; i < end; i++) {
-                    apiSet.add(apiList.get(i));
-                }
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to search APIs with input url-pattern", e);
-        } catch (GovernanceException e) {
-            handleException("Failed to search APIs with input url-pattern", e);
-        }
-        result.put("apis", apiSet);
-        result.put("length", totalLength);
-        return result;
-    }
-
     /**
      * This method will check the validity of given url. WSDL url should be
      * contain http, https, "/t" (for tenant APIs) or file system path
@@ -9210,11 +9125,9 @@ public final class APIUtil {
                 for (int i = 0; i < searchCriterias.length; i++) {
                     if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
                         if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX
-                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])
-                                || APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX
                                 .equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
                             throw new APIManagementException("Invalid query. AND based search is not supported for "
-                                    + "doc and subcontext prefixes");
+                                    + "doc prefix");
                         }
                     }
                     if (i == 0) {

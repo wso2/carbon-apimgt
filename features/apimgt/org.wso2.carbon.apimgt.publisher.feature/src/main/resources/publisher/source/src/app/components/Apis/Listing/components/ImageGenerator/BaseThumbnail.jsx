@@ -42,7 +42,10 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: theme.palette.common.white,
+        background: '#0002',
+        color: '#000',
+        padding: 50,
+        borderRadius: 5,
     },
     thumbBackdrop: {
         position: 'absolute',

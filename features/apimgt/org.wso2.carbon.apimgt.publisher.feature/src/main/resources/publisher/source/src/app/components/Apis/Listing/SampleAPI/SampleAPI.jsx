@@ -107,6 +107,19 @@ class SampleAPI extends Component {
                         restApi.deployRevision(sampleAPI.id, revisionId, body1)
                             .then(() => {
                                 Alert.info('API Revision Deployed Successfully');
+                                // Publish sample API after deploying
+                                sampleAPI.publish()
+                                    .then(() => {
+                                        this.setState({ published: true, api: sampleAPI });
+                                        Alert.info(intl.formatMessage({
+                                            id: 'Apis.Listing.SampleAPI.SampleAPI.published',
+                                            defaultMessage: 'Sample PizzaShackAPI API Published successfully',
+                                        }));
+                                    })
+                                    .catch((error) => {
+                                        this.setState({ deploying: false });
+                                        Alert.error(error);
+                                    });
                             })
                             .catch((error) => {
                                 console.error(error);
@@ -130,18 +143,6 @@ class SampleAPI extends Component {
                                 defaultMessage: 'Something went wrong while creating the API Revision',
                             }));
                         }
-                    });
-                sampleAPI.publish()
-                    .then(() => {
-                        this.setState({ published: true, api: sampleAPI });
-                        Alert.info(intl.formatMessage({
-                            id: 'Apis.Listing.SampleAPI.SampleAPI.created',
-                            defaultMessage: 'Sample PizzaShackAPI API created successfully',
-                        }));
-                    })
-                    .catch((error) => {
-                        this.setState({ deploying: false });
-                        Alert.error(error);
                     });
             });
         } else {

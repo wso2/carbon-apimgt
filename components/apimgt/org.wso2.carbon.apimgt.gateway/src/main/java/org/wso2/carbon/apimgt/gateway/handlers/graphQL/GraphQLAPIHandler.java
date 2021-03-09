@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers.graphQL;
 
-import graphql.language.Definition;
+import graphql.language.*;
 import graphql.language.Document;
 import graphql.language.Field;
 import graphql.language.OperationDefinition;
@@ -31,7 +31,6 @@ import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.validation.ValidationError;
 import graphql.validation.Validator;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -51,17 +50,13 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 
-import java.io.IOException;
-import java.util.Base64;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.*;
 
-import static org.apache.axis2.Constants.Configuration.*;
+import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
 
 public class GraphQLAPIHandler extends AbstractHandler {
 
@@ -166,12 +161,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     /**
      * This method used to extract operation List
+     *
      * @param messageContext messageContext
-     * @param operation operation
+     * @param operation      operation
      * @return operationList
      */
-    private String getOperationList(MessageContext messageContext,OperationDefinition operation) {
-        String operationList = "";
+    private String getOperationList(MessageContext messageContext, OperationDefinition operation) {
+        String operationList;
         GraphQLSchemaDefinition graphql = new GraphQLSchemaDefinition();
         ArrayList<String> operationArray = new ArrayList<>();
 
@@ -186,12 +182,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     /**
      * This method support to extracted nested level operations
-     * @param selectionList selection List
+     *
+     * @param selectionList   selection List
      * @param supportedFields supportedFields
-     * @param operationArray operationArray
+     * @param operationArray  operationArray
      */
     public void getNestedLevelOperations(List<Selection> selectionList, ArrayList<String> supportedFields,
-                                ArrayList<String> operationArray) {
+                                         ArrayList<String> operationArray) {
         for (Selection selection : selectionList) {
             Field levelField = (Field) selection;
             if (!operationArray.contains(levelField.getName()) &&
@@ -209,12 +206,13 @@ public class GraphQLAPIHandler extends AbstractHandler {
 
     /**
      * This method helps to extract only supported operation names
+     *
      * @param list URITemplates
      * @return supported Fields
      */
     private ArrayList<String> getSupportedFields(List<URITemplate> list) {
         ArrayList<String> supportedFields = new ArrayList<>();
-        for(URITemplate template: list) {
+        for (URITemplate template : list) {
             supportedFields.add(template.getUriTemplate());
         }
         return supportedFields;
@@ -240,9 +238,14 @@ public class GraphQLAPIHandler extends AbstractHandler {
         if (schema != null) {
             Set<GraphQLType> additionalTypes = schema.getAdditionalTypes();
             for (GraphQLType additionalType : additionalTypes) {
-                String[] additionalTypeNameArray = additionalType.getName().split("_", 2);
-                if (additionalTypeNameArray.length > 1) {
-                    String additionalTypeName = additionalTypeNameArray[1];
+                if (additionalType.getName().startsWith(APIConstants.GRAPHQL_ADDITIONAL_TYPE_PREFIX)) {
+                    String[] additionalTypeNameArray = additionalType.getName().split("_", 2);
+                    String additionalTypeName;
+                    if (additionalTypeNameArray.length > 1) {
+                        additionalTypeName = additionalTypeNameArray[1];
+                    } else {
+                        additionalTypeName = additionalTypeNameArray[0];
+                    }
                     String base64DecodedAdditionalType = new String(Base64.getUrlDecoder().decode(additionalTypeName));
                     for (GraphQLType type : additionalType.getChildren()) {
                         if (additionalType.getName().contains(APIConstants.SCOPE_ROLE_MAPPING)) {

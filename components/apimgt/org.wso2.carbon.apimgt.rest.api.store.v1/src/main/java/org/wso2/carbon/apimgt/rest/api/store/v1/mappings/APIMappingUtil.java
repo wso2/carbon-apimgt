@@ -77,7 +77,7 @@ public class APIMappingUtil {
         dto.setId(model.getUUID());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
-        dto.setIsDefaultVersion(model.isDefaultVersion());
+        dto.setIsDefaultVersion(model.isPublishedDefaultVersion());
         dto.setLifeCycleStatus(model.getStatus());
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
