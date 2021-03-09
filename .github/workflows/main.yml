@@ -33,10 +33,6 @@ jobs:
       - name: Build carbon-apimgt with Tests, skipping AspectJ
         continue-on-error: true
         run: mvn clean install --file pom.xml -Dskip.aspectj=true
-      - name: Upload unit test coverage to Codecov
-        uses: codecov/codecov-action@v1.2.1
-        with:
-          flags: unit_tests
 
   build-product:
     runs-on: ubuntu-latest
@@ -86,12 +82,6 @@ jobs:
         run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml
         env:
           PRODUCT_APIM_TESTS: ${{ matrix.segment }}
-      - name: Upload integration test coverage to Codecov
-        uses: codecov/codecov-action@v1.2.1
-        if: ${{ always() }}
-        with:
-          flags: integration_tests
-          directory: product-apim
       - name: Prepare upload testng report
         if: always()
         run: mv product-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml TEST-TestSuite_${{ matrix.id }}.xml
