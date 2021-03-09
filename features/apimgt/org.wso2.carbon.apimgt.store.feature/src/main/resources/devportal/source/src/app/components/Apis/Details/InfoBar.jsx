@@ -443,7 +443,7 @@ class InfoBar extends React.Component {
                         </Box>
                     )}
                     <Box display='flex' flexDirection='column'>
-                        <Box display='flex' flexDirection='row' alignItems='center' pt={1}>
+                        <Box display='flex' flexDirection='row' alignItems='center' pt={1} pb={1}>
                             <Box ml={1} mr={2}>
                                 <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
                                     <Typography variant='h4' component='div'>{api.name}</Typography>
@@ -479,7 +479,7 @@ class InfoBar extends React.Component {
                             )}
                             <Social />
                         </Box>
-                        <Box display='flex' flexDirection='row' alignItems='center' pl={1}>
+                        <Box display='flex' flexDirection='row' alignItems='center' pl={1} pb={1}>
                             <Grid container spacing={2}>
                                 <Grid item xl={2} className={classes.infoWrapper}>
                                     <Typography variant='body2' className={classes.endpointLabel}>

@@ -71,6 +71,7 @@ const styles = theme => ({
     rateThis: {
         lineHeight: '15px',
         width: 40,
+        marginTop: '-6px',
     },
 });
 
@@ -222,7 +223,10 @@ class StarRatingBar extends React.Component {
                                             {(userRating === 0) ? (
                                                 <FormattedMessage defaultMessage='Rate This' id='Apis.Listing.StarRatingBar.rate.this' />
                                             ) : (
-                                                    <><Box fontSize={22} ml={1}>{userRating}</Box>You</>
+                                                    <Box>
+                                                        <Box fontSize={22} ml={1} mb={1}>{userRating}</Box>
+                                                        <Box>You</Box>
+                                                    </Box>
                                                 )}
                                         </Typography>
                                     </Box>
