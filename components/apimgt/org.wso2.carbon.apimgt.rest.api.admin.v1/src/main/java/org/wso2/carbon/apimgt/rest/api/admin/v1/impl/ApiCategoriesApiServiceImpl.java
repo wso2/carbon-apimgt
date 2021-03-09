@@ -133,8 +133,7 @@ public class ApiCategoriesApiServiceImpl implements ApiCategoriesApiService {
     }
 
     @Override
-    public Response apiCategoriesApiCategoryIdDelete(String apiCategoryId, String ifMatch, String ifUnmodifiedSince,
-                                                     MessageContext messageContext) {
+    public Response apiCategoriesApiCategoryIdDelete(String apiCategoryId, MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String userName = RestApiCommonUtil.getLoggedInUsername();

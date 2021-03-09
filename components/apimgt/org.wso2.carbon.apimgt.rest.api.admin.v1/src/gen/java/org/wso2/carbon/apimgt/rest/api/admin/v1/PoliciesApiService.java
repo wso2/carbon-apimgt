@@ -22,9 +22,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface PoliciesApiService {
-      public Response policiesMediationGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
-      public Response policiesMediationMediationPolicyIdDelete(String mediationPolicyId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response policiesMediationMediationPolicyIdGet(String mediationPolicyId, String accept, String ifNoneMatch, String ifModifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response policiesMediationMediationPolicyIdPut(String mediationPolicyId, String contentType, MediationDTO mediationDTO, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
-      public Response policiesMediationPost(String contentType, MediationDTO mediationDTO, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response policiesMediationGet(Integer limit, Integer offset, String query, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response policiesMediationMediationPolicyIdDelete(String mediationPolicyId, MessageContext messageContext) throws APIManagementException;
+      public Response policiesMediationMediationPolicyIdGet(String mediationPolicyId, String accept, MessageContext messageContext) throws APIManagementException;
+      public Response policiesMediationMediationPolicyIdPut(String mediationPolicyId, String contentType, MediationDTO mediationDTO, MessageContext messageContext) throws APIManagementException;
+      public Response policiesMediationPost(String contentType, MediationDTO mediationDTO, MessageContext messageContext) throws APIManagementException;
 }

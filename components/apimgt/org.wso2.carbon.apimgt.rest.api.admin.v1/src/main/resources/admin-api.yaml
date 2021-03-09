@@ -120,25 +120,12 @@ paths:
         Retrieves all existing application throttling policies.
       parameters:
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policies returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -148,11 +135,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationThrottlePolicyList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -187,12 +169,6 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 Location of the newly created Policy object.
@@ -244,26 +220,12 @@ paths:
         Retrieves an application throttling policy.
       parameters:
       - $ref: '#/components/parameters/policyId'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policy returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -285,11 +247,6 @@ paths:
                     timeUnit: min
                     unitTime: 1
                     requestCount: 20
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -312,8 +269,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/policyId'
       - $ref: '#/components/parameters/Content-Type'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -328,18 +283,6 @@ paths:
             OK.
             Policy updated.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional request.
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional reuquests.
-              schema:
-                type: string
             Location:
               description: |
                 The URL of the newly created resource.
@@ -370,8 +313,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -389,8 +330,6 @@ paths:
         Deletes an application level throttling policy.
       parameters:
       - $ref: '#/components/parameters/policyId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -399,8 +338,6 @@ paths:
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -430,18 +367,12 @@ paths:
         schema:
           type: string
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
             OK.
             List of mediation policies is returned.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: The content type of the body.
               schema:
@@ -450,11 +381,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/mediationList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -474,8 +400,6 @@ paths:
         This operation can be used to add a new global mediation policy.
       parameters:
       - $ref: '#/components/parameters/Content-Type'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: mediation policy to upload
         content:
@@ -489,18 +413,6 @@ paths:
             OK.
             Mediation policy added successfully.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 The URL of the uploaded thumbnail image of the API.
@@ -519,8 +431,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -543,26 +453,12 @@ paths:
       parameters:
       - $ref: '#/components/parameters/mediationPolicyId'
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Mediation Policy returned.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -572,11 +468,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Mediation'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -599,8 +490,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/mediationPolicyId'
       - $ref: '#/components/parameters/Content-Type'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Mediation policy object that needs to be updated
@@ -615,17 +504,6 @@ paths:
             OK.
             Successful response with updated mediation policy object
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 The URL of the newly created resource.
@@ -646,8 +524,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -665,8 +541,6 @@ paths:
         This operation can be used to delete an existing global mediation policy providing the Id of the mediation policy.
       parameters:
       - $ref: '#/components/parameters/mediationPolicyId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -677,8 +551,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -700,26 +572,12 @@ paths:
         This operation can be used to retrieve all Subscription level throttling policies.
       parameters:
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policies returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -729,11 +587,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubscriptionThrottlePolicyList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -768,12 +621,6 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 Location of the newly created Policy object.
@@ -831,26 +678,12 @@ paths:
         This operation can be used to retrieves subscription level throttling policy by specifying the Id of the policy as a path paramter
       parameters:
       - $ref: '#/components/parameters/policyId'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policy returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -878,11 +711,6 @@ paths:
                 customAttributes: []
                 stopOnQuotaReach: true
                 billingPlan: FREE
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -905,8 +733,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/policyId'
       - $ref: '#/components/parameters/Content-Type'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -921,18 +747,6 @@ paths:
             OK.
             Policy updated.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 The URL of the newly created resource.
@@ -969,8 +783,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -988,8 +800,6 @@ paths:
         This operation can be used to delete a subscription level throttling policy by specifying the Id of the policy as a path paramter.
       parameters:
       - $ref: '#/components/parameters/policyId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -998,8 +808,6 @@ paths:
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1024,26 +832,12 @@ paths:
         * Only super tenant users are allowed for this operation.
       parameters:
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policies returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -1053,11 +847,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomRuleList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -1095,12 +884,6 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 Location of the newly created resource.
@@ -1155,26 +938,12 @@ paths:
         * Only super tenant users are allowed for this operation.
       parameters:
       - $ref: '#/components/parameters/ruleId'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policy returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -1196,11 +965,6 @@ paths:
                   \ expiryTimeStamp group by throttleKey \nINSERT ALL EVENTS into\
                   \ ResultStream;"
                 keyTemplate: $userId
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -1226,8 +990,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/ruleId'
       - $ref: '#/components/parameters/Content-Type'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -1242,18 +1004,6 @@ paths:
             OK.
             Policy updated.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 The URL of the newly created resource.
@@ -1284,8 +1034,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1306,8 +1054,6 @@ paths:
         * Only super tenant users are allowed for this operation.
       parameters:
       - $ref: '#/components/parameters/ruleId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -1316,8 +1062,6 @@ paths:
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1339,26 +1083,12 @@ paths:
         Retrieves all existing advanced throttling policies.
       parameters:
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policies returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -1368,11 +1098,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AdvancedThrottlePolicyList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -1407,12 +1132,6 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 Location of the newly created Advanced Throttling Policy.
@@ -1465,26 +1184,12 @@ paths:
         Retrieves an advanced throttling policy.
       parameters:
       - $ref: '#/components/parameters/policyId'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Policy returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -1507,11 +1212,6 @@ paths:
                     unitTime: 1
                     requestCount: 10000
                 conditionalGroups: []
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -1534,8 +1234,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/policyId'
       - $ref: '#/components/parameters/Content-Type'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Policy object that needs to be modified
@@ -1550,18 +1248,6 @@ paths:
             OK.
             Policy updated.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 The URL of the newly created resource.
@@ -1593,8 +1279,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1612,8 +1296,6 @@ paths:
         Deletes an advanced throttling policy.
       parameters:
       - $ref: '#/components/parameters/policyId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -1622,8 +1304,6 @@ paths:
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1645,26 +1325,12 @@ paths:
         Retrieves all existing deny policies.
       parameters:
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Deny Policies returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -1674,11 +1340,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BlockingConditionList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         406:
           $ref: '#/components/responses/NotAcceptable'
       security:
@@ -1713,12 +1374,6 @@ paths:
             Successful response with the newly created object as entity in the body.
             Location header contains URL of newly created entity.
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Location:
               description: |
                 Location of the newly created resource.
@@ -1758,26 +1413,12 @@ paths:
         Retrieves a Deny policy providing the condition Id
       parameters:
       - $ref: '#/components/parameters/conditionId'
-      - $ref: '#/components/parameters/If-None-Match'
-      - $ref: '#/components/parameters/If-Modified-Since'
       responses:
         200:
           description: |
             OK.
             Condition returned
           headers:
-            ETag:
-              description: |
-                Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
-            Last-Modified:
-              description: |
-                Date and time the resource has been modifed the last time.
-                Used by caches, or in conditional requests (Will be supported in future).
-              schema:
-                type: string
             Content-Type:
               description: |
                 The content type of the body.
@@ -1787,11 +1428,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BlockingCondition'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         404:
           $ref: '#/components/responses/NotFound'
         406:
@@ -1813,8 +1449,6 @@ paths:
         Deletes an existing deny policy
       parameters:
       - $ref: '#/components/parameters/conditionId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -1823,8 +1457,6 @@ paths:
           content: {}
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -1843,8 +1475,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/conditionId'
       - $ref: '#/components/parameters/Content-Type'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       requestBody:
         description: |
           Blocking condition with updated status
@@ -1892,7 +1522,6 @@ paths:
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
       - name: name
         in: query
         description: |
@@ -1923,11 +1552,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         400:
           $ref: '#/components/responses/BadRequest'
         406:
@@ -1955,7 +1579,6 @@ paths:
         This operation can be used to delete an application by specifying its id.
       parameters:
       - $ref: '#/components/parameters/applicationId'
-      - $ref: '#/components/parameters/If-Match'
       responses:
         200:
           description: |
@@ -1978,8 +1601,6 @@ paths:
                 $ref: '#/components/schemas/WorkflowResponse'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2014,8 +1635,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
-        412:
-          $ref: '#/components/responses/PreconditionFailed'
       security:
       - OAuth2Security:
         - apim:admin
@@ -2137,8 +1756,6 @@ paths:
         Delete a Label by label Id
       parameters:
       - $ref: '#/components/parameters/labelId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -2399,7 +2016,6 @@ paths:
       - $ref: '#/components/parameters/limit'
       - $ref: '#/components/parameters/offset'
       - $ref: '#/components/parameters/Accept'
-      - $ref: '#/components/parameters/If-None-Match'
       - name: workflowType
         in: query
         description: |
@@ -2431,11 +2047,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
-          content: {}
         400:
           $ref: '#/components/responses/BadRequest'
         404:
@@ -2467,7 +2078,6 @@ paths:
         required: true
         schema:
           type: string
-      - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
@@ -2749,8 +2359,6 @@ paths:
         Delete an API Category by API Category Id
       parameters:
       - $ref: '#/components/parameters/apiCategoryId'
-      - $ref: '#/components/parameters/If-Match'
-      - $ref: '#/components/parameters/If-Unmodified-Since'
       responses:
         200:
           description: |
@@ -5315,36 +4923,6 @@ components:
       schema:
         type: string
         default: application/json
-    If-None-Match:
-      name: If-None-Match
-      in: header
-      description: |
-        Validator for conditional requests; based on the ETag of the formerly retrieved
-        variant of the resource (Will be supported in future).
-      schema:
-        type: string
-    If-Modified-Since:
-      name: If-Modified-Since
-      in: header
-      description: |
-        Validator for conditional requests; based on Last Modified header of the
-        formerly retrieved variant of the resource (Will be supported in future).
-      schema:
-        type: string
-    If-Match:
-      name: If-Match
-      in: header
-      description: |
-        Validator for conditional requests; based on ETag (Will be supported in future).
-      schema:
-        type: string
-    If-Unmodified-Since:
-      name: If-Unmodified-Since
-      in: header
-      description: |
-        Validator for conditional requests; based on Last Modified header (Will be supported in future).
-      schema:
-        type: string
     limit:
       name: limit
       in: query
