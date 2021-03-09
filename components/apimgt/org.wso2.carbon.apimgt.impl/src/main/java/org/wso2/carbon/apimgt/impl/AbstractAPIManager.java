@@ -499,7 +499,9 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void loadTenantRegistry(int apiTenantId) throws RegistryException {
         APIUtil.loadTenantRegistry(apiTenantId);
     }
-
+    protected void populateDefaultVersion(API api) throws APIManagementException{
+        apiMgtDAO.setDefaultVersion(api);
+    }
     /**
      * Get API by registry artifact id
      *
