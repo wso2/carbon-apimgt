@@ -664,9 +664,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         TreeMap<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> selectedAPIS =
                 Utils.getSelectedAPIList(requestPath, tenantDomain);
         if (selectedAPIS.size() > 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving apis for inbound : " + inboundName);
-            }
             String selectedPath = selectedAPIS.firstKey();
             org.wso2.carbon.apimgt.keymgt.model.entity.API selectedAPI = selectedAPIS.get(selectedPath);
             API api = synCtx.getEnvironment().getSynapseConfiguration()
