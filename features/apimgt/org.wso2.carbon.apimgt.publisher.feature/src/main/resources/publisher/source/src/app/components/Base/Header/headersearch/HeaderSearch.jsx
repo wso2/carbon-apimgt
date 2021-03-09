@@ -331,12 +331,6 @@ class HeaderSearch extends React.Component {
                                 </li>
                                 <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option7'
-                                        defaultMessage='Sub-Context [ Syntax - subcontext:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option8'
                                         defaultMessage='Documentation Content [ Syntax - doc:xxxx ]'
                                     />

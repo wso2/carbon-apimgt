@@ -2359,12 +2359,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             	} else {
             		result.put("length", end-start);
             	}
-        	}
-            else if ("subcontext".equalsIgnoreCase(searchType)) {
-                result = APIUtil.searchAPIsByURLPattern(userRegistry, searchTerm, start,end);               ;
-
-            }else {
-            	result=searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
+        	} else {
+            	result = searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
             }
 
         } catch (Exception e) {
@@ -6078,6 +6074,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateDefaultVersion(api);
                     api = addTiersToAPI(api, requestedTenantDomain);
                     return new ApiTypeWrapper(api);
                 }
