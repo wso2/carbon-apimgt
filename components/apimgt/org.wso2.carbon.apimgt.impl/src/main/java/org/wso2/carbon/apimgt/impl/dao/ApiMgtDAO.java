@@ -8185,26 +8185,47 @@ public class ApiMgtDAO {
      */
     public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()){
-            int id = -1;
-            String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
             Identifier identifier;
             if (apiTypeWrapper.isAPIProduct()) {
                 identifier = apiTypeWrapper.getApiProduct().getId();
             } else {
                 identifier = apiTypeWrapper.getApi().getId();
             }
+            return deleteComment(identifier, commentId, connection);
+        } catch (SQLException e) {
+            handleException("Error while deleting comment " + commentId + " from the database", e);
+        }
+        return false;
+    }
+
+    private boolean deleteComment(Identifier identifier, String commentId, Connection connection) throws APIManagementException {
+        int id = -1;
+        String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
+        String getCommentIDsOfReplies = SQLConstants.GET_IDS_OF_REPLIES_SQL;
+        ResultSet resultSet = null;
+        try {
             id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
                 throw new APIManagementException(msg);
             }
             connection.setAutoCommit(false);
-            try (PreparedStatement prepStmt = connection.prepareStatement(deleteCommentQuery)) {
-                prepStmt.setInt(1, id);
-                prepStmt.setString(2, commentId);
-                prepStmt.execute();
-                connection.commit();
-                return true;
+            try (PreparedStatement prepStmtGetReplies = connection.prepareStatement(getCommentIDsOfReplies)) {
+                prepStmtGetReplies.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+                prepStmtGetReplies.setString(2, identifier.getName());
+                prepStmtGetReplies.setString(3, identifier.getVersion());
+                prepStmtGetReplies.setString(4, commentId);
+                resultSet = prepStmtGetReplies.executeQuery();
+                while (resultSet.next()) {
+                    deleteComment(identifier, resultSet.getString("COMMENT_ID"), connection);
+                }
+                try (PreparedStatement prepStmt = connection.prepareStatement(deleteCommentQuery)) {
+                    prepStmt.setInt(1, id);
+                    prepStmt.setString(2, commentId);
+                    prepStmt.execute();
+                    connection.commit();
+                    return true;
+                }
             }
         } catch (SQLException e) {
             handleException("Error while deleting comment " + commentId + " from the database", e);

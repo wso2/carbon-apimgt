@@ -2351,6 +2351,19 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID IS NULL LIMIT ? OFFSET ?";
 
+    public static final String GET_IDS_OF_REPLIES_SQL =
+            "SELECT " +
+                "AM_API_COMMENTS.COMMENT_ID " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID = ?";
+
     public static final String GET_REPLIES_COUNT_SQL =
             "SELECT " +
                 "COUNT(AM_API_COMMENTS.COMMENT_ID) AS COMMENT_COUNT " +
