@@ -452,34 +452,12 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
-        String apiPath = APIUtil.getAPIPath(identifier);
-        Registry registry;
         try {
             String apiTenantDomain = getTenantDomain(identifier);
             String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(identifier.getUUID());
-            int apiTenantId = getTenantManager()
-                    .getTenantId(apiTenantDomain);
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-                APIUtil.loadTenantRegistry(apiTenantId);
-            }
-
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-                registry = getRegistryService().getGovernanceUserRegistry(
-                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
-            } else {
-                registry = this.registry;
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-
-            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
-            APIUtil.updateAPIProductDependencies(api, registry);
+            Organization org = new Organization(organizationId);
+            PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, identifier.getUUID());
+            API api = APIMapper.INSTANCE.toApi(publisherAPI);
             if (api.isAsync()) {
                 api.setAsyncApiDefinition(getAsyncAPIDefinition(identifier));
             } else {
@@ -496,16 +474,11 @@ public abstract class AbstractAPIManager implements APIManager {
                 throw new APIManagementException("User " + username + " does not have permission to view API : "
                         + api.getId().getApiName());
             }
-
             return api;
-
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
+        } catch (APIPersistenceException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     protected String getTenantAwareUsername(String username) {
