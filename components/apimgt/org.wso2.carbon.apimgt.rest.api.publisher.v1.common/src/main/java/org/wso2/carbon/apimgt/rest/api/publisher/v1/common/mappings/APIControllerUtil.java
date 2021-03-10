@@ -75,6 +75,37 @@ public class APIControllerUtil {
     }
 
     /**
+     * Method retrieve the params configurations dependent APIs of an API Product
+     *
+     * @param path Path of the archive project
+     * @return JsonObject of environment parameters of the dependent APIs
+     * @throws IOException If an error occurs when resolving API controller environment parameters
+     */
+    public static JsonObject getDependentAPIsParams(String path) throws IOException {
+        JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(path);
+        JsonObject dependentAPIsParams = null;
+        if (paramsConfigObject != null && paramsConfigObject.has(ImportExportConstants.DEPENDENT_APIS_FIELD)) {
+            dependentAPIsParams = paramsConfigObject.get(ImportExportConstants.DEPENDENT_APIS_FIELD).getAsJsonObject();
+        }
+        return dependentAPIsParams;
+    }
+
+    /**
+     * Method retrieve the params configurations for a dependent API of an API Product specified by the
+     * API directory name
+     *
+     * @param dependentAPIsParams Env params array of dependent APIs of the API Product
+     * @param apiDirectoryName    Dependent API directory name
+     * @return JsonObject of environment parameters of the dependent API
+     */
+    public static JsonObject getDependentAPIParams(JsonObject dependentAPIsParams, String apiDirectoryName) {
+        if (dependentAPIsParams.has(apiDirectoryName)) {
+            return dependentAPIsParams.get(apiDirectoryName).getAsJsonObject();
+        }
+        return null;
+    }
+
+    /**
      * This method will be used to add Extracted environment parameters to the imported Api object
      *
      * @param pathToArchive  Path to API or API Product archive
@@ -850,5 +881,4 @@ public class APIControllerUtil {
             throw new APIManagementException(e);
         }
     }
-
 }

@@ -133,18 +133,20 @@ public class ImportUtils {
     /**
      * This method imports an API.
      *
-     * @param extractedFolderPath Location of the extracted folder of the API
-     * @param importedApiDTO      API DTO of the importing API
-     *                            (This will not be null when importing dependent APIs with API Products)
-     * @param preserveProvider    Decision to keep or replace the provider
-     * @param overwrite           Whether to update the API or not
-     * @param tokenScopes         Scopes of the token
+     * @param extractedFolderPath            Location of the extracted folder of the API
+     * @param importedApiDTO                 API DTO of the importing API
+     *                                       (This will not be null when importing dependent APIs with API Products)
+     * @param preserveProvider               Decision to keep or replace the provider
+     * @param overwrite                      Whether to update the API or not
+     * @param tokenScopes                    Scopes of the token
+     * @param dependentAPIParamsConfigObject Params configuration of an API (this will not be null if a dependent API of an
+     *                                       API product wants to override the parameters)
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-                                Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct,
-                                String[] tokenScopes) throws APIManagementException {
+            Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct, String[] tokenScopes,
+            JsonObject dependentAPIParamsConfigObject) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
@@ -156,6 +158,7 @@ public class ImportUtils {
         GraphqlComplexityInfo graphqlComplexityInfo = null;
         int tenantId = 0;
         JsonArray deploymentInfoArray = null;
+        JsonObject paramsConfigObject;
 
         try {
             if (importedApiDTO == null) {
@@ -163,8 +166,13 @@ public class ImportUtils {
                 importedApiDTO = new Gson().fromJson(jsonObject, APIDTO.class);
             }
 
-            // Get API params Definition as JSON and resolve them
-            JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
+            // If the provided dependent APIs params config is null, it means this happening when importing an API (not
+            // because when importing a dependent API of an API Product). Hence, try to retrieve the definition from
+            // the API folder path
+            paramsConfigObject = (dependentAPIParamsConfigObject != null) ?
+                    dependentAPIParamsConfigObject :
+                    APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
+            // If above the params configurations are not null, then resolve those
             if (paramsConfigObject != null) {
                 importedApiDTO = APIControllerUtil.injectEnvParamsToAPI(importedApiDTO, paramsConfigObject,
                         extractedFolderPath);
@@ -2016,17 +2024,27 @@ public class ImportUtils {
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
             APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
-                                                     String[] tokenScopes)
-            throws IOException, APIManagementException {
+            String[] tokenScopes) throws IOException, APIManagementException {
 
+        JsonObject dependentAPIParamsConfigObject = null;
+        // Retrieve the dependent APIs param configurations from the params file of the API Product
+        JsonObject dependentAPIsParams = APIControllerUtil.getDependentAPIsParams(path);
         String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);
         File[] apisDirectoryListing = apisDirectory.listFiles();
+
         if (apisDirectoryListing != null) {
             for (File apiDirectory : apisDirectoryListing) {
                 String apiDirectoryPath =
                         path + File.separator + ImportExportConstants.APIS_DIRECTORY + File.separator + apiDirectory
                                 .getName();
+
+                // If the param configurations of the dependent APIs are available, the configurations of the current
+                // API in the API directory will be retrieved if available
+                if (dependentAPIsParams != null) {
+                    dependentAPIParamsConfigObject = APIControllerUtil
+                            .getDependentAPIParams(dependentAPIsParams, apiDirectory.getName());
+                }
 
                 JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, isDefaultProviderAllowed,
                         currentUser);
@@ -2045,12 +2063,14 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes);
+                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
+                                    dependentAPIParamsConfigObject);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes);
+                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
+                                dependentAPIParamsConfigObject);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -2065,13 +2085,15 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes);
+                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
+                                dependentAPIParamsConfigObject);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes);
+                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
+                                    dependentAPIParamsConfigObject);
                         }
                     }
                 }

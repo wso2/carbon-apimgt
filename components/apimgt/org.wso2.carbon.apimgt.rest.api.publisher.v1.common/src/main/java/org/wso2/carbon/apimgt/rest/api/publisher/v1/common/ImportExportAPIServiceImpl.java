@@ -187,7 +187,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             throw new APIManagementException(e);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision, overwrite,
-                false, tokenScopes);
+                false, tokenScopes, null);
     }
 
     @Override
