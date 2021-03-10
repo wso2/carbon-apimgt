@@ -8477,7 +8477,7 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to get the labels in a given tenant space
+     * This method is used to get the default policy in a given tenant space
      *
      * @param tenantDomain tenant domain name
      * @return default throttling policy for a given tenant
