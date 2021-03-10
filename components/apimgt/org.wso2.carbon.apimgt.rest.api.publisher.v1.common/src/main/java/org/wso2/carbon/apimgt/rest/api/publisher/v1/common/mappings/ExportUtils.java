@@ -950,7 +950,7 @@ public class ExportUtils {
                 log.debug(
                         "Meta information retrieved successfully for API Product: " + apiProductDtoToReturn.getName());
             }
-            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
+            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_PRODUCT_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API_PRODUCT, apiProductDtoToReturn);
         } catch (APIManagementException e) {
             throw new APIImportExportException(

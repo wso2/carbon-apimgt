@@ -162,7 +162,8 @@ public class ImportUtils {
 
         try {
             if (importedApiDTO == null) {
-                JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName);
+                JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
+                        ImportExportConstants.TYPE_API);
                 importedApiDTO = new Gson().fromJson(jsonObject, APIDTO.class);
             }
 
@@ -563,7 +564,7 @@ public class ImportUtils {
     }
 
     /**
-     * Validate API/API Product configuration (api.yaml/api.json)  and return it.
+     * Validate API/API Product configuration (api/api_product.yaml or api/api_product.json) and return it.
      *
      * @param pathToArchive            Path to the extracted folder
      * @param isDefaultProviderAllowed Preserve provider flag value
@@ -571,25 +572,47 @@ public class ImportUtils {
      * @throws APIMgtAuthorizationFailedException If an error occurs while authorizing the provider
      */
     private static JsonElement retrieveValidatedDTOObject(String pathToArchive, Boolean isDefaultProviderAllowed,
-            String currentUser) throws IOException, APIMgtAuthorizationFailedException {
-
-        JsonObject configObject = retrievedAPIDtoJson(pathToArchive);
-
+            String currentUser, String type) throws IOException, APIMgtAuthorizationFailedException {
+        JsonObject configObject = (StringUtils.equals(type, ImportExportConstants.TYPE_API)) ?
+                retrievedAPIDtoJson(pathToArchive) :
+                retrievedAPIProductDtoJson(pathToArchive);
         configObject = validatePreserveProvider(configObject, isDefaultProviderAllowed, currentUser);
         return configObject;
     }
 
     @NotNull
     private static JsonObject retrievedAPIDtoJson(String pathToArchive) throws IOException {
-
         // Get API Definition as JSON
         String jsonContent =
                 getFileContentAsJson(pathToArchive + ImportExportConstants.API_FILE_LOCATION);
-        String apiVersion;
         if (jsonContent == null) {
-            throw new IOException("Cannot find API definition. api.json or api.yaml should present");
+            throw new IOException("Cannot find API definition. api.yaml or api.json should present");
         }
-        // Retrieving the field "data" in api.yaml/json and convert it to a JSON object for further processing
+        return processRetrievedDefinition(jsonContent);
+    }
+
+    @NotNull
+    private static JsonObject retrievedAPIProductDtoJson(String pathToArchive) throws IOException {
+        // Get API Product Definition as JSON
+        String jsonContent = getFileContentAsJson(pathToArchive + ImportExportConstants.API_PRODUCT_FILE_LOCATION);
+        if (jsonContent == null) {
+            throw new IOException(
+                    "Cannot find API Product definition. api_product.yaml or api_product.json should present");
+        }
+        return processRetrievedDefinition(jsonContent);
+    }
+
+    /**
+     * Process the retrieved api.yaml or api_product.yaml content
+     *
+     * @param jsonContent Path to the extracted folder
+     * @return JsonObject of processed api.yaml or api_product.yaml content
+     * @throws IOException If an error occurs when the API/API Product name or version not provided
+     */
+    private static JsonObject processRetrievedDefinition(String jsonContent) throws IOException {
+        String apiVersion;
+        // Retrieving the field "data" in api.yaml/json or api_product.yaml/json and
+        // convert it to a JSON object for further processing
         JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
         JsonObject configObject = configElement.getAsJsonObject();
 
@@ -605,7 +628,7 @@ public class ImportUtils {
             apiVersion = ImportExportConstants.DEFAULT_API_PRODUCT_VERSION;
         }
 
-        // Remove spaces of API Name/version if present
+        // Remove spaces of API/API Product name/version if present
         if (apiName != null && apiVersion != null) {
             configObject.remove(apiName);
             configObject.addProperty(ImportExportConstants.API_NAME_ELEMENT, apiName.replace(" ", ""));
@@ -614,7 +637,7 @@ public class ImportUtils {
                 configObject.addProperty(ImportExportConstants.VERSION_ELEMENT, apiVersion.replace(" ", ""));
             }
         } else {
-            throw new IOException("API name and version must be provided in api.yaml");
+            throw new IOException("API/API Product name and version must be provided in API/API Product definition");
         }
         return configObject;
     }
@@ -627,7 +650,7 @@ public class ImportUtils {
 
     public static APIProductDTO retrieveAPIProductDto(String pathToArchive) throws IOException {
 
-        JsonObject jsonObject = retrievedAPIDtoJson(pathToArchive);
+        JsonObject jsonObject = retrievedAPIProductDtoJson(pathToArchive);
 
         return new Gson().fromJson(jsonObject, APIProductDTO.class);
     }
@@ -1799,7 +1822,8 @@ public class ImportUtils {
         JsonArray deploymentInfoArray = null;
 
         try {
-            JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName);
+            JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
+                    ImportExportConstants.TYPE_API_PRODUCT);
             APIProductDTO importedApiProductDTO = new Gson().fromJson(jsonObject, APIProductDTO.class);
 
             // If the provided dependent APIs params config is null, it means this happening when importing an API (not
@@ -1963,7 +1987,8 @@ public class ImportUtils {
                 String apiDirectoryPath =
                         path + File.separator + ImportExportConstants.APIS_DIRECTORY + File.separator + apiDirectory
                                 .getName();
-                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, preserveProvider, currentUser);
+                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, preserveProvider, currentUser,
+                        ImportExportConstants.TYPE_API);
                 APIDTO apiDto = new Gson().fromJson(jsonObject, APIDTO.class);
                 String apiName = apiDto.getName();
                 String apiVersion = apiDto.getVersion();
@@ -2064,7 +2089,7 @@ public class ImportUtils {
                 }
 
                 JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, isDefaultProviderAllowed,
-                        currentUser);
+                        currentUser, ImportExportConstants.TYPE_API);
                 APIDTO apiDtoToImport = new Gson().fromJson(jsonObject, APIDTO.class);
                 API importedApi = null;
                 String apiName = apiDtoToImport.getName();

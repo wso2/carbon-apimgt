@@ -30,6 +30,9 @@ public final class ImportExportConstants {
     // Location of the API definition file
     public static final String API_FILE_LOCATION = File.separator + "api";
 
+    // Location of the API definition file
+    public static final String API_PRODUCT_FILE_LOCATION = File.separator + "api_product";
+
     // Location of the definitions such as swagger, graphql schema etc
     public static final String DEFINITIONS_DIRECTORY = "Definitions";
 
