@@ -207,6 +207,8 @@ public final class APIImportUtil {
 
                 // Since the overwrite should be done, the imported API Identifier should be equal to the target API Identifier
                 importedApi.setId(targetApi.getId());
+                // Set the UUID of the imported API from the targetAPI.
+                importedApi.setUUID(targetApi.getUUID());
             } else {
                 if (apiProvider.isAPIAvailable(importedApi.getId())
                         || apiProvider.isApiNameWithDifferentCaseExist(apiName)) {
