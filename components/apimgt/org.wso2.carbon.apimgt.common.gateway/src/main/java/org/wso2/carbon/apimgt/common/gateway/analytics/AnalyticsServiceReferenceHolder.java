@@ -46,7 +46,7 @@ public class AnalyticsServiceReferenceHolder {
     public void setConfigurations(Map<String, String> configurations) {
         this.configurations = configurations;
         // initialize data publisher at server start up
-        AnalyticsDataPublisher.getInstance().initialize();
-        log.info("Analytics data publisher initialized.");
+        AnalyticsDataPublisher.getInstance().initialize(configurations);
+        log.debug("Analytics data publisher initialized.");
     }
 }
