@@ -210,8 +210,6 @@ function AddEdit(props) {
     useEffect(() => {
         if (isEdit) {
             restApi.subscriptionThrottlingPolicyGet(params.id).then((result) => {
-                console.log('edit state');
-                console.log(result.body);
                 let requestCountEdit = '';
                 let dataAmountEdit = '';
                 let timeUnitEdit = 'min';
@@ -236,7 +234,7 @@ function AddEdit(props) {
                     timeUnitEdit = result.body.defaultLimit.eventCount.timeUnit;
                     typeEdit = result.body.defaultLimit.type;
                 }
-                setValidRoles(result.body.permissions.roles);
+                setValidRoles(result.body.permissions && result.body.permissions.roles ? result.body.permissions.roles : []);
                 const editState = {
                     policyName: result.body.policyName,
                     description: result.body.description,
