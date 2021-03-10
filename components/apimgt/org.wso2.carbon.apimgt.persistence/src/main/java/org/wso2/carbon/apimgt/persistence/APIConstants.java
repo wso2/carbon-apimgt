@@ -32,7 +32,6 @@ public final class APIConstants {
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
-    public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
     public static final String API_OVERVIEW_CONTEXT_TEMPLATE = "overview_contextTemplate";
     public static final String API_OVERVIEW_DESCRIPTION = "overview_description";

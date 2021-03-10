@@ -6074,6 +6074,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateDefaultVersion(api);
                     api = addTiersToAPI(api, requestedTenantDomain);
                     return new ApiTypeWrapper(api);
                 }

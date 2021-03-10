@@ -51,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObserver {
     private static final Log log = LogFactory.getLog(TenantServiceCreator.class);
     private String resourceMisMatchSequenceName = "_resource_mismatch_handler_";
-    private static final String blockingSequence = "_auth_failure_handler_";
+    private static final String blockingSequence = "_block_api_handler_";
     private String authFailureHandlerSequenceName = "_auth_failure_handler_";
     private String graphqlAuthFailureHandlerSequenceName = "_graphql_failure_handler_";
     private String sandboxKeyErrorSequenceName = "_sandbox_key_error_";
@@ -142,10 +142,10 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                     MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + blockingSequence + ".xml";
             File blockingSequenceXml = new File(blockingSequenceLocation);
             if (!blockingSequenceXml.exists()) {
-                FileUtils.copyFile(new File(synapseConfigRootPath + blockingSequenceLocation + ".xml"),
+                FileUtils.copyFile(new File(synapseConfigRootPath + blockingSequence + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
-                                blockingSequenceLocation + ".xml"));
+                                blockingSequence + ".xml"));
             }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);

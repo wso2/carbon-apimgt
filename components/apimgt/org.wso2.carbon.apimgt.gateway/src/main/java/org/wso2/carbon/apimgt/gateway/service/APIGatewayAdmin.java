@@ -768,10 +768,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             log.debug("Start to deploy Default API Definition" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
         }
 
-        // Add Default API
-        if (StringUtils.isNotEmpty(gatewayAPIDTO.getDefaultAPIDefinition())) {
-            restapiAdminServiceProxy.addApi(gatewayAPIDTO.getDefaultAPIDefinition());
-        }
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " Default API Definition deployed");
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + "Deployed successfully");

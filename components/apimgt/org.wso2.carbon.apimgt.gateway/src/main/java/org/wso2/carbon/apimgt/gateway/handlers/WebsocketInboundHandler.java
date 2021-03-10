@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnal
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -78,11 +79,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.cache.Cache;
 
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.DEFAULT_RESOURCE_NAME;
@@ -108,8 +105,10 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private String apiName;
     private String keyType;
     private API api;
+    private String electedRoute;
     private AuthenticationContext authContext;
     private WebSocketAnalyticsMetricsHandler metricsHandler;
+    private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
 
     public WebsocketInboundHandler() {
         initializeDataPublisher();
@@ -595,26 +594,16 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             throws WebSocketApiException, AxisFault, URISyntaxException {
 
         MessageContext synCtx = getMessageContext(tenantDomain);
-        API selectedApi = getApi(fullRequestPath, synCtx);
-        if (selectedApi == null) {
+        api = getApi(fullRequestPath, synCtx);
+        if (api == null) {
             handleError(ctx, "No matching API found to dispatch the request");
             return null;
         }
-        if (StringUtils.EMPTY.equals(selectedApi.getVersion())) {
-            // this is a call to default api
-            findAndUpdateApiName(selectedApi);
-            selectedApi = synCtx.getConfiguration().getAPI(apiName);
-            if (selectedApi == null) {
-                handleError(ctx, "API missing for default version");
-                return null;
-            }
-            reConstructFullUriWithVersion(selectedApi.getContext(), req, synCtx);
-        }
-        api = selectedApi;
-        apiContext = selectedApi.getContext();
+        reConstructFullUriWithVersion(req, synCtx);
+        apiContext = api.getContext();
         Resource selectedResource = null;
-        Utils.setSubRequestPath(selectedApi, synCtx);
-        Set<Resource> acceptableResources = new LinkedHashSet<>(Arrays.asList(selectedApi.getResources()));
+        Utils.setSubRequestPath(api, synCtx);
+        Set<Resource> acceptableResources = new LinkedHashSet<>(Arrays.asList(api.getResources()));
         if (!acceptableResources.isEmpty()) {
             for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
                 Resource resource = dispatcher.findResource(synCtx, acceptableResources);
@@ -642,38 +631,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         return resource;
     }
 
-    private void findAndUpdateApiName(API defaultAPI) {
-
-        Set<Resource> resources = new LinkedHashSet<>(Arrays.asList(defaultAPI.getResources()));
-        for (Resource resource : resources) {
-            String dispatchPath = resource.getDispatcherHelper().getString();
-            if (dispatchPath.startsWith(DEFAULT_RESOURCE_NAME)) {
-                version = dispatchPath.substring(DEFAULT_RESOURCE_NAME.length());
-                break;
-            }
-        }
-        apiName = apiName + ":v" + version;
-        if (log.isDebugEnabled()) {
-            log.debug("Name of API corresponding to default invocation : " + apiName);
-            log.debug("Version of API corresponding to default invocation : " + version);
-        }
-    }
-
-    private void reConstructFullUriWithVersion(String apiContext, FullHttpRequest req, MessageContext synCtx) {
-
-        StringBuilder newUrl = new StringBuilder();
-        int versionInsertionIndex = apiContext.split(URL_SEPARATOR).length - 2; // leaving preceding empty part
-        String[] uriParts = fullRequestPath.split(URL_SEPARATOR);
-        for (int index = 0; index < uriParts.length; index++) {
-            newUrl.append(URL_SEPARATOR);
-            newUrl.append(uriParts[index]);
-            if (index == versionInsertionIndex) {
-                newUrl.append(URL_SEPARATOR);
-                newUrl.append(version);
-            }
-        }
-        // updating url for request dispatch
-        fullRequestPath = newUrl.toString().substring(1);  // removing additional '/' at the beginning
+    private void reConstructFullUriWithVersion(FullHttpRequest req, MessageContext synCtx) {
+        fullRequestPath = fullRequestPath.replace(electedRoute, electedAPI.getContext());
         req.setUri(fullRequestPath);
         org.apache.axis2.context.MessageContext axis2MsgCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         axis2MsgCtx.setProperty(Constants.Configuration.TRANSPORT_IN_URL, fullRequestPath);
@@ -702,20 +661,19 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @return String The api name
      */
     private API getApi(String requestPath, MessageContext synCtx) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieving apis for inbound : " + inboundName);
-        }
-        for (API apiObject : synCtx.getEnvironment().getSynapseConfiguration().getAPIs(inboundName)) {
-            if (ApiUtils.matchApiPath(requestPath, apiObject.getContext())) {
-                apiName = apiObject.getName();
-                if (apiObject.getVersionStrategy().getVersion() != null && !"".equals(apiObject.getVersionStrategy().
-                        getVersion())) {
-                    apiName = apiName + ":v" + apiObject.getVersionStrategy().getVersion();
-                }
-                version = apiObject.getVersion();
-                return apiObject;
-            }
+        TreeMap<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> selectedAPIS =
+                Utils.getSelectedAPIList(requestPath, tenantDomain);
+        if (selectedAPIS.size() > 0) {
+            String selectedPath = selectedAPIS.firstKey();
+            org.wso2.carbon.apimgt.keymgt.model.entity.API selectedAPI = selectedAPIS.get(selectedPath);
+            API api = synCtx.getEnvironment().getSynapseConfiguration()
+                    .getAPI(GatewayUtils.getQualifiedApiName(selectedAPI.getApiName(),
+                            selectedAPI.getApiVersion()));
+            version = selectedAPI.getApiVersion();
+            apiName = selectedAPI.getApiName();
+            electedRoute = selectedPath;
+            electedAPI = selectedAPI;
+            return api;
         }
         return null;
     }

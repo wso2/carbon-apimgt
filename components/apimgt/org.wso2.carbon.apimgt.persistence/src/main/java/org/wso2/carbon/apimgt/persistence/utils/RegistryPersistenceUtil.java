@@ -126,7 +126,6 @@ public class RegistryPersistenceUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(api.isDefaultVersion()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
@@ -722,8 +721,6 @@ public class RegistryPersistenceUtil {
             api.setEnableStore(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENABLE_STORE)));
             api.setTestKey(artifact.getAttribute(APIConstants.API_OVERVIEW_TESTKEY));
 
-            api.setDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(
-                    APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             Set<String> tags = new HashSet<String>();
             Tag[] tag = registry.getTags(artifactPath);
             for (Tag tag1 : tag) {
