@@ -26,7 +26,7 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import ScreenLockLandscapeIcon from '@material-ui/icons/ScreenLockLandscape';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
@@ -260,7 +260,7 @@ class Details extends Component {
      * @memberof Details
      */
     render() {
-        const { classes, match, theme } = this.props;
+        const { classes, match, theme, intl, } = this.props;
         const { notFound, application } = this.state;
         const pathPrefix = '/applications/' + match.params.application_uuid;
         const redirectUrl = pathPrefix + '/overview';
@@ -284,7 +284,12 @@ class Details extends Component {
                 <Helmet>
                     <title>{`${prefix} ${application.name}${sufix}`}</title>
                 </Helmet>
-                <div
+                <nav
+                    role="navigation"
+                    aria-label={intl.formatMessage({
+                        id: 'Applications.Details.index.secondary.navigation',
+                        defaultMessage: 'Secondary Navigation'
+                    })}
                     className={classNames(
                         classes.LeftMenu,
                         {
@@ -355,7 +360,7 @@ class Details extends Component {
                         route='subscriptions'
                         to={pathPrefix + '/subscriptions'}
                         open={open} />
-                </div>
+                </nav>
                 <div className={classes.content}>
                     <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
                     <div
@@ -411,6 +416,9 @@ Details.propTypes = {
     history: PropTypes.shape({
         push: PropTypes.func.isRequired,
     }).isRequired,
+    intl: PropTypes.shape({
+        formatMessage: PropTypes.func,
+    }).isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(Details);
+export default withStyles(styles, { withTheme: true })(injectIntl(Details));

@@ -101,7 +101,7 @@ const styles = (theme) => ({
         paddingLeft: 12,
         [theme.breakpoints.down('sm')]: {
             paddingLeft: 0,
-            color: '#cccccc',
+            color: theme.palette.grey[500],
         }
     },
 });
@@ -161,7 +161,7 @@ function LeftMenuItem(props) {
                 )}
                 to={to}
                 style={{ backgroundColor: activeBackground }}
-                title={props.text}
+                title={text}
             >
                 {
                     // If the icon pro ( which is coming from the React Material library )
