@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -42,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.APIAndAPIProductCommonUtil
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -198,9 +201,29 @@ public class APIControllerUtil {
         // handle available subscription policies
         JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
         if (policies != null && !policies.isJsonNull()) {
-            handleSubscriptionPolicies(policies, importedApiDto);
+            handleSubscriptionPolicies(policies, importedApiDto, null);
         }
         return importedApiDto;
+    }
+
+    /**
+     * This method will be used to add extracted environment parameters to the imported API Product DTO object
+     *
+     * @param importedApiProductDto API Product DTO object to be imported
+     * @param envParams             Env params object with required parameters
+     * @return APIProductDTO Updated API Product DTO Object
+     */
+    public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams) {
+
+        if (envParams == null || envParams.isJsonNull()) {
+            return importedApiProductDto;
+        }
+        // handle available subscription policies
+        JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
+        if (policies != null && !policies.isJsonNull()) {
+            handleSubscriptionPolicies(policies, null, importedApiProductDto);
+        }
+        return importedApiProductDto;
     }
 
     /**
@@ -265,10 +288,12 @@ public class APIControllerUtil {
     /**
      * This method will add the defined available subscription policies in an environment to the particular imported API
      *
-     * @param importedApiDto API DTO object to be updated
-     * @param policies       policies with the values
+     * @param importedApiDto        API DTO object to be updated
+     * @param importedApiProductDto API Product DTO object to be updated
+     * @param policies              policies with the values
      */
-    private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto) {
+    private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto,
+            APIProductDTO importedApiProductDto) {
         JsonArray definedPolicies = policies.getAsJsonArray();
         List<String> policiesListToAdd = new ArrayList<>();
         for (JsonElement definedPolicy : definedPolicies) {
@@ -283,7 +308,11 @@ public class APIControllerUtil {
         // Hence, this if statement will prevent setting the policies in api.yaml to an empty array if the policies
         // are not properly defined in the params file
         if (policiesListToAdd.size() > 0) {
-            importedApiDto.setPolicies(policiesListToAdd);
+            if (importedApiDto != null) {
+                importedApiDto.setPolicies(policiesListToAdd);
+            } else {
+                importedApiProductDto.setPolicies(policiesListToAdd);
+            }
         }
     }
 

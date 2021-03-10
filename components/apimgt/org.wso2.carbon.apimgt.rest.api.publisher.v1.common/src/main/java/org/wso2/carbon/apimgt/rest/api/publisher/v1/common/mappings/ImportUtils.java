@@ -1796,10 +1796,24 @@ public class ImportUtils {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
         APIProduct importedApiProduct = null;
+        JsonArray deploymentInfoArray = null;
 
         try {
             JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName);
             APIProductDTO importedApiProductDTO = new Gson().fromJson(jsonObject, APIProductDTO.class);
+
+            // If the provided dependent APIs params config is null, it means this happening when importing an API (not
+            // because when importing a dependent API of an API Product). Hence, try to retrieve the definition from
+            // the API folder path
+            JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
+            // If above the params configurations are not null, then resolve those
+            if (paramsConfigObject != null) {
+                importedApiProductDTO = APIControllerUtil.injectEnvParamsToAPIProduct(importedApiProductDTO, paramsConfigObject);
+                JsonElement deploymentsParam = paramsConfigObject.get(ImportExportConstants.DEPLOYMENT_ENVIRONMENTS);
+                if (deploymentsParam != null && !deploymentsParam.isJsonNull()) {
+                    deploymentInfoArray = deploymentsParam.getAsJsonArray();
+                }
+            }
 
             APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiProductDTO.getProvider());
 
@@ -1849,7 +1863,10 @@ public class ImportUtils {
             addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
                     importedApiProduct.getId().getProviderName());
 
-            JsonArray deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
+            if (deploymentInfoArray == null) {
+                // If the params have not overwritten the deployment environments, yaml file will be read
+                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
+            }
             List<APIRevisionDeployment> apiProductRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
                     currentTenantDomain, apiProvider);
             if (apiProductRevisionDeployments.size() > 0) {
