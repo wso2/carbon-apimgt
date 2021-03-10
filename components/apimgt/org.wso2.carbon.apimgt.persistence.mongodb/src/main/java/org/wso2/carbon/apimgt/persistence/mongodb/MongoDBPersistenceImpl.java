@@ -695,6 +695,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(org.getName());
         APIDocumentation apiDocumentation = DocumentationMapper.INSTANCE.toAPIDocumentation(documentation);
         ObjectId docId = apiDocumentation.getId();
+        APIDocumentation mongodbAPIDocumentation = getMongodbAPIDocumentation(org, apiId, docId.toHexString());
+        if (mongodbAPIDocumentation != null) {
+            apiDocumentation.setTextContent(mongodbAPIDocumentation.getTextContent());
+            apiDocumentation.setGridFsReference(mongodbAPIDocumentation.getGridFsReference());
+        }
         FindOneAndUpdateOptions options = new FindOneAndUpdateOptions();
         options.returnDocument(ReturnDocument.AFTER);
         MongoDBPublisherAPI updatedAPI = collection.findOneAndUpdate(
@@ -717,6 +722,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public Documentation getDocumentation(Organization org, String apiId, String docId)
             throws DocumentationPersistenceException {
+
+        return DocumentationMapper.INSTANCE.toDocumentation(getMongodbAPIDocumentation(org, apiId, docId));
+    }
+
+    private APIDocumentation getMongodbAPIDocumentation(Organization org, String apiId, String docId) {
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(org.getName());
         MongoCursor<MongoDBPublisherAPI> cursor = collection.aggregate(Arrays.asList(
                 match(eq("_id", new ObjectId(apiId))),
@@ -731,7 +741,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             MongoDBPublisherAPI mongoDBAPIDocument = cursor.next();
             APIDocumentation apiDocumentation = (APIDocumentation) mongoDBAPIDocument.getDocumentationList()
                     .toArray()[0];
-            return DocumentationMapper.INSTANCE.toDocumentation(apiDocumentation);
+            return apiDocumentation;
         }
         return null;
     }
