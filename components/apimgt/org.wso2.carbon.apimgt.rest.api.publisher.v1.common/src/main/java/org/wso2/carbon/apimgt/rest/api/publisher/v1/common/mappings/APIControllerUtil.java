@@ -65,44 +65,13 @@ public class APIControllerUtil {
     public static JsonObject resolveAPIControllerEnvParams(String pathToArchive) throws IOException {
 
         String jsonParamsContent;
-        jsonParamsContent = getParamsDefinitionAsJSON(pathToArchive);
+        jsonParamsContent = ImportUtils
+                .getFileContentAsJson(pathToArchive + ImportExportConstants.INTERMEDIATE_PARAMS_FILE_LOCATION);
         if (StringUtils.isEmpty(jsonParamsContent)) {
             return null;
         }
         JsonElement paramsElement = new JsonParser().parse(jsonParamsContent);
         return paramsElement.getAsJsonObject();
-    }
-
-    /**
-     * Retrieve API params file as JSON.
-     *
-     * @param pathToArchive Path to API or API Product archive
-     * @return String JsonString of environment parameters
-     * @throws IOException If an error occurs while reading the file
-     */
-    public static String getParamsDefinitionAsJSON(String pathToArchive) throws IOException {
-
-        String jsonContent = null;
-        String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_API_PARAMS_FILE_LOCATION;
-        String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_API_PARAMS_FILE_LOCATION;
-
-        // load yaml representation first,if it is present
-        if (CommonUtil.checkFileExistence(pathToYamlFile)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Found api params definition file " + pathToYamlFile);
-            }
-            String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
-            if (StringUtils.isNotEmpty(yamlContent)) {
-                jsonContent = CommonUtil.yamlToJson(yamlContent);
-            }
-        } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-            // load as a json fallback
-            if (log.isDebugEnabled()) {
-                log.debug("Found api params definition file " + pathToJsonFile);
-            }
-            jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
-        }
-        return jsonContent;
     }
 
     /**
@@ -123,7 +92,7 @@ public class APIControllerUtil {
 
         API importedApi = APIMappingUtil.fromDTOtoAPI(importedApiDto, importedApiDto.getProvider());
 
-        // if endpointType field is not specified in the api_params.yaml, it will be considered as HTTP/REST
+        // if endpointType field is not specified in the params file, it will be considered as HTTP/REST
         JsonElement endpointTypeElement = envParams.get(ImportExportConstants.ENDPOINT_TYPE_FIELD);
         String endpointType = null;
         if (endpointTypeElement != null) {
@@ -139,7 +108,7 @@ public class APIControllerUtil {
         try {
             endpointConfig = mapper.readValue(jsonObject.toString(), HashMap.class);
         } catch (JsonProcessingException e) {
-            String errorMessage = "Error while reading endpointConfig information in the api_params.yaml.";
+            String errorMessage = "Error while reading endpointConfig information in the params file.";
             throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
         }
         importedApiDto.setEndpointConfig(endpointConfig);
@@ -212,7 +181,7 @@ public class APIControllerUtil {
      */
     private static void handleEndpointSecurityConfigs(JsonObject envParams, APIDTO importedApiDto)
             throws APIManagementException {
-        // If the user has set (either true or false) the enabled field under security in api_params.yaml,
+        // If the user has set (either true or false) the enabled field under security in the params file,
         // the following code should be executed.
         JsonObject security = envParams.getAsJsonObject(ImportExportConstants.ENDPOINT_SECURITY_FIELD);
         if (security == null) {
@@ -225,22 +194,22 @@ public class APIControllerUtil {
 
         // If endpoint security is enabled
         if (isSecurityEnabled) {
-            // Check whether the username, password and type fields have set in api_params.yaml
+            // Check whether the username, password and type fields have set in the params file
             JsonElement username = security.get(ImportExportConstants.ENDPOINT_UT_USERNAME);
             JsonElement password = security.get(ImportExportConstants.ENDPOINT_UT_PASSWORD);
             JsonElement type = security.get(ImportExportConstants.ENDPOINT_SECURITY_TYPE);
 
             if (username == null) {
                 throw new APIManagementException("You have enabled endpoint security but the username is not found "
-                        + "in the api_params.yaml. Please specify username field for and continue...",
+                        + "in the params file. Please specify username field for and continue...",
                         ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else if (password == null) {
                 throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for and continue...",
+                        + "in the params file. Please specify password field for and continue...",
                         ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else if (type == null) {
                 throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for and continue...",
+                        + "in the params file. Please specify password field for and continue...",
                         ExceptionCodes.ERROR_READING_PARAMS_FILE);
             } else {
                 apiEndpointSecurityDTO.setPassword(password.toString());
@@ -252,7 +221,7 @@ public class APIControllerUtil {
                     apiEndpointSecurityDTO.setType(APIEndpointSecurityDTO.TypeEnum.BASIC);
                 } else {
                     // If the type is not either basic or digest, return an error
-                    throw new APIManagementException("Invalid endpoint security type found in the api_params.yaml. "
+                    throw new APIManagementException("Invalid endpoint security type found in the params file. "
                             + "Should be either basic or digest"
                             + "Please specify correct security types field for and continue...",
                             ExceptionCodes.ERROR_READING_PARAMS_FILE);
@@ -279,9 +248,9 @@ public class APIControllerUtil {
                 }
             }
         }
-        // If the policies are not defined in api_params.yaml, the values in the api.yaml should be considered.
+        // If the policies are not defined in params file, the values in the api.yaml should be considered.
         // Hence, this if statement will prevent setting the policies in api.yaml to an empty array if the policies
-        // are not properly defined in the api_params.yaml
+        // are not properly defined in the params file
         if (policiesListToAdd.size() > 0) {
             importedApiDto.setPolicies(policiesListToAdd);
         }
