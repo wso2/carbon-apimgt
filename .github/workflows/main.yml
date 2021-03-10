@@ -31,7 +31,6 @@ jobs:
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
       - name: Build carbon-apimgt with Tests, skipping AspectJ
-        continue-on-error: true
         run: mvn clean install --file pom.xml -Dskip.aspectj=true
 
   build-product:
@@ -101,7 +100,7 @@ jobs:
         with:
           path: reports
       - name: Publish Test Report
-        if: ${{ always() }}
+        if: always()
         uses: malinthaprasan/action-surefire-report@v1
         with:
           report_paths: 'reports/**/TEST-*.xml'
