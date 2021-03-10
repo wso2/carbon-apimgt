@@ -369,5 +369,5 @@ public class DevPortalAPI extends DevPortalAPIInfo {
      This should not return all the other tenants available for subscrition in the store. So this property should not be
       be returned in api get response*/
 
-    private Set<String> accessControlRoles;
+    /* private Set<String> accessControlRoles; // dev portal doesn't need this */
 }

@@ -453,7 +453,6 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         try {
-            String apiTenantDomain = getTenantDomain(identifier);
             String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(identifier.getUUID());
             Organization org = new Organization(organizationId);
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, identifier.getUUID());
@@ -470,15 +469,10 @@ public abstract class AbstractAPIManager implements APIManager {
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
                 return api;
             }
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-                throw new APIManagementException("User " + username + " does not have permission to view API : "
-                        + api.getId().getApiName());
-            }
             return api;
         } catch (APIPersistenceException e) {
-            e.printStackTrace();
+            throw new APIManagementException("Error while retrieving the api " + e);
         }
-        return null;
     }
 
     protected String getTenantAwareUsername(String username) {

@@ -5265,10 +5265,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             if (identifier == null || !isAccessControlRestrictionEnabled) {
                 if (!isAccessControlRestrictionEnabled && log.isDebugEnabled() && identifier != null) {
-                    log.debug(
-                            "Publisher access control restriction is not enabled. Hence the API/Product " + identifier.getName()
-                                    + " should not be checked for further permission. Registry permission check "
-                                    + "is sufficient");
+                    log.debug("Publisher access control restriction is not enabled. Hence the API/Product " +
+                            identifier.getName() + " should not be checked for further permission. Registry permission " +
+                            "check is sufficient");
                 }
                 return;
             }
@@ -5282,7 +5281,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 return;
             }
-
             String visibleRoles = devPortalApi.getVisibleRoles();
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
             if (visibleRoles != null) {
@@ -5307,9 +5305,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             + "has a store visibility  restriction");
                 }
                 throw new APIMgtAuthorizationFailedException(
-                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view  the " + identifier + " " + identifier);
+                        APIConstants.UN_AUTHORIZED_ERROR_MESSAGE + " view  the " + identifier);
             }
-
         } catch (APIPersistenceException e) {
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
