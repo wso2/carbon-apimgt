@@ -24,7 +24,7 @@ import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
+import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.analytics.Constants;
 
 import java.util.Map;
@@ -49,15 +49,14 @@ public class AnalyticsDataPublisher {
             synchronized (AnalyticsDataPublisher.class) {
                 if (instance == null) {
                     instance = new AnalyticsDataPublisher();
-                    instance.init();
                 }
             }
         }
         return instance;
     }
 
-    private void init() {
-        Map<String, String> configs = AnalyticsConfigurationHolder.getInstance().getConfigurations();
+    public void initialize() {
+        Map<String, String> configs = AnalyticsServiceReferenceHolder.getInstance().getConfigurations();
         String reporterClass = configs.get("publisher.reporter.class");
         try {
             MetricReporter metricReporter;
@@ -77,10 +76,16 @@ public class AnalyticsDataPublisher {
     }
 
     public CounterMetric getSuccessMetricReporter() {
+        if (instance == null) {
+            throw new RuntimeException("AnalyticsDataPublisher is not initialized.");
+        }
         return successMetricReporter;
     }
 
     public CounterMetric getFaultyMetricReporter() {
+        if (instance == null) {
+            throw new RuntimeException("AnalyticsDataPublisher is not initialized.");
+        }
         return faultyMetricReporter;
     }
 }
