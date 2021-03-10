@@ -5275,7 +5275,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String orgId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(uuid);
             Organization org = new Organization(orgId);
             DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org , uuid);
-            if (devPortalApi.getAccessControl().equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+            if (APIConstants.NO_ACCESS_CONTROL.equals(devPortalApi.getAccessControl())) {
                 if (log.isDebugEnabled()) {
                     log.debug(identifier + " does not have any access control restriction");
                 }
