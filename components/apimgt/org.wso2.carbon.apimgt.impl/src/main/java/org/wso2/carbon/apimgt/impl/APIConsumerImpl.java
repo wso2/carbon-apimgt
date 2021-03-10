@@ -5756,8 +5756,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
             }
             if (StringUtils.isEmpty(host)) {
-                handleResourceNotFoundException("Could not find a deployment in provided environment '"
-                        + environmentName + "'");
+                // returns empty server urls
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, "");
+                return hostsWithSchemes;
             }
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
