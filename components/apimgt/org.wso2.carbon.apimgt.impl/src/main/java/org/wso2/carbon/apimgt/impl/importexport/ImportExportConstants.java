@@ -176,7 +176,9 @@ public final class ImportExportConstants {
 
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
 
-    public static final String APIM_VERSION = "v4";
+    public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
+
+    public static final String APIM_VERSION = "v4.0.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
