@@ -121,7 +121,7 @@ public final class RestApiConstants {
     public static final String SERVER_PASSWORD = "password";
 
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
-    public static final String RESOURCE_PATH_TIERS = "/tiers";
+    public static final String RESOURCE_PATH_TIERS = "/throttling-policies";
     public static final String RESOURCE_PATH_TIERS_API = RESOURCE_PATH_TIERS + "/api";
     public static final String RESOURCE_PATH_TIERS_APPLICATION = RESOURCE_PATH_TIERS + "/application";
     public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";
