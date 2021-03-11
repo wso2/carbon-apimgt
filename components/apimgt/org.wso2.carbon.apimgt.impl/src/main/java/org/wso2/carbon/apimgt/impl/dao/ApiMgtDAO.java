@@ -8040,11 +8040,13 @@ public class ApiMgtDAO {
                         prepStmt.setString(3, identifier.getVersion());
                         if (parentCommentID != null) {
                             prepStmt.setString(4, parentCommentID);
-                            prepStmt.setInt(5, limit);
-                            prepStmt.setInt(6, offset);
+                            // temporary commented below two lines as mssql doesn't support limit and offset
+//                            prepStmt.setInt(5, limit);
+//                            prepStmt.setInt(6, offset);
                         } else {
-                            prepStmt.setInt(4, limit);
-                            prepStmt.setInt(5, offset);
+                            // temporary commented below two lines as mssql doesn't support limit and offset
+//                            prepStmt.setInt(4, limit);
+//                            prepStmt.setInt(5, offset);
                         }
                         try (ResultSet resultSet = prepStmt.executeQuery()) {
                             while (resultSet.next()) {
@@ -8062,6 +8064,12 @@ public class ApiMgtDAO {
                                         connection));
                                 list.add(comment);
                             }
+                                if (limit+offset>total){
+                                    list = list.subList(offset, total);
+                                } else {
+                                    list = list.subList(offset, limit+offset);
+                                }
+
                         }
                     }
                 } else {

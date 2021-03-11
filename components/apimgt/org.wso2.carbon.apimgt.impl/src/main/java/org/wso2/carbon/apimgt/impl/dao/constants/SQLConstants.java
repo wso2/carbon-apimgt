@@ -2331,7 +2331,7 @@ public class SQLConstants {
                 "AND API.API_NAME = ? " +
                 "AND API.API_VERSION  = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
-                "AND PARENT_COMMENT_ID = ? LIMIT ? OFFSET ?";
+                "AND PARENT_COMMENT_ID = ?";
 
     public static final String GET_ROOT_COMMENTS_SQL =
             "SELECT " +
@@ -2352,7 +2352,7 @@ public class SQLConstants {
                 "AND API.API_NAME = ? " +
                 "AND API.API_VERSION  = ? " +
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
-                "AND PARENT_COMMENT_ID IS NULL LIMIT ? OFFSET ?";
+                "AND PARENT_COMMENT_ID IS NULL";
 
     public static final String GET_IDS_OF_REPLIES_SQL =
             "SELECT " +
