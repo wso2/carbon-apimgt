@@ -8477,6 +8477,30 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get the default policy in a given tenant space
+     *
+     * @param tenantDomain tenant domain name
+     * @return default throttling policy for a given tenant
+     */
+    public static String getDefaultThrottlingPolicy(String tenantDomain) {
+        String defaultTier = APIConstants.UNLIMITED_TIER;
+        if (!isEnabledUnlimitedTier()) {
+            // Set an available value if the Unlimited policy is disabled
+            try {
+                Map<String, Tier> tierMap = getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                if (tierMap.size() > 0) {
+                    defaultTier = tierMap.keySet().toArray()[0].toString();
+                } else {
+                    log.error("No throttle policies available in the tenant " + tenantDomain);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while getting throttle policies for tenant " + tenantDomain);
+            }
+        }
+        return defaultTier;
+    }
+
+    /**
      * This method is used to get the labels in a given tenant space
      *
      * @param tenantDomain tenant domain name

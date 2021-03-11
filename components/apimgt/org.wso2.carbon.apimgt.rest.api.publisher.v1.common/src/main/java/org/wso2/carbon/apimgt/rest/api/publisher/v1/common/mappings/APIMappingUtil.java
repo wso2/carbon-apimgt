@@ -2089,6 +2089,9 @@ public class APIMappingUtil {
             supportedMethods = APIConstants.HTTP_DEFAULT_METHODS;
         }
 
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String defaultThrottlingPolicy = APIUtil.getDefaultThrottlingPolicy(tenantDomain);
+
         for (String verb : supportedMethods) {
             APIOperationsDTO operationsDTO = new APIOperationsDTO();
             if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
@@ -2097,7 +2100,7 @@ public class APIMappingUtil {
                 operationsDTO.setTarget("/*");
             }
             operationsDTO.setVerb(verb);
-            operationsDTO.setThrottlingPolicy(APIConstants.UNLIMITED_TIER);
+            operationsDTO.setThrottlingPolicy(defaultThrottlingPolicy);
             operationsDTO.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             operationsDTOs.add(operationsDTO);
         }
