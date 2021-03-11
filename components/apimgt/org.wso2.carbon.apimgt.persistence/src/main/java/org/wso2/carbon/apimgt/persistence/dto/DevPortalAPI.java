@@ -346,11 +346,16 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     }
     
 
-    /*
-    private String accessControl; //publisher accessControl : 'restricted', 'all' // this won't be required
 
-     */
+    private String accessControl;
 
+    public String getAccessControl() {
+        return accessControl;
+    }
+
+    public void setAccessControl(String accessControl) {
+        this.accessControl = accessControl;
+    }
     /* private String apiDefinition; currently this is also returned in apiGet call. But this is not required. In
     store, when we go into an api, separate swagger get call is sent after the normal api get call. */
 
