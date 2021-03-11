@@ -855,11 +855,11 @@ public class ImportUtils {
                     getFileContentAsJson(new File(pathToArchive).getParentFile().getParent()
                             + File.separator + ImportExportConstants.DEPLOYMENT_INFO_LOCATION) :
                     getFileContentAsJson(pathToArchive + ImportExportConstants.DEPLOYMENT_INFO_LOCATION);
-            // Retrieving the field "data" in deployment_environments.yaml
-            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             if (jsonContent == null) {
                 return null;
             }
+            // Retrieving the field "data" in deployment_environments.yaml
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             return configElement.getAsJsonArray();
         } catch (IOException e) {
             throw new APIManagementException("Error while reading deployment environments info from path: "
