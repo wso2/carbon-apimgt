@@ -159,15 +159,13 @@ class Comments extends Component {
 
         CommentsAPI.all(this.state.apiId, limit, offset)
             .then((result) => {
-                const commentList = result.body.list;
-                const newAllCommentList = allComments.concat(commentList);
-                this.setState({ allComments: newAllCommentList });
+                const newAllCommentList = allComments.concat(result.body.list);
+                this.setState({ allComments: newAllCommentList, comments: newAllCommentList });
                 if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
-                    this.setState({ startCommentsToDisplay: 0, comments: allComments });
+                    this.setState({ startCommentsToDisplay: 0 });
                 } else {
                     this.setState({
                         startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
-                        comments: allComments,
                     });
                 }
             })
