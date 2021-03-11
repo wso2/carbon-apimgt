@@ -735,7 +735,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 removeAPI(api);
             } else {
                 API newAPI = new SubscriptionDataLoaderImpl().getApi(event.getContext(), event.getVersion());
-                addOrUpdateAPI(newAPI);
+                if (newAPI != null) {
+                    addOrUpdateAPI(newAPI);
+                }
             }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);
