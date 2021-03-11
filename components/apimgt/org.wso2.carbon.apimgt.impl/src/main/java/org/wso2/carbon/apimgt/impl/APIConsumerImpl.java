@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -108,6 +109,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -2360,12 +2362,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             	} else {
             		result.put("length", end-start);
             	}
-        	}
-            else if ("subcontext".equalsIgnoreCase(searchType)) {
-                result = APIUtil.searchAPIsByURLPattern(userRegistry, searchTerm, start,end);               ;
-
-            }else {
-            	result=searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
+        	} else {
+            	result = searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
             }
 
         } catch (Exception e) {
@@ -2378,6 +2376,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
 
+    @Deprecated
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
             boolean isLazyLoad) throws APIManagementException {
@@ -5575,45 +5574,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
-     * @param apiId Id of the API
-     * @param synapseEnvName Name of the synapse gateway environment
-     * @param clusterName Name of the container managed cluster
-     * @return Updated Open API definition
-     * @throws APIManagementException
-     */
-    private String getOpenAPIDefinitionForDeployment(Identifier apiId, String synapseEnvName, String clusterName)
-            throws APIManagementException {
-        String apiTenantDomain;
-        String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId, tenantDomain);
-            //todo: use get api by id, so no need to set scopes or uri templates
-            api.setScopes(oasParser.getScopes(definition));
-            api.setUriTemplates(oasParser.getURITemplates(definition));
-            apiTenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            if (!StringUtils.isEmpty(synapseEnvName)) {
-                hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
-            } else {
-                hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);
-            }
-            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
-        } else if (apiId instanceof APIProductIdentifier) {
-            APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
-            apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
-            apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
-        }
-        return updatedDefinition;
-    }
-
-    /**
-     * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
      * @param synapseEnvName Name of the synapse gateway environment
      * @param clusterName Name of the container managed cluster
      * @return Updated Open API definition
@@ -5636,7 +5596,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiTenantDomain = MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         if (!StringUtils.isEmpty(synapseEnvName)) {
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
+            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, synapseEnvName);
         } else {
             hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);
         }
@@ -5762,7 +5722,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return Host name to transport scheme mapping
      * @throws APIManagementException if an error occurs when getting host names with schemes
      */
-    private Map<String, String> getHostWithSchemeMappingForEnvironment(String apiTenantDomain, String environmentName)
+    private Map<String, String> getHostWithSchemeMappingForEnvironment(API api, String apiTenantDomain, String environmentName)
             throws APIManagementException {
 
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
@@ -5782,15 +5742,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 handleResourceNotFoundException("Could not find provided environment '" + environmentName + "'");
             }
 
-            assert environment != null;
-            String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
-            for (String url : hostsWithScheme) {
-                if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, url);
+            List<APIRevisionDeployment> deploymentList = getAPIRevisionDeploymentListOfAPI(api.getUuid());
+            String host = "";
+            for (APIRevisionDeployment deployment : deploymentList) {
+                if (!deployment.isDisplayOnDevportal()) {
+                    continue;
                 }
-                if (url.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, url);
+                if (StringUtils.equals(deployment.getDeployment(), environmentName)) {
+                    host = deployment.getVhost();
                 }
+            }
+            if (StringUtils.isEmpty(host)) {
+                // returns empty server urls
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, "");
+                return hostsWithSchemes;
+            }
+
+            VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
+            }
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)) {
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
             }
         }
         return hostsWithSchemes;
@@ -6052,7 +6025,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        return result ;
+        if (APIUtil.isAllowDisplayMultipleVersions()) {
+            return result;
+        }
+        return filterMultipleVersionedAPIs(result);
     }
 
     @Override
@@ -6075,6 +6051,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateDefaultVersion(api);
                     api = addTiersToAPI(api, requestedTenantDomain);
                     return new ApiTypeWrapper(api);
                 }

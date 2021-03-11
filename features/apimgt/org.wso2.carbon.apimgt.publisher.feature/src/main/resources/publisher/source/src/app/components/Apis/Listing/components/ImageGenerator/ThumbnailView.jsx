@@ -570,26 +570,34 @@ class ThumbnailView extends Component {
                                         color={this.state.color || '#ffffff'}
                                         onChangeComplete={this.handleChangeComplete}
                                     />
-                                    <div className={classes.subtitleWrapper}>
-                                        <Typography component='p' variant='subtitle2' className={classes.subtitle}>
-                                            <FormattedMessage
-                                                id={
-                                                    'Apis.Listing.components.ImageGenerator.'
-                                                    + 'ThumbnailView.select.background'
-                                                }
-                                                defaultMessage='Select a Background'
-                                            />
-                                        </Typography>
-                                    </div>
-                                    {colorPairs.map((colorPair, index) => (
-                                        <div
-                                            className={classes.backgroundSelection}
-                                            onClick={() => this.selectBackground(index)}
-                                            onKeyDown={() => { }}
-                                        >
-                                            <Background width={100} height={100} colorPair={colorPair} />
-                                        </div>
-                                    ))}
+                                    {(!theme.custom.thumbnailTemplates || !theme.custom.thumbnailTemplates.active) && (
+                                        <>
+                                            <div className={classes.subtitleWrapper}>
+                                                <Typography
+                                                    component='p'
+                                                    variant='subtitle2'
+                                                    className={classes.subtitle}
+                                                >
+                                                    <FormattedMessage
+                                                        id={
+                                                            'Apis.Listing.components.ImageGenerator.'
+                                                        + 'ThumbnailView.select.background'
+                                                        }
+                                                        defaultMessage='Select a Background'
+                                                    />
+                                                </Typography>
+                                            </div>
+                                            {colorPairs.map((colorPair, index) => (
+                                                <div
+                                                    className={classes.backgroundSelection}
+                                                    onClick={() => this.selectBackground(index)}
+                                                    onKeyDown={() => { }}
+                                                >
+                                                    <Background width={100} height={100} colorPair={colorPair} />
+                                                </div>
+                                            ))}
+                                        </>
+                                    )}
                                 </Grid>
                             </Grid>
                         )}

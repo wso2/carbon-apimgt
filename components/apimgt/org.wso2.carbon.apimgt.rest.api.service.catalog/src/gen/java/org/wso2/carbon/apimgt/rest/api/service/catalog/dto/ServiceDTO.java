@@ -133,7 +133,7 @@ return null;
   @ApiModelProperty(example = "Pizzashack-Endpoint", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="^[^\\*]+$")  public String getName() {
+ @Pattern(regexp="^[^\\*]+$") @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -150,7 +150,7 @@ return null;
   
   @ApiModelProperty(example = "A Catalog Entry that exposes a REST endpoint", value = "")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
@@ -168,7 +168,7 @@ return null;
   @ApiModelProperty(example = "v1", required = true, value = "")
   @JsonProperty("version")
   @NotNull
-  public String getVersion() {
+ @Size(min=1,max=30)  public String getVersion() {
     return version;
   }
   public void setVersion(String version) {
@@ -185,7 +185,7 @@ return null;
   
   @ApiModelProperty(example = "Pizzashack-Endpoint-1.0.0", value = "")
   @JsonProperty("serviceKey")
-  public String getServiceKey() {
+ @Size(max=512)  public String getServiceKey() {
     return serviceKey;
   }
   public void setServiceKey(String serviceKey) {
@@ -256,7 +256,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Whether Mutual SSL is enabled for the endpoint")
+  @ApiModelProperty(example = "false", value = "Whether Mutual SSL is enabled for the endpoint")
   @JsonProperty("mutualSSLEnabled")
   public Boolean isMutualSSLEnabled() {
     return mutualSSLEnabled;

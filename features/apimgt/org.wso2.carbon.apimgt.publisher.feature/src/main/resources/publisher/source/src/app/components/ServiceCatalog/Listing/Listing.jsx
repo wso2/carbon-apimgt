@@ -329,7 +329,7 @@ function Listing(props) {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
                         const {
-                            id, serviceKey, name, version, serviceUrl,
+                            id, serviceKey, name, definitionType, version, serviceUrl,
                         } = dataRow;
                         return (
                             <>
@@ -338,6 +338,7 @@ function Listing(props) {
                                         history={history}
                                         serviceId={id}
                                         serviceKey={serviceKey}
+                                        definitionType={definitionType}
                                         serviceDisplayName={name}
                                         serviceVersion={version}
                                         serviceUrl={serviceUrl}

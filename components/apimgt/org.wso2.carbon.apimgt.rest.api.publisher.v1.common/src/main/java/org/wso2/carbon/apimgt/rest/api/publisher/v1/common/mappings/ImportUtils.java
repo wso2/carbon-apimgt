@@ -470,12 +470,13 @@ public class ImportUtils {
     public static String preprocessImportedArtifact(String tempDirectory) throws APIImportExportException {
 
         String tempDirectoryAbsolutePath = tempDirectory + File.separator;
-        boolean isParamsFileAvailable = CommonUtil
-                .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME);
+        String paramsFileName =
+                ImportExportConstants.INTERMEDIATE_PARAMS_FILE_LOCATION + ImportExportConstants.YAML_EXTENSION;
+        boolean isParamsFileAvailable = CommonUtil.checkFileExistence(tempDirectoryAbsolutePath + paramsFileName);
         boolean isDeploymentDirectoryAvailable = CommonUtil
                 .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME);
 
-        //When api controller is provided with api_params.file
+        // When API controller is provided with params file
         if (isParamsFileAvailable) {
             if (!CommonUtil
                     .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
@@ -485,16 +486,15 @@ public class ImportUtils {
                         new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
                         tempDirectoryAbsolutePath);
 
-                //Copy api_params.yaml file to working directory
-                String srcParamsFilePath = tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME;
-                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
-                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                // Copy the params file to working directory
+                String srcParamsFilePath = tempDirectoryAbsolutePath + paramsFileName;
+                String destParamsFilePath =
+                        tempDirectoryAbsolutePath + newExtractedFolderName + File.separator + paramsFileName;
                 CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
-
                 return tempDirectoryAbsolutePath + newExtractedFolderName;
             }
         }
-        //When api controller is provided with the "Deployment" directory
+        //When API controller is provided with the "Deployment" directory
         if (isDeploymentDirectoryAvailable) {
             if (!CommonUtil
                     .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
@@ -504,12 +504,12 @@ public class ImportUtils {
                         new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
                         tempDirectoryAbsolutePath);
 
-                //Copy api_params.yaml file to working directory
+                // Copy the params file to working directory
                 String srcParamsFilePath =
                         tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME + File.separator
-                                + ImportExportConstants.API_PARAMS_FILE_NAME;
-                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
-                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                                + paramsFileName;
+                String destParamsFilePath =
+                        tempDirectoryAbsolutePath + newExtractedFolderName + File.separator + paramsFileName;
                 CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
 
                 //move deployment directory into working directory
@@ -858,7 +858,9 @@ public class ImportUtils {
             if (jsonContent == null) {
                 return null;
             }
-            return new Gson().fromJson(jsonContent, JsonArray.class);
+            // Retrieving the field "data" in deployment_environments.yaml
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            return configElement.getAsJsonArray();
         } catch (IOException e) {
             throw new APIManagementException("Error while reading deployment environments info from path: "
                     + pathToArchive, e, ExceptionCodes.ERROR_READING_META_DATA);

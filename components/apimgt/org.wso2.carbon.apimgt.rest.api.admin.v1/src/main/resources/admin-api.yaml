@@ -2589,7 +2589,7 @@ paths:
   /environments:
     get:
       tags:
-        - Environment Collection
+        - Environments
       summary: Get all registered Environments
       description: |
         Get all Registered Environments
@@ -2607,13 +2607,13 @@ paths:
             - apim:admin
             - apim:environment_read
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v2/environments"'
 
     post:
       tags:
-        - Environment
+        - Environments
       summary: Add an Environment
       description: |
         Add a new geteway environment
@@ -2629,7 +2629,7 @@ paths:
         201:
           description: |
             Created.
-            Successful response with the newly created object as entity in the body.
+            Successful response with the newly created environment as entity in the body.
           content:
             application/json:
               schema:
@@ -2641,7 +2641,7 @@ paths:
             - apim:admin
             - apim:environment_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v2/environments"'
 
@@ -2651,7 +2651,7 @@ paths:
   /environments/{environmentId}:
     put:
       tags:
-        - Environment
+        - Environments
       summary: Update an Environment
       description: |
         Update a gateway Environment by environment Id
@@ -2683,13 +2683,13 @@ paths:
             - apim:admin
             - apim:environment_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v2/environments/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
     delete:
       tags:
-        - Environment
+        - Environments
       summary: Delete an Environment
       description: |
         Delete a Environment by Environment Id
@@ -2708,7 +2708,7 @@ paths:
             - apim:admin
             - apim:environment_manage
       x-code-samples:
-        - lang: Shell
+        - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v2/environments/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 

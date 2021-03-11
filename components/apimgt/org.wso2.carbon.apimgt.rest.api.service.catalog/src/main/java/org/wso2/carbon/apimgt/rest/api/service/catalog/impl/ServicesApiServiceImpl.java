@@ -75,11 +75,22 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
     @Override
     public Response addService(ServiceDTO serviceDTO, InputStream definitionFileInputStream,
-                                  Attachment definitionFileDetail, MessageContext messageContext) {
+                               Attachment definitionFileDetail, String inlineContent, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         try {
-            byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            validateInputParams(definitionFileInputStream, definitionFileDetail, inlineContent);
+            ServiceEntry existingService = serviceCatalog.getServiceByKey(serviceDTO.getServiceKey(), tenantId);
+            if (existingService != null) {
+                RestApiUtil.handleResourceAlreadyExistsError("Error while adding Service : A service already "
+                        + "exists with key: " + serviceDTO.getServiceKey(), log);
+            }
+            byte[] definitionFileByteArray;
+            if (definitionFileInputStream != null) {
+                definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            } else {
+                definitionFileByteArray = inlineContent.getBytes();
+            }
             ServiceEntry service = ServiceCatalogUtils.createServiceFromDTO(serviceDTO, definitionFileByteArray);
             if (!validateAndRetrieveServiceDefinition(definitionFileByteArray, serviceDTO.getServiceUrl(),
                     service.getDefinitionType()).isValid()) {
@@ -294,8 +305,8 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 }
             }
             if (importedServiceList == null) {
-                RestApiUtil.handleBadRequest("Cannot update the version or key or definition type of an existing " +
-                        "service", log);
+                RestApiUtil.handleBadRequest("Cannot update the name or version or key or definition type of an " +
+                        "existing service", log);
             }
             for (ServiceEntry service : importedServiceList) {
                 retrievedServiceList.add(serviceCatalog.getServiceByKey(service.getKey(), tenantId));
@@ -359,14 +370,21 @@ public class ServicesApiServiceImpl implements ServicesApiService {
 
     @Override
     public Response updateService(String serviceId, ServiceDTO serviceDTO, InputStream definitionFileInputStream,
-                                  Attachment definitionFileDetail, MessageContext messageContext) {
+                              Attachment definitionFileDetail, String inlineContent, MessageContext messageContext) {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         int tenantId = APIUtil.getTenantId(userName);
         if (StringUtils.isEmpty(serviceId)) {
             RestApiUtil.handleBadRequest("The service Id should not be empty", log);
         }
+        validateInputParams(definitionFileInputStream, definitionFileDetail, inlineContent);
         try {
-            byte[] definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            ServiceEntry existingService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
+            byte[] definitionFileByteArray;
+            if (definitionFileInputStream != null) {
+                definitionFileByteArray = getDefinitionFromInput(definitionFileInputStream);
+            } else {
+                definitionFileByteArray = inlineContent.getBytes();
+            }
             ServiceEntry service = ServiceCatalogUtils.createServiceFromDTO(serviceDTO, definitionFileByteArray);
             if (!validateAndRetrieveServiceDefinition(definitionFileByteArray, serviceDTO.getServiceUrl(),
                     service.getDefinitionType()).isValid()) {
@@ -374,11 +392,20 @@ public class ServicesApiServiceImpl implements ServicesApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(getErrorDTO(RestApiConstants
                         .STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, errorMsg, StringUtils.EMPTY)).build();
             }
-            service.setUuid(serviceId);
+            if (!existingService.getKey().equals(service.getKey()) || !existingService.getName().equals(service
+                .getName()) || !existingService.getDefinitionType().equals(service.getDefinitionType()) ||
+                    !existingService.getVersion().equals(service.getVersion())) {
+                RestApiUtil.handleBadRequest("Cannot update the name or version or key or definition type of an " +
+                        "existing service", log);
+            }
+            service.setUuid(existingService.getUuid());
             serviceCatalog.updateService(service, tenantId, userName);
             ServiceEntry createdService = serviceCatalog.getServiceByUUID(serviceId, tenantId);
             return Response.ok().entity(ServiceEntryMappingUtil.fromServiceToDTO(createdService, false)).build();
         } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError("Service", serviceId, e, log);
+            }
             RestApiUtil.handleInternalServerError("Error when validating the service definition", log);
         } catch (IOException e) {
             RestApiUtil.handleInternalServerError("Error when reading the file content", log);
@@ -473,5 +500,16 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         ByteArrayOutputStream definitionFileOutputByteStream = new ByteArrayOutputStream();
         IOUtils.copy(definitionFileInputStream, definitionFileOutputByteStream);
         return definitionFileOutputByteStream.toByteArray();
+    }
+
+    private void validateInputParams(InputStream definitionInputStream, Attachment fileDetail, String inlineContent) {
+        boolean isFileSpecified = definitionInputStream != null && fileDetail != null &&
+                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null;
+        if (inlineContent == null && !isFileSpecified) {
+            RestApiUtil.handleBadRequest("Either inline definition or file should be provided", log);
+        }
+        if (inlineContent != null && isFileSpecified) {
+            RestApiUtil.handleBadRequest("Only one of inline definition or file should be provided", log);
+        }
     }
 }

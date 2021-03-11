@@ -112,7 +112,7 @@ public class WebhooksSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(value = "The tenant id.")
+  @ApiModelProperty(example = "-1234", value = "The tenant id.")
   @JsonProperty("tenantId")
   public Integer getTenantId() {
     return tenantId;
@@ -130,7 +130,7 @@ public class WebhooksSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(value = "The application ID of the subscription.")
+  @ApiModelProperty(example = "1", value = "The application ID of the subscription.")
   @JsonProperty("appID")
   public String getAppID() {
     return appID;
@@ -220,7 +220,7 @@ public class WebhooksSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(value = "the subscription tier.")
+  @ApiModelProperty(example = "Bronze", value = "the subscription tier.")
   @JsonProperty("tier")
   public String getTier() {
     return tier;
@@ -238,7 +238,7 @@ public class WebhooksSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(value = "the application tier.")
+  @ApiModelProperty(example = "Unlimited", value = "the application tier.")
   @JsonProperty("applicationTier")
   public String getApplicationTier() {
     return applicationTier;
@@ -256,7 +256,7 @@ public class WebhooksSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(value = "the API tier.")
+  @ApiModelProperty(example = "Bronze", value = "the API tier.")
   @JsonProperty("apiTier")
   public String getApiTier() {
     return apiTier;
@@ -274,7 +274,7 @@ public class WebhooksSubscriptionDTO   {
   }
 
   
-  @ApiModelProperty(value = "the subscriber name.")
+  @ApiModelProperty(example = "admin", value = "the subscriber name.")
   @JsonProperty("subscriberName")
   public String getSubscriberName() {
     return subscriberName;

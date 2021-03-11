@@ -86,6 +86,9 @@
   "Apis.Create.Components.DefaultAPIForm.version": {
     "defaultMessage": "Version"
   },
+  "Apis.Create.Components.NewTopic.topic.name": {
+    "defaultMessage": "Topic Name"
+  },
   "Apis.Create.Components.SelectPolicies.business.plans": {
     "defaultMessage": "Business plan(s)"
   },
@@ -1860,7 +1863,7 @@
   "Apis.Details.Environments.MicroGateway.undeploy.btn": {
     "defaultMessage": "Undeploy"
   },
-  "Apis.Details.Environments.create.vhost": {
+  "Apis.Details.Environments.deploy.vhost": {
     "defaultMessage": "VHost"
   },
   "Apis.Details.ExternalStores.ExternalStores.cancel": {
@@ -3078,6 +3081,12 @@
   "Apis.Listing.ApiTableView.version": {
     "defaultMessage": "Version"
   },
+  "Apis.Listing.ApiThumb.by": {
+    "defaultMessage": "By"
+  },
+  "Apis.Listing.ApiThumb.by.colon": {
+    "defaultMessage": ":"
+  },
   "Apis.Listing.ApiThumb.channel": {
     "defaultMessage": "Channel"
   },
@@ -3923,9 +3932,6 @@
   },
   "error.list.500.description": {
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-  },
-  "n8vnpP": {
-    "defaultMessage": "Topic Name"
   },
   "sIDiOO": {
     "defaultMessage": "Yes. Delete"

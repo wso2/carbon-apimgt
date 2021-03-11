@@ -47,6 +47,8 @@ public enum ExceptionCodes implements ErrorHandler {
             + "update the API"),
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
+    DOCUMENT_INVALID_SOURCE_TYPE(900319, "Invalid document source type", 500, "Source type of the document '%s' is invalid"),
+
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
@@ -57,6 +59,7 @@ public enum ExceptionCodes implements ErrorHandler {
     RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
     RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
+    DOCUMENT_INVALID_VISIBILITY(900326, "Invalid document visibility type", 500, "Visibility type of the document '%s' is invalid"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
     COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
             "A Composite API already exists for this application"),
@@ -425,8 +428,8 @@ public enum ExceptionCodes implements ErrorHandler {
     // API import/export related codes
     ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
-    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
-            "Error while reading meta information from the api_params.yaml file"),
+    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the params file", 400,
+            "Error while reading meta information from the params file"),
     NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
 
