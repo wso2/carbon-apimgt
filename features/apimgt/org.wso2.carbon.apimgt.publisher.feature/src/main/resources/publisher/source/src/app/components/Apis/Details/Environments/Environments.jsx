@@ -1512,7 +1512,7 @@ export default function Environments() {
                                                     action={(
                                                         <Checkbox
                                                             id={row.name.split(' ').join('')}
-                                                            value={row.displayName}
+                                                            value={row.name}
                                                             checked={SelectedEnvironment.includes(row.name)}
                                                             onChange={handleChange}
                                                             color='primary'
