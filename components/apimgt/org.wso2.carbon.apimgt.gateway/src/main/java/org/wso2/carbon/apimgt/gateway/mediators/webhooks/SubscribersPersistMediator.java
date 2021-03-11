@@ -25,6 +25,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.util.EntityUtils;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -34,8 +35,10 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -95,9 +98,12 @@ public class SubscribersPersistMediator extends AbstractMediator {
                     APIConstants.Webhooks.SUBSCRIPTION_EVENT_TYPE);
             handleResponse(httpResponse, messageContext);
         } catch (URISyntaxException | InterruptedException | IOException e) {
-            if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-                Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                        "Error while persisting request", "Check the request format"));
+            messageContext.setProperty(SynapseConstants.ERROR_CODE, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Error while persisting request");
+            messageContext.setProperty(SynapseConstants.ERROR_DETAIL, "Error while persisting request");
+            Mediator sequence = messageContext.getSequence(APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+            if (sequence != null && !sequence.mediate(messageContext)) {
+                return true;
             }
             WebhooksUtils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
@@ -131,9 +137,16 @@ public class SubscribersPersistMediator extends AbstractMediator {
             if (response.contains("Throttle")) {
                 WebhooksUtils.handleThrottleOutMessage(messageContext);
             }
-            if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-                Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(statusCode, response, response));
+            messageContext.setProperty(SynapseConstants.ERROR_CODE, statusCode);
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, response);
+            messageContext.setProperty(SynapseConstants.ERROR_DETAIL, response);
+            Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
+            if (sequence != null && !sequence.mediate(messageContext)) {
+                // If needed user should be able to prevent the rest of the fault handling
+                // logic from getting executed
+                return;
             }
+
             WebhooksUtils.sendFault(messageContext, statusCode);
         }
     }

@@ -84,21 +84,7 @@ public class Utils {
     public static void sendFault(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-
         axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
-        messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);
-        axis2MC.removeProperty("NO_ENTITY_BODY");
-
-        // Always remove the ContentType - Let the formatter do its thing
-        axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers != null) {
-            headers.remove(HttpHeaders.AUTHORIZATION);
-
-            headers.remove(HttpHeaders.HOST);
-        }
         Axis2Sender.sendBack(messageContext);
     }
 
