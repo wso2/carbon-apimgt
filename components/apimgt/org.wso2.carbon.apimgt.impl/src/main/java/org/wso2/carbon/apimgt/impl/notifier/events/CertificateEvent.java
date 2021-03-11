@@ -32,6 +32,15 @@ public class CertificateEvent extends Event {
         this.tenantDomain = tenantDomain;
     }
 
+    public CertificateEvent(String eventId, long timeStamp, String type, String tenantDomain, String alias) {
+
+        this.alias = alias;
+        this.eventId = eventId;
+        this.timeStamp = timeStamp;
+        this.type = type;
+        this.tenantDomain = tenantDomain;
+    }
+
     public String getAlias() {
 
         return alias;

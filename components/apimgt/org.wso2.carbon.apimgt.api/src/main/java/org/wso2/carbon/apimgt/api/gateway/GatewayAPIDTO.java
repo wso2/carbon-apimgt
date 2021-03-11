@@ -35,7 +35,6 @@ public class GatewayAPIDTO implements Serializable {
     private String tenantDomain;
     private String apiId;
     private String apiDefinition;
-    private String defaultAPIDefinition;
     private boolean override;
     private GatewayContentDTO[] sequenceToBeAdd;
     private String[] sequencesToBeRemove;
@@ -106,16 +105,6 @@ public class GatewayAPIDTO implements Serializable {
     public void setApiDefinition(String apiDefinition) {
 
         this.apiDefinition = apiDefinition;
-    }
-
-    public String getDefaultAPIDefinition() {
-
-        return defaultAPIDefinition;
-    }
-
-    public void setDefaultAPIDefinition(String defaultAPIDefinition) {
-
-        this.defaultAPIDefinition = defaultAPIDefinition;
     }
 
     public GatewayContentDTO[] getSequenceToBeAdd() {
