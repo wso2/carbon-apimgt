@@ -190,12 +190,17 @@ export default {
             backgroundChip: '#5aebf9',
         },
         warningColor: '#ffc439',
-        landingPageIcons: {
-            graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
-            restApiIcon: '/site/public/images/landing-icons/restapi.svg',
-            soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
-            streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
-            websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+        landingPage: {
+            icons: {
+                graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
+                restApiIcon: '/site/public/images/landing-icons/restapi.svg',
+                soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
+                streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+                websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+            },
+            menu: {
+                primary: '#34679D',
+            },
         },
         title: {
             prefix: '[Publisher]',

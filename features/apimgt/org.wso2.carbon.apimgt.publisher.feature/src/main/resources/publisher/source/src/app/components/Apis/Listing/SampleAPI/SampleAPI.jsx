@@ -32,6 +32,7 @@ import getSampleSwagger from './SamplePizzaShack.js';
  *
  * @class SampleAPI
  * @extends {Component}
+ * @deprecated NOTE: Don't use this component this has been replaced by APILanding component
  */
 class SampleAPI extends Component {
     /**

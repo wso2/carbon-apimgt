@@ -269,11 +269,17 @@
   "Apis.Details.APIDefinition.APIDefinition.btn.close": {
     "defaultMessage": "Close"
   },
+  "Apis.Details.APIDefinition.APIDefinition.btn.hide.diff": {
+    "defaultMessage": "Hide Diff"
+  },
   "Apis.Details.APIDefinition.APIDefinition.btn.no": {
     "defaultMessage": "CANCEL"
   },
   "Apis.Details.APIDefinition.APIDefinition.btn.reimport": {
     "defaultMessage": "Re-import"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": {
+    "defaultMessage": "Show Diff"
   },
   "Apis.Details.APIDefinition.APIDefinition.btn.yes": {
     "defaultMessage": "SAVE"
@@ -3701,6 +3707,9 @@
   },
   "ServiceCatalog.CreateApi.mandatory.field.label": {
     "defaultMessage": "Mandatory fields"
+  },
+  "ServiceCatalog.CreateApi.select.protocol": {
+    "defaultMessage": "Select Protocol"
   },
   "ServiceCatalog.CreateApi.update.btn": {
     "defaultMessage": "Create API"

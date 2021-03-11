@@ -603,6 +603,12 @@
       "value": "Close"
     }
   ],
+  "Apis.Details.APIDefinition.APIDefinition.btn.hide.diff": [
+    {
+      "type": 0,
+      "value": "Hide Diff"
+    }
+  ],
   "Apis.Details.APIDefinition.APIDefinition.btn.no": [
     {
       "type": 0,
@@ -613,6 +619,12 @@
     {
       "type": 0,
       "value": "Re-import"
+    }
+  ],
+  "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": [
+    {
+      "type": 0,
+      "value": "Show Diff"
     }
   ],
   "Apis.Details.APIDefinition.APIDefinition.btn.yes": [
@@ -7743,6 +7755,12 @@
     {
       "type": 0,
       "value": "Mandatory fields"
+    }
+  ],
+  "ServiceCatalog.CreateApi.select.protocol": [
+    {
+      "type": 0,
+      "value": "Select Protocol"
     }
   ],
   "ServiceCatalog.CreateApi.update.btn": [
