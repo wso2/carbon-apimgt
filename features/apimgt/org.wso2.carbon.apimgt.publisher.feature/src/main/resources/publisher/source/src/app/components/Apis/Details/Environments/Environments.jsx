@@ -1300,7 +1300,7 @@ export default function Environments() {
      */
     function getGatewayAccessUrl(vhost, type) {
         const endpoints = { primary: '', secondary: '', combined: '' };
-        if (!vhost || !vhost.host) {
+        if (!vhost) {
             return endpoints;
         }
 
