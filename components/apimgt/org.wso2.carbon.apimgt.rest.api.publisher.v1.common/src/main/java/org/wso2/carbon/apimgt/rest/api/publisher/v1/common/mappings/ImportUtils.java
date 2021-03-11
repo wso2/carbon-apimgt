@@ -1832,7 +1832,8 @@ public class ImportUtils {
             JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
             // If above the params configurations are not null, then resolve those
             if (paramsConfigObject != null) {
-                importedApiProductDTO = APIControllerUtil.injectEnvParamsToAPIProduct(importedApiProductDTO, paramsConfigObject);
+                importedApiProductDTO = APIControllerUtil
+                        .injectEnvParamsToAPIProduct(importedApiProductDTO, paramsConfigObject, extractedFolderPath);
                 JsonElement deploymentsParam = paramsConfigObject.get(ImportExportConstants.DEPLOYMENT_ENVIRONMENTS);
                 if (deploymentsParam != null && !deploymentsParam.isJsonNull()) {
                     deploymentInfoArray = deploymentsParam.getAsJsonArray();

@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -155,29 +156,7 @@ public class APIControllerUtil {
         }
 
         //handle mutualSSL certificates
-        JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
-        if (clientCertificates != null) {
-            try {
-                List<String> apiSecurity = importedApiDto.getSecurityScheme();
-                if (!apiSecurity.isEmpty()) {
-                    if (!apiSecurity.contains(ImportExportConstants.MUTUAL_SSL_ENABLED)) {
-                        // if the apiSecurity field does not have mutualssl type, append it
-                        apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
-                    }
-                } else {
-                    // if the apiSecurity field is empty, assign the value as "mutualssl"
-                    apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
-                }
-                importedApiDto.securityScheme(apiSecurity);
-                String jsonString = clientCertificates.toString();
-                handleClientCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), importedApi.getId(),
-                        pathToArchive);
-            } catch (IOException e) {
-                //Error is logged and when generating certificate details and certs in the archive
-                String errorMessage = "Error while generating meta information of client certificates from path.";
-                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            }
-        }
+        handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);
 
         //handle endpoint certificates
         JsonElement endpointCertificates = envParams.get(ImportExportConstants.ENDPOINT_CERTIFICATES_FIELD);
@@ -207,17 +186,69 @@ public class APIControllerUtil {
     }
 
     /**
+     * This method will be used to generate ClientCertificates and meta information related to client certs
+     *
+     * @param envParams             Env params object with required parameters
+     * @param importedApiDto        Imported API DTO (this will be null for API Products)
+     * @param importedApiProductDto Imported API Product DTO (this will be null for APIs)
+     * @param identifier            API Identifier/API Product Identifier of the imported API/API Product
+     * @param pathToArchive         String of the archive project
+     * @throws APIManagementException If an error while generating client certificate information
+     */
+    private static void handleMutualSslCertificates(JsonObject envParams, APIDTO importedApiDto,
+            APIProductDTO importedApiProductDto, Identifier identifier, String pathToArchive)
+            throws APIManagementException {
+        JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
+        if (clientCertificates != null) {
+            try {
+                List<String> apiSecurity = (importedApiDto != null) ?
+                        importedApiDto.getSecurityScheme() :
+                        importedApiProductDto.getSecurityScheme();
+                if (!apiSecurity.isEmpty()) {
+                    if (!apiSecurity.contains(ImportExportConstants.MUTUAL_SSL_ENABLED)) {
+                        // if the apiSecurity field does not have mutualssl type, append it
+                        apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
+                    }
+                } else {
+                    // if the apiSecurity field is empty, assign the value as "mutualssl"
+                    apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
+                }
+
+                if (importedApiDto != null) {
+                    importedApiDto.securityScheme(apiSecurity);
+                } else {
+                    importedApiProductDto.securityScheme(apiSecurity);
+                }
+
+                String jsonString = clientCertificates.toString();
+                handleClientCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), identifier,
+                        pathToArchive);
+            } catch (IOException e) {
+                //Error is logged and when generating certificate details and certs in the archive
+                String errorMessage = "Error while generating meta information of client certificates from path.";
+                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
+            }
+        }
+    }
+
+    /**
      * This method will be used to add extracted environment parameters to the imported API Product DTO object
      *
      * @param importedApiProductDto API Product DTO object to be imported
      * @param envParams             Env params object with required parameters
      * @return APIProductDTO Updated API Product DTO Object
      */
-    public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams) {
+    public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams, String pathToArchive)
+            throws APIManagementException {
 
         if (envParams == null || envParams.isJsonNull()) {
             return importedApiProductDto;
         }
+
+        APIProduct importedApiProduct = APIMappingUtil.fromDTOtoAPIProduct(importedApiProductDto, importedApiProductDto.getProvider());
+        //handle mutualSSL certificates
+        handleMutualSslCertificates(envParams, null, importedApiProductDto, importedApiProduct.getId(), pathToArchive);
+
         // handle available subscription policies
         JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
         if (policies != null && !policies.isJsonNull()) {
@@ -795,14 +826,16 @@ public class APIControllerUtil {
      * This method will be used to generate ClientCertificates and meta information related to client certs
      *
      * @param certificates  JsonArray of client-certificates
-     * @param apiIdentifier APIIdentifier if the importedApi
+     * @param identifier    API Identifier/API Product Identifier of the imported API/API Product
      * @param pathToArchive String of the archive project
      * @throws IOException            If an error occurs when generating new certs and yaml file or when moving certs
      * @throws APIManagementException If an error while generating new directory
      */
-    private static void handleClientCertificates(JsonArray certificates, APIIdentifier apiIdentifier,
+    private static void handleClientCertificates(JsonArray certificates, Identifier identifier,
             String pathToArchive) throws IOException, APIManagementException {
 
+        APIIdentifier apiIdentifier = new APIIdentifier(identifier.getProviderName(), identifier.getName(),
+                identifier.getVersion());
         List<ClientCertificateDTO> certs = new ArrayList<>();
 
         for (JsonElement certificate : certificates) {
@@ -844,7 +877,7 @@ public class APIControllerUtil {
         String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
-                    ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, jsonElement);
+                    ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
