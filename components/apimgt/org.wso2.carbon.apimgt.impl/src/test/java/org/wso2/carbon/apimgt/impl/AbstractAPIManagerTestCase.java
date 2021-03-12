@@ -273,12 +273,10 @@ public class AbstractAPIManagerTestCase {
         APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
         identifier.setUuid("1234");
         Assert.assertNotNull(abstractAPIManager.getAPI(identifier));
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
         API api = abstractAPIManager.getAPI(identifier);
         PublisherAPI publisherAPI1 = APIMapper.INSTANCE.toPublisherApi(api);
         Assert.assertEquals(publisherAPI1.getApiName(), SAMPLE_API_NAME);
     }
-
 
     @Test
     public void testGetAPIbyUUID()

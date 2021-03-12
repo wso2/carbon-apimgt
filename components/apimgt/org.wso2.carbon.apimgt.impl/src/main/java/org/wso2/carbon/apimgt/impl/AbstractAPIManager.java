@@ -463,6 +463,14 @@ public abstract class AbstractAPIManager implements APIManager {
             Organization org = new Organization(organizationId);
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, identifier.getUUID());
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
+            if (api.isAsync()) {
+                api.setAsyncApiDefinition(getAsyncAPIDefinition(identifier));
+            } else {
+                api.setSwaggerDefinition(getOpenAPIDefinition(identifier, organizationId));
+            }
+            if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
+                api.setGraphQLSchema(getGraphqlSchema(api.getId()));
+            }
             return api;
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while retrieving the api " + e);
