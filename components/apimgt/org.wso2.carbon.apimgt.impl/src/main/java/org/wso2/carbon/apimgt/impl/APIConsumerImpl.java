@@ -33,11 +33,13 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -3011,10 +3013,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 } else {
                     System.out.println("Cannot deploy applications with API products that don't exist in Solace broker");
+                    throw new APIManagementException("Cannot deploy applications with API products that don't exist in Solace broker");
                 }
 
                 if (appDeployedInSolace) {
                     System.out.println("App deployed successfully....");
+                    log.info("App deployed successfully into Solace broker");
                 } else {
                     throw new APIManagementException("Error caused while deploying application to Solace Broker");
                 }
@@ -6581,17 +6585,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private String generateApiProductNameForSolaceBroker(API api) {
         String[] apiContextParts = api.getContext().split("/");
-        return api.getId().getName() + "_" + apiContextParts[1] + "_" + apiContextParts[2];
+        return api.getId().getName() + "-" + apiContextParts[1] + "-" + apiContextParts[2];
     }
 
     private boolean checkApiAndApiProductAlreadyDeployedInSolace(API api) throws IOException {
-        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
-        String organization = "MyOrg";
+        //Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
+        String organization = "WSO2";
         String environment = "devEnv";
         String developerUserName = "dev-1";
         String apiNameWithContext = generateApiProductNameForSolaceBroker(api);
         String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1";
-        String encoding = Base64.getEncoder().encodeToString(("api-user:Solace123!").getBytes());
+        String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
         HttpClient httpClient = HttpClients.createDefault();
 
         // check whether API is registered in solace broker
@@ -6612,8 +6616,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return true;
             } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 System.out.println("API product not found in Solace broker");
+                System.out.println(EntityUtils.toString(response2.getEntity()));
             } else {
                 System.out.println("Error retrieving API product");
+                System.out.println(EntityUtils.toString(response2.getEntity()));
+                throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
             }
 
         // } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
@@ -6626,11 +6633,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     private boolean deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts) throws IOException {
 
-        String organization = "MyOrg";
+        String organization = "WSO2";
         String environment = "devEnv";
         String developerUserName = "dev-1";
         String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1";
-        String encoding = Base64.getEncoder().encodeToString(("api-user:Solace123!").getBytes());
+        String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
         String urlForOrganizations = baseUrl + "/organizations";
         HttpClient httpClient = HttpClients.createDefault();
 
@@ -6645,7 +6652,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // 2. check whether application already exists
             HttpGet request2 = new HttpGet(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps/" + application.getName());
             request2.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-            HttpResponse response2 = httpClient.execute(request2);
+            HttpClient httpClient2 = HttpClients.createDefault();
+            HttpResponse response2 = httpClient2.execute(request2);
 
             // application - if
             if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -6657,7 +6665,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 System.out.println(requestBody.toString());
                 StringEntity params = new StringEntity(requestBody.toString());
                 request3.setEntity(params);
-                HttpResponse response3 = httpClient.execute(request3);
+                HttpClient httpClient3 = HttpClients.createDefault();
+                HttpResponse response3 = httpClient3.execute(request3);
 
                 return response3.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
 
@@ -6667,10 +6676,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 request4.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
                 request4.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
                 org.json.JSONObject requestBody = buildRequestBodyForCreatingApp(application.getName(), apiProducts);
-                System.out.println(requestBody.toString());
                 StringEntity params = new StringEntity(requestBody.toString());
                 request4.setEntity(params);
-                HttpResponse response4 = httpClient.execute(request4);
+                HttpClient httpClient4 = HttpClients.createDefault();
+                HttpResponse response4 = httpClient4.execute(request4);
 
                 return response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED;
 

@@ -309,6 +309,7 @@ export default function Environments() {
     const [revisionToRestore, setRevisionToRestore] = useState([]);
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
     const [lastRevisionCount, setLastRevisionCount] = useState(0);
+    const [deployedToSolace, setDeployedToSolace] = useState(false);
 
     const allEnvDeployments = [];
     settings.environment.forEach((env) => {
@@ -344,6 +345,9 @@ export default function Environments() {
                 });
             restApi.getRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
+                if (result.body.list[0].deploymentInfo[0].name === 'Solace Message Broker') {
+                    setDeployedToSolace(true);
+                }
                 setLastRevisionCount(result.body.count);
                 extractLastRevisionNumber(result.body.list, null);
             });
@@ -408,6 +412,17 @@ export default function Environments() {
         setRevision(revisions);
     };
 
+    const handleSelectForBrokers = (event) => {
+        const revisions = selectedRevision.filter((r) => r.env !== event.target.name);
+        const oldRevision = selectedRevision.find((r) => r.env === event.target.name);
+        let displayOnDevPortal = true;
+        if (oldRevision) {
+            displayOnDevPortal = oldRevision.displayOnDevPortal;
+        }
+        revisions.push({ env: event.target.name, revision: event.target.value, displayOnDevPortal });
+        setRevision(revisions);
+    };
+
     const handleDisplayOnDevPortal = (event, env) => {
         const revisions = selectedRevision.filter((r) => r.env !== env);
         const oldRevision = selectedRevision.find((r) => r.env === env);
@@ -442,10 +457,6 @@ export default function Environments() {
         const vhosts = selectedVhostDeploy.filter((v) => v.env !== event.target.name);
         vhosts.push({ env: event.target.name, vhost: event.target.value });
         setVhostsDeploy(vhosts);
-    };
-
-    const handleSelectForBrokers = (event) => {
-        setRevision(event.target.value);
     };
 
     const handleClose = () => {
@@ -2233,7 +2244,7 @@ export default function Environments() {
                                         </TableCell>
                                         <TableCell align='left'>
                                             {/* {row.type} */}
-                                            MyOrg
+                                            WSO2
                                         </TableCell>
                                         {/* {api.isWebSocket() ? (
                                             <>
@@ -2261,55 +2272,135 @@ export default function Environments() {
                                             {/* {row.type} */}
                                             devEnv
                                         </TableCell>
-                                        <TableCell align='left'>
-                                            {allEnvRevision && allEnvRevision.filter(
-                                                (o1) => {
-                                                    if (o1.deploymentInfo.filter(
-                                                        (o2) => o2.name === 'Solace Message Broker',
-                                                    ).length > 0) {
-                                                        return o1;
-                                                    }
-                                                    return null;
-                                                },
-                                            ).length !== 0 ? (
-                                                    allEnvRevision && allEnvRevision.filter(
-                                                        (o1) => {
-                                                            if (o1.deploymentInfo.filter(
-                                                                (o2) => o2.name === 'Solace Message Broker',
-                                                            ).length > 0) {
-                                                                return o1;
-                                                            }
-                                                            return null;
-                                                        },
-                                                    ).map((o3) => (
-                                                        <div>
-                                                            <Chip
-                                                                label={o3.displayName}
-                                                                style={{ backgroundColor: '#15B8CF' }}
+                                        {/* <TableCell align='left'> */}
+                                        {/*    {allEnvRevision && allEnvRevision.filter( */}
+                                        {/*        (o1) => { */}
+                                        {/*            if (o1.deploymentInfo.filter( */}
+                                        {/*                (o2) => o2.name === 'Solace Message Broker', */}
+                                        {/*            ).length > 0) { */}
+                                        {/*                return o1; */}
+                                        {/*            } */}
+                                        {/*            return null; */}
+                                        {/*        }, */}
+                                        {/*    ).length !== 0 ? ( */}
+                                        {/*            allEnvRevision && allEnvRevision.filter( */}
+                                        {/*                (o1) => { */}
+                                        {/*                    if (o1.deploymentInfo.filter( */}
+                                        {/*                        (o2) => o2.name === 'Solace Message Broker', */}
+                                        {/*                    ).length > 0) { */}
+                                        {/*                        return o1; */}
+                                        {/*                    } */}
+                                        {/*                    return null; */}
+                                        {/*                }, */}
+                                        {/*            ).map((o3) => ( */}
+                                        {/*                <div> */}
+                                        {/*                    <Chip */}
+                                        {/*                        label={o3.displayName} */}
+                                        {/*                        style={{ backgroundColor: '#15B8CF' }} */}
+                                        {/*                    /> */}
+                                        {/*                    <Button */}
+                                        {/*                        className={classes.button1} */}
+                                        {/*                        variant='outlined' */}
+                                        {/*                        disabled={api.isRevision} */}
+                                        {/*                        onClick={() => undeployRevision(o3.id, */}
+                                        {/*                            'Solace Message Broker')} */}
+                                        {/*                        size='small' */}
+                                        {/*                    > */}
+                                        {/*                        <FormattedMessage */}
+                                        {/* eslint-disable-next-line max-len */}
+                                        {/*                            id='Apis.Details.Third.Party.Brokers.undeploy.btn' */}
+                                        {/*                            defaultMessage='Undeploy' */}
+                                        {/*                        /> */}
+                                        {/*                    </Button> */}
+                                        {/*                </div> */}
+                                        {/*            ))) : ( */}
+                                        {/*        // eslint-disable-next-line react/jsx-indent */}
+                                        {/*            <div> */}
+                                        {/*                <TextField */}
+                                        {/*                    id='revision-selector' */}
+                                        {/*                    select */}
+                                        {/*                    label={( */}
+                                        {/*                        <FormattedMessage */}
+                                        {/* eslint-disable-next-line max-len */}
+                                        {/*                            id='Apis.Details.Third.Party.Broker.select.table' */}
+                                        {/*                            defaultMessage='Select Revision' */}
+                                        {/*                        /> */}
+                                        {/*                    )} */}
+                                        {/*                    SelectProps={{ */}
+                                        {/*                        MenuProps: { */}
+                                        {/*                            anchorOrigin: { */}
+                                        {/*                                vertical: 'bottom', */}
+                                        {/*                                horizontal: 'left', */}
+                                        {/*                            }, */}
+                                        {/*                            getContentAnchorEl: null, */}
+                                        {/*                        }, */}
+                                        {/*                    }} */}
+                                        {/*                    name='selectRevision' */}
+                                        {/*                    onChange={handleSelectForBrokers} */}
+                                        {/*                    margin='dense' */}
+                                        {/*                    variant='outlined' */}
+                                        {/*                    style={{ width: '50%' }} */}
+                                        {/*                    disabled={api.isRevision */}
+                                        {/*                || !allRevisions || allRevisions.length === 0} */}
+                                        {/*                > */}
+                                        {/*                     eslint-disable-next-line max-len */}
+                                        {/*                    {allRevisions && allRevisions.length !== 0 && allRevisions.map( */}
+                                        {/*                        (number) => ( */}
+                                        {/*                            <MenuItem value={number.id}> */}
+                                        {/*                                {number.displayName} */}
+                                        {/*                            </MenuItem> */}
+                                        {/*                        ), */}
+                                        {/*                    )} */}
+                                        {/*                </TextField> */}
+                                        {/*                <Button */}
+                                        {/*                    className={classes.button2} */}
+                                        {/*                    disabled={api.isRevision || !selectedRevision} */}
+                                        {/*                    variant='outlined' */}
+                                        {/*                    onClick={() => deployRevision(selectedRevision, */}
+                                        {/*                        'Solace Message Broker')} */}
+
+                                        {/*                > */}
+                                        {/*                    <FormattedMessage */}
+                                        {/* eslint-disable-next-line max-len */}
+                                        {/*                        id='Apis.Details.Third.Party.Broker.deploy.button' */}
+                                        {/*                        defaultMessage='Deploy' */}
+                                        {/*                    /> */}
+                                        {/*                </Button> */}
+                                        {/*            </div> */}
+                                        {/*        )} */}
+                                        {/* </TableCell> */}
+                                        <TableCell align='left' style={{ width: '300px' }}>
+                                            {deployedToSolace
+                                                ? (
+                                                    <div>
+                                                        <Chip
+                                                            label='Revision1'
+                                                            style={{ backgroundColor: '#15B8CF' }}
+                                                        />
+                                                        <Button
+                                                            className={classes.button1}
+                                                            variant='outlined'
+                                                            disabled={api.isRevision}
+                                                            onClick={() => undeployRevision(
+                                                                allEnvDeployments[row.name].revision.id, row.name,
+                                                            )}
+                                                            size='small'
+                                                        >
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Environments.Environments.undeploy.btn'
+                                                                defaultMessage='Undeploy'
                                                             />
-                                                            <Button
-                                                                className={classes.button1}
-                                                                variant='outlined'
-                                                                disabled={api.isRevision}
-                                                                onClick={() => undeployRevision(o3.id,
-                                                                    'Solace Message Broker')}
-                                                                size='small'
-                                                            >
-                                                                <FormattedMessage
-                                                                    id='Apis.Details.Third.Party.Brokers.undeploy.btn'
-                                                                    defaultMessage='Undeploy'
-                                                                />
-                                                            </Button>
-                                                        </div>
-                                                    ))) : (
-                                                // eslint-disable-next-line react/jsx-indent
+                                                        </Button>
+                                                    </div>
+                                                ) : (
                                                     <div>
                                                         <TextField
                                                             id='revision-selector'
                                                             select
                                                             label={(
                                                                 <FormattedMessage
-                                                                    id='Apis.Details.Third.Party.Broker.select.table'
+                                                                    // eslint-disable-next-line max-len
+                                                                    id='Apis.Details.Environments.Environments.select.table'
                                                                     defaultMessage='Select Revision'
                                                                 />
                                                             )}
@@ -2322,13 +2413,13 @@ export default function Environments() {
                                                                     getContentAnchorEl: null,
                                                                 },
                                                             }}
-                                                            name='selectRevision'
+                                                            name='Solace Message Broker'
                                                             onChange={handleSelectForBrokers}
                                                             margin='dense'
                                                             variant='outlined'
                                                             style={{ width: '50%' }}
                                                             disabled={api.isRevision
-                                                        || !allRevisions || allRevisions.length === 0}
+                                                            || !allRevisions || allRevisions.length === 0}
                                                         >
                                                             {/* eslint-disable-next-line max-len */}
                                                             {allRevisions && allRevisions.length !== 0 && allRevisions.map(
@@ -2341,14 +2432,21 @@ export default function Environments() {
                                                         </TextField>
                                                         <Button
                                                             className={classes.button2}
-                                                            disabled={api.isRevision || !selectedRevision}
+                                                            disabled={api.isRevision || !selectedRevision.some(
+                                                                (r) => r.env === 'Solace Message Broker' && r.revision,
+                                                            )}
                                                             variant='outlined'
-                                                            onClick={() => deployRevision(selectedRevision,
-                                                                'Solace Message Broker')}
+                                                            onClick={() => deployRevision(selectedRevision.find(
+                                                                (r) => r.env === 'Solace Message Broker',
+                                                            ).revision, 'Solace Message Broker',
+                                                            null, selectedRevision.find(
+                                                                (r) => r.env === 'Solace Message Broker',
+                                                            ).displayOnDevPortal)}
 
                                                         >
                                                             <FormattedMessage
-                                                                id='Apis.Details.Third.Party.Broker.deploy.button'
+                                                                // eslint-disable-next-line max-len
+                                                                id='Apis.Details.Environments.Environments.deploy.button'
                                                                 defaultMessage='Deploy'
                                                             />
                                                         </Button>

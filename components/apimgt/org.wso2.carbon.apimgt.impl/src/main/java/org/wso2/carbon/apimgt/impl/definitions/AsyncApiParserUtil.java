@@ -237,10 +237,20 @@ public class AsyncApiParserUtil {
                     uriTemplates.add(uriTemplate);
                 }*/
 
+                String topicWithPathSeparator = Paths.get(PATH_SEPARATOR, topic).toString();
+
+                if (definition.channels.get(topic).publish != null) {
+                    URITemplate uriTemplate = new URITemplate();
+                    uriTemplate.setUriTemplate(topicWithPathSeparator);
+                    uriTemplate.setHTTPVerb("PUBLISH");
+                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
+                    uriTemplates.add(uriTemplate);
+                }
+
                 if (definition.channels.get(topic).subscribe != null) {
                     URITemplate uriTemplate = new URITemplate();
-                    topic = Paths.get(PATH_SEPARATOR, topic).toString();
-                    uriTemplate.setUriTemplate(topic);
+                    uriTemplate.setUriTemplate(topicWithPathSeparator);
                     uriTemplate.setHTTPVerb("SUBSCRIBE");
                     uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
                     uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);

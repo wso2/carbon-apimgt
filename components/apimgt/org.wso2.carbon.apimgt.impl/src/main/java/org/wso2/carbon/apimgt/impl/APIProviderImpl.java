@@ -53,24 +53,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
-import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.ErrorItem;
-import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
-import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
-import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -9644,7 +9634,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 e.printStackTrace();
             }
         } else if (solaceBrokerAPI && !deployedToSolace) {
-            System.out.println("Error while deploying API in Solace");
+            throw new APIManagementException("Error while deploying API in Solace");
         } else if (!solaceBrokerAPI) {
             GatewayArtifactsMgtDAO.getInstance()
                     .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
@@ -10022,20 +10012,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
 
-    private boolean deployToSolaceBroker(API api) throws IOException {
+    private boolean deployToSolaceBroker(API api) throws IOException, APIManagementException {
         String apiDefinition = api.getAsyncApiDefinition();
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
         String[] apiContextParts = api.getContext().split("/");
-        String apiNameWithContext = api.getId().getName() + "_" + apiContextParts[1] + "_" + apiContextParts[2];
+        String apiNameWithContext = api.getId().getName() + "-" + apiContextParts[1] + "-" + apiContextParts[2];
         String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1/";
         String urlForOrganizations = baseUrl + "/organizations";
         HttpClient httpClient = HttpClients.createDefault();
         HttpClient httpClient2 = HttpClients.createDefault();
 
         //set authorization String
-        String encoding = Base64.getEncoder().encodeToString(("api-user:Solace123!").getBytes());
+        String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
 
-        String organization = "MyOrg";
+        String organization = "WSO2";
         String env = "devEnv";
 
         // 1. Check whether the organization is available
@@ -10084,11 +10074,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         return true;
+                    } else {
+                        throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.getStatusLine().getReasonPhrase());
                     }
+
+                } else {
+                    throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine().getReasonPhrase());
                 }
+
+            } else {
+                throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
             }
         //}
-        return false;
     }
 
     private org.json.JSONObject buildAPIProductRequestBody(Aai20Document aai20Document, String environment, String apiNameWithContext) throws JsonProcessingException {
@@ -10153,7 +10150,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         for (String protocol : protocolsHashSet) {
             org.json.JSONObject protocolObject = new org.json.JSONObject();
             protocolObject.put("name", protocol);
-            protocolObject.put("version", getProtocolVersion(protocol));
+            //protocolObject.put("version", getProtocolVersion(protocol));
             protocols.put(protocolObject);
         }
         requestBody.put("protocols", protocols);
@@ -10196,6 +10193,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (bindings.sqs != null) { protocolsFromBindings.add("sqs"); }
         if (bindings.stomp != null) { protocolsFromBindings.add("stomp"); }
         if (bindings.redis != null) { protocolsFromBindings.add("redis"); }
+
+        if (bindings.hasExtraProperties()) {
+            protocolsFromBindings.addAll(bindings.getExtraPropertyNames());
+        }
 
         return protocolsFromBindings;
     }

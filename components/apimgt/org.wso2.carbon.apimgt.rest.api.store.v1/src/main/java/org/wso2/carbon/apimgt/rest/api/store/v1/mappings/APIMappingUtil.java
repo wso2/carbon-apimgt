@@ -465,43 +465,51 @@ public class APIMappingUtil {
         defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
 
         // Deployed VHost
-        VHost vHost;
-        if (revisionDeployment.getVhost() == null && environment.getVhosts().size() > 0) {
-            // VHost is NULL set first Vhost (set in deployment toml)
-            vHost = environment.getVhosts().get(0);
-        } else {
-            vHost = environment.getVhosts().stream()
-                    .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
-                    .findAny()
-                    .orElse(defaultVhost);
+        VHost vHost = null;
+        if (environment != null) {
+            if (revisionDeployment.getVhost() == null && environment.getVhosts().size() > 0) {
+                // VHost is NULL set first Vhost (set in deployment toml)
+                vHost = environment.getVhosts().get(0);
+            } else {
+                vHost = environment.getVhosts().stream()
+                        .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
+                        .findAny()
+                        .orElse(defaultVhost);
+            }
         }
 
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
-        apiEndpointURLsDTO.setEnvironmentName(environment.getName());
-        apiEndpointURLsDTO.setEnvironmentType(environment.getType());
+        if (environment != null) {
+            apiEndpointURLsDTO.setEnvironmentName(environment.getName());
+            apiEndpointURLsDTO.setEnvironmentType(environment.getType());
+        }
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
         String context = apidto.getContext();
         boolean isWs = apidto.getEndpointURLs().size() > 0
                 && apidto.getEndpointURLs().get(0).getUrLs().getWs() != null;
-        if (!isWs) {
-            apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
-            apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
-        } else {
-            apiurLsDTO.setWs(vHost.getWsUrl() + context);
-            apiurLsDTO.setWss(vHost.getWssUrl() + context);
+        if (vHost != null) {
+            if (!isWs) {
+                apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
+                apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
+            } else {
+                apiurLsDTO.setWs(vHost.getWsUrl() + context);
+                apiurLsDTO.setWss(vHost.getWssUrl() + context);
+            }
         }
         apiEndpointURLsDTO.setUrLs(apiurLsDTO);
 
         APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
         if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
             String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
-            if (!isWs) {
-                apiDefaultVersionURLsDTO.setHttp(vHost.getHttpUrl() + defaultContext);
-                apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
-            } else {
-                apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
-                apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
+            if (vHost != null) {
+                if (!isWs) {
+                    apiDefaultVersionURLsDTO.setHttp(vHost.getHttpUrl() + defaultContext);
+                    apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
+                } else {
+                    apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
+                    apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
+                }
             }
         }
         apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
