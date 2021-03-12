@@ -78,7 +78,6 @@ import javax.cache.Caching;
 
 import static org.junit.Assert.fail;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
 
 /**
  * Test class for WebsocketInboundHandler
@@ -273,7 +272,6 @@ public class WebsocketInboundHandlerTestCase {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
         Mockito.when(gatewayCache.get(CACHE_KEY)).thenReturn(apiKeyValidationInfoDTO);
         PowerMockito.mockStatic(APISecurityUtils.class);
-        PowerMockito.when(APISecurityUtils.getKeyValidatorClientType()).thenReturn("invalid");
         Mockito.when(headers.contains(org.apache.http.HttpHeaders.AUTHORIZATION)).thenReturn(true);
 
         ConfigurationContext ctx = ConfigurationContextFactory
@@ -410,7 +408,6 @@ public class WebsocketInboundHandlerTestCase {
 //        APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
         Mockito.when(gatewayCache.get(CACHE_KEY)).thenReturn(apiKeyValidationInfoDTO);
         PowerMockito.mockStatic(APISecurityUtils.class);
-        PowerMockito.when(APISecurityUtils.getKeyValidatorClientType()).thenReturn("invalid");
         ConfigurationContext ctx = ConfigurationContextFactory
                 .createConfigurationContextFromFileSystem(null, null);
         APIKeyValidationService apiKeyValidationServiceStub = Mockito.mock(APIKeyValidationService.class);
@@ -457,7 +454,6 @@ public class WebsocketInboundHandlerTestCase {
         };
 
         // keyValidatorClientType = wsclient
-        PowerMockito.when(APISecurityUtils.getKeyValidatorClientType()).thenReturn(API_KEY_VALIDATOR_WS_CLIENT);
         PowerMockito.when(WebsocketUtil.isGatewayTokenCacheEnabled()).thenReturn(false);
 
         try {
