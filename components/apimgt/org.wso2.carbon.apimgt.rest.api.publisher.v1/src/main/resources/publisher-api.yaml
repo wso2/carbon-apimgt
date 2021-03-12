@@ -7328,34 +7328,6 @@ paths:
         $ref: docs/examples/alerts/alerts_config.yaml#/delete
 
   ######################################################
-  # The "Label Collection" resource API
-  ######################################################
-  /labels:
-    get:
-      tags:
-        - Label Collection
-      summary: Get all Registered Labels
-      description: |
-        Get all registered Labels
-      responses:
-        200:
-          description: |
-            OK.
-            Labels returned
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LabelList'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/labels"'
-      operationId: getLabels
-
-  ######################################################
   # The "API Category Collection" resource API
   ######################################################
   /api-categories:

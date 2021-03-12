@@ -498,6 +498,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
     /**
      * Get a list of available Microgateway labels
      */
@@ -509,6 +510,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
      /**
      * Delete a Microgateway Label
      */
@@ -521,6 +523,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
      /**
      * Add a Microgateway Label
      */
@@ -542,6 +545,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
      /**
      * Update a Microgateway Label
      */

@@ -381,14 +381,7 @@ public class ImportUtils {
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
-            Set<String> keySet =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet();
-            Set<String> gatewayEnvironmentsSet = new HashSet<>(keySet);
-            List<Label> labels = apiProvider.getAllLabels(tenantDomain);
-            for (Label label : labels) {
-                gatewayEnvironmentsSet.add(label.getName());
-            }
+            Set<String> gatewayEnvironmentsSet = APIUtil.getEnvironments().keySet();
 
             for (int i = 0; i < deploymentInfoArray.size(); i++) {
                 JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();

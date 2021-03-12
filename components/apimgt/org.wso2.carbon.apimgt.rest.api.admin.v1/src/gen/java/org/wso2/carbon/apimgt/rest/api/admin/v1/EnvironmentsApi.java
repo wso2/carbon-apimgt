@@ -46,7 +46,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
-    }, tags={ "Environment",  })
+    }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Environment successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
@@ -63,7 +63,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
-    }, tags={ "Environment",  })
+    }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Environment updated. ", response = EnvironmentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
@@ -81,7 +81,7 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
         })
-    }, tags={ "Environment Collection",  })
+    }, tags={ "Environments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Environments returned ", response = EnvironmentListDTO.class) })
     public Response environmentsGet() throws APIManagementException{
@@ -97,9 +97,9 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
-    }, tags={ "Environment" })
+    }, tags={ "Environments" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. ", response = EnvironmentDTO.class),
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created environment as entity in the body. ", response = EnvironmentDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
     public Response environmentsPost(@ApiParam(value = "Environment object that should to be added " ,required=true) EnvironmentDTO environmentDTO) throws APIManagementException{
         return delegate.environmentsPost(environmentDTO, securityContext);
