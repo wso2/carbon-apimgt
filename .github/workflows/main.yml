@@ -1,12 +1,6 @@
 name: API Manager Build with Test
 
-on:
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:
-    branches:
-      - master
+on: [push]
 
 jobs:
 
@@ -71,8 +65,8 @@ jobs:
       - name: Checkout Product-APIM
         uses: actions/checkout@v2
         with:
-          repository: wso2/product-apim
-          ref: refs/heads/master
+          repository: renuka-fernando/product-apim
+          ref: refs/heads/remove-mg-label
           fetch-depth: '10'
           path: product-apim
       - name: Build product-apim with tests
