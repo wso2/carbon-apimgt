@@ -1489,11 +1489,7 @@
                 <version>${carbon.metrics.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.throttle.service.interceptors</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.wso2.wsdl4j</groupId>
                 <artifactId>wsdl4j.wso2</artifactId>
