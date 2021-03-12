@@ -720,26 +720,23 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves the swagger document of an API
      *
      * @param apiId API identifier
-     * @param labelName name of the gateway label
      * @param environmentName name of the gateway environment
      * @param clusterName name of the container managed cluster
      * @param ifNoneMatch If-None-Match header value
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param messageContext CXF message context
-     * @return Swagger document of the API for the given label or gateway environment
+     * @return Swagger document of the API for the given cluster or gateway environment
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String clusterName,
+    public Response apisApiIdSwaggerGet(String apiId, String environmentName, String clusterName,
             String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
 
-            if (StringUtils.isNotEmpty(labelName) ?
-                    StringUtils.isNotEmpty(environmentName) || StringUtils.isNotEmpty(clusterName) :
-                    StringUtils.isNotEmpty(environmentName) && StringUtils.isNotEmpty(clusterName)) {
+            if (StringUtils.isNotEmpty(environmentName) && StringUtils.isNotEmpty(clusterName)) {
                 RestApiUtil.handleBadRequest(
-                        "Only one of 'labelName', 'environmentName' or 'clusterName' can be provided", log
+                        "Only one of 'environmentName' or 'clusterName' can be provided", log
                 );
             }
 
@@ -754,9 +751,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, requestedTenantDomain));
             }
 
-            // gets the first available environment if any of label, environment or cluster name is not provided
-            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
-                    && StringUtils.isEmpty(clusterName)) {
+            // gets the first available environment if any of environment or cluster name is not provided
+            if (StringUtils.isEmpty(environmentName) && StringUtils.isEmpty(clusterName)) {
                 Map<String, Environment> existingEnvironments = APIUtil.getEnvironments();
 
                 // find a valid environment name from API
@@ -798,8 +794,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     throw e;
                 }
-            } else if (StringUtils.isNotEmpty(labelName)) {
-                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api, labelName);
             } else if (StringUtils.isNotEmpty(clusterName)) {
                 apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api, clusterName);
             } else {
@@ -1053,7 +1047,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
+    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -1062,7 +1056,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
         if (environments != null && environments.size() > 0) {
-            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
+            if (StringUtils.isEmpty(environmentName)) {
                 environmentName = api.getEnvironments().iterator().next();
             }
 

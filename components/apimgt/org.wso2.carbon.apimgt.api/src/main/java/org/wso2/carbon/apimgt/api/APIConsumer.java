@@ -796,17 +796,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns the swagger definition of the API for the given microgateway gateway label as a string
-     *
-     * @param api api
-     * @param labelName name of the microgateway label
-     * @return swagger string
-     * @throws APIManagementException if error occurred while obtaining the swagger definition
-     */
-    String getOpenAPIDefinitionForLabel(API api, String labelName)
-            throws APIManagementException;
-
-    /**
      * Returns the swagger definition of the API for the given container managed cluster name as a string
      *
      * @param api api

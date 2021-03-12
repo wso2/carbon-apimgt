@@ -257,16 +257,6 @@ public class RegistryPersistenceUtil {
                     RegistryPersistenceUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
 
             //attaching micro-gateway labels to the API
-            
-            //clear all the existing labels first
-            artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
-            //if there are labels attached to the API object, add them to the artifact
-            if (api.getGatewayLabels() != null) {
-                List<Label> labelList = api.getGatewayLabels();
-                for (Label label : labelList) {
-                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
-                }
-            }
 
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();

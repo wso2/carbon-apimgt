@@ -157,17 +157,6 @@ public interface APIMapper {
 
     }
 
-    default Set<String> mapLabelToSet(List<Label> labelList) {
-        Set<String> labelSet = new HashSet<String>();
-        if (labelList != null) {
-            for (Label label : labelList) {
-                labelSet.add(label.getName());
-            }
-        }
-
-        return labelSet;
-    }
-
     default String mapAccessControlRolesToString(Set<String> accessControlRoles) {
         if (accessControlRoles != null) {
             return String.join(",", accessControlRoles);
