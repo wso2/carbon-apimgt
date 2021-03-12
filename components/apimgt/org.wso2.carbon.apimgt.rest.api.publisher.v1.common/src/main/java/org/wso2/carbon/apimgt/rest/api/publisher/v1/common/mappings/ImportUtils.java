@@ -149,7 +149,7 @@ public class ImportUtils {
             JsonObject dependentAPIParamsConfigObject) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
+        APIDefinitionValidationResponse validationResponse = null;
         String graphQLSchema = null;
         API importedApi = null;
         String currentStatus;
@@ -190,7 +190,7 @@ public class ImportUtils {
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                swaggerDefinitionValidationResponse = retrieveValidatedSwaggerDefinitionFromArchive(
+                validationResponse = retrieveValidatedSwaggerDefinitionFromArchive(
                         extractedFolderPath);
             }
             // Validate the GraphQL schema
@@ -201,6 +201,10 @@ public class ImportUtils {
             if (APIConstants.API_TYPE_SOAP.equalsIgnoreCase(apiType) || APIConstants.API_TYPE_SOAPTOREST
                     .equalsIgnoreCase(apiType)) {
                 validateWSDLFromArchive(extractedFolderPath, importedApiDTO);
+            }
+            // Validate the AsyncAPI definition of streaming APIs
+            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
+                validationResponse = retrieveValidatedAsyncApiDefinitionFromArchive(extractedFolderPath);
             }
 
             String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
@@ -222,7 +226,7 @@ public class ImportUtils {
                 // updating a "No resources found" error will be thrown. This is not a problem in the UI, since
                 // when updating an API from the UI there is at least one resource (operation) inside the DTO.
                 if (importedApiDTO.getOperations().isEmpty()) {
-                    setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
+                    setOperationsToDTO(importedApiDTO, validationResponse);
                 }
                 importedApi = PublisherCommonUtils
                         .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
@@ -242,11 +246,11 @@ public class ImportUtils {
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
             lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
 
-            // Add/update swagger content except for WebSocket APIs
+            // Add/update swagger content except for streaming APIs and GraphQL APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), swaggerDefinitionValidationResponse, false);
+                PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false);
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -255,6 +259,11 @@ public class ImportUtils {
                 if (graphqlComplexityInfo != null && graphqlComplexityInfo.getList().size() != 0) {
                     apiProvider.addOrUpdateComplexityDetails(importedApi.getId(), graphqlComplexityInfo);
                 }
+            }
+            // Add/update Async API definition for streaming APIs
+            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
+                // Add the validated Async API definition separately since the UI does the same procedure
+                PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse);
             }
 
             tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
@@ -786,7 +795,14 @@ public class ImportUtils {
         return jsonContent;
     }
 
-    public static String retrieveValidatedAsyncApiDefinitionFromArchive(String pathToArchive)
+    /**
+     * Validate Aysnc API definition from the archive directory and return it.
+     *
+     * @param pathToArchive Path to API archive
+     * @return APIDefinitionValidationResponse of the Async API definition content
+     * @throws APIManagementException If an error occurs while reading the file
+     */
+    public static APIDefinitionValidationResponse retrieveValidatedAsyncApiDefinitionFromArchive(String pathToArchive)
             throws APIManagementException {
         try {
             String asyncApiDefinition = loadAsyncApiDefinitionFromFile(pathToArchive);
@@ -797,7 +813,7 @@ public class ImportUtils {
                         "Error occurred while importing the API. Invalid AsyncAPI definition found. "
                                 + validationResponse.getErrorItems());
             }
-            return asyncApiDefinition;
+            return validationResponse;
         } catch (IOException e) {
             throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
@@ -810,8 +826,16 @@ public class ImportUtils {
                 log.debug("Found AsyncAPI file " + pathToArchive
                         + ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION);
             }
-            return FileUtils.readFileToString(
-                    new File(pathToArchive, ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION));
+            return FileUtils
+                    .readFileToString(new File(pathToArchive, ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION));
+        } else if (CommonUtil
+                .checkFileExistence(pathToArchive + ImportExportConstants.YAML_ASYNCAPI_DEFINITION_LOCATION)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found AsyncAPI file " + pathToArchive
+                        + ImportExportConstants.YAML_ASYNCAPI_DEFINITION_LOCATION);
+            }
+            return CommonUtil.yamlToJson(FileUtils.readFileToString(
+                    new File(pathToArchive + ImportExportConstants.YAML_ASYNCAPI_DEFINITION_LOCATION)));
         }
         throw new IOException("Missing AsyncAPI definition file.");
     }
@@ -983,7 +1007,8 @@ public class ImportUtils {
      * Validate swagger definition from the archive directory and return it.
      *
      * @param pathToArchive Path to API or API Product archive
-     * @throws APIImportExportException If an error occurs while reading the file
+     * @return APIDefinitionValidationResponse of the swagger content
+     * @throws APIManagementException If an error occurs while reading the file
      */
     public static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinitionFromArchive(String pathToArchive)
             throws APIManagementException {
@@ -1164,7 +1189,7 @@ public class ImportUtils {
                     Documentation documentation = apiTypeWrapper.isAPIProduct() ?
                             PublisherCommonUtils
                                     .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid()) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID());
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid());
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();
@@ -2168,7 +2193,7 @@ public class ImportUtils {
         for (ProductAPIDTO api : apis) {
             if (StringUtils.equals(api.getName(), importedApiIdentifier.getName()) && StringUtils
                     .equals(api.getVersion(), importedApiIdentifier.getVersion())) {
-                api.setApiId(importedApi.getUUID());
+                api.setApiId(importedApi.getUuid());
                 break;
             }
         }
@@ -2190,7 +2215,7 @@ public class ImportUtils {
             API targetApi = retrieveApiToOverwrite(api.getName(), api.getVersion(), currentTenantDomain, apiProvider,
                     Boolean.FALSE);
             if (targetApi != null) {
-                api.setApiId(targetApi.getUUID());
+                api.setApiId(targetApi.getUuid());
             }
         }
         return importedApiProductDtO;

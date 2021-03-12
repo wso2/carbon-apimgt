@@ -96,6 +96,10 @@ public final class ImportExportConstants {
     public static final String JSON_ASYNCAPI_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "asyncapi.json";
 
+    // Location of the AsyncAPI definition file
+    public static final String YAML_ASYNCAPI_DEFINITION_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "asyncapi.yaml";
+
     // Name of the API provider element tag of the api.json file
     public static final String PROVIDER_ELEMENT = "provider";
 
