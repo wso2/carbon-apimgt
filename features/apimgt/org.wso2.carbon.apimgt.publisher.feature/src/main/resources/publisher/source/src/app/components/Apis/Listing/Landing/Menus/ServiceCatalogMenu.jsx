@@ -11,7 +11,7 @@ const ServiceCatalogMenu = (props) => {
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.streaming.api'
-                    defaultMessage='Streaming API'
+                    defaultMessage='Service Catalog'
                 />
             )}
             icon={icon}

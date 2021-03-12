@@ -36,6 +36,7 @@ const Progress = (props) => {
                     width: '300px',
                     display: 'flex',
                     justifyContent: 'center',
+                    'padding-bottom': '14px',
                 }}
                 >
                     {message}

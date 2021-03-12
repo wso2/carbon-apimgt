@@ -6520,13 +6520,13 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new": [
     {
       "type": 0,
-      "value": "Create an API"
+      "value": "Let’s get started !"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": [
     {
       "type": 0,
-      "value": "API creation is the process of linking an existing backend API backend API implementation to the API Publisher, so that you can manage and monitor the API’s lifecycle, documentation, security, community, and subscriptions Alternatively, you can provide the API implementation in-line in the API Publisher itself."
+      "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.created": [
@@ -6563,6 +6563,12 @@
     {
       "type": 0,
       "value": "Import GraphQL SDL"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.published": [
+    {
+      "type": 0,
+      "value": "Sample PizzaShackAPI API Published successfully"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": [
@@ -7257,12 +7263,6 @@
     {
       "type": 0,
       "value": "Description [ Syntax - description:xxxx ]"
-    }
-  ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option7": [
-    {
-      "type": 0,
-      "value": "Sub-Context [ Syntax - subcontext:xxxx ]"
     }
   ],
   "Base.Header.headersearch.HeaderSearch.tooltip.option8": [
