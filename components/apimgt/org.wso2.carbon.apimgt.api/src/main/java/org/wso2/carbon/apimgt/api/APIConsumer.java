@@ -296,13 +296,13 @@ public interface APIConsumer extends APIManager {
     /**
      * Returns true if a given user has subscribed to the API
      *
-     * @param apiIdentifier APIIdentifier
+     * @param identifier    Identifier
      * @param applicationId application Id
-     * @param userId userId
+     * @param userId        userId
      * @return true, if giving api identifier is already subscribed
      * @throws APIManagementException if failed to check the subscribed state
      */
-    boolean isSubscribedToApp(APIIdentifier apiIdentifier, String userId, int applicationId) throws APIManagementException;
+    boolean isSubscribedToApp(Identifier identifier, String userId, int applicationId) throws APIManagementException;
 
     /**
      * Returns the number of subscriptions for the given subscriber and app.
