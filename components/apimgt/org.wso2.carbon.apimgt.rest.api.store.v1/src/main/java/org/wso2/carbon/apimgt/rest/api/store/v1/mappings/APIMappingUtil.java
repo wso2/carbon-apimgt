@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -190,8 +191,6 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
-
-        dto.setEndpointURLs(APIUtils.extractEndpointURLs(model, tenantDomain));
 
         dto.setIngressURLs(extractIngressURLs(model));
 
@@ -380,8 +379,6 @@ public class APIMappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
-        dto.setEndpointURLs(APIUtils.extractEndpointURLs(model, tenantDomain));
-
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
         apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
@@ -433,83 +430,94 @@ public class APIMappingUtil {
 
 
     public static APIDTO fromAPItoDTO(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+        APIDTO apidto;
         if (model.isAPIProduct()) {
-            return fromAPItoDTO(model.getApiProduct(), tenantDomain);
+            apidto = fromAPItoDTO(model.getApiProduct(), tenantDomain);
         } else {
-            return fromAPItoDTO(model.getApi(), tenantDomain);
+            apidto = fromAPItoDTO(model.getApi(), tenantDomain);
         }
+        apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
+        return apidto;
     }
 
-    public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(
-            APIDTO apidto,
-            List<APIRevisionDeployment> revisionDeployments) throws APIManagementException {
+    public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String tenantDomain)
+            throws APIManagementException {
 
         Map<String, Environment> environments = APIUtil.getEnvironments();
-        return revisionDeployments.stream().filter(APIRevisionDeployment::isDisplayOnDevportal)
-                .map(r -> fromAPIRevisionToEndpoints(apidto, r, environments))
-                .collect(Collectors.toList());
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
+
+        // custom gateway URL of tenant
+        Map<String, String> domains = new HashMap<>();
+        if (tenantDomain != null) {
+            domains = apiConsumer.getTenantDomainMappings(tenantDomain,
+                    APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
+        }
+        String customGatewayUrl = domains.get(APIConstants.CUSTOM_URL);
+
+        List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
+        for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
+            if (revisionDeployment.isDisplayOnDevportal()) {
+                // Deployed environment
+                Environment environment = environments.get(revisionDeployment.getDeployment());
+                if (environment != null) {
+                    APIEndpointURLsDTO apiEndpointURLsDTO = fromAPIRevisionToEndpoints(apidto, environment,
+                            revisionDeployment.getVhost(), customGatewayUrl, tenantDomain);
+                    endpointUrls.add(apiEndpointURLsDTO);
+                }
+            }
+        }
+        return endpointUrls;
     }
 
-    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto,
-                                                                 APIRevisionDeployment revisionDeployment,
-                                                                 Map<String, Environment> environments) {
-        // Deployed environment
-        Environment environment = environments.get(revisionDeployment.getDeployment());
-        // If there are any inconstancy (if VHost not found) use default VHost
-        VHost defaultVhost = new VHost();
-        defaultVhost.setHost(revisionDeployment.getVhost());
-        defaultVhost.setHttpContext("");
-        defaultVhost.setHttpsPort(APIConstants.HTTPS_PROTOCOL_PORT);
-        defaultVhost.setHttpPort(APIConstants.HTTP_PROTOCOL_PORT);
-        defaultVhost.setWsPort(APIConstants.WS_PROTOCOL_PORT);
-        defaultVhost.setWssPort(APIConstants.WSS_PROTOCOL_PORT);
-
+    private static APIEndpointURLsDTO fromAPIRevisionToEndpoints(APIDTO apidto, Environment environment,
+                                                                 String host, String customGatewayUrl,
+                                                                 String tenantDomain) throws APIManagementException {
         // Deployed VHost
-        VHost vHost = null;
-        if (environment != null) {
-            if (revisionDeployment.getVhost() == null && environment.getVhosts().size() > 0) {
-                // VHost is NULL set first Vhost (set in deployment toml)
-                vHost = environment.getVhosts().get(0);
-            } else {
-                vHost = environment.getVhosts().stream()
-                        .filter(v -> StringUtils.equals(v.getHost(), revisionDeployment.getVhost()))
-                        .findAny()
-                        .orElse(defaultVhost);
+        VHost vHost;
+        String context = apidto.getContext();
+        if (StringUtils.isEmpty(customGatewayUrl)) {
+            vHost = VHostUtils.getVhostFromEnvironment(environment, host);
+        } else {
+            if (!StringUtils.contains(customGatewayUrl, "://")) {
+                customGatewayUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + customGatewayUrl;
             }
+            vHost = VHost.fromEndpointUrls(new String[]{customGatewayUrl});
+            context = context.replace("/t/" + tenantDomain, "");
         }
 
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
-        if (environment != null) {
-            apiEndpointURLsDTO.setEnvironmentName(environment.getName());
-            apiEndpointURLsDTO.setEnvironmentType(environment.getType());
-        }
+        apiEndpointURLsDTO.setEnvironmentName(environment.getName());
+        apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
-        String context = apidto.getContext();
-        boolean isWs = apidto.getEndpointURLs().size() > 0
-                && apidto.getEndpointURLs().get(0).getUrLs().getWs() != null;
-        if (vHost != null) {
-            if (!isWs) {
+        boolean isWs = StringUtils.equalsIgnoreCase("WS", apidto.getType());
+        if (!isWs) {
+            if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
                 apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
-                apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
-            } else {
-                apiurLsDTO.setWs(vHost.getWsUrl() + context);
-                apiurLsDTO.setWss(vHost.getWssUrl() + context);
             }
+            if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
+                apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
+            }
+        } else {
+            apiurLsDTO.setWs(vHost.getWsUrl() + context);
+            apiurLsDTO.setWss(vHost.getWssUrl() + context);
         }
         apiEndpointURLsDTO.setUrLs(apiurLsDTO);
 
         APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
         if (apidto.isIsDefaultVersion() != null && apidto.isIsDefaultVersion()) {
             String defaultContext = context.replaceAll("/" + apidto.getVersion() + "$", "");
-            if (vHost != null) {
-                if (!isWs) {
+            if (!isWs) {
+                if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
                     apiDefaultVersionURLsDTO.setHttp(vHost.getHttpUrl() + defaultContext);
-                    apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
-                } else {
-                    apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
-                    apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
                 }
+                if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
+                    apiDefaultVersionURLsDTO.setHttps(vHost.getHttpsUrl() + defaultContext);
+                }
+            } else {
+                apiDefaultVersionURLsDTO.setWs(vHost.getWsUrl() + defaultContext);
+                apiDefaultVersionURLsDTO.setWss(vHost.getWssUrl() + defaultContext);
             }
         }
         apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);

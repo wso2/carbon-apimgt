@@ -29,7 +29,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
+import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
@@ -224,8 +224,11 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service bound to the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
-        AnalyticsConfigurationHolder.getInstance()
-                .setConfigurations(amcService.getAPIAnalyticsConfiguration().getReporterProperties());
+        if (amcService.getAPIAnalyticsConfiguration().isAnalyticsEnabled()) {
+            AnalyticsServiceReferenceHolder.getInstance()
+                    .setConfigurations(amcService.getAPIAnalyticsConfiguration().getReporterProperties());
+        }
+
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {

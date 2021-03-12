@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -285,19 +284,10 @@ public class APIAuthenticationHandlerTestCase {
             }
 
             @Override
-            protected void setSOAPFault(MessageContext messageContext, APISecurityException e) {
-
-            }
-
-            @Override
             protected void sendFault(MessageContext messageContext, int status) {
 
             }
 
-            @Override
-            protected void setFaultPayload(MessageContext messageContext, APISecurityException e) {
-                getFaultPayload(e);
-            }
         };
     }
 

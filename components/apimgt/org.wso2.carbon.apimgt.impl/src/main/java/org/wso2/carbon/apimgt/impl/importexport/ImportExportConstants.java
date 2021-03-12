@@ -176,7 +176,9 @@ public final class ImportExportConstants {
 
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
 
-    public static final String APIM_VERSION = "v4";
+    public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
+
+    public static final String APIM_VERSION = "v4.0.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
@@ -193,8 +195,8 @@ public final class ImportExportConstants {
     public static final String JSON_APPLICATION_FILE_LOCATION = File.separator + "application.json";
 
     //Api controller Env Params related constants
-    public static final String YAML_API_PARAMS_FILE_LOCATION = File.separator + "api_params.yaml";
-    public static final String JSON_API_PARAMS_FILE_LOCATION = File.separator + "api_params.json";
+    public static final String 
+            INTERMEDIATE_PARAMS_FILE_LOCATION = File.separator + "intermediate_params";
     //Env param fields
     public static final String ENV_NAME_FIELD = "name";
     public static final String ENDPOINT_TYPE_FIELD = "endpointType";
@@ -285,7 +287,6 @@ public final class ImportExportConstants {
     public static final String DEPLOYMENT_DIRECTORY_NAME= "Deployment";
     public static final String DEPLOYMENT_DIRECTORY= File.separator + DEPLOYMENT_DIRECTORY_NAME;
     public static final String SOURCE_ZIP_DIRECTORY_NAME = "SourceArchive.zip";
-    public static final String API_PARAMS_FILE_NAME = "api_params.yaml";
 
     // Location of the deployments file
     public static final String DEPLOYMENT_INFO_LOCATION = File.separator + "deployment_environments";

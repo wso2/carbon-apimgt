@@ -1,32 +1,107 @@
 name: API Manager Build with Test
 
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - master
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
 
+  build-carbon:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout master
-      uses: actions/checkout@v1
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '14.x'
-    - name: Build carbon-apimgt with Test.
-      run: mvn clean install --file pom.xml
-    - name: Get carbon.apimgt.version
-      run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
-    - name: Print carbon.apimgt.version
-      run: |
-        echo $(cat ../CARBON_APIMGT_VERSION_FILE)
-    - name: Checkout Product-APIM
-      uses: actions/checkout@v1
-      with: 
-        repository: wso2/product-apim
-        ref: refs/heads/master
-    - name: Build Product-Apim with Maven
-      run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file ../product-apim/pom.xml
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '10'
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build carbon-apimgt with Tests, skipping AspectJ
+        run: mvn clean install --file pom.xml -Dskip.aspectj=true
+
+  build-product:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - id: 1
+            segment: apim-integration-tests-api-common, apim-integration-tests-api-change-endpoint, apim-integration-tests-api-product, apim-integration-tests-api-lifecycle, apim-integration-tests-api-lifecycle-2, apim-email-secondary-userstore-tests, apim-CORS-tests, apim-integration-tests-samples, apim-publisher-tests, apim-store-tests, apim-integration-tests-graphql, admin-rest-api-tests, rest-api-tests, apim-mediation-tests, apim-websocket-tests
+          - id: 2
+            segment: apim-integration-tests-without-restarts, apim-integration-tests-without-advance-throttling, apim-integration-tests-application-sharing, apim-JWT-integration-tests, apim-urlsafe-JWT-integration-tests, apim-integration-tests-endpoint-security, apim-integration-tests-external-idp, apim-integration-emailusername-login, apim-integration-tests-workflow
+      fail-fast: false
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '10'
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - name: Cache maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build carbon-apimgt without tests, skip AspectJ, skip portal builds
+        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dskip.aspectj=true -Dnpm.build.skip=true
+      - name: Get carbon.apimgt.version
+        run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
+      - name: Print carbon.apimgt.version
+        run: |
+          echo $(cat ../CARBON_APIMGT_VERSION_FILE)
+      - name: Checkout Product-APIM
+        uses: actions/checkout@v2
+        with:
+          repository: wso2/product-apim
+          ref: refs/heads/master
+          fetch-depth: '10'
+          path: product-apim
+      - name: Build product-apim with tests
+        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml
+        env:
+          PRODUCT_APIM_TESTS: ${{ matrix.segment }}
+      - name: Prepare upload testng report
+        if: always()
+        run: mv product-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml TEST-TestSuite_${{ matrix.id }}.xml
+      - name: Archive testng report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: TEST-TestSuite_${{ matrix.id }}
+          path: |
+            TEST-TestSuite_${{ matrix.id }}.xml
+          if-no-files-found: warn
+
+  show-report:
+    if: always()
+    needs: build-product
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          path: reports
+      - name: Publish Test Report
+        if: always()
+        uses: malinthaprasan/action-surefire-report@v1
+        with:
+          report_paths: 'reports/**/TEST-*.xml'
+

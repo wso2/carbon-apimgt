@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for mapping APIM core tier related objects into REST API Tier related DTOs
@@ -57,7 +58,7 @@ public class ThrottlingPolicyMappingUtil {
         //identifying the proper start and end indexes
         int size = tiers.size();
         int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
+        int end = Math.min(offset + limit - 1, size - 1);
 
         for (int i = start; i <= end; i++) {
             Tier tier = tiers.get(i);

@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
@@ -349,36 +350,14 @@ public class GraphQLAPIHandler extends AbstractHandler {
      * @param errorDescription description of the error
      */
     private void handleFailure(MessageContext messageContext, String errorDescription) {
-        OMElement payload = getFaultPayload(errorDescription);
-        Utils.setFaultPayload(messageContext, payload);
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, GraphQLConstants.GRAPHQL_INVALID_QUERY);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, GraphQLConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
         Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
         Utils.sendFault(messageContext, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-    }
-
-    /**
-     * @param description description of the error
-     * @return the OMElement
-     */
-    private OMElement getFaultPayload(String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(GraphQLConstants.GRAPHQL_INVALID_QUERY + "");
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(GraphQLConstants.GRAPHQL_INVALID_QUERY_MESSAGE);
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(description);
-
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
     }
 
     @Override

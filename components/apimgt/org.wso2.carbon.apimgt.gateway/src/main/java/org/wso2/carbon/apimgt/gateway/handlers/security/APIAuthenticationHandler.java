@@ -551,6 +551,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, status);
+
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
             // If needed user should be able to prevent the rest of the fault handling
@@ -558,52 +559,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             return;
         }
 
-        if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            setFaultPayload(messageContext, e);
-        } else {
-            setSOAPFault(messageContext, e);
-        }
         sendFault(messageContext, status);
-    }
-
-    protected void setFaultPayload(MessageContext messageContext, APISecurityException e) {
-        Utils.setFaultPayload(messageContext, getFaultPayload(e));
     }
 
     protected void sendFault(MessageContext messageContext, int status) {
         Utils.sendFault(messageContext, status);
-    }
-
-    protected void setSOAPFault(MessageContext messageContext, APISecurityException e) {
-        Utils.setSOAPFault(messageContext, "Client", "Authentication Failure", e.getMessage());
-    }
-
-    protected OMElement getFaultPayload(APISecurityException e) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(String.valueOf(e.getErrorCode()));
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()));
-
-        // if custom auth header is configured, the error message should specify its name instead of default value
-        if (e.getErrorCode() == APISecurityConstants.API_AUTH_MISSING_CREDENTIALS) {
-            String errorDescription =
-                    APISecurityConstants.getFailureMessageDetailDescription(e.getErrorCode(), e.getMessage()) + "'"
-                            + authorizationHeader + " : Bearer ACCESS_TOKEN' or '" + authorizationHeader +
-                            " : Basic ACCESS_TOKEN' or 'apikey: API_KEY'" ;
-            errorDetail.setText(errorDescription);
-        }
-
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
     }
 
     private String logMessageDetails(MessageContext messageContext) {

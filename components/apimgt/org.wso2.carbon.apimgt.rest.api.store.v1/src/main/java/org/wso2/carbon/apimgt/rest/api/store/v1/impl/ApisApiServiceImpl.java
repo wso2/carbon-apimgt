@@ -1232,10 +1232,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
 
-                APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
-                List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apiId);
-                apidto.setEndpointURLs(APIMappingUtil.fromAPIRevisionListToEndpointsList(apidto, revisionDeployments));
-                return apidto;
+                return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }

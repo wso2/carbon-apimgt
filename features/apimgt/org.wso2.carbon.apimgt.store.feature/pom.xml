@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.36-SNAPSHOT</version>
+        <version>9.0.49-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -267,6 +267,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>${basedir}/src/main/resources/devportal</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -312,6 +313,7 @@
     </build>
     <properties>
         <maven.test.skip>false</maven.test.skip>
+        <npm.build.skip>false</npm.build.skip>
         <npm.executable>npm</npm.executable>
         <npm.build.command>build:prod</npm.build.command>
         <npm.working.dir>./src/main/</npm.working.dir>

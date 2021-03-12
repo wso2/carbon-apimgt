@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.36-SNAPSHOT</version>
+        <version>9.0.49-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -72,6 +72,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -86,6 +87,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -101,6 +103,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -116,6 +119,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -131,6 +135,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <arguments>
@@ -175,6 +180,7 @@
     </build>
     <properties>
         <maven.test.skip>false</maven.test.skip>
+        <npm.build.skip>false</npm.build.skip>
         <npm.executable>npm</npm.executable>
         <npm.build.command>build:prod</npm.build.command>
         <npm.test.command>test</npm.test.command>
