@@ -30,6 +30,9 @@ public final class ImportExportConstants {
     // Location of the API definition file
     public static final String API_FILE_LOCATION = File.separator + "api";
 
+    // Location of the API definition file
+    public static final String API_PRODUCT_FILE_LOCATION = File.separator + "api_product";
+
     // Location of the definitions such as swagger, graphql schema etc
     public static final String DEFINITIONS_DIRECTORY = "Definitions";
 
@@ -209,6 +212,7 @@ public final class ImportExportConstants {
     public static final String ENDPOINTS_FIELD = "endpoints";
     public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "loadBalanceEndpoints";
     public static final String FAILOVER_ENDPOINTS_FIELD = "failoverEndpoints";
+    public static final String DEPENDENT_APIS_FIELD = "dependentAPIs";
 
     //Security config related constants
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
