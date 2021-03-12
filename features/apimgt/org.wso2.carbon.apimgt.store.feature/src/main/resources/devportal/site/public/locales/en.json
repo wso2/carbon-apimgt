@@ -338,7 +338,6 @@
   "Base.Header.headersearch.HeaderSearch.tooltip.option4": "By Context [ Syntax - context:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.option5": "By Description [ Syntax - description:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.option6": "By Tags [ Syntax - tags:xxxx ]",
-  "Base.Header.headersearch.HeaderSearch.tooltip.option7": "By Sub-Context [ Syntax - subcontext:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.option8": "By Documentation Content [ Syntax - doc:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.option9": "By Gateway Label [ Syntax - label:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.title": "Search Options",
