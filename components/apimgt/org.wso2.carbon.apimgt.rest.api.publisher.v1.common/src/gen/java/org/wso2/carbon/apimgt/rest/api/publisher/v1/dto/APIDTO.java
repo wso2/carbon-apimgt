@@ -150,7 +150,6 @@ return null;
     private List<String> gatewayEnvironments = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<DeploymentEnvironmentsDTO>();
-    private List<String> labels = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
@@ -869,24 +868,6 @@ return null;
   }
 
   /**
-   * Labels of micro-gateway environments attached to the API. 
-   **/
-  public APIDTO labels(List<String> labels) {
-    this.labels = labels;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[]", value = "Labels of micro-gateway environments attached to the API. ")
-  @JsonProperty("labels")
-  public List<String> getLabels() {
-    return labels;
-  }
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
-  }
-
-  /**
    **/
   public APIDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
     this.mediationPolicies = mediationPolicies;
@@ -1305,7 +1286,6 @@ return null;
         Objects.equals(endpointSecurity, API.endpointSecurity) &&
         Objects.equals(gatewayEnvironments, API.gatewayEnvironments) &&
         Objects.equals(deploymentEnvironments, API.deploymentEnvironments) &&
-        Objects.equals(labels, API.labels) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
@@ -1331,7 +1311,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
   }
 
   @Override
@@ -1373,7 +1353,6 @@ return null;
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    deploymentEnvironments: ").append(toIndentedString(deploymentEnvironments)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
