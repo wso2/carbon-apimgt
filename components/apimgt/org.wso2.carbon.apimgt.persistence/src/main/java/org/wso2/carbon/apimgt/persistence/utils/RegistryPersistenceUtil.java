@@ -746,7 +746,6 @@ public class RegistryPersistenceUtil {
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
                 api.setMonetizationProperties(jsonObj);
             }
-            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -1188,24 +1187,7 @@ public class RegistryPersistenceUtil {
         }
         return deploymentEnvironmentsSet;
     }
-    
-    public static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
-            throws GovernanceException, APIManagementException {
 
-        String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
-        List<Label> gatewayLabelListForAPI = new ArrayList<>();
-
-        if (labelArray != null && labelArray.length > 0) {
-            for (String labelName : labelArray) {
-                Label label = new Label();
-                //set the name
-                label.setName(labelName);
-                gatewayLabelListForAPI.add(label);
-            }
-        }
-        return gatewayLabelListForAPI;
-    }
-    
     /**
      * This method used to extract environment list configured with non empty URLs.
      *

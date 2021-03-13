@@ -75,7 +75,6 @@ public class PublisherAPI extends PublisherAPIInfo {
     private Set<String> environments;
     private CORSConfiguration corsConfiguration;
     private WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
-    private Set<String> gatewayLabels;
     private Set<String> apiCategories;
     private boolean isMonetizationEnabled;
     private Map<String, String> monetizationProperties = new JSONObject();
@@ -427,14 +426,6 @@ public class PublisherAPI extends PublisherAPIInfo {
         this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
     }
 
-    public Set<String> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(Set<String> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
-    }
-
     public Set<String> getApiCategories() {
         return apiCategories;
     }
@@ -558,7 +549,7 @@ public class PublisherAPI extends PublisherAPIInfo {
                 + ", enableStore=" + enableStore + ", testKey=" + testKey + ", contextTemplate=" + contextTemplate
                 + ", availableTierNames=" + availableTierNames + ", environments=" + environments
                 + ", corsConfiguration=" + corsConfiguration + ", websubSubscriptionConfiguration="
-                + websubSubscriptionConfiguration + ", gatewayLabels=" + gatewayLabels + ", apiCategories="
+                + websubSubscriptionConfiguration + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", monetizationProperties="
                 + monetizationProperties + ", keyManagers=" + keyManagers + ", deploymentEnvironments="
                 + deploymentEnvironments + ", tags=" + tags + ", accessControl=" + accessControl
