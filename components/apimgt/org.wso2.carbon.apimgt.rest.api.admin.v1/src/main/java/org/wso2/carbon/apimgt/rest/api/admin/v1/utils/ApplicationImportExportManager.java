@@ -138,13 +138,16 @@ public class ApplicationImportExportManager {
                 if (apiSet != null && !apiSet.isEmpty()) {
                     Object type = apiSet.iterator().next();
                     ApiTypeWrapper apiTypeWrapper = null;
+                    Identifier id = null;
                     //Check whether the object is ApiProduct
                     if (isApiProduct(type)) {
                         APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
                         apiTypeWrapper = new ApiTypeWrapper(apiProduct);
+                        id = apiProduct.getId();
                     } else {
                         API api = (API) apiSet.iterator().next();
                         apiTypeWrapper = new ApiTypeWrapper(api);
+                        id = api.getId();
                     }
                     //tier of the imported subscription
                     Tier tier = subscribedAPI.getTier();
@@ -156,7 +159,7 @@ public class ApplicationImportExportManager {
                         // it will throw an error if subscriber already exists
                         if (update == null || !update) {
                             apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
+                        } else if (!apiConsumer.isSubscribedToApp(id, userId, appId)) {
                             // on update skip subscriptions that already exists
                             apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
                         }
