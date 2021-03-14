@@ -8030,9 +8030,9 @@ public class ApiMgtDAO {
                 }
                 if (total > 0) {
                     if (parentCommentID == null) {
-                        sqlQuery = SQLConstants.GET_ROOT_COMMENTS_SQL;
+                        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_ROOT_COMMENTS_SQL");
                     } else {
-                        sqlQuery = SQLConstants.GET_REPLIES_SQL;
+                        sqlQuery = SQLConstantManagerFactory.getSQlString("GET_REPLIES_SQL");
                     }
                     try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
                         prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -8040,13 +8040,43 @@ public class ApiMgtDAO {
                         prepStmt.setString(3, identifier.getVersion());
                         if (parentCommentID != null) {
                             prepStmt.setString(4, parentCommentID);
-                            // temporary commented below two lines as mssql doesn't support limit and offset
-//                            prepStmt.setInt(5, limit);
-//                            prepStmt.setInt(6, offset);
+                            if (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
+                                    .getDriverName().contains("H2")) {
+                                prepStmt.setInt(5, limit);
+                                prepStmt.setInt(6, offset);
+                            } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+                                return null;
+                            } else if (connection.getMetaData().getDriverName().contains("MS SQL") || connection
+                                    .getMetaData().getDriverName().contains("Microsoft")) {
+                                prepStmt.setInt(5, offset);
+                                prepStmt.setInt(6, limit);
+                            } else if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                                return null;
+                            } else if (connection.getMetaData().getDriverName().contains("Oracle")) {
+                                return null;
+                            }else{
+                                log.error("Could not find DB type to load constants");
+                                throw new APIManagementException("Error occurred while initializing SQL Constants Manager");
+                            }
                         } else {
-                            // temporary commented below two lines as mssql doesn't support limit and offset
-//                            prepStmt.setInt(4, limit);
-//                            prepStmt.setInt(5, offset);
+                            if (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
+                                    .getDriverName().contains("H2")) {
+                                prepStmt.setInt(4, limit);
+                                prepStmt.setInt(5, offset);
+                            } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+                                return null;
+                            } else if (connection.getMetaData().getDriverName().contains("MS SQL") || connection
+                                    .getMetaData().getDriverName().contains("Microsoft")) {
+                                prepStmt.setInt(4, offset);
+                                prepStmt.setInt(5, limit);
+                            } else if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                                return null;
+                            } else if (connection.getMetaData().getDriverName().contains("Oracle")) {
+                                return null;
+                            }else{
+                                log.error("Could not find DB type to load constants");
+                                throw new APIManagementException("Error occurred while initializing SQL Constants Manager");
+                            }
                         }
                         try (ResultSet resultSet = prepStmt.executeQuery()) {
                             while (resultSet.next()) {
@@ -8064,12 +8094,6 @@ public class ApiMgtDAO {
                                         connection));
                                 list.add(comment);
                             }
-                                if (limit+offset>total){
-                                    list = list.subList(offset, total);
-                                } else {
-                                    list = list.subList(offset, limit+offset);
-                                }
-
                         }
                     }
                 } else {
@@ -8105,9 +8129,9 @@ public class ApiMgtDAO {
         int id = -1;
         String sqlQuery;
         if (parentCommentID == null) {
-            sqlQuery = SQLConstants.GET_ROOT_COMMENTS_SQL;
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_ROOT_COMMENTS_SQL");
         } else {
-            sqlQuery = SQLConstants.GET_REPLIES_SQL;
+            sqlQuery = SQLConstantManagerFactory.getSQlString("GET_REPLIES_SQL");
         }
         try {
             connection = APIMgtDBUtil.getConnection();

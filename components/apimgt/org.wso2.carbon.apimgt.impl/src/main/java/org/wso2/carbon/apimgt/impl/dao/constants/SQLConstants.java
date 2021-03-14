@@ -2312,48 +2312,6 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND AM_API_COMMENTS.COMMENT_ID = ?";
 
-    public static final String GET_REPLIES_SQL =
-            "SELECT " +
-                "AM_API_COMMENTS.COMMENT_ID, " +
-                "AM_API_COMMENTS.COMMENT_TEXT, " +
-                "AM_API_COMMENTS.CREATED_BY, " +
-                "AM_API_COMMENTS.CREATED_TIME, " +
-                "AM_API_COMMENTS.UPDATED_TIME, " +
-                "AM_API_COMMENTS.API_ID, " +
-                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
-                "AM_API_COMMENTS.ENTRY_POINT, " +
-                "AM_API_COMMENTS.CATEGORY " +
-            "FROM " +
-                "AM_API_COMMENTS, " +
-                "AM_API API " +
-            "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
-                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
-                "AND PARENT_COMMENT_ID = ?";
-
-    public static final String GET_ROOT_COMMENTS_SQL =
-            "SELECT " +
-                "AM_API_COMMENTS.COMMENT_ID, " +
-                "AM_API_COMMENTS.COMMENT_TEXT, " +
-                "AM_API_COMMENTS.CREATED_BY, " +
-                "AM_API_COMMENTS.CREATED_TIME, " +
-                "AM_API_COMMENTS.UPDATED_TIME, " +
-                "AM_API_COMMENTS.API_ID, " +
-                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
-                "AM_API_COMMENTS.ENTRY_POINT, " +
-                "AM_API_COMMENTS.CATEGORY " +
-            "FROM " +
-                "AM_API_COMMENTS, " +
-                "AM_API API " +
-            "WHERE " +
-                "API.API_PROVIDER = ? " +
-                "AND API.API_NAME = ? " +
-                "AND API.API_VERSION  = ? " +
-                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
-                "AND PARENT_COMMENT_ID IS NULL";
-
     public static final String GET_IDS_OF_REPLIES_SQL =
             "SELECT " +
                 "AM_API_COMMENTS.COMMENT_ID " +
