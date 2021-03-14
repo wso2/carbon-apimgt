@@ -96,7 +96,8 @@
                     <artifactId>jboss-logging</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>        <dependency>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
             <scope>provided</scope>
