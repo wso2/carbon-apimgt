@@ -836,7 +836,7 @@ public class PublisherCommonUtils {
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
             throw new APIManagementException(
                     "Error occurred while adding API. API with name " + body.getName() + " already exists.",
-                    ExceptionCodes.API_ALREADY_EXISTS);
+                    ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, body.getName()));
         }
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
@@ -864,24 +864,17 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(context)) {
-                        throw new APIManagementException(
-                                "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context, ExceptionCodes.API_ALREADY_EXISTS);
-                    } else {
-                        throw new APIManagementException(
-                                "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context,
-                                ExceptionCodes.API_ALREADY_EXISTS);
-                    }
+                    throw new APIManagementException(
+                            "Error occurred while adding the API. The version already exists: " + version,
+                            ExceptionCodes.from(ExceptionCodes.API_VERSION_ALREADY_EXISTS, version));
                 }
             }
         } else {
             //If no any previous version exists
             if (apiProvider.isDuplicateContextTemplate(context)) {
                 throw new APIManagementException(
-                        "Error occurred while adding the API. A duplicate API context " + "already exists for "
-                                + context, ExceptionCodes.API_ALREADY_EXISTS);
+                        "Error occurred while adding the API. A duplicate API context already exists for "
+                                + context, ExceptionCodes.from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
             }
         }
 
@@ -1354,8 +1347,8 @@ public class PublisherCommonUtils {
         //Check whether the context already exists
         if (apiProvider.isContextExist(context)) {
             throw new APIManagementException(
-                    "Error occurred while adding API Product. API Product with the context " + context
-                            + " already exists.", ExceptionCodes.API_ALREADY_EXISTS);
+                    "Error occurred while adding API Product. API Product with the context " + context + " already " +
+                            "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
