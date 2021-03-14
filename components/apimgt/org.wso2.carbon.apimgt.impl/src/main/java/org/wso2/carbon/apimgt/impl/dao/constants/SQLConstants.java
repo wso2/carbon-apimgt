@@ -1388,7 +1388,7 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
-            "   API.CONTEXT AS CONTEXT," +
+            "   API.CONTEXT AS CONTEXT" +
             " FROM" +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_API API " +
