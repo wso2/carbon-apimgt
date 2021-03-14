@@ -6613,6 +6613,12 @@
       "value": "Deploy Sample API"
     }
   ],
+  "Apis.Listing.SampleAPI.SampleAPI.service.catalog.api": [
+    {
+      "type": 0,
+      "value": "Service Catalog"
+    }
+  ],
   "Apis.Listing.SampleAPI.SampleAPI.soap.api": [
     {
       "type": 0,

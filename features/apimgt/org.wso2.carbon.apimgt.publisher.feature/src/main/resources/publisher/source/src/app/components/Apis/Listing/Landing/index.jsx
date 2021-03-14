@@ -5,6 +5,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
@@ -19,13 +20,21 @@ const useStyles = makeStyles({
     root: {
         flexGrow: 1,
     },
+    dividerCls: {
+        height: '180px',
+        position: 'absolute',
+        top: '50%',
+        '-ms-transform': 'translateY(-50%)',
+        transform: 'translateY(-50%)',
+        margin: 'auto',
+    },
 });
 
 const APILanding = (props) => {
     const { deploying, handleDeploySample } = props;
     const theme = useTheme();
     const matches = useMediaQuery(theme.breakpoints.down('xs'));
-    const classes = useStyles();
+    const { dividerCls, root } = useStyles();
     const {
         graphqlIcon,
         restApiIcon,
@@ -34,7 +43,7 @@ const APILanding = (props) => {
     } = theme.custom.landingPage.icons;
 
     return (
-        <div className={classes.root}>
+        <div className={root}>
             <Grid
                 container
                 direction='column'
@@ -79,7 +88,9 @@ const APILanding = (props) => {
                             <SoapAPIMenu icon={soapApiIcon} />
                             <GraphqlAPIMenu icon={graphqlIcon} />
                             <StreamingAPIMenu icon={streamingApiIcon} />
-                            {/* <Divider light orientation='vertical' variant='inset' /> */}
+                            <Box display={{ xs: 'none', lg: 'block' }} mx={5}>
+                                <Divider className={dividerCls} light orientation='vertical' variant='inset' />
+                            </Box>
                             <ServiceCatalogMenu icon={streamingApiIcon} />
                         </Grid>
                     </Box>

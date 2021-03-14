@@ -3150,6 +3150,9 @@
   "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.title": {
     "defaultMessage": "Deploy Sample API"
   },
+  "Apis.Listing.SampleAPI.SampleAPI.service.catalog.api": {
+    "defaultMessage": "Service Catalog"
+  },
   "Apis.Listing.SampleAPI.SampleAPI.soap.api": {
     "defaultMessage": "SOAP API"
   },

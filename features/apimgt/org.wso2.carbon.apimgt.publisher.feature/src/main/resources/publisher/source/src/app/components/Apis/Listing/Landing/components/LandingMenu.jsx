@@ -124,9 +124,9 @@ const LandingMenu = (props) => {
                                 <Grid
                                     container
                                     direction='row'
-                                    justify='center'
+                                    justify='flex-start'
                                     alignItems='center'
-                                    spacing={6}
+                                    spacing={4}
                                 >
                                     {/* Menu links or buttons */}
                                     {children}

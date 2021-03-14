@@ -7,8 +7,9 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { FormattedMessage } from 'react-intl';
-import LandingMenuItem from '../components/LandingMenuItem';
-import LandingMenu from '../components/LandingMenu';
+import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
+import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
+import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
 
 const RestAPIMenu = (props) => {
     const { icon, deploying, handleDeploySample } = props;
@@ -44,7 +45,7 @@ const RestAPIMenu = (props) => {
                 helperText={(
                     <FormattedMessage
                         id='Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content'
-                        defaultMessage='Upload definition or provide the url'
+                        defaultMessage='Import OAS 3 or Swagger 2.0 definition'
                     />
                 )}
             >
@@ -54,37 +55,7 @@ const RestAPIMenu = (props) => {
                 />
             </LandingMenuItem>
 
-            {(deploying !== null && handleDeploySample !== null) && (
-                <Box mt={2}>
-                    {!deploying ? (
-                        <Typography variant='body1'>
-
-                            <MUILink
-                                id='itest-id-landing-sample-deploy'
-                                onClick={handleDeploySample}
-                            >
-                                <FormattedMessage
-                                    id={'Apis.Listing.SampleAPI.SampleAPI.'
-                                        + 'rest.d.sample.title'}
-                                    defaultMessage='Deploy Sample API'
-                                />
-                            </MUILink>
-                        </Typography>
-                    )
-                        : (
-                            <CircularProgress
-                                size={24}
-                            />
-                        )}
-                    <Typography variant='body2'>
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content'
-                            defaultMessage={`This is a sample API for Pizza Shack
-                                    online pizza delivery store`}
-                        />
-                    </Typography>
-                </Box>
-            )}
+            <SampleAPI />
         </LandingMenu>
     );
 };

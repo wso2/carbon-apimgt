@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import LandingMenuItem from '../components/LandingMenuItem';
-import LandingMenu from '../components/LandingMenu';
+import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
+import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 
 const ServiceCatalogMenu = (props) => {
     const { icon } = props;
@@ -10,7 +10,7 @@ const ServiceCatalogMenu = (props) => {
         <LandingMenu
             title={(
                 <FormattedMessage
-                    id='Apis.Listing.SampleAPI.SampleAPI.streaming.api'
+                    id='Apis.Listing.SampleAPI.SampleAPI.service.catalog.api'
                     defaultMessage='Service Catalog'
                 />
             )}

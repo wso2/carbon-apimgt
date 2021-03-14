@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import LandingMenuItem from '../components/LandingMenuItem';
-import LandingMenu from '../components/LandingMenu';
+import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
+import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
+import Box from '@material-ui/core/Box';
 
 const StreamingAPIMenu = (props) => {
     const { icon } = props;
@@ -17,33 +18,64 @@ const StreamingAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
-                id='itest-id-create-default'
-                linkTo='/apis/create/rest'
+                id='itest-id-create-streaming-api-ws'
+                linkTo='/apis/create/streamingapi'
                 helperText={(
                     <FormattedMessage
-                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.content'
-                        defaultMessage='Design and prototype a new Streaming API'
+                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content'
+                        defaultMessage='Create a Web Socket API'
                     />
                 )}
             >
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title'
-                    defaultMessage='Design New Streaming API'
+                    defaultMessage='Web Socket API'
                 />
             </LandingMenuItem>
             <LandingMenuItem
-                id='itest-id-create-default'
-                linkTo='/apis/create/rest'
+                id='itest-id-create-streaming-api-web-hook'
+                linkTo='/apis/create/streamingapi'
+                helperText={(
+                    <FormattedMessage
+                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content'
+                        defaultMessage='Create a Webhook/WebSub API'
+                    />
+                )}
+            >
+                <FormattedMessage
+                    id='Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title'
+                    defaultMessage='Webhook API'
+                />
+            </LandingMenuItem>
+            <LandingMenuItem
+                id='itest-id-create-streaming-api-sse'
+                linkTo='/apis/create/streamingapi'
+                helperText={(
+                    <FormattedMessage
+                        id='Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content'
+                        defaultMessage='Create a Server-Sent Events API'
+                    />
+                )}
+            >
+                <FormattedMessage
+                    id='Apis.Listing.SampleAPI.SampleAPI.streaming.sse.title'
+                    defaultMessage='SSE API'
+                />
+            </LandingMenuItem>
+            <Box mt={2} />
+            <LandingMenuItem
+                id='itest-id-create-streaming-api-import'
+                linkTo='/apis/create/asyncapi'
                 helperText={(
                     <FormattedMessage
                         id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.content'
-                        defaultMessage='Upload the definition or provide the URL'
+                        defaultMessage='Upload a file or provide an Async API URL'
                     />
                 )}
             >
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.streaming.import.title'
-                    defaultMessage='Import AsyncAPI Definition'
+                    defaultMessage='Import an AsyncAPI'
                 />
             </LandingMenuItem>
         </LandingMenu>
