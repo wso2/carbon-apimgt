@@ -170,7 +170,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             log.error("Error while cleaning up workflow task for the user: " + username, e);
         }
         APIUtil.clearRoleCache(getUserName(username, userStoreManager));
-        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
+        return !isEnable();
     }
 
     @Override
@@ -178,9 +178,6 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                              UserStoreManager userStoreManager) {
         if (!isEnable()) {
             return true;
-        }
-        if (ArrayUtils.isNotEmpty(deletedRoles)) {
-            removeGatewayKeyCache(username, userStoreManager);
         }
         APIUtil.clearRoleCache(getUserName(username, userStoreManager));
         return true;
@@ -193,46 +190,6 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         boolean isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(deletedUsers, userStoreManager, true);
         isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(newUsers, userStoreManager, isRemoveGatewayKeyCache);
         return !isEnable() || isRemoveGatewayKeyCache;
-    }
-
-    private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager) {
-
-        username = getUserName(username, userStoreManager);
-
-        try {
-            if (APIUtil.getEnvironments().size() <= 0) {
-                return true;
-            }
-        } catch (APIManagementException e) {
-            log.error("Error while reading configured gateway environments", e);
-            return false;
-        }
-
-        ApiMgtDAO apiMgtDAO = getDAOInstance();
-        Set<String> activeTokens;
-
-        try {
-            activeTokens = apiMgtDAO.getActiveAccessTokensOfUser(username);
-        } catch (APIManagementException e) {
-            log.error("Error while getting active access tokens of user " + username, e);
-            return false;
-        }
-
-        if (activeTokens == null || activeTokens.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("No active tokens found for the user " + username);
-            }
-            return true;
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Found " + activeTokens.size() + " active tokens of the user " + username);
-        }
-
-        APIAuthenticationAdminClient client = getApiAuthenticationAdminClient();
-        client.invalidateCachedTokens(activeTokens);
-
-        return true;
     }
 
     /**
@@ -355,9 +312,6 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         for (String username : users) {
             username = getUserName(username, userStoreManager);
             APIUtil.clearRoleCache(username);
-            if (isEnable()) {
-                removedGatewayCache = removedGatewayCache && removeGatewayKeyCache(username, userStoreManager);
-            }
         }
         return removedGatewayCache;
     }
@@ -365,10 +319,6 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     public boolean doPostSetUserClaimValue(String userName, UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        boolean isAccountLocked = isAccountLock(userName, userStoreManager);
-        if (isAccountLocked) {
-            removeGatewayKeyCache(userName, userStoreManager);
-        }
         return super.doPostSetUserClaimValue(userName, userStoreManager);
     }
 
@@ -377,25 +327,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                             UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        boolean isAccountLocked = isAccountLock(userName, userStoreManager);
-        if (isAccountLocked) {
-            removeGatewayKeyCache(userName, userStoreManager);
-        }
         return super.doPostSetUserClaimValues(userName, claims, profileName, userStoreManager);
     }
 
-    private boolean isAccountLock(String userName, UserStoreManager userStoreManager) {
-
-        String accountLockedClaim;
-        try {
-            Map<String, String> values = userStoreManager.getUserClaimValues(userName, new String[]{
-                    APIConstants.ACCOUNT_LOCKED_CLAIM}, UserCoreConstants.DEFAULT_PROFILE);
-            accountLockedClaim = values.get(APIConstants.ACCOUNT_LOCKED_CLAIM);
-            return Boolean.parseBoolean(accountLockedClaim);
-        } catch (UserStoreException e) {
-            log.error("Error occurred while retrieving " + APIConstants.ACCOUNT_LOCKED_CLAIM
-                    + " claim value", e);
-        }
-        return false;
-    }
 }

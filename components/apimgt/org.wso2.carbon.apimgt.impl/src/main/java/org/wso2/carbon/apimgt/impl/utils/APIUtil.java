@@ -199,7 +199,6 @@ import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
@@ -1190,30 +1189,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return provider;
-    }
-
-    /**
-     * Returns a list of scopes when passed the Provider Name and Scope Key
-     *
-     * @param scopeKey
-     * @param provider
-     * @return
-     * @throws APIManagementException
-     */
-    public static Set<Scope> getScopeByScopeKey(String scopeKey, String provider) throws APIManagementException {
-
-        Set<Scope> scopeSet = null;
-        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomainName);
-            scopeSet = ApiMgtDAO.getInstance().getAPIScopesByScopeKey(scopeKey, tenantId);
-        } catch (UserStoreException e) {
-            String msg = "Error while retrieving Scopes";
-            log.error(msg, e);
-            handleException(msg);
-        }
-        return scopeSet;
     }
 
     /**
@@ -3572,79 +3547,6 @@ public final class APIUtil {
     public static boolean checkUserNameAssertionEnabled() {
 
         return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isUserNameAssertionEnabled();
-    }
-
-    public static String[] getAvailableKeyStoreTables() throws APIManagementException {
-
-        String[] keyStoreTables = new String[0];
-        Map<String, String> domainMappings = getAvailableUserStoreDomainMappings();
-        if (domainMappings != null) {
-            keyStoreTables = new String[domainMappings.size()];
-            int i = 0;
-            for (Entry<String, String> e : domainMappings.entrySet()) {
-                String value = e.getValue();
-                keyStoreTables[i] = APIConstants.ACCESS_TOKEN_STORE_TABLE + "_" + value.trim();
-                i++;
-            }
-        }
-        return keyStoreTables;
-    }
-
-    public static Map<String, String> getAvailableUserStoreDomainMappings() throws
-            APIManagementException {
-
-        Map<String, String> userStoreDomainMap = new HashMap<String, String>();
-        String domainsStr =
-                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getAccessTokenPartitioningDomains();
-        if (domainsStr != null) {
-            String[] userStoreDomainsArr = domainsStr.split(",");
-            for (String anUserStoreDomainsArr : userStoreDomainsArr) {
-                String[] mapping = anUserStoreDomainsArr.trim().split(":"); //A:foo.com , B:bar.com
-                if (mapping.length < 2) {
-                    throw new APIManagementException("Domain mapping has not defined");
-                }
-                userStoreDomainMap.put(mapping[1].trim(), mapping[0].trim()); //key=domain & value=mapping
-            }
-        }
-        return userStoreDomainMap;
-    }
-
-    public static String getAccessTokenStoreTableFromUserId(String userId)
-            throws APIManagementException {
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        String userStore;
-        if (userId != null) {
-            String[] strArr = userId.split("/");
-            if (strArr.length > 1) {
-                userStore = strArr[0];
-                Map<String, String> availableDomainMappings = getAvailableUserStoreDomainMappings();
-                if (availableDomainMappings != null &&
-                        availableDomainMappings.containsKey(userStore)) {
-                    accessTokenStoreTable = accessTokenStoreTable + "_" +
-                            availableDomainMappings.get(userStore);
-                }
-            }
-        }
-        return accessTokenStoreTable;
-    }
-
-    public static String getAccessTokenStoreTableFromAccessToken(String apiKey)
-            throws APIManagementException {
-
-        String userId = getUserIdFromAccessToken(apiKey); //i.e: 'foo.com/admin' or 'admin'
-        return getAccessTokenStoreTableFromUserId(userId);
-    }
-
-    public static String getUserIdFromAccessToken(String apiKey) {
-
-        String userId = null;
-        String decodedKey = new String(Base64.decodeBase64(apiKey.getBytes(Charset.defaultCharset())), Charset.defaultCharset());
-        String[] tmpArr = decodedKey.split(":");
-        if (tmpArr.length == 2) { //tmpArr[0]= userStoreDomain & tmpArr[1] = userId
-            userId = tmpArr[1];
-        }
-        return userId;
     }
 
     /**
