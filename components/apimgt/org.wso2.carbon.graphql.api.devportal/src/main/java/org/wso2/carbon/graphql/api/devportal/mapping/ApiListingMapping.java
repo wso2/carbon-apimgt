@@ -11,10 +11,10 @@ import java.util.List;
 
 public class ApiListingMapping {
 
-    public ApiListingDTO getApiListing(int start, int offset) throws APIPersistenceException, APIManagementException {
-        ApiService apiDetails = new ApiService();
-        PersistenceService artifactData = new PersistenceService();
-        List<ApiDTO> apis = apiDetails.getAllApis(start, offset);
-        return  new ApiListingDTO(artifactData.apiCount(start, offset),apis, apiDetails.getPaginationData(start,offset));
-    }
+//    public ApiListingDTO getApiListing(int start, int offset) throws APIPersistenceException, APIManagementException {
+//        ApiService apiDetails = new ApiService();
+//        PersistenceService artifactData = new PersistenceService();
+//        List<ApiDTO> apis = apiDetails.getAllApis(start, offset);
+//        return  new ApiListingDTO(artifactData.apiCount(start, offset),apis, apiDetails.getPaginationData(start,offset));
+//    }
 }

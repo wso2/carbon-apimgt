@@ -38,7 +38,10 @@ public class ApiDataFetcherImpl {
         return env-> {
             int start = env.getArgument("start");
             int offset = env.getArgument("offset");
-            return apiListingMapping.getApiListing(start,offset);
+            String token = env.getArgument("token");
+            String oauth = env.getArgument("oauth");
+            return apiService.getAllApis(start,offset,token,oauth);
+            //return apiListingMapping.getApiListing(start,offset);
         };
     }
 

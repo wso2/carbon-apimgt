@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.graphql.api.devportal.mapping.ApiMapping;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ApiDTO;
+import org.wso2.carbon.graphql.api.devportal.modules.api.ApiListingDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.Pagination;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -30,15 +31,21 @@ public class ApiService {
 
     APIPersistence apiPersistenceInstance;
 
-    public List<ApiDTO> getAllApis(int start, int offset) throws APIPersistenceException, APIManagementException {
+    public ApiListingDTO getAllApis(int start, int offset, String token, String oauth) throws APIPersistenceException, APIManagementException {
         PersistenceService artifactData = new PersistenceService();
         List<ApiDTO> apiDTOList = new ArrayList<ApiDTO>();
-        List<DevPortalAPI> list = artifactData.getDevportalAPIS(start,offset);
+        // List<DevPortalAPI> list = artifactData.getDevportalAPIS(start,offset,token,oauth);
+        Map<String, Object> result = artifactData.getDevportalAPIS(start,offset,token,oauth);
+        List<DevPortalAPI> list = (List<DevPortalAPI>) result.get("apis");
         for (DevPortalAPI devPortalAPI: list){
             ApiMapping apiMapping = new ApiMapping();
             apiDTOList.add(apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI));
         }
-     return apiDTOList;
+        int count = (int) result.get("count");
+        Pagination pagination = getPaginationData(offset,start,count);
+        return  new ApiListingDTO(count,apiDTOList, pagination);
+
+        // return apiDTOList;
     }
     public String getApiDefinition(String uuid) throws OASPersistenceException {
         Properties properties = new Properties();
@@ -56,9 +63,9 @@ public class ApiService {
         ApiMapping apiMapping = new ApiMapping();
         return  apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI);
     }
-    public Pagination getPaginationData(int offset, int limit) throws APIPersistenceException, APIManagementException {
+    public Pagination getPaginationData(int offset, int limit, int size) throws APIPersistenceException, APIManagementException {
         PersistenceService artifactData = new PersistenceService();
-        int size = artifactData.apiCount(offset, limit);
+        //int size = artifactData.apiCount(offset, limit);
         String paginatedPrevious = "";
         String paginatedNext = "";
         String query = "";
