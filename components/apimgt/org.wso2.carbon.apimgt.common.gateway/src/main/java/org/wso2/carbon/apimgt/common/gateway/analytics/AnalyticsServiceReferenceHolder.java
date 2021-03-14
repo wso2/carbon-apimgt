@@ -16,22 +16,26 @@
  */
 package org.wso2.carbon.apimgt.common.gateway.analytics;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.AnalyticsDataPublisher;
+
 import java.util.Map;
 
 /**
  * Configuration holder
  */
-public class AnalyticsConfigurationHolder {
-
-    private static final AnalyticsConfigurationHolder instance = new AnalyticsConfigurationHolder();
+public class AnalyticsServiceReferenceHolder {
+    private static final Log log = LogFactory.getLog(AnalyticsServiceReferenceHolder.class);
+    private static final AnalyticsServiceReferenceHolder instance = new AnalyticsServiceReferenceHolder();
 
     private Map<String, String> configurations;
 
-    private AnalyticsConfigurationHolder() {
+    private AnalyticsServiceReferenceHolder() {
 
     }
 
-    public static AnalyticsConfigurationHolder getInstance() {
+    public static AnalyticsServiceReferenceHolder getInstance() {
         return instance;
     }
 
@@ -41,5 +45,8 @@ public class AnalyticsConfigurationHolder {
 
     public void setConfigurations(Map<String, String> configurations) {
         this.configurations = configurations;
+        // initialize data publisher at server start up
+        AnalyticsDataPublisher.getInstance().initialize(configurations);
+        log.debug("Analytics data publisher initialized.");
     }
 }

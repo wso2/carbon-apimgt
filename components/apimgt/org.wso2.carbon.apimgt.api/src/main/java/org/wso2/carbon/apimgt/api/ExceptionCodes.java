@@ -434,8 +434,8 @@ public enum ExceptionCodes implements ErrorHandler {
     // API import/export related codes
     ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
-    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
-            "Error while reading meta information from the api_params.yaml file"),
+    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the params file", 400,
+            "Error while reading meta information from the params file"),
     NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
 

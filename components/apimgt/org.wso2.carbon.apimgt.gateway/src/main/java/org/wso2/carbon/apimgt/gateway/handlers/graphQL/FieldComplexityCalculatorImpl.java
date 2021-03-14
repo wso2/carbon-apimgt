@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -44,7 +45,7 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
 
         } catch (ParseException e) {
             String errorMessage = "Policy definition parsing failed. ";
-            handleFailure(GraphQLConstants.GRAPHQL_INVALID_QUERY, messageContext, errorMessage, errorMessage);
+            handleFailure(messageContext, errorMessage, errorMessage);
         }
     }
 
@@ -88,16 +89,14 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
 
     /**
      * This method handle the failure
-     *
-     * @param errorCodeValue   error code of the failure
-     * @param messageContext   message context of the request
+     *  @param messageContext   message context of the request
      * @param errorMessage     error message of the failure
      * @param errorDescription error description of the failure
      */
-    private void handleFailure(int errorCodeValue, MessageContext messageContext,
-                               String errorMessage, String errorDescription) {
-        OMElement payload = getFaultPayload(errorCodeValue, errorMessage, errorDescription);
-        Utils.setFaultPayload(messageContext, payload);
+    private void handleFailure(MessageContext messageContext, String errorMessage, String errorDescription) {
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, GraphQLConstants.GRAPHQL_INVALID_QUERY);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, errorDescription);
         Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
@@ -105,24 +104,5 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
         Utils.sendFault(messageContext, HttpStatus.SC_BAD_REQUEST);
     }
 
-
-    private OMElement getFaultPayload(int errorCodeValue, String message, String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(errorCodeValue + "");
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(message);
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(description);
-
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
-    }
 
 }

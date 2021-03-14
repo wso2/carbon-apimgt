@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -8476,6 +8477,30 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get the default policy in a given tenant space
+     *
+     * @param tenantDomain tenant domain name
+     * @return default throttling policy for a given tenant
+     */
+    public static String getDefaultThrottlingPolicy(String tenantDomain) {
+        String defaultTier = APIConstants.UNLIMITED_TIER;
+        if (!isEnabledUnlimitedTier()) {
+            // Set an available value if the Unlimited policy is disabled
+            try {
+                Map<String, Tier> tierMap = getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                if (tierMap.size() > 0) {
+                    defaultTier = tierMap.keySet().toArray()[0].toString();
+                } else {
+                    log.error("No throttle policies available in the tenant " + tenantDomain);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while getting throttle policies for tenant " + tenantDomain);
+            }
+        }
+        return defaultTier;
+    }
+
+    /**
      * This method is used to get the labels in a given tenant space
      *
      * @param tenantDomain tenant domain name
@@ -9943,6 +9968,24 @@ public final class APIUtil {
     public static Map<String, Environment> getReadOnlyEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
+
+    /**
+     * Get default (first) vhost of the given read only environment
+     * @param environmentName name of the read only environment
+     * @return default vhost of environment
+     */
+    public static VHost getDefaultVhostOfReadOnlyEnvironment(String environmentName) throws APIManagementException {
+        Map<String, Environment> readOnlyEnvironments = getReadOnlyEnvironments();
+        if (readOnlyEnvironments.get(environmentName) == null) {
+            throw new APIManagementException("Configured read only environment not found: "
+                    + environmentName);
+        }
+        if (readOnlyEnvironments.get(environmentName).getVhosts().isEmpty()) {
+            throw new APIManagementException("VHosts not found for the environment: "
+                    + environmentName);
+        }
+        return readOnlyEnvironments.get(environmentName).getVhosts().get(0);
     }
 
     private static QName getQNameWithIdentityNS(String localPart) {
