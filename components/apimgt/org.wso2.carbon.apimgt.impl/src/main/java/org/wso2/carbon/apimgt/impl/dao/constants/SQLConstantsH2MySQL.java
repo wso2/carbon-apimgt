@@ -269,7 +269,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "AND API.API_NAME = ? " +
                     "AND API.API_VERSION  = ? " +
                     "AND API.API_ID = AM_API_COMMENTS.API_ID " +
-                    "AND PARENT_COMMENT_ID = ? ORDER BY  AM_API_COMMENTS.CREATED_TIME ASC LIMIT ? OFFSET ?";
+                    "AND PARENT_COMMENT_ID = ? ORDER BY  AM_API_COMMENTS.CREATED_TIME ASC LIMIT ?, ?";
 
     public static final String GET_ROOT_COMMENTS_SQL =
             "SELECT " +
@@ -290,5 +290,5 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "AND API.API_NAME = ? " +
                     "AND API.API_VERSION  = ? " +
                     "AND API.API_ID = AM_API_COMMENTS.API_ID " +
-                    "AND PARENT_COMMENT_ID IS NULL ORDER BY  AM_API_COMMENTS.CREATED_TIME DESC LIMIT ? OFFSET ?";
+                    "AND PARENT_COMMENT_ID IS NULL ORDER BY  AM_API_COMMENTS.CREATED_TIME DESC LIMIT ?, ?";
 }

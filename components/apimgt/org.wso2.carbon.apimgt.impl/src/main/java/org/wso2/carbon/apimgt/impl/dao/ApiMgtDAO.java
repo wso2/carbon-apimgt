@@ -8040,43 +8040,11 @@ public class ApiMgtDAO {
                         prepStmt.setString(3, identifier.getVersion());
                         if (parentCommentID != null) {
                             prepStmt.setString(4, parentCommentID);
-                            if (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
-                                    .getDriverName().contains("H2")) {
-                                prepStmt.setInt(5, limit);
-                                prepStmt.setInt(6, offset);
-                            } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
-                                return null;
-                            } else if (connection.getMetaData().getDriverName().contains("MS SQL") || connection
-                                    .getMetaData().getDriverName().contains("Microsoft")) {
-                                prepStmt.setInt(5, offset);
-                                prepStmt.setInt(6, limit);
-                            } else if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-                                return null;
-                            } else if (connection.getMetaData().getDriverName().contains("Oracle")) {
-                                return null;
-                            }else{
-                                log.error("Could not find DB type to load constants");
-                                throw new APIManagementException("Error occurred while initializing SQL Constants Manager");
-                            }
+                            prepStmt.setInt(5, offset);
+                            prepStmt.setInt(6, limit);
                         } else {
-                            if (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData()
-                                    .getDriverName().contains("H2")) {
-                                prepStmt.setInt(4, limit);
-                                prepStmt.setInt(5, offset);
-                            } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
-                                return null;
-                            } else if (connection.getMetaData().getDriverName().contains("MS SQL") || connection
-                                    .getMetaData().getDriverName().contains("Microsoft")) {
-                                prepStmt.setInt(4, offset);
-                                prepStmt.setInt(5, limit);
-                            } else if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-                                return null;
-                            } else if (connection.getMetaData().getDriverName().contains("Oracle")) {
-                                return null;
-                            }else{
-                                log.error("Could not find DB type to load constants");
-                                throw new APIManagementException("Error occurred while initializing SQL Constants Manager");
-                            }
+                            prepStmt.setInt(4, offset);
+                            prepStmt.setInt(5, limit);
                         }
                         try (ResultSet resultSet = prepStmt.executeQuery()) {
                             while (resultSet.next()) {
