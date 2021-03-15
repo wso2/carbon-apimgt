@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.DocumentationPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -262,75 +263,19 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test
-    public void testGetApi()
-            throws APIManagementException, RegistryException, org.wso2.carbon.user.api.UserStoreException, OASPersistenceException {
-        PowerMockito.mockStatic(APIUtil.class);
-        Resource resource = new ResourceImpl();
-        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
-                registry, tenantManager, apiMgtDAO, apiPersistenceInstance);
-        abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME1, API_PROVIDER, SAMPLE_API_VERSION);
-        String apiPath =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
-        Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenThrow(UserStoreException.class)
-                .thenReturn(-1234);
-        API sampleAPI = new API(identifier);
-        sampleAPI.setOrganizationId(SAMPLE_ORGANIZATION_ID);
-        PowerMockito.when(APIUtil.getAPIForPublishing((GovernanceArtifact) Mockito.any(), (Registry) Mockito.any()))
-                .thenReturn(sampleAPI);
-        PowerMockito.when(APIUtil.getAPIPath(identifier)).thenReturn(apiPath);
-        apiMgtDAO = TestUtils.getApiMgtDAO();
-        try {
-            abstractAPIManager.getAPI(identifier);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get API from "));
-        }
-        Mockito.when(registry.get(apiPath)).thenThrow(RegistryException.class).thenReturn(resource);
-        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME1, API_PROVIDER, SAMPLE_API_VERSION,
-                "sample");
-        Mockito.when(genericArtifactManager.getGenericArtifact(SAMPLE_RESOURCE_ID)).thenReturn(genericArtifact);
-
-        try {
-            abstractAPIManager.getAPI(identifier);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("Failed to get API from"));
-        }
-        Mockito.when(apiMgtDAO.getUUIDFromIdentifier(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn("123456");
-        PowerMockito.when(apiPersistenceInstance.getOASDefinition(any(Organization.class), Mockito.anyString()))
-                .thenReturn("test swagger definition");
-        try {
-            abstractAPIManager.getAPI(identifier);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("artifact id is null"));
-        }
-        resource.setUUID(SAMPLE_RESOURCE_ID);
+    public void testGetApi() throws Exception {
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);
+        PublisherAPI publisherAPI = Mockito.mock(PublisherAPI.class);
+        Mockito.when(publisherAPI.getApiName()).thenReturn(SAMPLE_API_NAME);
+        Organization org = Mockito.mock(Organization.class);
+        PowerMockito.whenNew(Organization.class).withArguments(SAMPLE_TENANT_DOMAIN, null).thenReturn(org);
+        Mockito.when(apiPersistenceInstance.getPublisherAPI(org, "1234")).thenReturn(publisherAPI);
+        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        identifier.setUuid("1234");
+        Assert.assertNotNull(abstractAPIManager.getAPI(identifier));
         API api = abstractAPIManager.getAPI(identifier);
-        Assert.assertNotNull(api);
-        Assert.assertEquals(api.getId().getApiName(), SAMPLE_API_NAME1);
-        sampleAPI.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
-        Assert.assertEquals(abstractAPIManager.getAPI(identifier).getId().getApiName(), SAMPLE_API_NAME1);
-        abstractAPIManager.tenantDomain = null;
-        UserRegistry registry = Mockito.mock(UserRegistry.class);
-        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
-                .thenReturn(registry);
-        Mockito.when(registry.get(apiPath)).thenReturn(resource);
-        PowerMockito.when(APIUtil.replaceEmailDomainBack(Mockito.anyString())).thenReturn(API_PROVIDER);
-        sampleAPI.setVisibility(null);
-        try {
-            abstractAPIManager.getAPI(identifier);
-            Assert.fail("Exception not thrown for error scenario");
-        } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("does not have permission to view API"));
-        }
-        AbstractAPIManager abstractAPIManager1 = new AbstractAPIManagerWrapperExtended(genericArtifactManager,
-                registryService, registry, tenantManager, apiMgtDAO, apiPersistenceInstance);
-        abstractAPIManager1.tenantDomain =SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(abstractAPIManager1.getAPI(identifier).getId().getApiName(), SAMPLE_API_NAME1);
+        PublisherAPI publisherAPI1 = APIMapper.INSTANCE.toPublisherApi(api);
+        Assert.assertEquals(publisherAPI1.getApiName(), SAMPLE_API_NAME);
     }
 
     @Test

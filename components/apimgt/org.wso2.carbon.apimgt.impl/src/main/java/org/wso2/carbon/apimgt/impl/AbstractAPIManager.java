@@ -453,7 +453,13 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         try {
-            String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(identifier.getUUID());
+            String uuid;
+            if (identifier.getUUID() != null) {
+                uuid = identifier.getUUID();
+            } else {
+                uuid = apiMgtDAO.getUUIDFromIdentifier(identifier);
+            }
+            String organizationId = apiMgtDAO.getOrganizationIDByAPIUUID(uuid);
             Organization org = new Organization(organizationId);
             PublisherAPI publisherAPI = apiPersistenceInstance.getPublisherAPI(org, identifier.getUUID());
             API api = APIMapper.INSTANCE.toApi(publisherAPI);
@@ -464,10 +470,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())){
                 api.setGraphQLSchema(getGraphqlSchema(api.getId()));
-            }
-            //check for API visibility
-            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
-                return api;
             }
             return api;
         } catch (APIPersistenceException e) {
