@@ -3893,6 +3893,9 @@ components:
               environmentName:
                 type: string
                 example: Production and Sandbox
+              environmentDisplayName:
+                type: string
+                example: Production and Sandbox
               environmentType:
                 type: string
                 example: hybrid
