@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
-import com.google.common.io.Files;
 import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -26,7 +25,6 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -48,7 +46,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUt
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,6 +85,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                             artifact);
                             if (APIConstants.API_PRODUCT.equals(runTimeArtifact.getType())) {
                                 APIProductDTO apiProductDTO = ImportUtils.retrieveAPIProductDto(extractedFolderPath);
+                                apiProductDTO.setId(runTimeArtifact.getApiId());
                                 APIProduct apiProduct = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO,
                                         apiProductDTO.getProvider());
                                 APIDefinitionValidationResponse apiDefinitionValidationResponse =
@@ -95,8 +93,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                 apiProduct.setDefinition(apiDefinitionValidationResponse.getContent());
                                 gatewayAPIDTO = TemplateBuilderUtil
                                         .retrieveGatewayAPIDto(apiProduct, environment, tenantDomain,
-                                                extractedFolderPath,
-                                                apiDefinitionValidationResponse);
+                                                extractedFolderPath
+                                        );
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());

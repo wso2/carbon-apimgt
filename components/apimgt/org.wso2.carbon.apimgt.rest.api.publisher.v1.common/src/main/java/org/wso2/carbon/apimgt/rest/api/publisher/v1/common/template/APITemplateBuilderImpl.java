@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,8 +47,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Constructs API and resource configurations for the ESB/Synapse using a Apache velocity
@@ -90,6 +86,11 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         this(api);
         this.soapToRestInMediationDtoList = soapToRestInMediationDtoList;
         this.soapToRestOutMediationDtoList = soapToRestOutMediationDtoList;
+    }
+
+    public APITemplateBuilderImpl(API api, APIProduct apiProduct) {
+        this.api = api;
+        this.apiProduct = apiProduct;
     }
 
     @Override
@@ -167,7 +168,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new SecurityConfigContext(configcontext, api);
             configcontext = new JwtConfigContext(configcontext);
             configcontext = new ResponseCacheConfigContext(configcontext, api);
-            configcontext = new BAMMediatorConfigContext(configcontext);
             configcontext = new HandlerConfigContex(configcontext, handlers);
             configcontext = new EnvironmentConfigContext(configcontext, environment);
             configcontext = new TemplateUtilContext(configcontext);
@@ -202,58 +202,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return writer.toString();
     }
 
-    @Override
-    public String getConfigStringForDefaultAPITemplate(String defaultVersion) throws APITemplateException {
-        StringWriter writer = new StringWriter();
-
-        try {
-            VelocityEngine velocityengine = new VelocityEngine();
-            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        CommonsLogLogChute.class.getName());
-                velocityengine.setProperty(VelocityEngine.RESOURCE_LOADER, "classpath");
-                velocityengine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-            }
-
-            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
-            initVelocityEngine(velocityengine);
-
-            ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new TransportConfigContext(configcontext, api);
-            configcontext = new ResourceConfigContext(configcontext, api);
-            configcontext = new TemplateUtilContext(configcontext);
-
-            VelocityContext context = configcontext.getContext();
-            context.put("defaultVersion", defaultVersion);
-            String fwdApiContext = this.api.getContext();
-            if (fwdApiContext != null && fwdApiContext.charAt(0) == '/') {
-                fwdApiContext = fwdApiContext.substring(1);
-            }
-            context.put("fwdApiContext", fwdApiContext);
-
-            // for default version, we remove the {version} param from the apiContext
-            String apiContext = this.api.getContextTemplate();
-            if(apiContext.contains("{version}")){
-                apiContext = apiContext.replace("/{version}","");
-                apiContext = apiContext.replace("{version}","");
-            }
-
-            context.put("apiContext", apiContext);
-
-            Template t = velocityengine.getTemplate(this.getDefaultAPITemplatePath());
-
-            if (APIConstants.APITransportType.WS.toString().equals(this.api.getType())) {
-                context.put("defaultVersionUrlMapping", "/_default_resource_of_api_" + this.api.getId().getVersion());
-            }
-
-            t.merge(context, writer);
-        } catch (Exception e) {
-            log.error("Velocity Error", e);
-            throw new APITemplateException("Velocity Error", e);
-        }
-        return writer.toString();
-    }
-
     /**
      * Sets the necessary variables to velocity context
      *
@@ -267,8 +215,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         try {
             ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new EndpointBckConfigContext(configcontext, api);
-            configcontext = new EndpointConfigContext(configcontext, api);
+            configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
             configcontext = new TemplateUtilContext(configcontext);
 
             configcontext.validate();
@@ -356,7 +303,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new SecurityConfigContext(configcontext, api);
         configcontext = new JwtConfigContext(configcontext);
         configcontext = new ResponseCacheConfigContext(configcontext, api);
-        configcontext = new BAMMediatorConfigContext(configcontext);
         configcontext = new HandlerConfigContex(configcontext, handlers);
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
@@ -380,24 +326,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new ResourceConfigContext(configcontext, apiProduct);
 
         configcontext = new ResponseCacheConfigContext(configcontext, apiProduct);
-        configcontext = new BAMMediatorConfigContext(configcontext);
         configcontext = new HandlerConfigContex(configcontext, handlers);
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
         configcontext = new SecurityConfigContext(configcontext, apiProduct, associatedAPIMap);
 
         return configcontext;
-    }
-
-    @Override
-    public OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException {
-        try {
-            return AXIOMUtil.stringToOM(getConfigStringForTemplate(environment));
-        } catch (XMLStreamException e) {
-            String msg = "Error converting string to OMElement - String: " + getConfigStringForTemplate(environment);
-            log.error(msg, e);
-            throw new APITemplateException(msg, e);
-        }
     }
 
     public void addHandler(String handlerName, Map<String, String> properties) {
