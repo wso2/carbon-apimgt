@@ -56,21 +56,23 @@ public interface APIProvider extends APIManager {
      *
      * @param apiTypeWrapper Api Type Wrapper
      * @param commentId Comment ID
-     * @param limit
-     * @param offset
+     * @param replyLimit
+     * @param replyOffset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
 
     /**
      * @param apiTypeWrapper Api type wrapper
      * @param parentCommentID
+     * @param replyLimit
+     * @param replyOffset
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException;
+    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
