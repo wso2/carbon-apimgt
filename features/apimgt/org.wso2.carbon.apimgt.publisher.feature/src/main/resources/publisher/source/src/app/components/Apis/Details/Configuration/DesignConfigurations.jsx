@@ -365,23 +365,25 @@ export default function DesignConfigurations() {
                                 defaultMessage='Design Configurations'
                             />
                         </Typography>
-                        {api.apiType === API.CONSTS.APIProduct
-                            ? (
-                                <Typography variant='caption'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading'
-                                        defaultMessage='Configure API Product visibility.'
-                                    />
-                                </Typography>
-                            )
-                            : (
-                                <Typography variant='caption'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Configuration.Configuration.Design.sub.heading'
-                                        defaultMessage='Configure API visibility.'
-                                    />
-                                </Typography>
-                            )}
+                        <Box color='text.secondary'>
+                            {api.apiType === API.CONSTS.APIProduct
+                                ? (
+                                    <Typography variant='caption'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading'
+                                            defaultMessage='Configure basic API Product meta informations'
+                                        />
+                                    </Typography>
+                                )
+                                : (
+                                    <Typography variant='caption'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.Design.sub.heading'
+                                            defaultMessage='Configure basic API meta information'
+                                        />
+                                    </Typography>
+                                )}
+                        </Box>
                     </Grid>
                     <Grid item md={12}>
                         <Paper elevation={0}>

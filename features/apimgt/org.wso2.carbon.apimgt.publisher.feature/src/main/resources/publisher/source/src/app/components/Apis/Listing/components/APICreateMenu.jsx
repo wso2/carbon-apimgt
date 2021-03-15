@@ -21,12 +21,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import {
     useTheme,
 } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
-import { FormattedMessage } from 'react-intl';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 import RestAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/RestAPIMenu';
 import SoapAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/SoapAPIMenu';
@@ -34,12 +31,8 @@ import GraphqlAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/GraphqlAPIM
 import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/StreamingAPIMenu';
 import ServiceCatalogMenu from 'AppComponents/Apis/Listing/Landing/Menus/ServiceCatalogMenu';
 import MenuButton from 'AppComponents/Shared/MenuButton';
-import AuthManager from 'AppData/AuthManager';
 
 const useStyles = makeStyles({
-    root: {
-        flexGrow: 1,
-    },
     dividerCls: {
         height: '180px',
         position: 'absolute',
@@ -52,8 +45,7 @@ const useStyles = makeStyles({
 
 const APICreateMenu = () => {
     const theme = useTheme();
-    const matches = useMediaQuery(theme.breakpoints.down('xs'));
-    const { dividerCls, root } = useStyles();
+    const { dividerCls } = useStyles();
     const {
         graphqlIcon,
         restApiIcon,

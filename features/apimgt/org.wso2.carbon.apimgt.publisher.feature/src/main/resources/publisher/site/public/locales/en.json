@@ -1350,13 +1350,13 @@
   "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Configure API Product visibility."
+      "value": "Configure basic API Product meta informations"
     }
   ],
   "Apis.Details.Configuration.Configuration.Design.sub.heading": [
     {
       "type": 0,
-      "value": "Configure API visibility."
+      "value": "Configure basic API meta information"
     }
   ],
   "Apis.Details.Configuration.Configuration.Design.topic.header": [
@@ -1866,7 +1866,7 @@
   "Apis.Details.Configuration.components.Social.giturl.help": [
     {
       "type": 0,
-      "value": "You need to enable social feature to view this from devportal. Set custom.social.showSharing.active to true. Refer documentation for more information"
+      "value": "This GitHub URL will be available in the API overview page in developer portal"
     }
   ],
   "Apis.Details.Configuration.components.Social.slack": [
@@ -1878,7 +1878,7 @@
   "Apis.Details.Configuration.components.Social.slack_url.help": [
     {
       "type": 0,
-      "value": "You need to enable social feature to view this from devportal. Set custom.social.showSharing.active to true. Refer documentation for more information"
+      "value": "This Slack Channel URL will be available in the API overview page in developer portal"
     }
   ],
   "Apis.Details.Configuration.components.StoreVisibility.dropdown.public": [
@@ -6272,7 +6272,7 @@
   "Apis.Details.index.api.Config": [
     {
       "type": 0,
-      "value": "API configuration"
+      "value": "API configurations"
     }
   ],
   "Apis.Details.index.api.definition2": [
@@ -6388,7 +6388,7 @@
   "Apis.Details.index.portal.configuration": [
     {
       "type": 0,
-      "value": "Portal Configuration"
+      "value": "Portal Configurations"
     }
   ],
   "Apis.Details.index.properties": [
@@ -6535,18 +6535,6 @@
       "value": "Sample PizzaShackAPI API created successfully"
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.create.revision": [
-    {
-      "type": 0,
-      "value": "Something went wrong while creating the API Revision"
-    }
-  ],
-  "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.deploy.revision": [
-    {
-      "type": 0,
-      "value": "Something went wrong while deploying the API Revision"
-    }
-  ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
     {
       "type": 0,
@@ -6568,7 +6556,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.published": [
     {
       "type": 0,
-      "value": "Sample PizzaShackAPI API Published successfully"
+      "value": "Sample PizzaShackAPI API published successfully"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": [
@@ -6580,7 +6568,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content": [
     {
       "type": 0,
-      "value": "Upload definition or provide the url"
+      "value": "Import OAS 3 or Swagger 2.0 definition"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.title": [
@@ -6604,7 +6592,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content": [
     {
       "type": 0,
-      "value": "This is a sample API for Pizza Shack online pizza delivery store"
+      "value": "Sample Pizza Shack API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.title": [
@@ -6628,7 +6616,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content": [
     {
       "type": 0,
-      "value": "Use an existing WSDL"
+      "value": "Generate REST or create a pass-through API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.title": [
@@ -6643,28 +6631,52 @@
       "value": "Streaming API"
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.content": [
-    {
-      "type": 0,
-      "value": "Design and prototype a new Streaming API"
-    }
-  ],
   "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title": [
     {
       "type": 0,
-      "value": "Design New Streaming API"
+      "value": "Web Socket API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content": [
+    {
+      "type": 0,
+      "value": "Create a Web Socket API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.streaming.import.content": [
     {
       "type": 0,
-      "value": "Upload the definition or provide the URL"
+      "value": "Upload a file or provide an Async API URL"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.streaming.import.title": [
     {
       "type": 0,
-      "value": "Import AsyncAPI Definition"
+      "value": "Import an AsyncAPI"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content": [
+    {
+      "type": 0,
+      "value": "Create a Server-Sent Events API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.title": [
+    {
+      "type": 0,
+      "value": "SSE API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content": [
+    {
+      "type": 0,
+      "value": "Create a Webhook/WebSub API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title": [
+    {
+      "type": 0,
+      "value": "Webhook API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": [
@@ -6838,13 +6850,19 @@
   "Apis.Listing.components.TopMenu.displaying": [
     {
       "type": 0,
-      "value": "Displaying"
+      "value": "Total of"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
       "value": "Search Result(s)"
+    }
+  ],
+  "Apis.Listing.import.from.service.catalog.title": [
+    {
+      "type": 0,
+      "value": "Import From Service Catalog"
     }
   ],
   "Apis.Settings.Alert.AlertConfiguration.add": [

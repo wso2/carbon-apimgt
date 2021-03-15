@@ -589,10 +589,10 @@
     "defaultMessage": "The header name that is used to send the authorization information. \"Authorization\" is the default header."
   },
   "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": {
-    "defaultMessage": "Configure API Product visibility."
+    "defaultMessage": "Configure basic API Product meta informations"
   },
   "Apis.Details.Configuration.Configuration.Design.sub.heading": {
-    "defaultMessage": "Configure API visibility."
+    "defaultMessage": "Configure basic API meta information"
   },
   "Apis.Details.Configuration.Configuration.Design.topic.header": {
     "defaultMessage": "Design Configurations"
@@ -847,13 +847,13 @@
     "defaultMessage": "GitHub URL"
   },
   "Apis.Details.Configuration.components.Social.giturl.help": {
-    "defaultMessage": "You need to enable social feature to view this from devportal. Set custom.social.showSharing.active to true. Refer documentation for more information"
+    "defaultMessage": "This GitHub URL will be available in the API overview page in developer portal"
   },
   "Apis.Details.Configuration.components.Social.slack": {
     "defaultMessage": "Slack URL"
   },
   "Apis.Details.Configuration.components.Social.slack_url.help": {
-    "defaultMessage": "You need to enable social feature to view this from devportal. Set custom.social.showSharing.active to true. Refer documentation for more information"
+    "defaultMessage": "This Slack Channel URL will be available in the API overview page in developer portal"
   },
   "Apis.Details.Configuration.components.StoreVisibility.dropdown.public": {
     "defaultMessage": "Public"
@@ -2983,7 +2983,7 @@
     "defaultMessage": "Test Console"
   },
   "Apis.Details.index.api.Config": {
-    "defaultMessage": "API configuration"
+    "defaultMessage": "API configurations"
   },
   "Apis.Details.index.api.definition2": {
     "defaultMessage": "API definition"
@@ -3037,7 +3037,7 @@
     "defaultMessage": "overview"
   },
   "Apis.Details.index.portal.configuration": {
-    "defaultMessage": "Portal Configuration"
+    "defaultMessage": "Portal Configurations"
   },
   "Apis.Details.index.properties": {
     "defaultMessage": "properties"
@@ -3111,12 +3111,6 @@
   "Apis.Listing.SampleAPI.SampleAPI.created": {
     "defaultMessage": "Sample PizzaShackAPI API created successfully"
   },
-  "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.create.revision": {
-    "defaultMessage": "Something went wrong while creating the API Revision"
-  },
-  "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.deploy.revision": {
-    "defaultMessage": "Something went wrong while deploying the API Revision"
-  },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": {
     "defaultMessage": "GraphQL"
   },
@@ -3127,13 +3121,13 @@
     "defaultMessage": "Import GraphQL SDL"
   },
   "Apis.Listing.SampleAPI.SampleAPI.published": {
-    "defaultMessage": "Sample PizzaShackAPI API Published successfully"
+    "defaultMessage": "Sample PizzaShackAPI API published successfully"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": {
     "defaultMessage": "REST API"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content": {
-    "defaultMessage": "Upload definition or provide the url"
+    "defaultMessage": "Import OAS 3 or Swagger 2.0 definition"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.title": {
     "defaultMessage": "Import Open API"
@@ -3145,7 +3139,7 @@
     "defaultMessage": "Start From Scratch"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content": {
-    "defaultMessage": "This is a sample API for Pizza Shack online pizza delivery store"
+    "defaultMessage": "Sample Pizza Shack API"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.title": {
     "defaultMessage": "Deploy Sample API"
@@ -3157,7 +3151,7 @@
     "defaultMessage": "SOAP API"
   },
   "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content": {
-    "defaultMessage": "Use an existing WSDL"
+    "defaultMessage": "Generate REST or create a pass-through API"
   },
   "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.title": {
     "defaultMessage": "Import WSDL"
@@ -3165,17 +3159,29 @@
   "Apis.Listing.SampleAPI.SampleAPI.streaming.api": {
     "defaultMessage": "Streaming API"
   },
-  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.content": {
-    "defaultMessage": "Design and prototype a new Streaming API"
-  },
   "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title": {
-    "defaultMessage": "Design New Streaming API"
+    "defaultMessage": "Web Socket API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content": {
+    "defaultMessage": "Create a Web Socket API"
   },
   "Apis.Listing.SampleAPI.SampleAPI.streaming.import.content": {
-    "defaultMessage": "Upload the definition or provide the URL"
+    "defaultMessage": "Upload a file or provide an Async API URL"
   },
   "Apis.Listing.SampleAPI.SampleAPI.streaming.import.title": {
-    "defaultMessage": "Import AsyncAPI Definition"
+    "defaultMessage": "Import an AsyncAPI"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content": {
+    "defaultMessage": "Create a Server-Sent Events API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.title": {
+    "defaultMessage": "SSE API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content": {
+    "defaultMessage": "Create a Webhook/WebSub API"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title": {
+    "defaultMessage": "Webhook API"
   },
   "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": {
     "defaultMessage": "Create New API Product"
@@ -3262,10 +3268,13 @@
     "defaultMessage": "Create API"
   },
   "Apis.Listing.components.TopMenu.displaying": {
-    "defaultMessage": "Displaying"
+    "defaultMessage": "Total of"
   },
   "Apis.Listing.components.TopMenu.search.results": {
     "defaultMessage": "Search Result(s)"
+  },
+  "Apis.Listing.import.from.service.catalog.title": {
+    "defaultMessage": "Import From Service Catalog"
   },
   "Apis.Settings.Alert.AlertConfiguration.add": {
     "defaultMessage": "New Configuration"
