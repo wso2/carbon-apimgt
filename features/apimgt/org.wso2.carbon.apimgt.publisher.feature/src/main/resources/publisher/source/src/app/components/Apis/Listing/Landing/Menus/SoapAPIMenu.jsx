@@ -5,9 +5,10 @@ import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/Landi
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 
 const SoapAPIMenu = (props) => {
-    const { icon } = props;
+    const { icon, openList } = props;
     return (
         <LandingMenu
+            openList={openList}
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.soap.api'
@@ -17,12 +18,13 @@ const SoapAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-create-soap-api'
                 linkTo='/apis/create/wsdl'
                 helperText={(
                     <FormattedMessage
                         id='Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content'
-                        defaultMessage='Use an existing WSDL'
+                        defaultMessage='Generate REST or create a pass-through API'
                     />
                 )}
             >

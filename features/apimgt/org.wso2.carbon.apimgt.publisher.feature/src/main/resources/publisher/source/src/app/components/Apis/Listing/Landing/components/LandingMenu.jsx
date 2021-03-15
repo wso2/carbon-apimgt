@@ -7,7 +7,8 @@ import Configurations from 'Config';
 import Fade from '@material-ui/core/Fade';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Divider from '@material-ui/core/Divider';
+import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles({
     boxTransition: {
@@ -29,6 +30,9 @@ const useStyles = makeStyles({
 });
 
 const LandingMenu = (props) => {
+    const {
+        title, icon, children, openList,
+    } = props;
     const [isHover, setIsHover] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isFadeOut, setIsFadeOut] = useState(true);
@@ -40,7 +44,10 @@ const LandingMenu = (props) => {
         setIsHover(false);
     };
 
-    const { title, icon, children } = props;
+    let menuListVisibility = 'hidden';
+    if (!isFadeOut || openList) {
+        menuListVisibility = 'visible';
+    }
     return (
         <Grid
             item
@@ -61,7 +68,7 @@ const LandingMenu = (props) => {
                 display='flex'
                 border={1}
                 boxShadow={isHover ? 4 : 1}
-                minHeight={340}
+                minHeight={openList ? 300 : 340}
                 p={1}
                 color={blue[900]}
                 fontSize='h4.fontSize'
@@ -88,7 +95,7 @@ const LandingMenu = (props) => {
                                 width='90px'
                                 src={Configurations.app.context
                                     + icon}
-                                alt='Rest API'
+                                alt={title}
                             />
                         </Box>
                     </Grid>
@@ -104,36 +111,52 @@ const LandingMenu = (props) => {
                     textAlign='center'
                     width='97%'
                     className={overlayBox}
-                    visibility={isFadeOut && 'hidden'}
+                    visibility={menuListVisibility}
                 >
-                    <ClickAwayListener onClickAway={() => {
 
-                    }}
+                    <Fade
+                        onExited={() => setIsFadeOut(true)}
+                        timeout={{ enter: 500, exit: 150 }}
+                        in={isCollapsed || openList}
                     >
-                        <Fade onExited={() => setIsFadeOut(true)} timeout={{ enter: 500, exit: 150 }} in={isCollapsed}>
-                            <Box>
-                                <IconButton
-                                    className={overlayCloseButton}
-                                    onClick={(e) => {
-                                        setIsCollapsed(false);
-                                        e.preventDefault(); e.stopPropagation();
-                                    }}
-                                >
-                                    <CloseIcon />
-                                </IconButton>
-                                <Grid
-                                    container
-                                    direction='row'
-                                    justify='flex-start'
-                                    alignItems='center'
-                                    spacing={4}
-                                >
-                                    {/* Menu links or buttons */}
-                                    {children}
-                                </Grid>
-                            </Box>
-                        </Fade>
-                    </ClickAwayListener>
+                        <Box>
+                            {
+                                !openList && (
+                                    <IconButton
+                                        className={overlayCloseButton}
+                                        onClick={(e) => {
+                                            setIsCollapsed(false);
+                                            e.preventDefault(); e.stopPropagation();
+                                        }}
+                                    >
+                                        <CloseIcon />
+                                    </IconButton>
+                                )
+                            }
+
+                            {openList && (
+                                <Box mb={2}>
+                                    <Typography
+                                        variant='h6'
+                                        align='left'
+                                    >
+                                        {title}
+                                    </Typography>
+                                    <Divider />
+                                </Box>
+                            )}
+                            <Grid
+                                container
+                                direction='row'
+                                justify='flex-start'
+                                alignItems='center'
+                                spacing={4}
+                            >
+                                {/* Menu links or buttons */}
+                                {children}
+                            </Grid>
+                        </Box>
+                    </Fade>
                 </Box>
             </Box>
         </Grid>

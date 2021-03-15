@@ -5,9 +5,10 @@ import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/Landi
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 
 const GraphqlAPIMenu = (props) => {
-    const { icon } = props;
+    const { icon, openList } = props;
     return (
         <LandingMenu
+            openList={openList}
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.graphql.api'
@@ -17,6 +18,7 @@ const GraphqlAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-create-graphql-api'
                 linkTo='/apis/create/graphQL'
                 helperText={(

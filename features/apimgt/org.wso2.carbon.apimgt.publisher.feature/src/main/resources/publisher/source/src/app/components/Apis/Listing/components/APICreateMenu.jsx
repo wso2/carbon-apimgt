@@ -17,28 +17,76 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { makeStyles } from '@material-ui/core/styles';
+import {
+    useTheme,
+} from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import { FormattedMessage } from 'react-intl';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+
+import RestAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/RestAPIMenu';
+import SoapAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/SoapAPIMenu';
+import GraphqlAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/GraphqlAPIMenu';
+import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/StreamingAPIMenu';
+import ServiceCatalogMenu from 'AppComponents/Apis/Listing/Landing/Menus/ServiceCatalogMenu';
 import MenuButton from 'AppComponents/Shared/MenuButton';
-import Landing from 'AppComponents/Apis/Listing/Landing';
 import AuthManager from 'AppData/AuthManager';
 
+const useStyles = makeStyles({
+    root: {
+        flexGrow: 1,
+    },
+    dividerCls: {
+        height: '180px',
+        position: 'absolute',
+        top: '50%',
+        '-ms-transform': 'translateY(-50%)',
+        transform: 'translateY(-50%)',
+        margin: 'auto',
+    },
+});
 
-const APICreateMenu = (props) => {
-    const { handleDeploySample, deploying } = props;
-
-    if (deploying !== null && handleDeploySample !== null) {
-        return <Landing />;
-    } else {
-        return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={<Landing />} />;
-    }
-};
-APICreateMenu.defaultProps = {
-    handleDeploySample: null,
-    deploying: null,
-};
-APICreateMenu.propTypes = {
-    children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.shape({}))]).isRequired,
-    handleDeploySample: PropTypes.func,
-    deploying: PropTypes.bool,
+const APICreateMenu = () => {
+    const theme = useTheme();
+    const matches = useMediaQuery(theme.breakpoints.down('xs'));
+    const { dividerCls, root } = useStyles();
+    const {
+        graphqlIcon,
+        restApiIcon,
+        soapApiIcon,
+        streamingApiIcon,
+    } = theme.custom.landingPage.icons;
+    return (
+        <MenuButton
+            buttonProps={{
+                color: 'primary',
+                variant: 'contained',
+            }}
+            menuList={(
+                <Grid
+                    container
+                    direction='row'
+                    justify='center'
+                    alignItems='flex-start'
+                    spacing={3}
+                >
+                    <RestAPIMenu openList icon={restApiIcon} />
+                    <SoapAPIMenu openList icon={soapApiIcon} />
+                    <GraphqlAPIMenu openList icon={graphqlIcon} />
+                    <StreamingAPIMenu openList icon={streamingApiIcon} />
+                    <Box display={{ xs: 'none', lg: 'block' }} mx={2}>
+                        <Divider className={dividerCls} light orientation='vertical' variant='inset' />
+                    </Box>
+                    <ServiceCatalogMenu openList icon={streamingApiIcon} />
+                </Grid>
+            )}
+        >
+            Create API
+        </MenuButton>
+    );
 };
 export default APICreateMenu;

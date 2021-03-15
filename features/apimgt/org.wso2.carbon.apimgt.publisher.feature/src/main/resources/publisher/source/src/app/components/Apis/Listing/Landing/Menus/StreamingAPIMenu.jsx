@@ -6,9 +6,10 @@ import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMe
 import Box from '@material-ui/core/Box';
 
 const StreamingAPIMenu = (props) => {
-    const { icon } = props;
+    const { icon, openList } = props;
     return (
         <LandingMenu
+            openList={openList}
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.streaming.api'
@@ -18,6 +19,7 @@ const StreamingAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-create-streaming-api-ws'
                 linkTo='/apis/create/streamingapi'
                 helperText={(
@@ -33,6 +35,7 @@ const StreamingAPIMenu = (props) => {
                 />
             </LandingMenuItem>
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-create-streaming-api-web-hook'
                 linkTo='/apis/create/streamingapi'
                 helperText={(
@@ -48,6 +51,7 @@ const StreamingAPIMenu = (props) => {
                 />
             </LandingMenuItem>
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-create-streaming-api-sse'
                 linkTo='/apis/create/streamingapi'
                 helperText={(
@@ -64,6 +68,7 @@ const StreamingAPIMenu = (props) => {
             </LandingMenuItem>
             <Box mt={2} />
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-create-streaming-api-import'
                 linkTo='/apis/create/asyncapi'
                 helperText={(

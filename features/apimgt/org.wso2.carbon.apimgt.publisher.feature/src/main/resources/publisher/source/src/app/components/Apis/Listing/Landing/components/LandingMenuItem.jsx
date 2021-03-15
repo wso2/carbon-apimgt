@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 const LandingMenuItem = (props) => {
     const {
-        helperText, children, id, linkTo, component = 'Link', onClick,
+        helperText, children, id, linkTo, component = 'Link', onClick, dense,
     } = props;
     const { lintRoot } = useStyles();
     return (
@@ -30,7 +30,7 @@ const LandingMenuItem = (props) => {
         >
             <Typography
                 color='primary'
-                variant='h6'
+                variant={dense ? 'subtitle1' : 'h6'}
             >
                 {/* Using React Router Links with Material-UI Links
                 Pattern as suggested in https://material-ui.com/guides/composition/#link */}
@@ -45,11 +45,22 @@ const LandingMenuItem = (props) => {
                     </Link>
                 )}
                 {component.toLowerCase() === 'button' && (
-                    <Button onClick={onClick} color='primary' variant='outlined'>{children}</Button>
+                    <Button
+                        size={dense ? 'small' : 'medium'}
+                        onClick={onClick}
+                        color='primary'
+                        variant='outlined'
+                    >
+                        {children}
+                    </Button>
                 )}
 
             </Typography>
-            <Box color='text.secondary' fontFamily='fontFamily' fontSize='body2.fontSize'>
+            <Box
+                color='text.secondary'
+                fontFamily='fontFamily'
+                fontSize={dense ? 'caption.fontSize' : 'body2.fontSize'}
+            >
                 {helperText}
             </Box>
         </Grid>

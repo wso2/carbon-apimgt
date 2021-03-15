@@ -30,8 +30,7 @@ const useStyles = makeStyles({
     },
 });
 
-const APILanding = (props) => {
-    const { deploying, handleDeploySample } = props;
+const APILanding = () => {
     const theme = useTheme();
     const matches = useMediaQuery(theme.breakpoints.down('xs'));
     const { dividerCls, root } = useStyles();
@@ -53,27 +52,23 @@ const APILanding = (props) => {
                 <Grid item xs={12}>
                     <Box pt={matches ? 2 : 7} />
                 </Grid>
-                {(deploying !== null && handleDeploySample !== null) && (
-                    <Grid item md={12}>
-                        <Typography display='block' gutterBottom align='center' variant='h4'>
-                            <FormattedMessage
-                                id='Apis.Listing.SampleAPI.SampleAPI.create.new'
-                                defaultMessage='Let’s get started !'
-                            />
-                            <Box color='text.secondary' pt={2}>
-                                <Typography display='block' gutterBottom align='center' variant='body1'>
-                                    <FormattedMessage
-                                        id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
-                                        defaultMessage={'Monitor the API’s lifecycle, documentation, '
+                <Grid item md={12}>
+                    <Typography display='block' gutterBottom align='center' variant='h4'>
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.create.new'
+                            defaultMessage='Let’s get started !'
+                        />
+                        <Box color='text.secondary' pt={2}>
+                            <Typography display='block' gutterBottom align='center' variant='body1'>
+                                <FormattedMessage
+                                    id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
+                                    defaultMessage={'Monitor the API’s lifecycle, documentation, '
                                             + 'security, community, and subscriptions.'}
-                                    />
-                                </Typography>
-                            </Box>
-
-                        </Typography>
-
-                    </Grid>
-                )}
+                                />
+                            </Typography>
+                        </Box>
+                    </Typography>
+                </Grid>
 
                 <Grid item xs={12}>
                     <Box pt={matches ? 2 : 7} pb={5} mx={matches ? 12 : 3}>

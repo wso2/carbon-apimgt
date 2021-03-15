@@ -1,20 +1,15 @@
 
 import React from 'react';
-import {
-    Link as MUILink,
-} from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
 
 const RestAPIMenu = (props) => {
-    const { icon, deploying, handleDeploySample } = props;
+    const { icon, openList } = props;
     return (
         <LandingMenu
+            openList={openList}
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.rest.api'
@@ -24,6 +19,7 @@ const RestAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-landing-rest-create-default'
                 linkTo='/apis/create/rest'
                 helperText={(
@@ -40,6 +36,7 @@ const RestAPIMenu = (props) => {
             </LandingMenuItem>
 
             <LandingMenuItem
+                dense={openList}
                 id='itest-id-landing-upload-oas'
                 linkTo='/apis/create/openapi'
                 helperText={(
@@ -55,7 +52,7 @@ const RestAPIMenu = (props) => {
                 />
             </LandingMenuItem>
 
-            <SampleAPI />
+            <SampleAPI dense={openList} />
         </LandingMenu>
     );
 };

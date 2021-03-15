@@ -136,7 +136,7 @@ function TopMenu(props) {
                             <Typography variant='caption' gutterBottom align='left' component='div'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.displaying'
-                                    defaultMessage='Displaying'
+                                    defaultMessage='Total of'
                                 />
                                 {' '}
                                 {' '}
@@ -160,12 +160,7 @@ function TopMenu(props) {
                             </Button>
                         </Link>
                     ) : (
-                        <APICreateMenu buttonProps={{
-                            variant: 'contained',
-                            color: 'primary',
-                            className: classes.button,
-                        }}
-                        >
+                        <APICreateMenu>
                             <FormattedMessage
                                 id='Apis.Listing.components.TopMenu.create.api'
                                 defaultMessage='Create API'

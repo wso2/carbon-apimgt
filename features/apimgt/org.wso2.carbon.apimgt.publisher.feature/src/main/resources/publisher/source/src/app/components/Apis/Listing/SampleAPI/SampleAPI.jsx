@@ -17,10 +17,8 @@
  */
 
 import React, { useReducer, useState } from 'react';
-import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Redirect from 'react-router-dom/Redirect';
-import { PropTypes } from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Modal from '@material-ui/core/Modal';
 import Backdrop from '@material-ui/core/Backdrop';
@@ -58,7 +56,8 @@ const tasksReducer = (state, action) => {
  * @extends {Component}
  */
 
-const SampleAPI = () => {
+const SampleAPI = (props) => {
+    const { dense } = props;
     const intl = useIntl();
     const [tasksStatus, tasksStatusDispatcher] = useReducer(tasksReducer, {
         create: { inProgress: false, completed: false, errors: false },
@@ -165,6 +164,7 @@ const SampleAPI = () => {
     return (
         <>
             <LandingMenuItem
+                dense={dense}
                 id='itest-id-deploy-sample'
                 onClick={handleDeploySample}
                 component='button'
