@@ -41,6 +41,7 @@ import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 import Wizard from './Credentials/Wizard/Wizard';
 import User from '../../../data/User';
+import CONSTANTS from 'AppData/Constants'
 
 
 const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));
@@ -63,7 +64,7 @@ const LoadableSwitch = withRouter((props) => {
     let tryoutRoute;
     if (api.type === 'GRAPHQL') {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />
-    } else if (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') {
+    } else if (api.type === CONSTANTS.API_TYPES.WS || api.type === CONSTANTS.API_TYPES.WEBSUB || api.type === CONSTANTS.API_TYPES.SSE) {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={AsyncApiConsole} />
     } else {
         tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />
@@ -367,7 +368,7 @@ class Details extends React.Component {
     }
 
     isAsyncAPI(api) {
-        return (api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE'));
+        return (api && (api.type === CONSTANTS.API_TYPES.WS || api.type === CONSTANTS.API_TYPES.WEBSUB || api.type === CONSTANTS.API_TYPES.SSE));
     }
 
     /**

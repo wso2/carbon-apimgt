@@ -25,6 +25,7 @@ import { FormattedMessage } from 'react-intl';
 import { makeStyles } from '@material-ui/core/styles';
 import AuthManager from 'AppData/AuthManager';
 import Icon from '@material-ui/core/Icon';
+import Alert from 'AppComponents/Shared/Alert';
 import TryOutController from '../ApiConsole/TryOutController';
 import { ApiContext } from '../ApiContext';
 import Api from '../../../../data/api';
@@ -32,9 +33,6 @@ import Progress from '../../../Shared/Progress';
 import AsyncApiUI from './AsyncApiUI';
 
 const useStyles = makeStyles((theme) => ({
-    buttonIcon: {
-        marginRight: 10,
-    },
     paper: {
         margin: theme.spacing(1),
         padding: theme.spacing(1),
@@ -62,9 +60,9 @@ export default function AsyncApiConsole() {
     const [selectedEnvironment, setSelectedEnvironment] = useState();
     const [productionAccessToken, setProductionAccessToken] = useState();
     const [sandboxAccessToken, setSandboxAccessToken] = useState();
-    const [environments, setEnvironments] = useState();
-    const [scopes, setScopes] = useState([]);
-    const [labels, setLabels] = useState();
+    const [environments, setEnvironments] = useState(null);
+    const [scopes, setScopes] = useState(null);
+    const [labels, setLabels] = useState(null);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [selectedKeyType, setSelectedKey] = useState('PRODUCTION');
@@ -106,7 +104,11 @@ export default function AsyncApiConsole() {
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
                     console.error(error);
+                    Alert.error('Error occurred while retrieving the API');
                 }
+                setScopes([]);
+                setEnvironments([]);
+                setLabels([]);
                 const { status } = error;
                 if (status === 404) {
                     setNotFound(true);
@@ -161,11 +163,11 @@ export default function AsyncApiConsole() {
         }
     }
 
-    if (api == null) {
+    if (api === null || !scopes || !labels || !environments) {
         return <Progress />;
     }
     if (notFound) {
-        return 'API Not found !';
+        return <FormattedMessage id='Apis.Details.WebhooksConsole.WebhooksConsole.Api.Unavailable' defaultMessage='API Not Found !' />;
     }
 
     let isApiKeyEnabled = false;

@@ -32,7 +32,7 @@ import Grid from '@material-ui/core/Grid';
 import Radio from '@material-ui/core/Radio';
 import { RadioGroup } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { injectIntl } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 
 const useStyles = makeStyles((theme) => (
     {
@@ -59,8 +59,8 @@ const useStyles = makeStyles((theme) => (
         },
         bootstrapCurl: {
             borderRadius: 4,
-            backgroundColor: '#41444e',
-            color: '#fff',
+            backgroundColor: theme.custom.curlGenerator.backgroundColor,
+            color: theme.custom.curlGenerator.color,
             border: '1px solid #ced4da',
             padding: '5px 12px',
             marginTop: '11px',
@@ -76,7 +76,7 @@ const useStyles = makeStyles((theme) => (
             fontWeight: 600,
         },
         subscriptionSummary: {
-            backgroundColor: '#89b7d1',
+            backgroundColor: theme.custom.AsyncTryOut.backgroundColor,
             maxHeight: '40px',
             borderColor: '#80bdff',
             '&$expanded': {
@@ -120,16 +120,12 @@ function WebhookSubscriptionUI(props) {
         dispatch({ field: e.target.name, value: e.target.value });
     };
 
-    function onCopy(message) {
-        Alert.info(message);
-    }
-
     return (
         <Accordion className={classes.subscription}>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
-                aria-controls='panel1bh-content'
-                id='panel1bh-header'
+                aria-controls='wh-subscription-content'
+                id='wh-subscription-header'
                 className={classes.subscriptionSummary}
             >
                 <Typography>{topic.name}</Typography>
@@ -241,7 +237,6 @@ function WebhookSubscriptionUI(props) {
                             value={curl}
                             fullWidth
                             multiline
-                            id='bootstrap-input'
                             InputProps={{
                                 disableUnderline: true,
                                 classes: {
@@ -258,9 +253,13 @@ function WebhookSubscriptionUI(props) {
                 </Grid>
             </AccordionDetails>
             <AccordionActions style={{ paddingRight: '18px' }}>
-                <Button size='small' onClick={handleClick}>Generate Curl</Button>
-                <CopyToClipboard text={curl} onCopy={() => onCopy('cURL copied')}>
-                    <Button size='small'>Copy Curl</Button>
+                <Button size='small' onClick={handleClick}>
+                    <FormattedMessage id='Apis.Details.AsyncApiConsole.Curl' defaultMessage='Generate Curl' />
+                </Button>
+                <CopyToClipboard text={curl} onCopy={() => Alert.info('cURL copied')}>
+                    <Button size='small'>
+                        <FormattedMessage id='Apis.Details.AsyncApiConsole.Copy' defaultMessage='Copy Curl' />
+                    </Button>
                 </CopyToClipboard>
             </AccordionActions>
         </Accordion>
