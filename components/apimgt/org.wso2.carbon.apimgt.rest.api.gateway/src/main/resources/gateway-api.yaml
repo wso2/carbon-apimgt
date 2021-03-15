@@ -7,7 +7,7 @@ info:
   title: "WSO2 API Manager - Gateway"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.
-    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/src/main/resources/gateway-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
   contact:
     name: "WSO2"
     url: "http://wso2.com/products/api-manager/"
@@ -67,9 +67,9 @@ paths:
         will be picked as the Tenant domain.
       operationId: redployAPI
       parameters:
-        - $ref: '#/parameters/ApiName'
-        - $ref: '#/parameters/Version'
-        - $ref: '#/parameters/TenantDomain'
+        - $ref: '#/parameters/apiName'
+        - $ref: '#/parameters/version'
+        - $ref: '#/parameters/tenantDomain'
       responses:
         200:
           description: |
@@ -107,9 +107,9 @@ paths:
         be picked as the Tenant domain.
       operationId: undeployAPI
       parameters:
-        - $ref: '#/parameters/ApiName'
-        - $ref: '#/parameters/Version'
-        - $ref: '#/parameters/TenantDomain'
+        - $ref: '#/parameters/apiName'
+        - $ref: '#/parameters/version'
+        - $ref: '#/parameters/tenantDomain'
       responses:
         200:
           description: |
@@ -146,9 +146,9 @@ paths:
         is not provided carbon.super will be picked as the Tenant domain.
       operationId: getAPIArtifacts
       parameters:
-        - $ref: '#/parameters/ApiName'
-        - $ref: '#/parameters/Version'
-        - $ref: '#/parameters/TenantDomain'
+        - $ref: '#/parameters/apiName'
+        - $ref: '#/parameters/version'
+        - $ref: '#/parameters/tenantDomain'
       responses:
         200:
           description: |
@@ -185,9 +185,9 @@ paths:
         will be picked as the Tenant domain.
       operationId: getLocalEntries
       parameters:
-        - $ref: '#/parameters/ApiName'
-        - $ref: '#/parameters/Version'
-        - $ref: '#/parameters/TenantDomain'
+        - $ref: '#/parameters/apiName'
+        - $ref: '#/parameters/version'
+        - $ref: '#/parameters/tenantDomain'
       responses:
         200:
           description: |
@@ -223,9 +223,9 @@ paths:
         will be picked as the Tenant domain.
       operationId: getSequences
       parameters:
-        - $ref: '#/parameters/ApiName'
-        - $ref: '#/parameters/Version'
-        - $ref: '#/parameters/TenantDomain'
+        - $ref: '#/parameters/apiName'
+        - $ref: '#/parameters/version'
+        - $ref: '#/parameters/tenantDomain'
       responses:
         200:
           description: |
@@ -262,9 +262,9 @@ paths:
         carbon.super will be picked as the Tenant domain.
       operationId: getEndpoints
       parameters:
-        - $ref: '#/parameters/ApiName'
-        - $ref: '#/parameters/Version'
-        - $ref: '#/parameters/TenantDomain'
+        - $ref: '#/parameters/apiName'
+        - $ref: '#/parameters/version'
+        - $ref: '#/parameters/tenantDomain'
       responses:
         200:
           description: |
@@ -297,7 +297,7 @@ parameters:
 
   # API name
   # Specified as part of the query string
-  ApiName:
+  apiName:
     name: apiName
     in: query
     description: |
@@ -307,7 +307,7 @@ parameters:
 
   # API version
   # Specified as part of the query string
-  Version:
+  version:
     name: version
     in: query
     description: |
@@ -317,7 +317,7 @@ parameters:
 
   # Tenant Domain name
   # Specified as part of the query string
-  TenantDomain:
+  tenantDomain:
     name: tenantDomain
     in: query
     description: |
