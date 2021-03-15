@@ -131,9 +131,9 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                         (APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
                                                 APIConstants.APITransportType.SSE.toString().equals(api.getType()) ||
                                                 APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
-                                    String asyncApiDefinition =
+                                    APIDefinitionValidationResponse asyncApiDefinition =
                                             ImportUtils.retrieveValidatedAsyncApiDefinitionFromArchive(extractedFolderPath);
-                                    api.setAsyncApiDefinition(asyncApiDefinition);
+                                    api.setAsyncApiDefinition(asyncApiDefinition.getContent());
                                     gatewayAPIDTO = TemplateBuilderUtil
                                             .retrieveGatewayAPIDtoForStreamingAPI(api, environment, tenantDomain,
                                                     apidto, extractedFolderPath);
