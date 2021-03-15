@@ -3573,7 +3573,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
-            APIManagementException{
+            APIManagementException {
         return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
     }
 

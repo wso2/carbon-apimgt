@@ -426,12 +426,10 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param identifier Api identifier
-     * @param comment comment text
-     * @param user Username of the comment author
+     * @param comment    comment text
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
-     *
-     * @deprecated
-     * This method needs to be removed once the Jaggery web apps are removed.
+     * @deprecated This method needs to be removed once the Jaggery web apps are removed.
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
 
@@ -439,14 +437,14 @@ public interface APIConsumer extends APIManager {
      * This method is to add a comment.
      *
      * @param identifier Api identifier
-     * @param comment comment object
-     * @param user Username of the comment author
+     * @param comment    comment object
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier Api identifier
+     * @param identifier      Api identifier
      * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
@@ -457,7 +455,7 @@ public interface APIConsumer extends APIManager {
      * This method is to get a comment of an API.
      *
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @param replyLimit
      * @param replyOffset
      * @return Comment
@@ -467,7 +465,7 @@ public interface APIConsumer extends APIManager {
             APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api type wrapper
+     * @param apiTypeWrapper  Api type wrapper
      * @param parentCommentID
      * @param replyLimit
      * @param replyOffset
@@ -478,8 +476,8 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId comment ID
-     * @param comment Comment object
+     * @param commentId      comment ID
+     * @param comment        Comment object
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
@@ -489,7 +487,7 @@ public interface APIConsumer extends APIManager {
      * This method is to delete a comment.
      *
      * @param identifier API Identifier
-     * @param commentId Comment ID
+     * @param commentId  Comment ID
      * @throws APIManagementException if failed to delete comment for identifier
      */
     void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
@@ -498,7 +496,7 @@ public interface APIConsumer extends APIManager {
      * This method is to delete a comment.
      *
      * @param apiTypeWrapper API Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
      */

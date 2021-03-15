@@ -7974,7 +7974,7 @@ public class ApiMgtDAO {
      */
     public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit, Integer offset) throws APIManagementException {
         CommentList commentList = null;
-        try (Connection connection = APIMgtDBUtil.getConnection()){
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             int id = -1;
             Identifier identifier;
             if (apiTypeWrapper.isAPIProduct()) {
@@ -8013,15 +8013,15 @@ public class ApiMgtDAO {
         String sqlQuery;
         String sqlQueryForCount;
         if (parentCommentID == null) {
-            sqlQueryForCount  = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
+            sqlQueryForCount = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
         } else {
-            sqlQueryForCount  = SQLConstants.GET_REPLIES_COUNT_SQL;
+            sqlQueryForCount = SQLConstants.GET_REPLIES_COUNT_SQL;
         }
         try (PreparedStatement prepStmtForCount = connection.prepareStatement(sqlQueryForCount)) {
             prepStmtForCount.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmtForCount.setString(2, identifier.getName());
             prepStmtForCount.setString(3, identifier.getVersion());
-            if (parentCommentID != null){
+            if (parentCommentID != null) {
                 prepStmtForCount.setString(4, parentCommentID);
             }
             try (ResultSet resultSetForCount = prepStmtForCount.executeQuery()) {
@@ -8079,7 +8079,7 @@ public class ApiMgtDAO {
                     return commentList;
                 }
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             handleException("Failed to retrieve comments for  " + identifier.getName(), e);
         }
         pagination.setLimit(limit);
@@ -8203,7 +8203,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()){
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             Identifier identifier;
             if (apiTypeWrapper.isAPIProduct()) {
                 identifier = apiTypeWrapper.getApiProduct().getId();
