@@ -17,8 +17,6 @@ const useStyles = makeStyles({
     },
     overlayBox: {
         cursor: 'auto',
-        opacity: 0.9,
-        'backdrop-filter': 'blur(10px)',
         outline: 'none',
         'border-color': '#f9f9f9',
         'box-shadow': '0 0 6px 4px #f9f9f9',
