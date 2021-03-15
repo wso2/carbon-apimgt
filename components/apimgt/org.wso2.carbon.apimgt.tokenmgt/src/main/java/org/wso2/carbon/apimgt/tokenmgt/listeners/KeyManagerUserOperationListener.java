@@ -159,18 +159,12 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             WorkflowExecutor userSignupWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
             String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForUserSignup(username);
             userSignupWFExecutor.cleanUpPendingTask(workflowExtRef);
-        } catch (WorkflowException e) {
-            // exception is not thrown to the caller since this is a event Identity(IS) listener
-            log.error("Error while cleaning up workflow task for the user: " + username, e);
-        } catch (APIManagementException e) {
-            // exception is not thrown to the caller since this is a event Identity(IS) listener
-            log.error("Error while cleaning up workflow task for the user: " + username, e);
-        } catch (UserStoreException e) {
+        } catch (WorkflowException | APIManagementException | UserStoreException e) {
             // exception is not thrown to the caller since this is a event Identity(IS) listener
             log.error("Error while cleaning up workflow task for the user: " + username, e);
         }
         APIUtil.clearRoleCache(getUserName(username, userStoreManager));
-        return !isEnable();
+        return true;
     }
 
     @Override
@@ -188,8 +182,9 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                                              UserStoreManager userStoreManager) {
 
         boolean isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(deletedUsers, userStoreManager, true);
-        isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(newUsers, userStoreManager, isRemoveGatewayKeyCache);
-        return !isEnable() || isRemoveGatewayKeyCache;
+        invalidateMultipleCacheKeys(newUsers, userStoreManager, isRemoveGatewayKeyCache);
+        isEnable();
+        return true;
     }
 
     /**

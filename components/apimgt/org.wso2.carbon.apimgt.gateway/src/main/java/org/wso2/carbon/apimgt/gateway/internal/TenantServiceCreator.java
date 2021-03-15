@@ -61,7 +61,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String mainSequenceName = "main";
     private String corsSequenceName = "_cors_request_handler_";
     private String threatFaultSequenceName = "_threat_fault_";
-    private String backendFailureSequence = "_backend_failure_handler_";
+    private String backendFailureSequenceName = "_backend_failure_handler_";
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTP = "WebhookServer";
@@ -150,10 +150,10 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             }
             String backEndFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
                     manger.getTracker().getCurrentConfigurationName() + File.separator +
-                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + backendFailureSequence + ".xml";
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + backendFailureSequenceName + ".xml";
             File backendSequenceXml = new File(backEndFailureSequence);
             if (!backendSequenceXml.exists()) {
-                FileUtils.copyFile(new File(synapseConfigRootPath + backEndFailureSequence + ".xml"),
+                FileUtils.copyFile(new File(synapseConfigRootPath + backendFailureSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
                                 backEndFailureSequence + ".xml"));
