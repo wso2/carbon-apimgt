@@ -384,13 +384,6 @@ public class APIMgtDAOTest {
     }
     @Test
     public void testKeyForwardCompatibility() throws Exception {
-        Set<APIIdentifier> apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
-        assertEquals(1, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertEquals("V1.0.0", apiId.getVersion());
-        }
 
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
@@ -400,29 +393,6 @@ public class APIMgtDAOTest {
         apiMgtDAO.addAPI(api, -1234);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0");
-        apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
-        assertEquals(2, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertTrue("V1.0.0".equals(apiId.getVersion()) || "V2.0.0".equals(apiId.getVersion()));
-        }
-
-        apiSet = apiMgtDAO.getAPIByConsumerKey("p1q2r3s4");
-        assertEquals(2, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertTrue("V1.0.0".equals(apiId.getVersion()) || "V2.0.0".equals(apiId.getVersion()));
-        }
-
-        apiSet = apiMgtDAO.getAPIByConsumerKey("a1b2c3d4");
-        assertEquals(1, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("PRABATH", apiId.getProviderName());
-            assertEquals("API2", apiId.getApiName());
-            assertEquals("V1.0.0", apiId.getVersion());
-        }
     }
 
     @Test
