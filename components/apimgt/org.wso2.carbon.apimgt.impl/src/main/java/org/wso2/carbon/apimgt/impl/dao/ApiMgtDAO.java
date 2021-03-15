@@ -8012,9 +8012,9 @@ public class ApiMgtDAO {
         int total = 0;
         String sqlQuery;
         String sqlQueryForCount;
-        if (parentCommentID == null){
+        if (parentCommentID == null) {
             sqlQueryForCount  = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
-        }else {
+        } else {
             sqlQueryForCount  = SQLConstants.GET_REPLIES_COUNT_SQL;
         }
         try (PreparedStatement prepStmtForCount = connection.prepareStatement(sqlQueryForCount)) {
@@ -8028,7 +8028,7 @@ public class ApiMgtDAO {
                 while (resultSetForCount.next()) {
                     total = resultSetForCount.getInt("COMMENT_COUNT");
                 }
-                if (total > 0) {
+                if (total > 0 && limit > 0) {
                     if (parentCommentID == null) {
                         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_ROOT_COMMENTS_SQL");
                     } else {
@@ -8058,8 +8058,17 @@ public class ApiMgtDAO {
                                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                                 comment.setCategory(resultSet.getString("CATEGORY"));
-                                comment.setReplies(getComments(identifier, resultSet.getString("COMMENT_ID"), 3, 0,
-                                        connection));
+                                if (parentCommentID == null) {
+                                    comment.setReplies(getComments(identifier, resultSet.getString("COMMENT_ID")
+                                            , APIConstants.REPLYLIMIT, APIConstants.REPLYOFFSET, connection));
+                                } else {
+                                    CommentList emptyCommentList = new CommentList();
+                                    Pagination emptyPagination = new Pagination();
+                                    emptyCommentList.setPagination(emptyPagination);
+                                    emptyCommentList.getPagination().setTotal(0);
+                                    emptyCommentList.setCount(0);
+                                    comment.setReplies(emptyCommentList);
+                                }
                                 list.add(comment);
                             }
                         }
@@ -8208,7 +8217,8 @@ public class ApiMgtDAO {
         return false;
     }
 
-    private boolean deleteComment(Identifier identifier, String commentId, Connection connection) throws APIManagementException {
+    private boolean deleteComment(Identifier identifier, String commentId, Connection connection) throws
+            APIManagementException {
         int id = -1;
         String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
         String getCommentIDsOfReplies = SQLConstants.GET_IDS_OF_REPLIES_SQL;
@@ -8217,7 +8227,8 @@ public class ApiMgtDAO {
             id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
-                throw new APIManagementException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, identifier
+                        .getName() + "-" + identifier.getVersion()));
             }
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmtGetReplies = connection.prepareStatement(getCommentIDsOfReplies)) {

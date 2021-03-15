@@ -485,11 +485,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 if ( comment.getUser().equals(username)) {
                     boolean commentEdited = false;
-                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment.getCategory()))){
+                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment
+                            .getCategory()))){
                         comment.setCategory(patchRequestBodyDTO.getCategory());
                         commentEdited = true;
                     }
-                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment.getText()))){
+                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment
+                            .getText()))){
                         comment.setText(patchRequestBodyDTO.getContent());
                         commentEdited = true;
                     }
@@ -504,20 +506,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                             return Response.ok(uri).entity(commentDTO).build();
                         }
                     } else {
-                        return Response.notModified("Not Modified").type(MediaType.APPLICATION_JSON).build();
+                        return Response.ok().build();
                     }
                 } else {
-                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId)
+                            , log);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
                         String.valueOf(commentId), log);
-            }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comment content location for API " + apiId;
@@ -536,7 +533,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
-                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
                 if ( Arrays.asList(tokenScopes).contains("apim:app_import_export")|| comment.getUser().equals(username)) {
                     if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
@@ -544,7 +542,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         obj.put("message", "The comment has been deleted");
                         return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
                     } else {
-                        return Response.status(405, "Method Not Allowed").type(MediaType.APPLICATION_JSON).build();
+                        return Response.status(405, "Method Not Allowed").type(MediaType
+                                .APPLICATION_JSON).build();
                     }
                 } else {
                     return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
