@@ -334,10 +334,7 @@ class Environments extends React.Component {
                                     <Grid item xs={12}>
                                         <Box>
                                             <Typography variant='body2'>
-                                                {endpoint.environmentName}
-                                                <Typography variant='caption'>
-                                                    ({endpoint.environmentType})
-                                            </Typography>
+                                                {endpoint.environmentDisplayName}
                                             </Typography>
                                         </Box>
                                         <TextField
