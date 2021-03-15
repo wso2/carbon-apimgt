@@ -1,7 +1,4 @@
 {
-  "APis.Details.tryout.help.main": {
-    "defaultMessage": "Test APIs while in the Development stage."
-  },
   "Api.category.dropdown.tooltip": {
     "defaultMessage": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API."
   },
@@ -80,6 +77,9 @@
   },
   "Apis.Create.Components.DefaultAPIForm.version": {
     "defaultMessage": "Version"
+  },
+  "Apis.Create.Components.NewTopic.topic.name": {
+    "defaultMessage": "Topic Name"
   },
   "Apis.Create.Components.SelectPolicies.business.plans": {
     "defaultMessage": "Business plan(s)"
@@ -453,6 +453,18 @@
   },
   "Apis.Details.APILevelRateLimitingPolicies.components.Configuration.tooltip": {
     "defaultMessage": "Selected Rate Limiting Policy will be applied to all the requests of this API."
+  },
+  "Apis.Details.ApiCOnsole.generate.test.key": {
+    "defaultMessage": "GET TEST KEY"
+  },
+  "Apis.Details.ApiConsole.ApiConsole.title": {
+    "defaultMessage": "Try Out"
+  },
+  "Apis.Details.ApiConsole.SelectAppPanel.environment": {
+    "defaultMessage": "Please select an environment"
+  },
+  "Apis.Details.ApiConsole.environment": {
+    "defaultMessage": "Environment"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": {
     "defaultMessage": "Business Information of the API"
@@ -1675,9 +1687,6 @@
   "Apis.Details.Environments.Environments.api.gateways.name": {
     "defaultMessage": "Name"
   },
-  "Apis.Details.Environments.Environments.api.gateways.type": {
-    "defaultMessage": "Type"
-  },
   "Apis.Details.Environments.Environments.create.cancel": {
     "defaultMessage": "Cancel"
   },
@@ -1708,14 +1717,14 @@
   "Apis.Details.Environments.Environments.display.in.devportal": {
     "defaultMessage": "Display in Developer Portal"
   },
+  "Apis.Details.Environments.Environments.gateway.accessUrl": {
+    "defaultMessage": "Gateway Access URL"
+  },
   "Apis.Details.Environments.Environments.gateway.action": {
     "defaultMessage": "Action"
   },
   "Apis.Details.Environments.Environments.gateway.deployed.revision": {
     "defaultMessage": "Deployed Revision"
-  },
-  "Apis.Details.Environments.Environments.gateway.endpoints": {
-    "defaultMessage": "Endpoints"
   },
   "Apis.Details.Environments.Environments.gateway.labels.heading": {
     "defaultMessage": "Gateway Labels"
@@ -1786,6 +1795,9 @@
   "Apis.Details.Environments.Environments.select.table": {
     "defaultMessage": "Select Revision"
   },
+  "Apis.Details.Environments.Environments.select.vhost": {
+    "defaultMessage": "Select Access URL"
+  },
   "Apis.Details.Environments.Environments.undeploy.btn": {
     "defaultMessage": "Undeploy"
   },
@@ -1821,6 +1833,9 @@
   },
   "Apis.Details.Environments.MicroGateway.undeploy.btn": {
     "defaultMessage": "Undeploy"
+  },
+  "Apis.Details.Environments.create.vhost": {
+    "defaultMessage": "VHost"
   },
   "Apis.Details.ExternalStores.ExternalStores.cancel": {
     "defaultMessage": "Cancel"
@@ -2863,12 +2878,6 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": {
     "defaultMessage": "Error while retrieving the subscriptions"
   },
-  "Apis.Details.TestConsole.TestConsole.info.message": {
-    "defaultMessage": "API should be in prototype(testing) state. Please demote to created state and click on the initialize Test button in the Test Console left menu item."
-  },
-  "Apis.Details.TestConsole.TestConsole.info.title": {
-    "defaultMessage": "API should be in prototype(testing) state."
-  },
   "Apis.Details.components.APIDetailsTopMenu.created.by": {
     "defaultMessage": "Created by:"
   },
@@ -2909,7 +2918,7 @@
     "defaultMessage": "Delete {type}"
   },
   "Apis.Details.index.Tryout": {
-    "defaultMessage": "Test Console"
+    "defaultMessage": "Try out"
   },
   "Apis.Details.index.api.Config": {
     "defaultMessage": "API configuration"
@@ -2946,9 +2955,6 @@
   },
   "Apis.Details.index.external-stores": {
     "defaultMessage": "external dev portals"
-  },
-  "Apis.Details.index.initTest": {
-    "defaultMessage": "Initialize test"
   },
   "Apis.Details.index.left.menu.scope": {
     "defaultMessage": "Local Scopes"
@@ -2989,12 +2995,6 @@
   "Apis.Details.index.wsdl.definition": {
     "defaultMessage": "WSDL Definition"
   },
-  "Apis.Details.tryout.initialize.test": {
-    "defaultMessage": "Initialize the API for the testing phase"
-  },
-  "Apis.Details.tryout.title": {
-    "defaultMessage": "Start Testing"
-  },
   "Apis.Listing.ApiTableView.context": {
     "defaultMessage": "Context"
   },
@@ -3006,9 +3006,6 @@
   },
   "Apis.Listing.ApiTableView.version": {
     "defaultMessage": "Version"
-  },
-  "Apis.Listing.ApiThumb.channel": {
-    "defaultMessage": "Channel"
   },
   "Apis.Listing.ApiThumb.context": {
     "defaultMessage": "Context"
@@ -3799,6 +3796,18 @@
   "UnexpectedError.title": {
     "defaultMessage": "Internal Server Error"
   },
+  "api.console.gateway.heading": {
+    "defaultMessage": "Gateway"
+  },
+  "api.console.security.heading": {
+    "defaultMessage": "Security"
+  },
+  "api.console.security.type.heading": {
+    "defaultMessage": "Internal key"
+  },
+  "api.gateways": {
+    "defaultMessage": "API Gateways"
+  },
   "app.components.Shared.Banner.back": {
     "defaultMessage": "Back"
   },
@@ -3844,8 +3853,7 @@
   "error.list.500.description": {
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
   },
-  "n8vnpP": {
-    "defaultMessage": "Topic Name"
+  "internal.token": {
   },
   "qLKC50": {
     "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = { } | < > , ' \" \\\\ / ) ."

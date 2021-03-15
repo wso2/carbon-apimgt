@@ -713,7 +713,7 @@ class Details extends Component {
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.Tryout',
-                                    defaultMessage: 'test console',
+                                    defaultMessage: 'Try out',
                                 })}
                                 to={pathPrefix + 'test-console'}
                                 iconText='test'
