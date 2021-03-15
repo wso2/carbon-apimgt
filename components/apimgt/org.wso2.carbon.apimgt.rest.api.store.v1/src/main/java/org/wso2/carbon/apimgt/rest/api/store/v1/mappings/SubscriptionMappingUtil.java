@@ -30,13 +30,16 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /** This class is responsible for mapping APIM core subscription related objects into REST API subscription related DTOs 
  *
@@ -146,5 +149,45 @@ public class SubscriptionMappingUtil {
 
         subscriptionListDTO.setCount(subscriptionDTOs.size());
         return subscriptionListDTO;
+    }
+
+    /**
+     * Sets pagination urls for a SubscriptionListDTO object given pagination parameters and url parameters
+     *
+     * @param subscriptionListDTO a SubscriptionListDTO object
+     * @param apiId               uuid/id of API
+     * @param groupId             group id of the applications to be returned
+     * @param limit               max number of objects returned
+     * @param offset              starting index
+     * @param size                max offset
+     */
+    public static void setPaginationParams(SubscriptionListDTO subscriptionListDTO, String apiId,
+                                           String groupId, int limit, int offset, int size) {
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiCommonUtil
+                    .getSubscriptionPaginatedURLForAPIId(
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId, groupId);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiCommonUtil
+                    .getSubscriptionPaginatedURLForAPIId(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId, groupId);
+        }
+
+        PaginationDTO pagination = new PaginationDTO();
+        pagination.setOffset(offset);
+        pagination.setLimit(limit);
+        pagination.setNext(paginatedNext);
+        pagination.setPrevious(paginatedPrevious);
+        pagination.setTotal(size);
+        subscriptionListDTO.setPagination(pagination);
     }
 }
