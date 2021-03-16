@@ -138,6 +138,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                     context.put("secret", api.getWebsubSubscriptionConfiguration().getSecret());
                     context.put("hmacSignatureGenerationAlgorithm", "Hmac" + signingAlgorithm);
                     context.put("signatureHeader", api.getWebsubSubscriptionConfiguration().getSignatureHeader());
+                    context.put("isSecurityEnabled", !StringUtils.isEmpty(api.getWebsubSubscriptionConfiguration().
+                            getSecret()));
                 }
             } else {
                 t = velocityengine.getTemplate(getApiProductTemplatePath());
