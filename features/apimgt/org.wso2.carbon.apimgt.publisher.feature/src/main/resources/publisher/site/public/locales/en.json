@@ -2277,6 +2277,12 @@
       "value": "deleted successfully."
     }
   ],
+  "Apis.Details.Documents.Delete.document.listing.delete": [
+    {
+      "type": 0,
+      "value": "Yes. Delete"
+    }
+  ],
   "Apis.Details.Documents.Delete.document.listing.delete.cancel": [
     {
       "type": 0,
@@ -8267,12 +8273,6 @@
     {
       "type": 0,
       "value": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-    }
-  ],
-  "sIDiOO": [
-    {
-      "type": 0,
-      "value": "Yes. Delete"
     }
   ],
   "save": [
