@@ -3654,7 +3654,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (id.getUUID() == null) {
             uuid = id.getUUID();
         } else {
-            uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion());
+            uuid = apiMgtDAO.getUUIDFromIdentifier(id.getProviderName(), id.getName(), id.getVersion(), organizationId);
         }
         removeDocumentation(uuid, docId, organizationId);
     }
@@ -4286,7 +4286,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         deleteScopes(localScopeKeysToDelete, tenantId);
-        apiMgtDAO.deleteAPI(apiIdentifier);
+        apiMgtDAO.deleteAPI(apiIdentifier, api.getOrganizationId());
         if (log.isDebugEnabled()) {
             log.debug("API : " + apiIdentifier + " is successfully deleted from the database and Key Manager.");
         }
@@ -5467,7 +5467,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (apiId.getUUID() != null) {
             uuid = apiId.getUUID();
         } else {
-            uuid = apiMgtDAO.getUUIDFromIdentifier(apiId);
+            uuid = apiMgtDAO.getUUIDFromIdentifierMatchingOrganization(apiId, organizationId);
         }
         saveSwaggerDefinition(uuid, jsonText, organizationId);
     }
@@ -5481,7 +5481,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else if (api.getId().getUUID() != null) {
             apiId = api.getId().getUUID();
         } else {
-            apiId = apiMgtDAO.getUUIDFromIdentifier(api.getId());
+            apiId = apiMgtDAO.getUUIDFromIdentifierMatchingOrganization(api.getId(), organizationId);
         }
         saveSwaggerDefinition(apiId, jsonText, organizationId);
     }
@@ -5878,7 +5878,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                     // if retired Delete Existing Gateway Deployments.
                     if (APIConstants.RETIRED.equals(targetStatus)){
-                        deleteAPIRevisions(uuid,tenantDomain);
+                        deleteAPIRevisions(uuid, organizationId);
                     }
                     if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                         apiMgtDAO.recordAPILifeCycleEvent(apiId, currentStatus.toUpperCase(),

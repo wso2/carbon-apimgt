@@ -7564,7 +7564,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public void deleteAPI(APIIdentifier apiId) throws APIManagementException {
+    public void deleteAPI(APIIdentifier apiId, String organizationId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         int id;
@@ -7626,6 +7626,7 @@ public class ApiMgtDAO {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             prepStmt.setString(2, apiId.getApiName());
             prepStmt.setString(3, apiId.getVersion());
+            prepStmt.setString(4, organizationId);
             prepStmt.execute();
             prepStmt.close();//If exception occurs at execute, this statement will close in finally else here
 
@@ -8485,6 +8486,36 @@ public class ApiMgtDAO {
     /**
      * Get API UUID by the API Identifier.
      *
+     * @param identifier     API Identifier
+     * @param organizationId Identifier of an Organization
+     * @return String UUID
+     * @throws APIManagementException if an error occurs
+     */
+    public String getUUIDFromIdentifierMatchingOrganization(APIIdentifier identifier, String organizationId)
+            throws APIManagementException {
+        String uuid = null;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_UUID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION)) {
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            prepStmt.setString(4, organizationId);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    uuid = resultSet.getString(1);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get the UUID for API : " + identifier.getApiName() + '-'
+                    + identifier.getVersion(), e);
+        }
+        return uuid;
+    }
+
+    /**
+     * Get API UUID by the API Identifier.
+     *
      * @param identifier API Identifier
      * @return String UUID
      * @throws APIManagementException if an error occurs
@@ -8516,18 +8547,20 @@ public class ApiMgtDAO {
      * @param provider Provider of the API
      * @param apiName Name of the API
      * @param version Version of the API
+     * @param organizationId Identifier of an organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
-    public String getUUIDFromIdentifier(String provider, String apiName, String version) throws APIManagementException {
+    public String getUUIDFromIdentifier(String provider, String apiName, String version, String organizationId) throws APIManagementException {
 
         String uuid = null;
-        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL;
+        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION;
         try(Connection connection = APIMgtDBUtil.getConnection()) {
             PreparedStatement prepStmt = connection.prepareStatement(sql);
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(provider));
             prepStmt.setString(2, apiName);
             prepStmt.setString(3, version);
+            prepStmt.setString(4, organizationId);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     uuid = resultSet.getString(1);
