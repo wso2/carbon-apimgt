@@ -54,28 +54,30 @@ import java.util.Map;
  */
 public class APITemplateBuilderImpl implements APITemplateBuilder {
 
-    private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
-
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
     public static final String TEMPLATE_WEBSUB_API = "websub_api_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     public static final String TEMPLATE_DEFAULT_WS_API = "default_ws_api_template";
+    private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
     private static final String TEMPLATE_TYPE_ENDPOINT = "endpoint_template";
     private static final String TEMPLATE_TYPE_API_PRODUCT = "api_product_template";
-    private  List<SoapToRestMediationDto> soapToRestOutMediationDtoList;
-    private  List<SoapToRestMediationDto> soapToRestInMediationDtoList;
+    private List<SoapToRestMediationDto> soapToRestOutMediationDtoList;
+    private List<SoapToRestMediationDto> soapToRestInMediationDtoList;
     private API api;
     private APIProduct apiProduct;
     private String velocityLogPath = null;
     private List<HandlerConfig> handlers = new ArrayList<HandlerConfig>();
-    private Map<String,APIDTO> associatedAPIMap = new HashMap<>();
+    private Map<String, APIDTO> associatedAPIMap = new HashMap<>();
+
     public APITemplateBuilderImpl(API api) {
+
         this.api = api;
     }
 
     public APITemplateBuilderImpl(APIProduct apiProduct,
                                   Map<String, APIDTO> associatedAPIMap) {
+
         this.apiProduct = apiProduct;
         this.associatedAPIMap = associatedAPIMap;
     }
@@ -89,12 +91,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     public APITemplateBuilderImpl(API api, APIProduct apiProduct) {
+
         this.api = api;
         this.apiProduct = apiProduct;
     }
 
     @Override
     public String getConfigStringForTemplate(Environment environment) throws APITemplateException {
+
         StringWriter writer = new StringWriter();
 
         try {
@@ -155,6 +159,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
     @Override
     public String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException {
+
         StringWriter writer = new StringWriter();
 
         try {
@@ -203,7 +208,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     /**
-     * Sets the necessary variables to velocity context
+     * Sets the necessary variables to velocity context.
      *
      * @param endpointType Type of the endpoint : production or sandbox
      * @return The string of endpoint file content
@@ -211,6 +216,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
      */
     @Override
     public String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException {
+
         StringWriter writer = new StringWriter();
 
         try {
@@ -252,6 +258,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey,
                                                               String endpointUrl)
             throws APITemplateException {
+
         StringWriter writer = new StringWriter();
 
         try {
@@ -294,6 +301,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
     private ConfigContext createConfigContext(API api, Environment environment)
             throws UserStoreException, RegistryException {
+
         ConfigContext configcontext = new APIConfigContext(api);
         configcontext = new TransportConfigContext(configcontext, api);
         configcontext = new ResourceConfigContext(configcontext, api);
@@ -318,6 +326,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     public ConfigContext createConfigContext(APIProduct apiProduct, Environment environment) {
+
         StringWriter writer = new StringWriter();
 
         // build the context for template and apply the necessary decorators
@@ -335,46 +344,61 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     public void addHandler(String handlerName, Map<String, String> properties) {
+
         addHandlerPriority(handlerName, properties, handlers.size());
     }
 
     public void addHandlerPriority(String handlerName, Map<String, String> properties, int priority) {
+
         HandlerConfig handler = new HandlerConfig(handlerName, properties);
         handlers.add(priority, handler);
     }
 
     public String getTemplatePath() {
+
         if (APIConstants.APITransportType.WEBSUB.toString().equals(this.api.getType())) {
-            return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_WEBSUB_API + ".xml";
+            return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator +
+                    APITemplateBuilderImpl.TEMPLATE_WEBSUB_API + ".xml";
         }
-        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_VELOCITY + ".xml";
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator +
+                APITemplateBuilderImpl.TEMPLATE_TYPE_VELOCITY + ".xml";
     }
 
     public String getPrototypeTemplatePath() {
-        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_PROTOTYPE + ".xml";
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator +
+                APITemplateBuilderImpl.TEMPLATE_TYPE_PROTOTYPE + ".xml";
     }
 
     public String getDefaultAPITemplatePath() {
+
         if (APIConstants.APITransportType.WS.toString().equals(this.api.getType())) {
-            return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_DEFAULT_WS_API + ".xml";
+            return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator +
+                    APITemplateBuilderImpl.TEMPLATE_DEFAULT_WS_API + ".xml";
         }
-        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_DEFAULT_API + ".xml";
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator +
+                APITemplateBuilderImpl.TEMPLATE_DEFAULT_API + ".xml";
     }
 
     public String getEndpointTemplatePath() {
-        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_ENDPOINT + ".xml";
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator +
+                APITemplateBuilderImpl.TEMPLATE_TYPE_ENDPOINT + ".xml";
     }
 
     public String getApiProductTemplatePath() {
+
         return "repository" + File.separator + "resources" + File.separator + "api_templates" +
                 File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_API_PRODUCT + ".xml";
     }
 
     public String getVelocityLogger() {
+
         if (this.velocityLogPath != null) {
             return this.velocityLogPath;
         } else {
-            APIManagerConfigurationService config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+            APIManagerConfigurationService config =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
             String velocityLogPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.VELOCITY_LOGGER);
             if (velocityLogPath != null && velocityLogPath.length() > 1) {
                 this.velocityLogPath = velocityLogPath;
@@ -386,11 +410,13 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     /**
-     * Initialize velocity engine
+     * Initialize velocity engine.
+     *
      * @param velocityengine velocity engine object reference
      * @throws APITemplateException in case of an error
      */
     private void initVelocityEngine(VelocityEngine velocityengine) throws APITemplateException {
+
         Thread thread = Thread.currentThread();
         ClassLoader loader = thread.getContextClassLoader();
         thread.setContextClassLoader(this.getClass().getClassLoader());

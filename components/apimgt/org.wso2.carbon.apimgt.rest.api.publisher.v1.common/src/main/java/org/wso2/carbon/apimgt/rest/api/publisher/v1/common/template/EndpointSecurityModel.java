@@ -21,11 +21,13 @@ import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 
 import java.io.Serializable;
 
+/**
+ * This Class used for Endpoint Security Related data model.
+ */
 public class EndpointSecurityModel extends EndpointSecurity implements Serializable {
 
     private String alias;
     private String base64EncodedPassword;
-
 
     public String getAlias() {
 

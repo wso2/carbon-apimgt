@@ -32,8 +32,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APIConfigCon
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ConfigContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.ResourceConfigContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -95,22 +93,22 @@ public class ResourceConfigContextTest {
         Assert.assertNotNull(aggregates);
         Assert.assertTrue(aggregates instanceof List);
         List<APIProductResource> apiProductResources = (List<APIProductResource>) aggregates;
-        Assert.assertTrue(assertAPIProductResourceList(apiProduct.getProductResources(),apiProductResources));
+        Assert.assertTrue(assertAPIProductResourceList(apiProduct.getProductResources(), apiProductResources));
     }
 
     private boolean assertAPIProductResourceList(List<APIProductResource> productResources,
                                                  List<APIProductResource> aggregatedResources) {
         for (APIProductResource aggregatedResource : aggregatedResources) {
             for (APIProductResource productResource : productResources) {
-                if (aggregatedResource.getApiIdentifier().equals(productResource.getApiIdentifier())){
+                if (aggregatedResource.getApiIdentifier().equals(productResource.getApiIdentifier())) {
                     if (aggregatedResource.getUriTemplate().getUriTemplate()
                             .equals(productResource.getUriTemplate().getUriTemplate())) {
                         if (!aggregatedResource.getUriTemplate().getHttpVerbs()
-                                .contains(productResource.getUriTemplate().getHTTPVerb())){
+                                .contains(productResource.getUriTemplate().getHTTPVerb())) {
                             return false;
                         }
                     }
-                }else{
+                } else {
 
                 }
             }

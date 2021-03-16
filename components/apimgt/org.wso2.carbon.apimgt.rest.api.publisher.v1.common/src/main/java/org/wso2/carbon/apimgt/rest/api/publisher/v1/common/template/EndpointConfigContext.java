@@ -26,13 +26,13 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
 /**
- * Set endpoint config in context
+ * Set endpoint config in context.
  */
 public class EndpointConfigContext extends ConfigContextDecorator {
 
     private API api;
     private APIProduct apiProduct;
-    private JSONObject endpoint_config;
+    private JSONObject endpointConfig;
 
     public EndpointConfigContext(ConfigContext context, API api) {
         super(context);
@@ -51,12 +51,12 @@ public class EndpointConfigContext extends ConfigContextDecorator {
 
         JSONParser parser = new JSONParser();
         //check if endpoint config exists
-        String config_json = api.getEndpointConfig();
+        String configJson = api.getEndpointConfig();
 
-        if (config_json != null && !"".equals(config_json)) {
+        if (configJson != null && !"".equals(configJson)) {
             try {
-                Object config = parser.parse(config_json);
-                this.endpoint_config = (JSONObject) config;
+                Object config = parser.parse(configJson);
+                this.endpointConfig = (JSONObject) config;
             } catch (ParseException e) {
                 this.handleException("Unable to pass the endpoint JSON config");
             }
@@ -66,7 +66,7 @@ public class EndpointConfigContext extends ConfigContextDecorator {
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
 
-        context.put("endpoint_config", this.endpoint_config);
+        context.put("endpoint_config", this.endpointConfig);
         if (apiProduct == null) {
             context.put("endpointKey", this.getEndpointKey(api));
         } else {
@@ -79,11 +79,12 @@ public class EndpointConfigContext extends ConfigContextDecorator {
 
     private String getEndpointKey(APIProduct apiProduct, API api) {
 
-        return getEndpointKey(apiProduct.getId().getName(), apiProduct.getId().getVersion()).concat("--").concat(api.getUuid());
+        return getEndpointKey(apiProduct.getId().getName(), apiProduct.getId().getVersion()).concat("--")
+                .concat(api.getUuid());
     }
 
     /**
-     * Get the endpoint key name
+     * Get the endpoint key name.
      *
      * @param api API that the endpoint belong
      * @return String of endpoint key
@@ -93,7 +94,7 @@ public class EndpointConfigContext extends ConfigContextDecorator {
     }
 
     /**
-     * Get the endpoint key name
+     * Get the endpoint key name.
      *
      * @return String of endpoint key
      */

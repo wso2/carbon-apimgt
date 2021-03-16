@@ -20,12 +20,11 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.Gson;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +35,6 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -55,12 +53,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This Class Used for API Controller related operations.
+ */
 public class APIControllerUtil {
 
     private static final Log log = LogFactory.getLog(APIAndAPIProductCommonUtil.class);
 
     /**
-     * Method will check the archive and extract environment related params
+     * Method will check the archive and extract environment related params.
      *
      * @param pathToArchive String of the archive project
      * @return JsonObject of environment parameters
@@ -79,13 +80,14 @@ public class APIControllerUtil {
     }
 
     /**
-     * Method retrieve the params configurations dependent APIs of an API Product
+     * Method retrieve the params configurations dependent APIs of an API Product.
      *
      * @param path Path of the archive project
      * @return JsonObject of environment parameters of the dependent APIs
      * @throws IOException If an error occurs when resolving API controller environment parameters
      */
     public static JsonObject getDependentAPIsParams(String path) throws IOException {
+
         JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(path);
         JsonObject dependentAPIsParams = null;
         if (paramsConfigObject != null && paramsConfigObject.has(ImportExportConstants.DEPENDENT_APIS_FIELD)) {
@@ -95,7 +97,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * Method retrieve the params configurations for a dependent API of an API Product specified by the
+     * Method retrieve the params configurations for a dependent API of an API Product specified by the.
      * API directory name
      *
      * @param dependentAPIsParams Env params array of dependent APIs of the API Product
@@ -103,6 +105,7 @@ public class APIControllerUtil {
      * @return JsonObject of environment parameters of the dependent API
      */
     public static JsonObject getDependentAPIParams(JsonObject dependentAPIsParams, String apiDirectoryName) {
+
         if (dependentAPIsParams.has(apiDirectoryName)) {
             return dependentAPIsParams.get(apiDirectoryName).getAsJsonObject();
         }
@@ -110,7 +113,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to add Extracted environment parameters to the imported Api object
+     * This method will be used to add Extracted environment parameters to the imported Api object.
      *
      * @param pathToArchive  Path to API or API Product archive
      * @param importedApiDto APIDTO object to be imported
@@ -186,7 +189,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to generate ClientCertificates and meta information related to client certs
+     * This method will be used to generate ClientCertificates and meta information related to client certs.
      *
      * @param envParams             Env params object with required parameters
      * @param importedApiDto        Imported API DTO (this will be null for API Products)
@@ -196,8 +199,10 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error while generating client certificate information
      */
     private static void handleMutualSslCertificates(JsonObject envParams, APIDTO importedApiDto,
-            APIProductDTO importedApiProductDto, Identifier identifier, String pathToArchive)
+                                                    APIProductDTO importedApiProductDto, Identifier identifier,
+                                                    String pathToArchive)
             throws APIManagementException {
+
         JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
         if (clientCertificates != null) {
             try {
@@ -232,20 +237,22 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to add extracted environment parameters to the imported API Product DTO object
+     * This method will be used to add extracted environment parameters to the imported API Product DTO object.
      *
      * @param importedApiProductDto API Product DTO object to be imported
      * @param envParams             Env params object with required parameters
      * @return APIProductDTO Updated API Product DTO Object
      */
-    public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams, String pathToArchive)
+    public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams,
+                                                            String pathToArchive)
             throws APIManagementException {
 
         if (envParams == null || envParams.isJsonNull()) {
             return importedApiProductDto;
         }
 
-        APIProduct importedApiProduct = APIMappingUtil.fromDTOtoAPIProduct(importedApiProductDto, importedApiProductDto.getProvider());
+        APIProduct importedApiProduct =
+                APIMappingUtil.fromDTOtoAPIProduct(importedApiProductDto, importedApiProductDto.getProvider());
         //handle mutualSSL certificates
         handleMutualSslCertificates(envParams, null, importedApiProductDto, importedApiProduct.getId(), pathToArchive);
 
@@ -258,7 +265,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to add Endpoint security related environment parameters to imported Api object
+     * This method will be used to add Endpoint security related environment parameters to imported Api object.
      *
      * @param importedApiDto APIDTO object to be updated
      * @param envParams      Env params object with required parameters
@@ -317,14 +324,16 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will add the defined available subscription policies in an environment to the particular imported API
+     * This method will add the defined available subscription policies in an environment to the particular imported
+     * API.
      *
      * @param importedApiDto        API DTO object to be updated
      * @param importedApiProductDto API Product DTO object to be updated
      * @param policies              policies with the values
      */
     private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto,
-            APIProductDTO importedApiProductDto) {
+                                                   APIProductDTO importedApiProductDto) {
+
         JsonArray definedPolicies = policies.getAsJsonArray();
         List<String> policiesListToAdd = new ArrayList<>();
         for (JsonElement definedPolicy : definedPolicies) {
@@ -348,7 +357,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to add gateway environments to imported Api object
+     * This method will be used to add gateway environments to imported Api object.
      *
      * @param gatewayEnvironments Json array of gateway environments extracted from env params file
      * @return Gateway Environment list
@@ -363,7 +372,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to extract endpoint configurations from the env params file
+     * This method will be used to extract endpoint configurations from the env params file.
      *
      * @param endpointType Endpoint type
      * @param envParams    JsonObject of Env params  with required parameters
@@ -413,7 +422,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will handle the Dynamic and AWS endpoint configs
+     * This method will handle the Dynamic and AWS endpoint configs.
      *
      * @param envParams                 Json object of Env parameters
      * @param defaultProductionEndpoint Default production endpoint json object
@@ -423,7 +432,9 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleDynamicAndAwsEndpoints(JsonObject envParams, JsonObject defaultProductionEndpoint,
-            JsonObject defaultSandboxEndpoint, String endpointType) throws APIManagementException {
+                                                           JsonObject defaultSandboxEndpoint, String endpointType)
+            throws APIManagementException {
+
         JsonObject endpointsObject = null;
         if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
             endpointsObject = envParams.get(ImportExportConstants.ENDPOINTS_FIELD).getAsJsonObject();
@@ -450,7 +461,8 @@ public class APIControllerUtil {
             //add dynamic endpoint configs as endpoint configs
             return updatedDynamicEndpointParams;
 
-        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {// if endpoint type is AWS Lambda
+            // if endpoint type is AWS Lambda
+        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {
             //if aws config is not provided
             if (envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY) == null) {
                 throw new APIManagementException(
@@ -488,7 +500,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will handle the HTTP/REST endpoint configurations
+     * This method will handle the HTTP/REST endpoint configurations.
      *
      * @param envParams                 Json object of Env parameters
      * @param defaultProductionEndpoint Default production endpoint json object
@@ -498,9 +510,11 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleRestEndpoints(String routingPolicy, JsonObject envParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
+                                                  JsonObject defaultProductionEndpoint,
+                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
-        // if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual scenario
+        // if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual
+        // scenario
         JsonObject updatedRESTEndpointParams = new JsonObject();
         JsonObject endpoints = null;
         if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
@@ -609,7 +623,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will handle the HTTP/SOAP endpoint configurations
+     * This method will handle the HTTP/SOAP endpoint configurations.
      *
      * @param envParams                 Json object of Env parameters
      * @param defaultProductionEndpoint Default production endpoint json object
@@ -619,7 +633,8 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleSoapEndpoints(String routingPolicy, JsonObject envParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
+                                                  JsonObject defaultProductionEndpoint,
+                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         JsonObject updatedSOAPEndpointParams = new JsonObject();
         JsonObject endpoints = null;
@@ -742,7 +757,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will production and sandbox endpoint values
+     * This method will production and sandbox endpoint values.
      *
      * @param endpointConfigs           Endpoint configurations to be updated
      * @param updatedEndpointParams     Updated endpoint parameters object
@@ -750,7 +765,8 @@ public class APIControllerUtil {
      * @param defaultSandboxEndpoint    Default sandbox endpoint json object
      */
     private static void handleEndpointValues(JsonObject endpointConfigs, JsonObject updatedEndpointParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
+                                             JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint)
+            throws APIManagementException {
 
         //check api params file to get provided endpoints
         if (endpointConfigs == null) {
@@ -787,7 +803,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to extract endpoint configurations from env params file
+     * This method will be used to extract endpoint configurations from env params file.
      *
      * @param failoverEndpoints JsonArray of SOAP Failover endpoints
      * @return JsonArray of updated SOAP Failover endpoints
@@ -803,12 +819,13 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to extract endpoint configurations from env params file
+     * This method will be used to extract endpoint configurations from env params file.
      *
      * @param soapEndpoint JsonElement of SOAP endpoints
      * @return JsonObject of updated SOAP endpoints
      */
     private static JsonObject handleSoapProdAndSandboxEndpointValues(JsonElement soapEndpoint) {
+
         JsonObject soapEndpointObj = null;
         if (soapEndpoint == null) {
             return null;
@@ -823,7 +840,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to generate ClientCertificates and meta information related to client certs
+     * This method will be used to generate ClientCertificates and meta information related to client certs.
      *
      * @param certificates  JsonArray of client-certificates
      * @param identifier    API Identifier/API Product Identifier of the imported API/API Product
@@ -832,7 +849,7 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error while generating new directory
      */
     private static void handleClientCertificates(JsonArray certificates, Identifier identifier,
-            String pathToArchive) throws IOException, APIManagementException {
+                                                 String pathToArchive) throws IOException, APIManagementException {
 
         APIIdentifier apiIdentifier = new APIIdentifier(identifier.getProviderName(), identifier.getName(),
                 identifier.getVersion());
@@ -884,7 +901,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to generate Endpoint certificates and meta information related to endpoint certs
+     * This method will be used to generate Endpoint certificates and meta information related to endpoint certs.
      *
      * @param certificates  JsonArray of endpoint-certificates
      * @param pathToArchive String of the archive project

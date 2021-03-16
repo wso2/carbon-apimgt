@@ -30,7 +30,8 @@ public abstract class ConfigContextDecorator extends ConfigContext {
         this.context = context;
     }
 
-    public void validate() throws APITemplateException, APIManagementException { // implementing methods of the abstract class
+    public void validate()
+            throws APITemplateException, APIManagementException { // implementing methods of the abstract class
         context.validate();
     }
 

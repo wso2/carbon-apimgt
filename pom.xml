@@ -53,11 +53,7 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>${maven-bundle-plugin.version}</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>${maven.findbugsplugin.version}</version>
-                </plugin>
+
                 <plugin>
                     <groupId>io.swagger</groupId>
                     <artifactId>swagger-codegen-maven-plugin</artifactId>
@@ -281,7 +277,7 @@
                     <executions>
                         <execution>
                             <id>validate</id>
-                            <phase>validate</phase>
+                            <phase>compile</phase>
                             <configuration>
                                 <configLocation>
                                     https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
@@ -293,6 +289,7 @@
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>true</failsOnError>
                                 <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                                <excludes>**/gen/**/*</excludes>
                             </configuration>
                             <goals>
                                 <goal>check</goal>
