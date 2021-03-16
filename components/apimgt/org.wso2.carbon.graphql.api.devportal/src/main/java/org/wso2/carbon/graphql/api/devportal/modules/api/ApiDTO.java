@@ -86,4 +86,11 @@ public class ApiDTO {
         return uuid;
     }
 
+    public String getThrottlingPolicies() {
+        return throttlingPolicies;
+    }
+
+    public void setThrottlingPolicies(String throttlingPolicies) {
+        this.throttlingPolicies = throttlingPolicies;
+    }
 }

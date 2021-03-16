@@ -10,12 +10,13 @@ import java.util.*;
 
 
 public class ScopesService {
+    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
     public List<ScopesDTO> getScopesDetails(String uuid) throws APIManagementException{
 
 
-        String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        //String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
         List<Scope> scopeList = apiConsumer.getScopeDataDromDAO(uuid);//new ArrayList<>(scopes);
 
         ScopesMapping scopesMapping = new ScopesMapping();

@@ -18,15 +18,12 @@ import java.util.Set;
 public class OperationService {
 
 
+    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
+
     public List<OperationDTO> getOperationDetails(Map<String, ContextDTO> stringContextDTOMap, String uuid) throws  APIManagementException {
         String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
         String type = stringContextDTOMap.get(uuid).getType();
-//        for(int i = 0 ;i< contextDTOList.size();i++){
-//            if (contextDTOList.get(i).getId().equals(uuid)){
-//                type = contextDTOList.get(i).getType();
-//            }
-//        }
         OperationMapping operationMapping = new OperationMapping();
         List<OperationDTO> operationList = operationMapping.fromOperationDetailstoOperationDTO(apiConsumer.getURITemplateFromDAO(uuid),type);
         return operationList;

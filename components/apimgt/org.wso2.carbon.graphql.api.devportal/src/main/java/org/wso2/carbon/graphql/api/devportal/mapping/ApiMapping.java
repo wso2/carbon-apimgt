@@ -76,7 +76,7 @@ public class ApiMapping {
 
         boolean isMonetizationEnabled = devPortalAPI.isMonetizationEnabled();
 
-        String throttlingPolicies = getThrottlingPoliciesData(tiers);;
+        String throttlingPolicies = getThrottlingPoliciesData(tiers);
 
         Set<String> categoriesSet = devPortalAPI.getApiCategories();
 
@@ -113,12 +113,17 @@ public class ApiMapping {
 
     public String getThrottlingPoliciesData(Set<String> tierNames)  {
 
-        String throttlingPolicy = "";
+        String throttlingPolicy = null;
+
+        List<String> throtlingPolicies = new ArrayList<>();
 
         for (String tierName : tierNames) {
-            throttlingPolicy += tierName;
+            throtlingPolicies.add(tierName);
         }
 
+        if (throtlingPolicies!=null){
+            throttlingPolicy= String.join(",", throtlingPolicies);
+        }
         return throttlingPolicy;
     }
     public String getKeymanagers(List<String> keyManagersList){
@@ -147,28 +152,28 @@ public class ApiMapping {
         return hasthumbnail;
     }
 
-    public String getEnvironmentList(String Id) throws APIPersistenceException {
-
-        PersistenceService artifactData = new PersistenceService();
-        Set<String> environmentset = artifactData.getApiFromUUID(Id).getEnvironments();
-        String environments = null;
-        if(environmentset!=null){
-            List<String> environmentList = new ArrayList<>(environmentset);
-            environments = String.join(",",environmentList);
-        }else{
-            environments = null;
-        }
-        return environments;
-
-
-    }
-    public static Set<String> getEnvironments(String environments) {
-        if(environments != null) {
-            String[] publishEnvironmentArray = environments.split(",");
-            return new HashSet<String>(Arrays.asList(publishEnvironmentArray));
-        }
-        return null;
-    }
+//    public String getEnvironmentList(String Id) throws APIPersistenceException {
+//
+//        PersistenceService artifactData = new PersistenceService();
+//        Set<String> environmentset = artifactData.getApiFromUUID(Id).getEnvironments();
+//        String environments = null;
+//        if(environmentset!=null){
+//            List<String> environmentList = new ArrayList<>(environmentset);
+//            environments = String.join(",",environmentList);
+//        }else{
+//            environments = null;
+//        }
+//        return environments;
+//
+//
+//    }
+//    public static Set<String> getEnvironments(String environments) {
+//        if(environments != null) {
+//            String[] publishEnvironmentArray = environments.split(",");
+//            return new HashSet<String>(Arrays.asList(publishEnvironmentArray));
+//        }
+//        return null;
+//    }
 
     public String getCatogories(Set<String> catogoriesSet){
         String catogories = null;

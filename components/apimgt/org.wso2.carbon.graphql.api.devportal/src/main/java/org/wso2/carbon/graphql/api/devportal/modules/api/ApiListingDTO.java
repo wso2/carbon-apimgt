@@ -4,12 +4,12 @@ import java.util.List;
 
 public class ApiListingDTO {
     private int count;
-    private List<ApiDTO> getAllapis;
+    private List<ApiDTO> nodes;
     private Pagination pagination;
 
-    public ApiListingDTO(int count, List<ApiDTO> getAllapis, Pagination pagination){
+    public ApiListingDTO(int count, List<ApiDTO> nodes, Pagination pagination){
         this.count = count;
-        this.getAllapis = getAllapis;
+        this.nodes = nodes;
         this.pagination = pagination;
     }
 }

@@ -1,23 +1,17 @@
-package org.wso2.carbon.graphql.api.devportal.dataFetcher;
+package org.wso2.carbon.graphql.api.devportal.datafetcher;
 
-//import org.wso2.carbon.graphql.api.devportal.data.*;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
-//import org.wso2.carbon.graphql.api.devportal.service.ApiService;
-import org.wso2.carbon.graphql.api.devportal.mapping.ApiListingMapping;
 import org.wso2.carbon.graphql.api.devportal.service.ApiService;
 import org.wso2.carbon.graphql.api.devportal.service.LabelService;
 import org.wso2.carbon.graphql.api.devportal.service.OperationService;
 import org.wso2.carbon.graphql.api.devportal.service.ScopesService;
 import graphql.schema.DataFetcher;
 import org.springframework.stereotype.Component;
+import org.wso2.carbon.graphql.api.devportal.service.TagService;
 import org.wso2.carbon.graphql.api.devportal.service.TierService;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ApiDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.LabelNameDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.TierNameDTO;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.*;
 
@@ -29,19 +23,20 @@ public class ApiDataFetcherImpl {
     ScopesService scopesService = new ScopesService();
     OperationService operationService = new OperationService();
     LabelService labelService = new LabelService();
-   // ApiService apiService = new ApiService();
-    ApiListingMapping apiListingMapping = new ApiListingMapping();
 
+    TagService tagData = new TagService();
+
+    public DataFetcher getTagsData(){
+        return env->tagData.getAllTags();
+    }
 
 
     public DataFetcher getApiListing(){
         return env-> {
             int start = env.getArgument("start");
             int offset = env.getArgument("offset");
-            String token = env.getArgument("token");
-            String oauth = env.getArgument("oauth");
-            return apiService.getAllApis(start,offset,token,oauth);
-            //return apiListingMapping.getApiListing(start,offset);
+            //String oauth = env.getArgument("oauth");
+            return apiService.getAllApis(start,offset);
         };
     }
 
@@ -55,6 +50,7 @@ public class ApiDataFetcherImpl {
     public DataFetcher getApiFromArtifact(){
         return env->{
             String uuid = env.getArgument("id");
+            //String oauth = env.getArgument("oauth");
             return apiService.getApi(uuid);
         };
     }
@@ -100,14 +96,14 @@ public class ApiDataFetcherImpl {
     public DataFetcher getMonetizationLabel(){
         return env->{
             ApiDTO api = env.getSource();
-            return apiService.getMonetizationLabel(api.getUuid());
+            String tiers = api.getThrottlingPolicies();
+            return apiService.getMonetizationLabel(tiers);
         };
     }
 
     public DataFetcher getOperationInformation(){
         return env->{
             ApiDTO api = env.getSource();
-           // List<ContextDTO> contextDTOList = env.getContext();
             Map<String, ContextDTO> contextDTOMap = env.getContext();
             if(contextDTOMap.get(api.getUuid())==null){
                 contextDTOMap.put(api.getUuid(), apiService.getApiTimeDetails(api.getUuid()));

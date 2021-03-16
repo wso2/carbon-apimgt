@@ -14,8 +14,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.springframework.core.io.Resource;
-import org.wso2.carbon.graphql.api.devportal.dataFetcher.ApiDataFetcherImpl;
-import org.wso2.carbon.graphql.api.devportal.dataFetcher.TagDataFetcherImpl;
+import org.wso2.carbon.graphql.api.devportal.datafetcher.ApiDataFetcherImpl;
+
 
 @Component
 public class GraphqlProvider {
@@ -27,8 +27,8 @@ public class GraphqlProvider {
     @Autowired
     ApiDataFetcherImpl apiDataFetcher;
 
-    @Autowired
-    TagDataFetcherImpl tagDataFetcher;
+//    @Autowired
+//    TagDataFetcherImpl tagDataFetcher;
 
 
 
@@ -72,23 +72,23 @@ public class GraphqlProvider {
                 .type(ScopeInformationDataFetcher())
                 .type(QueryApiListing())
                 //.type(ApiTimeDetailsDataFetcher())
-                .type(c())
-                .type(u())
+                .type(APICreatedTimeDataFetcher())
+                .type(APILastUpdateDataFetcher())
                 .build();
     }
 
     private TypeRuntimeWiring.Builder QueryApiListing(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getApiListing", apiDataFetcher.getApiListing());
+                .dataFetcher("apis", apiDataFetcher.getApiListing());
     }
 
     private TypeRuntimeWiring.Builder queryApi(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getApi", apiDataFetcher.getApiFromArtifact());
+                .dataFetcher("api", apiDataFetcher.getApiFromArtifact());
     }
     private TypeRuntimeWiring.Builder queryApiTags(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getTags", tagDataFetcher.getTagsData());
+                .dataFetcher("getTags", apiDataFetcher.getTagsData());
     }
 //    private TypeRuntimeWiring.Builder ApiTimeDetailsDataFetcher(){
 //        return TypeRuntimeWiring.newTypeWiring("Api")
@@ -126,12 +126,12 @@ public class GraphqlProvider {
                 .dataFetcher("scope",apiDataFetcher.getScopeInformation());
     }
 
-    private TypeRuntimeWiring.Builder c(){
+    private TypeRuntimeWiring.Builder APICreatedTimeDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("createdTime",apiDataFetcher.getCreatedTime());
     }
 
-    private TypeRuntimeWiring.Builder u(){
+    private TypeRuntimeWiring.Builder APILastUpdateDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("lastUpdate",apiDataFetcher.getLastUpdate());
     }

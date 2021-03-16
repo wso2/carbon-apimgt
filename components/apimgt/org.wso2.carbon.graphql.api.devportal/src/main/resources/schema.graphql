@@ -138,14 +138,14 @@ type Pagination{
 }
 type ApiListing{
     count:Int
-    getAllapis:[Api]
+    nodes:[Api]
     pagination:Pagination
 }
 
 type Query{
     #getExtraDetails(start:Int,offset:Int):ExtraDetails
-    getApiListing(start:Int,offset:Int,token:String,oauth:String):ApiListing
-    getApi(id:String):Api
-    getApis(start:Int,offset:Int):[Api]
+    apis(start:Int!,offset:Int!):ApiListing
+    api(id:String!):Api
+    #getApis(start:Int,offset:Int):[Api]
     getTags:[Tag]
 }

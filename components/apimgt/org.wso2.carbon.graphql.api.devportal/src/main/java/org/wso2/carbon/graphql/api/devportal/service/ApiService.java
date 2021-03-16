@@ -17,11 +17,13 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.graphql.api.devportal.mapping.ApiMapping;
+import org.wso2.carbon.graphql.api.devportal.mapping.TierMapping;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ApiDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ApiListingDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.Pagination;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.*;
 
@@ -30,22 +32,26 @@ public class ApiService {
 
 
     APIPersistence apiPersistenceInstance;
+    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
-    public ApiListingDTO getAllApis(int start, int offset, String token, String oauth) throws APIPersistenceException, APIManagementException {
-        PersistenceService artifactData = new PersistenceService();
+    public ApiListingDTO getAllApis(int start, int offset) throws APIPersistenceException, APIManagementException {
+        PersistenceService persistenceService = new PersistenceService();
         List<ApiDTO> apiDTOList = new ArrayList<ApiDTO>();
-        // List<DevPortalAPI> list = artifactData.getDevportalAPIS(start,offset,token,oauth);
-        Map<String, Object> result = artifactData.getDevportalAPIS(start,offset,token,oauth);
-        List<DevPortalAPI> list = (List<DevPortalAPI>) result.get("apis");
-        for (DevPortalAPI devPortalAPI: list){
-            ApiMapping apiMapping = new ApiMapping();
-            apiDTOList.add(apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI));
+        Map<String, Object> result = persistenceService.getDevportalAPIS(start,offset);
+        int count = 0;
+        Pagination pagination = null;
+        if(result.size()==2){
+            List<DevPortalAPI> list = (List<DevPortalAPI>) result.get("apis");
+            count = (int) result.get("count");
+            if(list.size()>0){
+                for (DevPortalAPI devPortalAPI: list){
+                    ApiMapping apiMapping = new ApiMapping();
+                    apiDTOList.add(apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI));
+                }
+            }
+            pagination = getPaginationData(offset,start,count);
         }
-        int count = (int) result.get("count");
-        Pagination pagination = getPaginationData(offset,start,count);
         return  new ApiListingDTO(count,apiDTOList, pagination);
-
-        // return apiDTOList;
     }
     public String getApiDefinition(String uuid) throws OASPersistenceException {
         Properties properties = new Properties();
@@ -58,14 +64,16 @@ public class ApiService {
     }
     public ApiDTO getApi(String uuid) throws APIManagementException, APIPersistenceException {
 
-        PersistenceService artifactData = new PersistenceService();
-        DevPortalAPI devPortalAPI = artifactData.getApiFromUUID(uuid);
-        ApiMapping apiMapping = new ApiMapping();
-        return  apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI);
+        PersistenceService persistenceService = new PersistenceService();
+        DevPortalAPI devPortalAPI = persistenceService.getApiFromUUID(uuid);
+        ApiDTO apiDTO = null;
+        if (devPortalAPI!=null){
+            ApiMapping apiMapping = new ApiMapping();
+            apiDTO =  apiMapping.fromDevpotralApiTOApiDTO(devPortalAPI);
+        }
+        return apiDTO;
     }
-    public Pagination getPaginationData(int offset, int limit, int size) throws APIPersistenceException, APIManagementException {
-        PersistenceService artifactData = new PersistenceService();
-        //int size = artifactData.apiCount(offset, limit);
+    public Pagination getPaginationData(int offset, int limit, int size){
         String paginatedPrevious = "";
         String paginatedNext = "";
         String query = "";
@@ -87,10 +95,10 @@ public class ApiService {
     }
 
     public ContextDTO getApiTimeDetails(String uuid){
-        String username = "wso2.anonymous.user";
+        //String username = "wso2.anonymous.user";
         APIConsumer apiConsumer = null;
         try {
-            apiConsumer = RestApiCommonUtil.getConsumer(username);
+            apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
@@ -101,35 +109,22 @@ public class ApiService {
 
     }
 
-    //    public TimeDTO getApiTimeDetailsFromDAO(String uuid) throws APIManagementException {
-//        String username = "wso2.anonymous.user";
-//        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-//        Time time = apiConsumer.getTimeDetailsFromDAO(uuid);
-//        String createTime = time.getCreatedTime();
-//        String lastUpdate = time.getLastUpdate();
-//        return new TimeDTO(createTime,lastUpdate);
-//    }
     public Float getApiRatingFromDAO(String uuid) throws APIManagementException {
-        String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        //String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
         Float rating  = apiConsumer.getRatingFromDAO(uuid);
         return rating;
     }
-    public String getMonetizationLabel(String uuid) throws APIManagementException, UserStoreException, APIPersistenceException {
+    public String getMonetizationLabel(String tiers) throws APIManagementException{
 
-        PersistenceService persistenceService = new PersistenceService();
-        DevPortalAPI devPortalAPI = persistenceService.getApiFromUUID(uuid);
-
-        Set<String> tiers = devPortalAPI.getAvailableTierNames();
-
-        String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-
-        Map<String, Tier> definedTiers = apiConsumer.getTierDetailsFromDAO(uuid);
-
+        String[] strParts = tiers.split(",");
+        List<String> listTiers = Arrays.asList(strParts);
+        Set<String> tierSet = new HashSet<>(listTiers);
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
         String monetizationLabel = null;
         int free = 0, commercial = 0;
-        for(String name: tiers){
+        for(String name: tierSet){
             Tier definedTier = definedTiers.get(name);
             if (definedTier.getTierPlan().equalsIgnoreCase(APIConstants.API_CATEGORY_FREE)) {
                 free = free + 1;

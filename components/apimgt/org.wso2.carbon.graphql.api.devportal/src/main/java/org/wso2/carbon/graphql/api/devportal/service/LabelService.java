@@ -17,11 +17,13 @@ import java.util.Set;
 
 public class LabelService {
 
+    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
+
     public List<LabelDTO> getLabelDetails(String name) throws APIManagementException {
 
 
-        String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+        //String username = "wso2.anonymous.user";
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
         List<Label> labels = apiConsumer.getLabelDataFromDAO();
         LabelMapping labelMapping = new LabelMapping();
         List<LabelDTO> labelData = labelMapping.fromLabeltoLabelDTO(labels,name);
