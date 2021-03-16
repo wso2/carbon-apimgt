@@ -1,7 +1,7 @@
 {
   "swagger" : "2.0",
   "info" : {
-    "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
+    "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/src/main/resources/gateway-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
     "version" : "v2",
     "title" : "WSO2 API Manager - Gateway",
     "contact" : {
@@ -22,9 +22,9 @@
   "paths" : {
     "/redeploy-api" : {
       "post" : {
-        "tags" : [ "Deploy API" ],
         "summary" : "Re Deploy the API in the gateway",
         "description" : "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
+        "operationId" : "redployAPI",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -51,12 +51,6 @@
               "$ref" : "#/definitions/DeployResponse"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/DeployResponse"
-            }
-          },
           "400" : {
             "description" : "Bad Request.\nInvalid request or validation error\n",
             "schema" : {
@@ -68,24 +62,19 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
           }
         },
-        "x-wso2-curl" : "curl -k -H \"Authorization: Basic YWRtaW46YWRtaW4= \" -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
       }
     },
     "/undeploy-api" : {
       "post" : {
-        "tags" : [ "Undeploy API" ],
         "summary" : "Uneploy the API in the gateway",
         "description" : "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
+        "operationId" : "undeployAPI",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -112,12 +101,6 @@
               "$ref" : "#/definitions/DeployResponse"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/DeployResponse"
-            }
-          },
           "400" : {
             "description" : "Bad Request.\nInvalid request or validation error\n",
             "schema" : {
@@ -129,24 +112,15 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
           }
-        },
-        "x-wso2-curl" : "curl -k -H \"Authorization: Basic YWRtaW46YWRtaW4=\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/deploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "POST https://127.0.0.1:9443/api/am/gateway/v2/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        }
       }
     },
     "/api-artifact" : {
       "get" : {
-        "tags" : [ "Get API Artifacts" ],
         "summary" : "Get API artifact from the storage",
         "description" : "This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
+        "operationId" : "getAPIArtifacts",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -173,12 +147,6 @@
               "$ref" : "#/definitions/APIArtifact"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/APIArtifact"
-            }
-          },
           "400" : {
             "description" : "Bad Request.\nInvalid request or validation error\n",
             "schema" : {
@@ -190,24 +158,15 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
           }
-        },
-        "x-wso2-curl" : "curl -k -H \"Authorization: Basic YWRtaW46YWRtaW4=\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v2/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        }
       }
     },
     "/local-entry" : {
       "get" : {
-        "tags" : [ "Get API Artifacts" ],
         "summary" : "Get Local Entry from the storage",
         "description" : "This operation is used to get local entry from the storage.If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
+        "operationId" : "getLocalEntries",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -234,12 +193,6 @@
               "$ref" : "#/definitions/LocalEntry"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/LocalEntry"
-            }
-          },
           "400" : {
             "description" : "Bad Request.\nInvalid request or validation error\n",
             "schema" : {
@@ -251,24 +204,15 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
           }
-        },
-        "x-wso2-curl" : "curl -k -H \"Authorization: Basic YWRtaW46YWRtaW4=\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v2/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        }
       }
     },
     "/sequence" : {
       "get" : {
-        "tags" : [ "Get API Artifacts" ],
         "summary" : "Get sequences from the storage",
         "description" : "This operation is used to get the API sequence from the storage. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
+        "operationId" : "getSequences",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -295,12 +239,6 @@
               "$ref" : "#/definitions/Sequences"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Sequences"
-            }
-          },
           "400" : {
             "description" : "Bad Request.\nInvalid request or validation error\n",
             "schema" : {
@@ -312,24 +250,15 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
           }
-        },
-        "x-wso2-curl" : "curl -k -H \"Authorization: Basic YWRtaW46YWRtaW4=\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v2/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        }
       }
     },
     "/end-points" : {
       "get" : {
-        "tags" : [ "Get API Artifacts" ],
         "summary" : "Get end-points from the storage for the API",
         "description" : "This operation is used to get the end-points from the storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "operationId" : "getEndpoints",
         "parameters" : [ {
           "name" : "apiName",
           "in" : "query",
@@ -356,12 +285,6 @@
               "$ref" : "#/definitions/Endpoints"
             }
           },
-          "202" : {
-            "description" : "Accepted.\nThe request has been accepted.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Endpoints"
-            }
-          },
           "400" : {
             "description" : "Bad Request.\nInvalid request or validation error\n",
             "schema" : {
@@ -373,17 +296,8 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
-          },
-          "412" : {
-            "description" : "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema" : {
-              "$ref" : "#/definitions/Error"
-            }
           }
-        },
-        "x-wso2-curl" : "curl -k -H \"Authorization: Basic YWRtaW46YWRtaW4=\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v2/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"",
-        "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/gateway/v2/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\nAuthorization: Basic YWRtaW46YWRtaW4=\n",
-        "x-wso2-response" : "HTTP/1.1 200 OK"
+        }
       }
     }
   },
@@ -499,11 +413,25 @@
     }
   },
   "parameters" : {
-    "apiId-Q" : {
-      "name" : "apiId",
+    "apiName" : {
+      "name" : "apiName",
       "in" : "query",
-      "description" : "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+      "description" : "Name of the API\n",
       "required" : true,
+      "type" : "string"
+    },
+    "version" : {
+      "name" : "version",
+      "in" : "query",
+      "description" : "version of the API\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "tenantDomain" : {
+      "name" : "tenantDomain",
+      "in" : "query",
+      "description" : "Tenant Domain of the API\n",
+      "required" : false,
       "type" : "string"
     }
   }
