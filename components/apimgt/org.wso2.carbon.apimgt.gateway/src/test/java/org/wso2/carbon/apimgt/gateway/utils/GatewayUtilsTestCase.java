@@ -157,6 +157,12 @@ public class GatewayUtilsTestCase {
     }
 
     @Test
+    public void testGetJWTClaimsWhenJWTNotAvailable() {
+        AuthenticationContext authenticationContext = new AuthenticationContext();
+        Assert.assertNull(GatewayUtils.getJWTClaims(authenticationContext));
+    }
+
+    @Test
     public void testIsClusteringEnabled() {
         ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
         AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
