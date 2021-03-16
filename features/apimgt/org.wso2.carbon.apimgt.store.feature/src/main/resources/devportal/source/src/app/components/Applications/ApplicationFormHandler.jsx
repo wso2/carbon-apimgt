@@ -494,6 +494,7 @@ class ApplicationFormHandler extends React.Component {
                                 <Box display='flex' justifyContent='flex-start' mt={4} spacing={1}>
                                     <Box>
                                         <Button
+                                            id='itest-application-create-save'
                                             variant='contained'
                                             color='primary'
                                             onClick={isEdit ? this.saveEdit : this.saveApplication}

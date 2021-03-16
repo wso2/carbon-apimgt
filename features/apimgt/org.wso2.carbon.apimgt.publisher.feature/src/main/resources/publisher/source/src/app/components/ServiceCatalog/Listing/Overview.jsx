@@ -173,7 +173,7 @@ function Overview(props) {
         restApiIcon,
         soapApiIcon,
         streamingApiIcon,
-    } = theme.custom.landingPageIcons;
+    } = theme.custom.landingPage.icons;
 
     // Get Service Details
     const getService = () => {

@@ -30,6 +30,9 @@ public final class ImportExportConstants {
     // Location of the API definition file
     public static final String API_FILE_LOCATION = File.separator + "api";
 
+    // Location of the API definition file
+    public static final String API_PRODUCT_FILE_LOCATION = File.separator + "api_product";
+
     // Location of the definitions such as swagger, graphql schema etc
     public static final String DEFINITIONS_DIRECTORY = "Definitions";
 
@@ -92,6 +95,10 @@ public final class ImportExportConstants {
     // Location of the AsyncAPI definition file
     public static final String JSON_ASYNCAPI_DEFINITION_LOCATION =
             File.separator + DEFINITIONS_DIRECTORY + File.separator + "asyncapi.json";
+
+    // Location of the AsyncAPI definition file
+    public static final String YAML_ASYNCAPI_DEFINITION_LOCATION =
+            File.separator + DEFINITIONS_DIRECTORY + File.separator + "asyncapi.yaml";
 
     // Name of the API provider element tag of the api.json file
     public static final String PROVIDER_ELEMENT = "provider";
@@ -176,7 +183,9 @@ public final class ImportExportConstants {
 
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
 
-    public static final String APIM_VERSION = "v4";
+    public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
+
+    public static final String APIM_VERSION = "v4.0.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
@@ -207,6 +216,7 @@ public final class ImportExportConstants {
     public static final String ENDPOINTS_FIELD = "endpoints";
     public static final String LOAD_BALANCE_ENDPOINTS_FIELD = "loadBalanceEndpoints";
     public static final String FAILOVER_ENDPOINTS_FIELD = "failoverEndpoints";
+    public static final String DEPENDENT_APIS_FIELD = "dependentAPIs";
 
     //Security config related constants
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";

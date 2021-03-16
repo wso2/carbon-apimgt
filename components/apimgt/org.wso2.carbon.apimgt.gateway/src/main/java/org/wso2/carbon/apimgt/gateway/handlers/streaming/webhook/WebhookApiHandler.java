@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -163,30 +164,13 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
      * @param errorDescription description of the error
      */
     private void handleFailure(MessageContext messageContext, String errorDescription) {
-
-        OMElement payload = getFaultPayload(errorDescription);
-        Utils.setFaultPayload(messageContext, payload);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
         Mediator sequence =
                 messageContext.getSequence(APIConstants.WebHookProperties.WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
         Utils.sendFault(messageContext, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-    }
-
-    /**
-     * @param description description of the error
-     * @return the OMElement
-     */
-    private OMElement getFaultPayload(String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                                               APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-        OMElement error = fac.createOMElement("error", ns);
-        error.setText(description);
-        payload.addChild(error);
-        return payload;
     }
 
     public void setEventReceiverResourcePath(String eventReceiverResourcePath) {

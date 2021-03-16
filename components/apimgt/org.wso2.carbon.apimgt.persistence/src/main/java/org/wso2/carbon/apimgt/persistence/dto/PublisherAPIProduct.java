@@ -59,6 +59,7 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     private Set<String> tags = new LinkedHashSet<>();
     private String accessControl; // publisher accessControl : 'restricted', 'all'
     private Set<String> accessControlRoles; // reg has a just String
+    private Map<String, String> additionalProperties;
     
     public String getDescription() {
         return description;
@@ -234,7 +235,17 @@ public class PublisherAPIProduct extends PublisherAPIProductInfo {
     public void setAccessControlRoles(Set<String> accessControlRoles) {
         this.accessControlRoles = accessControlRoles;
     }
-    
+
+    public Map<String, String> getAdditionalProperties() {
+
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(Map<String, String> additionalProperties) {
+
+        this.additionalProperties = additionalProperties;
+    }
+
     
     /*
     private String inSequence;

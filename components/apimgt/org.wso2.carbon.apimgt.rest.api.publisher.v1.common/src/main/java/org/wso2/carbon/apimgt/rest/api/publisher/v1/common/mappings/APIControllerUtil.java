@@ -35,6 +35,9 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -42,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.APIAndAPIProductCommonUtil
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +76,37 @@ public class APIControllerUtil {
         }
         JsonElement paramsElement = new JsonParser().parse(jsonParamsContent);
         return paramsElement.getAsJsonObject();
+    }
+
+    /**
+     * Method retrieve the params configurations dependent APIs of an API Product
+     *
+     * @param path Path of the archive project
+     * @return JsonObject of environment parameters of the dependent APIs
+     * @throws IOException If an error occurs when resolving API controller environment parameters
+     */
+    public static JsonObject getDependentAPIsParams(String path) throws IOException {
+        JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(path);
+        JsonObject dependentAPIsParams = null;
+        if (paramsConfigObject != null && paramsConfigObject.has(ImportExportConstants.DEPENDENT_APIS_FIELD)) {
+            dependentAPIsParams = paramsConfigObject.get(ImportExportConstants.DEPENDENT_APIS_FIELD).getAsJsonObject();
+        }
+        return dependentAPIsParams;
+    }
+
+    /**
+     * Method retrieve the params configurations for a dependent API of an API Product specified by the
+     * API directory name
+     *
+     * @param dependentAPIsParams Env params array of dependent APIs of the API Product
+     * @param apiDirectoryName    Dependent API directory name
+     * @return JsonObject of environment parameters of the dependent API
+     */
+    public static JsonObject getDependentAPIParams(JsonObject dependentAPIsParams, String apiDirectoryName) {
+        if (dependentAPIsParams.has(apiDirectoryName)) {
+            return dependentAPIsParams.get(apiDirectoryName).getAsJsonObject();
+        }
+        return null;
     }
 
     /**
@@ -121,29 +156,7 @@ public class APIControllerUtil {
         }
 
         //handle mutualSSL certificates
-        JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
-        if (clientCertificates != null) {
-            try {
-                List<String> apiSecurity = importedApiDto.getSecurityScheme();
-                if (!apiSecurity.isEmpty()) {
-                    if (!apiSecurity.contains(ImportExportConstants.MUTUAL_SSL_ENABLED)) {
-                        // if the apiSecurity field does not have mutualssl type, append it
-                        apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
-                    }
-                } else {
-                    // if the apiSecurity field is empty, assign the value as "mutualssl"
-                    apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
-                }
-                importedApiDto.securityScheme(apiSecurity);
-                String jsonString = clientCertificates.toString();
-                handleClientCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), importedApi.getId(),
-                        pathToArchive);
-            } catch (IOException e) {
-                //Error is logged and when generating certificate details and certs in the archive
-                String errorMessage = "Error while generating meta information of client certificates from path.";
-                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            }
-        }
+        handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);
 
         //handle endpoint certificates
         JsonElement endpointCertificates = envParams.get(ImportExportConstants.ENDPOINT_CERTIFICATES_FIELD);
@@ -167,9 +180,81 @@ public class APIControllerUtil {
         // handle available subscription policies
         JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
         if (policies != null && !policies.isJsonNull()) {
-            handleSubscriptionPolicies(policies, importedApiDto);
+            handleSubscriptionPolicies(policies, importedApiDto, null);
         }
         return importedApiDto;
+    }
+
+    /**
+     * This method will be used to generate ClientCertificates and meta information related to client certs
+     *
+     * @param envParams             Env params object with required parameters
+     * @param importedApiDto        Imported API DTO (this will be null for API Products)
+     * @param importedApiProductDto Imported API Product DTO (this will be null for APIs)
+     * @param identifier            API Identifier/API Product Identifier of the imported API/API Product
+     * @param pathToArchive         String of the archive project
+     * @throws APIManagementException If an error while generating client certificate information
+     */
+    private static void handleMutualSslCertificates(JsonObject envParams, APIDTO importedApiDto,
+            APIProductDTO importedApiProductDto, Identifier identifier, String pathToArchive)
+            throws APIManagementException {
+        JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
+        if (clientCertificates != null) {
+            try {
+                List<String> apiSecurity = (importedApiDto != null) ?
+                        importedApiDto.getSecurityScheme() :
+                        importedApiProductDto.getSecurityScheme();
+                if (!apiSecurity.isEmpty()) {
+                    if (!apiSecurity.contains(ImportExportConstants.MUTUAL_SSL_ENABLED)) {
+                        // if the apiSecurity field does not have mutualssl type, append it
+                        apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
+                    }
+                } else {
+                    // if the apiSecurity field is empty, assign the value as "mutualssl"
+                    apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
+                }
+
+                if (importedApiDto != null) {
+                    importedApiDto.securityScheme(apiSecurity);
+                } else {
+                    importedApiProductDto.securityScheme(apiSecurity);
+                }
+
+                String jsonString = clientCertificates.toString();
+                handleClientCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), identifier,
+                        pathToArchive);
+            } catch (IOException e) {
+                //Error is logged and when generating certificate details and certs in the archive
+                String errorMessage = "Error while generating meta information of client certificates from path.";
+                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
+            }
+        }
+    }
+
+    /**
+     * This method will be used to add extracted environment parameters to the imported API Product DTO object
+     *
+     * @param importedApiProductDto API Product DTO object to be imported
+     * @param envParams             Env params object with required parameters
+     * @return APIProductDTO Updated API Product DTO Object
+     */
+    public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams, String pathToArchive)
+            throws APIManagementException {
+
+        if (envParams == null || envParams.isJsonNull()) {
+            return importedApiProductDto;
+        }
+
+        APIProduct importedApiProduct = APIMappingUtil.fromDTOtoAPIProduct(importedApiProductDto, importedApiProductDto.getProvider());
+        //handle mutualSSL certificates
+        handleMutualSslCertificates(envParams, null, importedApiProductDto, importedApiProduct.getId(), pathToArchive);
+
+        // handle available subscription policies
+        JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
+        if (policies != null && !policies.isJsonNull()) {
+            handleSubscriptionPolicies(policies, null, importedApiProductDto);
+        }
+        return importedApiProductDto;
     }
 
     /**
@@ -234,10 +319,12 @@ public class APIControllerUtil {
     /**
      * This method will add the defined available subscription policies in an environment to the particular imported API
      *
-     * @param importedApiDto API DTO object to be updated
-     * @param policies       policies with the values
+     * @param importedApiDto        API DTO object to be updated
+     * @param importedApiProductDto API Product DTO object to be updated
+     * @param policies              policies with the values
      */
-    private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto) {
+    private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto,
+            APIProductDTO importedApiProductDto) {
         JsonArray definedPolicies = policies.getAsJsonArray();
         List<String> policiesListToAdd = new ArrayList<>();
         for (JsonElement definedPolicy : definedPolicies) {
@@ -252,7 +339,11 @@ public class APIControllerUtil {
         // Hence, this if statement will prevent setting the policies in api.yaml to an empty array if the policies
         // are not properly defined in the params file
         if (policiesListToAdd.size() > 0) {
-            importedApiDto.setPolicies(policiesListToAdd);
+            if (importedApiDto != null) {
+                importedApiDto.setPolicies(policiesListToAdd);
+            } else {
+                importedApiProductDto.setPolicies(policiesListToAdd);
+            }
         }
     }
 
@@ -735,14 +826,16 @@ public class APIControllerUtil {
      * This method will be used to generate ClientCertificates and meta information related to client certs
      *
      * @param certificates  JsonArray of client-certificates
-     * @param apiIdentifier APIIdentifier if the importedApi
+     * @param identifier    API Identifier/API Product Identifier of the imported API/API Product
      * @param pathToArchive String of the archive project
      * @throws IOException            If an error occurs when generating new certs and yaml file or when moving certs
      * @throws APIManagementException If an error while generating new directory
      */
-    private static void handleClientCertificates(JsonArray certificates, APIIdentifier apiIdentifier,
+    private static void handleClientCertificates(JsonArray certificates, Identifier identifier,
             String pathToArchive) throws IOException, APIManagementException {
 
+        APIIdentifier apiIdentifier = new APIIdentifier(identifier.getProviderName(), identifier.getName(),
+                identifier.getVersion());
         List<ClientCertificateDTO> certs = new ArrayList<>();
 
         for (JsonElement certificate : certificates) {
@@ -784,7 +877,7 @@ public class APIControllerUtil {
         String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
-                    ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, jsonElement);
+                    ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
@@ -850,5 +943,4 @@ public class APIControllerUtil {
             throw new APIManagementException(e);
         }
     }
-
 }
