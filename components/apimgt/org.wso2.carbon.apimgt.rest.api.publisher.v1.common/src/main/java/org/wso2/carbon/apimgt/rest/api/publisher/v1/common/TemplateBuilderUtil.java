@@ -510,6 +510,7 @@ public class TemplateBuilderUtil {
                     productResource.setFaultSequenceName(sequenceName);
                 }
                 productResource.setProductIdentifier(apiProduct.getId());
+                productResource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             }
         }
         APITemplateBuilder
