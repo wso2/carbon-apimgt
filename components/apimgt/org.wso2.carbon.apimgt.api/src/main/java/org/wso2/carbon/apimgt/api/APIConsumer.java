@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -208,18 +209,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get API for subscriber
      */
     Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
-            throws APIManagementException;
-
-    /**
-     * Returns a set of SubscribedAPIs filtered by the given application id.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application Id
-     * @param groupingId the groupId of the subscriber
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<SubscribedAPI> getSubscribedAPIsByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
             throws APIManagementException;
 
     /**
@@ -457,21 +446,23 @@ public interface APIConsumer extends APIManager {
      *
      * @param apiTypeWrapper Api Type Wrapper
      * @param commentId Comment ID
-     * @param limit
-     * @param offset
+     * @param replyLimit
+     * @param replyOffset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
 
     /**
      * @param apiTypeWrapper Api type wrapper
      * @param parentCommentID
+     * @param replyLimit
+     * @param replyOffset
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException;
+    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
@@ -876,16 +867,6 @@ public interface APIConsumer extends APIManager {
      */
     Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException;
-
-    /**
-     * Returns a set of scopes for a given space seperated scope key string
-     *
-     * @param scopeKeys a space seperated string of scope keys
-     * @param tenantId  tenant id
-     * @return set of scopes
-     * @throws APIManagementException
-     */
-    Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
     /**
      * Returns the groupId of a specific Application when the Id is provided

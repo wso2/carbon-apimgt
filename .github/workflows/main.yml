@@ -31,7 +31,6 @@ jobs:
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
       - name: Build carbon-apimgt with Tests, skipping AspectJ
-        continue-on-error: true
         run: mvn clean install --file pom.xml -Dskip.aspectj=true
 
   build-product:
@@ -40,7 +39,7 @@ jobs:
       matrix:
         include:
           - id: 1
-            segment: apim-integration-tests-api-common, apim-integration-tests-api-change-endpoint, apim-integration-tests-api-product, apim-integration-tests-api-lifecycle, apim-integration-tests-api-lifecycle-2, apim-email-secondary-userstore-tests, apim-CORS-tests, apim-integration-tests-samples, apim-publisher-tests, apim-store-tests, apim-integration-tests-graphql, admin-rest-api-tests, rest-api-tests, apim-mediation-tests
+            segment: apim-integration-tests-api-common, apim-integration-tests-api-change-endpoint, apim-integration-tests-api-product, apim-integration-tests-api-lifecycle, apim-integration-tests-api-lifecycle-2, apim-email-secondary-userstore-tests, apim-CORS-tests, apim-integration-tests-samples, apim-publisher-tests, apim-store-tests, apim-integration-tests-graphql, admin-rest-api-tests, rest-api-tests, apim-mediation-tests, apim-websocket-tests
           - id: 2
             segment: apim-integration-tests-without-restarts, apim-integration-tests-without-advance-throttling, apim-integration-tests-application-sharing, apim-JWT-integration-tests, apim-urlsafe-JWT-integration-tests, apim-integration-tests-endpoint-security, apim-integration-tests-external-idp, apim-integration-emailusername-login, apim-integration-tests-workflow
       fail-fast: false
@@ -101,7 +100,7 @@ jobs:
         with:
           path: reports
       - name: Publish Test Report
-        if: ${{ always() }}
+        if: always()
         uses: malinthaprasan/action-surefire-report@v1
         with:
           report_paths: 'reports/**/TEST-*.xml'

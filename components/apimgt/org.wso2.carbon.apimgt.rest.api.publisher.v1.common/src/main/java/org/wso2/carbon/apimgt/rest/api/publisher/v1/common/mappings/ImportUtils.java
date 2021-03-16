@@ -133,21 +133,23 @@ public class ImportUtils {
     /**
      * This method imports an API.
      *
-     * @param extractedFolderPath Location of the extracted folder of the API
-     * @param importedApiDTO      API DTO of the importing API
-     *                            (This will not be null when importing dependent APIs with API Products)
-     * @param preserveProvider    Decision to keep or replace the provider
-     * @param overwrite           Whether to update the API or not
-     * @param tokenScopes         Scopes of the token
+     * @param extractedFolderPath            Location of the extracted folder of the API
+     * @param importedApiDTO                 API DTO of the importing API
+     *                                       (This will not be null when importing dependent APIs with API Products)
+     * @param preserveProvider               Decision to keep or replace the provider
+     * @param overwrite                      Whether to update the API or not
+     * @param tokenScopes                    Scopes of the token
+     * @param dependentAPIParamsConfigObject Params configuration of an API (this will not be null if a dependent API of an
+     *                                       API product wants to override the parameters)
      * @throws APIImportExportException If there is an error in importing an API
      * @@return Imported API
      */
     public static API importApi(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
-                                Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct,
-                                String[] tokenScopes) throws APIManagementException {
+            Boolean rotateRevision, Boolean overwrite, Boolean dependentAPIFromProduct, String[] tokenScopes,
+            JsonObject dependentAPIParamsConfigObject) throws APIManagementException {
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        APIDefinitionValidationResponse swaggerDefinitionValidationResponse = null;
+        APIDefinitionValidationResponse validationResponse = null;
         String graphQLSchema = null;
         API importedApi = null;
         String currentStatus;
@@ -156,15 +158,22 @@ public class ImportUtils {
         GraphqlComplexityInfo graphqlComplexityInfo = null;
         int tenantId = 0;
         JsonArray deploymentInfoArray = null;
+        JsonObject paramsConfigObject;
 
         try {
             if (importedApiDTO == null) {
-                JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName);
+                JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
+                        ImportExportConstants.TYPE_API);
                 importedApiDTO = new Gson().fromJson(jsonObject, APIDTO.class);
             }
 
-            // Get API params Definition as JSON and resolve them
-            JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
+            // If the provided dependent APIs params config is null, it means this happening when importing an API (not
+            // because when importing a dependent API of an API Product). Hence, try to retrieve the definition from
+            // the API folder path
+            paramsConfigObject = (dependentAPIParamsConfigObject != null) ?
+                    dependentAPIParamsConfigObject :
+                    APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
+            // If above the params configurations are not null, then resolve those
             if (paramsConfigObject != null) {
                 importedApiDTO = APIControllerUtil.injectEnvParamsToAPI(importedApiDTO, paramsConfigObject,
                         extractedFolderPath);
@@ -181,7 +190,7 @@ public class ImportUtils {
             // Validate swagger content except for streaming APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                swaggerDefinitionValidationResponse = retrieveValidatedSwaggerDefinitionFromArchive(
+                validationResponse = retrieveValidatedSwaggerDefinitionFromArchive(
                         extractedFolderPath);
             }
             // Validate the GraphQL schema
@@ -192,6 +201,10 @@ public class ImportUtils {
             if (APIConstants.API_TYPE_SOAP.equalsIgnoreCase(apiType) || APIConstants.API_TYPE_SOAPTOREST
                     .equalsIgnoreCase(apiType)) {
                 validateWSDLFromArchive(extractedFolderPath, importedApiDTO);
+            }
+            // Validate the AsyncAPI definition of streaming APIs
+            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
+                validationResponse = retrieveValidatedAsyncApiDefinitionFromArchive(extractedFolderPath);
             }
 
             String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
@@ -213,7 +226,7 @@ public class ImportUtils {
                 // updating a "No resources found" error will be thrown. This is not a problem in the UI, since
                 // when updating an API from the UI there is at least one resource (operation) inside the DTO.
                 if (importedApiDTO.getOperations().isEmpty()) {
-                    setOperationsToDTO(importedApiDTO, swaggerDefinitionValidationResponse);
+                    setOperationsToDTO(importedApiDTO, validationResponse);
                 }
                 importedApi = PublisherCommonUtils
                         .updateApi(targetApi, importedApiDTO, RestApiCommonUtil.getLoggedInUserProvider(), tokenScopes);
@@ -233,11 +246,11 @@ public class ImportUtils {
             // Retrieving the life cycle action to do the lifecycle state change explicitly later
             lifecycleAction = getLifeCycleAction(currentTenantDomain, currentStatus, targetStatus, apiProvider);
 
-            // Add/update swagger content except for WebSocket APIs
+            // Add/update swagger content except for streaming APIs and GraphQL APIs
             if (!PublisherCommonUtils.isStreamingAPI(importedApiDTO)
                     && !APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 // Add the validated swagger separately since the UI does the same procedure
-                PublisherCommonUtils.updateSwagger(importedApi.getUUID(), swaggerDefinitionValidationResponse, false);
+                PublisherCommonUtils.updateSwagger(importedApi.getUuid(), validationResponse, false);
             }
             // Add the GraphQL schema
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
@@ -246,6 +259,11 @@ public class ImportUtils {
                 if (graphqlComplexityInfo != null && graphqlComplexityInfo.getList().size() != 0) {
                     apiProvider.addOrUpdateComplexityDetails(importedApi.getId(), graphqlComplexityInfo);
                 }
+            }
+            // Add/update Async API definition for streaming APIs
+            if (PublisherCommonUtils.isStreamingAPI(importedApiDTO)) {
+                // Add the validated Async API definition separately since the UI does the same procedure
+                PublisherCommonUtils.updateAsyncAPIDefinition(importedApi.getUuid(), validationResponse);
             }
 
             tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
@@ -470,12 +488,13 @@ public class ImportUtils {
     public static String preprocessImportedArtifact(String tempDirectory) throws APIImportExportException {
 
         String tempDirectoryAbsolutePath = tempDirectory + File.separator;
-        boolean isParamsFileAvailable = CommonUtil
-                .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME);
+        String paramsFileName =
+                ImportExportConstants.INTERMEDIATE_PARAMS_FILE_LOCATION + ImportExportConstants.YAML_EXTENSION;
+        boolean isParamsFileAvailable = CommonUtil.checkFileExistence(tempDirectoryAbsolutePath + paramsFileName);
         boolean isDeploymentDirectoryAvailable = CommonUtil
                 .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME);
 
-        //When api controller is provided with api_params.file
+        // When API controller is provided with params file
         if (isParamsFileAvailable) {
             if (!CommonUtil
                     .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
@@ -485,16 +504,15 @@ public class ImportUtils {
                         new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
                         tempDirectoryAbsolutePath);
 
-                //Copy api_params.yaml file to working directory
-                String srcParamsFilePath = tempDirectoryAbsolutePath + ImportExportConstants.API_PARAMS_FILE_NAME;
-                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
-                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                // Copy the params file to working directory
+                String srcParamsFilePath = tempDirectoryAbsolutePath + paramsFileName;
+                String destParamsFilePath =
+                        tempDirectoryAbsolutePath + newExtractedFolderName + File.separator + paramsFileName;
                 CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
-
                 return tempDirectoryAbsolutePath + newExtractedFolderName;
             }
         }
-        //When api controller is provided with the "Deployment" directory
+        //When API controller is provided with the "Deployment" directory
         if (isDeploymentDirectoryAvailable) {
             if (!CommonUtil
                     .checkFileExistence(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME)) {
@@ -504,12 +522,12 @@ public class ImportUtils {
                         new File(tempDirectoryAbsolutePath + ImportExportConstants.SOURCE_ZIP_DIRECTORY_NAME),
                         tempDirectoryAbsolutePath);
 
-                //Copy api_params.yaml file to working directory
+                // Copy the params file to working directory
                 String srcParamsFilePath =
                         tempDirectoryAbsolutePath + ImportExportConstants.DEPLOYMENT_DIRECTORY_NAME + File.separator
-                                + ImportExportConstants.API_PARAMS_FILE_NAME;
-                String destParamsFilePath = tempDirectoryAbsolutePath + newExtractedFolderName + File.separator
-                        + ImportExportConstants.API_PARAMS_FILE_NAME;
+                                + paramsFileName;
+                String destParamsFilePath =
+                        tempDirectoryAbsolutePath + newExtractedFolderName + File.separator + paramsFileName;
                 CommonUtil.copyFile(srcParamsFilePath, destParamsFilePath);
 
                 //move deployment directory into working directory
@@ -555,7 +573,7 @@ public class ImportUtils {
     }
 
     /**
-     * Validate API/API Product configuration (api.yaml/api.json)  and return it.
+     * Validate API/API Product configuration (api/api_product.yaml or api/api_product.json) and return it.
      *
      * @param pathToArchive            Path to the extracted folder
      * @param isDefaultProviderAllowed Preserve provider flag value
@@ -563,25 +581,47 @@ public class ImportUtils {
      * @throws APIMgtAuthorizationFailedException If an error occurs while authorizing the provider
      */
     private static JsonElement retrieveValidatedDTOObject(String pathToArchive, Boolean isDefaultProviderAllowed,
-            String currentUser) throws IOException, APIMgtAuthorizationFailedException {
-
-        JsonObject configObject = retrievedAPIDtoJson(pathToArchive);
-
+            String currentUser, String type) throws IOException, APIMgtAuthorizationFailedException {
+        JsonObject configObject = (StringUtils.equals(type, ImportExportConstants.TYPE_API)) ?
+                retrievedAPIDtoJson(pathToArchive) :
+                retrievedAPIProductDtoJson(pathToArchive);
         configObject = validatePreserveProvider(configObject, isDefaultProviderAllowed, currentUser);
         return configObject;
     }
 
     @NotNull
     private static JsonObject retrievedAPIDtoJson(String pathToArchive) throws IOException {
-
         // Get API Definition as JSON
         String jsonContent =
                 getFileContentAsJson(pathToArchive + ImportExportConstants.API_FILE_LOCATION);
-        String apiVersion;
         if (jsonContent == null) {
-            throw new IOException("Cannot find API definition. api.json or api.yaml should present");
+            throw new IOException("Cannot find API definition. api.yaml or api.json should present");
         }
-        // Retrieving the field "data" in api.yaml/json and convert it to a JSON object for further processing
+        return processRetrievedDefinition(jsonContent);
+    }
+
+    @NotNull
+    private static JsonObject retrievedAPIProductDtoJson(String pathToArchive) throws IOException {
+        // Get API Product Definition as JSON
+        String jsonContent = getFileContentAsJson(pathToArchive + ImportExportConstants.API_PRODUCT_FILE_LOCATION);
+        if (jsonContent == null) {
+            throw new IOException(
+                    "Cannot find API Product definition. api_product.yaml or api_product.json should present");
+        }
+        return processRetrievedDefinition(jsonContent);
+    }
+
+    /**
+     * Process the retrieved api.yaml or api_product.yaml content
+     *
+     * @param jsonContent Path to the extracted folder
+     * @return JsonObject of processed api.yaml or api_product.yaml content
+     * @throws IOException If an error occurs when the API/API Product name or version not provided
+     */
+    private static JsonObject processRetrievedDefinition(String jsonContent) throws IOException {
+        String apiVersion;
+        // Retrieving the field "data" in api.yaml/json or api_product.yaml/json and
+        // convert it to a JSON object for further processing
         JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
         JsonObject configObject = configElement.getAsJsonObject();
 
@@ -597,7 +637,7 @@ public class ImportUtils {
             apiVersion = ImportExportConstants.DEFAULT_API_PRODUCT_VERSION;
         }
 
-        // Remove spaces of API Name/version if present
+        // Remove spaces of API/API Product name/version if present
         if (apiName != null && apiVersion != null) {
             configObject.remove(apiName);
             configObject.addProperty(ImportExportConstants.API_NAME_ELEMENT, apiName.replace(" ", ""));
@@ -606,7 +646,7 @@ public class ImportUtils {
                 configObject.addProperty(ImportExportConstants.VERSION_ELEMENT, apiVersion.replace(" ", ""));
             }
         } else {
-            throw new IOException("API name and version must be provided in api.yaml");
+            throw new IOException("API/API Product name and version must be provided in API/API Product definition");
         }
         return configObject;
     }
@@ -619,7 +659,7 @@ public class ImportUtils {
 
     public static APIProductDTO retrieveAPIProductDto(String pathToArchive) throws IOException {
 
-        JsonObject jsonObject = retrievedAPIDtoJson(pathToArchive);
+        JsonObject jsonObject = retrievedAPIProductDtoJson(pathToArchive);
 
         return new Gson().fromJson(jsonObject, APIProductDTO.class);
     }
@@ -755,7 +795,14 @@ public class ImportUtils {
         return jsonContent;
     }
 
-    public static String retrieveValidatedAsyncApiDefinitionFromArchive(String pathToArchive)
+    /**
+     * Validate Aysnc API definition from the archive directory and return it.
+     *
+     * @param pathToArchive Path to API archive
+     * @return APIDefinitionValidationResponse of the Async API definition content
+     * @throws APIManagementException If an error occurs while reading the file
+     */
+    public static APIDefinitionValidationResponse retrieveValidatedAsyncApiDefinitionFromArchive(String pathToArchive)
             throws APIManagementException {
         try {
             String asyncApiDefinition = loadAsyncApiDefinitionFromFile(pathToArchive);
@@ -766,7 +813,7 @@ public class ImportUtils {
                         "Error occurred while importing the API. Invalid AsyncAPI definition found. "
                                 + validationResponse.getErrorItems());
             }
-            return asyncApiDefinition;
+            return validationResponse;
         } catch (IOException e) {
             throw new APIManagementException("Error while reading API meta information from path: " + pathToArchive, e,
                     ExceptionCodes.ERROR_READING_META_DATA);
@@ -779,8 +826,16 @@ public class ImportUtils {
                 log.debug("Found AsyncAPI file " + pathToArchive
                         + ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION);
             }
-            return FileUtils.readFileToString(
-                    new File(pathToArchive, ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION));
+            return FileUtils
+                    .readFileToString(new File(pathToArchive, ImportExportConstants.JSON_ASYNCAPI_DEFINITION_LOCATION));
+        } else if (CommonUtil
+                .checkFileExistence(pathToArchive + ImportExportConstants.YAML_ASYNCAPI_DEFINITION_LOCATION)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Found AsyncAPI file " + pathToArchive
+                        + ImportExportConstants.YAML_ASYNCAPI_DEFINITION_LOCATION);
+            }
+            return CommonUtil.yamlToJson(FileUtils.readFileToString(
+                    new File(pathToArchive + ImportExportConstants.YAML_ASYNCAPI_DEFINITION_LOCATION)));
         }
         throw new IOException("Missing AsyncAPI definition file.");
     }
@@ -858,7 +913,9 @@ public class ImportUtils {
             if (jsonContent == null) {
                 return null;
             }
-            return new Gson().fromJson(jsonContent, JsonArray.class);
+            // Retrieving the field "data" in deployment_environments.yaml
+            JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            return configElement.getAsJsonArray();
         } catch (IOException e) {
             throw new APIManagementException("Error while reading deployment environments info from path: "
                     + pathToArchive, e, ExceptionCodes.ERROR_READING_META_DATA);
@@ -950,7 +1007,8 @@ public class ImportUtils {
      * Validate swagger definition from the archive directory and return it.
      *
      * @param pathToArchive Path to API or API Product archive
-     * @throws APIImportExportException If an error occurs while reading the file
+     * @return APIDefinitionValidationResponse of the swagger content
+     * @throws APIManagementException If an error occurs while reading the file
      */
     public static APIDefinitionValidationResponse retrieveValidatedSwaggerDefinitionFromArchive(String pathToArchive)
             throws APIManagementException {
@@ -1131,7 +1189,7 @@ public class ImportUtils {
                     Documentation documentation = apiTypeWrapper.isAPIProduct() ?
                             PublisherCommonUtils
                                     .addDocumentationToAPI(documentDTO, apiTypeWrapper.getApiProduct().getUuid()) :
-                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUUID());
+                            PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiTypeWrapper.getApi().getUuid());
 
                     // Adding doc content
                     String docSourceType = documentation.getSourceType().toString();
@@ -1786,10 +1844,26 @@ public class ImportUtils {
         String userName = RestApiCommonUtil.getLoggedInUsername();
         String currentTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
         APIProduct importedApiProduct = null;
+        JsonArray deploymentInfoArray = null;
 
         try {
-            JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName);
+            JsonElement jsonObject = retrieveValidatedDTOObject(extractedFolderPath, preserveProvider, userName,
+                    ImportExportConstants.TYPE_API_PRODUCT);
             APIProductDTO importedApiProductDTO = new Gson().fromJson(jsonObject, APIProductDTO.class);
+
+            // If the provided dependent APIs params config is null, it means this happening when importing an API (not
+            // because when importing a dependent API of an API Product). Hence, try to retrieve the definition from
+            // the API folder path
+            JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(extractedFolderPath);
+            // If above the params configurations are not null, then resolve those
+            if (paramsConfigObject != null) {
+                importedApiProductDTO = APIControllerUtil
+                        .injectEnvParamsToAPIProduct(importedApiProductDTO, paramsConfigObject, extractedFolderPath);
+                JsonElement deploymentsParam = paramsConfigObject.get(ImportExportConstants.DEPLOYMENT_ENVIRONMENTS);
+                if (deploymentsParam != null && !deploymentsParam.isJsonNull()) {
+                    deploymentInfoArray = deploymentsParam.getAsJsonArray();
+                }
+            }
 
             APIProvider apiProvider = RestApiCommonUtil.getProvider(importedApiProductDTO.getProvider());
 
@@ -1839,7 +1913,10 @@ public class ImportUtils {
             addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
                     importedApiProduct.getId().getProviderName());
 
-            JsonArray deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
+            if (deploymentInfoArray == null) {
+                // If the params have not overwritten the deployment environments, yaml file will be read
+                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, false);
+            }
             List<APIRevisionDeployment> apiProductRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
                     currentTenantDomain, apiProvider);
             if (apiProductRevisionDeployments.size() > 0) {
@@ -1936,7 +2013,8 @@ public class ImportUtils {
                 String apiDirectoryPath =
                         path + File.separator + ImportExportConstants.APIS_DIRECTORY + File.separator + apiDirectory
                                 .getName();
-                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, preserveProvider, currentUser);
+                JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, preserveProvider, currentUser,
+                        ImportExportConstants.TYPE_API);
                 APIDTO apiDto = new Gson().fromJson(jsonObject, APIDTO.class);
                 String apiName = apiDto.getName();
                 String apiVersion = apiDto.getVersion();
@@ -2014,20 +2092,30 @@ public class ImportUtils {
      */
     private static APIProductDTO importDependentAPIs(String path, String currentUser, boolean isDefaultProviderAllowed,
             APIProvider apiProvider, boolean overwriteAPIs, Boolean rotateRevision, APIProductDTO apiProductDto,
-                                                     String[] tokenScopes)
-            throws IOException, APIManagementException {
+            String[] tokenScopes) throws IOException, APIManagementException {
 
+        JsonObject dependentAPIParamsConfigObject = null;
+        // Retrieve the dependent APIs param configurations from the params file of the API Product
+        JsonObject dependentAPIsParams = APIControllerUtil.getDependentAPIsParams(path);
         String apisDirectoryPath = path + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);
         File[] apisDirectoryListing = apisDirectory.listFiles();
+
         if (apisDirectoryListing != null) {
             for (File apiDirectory : apisDirectoryListing) {
                 String apiDirectoryPath =
                         path + File.separator + ImportExportConstants.APIS_DIRECTORY + File.separator + apiDirectory
                                 .getName();
 
+                // If the param configurations of the dependent APIs are available, the configurations of the current
+                // API in the API directory will be retrieved if available
+                if (dependentAPIsParams != null) {
+                    dependentAPIParamsConfigObject = APIControllerUtil
+                            .getDependentAPIParams(dependentAPIsParams, apiDirectory.getName());
+                }
+
                 JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, isDefaultProviderAllowed,
-                        currentUser);
+                        currentUser, ImportExportConstants.TYPE_API);
                 APIDTO apiDtoToImport = new Gson().fromJson(jsonObject, APIDTO.class);
                 API importedApi = null;
                 String apiName = apiDtoToImport.getName();
@@ -2043,12 +2131,14 @@ public class ImportUtils {
                         // otherwise do not update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes);
+                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
+                                    dependentAPIParamsConfigObject);
                         }
                     } else {
                         // If the API is not already imported, import it
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes);
+                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
+                                dependentAPIParamsConfigObject);
                     }
                 } else {
                     // Retrieve the current tenant domain of the logged in user
@@ -2063,13 +2153,15 @@ public class ImportUtils {
                         // If there is no API in the current tenant domain (which means the provider name is blank)
                         // then the API should be imported freshly
                         importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes);
+                                rotateRevision, Boolean.FALSE, Boolean.TRUE, tokenScopes,
+                                dependentAPIParamsConfigObject);
                     } else {
                         // If there is an API already in the current tenant domain, update it if the overWriteAPIs flag is specified,
                         // otherwise do not import/update the API. (Just skip it)
                         if (Boolean.TRUE.equals(overwriteAPIs)) {
                             importedApi = importApi(apiDirectoryPath, apiDtoToImport, isDefaultProviderAllowed,
-                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes);
+                                    rotateRevision, Boolean.TRUE, Boolean.TRUE, tokenScopes,
+                                    dependentAPIParamsConfigObject);
                         }
                     }
                 }
@@ -2101,7 +2193,7 @@ public class ImportUtils {
         for (ProductAPIDTO api : apis) {
             if (StringUtils.equals(api.getName(), importedApiIdentifier.getName()) && StringUtils
                     .equals(api.getVersion(), importedApiIdentifier.getVersion())) {
-                api.setApiId(importedApi.getUUID());
+                api.setApiId(importedApi.getUuid());
                 break;
             }
         }
@@ -2123,7 +2215,7 @@ public class ImportUtils {
             API targetApi = retrieveApiToOverwrite(api.getName(), api.getVersion(), currentTenantDomain, apiProvider,
                     Boolean.FALSE);
             if (targetApi != null) {
-                api.setApiId(targetApi.getUUID());
+                api.setApiId(targetApi.getUuid());
             }
         }
         return importedApiProductDtO;

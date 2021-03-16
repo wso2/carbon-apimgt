@@ -270,7 +270,6 @@ class Comment extends React.Component {
                     {comments
                         && comments
                             .slice(0)
-                            .reverse()
                             .map((comment, index) => (
                                 <div
                                     // eslint-disable-next-line react/no-array-index-key

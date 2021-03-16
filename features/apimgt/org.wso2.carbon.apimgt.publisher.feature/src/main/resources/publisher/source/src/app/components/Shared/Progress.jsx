@@ -22,6 +22,7 @@ import defaultTheme from 'AppData/defaultTheme';
 
 const Progress = (props) => {
     const { message, per } = props;
+    const backgroundColor = per <= 10 ? 'white' : defaultTheme.custom.wrapperBackground;
     if (per === -1) { // Means default value means no progress percentage
         return (
             <div className='apim-dual-ring'>
@@ -32,10 +33,12 @@ const Progress = (props) => {
         return (
             <div id='apim-loader' className='progress-bar-striped'>
                 <span style={{
-                    backgroundColor: defaultTheme.custom.wrapperBackground, // to override this u need to build the app
+                    backgroundColor, // to override this u need to build the app
                     width: '300px',
                     display: 'flex',
                     justifyContent: 'center',
+                    fontFamily: '"Open Sans", "Helvetica", "Arial", sans-serif',
+                    'padding-bottom': '14px',
                 }}
                 >
                     {message}

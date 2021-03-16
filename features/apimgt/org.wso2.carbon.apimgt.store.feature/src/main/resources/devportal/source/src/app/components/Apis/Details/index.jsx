@@ -247,8 +247,8 @@ class Details extends React.Component {
             }
             if (user != null) {
                 this.setState({open:user.isSideBarOpen});
-                existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
                 const subscriptionLimit = Settings.app.subscribeApplicationLimit || 5000;
+                existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null, subscriptionLimit);
                 promisedApplications = restApi.getAllApplications(null, subscriptionLimit);
 
                 Promise.all([existingSubscriptions, promisedApplications])

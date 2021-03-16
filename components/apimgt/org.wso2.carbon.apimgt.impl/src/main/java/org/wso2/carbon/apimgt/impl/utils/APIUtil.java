@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -198,7 +199,6 @@ import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
@@ -1189,30 +1189,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return provider;
-    }
-
-    /**
-     * Returns a list of scopes when passed the Provider Name and Scope Key
-     *
-     * @param scopeKey
-     * @param provider
-     * @return
-     * @throws APIManagementException
-     */
-    public static Set<Scope> getScopeByScopeKey(String scopeKey, String provider) throws APIManagementException {
-
-        Set<Scope> scopeSet = null;
-        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomainName);
-            scopeSet = ApiMgtDAO.getInstance().getAPIScopesByScopeKey(scopeKey, tenantId);
-        } catch (UserStoreException e) {
-            String msg = "Error while retrieving Scopes";
-            log.error(msg, e);
-            handleException(msg);
-        }
-        return scopeSet;
     }
 
     /**
@@ -3571,79 +3547,6 @@ public final class APIUtil {
     public static boolean checkUserNameAssertionEnabled() {
 
         return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isUserNameAssertionEnabled();
-    }
-
-    public static String[] getAvailableKeyStoreTables() throws APIManagementException {
-
-        String[] keyStoreTables = new String[0];
-        Map<String, String> domainMappings = getAvailableUserStoreDomainMappings();
-        if (domainMappings != null) {
-            keyStoreTables = new String[domainMappings.size()];
-            int i = 0;
-            for (Entry<String, String> e : domainMappings.entrySet()) {
-                String value = e.getValue();
-                keyStoreTables[i] = APIConstants.ACCESS_TOKEN_STORE_TABLE + "_" + value.trim();
-                i++;
-            }
-        }
-        return keyStoreTables;
-    }
-
-    public static Map<String, String> getAvailableUserStoreDomainMappings() throws
-            APIManagementException {
-
-        Map<String, String> userStoreDomainMap = new HashMap<String, String>();
-        String domainsStr =
-                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getAccessTokenPartitioningDomains();
-        if (domainsStr != null) {
-            String[] userStoreDomainsArr = domainsStr.split(",");
-            for (String anUserStoreDomainsArr : userStoreDomainsArr) {
-                String[] mapping = anUserStoreDomainsArr.trim().split(":"); //A:foo.com , B:bar.com
-                if (mapping.length < 2) {
-                    throw new APIManagementException("Domain mapping has not defined");
-                }
-                userStoreDomainMap.put(mapping[1].trim(), mapping[0].trim()); //key=domain & value=mapping
-            }
-        }
-        return userStoreDomainMap;
-    }
-
-    public static String getAccessTokenStoreTableFromUserId(String userId)
-            throws APIManagementException {
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        String userStore;
-        if (userId != null) {
-            String[] strArr = userId.split("/");
-            if (strArr.length > 1) {
-                userStore = strArr[0];
-                Map<String, String> availableDomainMappings = getAvailableUserStoreDomainMappings();
-                if (availableDomainMappings != null &&
-                        availableDomainMappings.containsKey(userStore)) {
-                    accessTokenStoreTable = accessTokenStoreTable + "_" +
-                            availableDomainMappings.get(userStore);
-                }
-            }
-        }
-        return accessTokenStoreTable;
-    }
-
-    public static String getAccessTokenStoreTableFromAccessToken(String apiKey)
-            throws APIManagementException {
-
-        String userId = getUserIdFromAccessToken(apiKey); //i.e: 'foo.com/admin' or 'admin'
-        return getAccessTokenStoreTableFromUserId(userId);
-    }
-
-    public static String getUserIdFromAccessToken(String apiKey) {
-
-        String userId = null;
-        String decodedKey = new String(Base64.decodeBase64(apiKey.getBytes(Charset.defaultCharset())), Charset.defaultCharset());
-        String[] tmpArr = decodedKey.split(":");
-        if (tmpArr.length == 2) { //tmpArr[0]= userStoreDomain & tmpArr[1] = userId
-            userId = tmpArr[1];
-        }
-        return userId;
     }
 
     /**
@@ -8476,6 +8379,30 @@ public final class APIUtil {
     }
 
     /**
+     * This method is used to get the default policy in a given tenant space
+     *
+     * @param tenantDomain tenant domain name
+     * @return default throttling policy for a given tenant
+     */
+    public static String getDefaultThrottlingPolicy(String tenantDomain) {
+        String defaultTier = APIConstants.UNLIMITED_TIER;
+        if (!isEnabledUnlimitedTier()) {
+            // Set an available value if the Unlimited policy is disabled
+            try {
+                Map<String, Tier> tierMap = getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                if (tierMap.size() > 0) {
+                    defaultTier = tierMap.keySet().toArray()[0].toString();
+                } else {
+                    log.error("No throttle policies available in the tenant " + tenantDomain);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while getting throttle policies for tenant " + tenantDomain);
+            }
+        }
+        return defaultTier;
+    }
+
+    /**
      * This method is used to get the labels in a given tenant space
      *
      * @param tenantDomain tenant domain name
@@ -9943,6 +9870,24 @@ public final class APIUtil {
     public static Map<String, Environment> getReadOnlyEnvironments() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
+    }
+
+    /**
+     * Get default (first) vhost of the given read only environment
+     * @param environmentName name of the read only environment
+     * @return default vhost of environment
+     */
+    public static VHost getDefaultVhostOfReadOnlyEnvironment(String environmentName) throws APIManagementException {
+        Map<String, Environment> readOnlyEnvironments = getReadOnlyEnvironments();
+        if (readOnlyEnvironments.get(environmentName) == null) {
+            throw new APIManagementException("Configured read only environment not found: "
+                    + environmentName);
+        }
+        if (readOnlyEnvironments.get(environmentName).getVhosts().isEmpty()) {
+            throw new APIManagementException("VHosts not found for the environment: "
+                    + environmentName);
+        }
+        return readOnlyEnvironments.get(environmentName).getVhosts().get(0);
     }
 
     private static QName getQNameWithIdentityNS(String localPart) {

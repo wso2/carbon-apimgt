@@ -22,11 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIRealmUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommenterInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,13 +57,12 @@ public class CommentMappingUtil {
         }
         commentDTO.setCategory(comment.getCategory());
         commentDTO.setParentCommentId(comment.getParentCommentID());
-        if (comment.getEntryPoint().equals("devPortal")){
+        if (comment.getEntryPoint().equals("DEVPORTAL")){
             commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.DEVPORTAL);
-        } else if (comment.getEntryPoint().equals("publisher")){
+        } else if (comment.getEntryPoint().equals("PUBLISHER")){
             commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.PUBLISHER);
         }
-        commentDTO.setReplies(fromCommentListToDTO(comment.getReplies().toArray(
-                new Comment[comment.getReplies().size()]), 30, 0, false));
+        commentDTO.setReplies(fromCommentListToDTO(comment.getReplies(), false));
         return commentDTO;
     }
 
@@ -116,30 +117,34 @@ public class CommentMappingUtil {
         comment.setApiId(apiId);
         return comment;
     }
+
     /**
      * Wraps a List of Comments to a CommentListDTO
      *
      * @param commentList list of comments
-     * @param limit       maximum comments to return
-     * @param offset      starting position of the pagination
      * @return CommentListDTO
      */
-    public static CommentListDTO fromCommentListToDTO(Comment[] commentList, int limit, int offset,
-                                                      boolean includeCommenterInfo) {
+    public static CommentListDTO fromCommentListToDTO(CommentList commentList, boolean includeCommenterInfo) {
         CommentListDTO commentListDTO = new CommentListDTO();
         List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
-        commentListDTO.setCount(commentList.length);
+        commentListDTO.setCount(commentList.getCount());
 
-        int start = offset < commentList.length && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= commentList.length - 1 ? offset + limit - 1 : commentList.length - 1;
+        PaginationDTO paginationDTO = new PaginationDTO();
+        paginationDTO.setLimit(commentList.getPagination().getLimit());
+        paginationDTO.setOffset(commentList.getPagination().getOffset());
+        paginationDTO.setTotal(commentList.getPagination().getTotal());
+        paginationDTO.setNext(commentList.getPagination().getNext());
+        paginationDTO.setPrevious(commentList.getPagination().getPrevious());
+        commentListDTO.setPagination(paginationDTO);
+
         Map<String, Map<String, String>> userClaimsMap = new HashMap<>();
-        for (int i = start; i <= end; i++) {
+        for (Comment comment:commentList.getList()) {
             try {
                 if (includeCommenterInfo) {
-                    userClaimsMap = retrieveUserClaims(commentList[i].getUser(), userClaimsMap);
-                    listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(commentList[i], userClaimsMap));
+                    userClaimsMap = retrieveUserClaims(comment.getUser(), userClaimsMap);
+                    listOfCommentDTOs.add(fromCommentToDTOWithUserInfo(comment, userClaimsMap));
                 } else {
-                    listOfCommentDTOs.add(fromCommentToDTO(commentList[i]));
+                    listOfCommentDTOs.add(fromCommentToDTO(comment));
                 }
             } catch (APIManagementException e) {
                 log.error("Error while creating comments list", e);
@@ -148,5 +153,4 @@ public class CommentMappingUtil {
         commentListDTO.setList(listOfCommentDTOs);
         return commentListDTO;
     }
-
 }

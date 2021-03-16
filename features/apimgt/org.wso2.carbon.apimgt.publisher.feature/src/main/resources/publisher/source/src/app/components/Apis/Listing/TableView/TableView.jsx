@@ -30,7 +30,7 @@ import ApiThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/ApiTh
 import DocThumb from 'AppComponents/Apis/Listing/components/ImageGenerator/DocThumb';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
+import APILanding from 'AppComponents/Apis/Listing/Landing';
 import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
@@ -452,13 +452,11 @@ class TableView extends React.Component {
                         listType={listType}
                         showToggle={this.showToggle}
                     />
-                    <div className={classes.contentInside}>
-                        {isAPIProduct ? (
-                            <SampleAPIProduct />
-                        ) : (
-                            <SampleAPI />
-                        )}
-                    </div>
+                    {isAPIProduct ? (
+                        <SampleAPIProduct />
+                    ) : (
+                        <APILanding />
+                    )}
                 </>
             );
         }
@@ -491,7 +489,7 @@ TableView.propTypes = {
     intl: PropTypes.shape({ formatMessage: PropTypes.func.isRequired }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     theme: PropTypes.shape({
-        custom: PropTypes.string,
+        custom: PropTypes.shape({}),
     }).isRequired,
     query: PropTypes.string,
 };
