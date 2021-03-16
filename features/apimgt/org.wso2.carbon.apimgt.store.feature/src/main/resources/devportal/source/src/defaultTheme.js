@@ -340,6 +340,13 @@ const DefaultConfigurations = {
             active: true,
             redirectToIfInactive: 'https://wso2.com/api-management/cloud/',
         },
+        curlGenerator: {
+            backgroundColor: '#41444e',
+            color: '#fff',
+        },
+        AsyncTryOut: {
+            backgroundColor: '#89b7d1',
+        },
         overrides: {
             MuiOutlinedInput: {
                 root: {
