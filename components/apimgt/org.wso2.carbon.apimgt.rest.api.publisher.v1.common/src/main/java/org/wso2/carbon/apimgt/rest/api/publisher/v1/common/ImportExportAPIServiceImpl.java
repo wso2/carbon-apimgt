@@ -72,7 +72,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             // Validate API name, version and provider before exporting
             String provider = ExportUtils.validateExportParams(name, version, providerName);
             apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
-            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier);
+            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organizationId);
             if (apiId == null) {
                 throw new APIImportExportException("API Id not found for the provided details");
             }
