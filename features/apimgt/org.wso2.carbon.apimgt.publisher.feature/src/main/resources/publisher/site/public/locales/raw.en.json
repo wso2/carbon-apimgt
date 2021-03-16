@@ -1053,6 +1053,9 @@
   "Apis.Details.Documents.Delete.document.delete.successfully": {
     "defaultMessage": "deleted successfully."
   },
+  "Apis.Details.Documents.Delete.document.listing.delete": {
+    "defaultMessage": "Yes. Delete"
+  },
   "Apis.Details.Documents.Delete.document.listing.delete.cancel": {
     "defaultMessage": "Cancel"
   },
@@ -3953,9 +3956,6 @@
   },
   "error.list.500.description": {
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-  },
-  "sIDiOO": {
-    "defaultMessage": "Yes. Delete"
   },
   "save": {
     "defaultMessage": "Save"
