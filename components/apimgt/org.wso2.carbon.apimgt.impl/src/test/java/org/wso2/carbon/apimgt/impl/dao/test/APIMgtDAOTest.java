@@ -750,6 +750,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
                 "1.0.0");
         API api = new API(apiId);
+        api.setOrganizationId("org1");
         api.setContext("/getAPIVersionsMatchingApiName");
         api.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
         api.setUUID(UUID.randomUUID().toString());
@@ -757,6 +758,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId2 = new APIIdentifier("getAPIVersionsMatchingApiName", "getAPIVersionsMatchingApiName",
                 "2.0.0");
         API api2 = new API(apiId2);
+        api2.setOrganizationId("org2");
         api2.setContext("/getAPIVersionsMatchingApiName");
         api2.setContextTemplate("/getAPIVersionsMatchingApiName/{version}");
         api2.setUUID(UUID.randomUUID().toString());
@@ -766,8 +768,8 @@ public class APIMgtDAOTest {
         assertNotNull(versionList);
         assertTrue(versionList.contains("1.0.0"));
         assertTrue(versionList.contains("2.0.0"));
-        apiMgtDAO.deleteAPI(apiId);
-        apiMgtDAO.deleteAPI(apiId2);
+        apiMgtDAO.deleteAPI(apiId, "org1");
+        apiMgtDAO.deleteAPI(apiId2, "org2");
     }
 
     @Test
@@ -804,6 +806,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry", "1.0.0");
         API api = new API(apiId);
+        api.setOrganizationId("org1");
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         api.setUUID(UUID.randomUUID().toString());
@@ -811,6 +814,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
         API api1 = new API(apiId1);
+        api1.setOrganizationId("org2");
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
         api1.setUUID(UUID.randomUUID().toString());
@@ -830,8 +834,8 @@ public class APIMgtDAOTest {
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(apiId)));
         apiMgtDAO.removeSubscription(apiId, application.getId());
         apiMgtDAO.removeSubscriptionById(subsId);
-        apiMgtDAO.deleteAPI(apiId);
-        apiMgtDAO.deleteAPI(apiId1);
+        apiMgtDAO.deleteAPI(apiId, "org1");
+        apiMgtDAO.deleteAPI(apiId1, "org2");
         assertNotNull(apiMgtDAO.getWorkflowReference(application.getName(), subscriber.getName()));
         applicationRegistrationWorkflowDTO.setStatus(WorkflowStatus.APPROVED);
         apiMgtDAO.updateWorkflowStatus(applicationRegistrationWorkflowDTO);
@@ -876,6 +880,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("testCreateApplicationRegistrationEntry",
                 "testCreateApplicationRegistrationEntry", "1.0.0");
         API api = new API(apiId);
+        api.setOrganizationId("org1");
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
@@ -933,7 +938,7 @@ public class APIMgtDAOTest {
         assertTrue(apiMgtDAO.getConsumerKeys(apiId).length > 0);
         apiMgtDAO.removeAllSubscriptions(apiId);
         assertTrue(apiMgtDAO.getAPINamesMatchingContext(api.getContext()).size() > 0);
-        apiMgtDAO.deleteAPI(apiId);
+        apiMgtDAO.deleteAPI(apiId, "org1");
         apiMgtDAO.deleteApplication(application);
         apiMgtDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, "testCreateApplicationRegistrationEntry",
                 -1234);
@@ -1052,6 +1057,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiId = new APIIdentifier("testAddUpdateDeleteBlockCondition",
                 "testAddUpdateDeleteBlockCondition", "1.0.0");
         API api = new API(apiId);
+        api.setOrganizationId("org1");
         api.setContext("/testAddUpdateDeleteBlockCondition");
         api.setContextTemplate("/testAddUpdateDeleteBlockCondition/{version}");
         api.setUUID(UUID.randomUUID().toString());
@@ -1097,7 +1103,7 @@ public class APIMgtDAOTest {
         }
         apiMgtDAO.deleteApplication(application);
         apiMgtDAO.removeThrottlePolicy(PolicyConstants.POLICY_LEVEL_APP, applicationPolicy.getPolicyName(), -1234);
-        apiMgtDAO.deleteAPI(apiId);
+        apiMgtDAO.deleteAPI(apiId, "org1");
         deleteSubscriber(subscriber.getId());
     }
 
@@ -1120,6 +1126,7 @@ public class APIMgtDAOTest {
         APIIdentifier apiIdentifier = new APIIdentifier("testAddAndGetApi",
                 "testAddAndGetApi", "1.0.0");
         API api = new API(apiIdentifier);
+        api.setOrganizationId("org1");
         api.setContext("/testAddAndGetApi");
         api.setContextTemplate("/testAddAndGetApi/{version}");
         api.setUriTemplates(getUriTemplateSet());
@@ -1143,7 +1150,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.deleteExternalAPIStoresDetails(apiIdentifier, apiStoreSet);
         apiMgtDAO.updateExternalAPIStoresDetails(apiIdentifier, Collections.<APIStore>emptySet());
         assertTrue(apiMgtDAO.getExternalAPIStoresDetails(apiIdentifier).size()==0);
-        apiMgtDAO.deleteAPI(apiIdentifier);
+        apiMgtDAO.deleteAPI(apiIdentifier, "org1");
     }
 
     @Test
