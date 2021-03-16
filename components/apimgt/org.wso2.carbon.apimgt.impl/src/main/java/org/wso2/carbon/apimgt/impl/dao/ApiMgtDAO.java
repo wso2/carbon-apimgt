@@ -8494,9 +8494,9 @@ public class ApiMgtDAO {
     public String getUUIDFromIdentifierMatchingOrganization(APIIdentifier identifier, String organizationId)
             throws APIManagementException {
         String uuid = null;
-        String sql = SQLConstants.GET_UUID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION;
-        try(Connection connection = APIMgtDBUtil.getConnection()) {
-            PreparedStatement prepStmt = connection.prepareStatement(sql);
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_UUID_BY_IDENTIFIER_SQL_MATCHING_ORGANIZATION)) {
             prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmt.setString(2, identifier.getApiName());
             prepStmt.setString(3, identifier.getVersion());
