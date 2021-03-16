@@ -866,7 +866,7 @@ public class PublisherCommonUtils {
                     //If version already exists
                     throw new APIManagementException(
                             "Error occurred while adding the API. The version already exists: " + version,
-                            ExceptionCodes.from(ExceptionCodes.API_VERSION_ALREADY_EXISTS, version));
+                            ExceptionCodes.from(ExceptionCodes.API_VERSION_ALREADY_EXISTS, version, body.getName()));
                 }
             }
         } else {

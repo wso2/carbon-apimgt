@@ -29,11 +29,11 @@ import java.util.Arrays;
 public enum ExceptionCodes implements ErrorHandler {
 
     // API, Application related codes
-    API_NAME_ALREADY_EXISTS(900250, "The API name already exists.", 409, "An API with name %s already exists"),
-    API_CONTEXT_ALREADY_EXISTS(900251, "The API context already exists.", 409, "An API with context %s already exists"),
-    API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version %s already exists"),
+    API_NAME_ALREADY_EXISTS(900250, "The API name already exists.", 409, "An API with name '%s' already exists"),
+    API_CONTEXT_ALREADY_EXISTS(900251, "The API context already exists.", 409, "An API with context '%s' already exists"),
+    API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
 
-    API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, " An API Product with context %s already exists"),
+    API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
 
     API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),
     APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, "The application already exists"),
@@ -43,11 +43,10 @@ public enum ExceptionCodes implements ErrorHandler {
     TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
     TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
-    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id %s not found"),
+    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
-    UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
-            "done"),
+    UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
             + "update the API"),
