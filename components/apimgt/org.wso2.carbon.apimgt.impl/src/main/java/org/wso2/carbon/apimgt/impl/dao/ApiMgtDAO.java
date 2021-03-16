@@ -8547,6 +8547,7 @@ public class ApiMgtDAO {
      * @param provider Provider of the API
      * @param apiName Name of the API
      * @param version Version of the API
+     * @param organizationId Identifier of an organization
      * @return String UUID
      * @throws APIManagementException if an error occurs
      */
