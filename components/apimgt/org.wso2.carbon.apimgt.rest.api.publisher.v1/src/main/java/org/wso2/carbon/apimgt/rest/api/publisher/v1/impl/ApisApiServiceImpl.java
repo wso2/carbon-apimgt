@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
+import io.swagger.v3.core.util.Json;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -27,6 +29,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -48,11 +53,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
@@ -269,8 +270,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (isSoapToRestConvertedApi) {
                 if (StringUtils.isNotBlank(apiToAdd.getWsdlUrl())) {
                     String swaggerStr = SOAPOperationBindingUtils.getSoapOperationMapping(body.getWsdlUri());
-                    apiProvider.saveSwagger20Definition(apiToAdd.getId(), swaggerStr);
-                    SequenceGenerator.generateSequencesFromSwagger(swaggerStr, new Gson().toJson(body));
+                    String validatedSwaggerStr = validateSwaggerDefinition(swaggerStr);
+                    apiProvider.saveSwagger20Definition(apiToAdd.getId(), validatedSwaggerStr);
+                    SequenceGenerator.generateSequencesFromSwagger(validatedSwaggerStr, new Gson().toJson(body));
                 } else {
                     String errorMessage =
                             "Error while generating the swagger since the wsdl url is null for: " + body.getProvider()
@@ -280,7 +282,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (!isWSAPI) {
                 APIDefinitionFromOpenAPISpec apiDefinitionUsingOASParser = new APIDefinitionFromOpenAPISpec();
                 String apiDefinition = apiDefinitionUsingOASParser.generateAPIDefinition(apiToAdd);
-                apiProvider.saveSwagger20Definition(apiToAdd.getId(), apiDefinition);
+                String validatedSwaggerStr = validateSwaggerDefinition(apiDefinition);
+                apiProvider.saveSwagger20Definition(apiToAdd.getId(), validatedSwaggerStr);
             }
 
             APIIdentifier createdApiId = apiToAdd.getId();
@@ -371,11 +374,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             apiProvider.updateAPI(apiToUpdate);
 
+
             if (!isWSAPI) {
                 String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
                 APIDefinitionFromOpenAPISpec definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
                 String newDefinition = definitionFromOpenAPISpec.generateAPIDefinition(apiToUpdate, oldDefinition);
-                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), newDefinition);
+                String validatedSwaggerStr = validateSwaggerDefinition(newDefinition);
+                apiProvider.saveSwagger20Definition(apiToUpdate.getId(), validatedSwaggerStr);
             }
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
@@ -1034,6 +1039,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //Update API is called to update URITemplates and scopes of the API
             apiProvider.updateAPI(existingAPI);
+            apiDefinition = validateSwaggerDefinition(apiDefinition);
             apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
             //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
@@ -1157,6 +1163,44 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response apisCopyApiPost(String newVersion, String apiId, MessageContext messageContext) {
         // do some magic!
         return Response.ok().entity("magic!").build();
+    }
+
+    /**
+     * This method is used to validate and remove trailing slashes in resources
+     *
+     * @param apiDefinition
+     * @return apiDefinition with modified resources
+     */
+    private String validateSwaggerDefinition(String apiDefinition) {
+        try {
+            if (apiDefinition == null) {
+                RestApiUtil.handleBadRequest("Parameter: API Definition cannot be null", log);
+            }
+            JSONParser parser = new JSONParser();
+            JSONObject apiDefinitionJson = (JSONObject) parser.parse(apiDefinition);
+            Map <String, JSONObject> pathMap = (Map<String, JSONObject>) apiDefinitionJson
+                    .get(APIConstants.SWAGGER_PATHS);
+            Map <String, JSONObject> clonePathMap = new HashMap<>();
+            apiDefinitionJson.remove(APIConstants.SWAGGER_PATHS);
+            Iterator it = pathMap.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry resource = (Map.Entry)it.next();
+                String key = (String) resource.getKey();
+                JSONObject resourceDefinition = (JSONObject) resource.getValue();
+                if (key.endsWith("/")) {
+                    clonePathMap.put(key.substring(0, key.length()-1), resourceDefinition);
+                } else {
+                    clonePathMap.put(key, resourceDefinition);
+                }
+                it.remove();
+            }
+            apiDefinitionJson.put(APIConstants.SWAGGER_PATHS, clonePathMap);
+            return Json.mapper().writeValueAsString(apiDefinitionJson);
+        } catch (JsonProcessingException | ParseException e) {
+            String errorMessage = "Error while validating the swagger Definition";
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
     }
 
     @Override

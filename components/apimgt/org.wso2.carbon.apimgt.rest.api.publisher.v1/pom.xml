@@ -65,6 +65,10 @@
             <artifactId>jackson-jaxrs</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
