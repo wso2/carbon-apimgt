@@ -51,8 +51,7 @@ public class LabelsApiServiceImpl implements LabelsApiService {
      * @return Status of label Deletion
      */
     @Override
-    public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince,
-                                        MessageContext messageContext) {
+    public Response labelsLabelIdDelete(String labelId, MessageContext messageContext) {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String user = RestApiCommonUtil.getLoggedInUsername();
