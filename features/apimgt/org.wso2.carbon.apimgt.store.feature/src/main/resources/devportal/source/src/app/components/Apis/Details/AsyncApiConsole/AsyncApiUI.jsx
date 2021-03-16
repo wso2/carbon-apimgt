@@ -21,6 +21,7 @@ import { ApiContext } from '../ApiContext';
 import Api from '../../../../data/api';
 import Progress from '../../../Shared/Progress';
 import WebhookSubscriptionUI from './WebhookSubscriptionUI';
+import GenericSubscriptionUI from './GenericSubscriptionUI';
 
 export default function AsyncApiUI(props) {
     const {
@@ -115,6 +116,16 @@ export default function AsyncApiUI(props) {
                         topic={topic}
                         generateGenericWHSubscriptionCurl={generateGenericWHSubscriptionCurl}
                     />
+                ))}
+                {api.type === 'SSE' && allTopics.list.map((topic, index) => (
+                    <GenericSubscriptionUI
+                        command={generateSSESubscriptionCommand(topic)}
+                        topic={topic}/>
+                ))}
+                {api.type === 'WS' && allTopics.list.map((topic, index) => (
+                    <GenericSubscriptionUI
+                        command={generateWSSubscriptionCommand(topic)}
+                        topic={topic}/>
                 ))}
             </>
         );
