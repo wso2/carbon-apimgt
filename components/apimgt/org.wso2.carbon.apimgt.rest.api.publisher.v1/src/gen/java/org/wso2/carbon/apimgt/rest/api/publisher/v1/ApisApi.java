@@ -438,15 +438,14 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/{apiId}/deploy-revision")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Deploy Revision", notes = "Deploy a revision ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Deploy Revision", notes = "Deploy a revision ", response = APIRevisionDeploymentDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Revisions",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. ", response = Void.class),
-        @ApiResponse(code = 201, message = "Created. Successful response with the newly deployed APIRevisionDeployment List object as the entity in the body. ", response = APIRevisionDeploymentDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 200, message = "Created. Successful response with the newly deployed APIRevisionDeployment List object as the entity in the body. ", response = APIRevisionDeploymentDTO.class, responseContainer = "List"),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response deployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Revision ID of an API ")  @QueryParam("revisionId") String revisionId, @ApiParam(value = "Deployment object that needs to be added" ) List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO) throws APIManagementException{
         return delegate.deployAPIRevision(apiId, revisionId, apIRevisionDeploymentDTO, securityContext);
@@ -1231,7 +1230,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/import-graphql-schema")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Import API Definition", notes = "This operation can be used to create api from api definition.APIMgtDAOTest  API definition is GraphQL Schema ", response = APIDTO.class, authorizations = {
+    @ApiOperation(value = "Import a GraphQL SDL", notes = "This operation can be used to create api from api definition.APIMgtDAOTest  API definition is GraphQL Schema ", response = APIDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })
@@ -1643,7 +1642,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Path("/validate-graphql-schema")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Validate GraphQL API Definition and Retrieve a Summary", notes = "This operation can be used to validate a graphQL definition and retrieve a summary. ", response = GraphQLValidationResponseDTO.class, authorizations = {
+    @ApiOperation(value = "Validate a GraphQL SDL", notes = "This operation can be used to validate a graphQL definition and retrieve a summary. ", response = GraphQLValidationResponseDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API")
         })

@@ -29,19 +29,24 @@ import java.util.Arrays;
 public enum ExceptionCodes implements ErrorHandler {
 
     // API, Application related codes
-    API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
-    APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, " The application already exists"),
-    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting/retrieving data"),
-    APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, " Error occurred while changing " +
+    API_NAME_ALREADY_EXISTS(900250, "The API name already exists.", 409, "An API with name '%s' already exists"),
+    API_CONTEXT_ALREADY_EXISTS(900251, "The API context already exists.", 409, "An API with context '%s' already exists"),
+    API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
+
+    API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
+
+    API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),
+    APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, "The application already exists"),
+    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, "Error occurred while persisting/retrieving data"),
+    APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, "Error occurred while changing " +
             "lifecycle state"),
-    TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
-    TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " The tier name is invalid"),
+    TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
+    TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
-    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id %s not found"),
+    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
-    UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
-            "done"),
+    UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
             + "update the API"),
@@ -53,9 +58,9 @@ public enum ExceptionCodes implements ErrorHandler {
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
-    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
+    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, "Error occurred while retrieving data"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
-    STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
+    STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, "Status cannot be null"),
     RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
     RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
@@ -127,9 +132,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     // Gateway related codes
     API_DEFINITION_MALFORMED(900500, "ApiDefinition not found", 400, "Failed to retrieve API Definition"),
-    TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
-    GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
-    BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
+    TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, "Error generate service config"),
+    GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, "Error occurred while publishing to Gateway"),
+    BROKER_EXCEPTION(900503, "Broker Connection Error", 500, "Error occurred while obtaining broker connection"),
     INVALID_GATEWAY_ENVIRONMENT(900504, "Invalid Gateway Environment", 400, "Gateway Environment with name '%s' not found"),
     NO_GATEWAY_ENVIRONMENTS_ADDED(900505, "No Gateway Environments Available", 400, "No gateway environments " +
             "available for the API : %s."),

@@ -220,7 +220,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.namespace.QName;
 
-import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_ALREADY_EXISTS;
+import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -297,7 +297,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response createAPI(APIDTO body, String oasVersion, MessageContext messageContext) {
+    public Response createAPI(APIDTO body, String oasVersion, MessageContext messageContext)
+            throws APIManagementException{
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
@@ -308,10 +309,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
-                    body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
@@ -3677,7 +3674,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion,
-                                        String serviceVersion, MessageContext messageContext) {
+                String serviceVersion, MessageContext messageContext) throws APIManagementException {
         URI newVersionedApiUri;
         APIDTO newVersionedApi = new APIDTO();
         try {
@@ -3698,7 +3695,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             if (newVersion.equals(existingAPI.getId().getVersion())) {
                 throw new APIMgtResourceAlreadyExistsException("Version " + newVersion + " exists for api "
-                        + existingAPI.getId().getApiName(), ExceptionCodes.from(API_ALREADY_EXISTS, apiId));
+                        + existingAPI.getId().getApiName(), ExceptionCodes.from(API_VERSION_ALREADY_EXISTS, newVersion,
+                            existingAPI.getId().getApiName()));
             }
             if (StringUtils.isNotEmpty(serviceVersion)) {
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
@@ -3721,18 +3719,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             newVersionedApiUri =
                     new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
-        } catch (APIManagementException | DuplicateAPIException e) {
-            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
-                RestApiUtil.handleResourceAlreadyExistsError(errorMessage, e, log);
-            } else if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else if (isAuthorizationFailure(e)) {
+        } catch (APIManagementException e) {
+            if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + apiId, e, log);
             } else {
-                String errorMessage = "Error while copying API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                throw e;
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
