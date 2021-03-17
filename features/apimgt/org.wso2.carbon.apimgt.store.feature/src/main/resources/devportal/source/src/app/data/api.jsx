@@ -530,14 +530,16 @@ export default class API extends Resource {
     /**
      * Get keys of an application
      * @param applicationId id of the application that needs to get the keys
+     * @param limit subscription count to return
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSubscriptions(apiId, applicationId, callback = null) {
+    getSubscriptions(apiId, applicationId, limit=25, callback = null) {
         const payload = { apiId };
         if (applicationId) {
             payload[applicationId] = applicationId;
         }
+        payload['limit'] = limit;
         const promisedGet = this.client.then((client) => {
             return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
         });

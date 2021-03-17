@@ -24,15 +24,19 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Mapping util class to map label models.
+ */
 public class LabelMappingUtil {
 
     /**
-     * Convert list of Label to LabelListDTO
+     * Convert list of Label to LabelListDTO.
      *
      * @param label List of labels
      * @return LabelListDTO list containing label data
      */
     public static LabelListDTO fromLabelListToLabelListDTO(List<Label> label) {
+
         LabelListDTO labelListDTO = new LabelListDTO();
         labelListDTO.setCount(label.size());
         labelListDTO.setList(fromLabelListToLabelDTOList(label));
@@ -46,6 +50,7 @@ public class LabelMappingUtil {
      * @return LabelDTO list
      */
     private static List<LabelDTO> fromLabelListToLabelDTOList(List<Label> labels) {
+
         List<LabelDTO> labelDTOs = new ArrayList<>();
         for (Label label : labels) {
             LabelDTO labelDTO = new LabelDTO();

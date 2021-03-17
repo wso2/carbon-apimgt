@@ -91,9 +91,7 @@ public class APIHandlerServiceComponent {
                     ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(),
                             getAxis2ClientXmlLocation());
             ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
-            if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
-                clientPool = APIKeyValidatorClientPool.getInstance();
-            }
+            clientPool = APIKeyValidatorClientPool.getInstance();
             APIManagerConfiguration apiManagerConfiguration =
                     ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
             String gatewayType = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
@@ -148,9 +146,7 @@ public class APIHandlerServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component deactivated");
         }
-        if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
             clientPool.cleanup();
-        }
         if (registration != null) {
             log.debug("Unregistering ThrottleDataService...");
             registration.unregister();

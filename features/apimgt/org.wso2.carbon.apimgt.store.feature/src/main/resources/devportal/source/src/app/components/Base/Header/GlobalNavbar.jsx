@@ -99,7 +99,7 @@ function GlobalNavBar(props) {
                 </ListItem>
                 {(selected === 'apis' && !drawerView) && (<div className={classes.triangleDown}></div>)}
             </Link>
-            <Link to='/applications' className={classNames({ [classes.selected]: selected === 'applications', [classes.links]: true })}>
+            <Link id='itest-link-to-applications' to='/applications' className={classNames({ [classes.selected]: selected === 'applications', [classes.links]: true })}>
                 <ListItem button classes={{root: classes.listItemRoot}}>
                     <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                         <CustomIcon

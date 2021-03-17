@@ -79,7 +79,7 @@ const config = {
                 ],
             },
             {
-                test: /\.css$/,
+                test: /\.css$/i,
                 use: ['style-loader', 'css-loader'],
             },
             {
@@ -97,8 +97,11 @@ const config = {
                 ],
             },
             {
-                test: /\.(woff|woff2|eot|ttf|svg)$/,
-                use: { loader: 'url-loader?limit=100000' },
+                test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+                loader: 'url-loader',
+                options: {
+                    limit: 8192,
+                },
             },
         ],
     },

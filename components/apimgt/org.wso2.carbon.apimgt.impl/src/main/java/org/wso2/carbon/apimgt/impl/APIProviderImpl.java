@@ -3080,7 +3080,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
-                                   String tenantDomain) throws DuplicateAPIException, APIManagementException {
+                                   String tenantDomain) throws APIManagementException {
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
         if (existingAPI == null) {

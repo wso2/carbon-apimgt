@@ -603,6 +603,12 @@
       "value": "Close"
     }
   ],
+  "Apis.Details.APIDefinition.APIDefinition.btn.hide.diff": [
+    {
+      "type": 0,
+      "value": "Hide Diff"
+    }
+  ],
   "Apis.Details.APIDefinition.APIDefinition.btn.no": [
     {
       "type": 0,
@@ -613,6 +619,12 @@
     {
       "type": 0,
       "value": "Re-import"
+    }
+  ],
+  "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": [
+    {
+      "type": 0,
+      "value": "Show Diff"
     }
   ],
   "Apis.Details.APIDefinition.APIDefinition.btn.yes": [
@@ -1338,13 +1350,13 @@
   "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Configure API Product visibility."
+      "value": "Configure basic API Product meta informations"
     }
   ],
   "Apis.Details.Configuration.Configuration.Design.sub.heading": [
     {
       "type": 0,
-      "value": "Configure API visibility."
+      "value": "Configure basic API meta information"
     }
   ],
   "Apis.Details.Configuration.Configuration.Design.topic.header": [
@@ -1854,7 +1866,7 @@
   "Apis.Details.Configuration.components.Social.giturl.help": [
     {
       "type": 0,
-      "value": "You need to enable social feature to view this from devportal. Set custom.social.showSharing.active to true. Refer documentation for more information"
+      "value": "This GitHub URL will be available in the API overview page in developer portal"
     }
   ],
   "Apis.Details.Configuration.components.Social.slack": [
@@ -1866,7 +1878,7 @@
   "Apis.Details.Configuration.components.Social.slack_url.help": [
     {
       "type": 0,
-      "value": "You need to enable social feature to view this from devportal. Set custom.social.showSharing.active to true. Refer documentation for more information"
+      "value": "This Slack Channel URL will be available in the API overview page in developer portal"
     }
   ],
   "Apis.Details.Configuration.components.StoreVisibility.dropdown.public": [
@@ -2263,6 +2275,12 @@
     {
       "type": 0,
       "value": "deleted successfully."
+    }
+  ],
+  "Apis.Details.Documents.Delete.document.listing.delete": [
+    {
+      "type": 0,
+      "value": "Yes. Delete"
     }
   ],
   "Apis.Details.Documents.Delete.document.listing.delete.cancel": [
@@ -6260,7 +6278,7 @@
   "Apis.Details.index.api.Config": [
     {
       "type": 0,
-      "value": "API configuration"
+      "value": "API configurations"
     }
   ],
   "Apis.Details.index.api.definition2": [
@@ -6376,7 +6394,7 @@
   "Apis.Details.index.portal.configuration": [
     {
       "type": 0,
-      "value": "Portal Configuration"
+      "value": "Portal Configurations"
     }
   ],
   "Apis.Details.index.properties": [
@@ -6508,31 +6526,19 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new": [
     {
       "type": 0,
-      "value": "Create an API"
+      "value": "Let’s get started !"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": [
     {
       "type": 0,
-      "value": "API creation is the process of linking an existing backend API backend API implementation to the API Publisher, so that you can manage and monitor the API’s lifecycle, documentation, security, community, and subscriptions Alternatively, you can provide the API implementation in-line in the API Publisher itself."
+      "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.created": [
     {
       "type": 0,
       "value": "Sample PizzaShackAPI API created successfully"
-    }
-  ],
-  "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.create.revision": [
-    {
-      "type": 0,
-      "value": "Something went wrong while creating the API Revision"
-    }
-  ],
-  "Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.deploy.revision": [
-    {
-      "type": 0,
-      "value": "Something went wrong while deploying the API Revision"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
@@ -6553,6 +6559,12 @@
       "value": "Import GraphQL SDL"
     }
   ],
+  "Apis.Listing.SampleAPI.SampleAPI.published": [
+    {
+      "type": 0,
+      "value": "Sample PizzaShackAPI API published successfully"
+    }
+  ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": [
     {
       "type": 0,
@@ -6562,7 +6574,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.content": [
     {
       "type": 0,
-      "value": "Upload definition or provide the url"
+      "value": "Import OAS 3 or Swagger 2.0 definition"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api.import.open.title": [
@@ -6586,13 +6598,19 @@
   "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content": [
     {
       "type": 0,
-      "value": "This is a sample API for Pizza Shack online pizza delivery store"
+      "value": "Sample Pizza Shack API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.title": [
     {
       "type": 0,
       "value": "Deploy Sample API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.service.catalog.api": [
+    {
+      "type": 0,
+      "value": "Service Catalog"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.soap.api": [
@@ -6604,7 +6622,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.content": [
     {
       "type": 0,
-      "value": "Use an existing WSDL"
+      "value": "Generate REST or create a pass-through API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.soap.import.wsdl.title": [
@@ -6619,28 +6637,52 @@
       "value": "Streaming API"
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.content": [
-    {
-      "type": 0,
-      "value": "Design and prototype a new Streaming API"
-    }
-  ],
   "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.title": [
     {
       "type": 0,
-      "value": "Design New Streaming API"
+      "value": "Web Socket API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content": [
+    {
+      "type": 0,
+      "value": "Create a Web Socket API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.streaming.import.content": [
     {
       "type": 0,
-      "value": "Upload the definition or provide the URL"
+      "value": "Upload a file or provide an Async API URL"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.streaming.import.title": [
     {
       "type": 0,
-      "value": "Import AsyncAPI Definition"
+      "value": "Import an AsyncAPI"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content": [
+    {
+      "type": 0,
+      "value": "Create a Server-Sent Events API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.sse.title": [
+    {
+      "type": 0,
+      "value": "SSE API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content": [
+    {
+      "type": 0,
+      "value": "Create a Webhook/WebSub API"
+    }
+  ],
+  "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title": [
+    {
+      "type": 0,
+      "value": "Webhook API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": [
@@ -6814,13 +6856,19 @@
   "Apis.Listing.components.TopMenu.displaying": [
     {
       "type": 0,
-      "value": "Displaying"
+      "value": "Total of"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
       "value": "Search Result(s)"
+    }
+  ],
+  "Apis.Listing.import.from.service.catalog.title": [
+    {
+      "type": 0,
+      "value": "Import From Service Catalog"
     }
   ],
   "Apis.Settings.Alert.AlertConfiguration.add": [
@@ -7245,12 +7293,6 @@
     {
       "type": 0,
       "value": "Description [ Syntax - description:xxxx ]"
-    }
-  ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option7": [
-    {
-      "type": 0,
-      "value": "Sub-Context [ Syntax - subcontext:xxxx ]"
     }
   ],
   "Base.Header.headersearch.HeaderSearch.tooltip.option8": [
@@ -7745,6 +7787,12 @@
       "value": "Mandatory fields"
     }
   ],
+  "ServiceCatalog.CreateApi.select.protocol": [
+    {
+      "type": 0,
+      "value": "Select Protocol"
+    }
+  ],
   "ServiceCatalog.CreateApi.update.btn": [
     {
       "type": 0,
@@ -8225,12 +8273,6 @@
     {
       "type": 0,
       "value": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-    }
-  ],
-  "sIDiOO": [
-    {
-      "type": 0,
-      "value": "Yes. Delete"
     }
   ],
   "save": [

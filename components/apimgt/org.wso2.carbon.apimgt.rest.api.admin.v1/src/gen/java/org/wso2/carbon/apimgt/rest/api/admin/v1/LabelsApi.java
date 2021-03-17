@@ -66,8 +66,8 @@ LabelsApiService delegate = new LabelsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Label successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response labelsLabelIdDelete(@ApiParam(value = "Label UUID ",required=true) @PathParam("labelId") String labelId,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.labelsLabelIdDelete(labelId, ifMatch, ifUnmodifiedSince, securityContext);
+    public Response labelsLabelIdDelete(@ApiParam(value = "Label UUID ",required=true) @PathParam("labelId") String labelId) throws APIManagementException{
+        return delegate.labelsLabelIdDelete(labelId, securityContext);
     }
 
     @PUT

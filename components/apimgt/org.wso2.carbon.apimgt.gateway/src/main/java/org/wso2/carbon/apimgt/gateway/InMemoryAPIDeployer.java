@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -256,31 +257,26 @@ public class InMemoryAPIDeployer {
             if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
                 APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
                 MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
-                API api = new API(new APIIdentifier(gatewayEvent.getProvider(), gatewayEvent.getName(),
-                        gatewayEvent.getVersion()));
                 GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
                 gatewayAPIDTO.setName(gatewayEvent.getName());
                 gatewayAPIDTO.setVersion(gatewayEvent.getVersion());
                 gatewayAPIDTO.setProvider(gatewayEvent.getProvider());
                 gatewayAPIDTO.setTenantDomain(gatewayEvent.getTenantDomain());
-                gatewayAPIDTO.setOverride(true);
                 gatewayAPIDTO.setApiId(gatewayEvent.getUuid());
                 setClientCertificatesToRemoveIntoGatewayDTO(gatewayAPIDTO);
                 if (APIConstants.API_PRODUCT.equals(gatewayEvent.getApiType())) {
-                    gatewayAPIDTO.setOverride(false);
+                    APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(gatewayEvent.getProvider(),
+                            gatewayEvent.getName(), gatewayEvent.getVersion());
                     Set<APIEvent> associatedApis = gatewayEvent.getAssociatedApis();
                     for (APIEvent associatedApi : associatedApis) {
-                        if (!APIStatus.PUBLISHED.getStatus().equals(associatedApi.getApiStatus())) {
-                            GatewayUtils.setCustomSequencesToBeRemoved(
-                                    new API(new APIIdentifier(associatedApi.getApiProvider(),
-                                            associatedApi.getApiName(),
-                                            associatedApi.getApiVersion())), gatewayAPIDTO);
-                            GatewayUtils
-                                    .setEndpointsToBeRemoved(associatedApi.getApiName(), associatedApi.getApiVersion(),
-                                            gatewayAPIDTO);
-                        }
+                        GatewayUtils.setCustomSequencesToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),
+                                gatewayAPIDTO);
+                        GatewayUtils.setEndpointsToBeRemoved(apiProductIdentifier, associatedApi.getUuid(),
+                                gatewayAPIDTO);
                     }
                 } else {
+                    API api = new API(new APIIdentifier(gatewayEvent.getProvider(), gatewayEvent.getName(),
+                            gatewayEvent.getVersion()));
                     if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
                         gatewayAPIDTO.setLocalEntriesToBeRemove(
                                 org.wso2.carbon.apimgt.impl.utils.GatewayUtils

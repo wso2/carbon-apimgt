@@ -51,7 +51,6 @@ public class APIMgtGatewayConstants {
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
     public static final String CUSTOM_PROPERTY = "customProperty";
-
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";

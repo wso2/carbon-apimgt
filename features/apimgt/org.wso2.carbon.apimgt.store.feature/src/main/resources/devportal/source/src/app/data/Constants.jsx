@@ -22,6 +22,11 @@ const CONSTS = {
     },
     ISLOGINPERMITTED: 'isLoginPermitted',
     LOGINSTATUS: 'loginStatus',
+    API_TYPES: {
+        SSE: 'SSE',
+        WS: 'WS',
+        WEBSUB: 'WEBSUB'
+    },
 };
 
 export default CONSTS;

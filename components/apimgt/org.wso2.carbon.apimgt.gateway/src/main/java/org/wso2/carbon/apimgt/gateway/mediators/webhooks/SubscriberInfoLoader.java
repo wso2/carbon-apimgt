@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.gateway.mediators.webhooks;
 
 import org.apache.axis2.AxisFault;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -115,11 +116,15 @@ public class SubscriberInfoLoader extends AbstractMediator {
                         setProperty(SynapseConstants.HTTP_SC, APIThrottleConstants.SC_TOO_MANY_REQUESTS);
                 WebhooksUtils.publishAnalyticsData(messageContext);
             }
+            Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
 
-            if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-                Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(errorCode, errorMessage,
-                        errorDescription));
+            // Invoke the custom error handler specified by the user
+            if (sequence != null && !sequence.mediate(messageContext)) {
+                // If needed user should be able to prevent the rest of the fault handling
+                // logic from getting executed
+                return true;
             }
+            Utils.sendFault(messageContext, httpErrorCode);
         }
         return true;
     }
