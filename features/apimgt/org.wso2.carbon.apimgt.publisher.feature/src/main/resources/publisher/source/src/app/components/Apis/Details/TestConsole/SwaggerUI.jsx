@@ -47,8 +47,7 @@ const SwaggerUI = (props) => {
             const { url } = req;
             const { context } = api;
             const patternToCheck = `${context}/*`;
-            req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
-            // }
+            req.headers[authorizationHeader] = accessTokenProvider();
             if (url.endsWith(patternToCheck)) {
                 req.url = url.substring(0, url.length - 2);
             } else if (url.includes(patternToCheck + '?')) { // Check for query parameters.

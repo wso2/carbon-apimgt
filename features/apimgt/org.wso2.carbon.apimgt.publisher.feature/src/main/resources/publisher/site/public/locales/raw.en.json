@@ -3109,7 +3109,7 @@
     "defaultMessage": "Import GraphQL SDL"
   },
   "Apis.Listing.SampleAPI.SampleAPI.published": {
-    "defaultMessage": "Sample PizzaShackAPI API Published successfully"
+    "defaultMessage": "Sample PizzaShackAPI API published successfully"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": {
     "defaultMessage": "REST API"
@@ -3953,6 +3953,8 @@
   },
   "error.list.500.description": {
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
+  },
+  "internal.token": {
   },
   "save": {
     "defaultMessage": "Save"

@@ -185,7 +185,6 @@ class TestConsole extends React.Component {
         let selectedEnvironment;
         let swagger;
         let urls;
-        let basePath;
         const promisedAPI = restApi.getDeployedRevisions(apiObj.id);
         promisedAPI
             .then((apiResponse) => {
@@ -222,7 +221,6 @@ class TestConsole extends React.Component {
             .then((settingsObj) => {
                 if (settingsObj.environment) {
                     urls = settingsObj.environment.map((envo) => {
-                        console.log('---------------name-----envi', envo.name, JSON.stringify(envo.endpoints));
                         const env = {
                             name: envo.name,
                             endpoints: {
@@ -232,16 +230,11 @@ class TestConsole extends React.Component {
                         };
                         return env;
                     });
-                    basePath = apiData.context + '/' + apiData.version;
-                    console.log('base path------', basePath);
                 }
-                console.log('URLS', urls);
                 this.setState({
                     settings: urls,
-                    host: urls[0].endpoints.https.split('//')[1],
                     apiSettings: settingsObj,
                 });
-                console.log('settings---------', this.state.apiSettings);
                 this.setState({
                     swagger,
                 });
@@ -270,7 +263,6 @@ class TestConsole extends React.Component {
      */
     updateSwagger(environment) {
         let urls;
-        let basePath;
         const {
             api,
         } = this.state;
@@ -281,7 +273,6 @@ class TestConsole extends React.Component {
             .then((settingsNew) => {
                 if (settingsNew.environment) {
                     urls = settingsNew.environment.map((envo) => {
-                        console.log('---------------name-----envi', envo.name, JSON.stringify(envo.endpoints));
                         const env = {
                             name: envo.name,
                             endpoints: {
@@ -291,13 +282,9 @@ class TestConsole extends React.Component {
                         };
                         return env;
                     });
-                    basePath = api.context + '/' + api.version;
-                    console.log('base path------', basePath);
                 }
-                console.log('URLS', urls);
                 this.setState({
                     settings: urls,
-                    host: urls[0].endpoints.https.split('//')[1],
                 });
             });
         promiseSwagger
@@ -307,8 +294,8 @@ class TestConsole extends React.Component {
     }
 
     /**
-     * Generate Internal key for
-     */
+    * Generate Internal-Token
+    */
     generateKey() {
         let key;
         const {
@@ -318,7 +305,6 @@ class TestConsole extends React.Component {
         promisedAPI
             .then((apiResponse) => {
                 key = apiResponse.obj.apikey;
-                console.log('-----generate Key---', JSON.stringify(key));
                 this.setState({
                     key,
                     showToken: false,
@@ -355,21 +341,12 @@ class TestConsole extends React.Component {
      */
     accessTokenProvider() {
         const {
-            securitySchemeType, username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
+            securitySchemeType,
         } = this.state;
-        if (securitySchemeType === 'BASIC') {
-            const credentials = username + ':' + password;
-            return btoa(credentials);
-        }
         if (securitySchemeType === 'internalkey') {
-            console.log('acccccccc-----------------', this.state.key);
             return this.state.key;
         }
-        if (selectedKeyType === 'PRODUCTION') {
-            return productionAccessToken;
-        } else {
-            return sandboxAccessToken;
-        }
+        return null;
     }
 
     /**
@@ -378,17 +355,11 @@ class TestConsole extends React.Component {
      * @memberof TryOutController
      */
     handleChanges(event) {
-        const {
-            api,
-        } = this.state;
-        console.log('Handle changes', JSON.stringify(api));
         const { target } = event;
-        const { name, value } = target;
-        console.log('Name', name, value);
+        const { value } = target;
         this.setSelectedEnvironment(value);
         this.updateSwagger(value);
     }
-
 
     /**
      * @inheritdoc
@@ -397,32 +368,19 @@ class TestConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            api, swagger, securitySchemeType, selectedEnvironment, environments, key, host, settings,
+            api, swagger, securitySchemeType, selectedEnvironment, environments, settings,
             showToken, apiSettings,
         } = this.state;
-        const authorizationHeader = 'Authorization';
-        const prefix = 'Bearer';
-        console.log('jjjjjjjjj', JSON.stringify(swagger));
-        console.log('jjjjjjjjjngs--api setti', JSON.stringify(apiSettings));
+        const authorizationHeader = 'Internal-Key';
         if (!api || !securitySchemeType || !selectedEnvironment || !environments || !swagger || !settings
             || !apiSettings) {
             return <Progress />;
         }
-        console.log('env------', JSON.stringify(selectedEnvironment));
-        console.log('API--------', JSON.stringify(api));
-        console.log('swagger-------', JSON.stringify(swagger));
-        console.log('KEY------', JSON.stringify(key));
-        console.log('KEY state------', JSON.stringify(this.state.key));
-        console.log('schem-------', JSON.stringify(securitySchemeType));
-        console.log('settings------', JSON.stringify(settings));
-        console.log('---host------', host);
-        console.log('---api settings------', JSON.stringify(apiSettings));
-        const authHeader = `${authorizationHeader}: ${prefix}`;
+        const authHeader = `${authorizationHeader}`;
         if (!swagger.openapi) {
             for (let i = 0; i < apiSettings.environment.length; i++) {
                 if (apiSettings.environment[i].name === selectedEnvironment) {
                     const val = apiSettings.environment[i].endpoints.https.split('//')[1];
-                    console.log(val);
                     swagger.host = val;
                 }
             }
@@ -499,7 +457,7 @@ class TestConsole extends React.Component {
                                             }}
                                             position='start'
                                         >
-                                            {`${authorizationHeader}: ${prefix}`}
+                                            {`${authorizationHeader}`}
                                         </InputAdornment>
                                     ),
                                 }}
@@ -510,12 +468,7 @@ class TestConsole extends React.Component {
                                     variant='contained'
                                     className={classes.genKeyButton}
                                     name='internalToken'
-                                    // disabled={!user || (subscriptions && subscriptions.length === 0)
-                                    //             || (!ksGenerated && securitySchemeType === 'OAUTH')}
                                 >
-                                    {/* {isUpdating && (
-                                            <CircularProgress size={15} />
-                                    )} */}
                                     <FormattedMessage
                                         id='Apis.Details.ApiCOnsole.generate.test.key'
                                         defaultMessage='GET TEST KEY '
