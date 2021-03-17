@@ -2144,7 +2144,6 @@ class API extends Resource {
         if (callback) {
             return promiseGet.then(callback);
         } else {
-            console.log('----------getSwagger', JSON.stringify(promiseGet));
             return promiseGet;
         }
     }
