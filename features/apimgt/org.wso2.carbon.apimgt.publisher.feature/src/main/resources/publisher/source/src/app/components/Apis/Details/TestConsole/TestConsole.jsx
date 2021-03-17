@@ -427,7 +427,7 @@ class TestConsole extends React.Component {
                                 label={(
                                     <FormattedMessage
                                         id='internal.token'
-                                        sdefaultMessage='Internal Token'
+                                        defaultMessage='Internal Token'
                                     />
                                 )}
                                 type={showToken ? 'text' : 'password'}
