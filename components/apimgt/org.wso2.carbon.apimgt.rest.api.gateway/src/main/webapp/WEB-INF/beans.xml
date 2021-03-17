@@ -18,7 +18,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.RedeployApiApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.UndeployApiApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.ApiArtifactApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.EndPointsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.gateway.EndpointsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.LocalEntryApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.gateway.SequenceApi"/>
 

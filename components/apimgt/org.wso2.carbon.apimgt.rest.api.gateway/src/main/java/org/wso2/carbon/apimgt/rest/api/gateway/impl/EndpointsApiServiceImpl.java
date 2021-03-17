@@ -24,15 +24,15 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.gateway.EndPointsApiService;
+import org.wso2.carbon.apimgt.rest.api.gateway.EndpointsApiService;
 import org.wso2.carbon.apimgt.rest.api.gateway.dto.EndpointsDTO;
 
 import java.util.List;
 import javax.ws.rs.core.Response;
 
-public class EndPointsApiServiceImpl implements EndPointsApiService {
+public class EndpointsApiServiceImpl implements EndpointsApiService {
 
-    private static final Log log = LogFactory.getLog(EndPointsApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(EndpointsApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
     public Response getEndpoints(String apiName, String version, String tenantDomain, MessageContext messageContext)
