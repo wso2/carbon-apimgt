@@ -1,4 +1,4 @@
-const getSwagger = () => ({
+const getSampleOpenAPI = () => ({
     openapi: '3.0.0',
     info: {
         description: 'This is a RESTFul API for Pizza Shack online pizza delivery store.\n',
@@ -370,4 +370,67 @@ const getSwagger = () => ({
         },
     },
 });
-export default getSwagger;
+
+const getSampleAPIData = () => {
+    return {
+        name: 'PizzaShackAPI',
+        description: 'This is a simple API for Pizza Shack online pizza delivery store.',
+        context: '/pizzashack',
+        version: '1.0.0',
+        transport: ['http', 'https'],
+        tags: ['pizza'],
+        policies: ['Unlimited'],
+        securityScheme: ['oauth2'],
+        visibility: 'PUBLIC',
+        gatewayEnvironments: ['Production and Sandbox'],
+        businessInformation: {
+            businessOwner: 'Jane Roe',
+            businessOwnerEmail: 'marketing@pizzashack.com',
+            technicalOwner: 'John Doe',
+            technicalOwnerEmail: 'architecture@pizzashack.com',
+        },
+        endpointConfig: {
+            endpoint_type: 'http',
+            sandbox_endpoints: {
+                url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
+            },
+            production_endpoints: {
+                url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
+            },
+        },
+        operations: [
+            {
+                target: '/order/{orderId}',
+                verb: 'GET',
+                throttlingPolicy: 'Unlimited',
+                authType: 'Application & Application User',
+            },
+            {
+                target: '/order/{orderId}',
+                verb: 'DELETE',
+                throttlingPolicy: 'Unlimited',
+                authType: 'Application & Application User',
+            },
+            {
+                target: '/order/{orderId}',
+                verb: 'PUT',
+                throttlingPolicy: 'Unlimited',
+                authType: 'Application & Application User',
+            },
+            {
+                target: '/menu',
+                verb: 'GET',
+                throttlingPolicy: 'Unlimited',
+                authType: 'Application & Application User',
+            },
+            {
+                target: '/order',
+                verb: 'POST',
+                throttlingPolicy: 'Unlimited',
+                authType: 'Application & Application User',
+            },
+        ],
+    };
+};
+
+export { getSampleOpenAPI, getSampleAPIData };

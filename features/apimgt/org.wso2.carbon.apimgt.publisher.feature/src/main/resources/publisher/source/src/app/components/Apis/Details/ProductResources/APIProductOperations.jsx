@@ -89,7 +89,13 @@ export default function APIProductOperations() {
             {!isRestricted(['apim:api_create'], api) && (
                 <Grid item md={12}>
                     <Box ml={1}>
-                        <Button onClick={saveChanges} disabled={false} variant='contained' size='small' color='primary'>
+                        <Button
+                            onClick={saveChanges}
+                            disabled={api.isRevision}
+                            variant='contained'
+                            size='small'
+                            color='primary'
+                        >
                             Save
                             {isSaving && <CircularProgress size={24} />}
                         </Button>

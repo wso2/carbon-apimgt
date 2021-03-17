@@ -35,12 +35,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class used for utility for Comment models.
+ */
 public class CommentMappingUtil {
 
     private static final Logger log = LoggerFactory.getLogger(CommentMappingUtil.class);
 
     /**
-     * Converts a Comment object into corresponding REST API CommentDTO object
+     * Converts a Comment object into corresponding REST API CommentDTO object.
      *
      * @param comment comment object
      * @return CommentDTO
@@ -52,14 +55,14 @@ public class CommentMappingUtil {
         commentDTO.setContent(comment.getText());
         commentDTO.setCreatedBy(comment.getUser());
         commentDTO.setCreatedTime(comment.getCreatedTime().toString());
-        if (comment.getUpdatedTime()!=null){
+        if (comment.getUpdatedTime() != null) {
             commentDTO.setUpdatedTime(comment.getUpdatedTime().toString());
         }
         commentDTO.setCategory(comment.getCategory());
         commentDTO.setParentCommentId(comment.getParentCommentID());
-        if (comment.getEntryPoint().equals("DEVPORTAL")){
+        if (comment.getEntryPoint().equals("DEVPORTAL")) {
             commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.DEVPORTAL);
-        } else if (comment.getEntryPoint().equals("PUBLISHER")){
+        } else if (comment.getEntryPoint().equals("PUBLISHER")) {
             commentDTO.setEntryPoint(CommentDTO.EntryPointEnum.PUBLISHER);
         }
         commentDTO.setReplies(fromCommentListToDTO(comment.getReplies(), false));
@@ -67,13 +70,14 @@ public class CommentMappingUtil {
     }
 
     /**
-     * Converts a Comment object into corresponding REST API CommentDTO object with User Info
+     * Converts a Comment object into corresponding REST API CommentDTO object with User Info.
      *
      * @param comment comment object
      * @return CommentDTO
      */
     public static CommentDTO fromCommentToDTOWithUserInfo(Comment comment, Map<String,
-            Map<String, String>> userClaimsMap)  throws APIManagementException {
+            Map<String, String>> userClaimsMap) throws APIManagementException {
+
         CommentDTO commentDTO = fromCommentToDTO(comment);
         if (userClaimsMap.get(comment.getUser()) != null) {
             Map userClaims = userClaimsMap.get(comment.getUser());
@@ -83,18 +87,19 @@ public class CommentMappingUtil {
             commenterInfoDTO.setLastName((String) userClaims.get(APIConstants.LAST_NAME));
             commentDTO.setCommenterInfo(commenterInfoDTO);
         }
-        return  commentDTO;
+        return commentDTO;
     }
 
     /**
      * Retrieve userClaims from UserStore and save it in a cache map.
      *
-     * @param username        commenter username
-     * @param userClaimsMap   cache map with user deatils
-     * @return Map<String, Map<String, String>>
+     * @param username      commenter username
+     * @param userClaimsMap cache map with user deatils
+     * @return Map<String, Map < String, String>>
      */
-    public static  Map<String, Map<String, String>> retrieveUserClaims(String username, Map<String,
-            Map<String, String>> userClaimsMap)  throws APIManagementException {
+    public static Map<String, Map<String, String>> retrieveUserClaims(String username, Map<String,
+            Map<String, String>> userClaimsMap) throws APIManagementException {
+
         Map userClaims;
         if (userClaimsMap.get(username) == null) {
             userClaims = APIRealmUtils.getUserClaims(username);
@@ -102,8 +107,9 @@ public class CommentMappingUtil {
         }
         return userClaimsMap;
     }
+
     /**
-     * Converts a CommentDTO to a Comment object
+     * Converts a CommentDTO to a Comment object.
      *
      * @param body     commentDTO body
      * @param username username of the consumer
@@ -111,6 +117,7 @@ public class CommentMappingUtil {
      * @return Comment object
      */
     public static Comment fromDTOToComment(CommentDTO body, String username, String apiId) {
+
         Comment comment = new Comment();
         comment.setText(body.getContent());
         comment.setUser(username);
@@ -119,12 +126,13 @@ public class CommentMappingUtil {
     }
 
     /**
-     * Wraps a List of Comments to a CommentListDTO
+     * Wraps a List of Comments to a CommentListDTO.
      *
      * @param commentList list of comments
      * @return CommentListDTO
      */
     public static CommentListDTO fromCommentListToDTO(CommentList commentList, boolean includeCommenterInfo) {
+
         CommentListDTO commentListDTO = new CommentListDTO();
         List<CommentDTO> listOfCommentDTOs = new ArrayList<>();
         commentListDTO.setCount(commentList.getCount());
@@ -138,7 +146,7 @@ public class CommentMappingUtil {
         commentListDTO.setPagination(paginationDTO);
 
         Map<String, Map<String, String>> userClaimsMap = new HashMap<>();
-        for (Comment comment:commentList.getList()) {
+        for (Comment comment : commentList.getList()) {
             try {
                 if (includeCommenterInfo) {
                     userClaimsMap = retrieveUserClaims(comment.getUser(), userClaimsMap);

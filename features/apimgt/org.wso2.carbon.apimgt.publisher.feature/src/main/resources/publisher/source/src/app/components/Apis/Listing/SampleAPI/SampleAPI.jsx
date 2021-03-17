@@ -16,261 +16,199 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-import Grid from '@material-ui/core/Grid';
+import React, { useReducer, useState } from 'react';
+import Box from '@material-ui/core/Box';
 import Redirect from 'react-router-dom/Redirect';
-import { PropTypes } from 'prop-types';
-import { injectIntl } from 'react-intl';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+import { FormattedMessage, useIntl } from 'react-intl';
 import API from 'AppData/api';
 import Alert from 'AppComponents/Shared/Alert';
 import AuthManager from 'AppData/AuthManager';
-import APICreateMenu from 'AppComponents/Apis/Listing/components/APICreateMenu';
-import getSampleSwagger from './SamplePizzaShack.js';
+import { usePublisherSettings } from 'AppComponents/Shared/AppContext';
+import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
+import { makeStyles } from '@material-ui/core/styles';
+import { getSampleAPIData, getSampleOpenAPI } from './SamplePizzaShack.js';
+
+const useStyles = makeStyles({
+    modal: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    statusBox: {
+        outline: 'none',
+    },
+});
+
+const tasksReducer = (state, action) => {
+    const { name, status } = action;
+    // In the case of a key collision, the right-most (last) object's value wins out
+    return { ...state, [name]: { ...state[name], ...status } };
+};
+
 /**
- * Show Initial Welcome card if no APIs are available to list
- * Handle deploying a sample API (Create and Publish)
+ * Handle deploying a sample API (Create, Deploy and Publish)
  *
  * @class SampleAPI
  * @extends {Component}
  */
-class SampleAPI extends Component {
-    /**
-     *Creates an instance of SampleAPI.
-     * @param {Object} props @inheritdoc
-     * @memberof SampleAPI
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            published: false,
-            api: null,
-            deploying: false,
-        };
-        this.sampleApi = new API();
-        this.handleDeploySample = this.handleDeploySample.bind(this);
-        this.createSampleAPI = this.createSampleAPI.bind(this);
-    }
 
+const SampleAPI = (props) => {
+    const { dense } = props;
+    const intl = useIntl();
+    const [tasksStatus, tasksStatusDispatcher] = useReducer(tasksReducer, {
+        create: { inProgress: false, completed: false, errors: false },
+        update: { inProgress: false, completed: false, errors: false },
+        revision: { inProgress: false, completed: false, errors: false },
+        deploy: { inProgress: false, completed: false, errors: false },
+        publish: { inProgress: false, completed: false, errors: false },
+    });
+    const [showStatus, setShowStatus] = useState(false);
+    const [newSampleAPI, setNewSampleAPI] = useState();
+    const classes = useStyles();
+    const publisherSettings = usePublisherSettings();
+
+    const taskManager = async (promisedTask, name) => {
+        tasksStatusDispatcher({ name, status: { inProgress: true } });
+        let taskResult;
+        try {
+            taskResult = await promisedTask;
+        } catch (error) {
+            console.error(error);
+            tasksStatusDispatcher({ name, status: { error } });
+        }
+        tasksStatusDispatcher({ name, status: { inProgress: false, completed: true } });
+        return taskResult;
+    };
     /**
      *Handle onClick event for `Deploy Sample API` Button
      * @memberof SampleAPI
      */
-    handleDeploySample(e) {
-        e.preventDefault();
-        const { intl } = this.props;
+    const handleDeploySample = async () => {
+        setShowStatus(true);
         const restApi = new API();
-        let settings;
-        restApi.getSettings().then((response) => {
-            settings = response;
-        });
-        this.setState({ deploying: true });
-        const promisedSampleAPI = this.createSampleAPI();
-        const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
-            sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
-            return sampleAPI;
-        });
-        swaggerUpdatePromise.catch((error) => {
-            console.error(error);
-            Alert.error(error);
-        });
+
+        const sampleAPIObj = new API(getSampleAPIData());
+        // Creat the sample API -- 1st API call
+        const sampleAPI = await taskManager(sampleAPIObj.save(), 'create');
+        setNewSampleAPI(sampleAPI);
+
+        // Update the sample API -- 2nd API call
+        await taskManager(sampleAPI.updateSwagger(getSampleOpenAPI()), 'update');
+
         if (!AuthManager.isNotPublisher()) {
-            swaggerUpdatePromise.then((sampleAPI) => {
-                const body = {
-                    description: 'Initial Revision',
-                };
-                restApi.createRevision(sampleAPI.id, body)
-                    .then((api1) => {
-                        const revisionId = api1.body.id;
-                        const envList = settings.environment.map((env) => env.name);
-                        const body1 = [];
-                        const getFirstVhost = (envName) => {
-                            const env = settings.environment.find(
-                                (ev) => ev.name === envName && ev.vhosts.length > 0,
-                            );
-                            return env && env.vhosts[0].host;
-                        };
-                        if (envList && envList.length > 0) {
-                            if (envList.includes('Default') && getFirstVhost('Default')) {
-                                body1.push({
-                                    name: 'Default',
-                                    displayOnDevportal: true,
-                                    vhost: getFirstVhost('Default'),
-                                });
-                            } else if (getFirstVhost(envList[0])) {
-                                body1.push({
-                                    name: envList[0],
-                                    displayOnDevportal: true,
-                                    vhost: getFirstVhost(envList[0]),
-                                });
-                            }
-                        }
-                        restApi.deployRevision(sampleAPI.id, revisionId, body1)
-                            .then(() => {
-                                Alert.info('API Revision Deployed Successfully');
-                                // Publish sample API after deploying
-                                sampleAPI.publish()
-                                    .then(() => {
-                                        this.setState({ published: true, api: sampleAPI });
-                                        Alert.info(intl.formatMessage({
-                                            id: 'Apis.Listing.SampleAPI.SampleAPI.published',
-                                            defaultMessage: 'Sample PizzaShackAPI API Published successfully',
-                                        }));
-                                    })
-                                    .catch((error) => {
-                                        this.setState({ deploying: false });
-                                        Alert.error(error);
-                                    });
-                            })
-                            .catch((error) => {
-                                console.error(error);
-                                if (error.response) {
-                                    Alert.error(error.response.body.description);
-                                } else {
-                                    Alert.error(intl.formatMessage({
-                                        id: 'Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.deploy.revision',
-                                        defaultMessage: 'Something went wrong while deploying the API Revision',
-                                    }));
-                                }
-                            });
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        if (error.response) {
-                            Alert.error(error.response.body.description);
-                        } else {
-                            Alert.error(intl.formatMessage({
-                                id: 'Apis.Listing.SampleAPI.SampleAPI.error.errorMessage.create.revision',
-                                defaultMessage: 'Something went wrong while creating the API Revision',
-                            }));
-                        }
+            const revisionPayload = {
+                description: 'Initial Revision',
+            };
+
+            // Creat a revision of sample API -- 3rd API call
+            const sampleAPIRevision = await taskManager(
+                restApi.createRevision(sampleAPI.id, revisionPayload),
+                'revision',
+            );
+            const envList = publisherSettings.environment.map((env) => env.name);
+            const deployRevisionPayload = [];
+            const getFirstVhost = (envName) => {
+                const env = publisherSettings.environment.find(
+                    (ev) => ev.name === envName && ev.vhosts.length > 0,
+                );
+                return env && env.vhosts[0].host;
+            };
+            if (envList && envList.length > 0) {
+                if (envList.includes('Default') && getFirstVhost('Default')) {
+                    deployRevisionPayload.push({
+                        name: 'Default',
+                        displayOnDevportal: true,
+                        vhost: getFirstVhost('Default'),
                     });
-            });
-        } else {
-            swaggerUpdatePromise.then((sampleApi) => {
-                this.setState({ published: true, api: sampleApi });
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Listing.SampleAPI.SampleAPI.created',
-                    defaultMessage: 'Sample PizzaShackAPI API created successfully',
-                }));
-            })
-                .catch((error) => {
-                    Alert.error(error);
-                });
-        }
-    }
-
-    /**
-     * Construct the sample API date and invoke API.create method to create API
-     * @returns {Promise} SwaggerJs client promise appending an error handler and mapping response.obj as resolved value
-     * @memberof SampleAPI
-     */
-    createSampleAPI() {
-        const data = {
-            name: 'PizzaShackAPI',
-            description: 'This is a simple API for Pizza Shack online pizza delivery store.',
-            context: '/pizzashack',
-            version: '1.0.0',
-            transport: ['http', 'https'],
-            tags: ['pizza'],
-            policies: ['Unlimited'],
-            securityScheme: ['oauth2'],
-            visibility: 'PUBLIC',
-            gatewayEnvironments: ['Production and Sandbox'],
-            businessInformation: {
-                businessOwner: 'Jane Roe',
-                businessOwnerEmail: 'marketing@pizzashack.com',
-                technicalOwner: 'John Doe',
-                technicalOwnerEmail: 'architecture@pizzashack.com',
-            },
-            endpointConfig: {
-                endpoint_type: 'http',
-                sandbox_endpoints: {
-                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                },
-                production_endpoints: {
-                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                },
-            },
-            operations: [
-                {
-                    target: '/order/{orderId}',
-                    verb: 'GET',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/order/{orderId}',
-                    verb: 'DELETE',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/order/{orderId}',
-                    verb: 'PUT',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/menu',
-                    verb: 'GET',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/order',
-                    verb: 'POST',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-            ],
-        };
-
-        const sampleAPI = new API(data);
-        return sampleAPI.save().catch((error) => {
-            console.error(error);
-            this.setState({ deploying: false });
-            const { response } = error;
-            if (response) {
-                const { code, description, message } = response.body;
-                Alert.error(`ERROR[${code}] : ${description} | ${message}`);
-            } else {
-                Alert.error(error);
+                } else if (getFirstVhost(envList[0])) {
+                    deployRevisionPayload.push({
+                        name: envList[0],
+                        displayOnDevportal: true,
+                        vhost: getFirstVhost(envList[0]),
+                    });
+                }
             }
-        });
-    }
+            const revisionId = sampleAPIRevision.body.id;
 
-    /**
-     *
-     * @inheritdoc
-     * @returns {React.Component} @inheritdoc
-     * @memberof SampleAPI
-     */
-    render() {
-        const { published, api, deploying } = this.state;
+            // Deploy a revision of sample API -- 4th API call
+            await taskManager(restApi.deployRevision(sampleAPI.id,
+                revisionId, deployRevisionPayload), 'deploy');
+            Alert.info('API Revision Deployed Successfully');
 
-        if (published && api) {
-            const url = '/apis/' + api.id + '/overview';
-            return <Redirect to={url} />;
+            // Deploy a revision of sample API -- 5th API call
+            await taskManager(sampleAPI.publish(), 'publish');
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Listing.SampleAPI.SampleAPI.published',
+                defaultMessage: 'Sample PizzaShackAPI API published successfully',
+            }));
+        } else {
+            Alert.info(intl.formatMessage({
+                id: 'Apis.Listing.SampleAPI.SampleAPI.created',
+                defaultMessage: 'Sample PizzaShackAPI API created successfully',
+            }));
         }
-        return (
-            <Grid container spacing={3}>
-                <Grid item xs={12} />
-                {/*
-            Following two grids control the placement of whole create page
-            For centering the content better use `container` props, but instead used an empty grid item for flexibility
-             */}
-                <Grid item sm={0} md={2} />
-                <Grid item sm={12} md={8}>
-                    <APICreateMenu deploying={deploying} handleDeploySample={this.handleDeploySample} />
-                </Grid>
-            </Grid>
-        );
-    }
-}
+    };
 
-SampleAPI.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    const allDone = !AuthManager.isNotPublisher() ? Object.values(tasksStatus)
+        .map((tasks) => tasks.completed)
+        .reduce((done, current) => current && done) : tasksStatus.create.completed;
+    if (allDone) {
+        const url = '/apis/' + newSampleAPI.id + '/overview';
+        return <Redirect to={url} />;
+    }
+    const inProgressTask = Object.entries(tasksStatus).find(([, status]) => status.inProgress === true);
+    return (
+        <>
+            <LandingMenuItem
+                dense={dense}
+                id='itest-id-deploy-sample'
+                onClick={handleDeploySample}
+                component='button'
+                helperText={(
+                    <FormattedMessage
+                        id='Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content'
+                        defaultMessage={`Sample Pizza Shack
+                                    API`}
+                    />
+                )}
+            >
+                <FormattedMessage
+                    id={'Apis.Listing.SampleAPI.SampleAPI.'
+                        + 'rest.d.sample.title'}
+                    defaultMessage='Deploy Sample API'
+                />
+
+            </LandingMenuItem>
+
+            <Modal
+                aria-labelledby='transition-modal-title'
+                aria-describedby='transition-modal-description'
+                className={classes.modal}
+                open={showStatus}
+                // onClose={handleClose}
+                closeAfterTransition
+                BackdropComponent={Backdrop}
+                BackdropProps={{
+                    timeout: 500,
+                }}
+            >
+                <Fade in={showStatus}>
+                    <Box className={classes.statusBox} p={2}>
+                        <CircularProgress />
+                        {inProgressTask && (
+                            <Box color='success.main'>
+                                {`${inProgressTask[0]}ing sample API . . .`}
+                            </Box>
+                        )}
+                    </Box>
+                </Fade>
+            </Modal>
+        </>
+    );
 };
 
-export default injectIntl(SampleAPI);
+export default SampleAPI;

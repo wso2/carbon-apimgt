@@ -437,12 +437,11 @@ public interface APIProvider extends APIManager {
      * @param defaultVersion whether this version is default or not
      * @param orgId          Identifier of an organization
      * @return api created api
-     * @throws DuplicateAPIException  If the API trying to be created already exists
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
     API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId)
-            throws DuplicateAPIException, APIManagementException;
+            throws APIManagementException;
 
     /**
      * Retrieve the Key of the Service used in the API

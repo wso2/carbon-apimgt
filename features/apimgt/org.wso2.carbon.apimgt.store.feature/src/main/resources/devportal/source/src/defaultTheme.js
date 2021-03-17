@@ -38,7 +38,7 @@ const DefaultConfigurations = {
         contentAreaWidth: 1240,
         backgroundImage: '', // Add a watermark background to the content area of the page. Example ( '/devportal/site/public/images/back-light.png')
         defaultApiView: 'grid',   // Sets the default view for the api listing page ( Other values available = 'list' ). 
-                                    // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
+        // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
         page: {
             style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
             width: 1240, // This value is effected only when the page.style = 'fixed'
@@ -328,7 +328,7 @@ const DefaultConfigurations = {
             minWidth: 60, // Width of the language switcher in pixles
         },
         info: {
-            color: '#64b5f6',    
+            color: '#64b5f6',
         },
         /* 
             This is the config for the public teant store.
@@ -336,19 +336,26 @@ const DefaultConfigurations = {
             given by redirectToIfInactive. It will also hide the link
             SWITCH DEV PORTALS link at the header.
         */
-       publicTenantStore: {
+        publicTenantStore: {
             active: true,
             redirectToIfInactive: 'https://wso2.com/api-management/cloud/',
         },
+        curlGenerator: {
+            backgroundColor: '#41444e',
+            color: '#fff',
+        },
+        AsyncTryOut: {
+            backgroundColor: '#89b7d1',
+        },
         overrides: {
-             MuiOutlinedInput: {
-                 root: {
-                     borderColor: '#444',
-                 },
-                 notchedOutline: {
-                     borderColor: '#444',
-                 },
-             },
+            MuiOutlinedInput: {
+                root: {
+                    borderColor: '#444',
+                },
+                notchedOutline: {
+                    borderColor: '#444',
+                },
+            },
         },
     },
 };

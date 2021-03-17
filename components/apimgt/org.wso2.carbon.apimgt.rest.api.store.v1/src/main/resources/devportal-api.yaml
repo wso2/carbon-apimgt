@@ -20,7 +20,7 @@ info:
     Please see [full OpenAPI Specification](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.store.v1/src/main/resources/devportal-api.yaml) of the API which is written using [OAS 3.0](http://swagger.io/) specification.
 
     # Authentication
-    Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    The Developer Portal REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
     the API, you need to obtain an access token with the required scopes. This guide will walk you through the steps
     that you will need to follow to obtain an access token.
     First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
@@ -3914,6 +3914,9 @@ components:
             type: object
             properties:
               environmentName:
+                type: string
+                example: Production and Sandbox
+              environmentDisplayName:
                 type: string
                 example: Production and Sandbox
               environmentType:

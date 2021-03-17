@@ -569,7 +569,7 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.portal.configuration',
-                                defaultMessage: 'Portal Configuration',
+                                defaultMessage: 'Portal Configurations',
                             })}
                             head='valueOnly'
 
@@ -606,7 +606,7 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.api.Config',
-                                defaultMessage: 'API configuration',
+                                defaultMessage: 'API configurations',
                             })}
                             head='valueOnly'
 

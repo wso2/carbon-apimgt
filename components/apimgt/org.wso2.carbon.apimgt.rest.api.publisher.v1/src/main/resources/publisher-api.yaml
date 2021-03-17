@@ -19,7 +19,7 @@ info:
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Publisher**.
 
     # Authentication
-    Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    The Publisher REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
     the the API you need to obtain an access token with the required scopes. This guide will walk you through the steps
     that you will need to follow to obtain an access token.
     First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
@@ -1616,9 +1616,6 @@ paths:
       responses:
         200:
           description: |
-            OK.
-        201:
-          description: |
             Created.
             Successful response with the newly deployed APIRevisionDeployment List object as the entity in the body.
           content:
@@ -2260,7 +2257,7 @@ paths:
     post:
       tags:
         - APIs
-      summary: Import API Definition
+      summary: Import a GraphQL SDL
       description: |
         This operation can be used to create api from api definition.APIMgtDAOTest
 
@@ -2539,7 +2536,7 @@ paths:
     post:
       tags:
         - Validation
-      summary: Validate GraphQL API Definition and Retrieve a Summary
+      summary: Validate a GraphQL SDL
       description: |
         This operation can be used to validate a graphQL definition and retrieve a summary.
       requestBody:
@@ -8693,6 +8690,7 @@ components:
           minLength: 0
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+          readOnly: true
         name:
           maxLength: 255
           minLength: 1

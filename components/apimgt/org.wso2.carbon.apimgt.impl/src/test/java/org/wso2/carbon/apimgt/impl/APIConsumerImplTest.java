@@ -829,13 +829,6 @@ public class APIConsumerImplTest {
     }
 
 
-    @Test
-    public void testGetScopesByScopeKeys() throws APIManagementException {
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Set<Scope> scopes = new HashSet<>();
-        when(apiMgtDAO.getScopesByScopeKeys("testKey", 1234)).thenReturn(scopes);
-        assertEquals(scopes, apiConsumer.getScopesByScopeKeys("testKey", 1234));
-    }
 
     @Test
     public void testAddComment() throws APIManagementException {
@@ -1041,7 +1034,6 @@ public class APIConsumerImplTest {
         scopes.add(scope1);
         scopes.add(scope2);
         PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn("abc.org");
-        Mockito.when(apiMgtDAO.getScopesByScopeKeys(Mockito.anyString(), Mockito.anyInt())).thenReturn(scopes);
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
         keyManagerConfigurationsDto.setEnabled(true);
         Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName("abc.org", "default"))

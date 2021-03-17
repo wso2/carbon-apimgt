@@ -280,24 +280,27 @@ a {
   background-color: #356eac52;
 }
 .progress-bar-striped > div {
-  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-  background-size: 40px 40px;
-  float: left;
-  width: 0%;
-  height: 100%;
-  font-size: 12px;
-  line-height: 20px;
-  color: #ffffff;
-  text-align: center;
-  -webkit-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-  -moz-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-  -webkit-transition: width 3s ease;
-  -moz-transition: width 3s ease;
-  -o-transition: width 3s ease;
-  transition: width 3s ease;
-  animation: progress-bar-stripes 4s linear infinite;
-  background-color: #19569e;
+  background-image: linear-gradient(
+135deg
+, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    /* background-size: 51px 47px; */
+    float: left;
+    width: 0%;
+    height: 100%;
+    font-size: 12px;
+    line-height: 4px;
+    color: #ffffff;
+    text-align: center;
+    -webkit-box-shadow: inset 0 -1px 0 rgb(0 0 0 / 15%);
+    -moz-box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    box-shadow: 0px 1px 13px 6px rgb(4 57 103 / 15%);
+    -webkit-transition: width 3s ease;
+    -moz-transition: width 3s ease;
+    -o-transition: width 3s ease;
+    transition: width 2s ease;
+    animation: progress-bar-stripes 2s linear infinite;
+    background-color: #0064dac4;
+}
 }
 .progress-bar-striped p{
   margin: 0;

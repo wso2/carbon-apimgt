@@ -212,18 +212,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns a set of SubscribedAPIs filtered by the given application id.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application Id
-     * @param groupingId the groupId of the subscriber
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<SubscribedAPI> getSubscribedAPIsByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
-            throws APIManagementException;
-
-    /**
      *
      * @param jsonString this string will contain oAuth app details
      * @param userName user name of logged in user.
@@ -879,16 +867,6 @@ public interface APIConsumer extends APIManager {
      */
     Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException;
-
-    /**
-     * Returns a set of scopes for a given space seperated scope key string
-     *
-     * @param scopeKeys a space seperated string of scope keys
-     * @param tenantId  tenant id
-     * @return set of scopes
-     * @throws APIManagementException
-     */
-    Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
     /**
      * Returns the groupId of a specific Application when the Id is provided

@@ -112,6 +112,7 @@ function Delete(props) {
                     </Button>
                     <Button onClick={() => runAction('yes')} color='primary' autoFocus>
                         <FormattedMessage
+                            id='Apis.Details.Documents.Delete.document.listing.delete'
                             defaultMessage='Yes. Delete'
                         />
                     </Button>

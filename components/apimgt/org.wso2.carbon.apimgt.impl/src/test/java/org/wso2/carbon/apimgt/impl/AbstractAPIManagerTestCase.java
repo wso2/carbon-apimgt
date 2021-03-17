@@ -1590,7 +1590,88 @@ public class AbstractAPIManagerTestCase {
                 PolicyConstants.POLICY_LEVEL_GLOBAL).length);
         Assert.assertEquals(0, abstractAPIManager.getPolicies(API_PROVIDER, "Test").length);
     }
+    @Test
+    public void testGetPoliciesIncludeUnlimitedThrottletier() throws APIManagementException, org.wso2.carbon.user.api.UserStoreException,
+            RegistryException, XMLStreamException {
+        SubscriptionPolicy[] policies3 = { new SubscriptionPolicy("policy4"), new SubscriptionPolicy("policy5"),
+                new SubscriptionPolicy("policy6") };
+        PowerMockito.mockStatic(APIUtil.class);
+        BDDMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return (String) args[0];
+        });
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        Mockito.when(apiMgtDAO.getSubscriptionPolicies(Mockito.anyInt())).thenReturn(policies3);
 
+        ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class, Mockito.RETURNS_MOCKS);
+
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getThrottleProperties()).thenReturn(throttleProperties);
+        PowerMockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(true);
+        Assert.assertEquals(3, abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_SUB).length);
+    }
+
+    @Test
+    public void testGetPoliciesExcludingUnAuthenticatedTier() throws APIManagementException, org.wso2.carbon.user.api.UserStoreException,
+            RegistryException, XMLStreamException {
+        SubscriptionPolicy[] policies3 = { new SubscriptionPolicy("policy4"), new SubscriptionPolicy("policy5"),
+                new SubscriptionPolicy("policy6"), new SubscriptionPolicy(APIConstants.UNAUTHENTICATED_TIER),
+                new SubscriptionPolicy(APIConstants.UNLIMITED_TIER)};
+        PowerMockito.mockStatic(APIUtil.class);
+        BDDMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return (String) args[0];
+        });
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        Mockito.when(apiMgtDAO.getSubscriptionPolicies(Mockito.anyInt())).thenReturn(policies3);
+
+        ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
+
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getThrottleProperties()).thenReturn(throttleProperties);
+
+        Mockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(false);
+
+        Assert.assertEquals(3, abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_SUB).length);
+    }
+
+    @Test
+    public void testGetPoliciesIncludingUnlimitedTier() throws APIManagementException,
+            org.wso2.carbon.user.api.UserStoreException, RegistryException, XMLStreamException {
+        SubscriptionPolicy[] policies3 = { new SubscriptionPolicy("policy4"), new SubscriptionPolicy("policy5"),
+                new SubscriptionPolicy("policy6"), new SubscriptionPolicy(APIConstants.UNLIMITED_TIER)};
+        PowerMockito.mockStatic(APIUtil.class);
+        BDDMockito.when(APIUtil.getTenantId(Mockito.anyString())).thenReturn(-1234);
+        PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
+            Object[] args = invocation.getArguments();
+            return (String) args[0];
+        });
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiMgtDAO);
+        Mockito.when(apiMgtDAO.getSubscriptionPolicies(Mockito.anyInt())).thenReturn(policies3);
+
+        ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
+
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getThrottleProperties()).thenReturn(throttleProperties);
+
+        Mockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(true);
+
+        Assert.assertEquals(4, abstractAPIManager.getPolicies(API_PROVIDER, PolicyConstants.POLICY_LEVEL_SUB).length);
+    }
     @Test
     public void testSearchPaginatedAPIs()
             throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException,

@@ -116,6 +116,9 @@ public class VHost {
 
     private String getUrl(String protocol, String port, String context) {
         // {protocol}://{host}{port}{context}
+        if (StringUtils.isNotEmpty(context) && !context.startsWith("/")) {
+            context = "/" + context;
+        }
         return String.format("%s://%s%s%s", protocol, host, port, context);
     }
 

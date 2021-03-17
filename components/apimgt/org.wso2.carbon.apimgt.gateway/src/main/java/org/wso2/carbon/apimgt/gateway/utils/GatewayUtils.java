@@ -214,17 +214,20 @@ public class GatewayUtils {
 
     public static Map getJWTClaims(AuthenticationContext authContext) {
 
-        String[] jwtTokenArray = authContext.getCallerToken().split(Pattern.quote("."));
-        // decoding JWT
-        try {
-            byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
-            String jwtAssertion = new String(jwtByteArray, "UTF-8");
-            JSONParser parser = new JSONParser();
-            return (Map) parser.parse(jwtAssertion);
-        } catch (UnsupportedEncodingException e) {
-            log.error("Error while decoding jwt header", e);
-        } catch (ParseException e) {
-            log.error("Error while parsing jwt header", e);
+        String assertion = authContext.getCallerToken();
+        if (StringUtils.isNotEmpty(assertion)) {
+            String[] jwtTokenArray = authContext.getCallerToken().split(Pattern.quote("."));
+            // decoding JWT
+            try {
+                byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
+                String jwtAssertion = new String(jwtByteArray, "UTF-8");
+                JSONParser parser = new JSONParser();
+                return (Map) parser.parse(jwtAssertion);
+            } catch (UnsupportedEncodingException e) {
+                log.error("Error while decoding jwt header", e);
+            } catch (ParseException e) {
+                log.error("Error while parsing jwt header", e);
+            }
         }
         return null;
     }
