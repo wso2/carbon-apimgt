@@ -52,9 +52,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.stream.XMLStreamException;
 
+/**
+ * This class used to generate Synapse Artifact.
+ */
 @Component(
         name = "synapse.artifact.generator.service",
         immediate = true,
@@ -62,7 +64,7 @@ import javax.xml.stream.XMLStreamException;
 )
 public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
 
-    private static final Log log  = LogFactory.getLog(SynapseArtifactGenerator.class);
+    private static final Log log = LogFactory.getLog(SynapseArtifactGenerator.class);
 
     @Override
     public RuntimeArtifactDto generateGatewayArtifact(List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList)
@@ -119,8 +121,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                         (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType()))) {
-                                    APIDefinitionValidationResponse apiDefinitionValidationResponse =
-                                            ImportUtils.retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
+                                    APIDefinitionValidationResponse apiDefinitionValidationResponse = ImportUtils
+                                            .retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
                                     api.setSwaggerDefinition(apiDefinitionValidationResponse.getContent());
                                     gatewayAPIDTO = TemplateBuilderUtil
                                             .retrieveGatewayAPIDto(api, environment, tenantDomain, apidto,
@@ -128,9 +130,11 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
                                                 APIConstants.APITransportType.SSE.toString().equals(api.getType()) ||
-                                                APIConstants.APITransportType.WEBSUB.toString().equals(api.getType()))) {
+                                                APIConstants.APITransportType.WEBSUB.toString()
+                                                        .equals(api.getType()))) {
                                     APIDefinitionValidationResponse asyncApiDefinition =
-                                            ImportUtils.retrieveValidatedAsyncApiDefinitionFromArchive(extractedFolderPath);
+                                            ImportUtils.retrieveValidatedAsyncApiDefinitionFromArchive(
+                                                    extractedFolderPath);
                                     api.setAsyncApiDefinition(asyncApiDefinition.getContent());
                                     gatewayAPIDTO = TemplateBuilderUtil
                                             .retrieveGatewayAPIDtoForStreamingAPI(api, environment, tenantDomain,

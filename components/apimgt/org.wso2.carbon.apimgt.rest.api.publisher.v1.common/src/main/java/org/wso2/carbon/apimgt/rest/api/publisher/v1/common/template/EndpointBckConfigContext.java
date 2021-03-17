@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 import org.wso2.carbon.apimgt.api.model.API;
 
 /**
- * This is written to make sure backward compatibility of the APIs created prior AM 1.6.0v
+ * This is written to make sure backward compatibility of the APIs created prior AM 1.6.0v.
  */
 public class EndpointBckConfigContext extends ConfigContextDecorator {
 
@@ -29,12 +29,14 @@ public class EndpointBckConfigContext extends ConfigContextDecorator {
         super(context);
         //this.api = api;
         //check if endpoint_config not set
-        String endpoint_config = api.getEndpointConfig();
-        if(endpoint_config == null || "".equals(endpoint_config)){
+        String endpointConfig = api.getEndpointConfig();
+        if (endpointConfig == null || "".equals(endpointConfig)) {
             // Without setting the context make the endpoint_config json of api
             // The following config will be picked up by EndpointConfigContext
-            endpoint_config = "{\"production_endpoints\":{\"url\":\""+ api.getUrl()+"\", \"config\":null},\"sandbox_endpoint\":{\"url\":\""+api.getSandboxUrl()+"\",\"config\":null},\"endpoint_type\":\"http\"}";
-            api.setEndpointConfig(endpoint_config);
+            endpointConfig = "{\"production_endpoints\":{\"url\":\"" + api.getUrl() +
+                    "\", \"config\":null},\"sandbox_endpoint\":{\"url\":\"" + api.getSandboxUrl() +
+                    "\",\"config\":null},\"endpoint_type\":\"http\"}";
+            api.setEndpointConfig(endpointConfig);
         }
     }
 }

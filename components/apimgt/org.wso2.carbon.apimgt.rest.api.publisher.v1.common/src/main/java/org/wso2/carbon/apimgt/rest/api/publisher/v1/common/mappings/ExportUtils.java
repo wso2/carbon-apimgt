@@ -53,7 +53,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -84,6 +83,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class uses for Export API functionality.
+ */
 public class ExportUtils {
 
     private static final Log log = LogFactory.getLog(ExportUtils.class);
@@ -92,7 +94,7 @@ public class ExportUtils {
     private static final String SOAPTOREST = "SoapToRest";
 
     /**
-     * Validate name, version and provider before exporting an API/API Product
+     * Validate name, version and provider before exporting an API/API Product.
      *
      * @param name         API/API Product Name
      * @param version      API/API Product version
@@ -144,8 +146,9 @@ public class ExportUtils {
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
-    public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn,API api,
-            String userName, ExportFormat exportFormat, boolean preserveStatus, boolean preserveDocs)
+    public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
+                                 String userName, ExportFormat exportFormat, boolean preserveStatus,
+                                 boolean preserveDocs)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
@@ -165,7 +168,8 @@ public class ExportUtils {
             }
             addSOAPToRESTMediationToArchive(archivePath, apiIdentifier, registry);
             if (preserveDocs) {
-                addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider, APIConstants.API_IDENTIFIER_TYPE);
+                addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
+                        APIConstants.API_IDENTIFIER_TYPE);
             }
 
             if (StringUtils.isNotEmpty(apiDtoToReturn.getWsdlUrl()) && preserveDocs) {
@@ -186,10 +190,10 @@ public class ExportUtils {
             addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
 
             // Export mTLS authentication related certificates
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Exporting client certificates.");
-                }
-                addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Exporting client certificates.");
+            }
+            addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
             CommonUtil.archiveDirectory(exportAPIBasePath);
             FileUtils.deleteQuietly(new File(exportAPIBasePath));
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -261,7 +265,7 @@ public class ExportUtils {
      *                                  storing in the archive directory
      */
     public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider,
-            String type) throws APIImportExportException, APIManagementException {
+                                             String type) throws APIImportExportException, APIManagementException {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
@@ -275,9 +279,9 @@ public class ExportUtils {
                 if (extension != null) {
                     CommonUtil.createDirectory(localImagePath);
                     try (InputStream imageDataStream = thumbnailResource.getContent();
-                            OutputStream outputStream = new FileOutputStream(
-                                    localImagePath + File.separator + APIConstants.API_ICON_IMAGE + APIConstants.DOT
-                                            + extension)) {
+                         OutputStream outputStream = new FileOutputStream(
+                                 localImagePath + File.separator + APIConstants.API_ICON_IMAGE + APIConstants.DOT
+                                         + extension)) {
                         IOUtils.copy(imageDataStream, outputStream);
                         if (log.isDebugEnabled()) {
                             log.debug("Thumbnail image retrieved successfully for API/API Product: " + identifier
@@ -302,7 +306,7 @@ public class ExportUtils {
     }
 
     /**
-     * Retrieve SOAP to REST mediation logic for the exporting API and store it in the archive directory
+     * Retrieve SOAP to REST mediation logic for the exporting API and store it in the archive directory.
      *
      * @param archivePath   File path to export the SOAPToREST mediation logic
      * @param apiIdentifier ID of the requesting API
@@ -311,7 +315,7 @@ public class ExportUtils {
      *                                  storing in the archive directory
      */
     public static void addSOAPToRESTMediationToArchive(String archivePath, APIIdentifier apiIdentifier,
-            UserRegistry registry) throws APIImportExportException {
+                                                       UserRegistry registry) throws APIImportExportException {
 
         String soapToRestBaseUrl =
                 "/apimgt/applicationdata/provider" + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getProviderName()
@@ -330,10 +334,10 @@ public class ExportUtils {
                 if (inFlow != null) {
                     for (String inFlowPath : inFlow.getChildren()) {
                         try (InputStream inputStream = registry.get(inFlowPath).getContentStream();
-                                OutputStream outputStream = new FileOutputStream(
-                                        archivePath + File.separator + SOAPTOREST + File.separator + IN + inFlowPath
-                                                .substring(
-                                                        inFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)));) {
+                             OutputStream outputStream = new FileOutputStream(
+                                     archivePath + File.separator + SOAPTOREST + File.separator + IN + inFlowPath
+                                             .substring(
+                                                     inFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)));) {
                             IOUtils.copy(inputStream, outputStream);
                         }
                     }
@@ -341,9 +345,9 @@ public class ExportUtils {
                 if (outFlow != null) {
                     for (String outFlowPath : outFlow.getChildren()) {
                         try (InputStream inputStream = registry.get(outFlowPath).getContentStream();
-                                OutputStream outputStream = new FileOutputStream(
-                                        archivePath + File.separator + SOAPTOREST + File.separator + OUT + outFlowPath.
-                                                substring(outFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)))) {
+                             OutputStream outputStream = new FileOutputStream(
+                                     archivePath + File.separator + SOAPTOREST + File.separator + OUT + outFlowPath.
+                                             substring(outFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)))) {
                             IOUtils.copy(inputStream, outputStream);
                         }
                     }
@@ -495,7 +499,7 @@ public class ExportUtils {
      * Retrieve available custom sequences and API specific sequences for API export, and store it in the archive
      * directory.
      *
-     * @param archivePath   File path to export the sequences
+     * @param archivePath File path to export the sequences
      * @throws APIImportExportException If an error occurs while exporting sequences
      */
     public static void addSequencesToArchive(String archivePath, API api)
@@ -568,9 +572,9 @@ public class ExportUtils {
     /**
      * Write the sequence to API archive.
      *
-     * @param mediation Mediation resource
-     * @param individualSequenceExportPath         Path to export the mediation sequence
-     * @param mediationName     Name of the mediation policy
+     * @param mediation                    Mediation resource
+     * @param individualSequenceExportPath Path to export the mediation sequence
+     * @param mediationName                Name of the mediation policy
      * @throws APIManagementException If an error occurs while writing the mediation policy to file
      */
     private static void writeSequenceToArchive(Mediation mediation, String individualSequenceExportPath,
@@ -600,7 +604,7 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while exporting endpoint certificates
      */
     public static void addEndpointCertificatesToArchive(String archivePath, APIDTO apiDto, int tenantId,
-            ExportFormat exportFormat) throws APIImportExportException {
+                                                        ExportFormat exportFormat) throws APIImportExportException {
 
         List<String> productionEndpoints;
         List<String> sandboxEndpoints;
@@ -699,7 +703,8 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while retrieving endpoint certificate metadata and content
      */
     private static JsonArray getEndpointCertificateContentAndMetaData(int tenantId, String url,
-                                                                      String certDirectoryPath) throws APIImportExportException {
+                                                                      String certDirectoryPath)
+            throws APIImportExportException {
 
         List<CertificateMetadataDTO> certificateMetadataDTOS;
         CertificateManager certificateManager = CertificateManagerImpl.getInstance();
@@ -799,7 +804,8 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier)
+                                                      ExportFormat exportFormat, APIProvider apiProvider,
+                                                      APIIdentifier apiIdentifier)
             throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
@@ -826,7 +832,8 @@ public class ExportUtils {
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
                             APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
-                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
+                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
+                            exportFormat,
                             formattedSwaggerJson);
                 }
                 if (log.isDebugEnabled()) {
@@ -853,7 +860,7 @@ public class ExportUtils {
     }
 
     /**
-     * Retrieve Mutual SSL related certificates and store those in the archive directory
+     * Retrieve Mutual SSL related certificates and store those in the archive directory.
      *
      * @param archivePath  Folder path to export client certificates
      * @param identifier   Identifier
@@ -863,7 +870,8 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs when writing to file or retrieving certificate metadata
      */
     public static void addClientCertificatesToArchive(String archivePath, Identifier identifier, int tenantId,
-            APIProvider provider, ExportFormat exportFormat) throws APIImportExportException {
+                                                      APIProvider provider, ExportFormat exportFormat)
+            throws APIImportExportException {
 
         List<ClientCertificateDTO> certificateMetadataDTOs;
         try {
@@ -902,7 +910,7 @@ public class ExportUtils {
      * @return list of certificate detail JSON objects
      */
     private static JsonArray getClientCertificateContentAndMetaData(List<ClientCertificateDTO> clientCertificateDTOs,
-            String certDirectoryPath) {
+                                                                    String certDirectoryPath) {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonArray certificatesList = new JsonArray();
@@ -936,7 +944,8 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIProductMetaInformationToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider) throws APIImportExportException {
+                                                             ExportFormat exportFormat, APIProvider apiProvider)
+            throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 

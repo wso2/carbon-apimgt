@@ -24,6 +24,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.KeyManagerListDTO;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class used to convert KeyManager Models to rest API related Models.
+ */
 public class KeyManagerMappingUtil {
 
     public static KeyManagerListDTO toKeyManagerListDto(List<KeyManagerConfigurationDTO> keyManagerConfigurations) {
