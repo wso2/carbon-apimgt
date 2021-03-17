@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.SuccessRequestDataPublisher;
 
 /**
- * Success request data collector
+ * Success request data collector.
  */
 public class SuccessRequestDataCollector extends CommonRequestDataCollector implements RequestDataCollector {
     private static final Log log = LogFactory.getLog(SuccessRequestDataCollector.class);

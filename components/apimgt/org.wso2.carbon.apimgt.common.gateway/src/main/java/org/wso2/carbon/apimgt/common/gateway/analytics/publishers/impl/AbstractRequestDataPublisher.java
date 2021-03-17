@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 import java.util.Map;
 
 /**
- * Abstract implementation to publish an event
+ * Abstract implementation to publish an event.
  */
 public abstract class AbstractRequestDataPublisher implements RequestDataPublisher {
     private static final Log log = LogFactory.getLog(AbstractRequestDataPublisher.class);

@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Default implementation of jwt transformer
+ * Default implementation of jwt transformer.
  */
 public class DefaultJWTTransformer implements JWTTransformer {
 

@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.apikey;
 
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
@@ -30,7 +29,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -484,7 +482,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         String endUserToken = null;
         boolean valid = false;
         String jwtTokenCacheKey =
-                jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":").concat(tokenSignature);
+                jwtInfoDto.getApiContext().concat(":").concat(jwtInfoDto.getVersion()).concat(":").concat(tokenSignature);
         if (isGatewayTokenCacheEnabled) {
             Object token = getGatewayApiKeyCache().get(jwtTokenCacheKey);
             if (token != null) {
