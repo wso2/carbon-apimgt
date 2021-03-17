@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 
 /**
- * Api attribute in analytics event
+ * Api attribute in analytics event.
  */
 public class API {
     private String apiId;

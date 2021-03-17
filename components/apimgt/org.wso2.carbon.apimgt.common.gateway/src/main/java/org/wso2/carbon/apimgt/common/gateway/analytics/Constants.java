@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics;
 
 /**
- * analytics related publisher constants
+ * analytics related publisher constants.
  */
 public class Constants {
 

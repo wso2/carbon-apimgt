@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 
 /**
- * Target attribute in analytics event
+ * Target attribute in analytics event.
  */
 public class Target {
     private int targetResponseCode;

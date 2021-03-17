@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.FaultyRequestDataPublisher;
 
 /**
- * Target faulty request data collector
+ * Target faulty request data collector.
  */
 public class TargetFaultDataCollector extends AbstractFaultDataCollector {
     private static final Log log = LogFactory.getLog(TargetFaultDataCollector.class);
