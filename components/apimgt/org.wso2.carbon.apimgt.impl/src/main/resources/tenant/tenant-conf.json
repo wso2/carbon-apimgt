@@ -48,7 +48,7 @@
       },
       {
         "Name": "apim:subscribe",
-        "Roles": "admin,Internal/subscriber"
+        "Roles": "admin,Internal/subscriber,Internal/devops"
       },
       {
         "Name": "apim:tier_view",

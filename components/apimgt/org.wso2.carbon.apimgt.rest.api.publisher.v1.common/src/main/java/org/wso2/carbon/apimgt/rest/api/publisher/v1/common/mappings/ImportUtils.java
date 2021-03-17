@@ -2146,6 +2146,20 @@ public class ImportUtils {
                 if (dependentAPIsParams != null) {
                     dependentAPIParamsConfigObject = APIControllerUtil
                             .getDependentAPIParams(dependentAPIsParams, apiDirectory.getName());
+                    // If the "certificates" directory is specified, copy it inside Deployment directory of the
+                    // dependent API since there may be certificates required for APIs
+                    String deploymentCertificatesDirectoryPath = path + ImportExportConstants.DEPLOYMENT_DIRECTORY
+                            + ImportExportConstants.CERTIFICATE_DIRECTORY;
+                    if (CommonUtil.checkFileExistence(deploymentCertificatesDirectoryPath)) {
+                        try {
+                            CommonUtil.copyDirectory(deploymentCertificatesDirectoryPath,
+                                    apiDirectoryPath + ImportExportConstants.DEPLOYMENT_DIRECTORY
+                                            + ImportExportConstants.CERTIFICATE_DIRECTORY);
+                        } catch (APIImportExportException e) {
+                            throw new APIManagementException(
+                                    "Error while copying the directory " + deploymentCertificatesDirectoryPath, e);
+                        }
+                    }
                 }
 
                 JsonElement jsonObject = retrieveValidatedDTOObject(apiDirectoryPath, isDefaultProviderAllowed,
