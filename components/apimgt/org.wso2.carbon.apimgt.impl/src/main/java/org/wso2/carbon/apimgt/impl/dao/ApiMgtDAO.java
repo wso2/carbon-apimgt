@@ -15837,18 +15837,19 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Get APIRevisionDeployment details by providing deployment name
+     * Get APIRevisionDeployment details by providing deployment name and revision uuid
      *
      * @return APIRevisionDeployment object
      * @throws APIManagementException if an error occurs while retrieving revision details
      */
-    public APIRevisionDeployment getAPIRevisionDeploymentByName(String name) throws APIManagementException {
+    public APIRevisionDeployment getAPIRevisionDeploymentByNameAndRevsionID(String name, String revisionId) throws APIManagementException {
         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection
                      .prepareStatement(SQLConstants.
-                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_TYPE)) {
+                             APIRevisionSqlConstants.GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_REVISION_UUID)) {
             statement.setString(1, name);
+            statement.setString(2, revisionId);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     String environmentName = rs.getString("NAME");
@@ -16053,6 +16054,40 @@ public class ApiMgtDAO {
                     + apiUUID, e);
         }
     }
+
+    /**
+     * Update API revision Deployment mapping record
+     *
+     * @param apiUUID          API UUID
+     * @param deployments content of the revision deployment mapping objects
+     * @throws APIManagementException if an error occurs when adding a new API revision
+     */
+    public void updateAPIRevisionDeployment(String apiUUID, Set<APIRevisionDeployment> deployments)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                // Update an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+            try (PreparedStatement statement = connection
+                    .prepareStatement(SQLConstants.APIRevisionSqlConstants.UPDATE_API_REVISION_DEPLOYMENT_MAPPING)) {
+                for (APIRevisionDeployment deployment : deployments) {
+                    statement.setBoolean(1, deployment.isDisplayOnDevportal());
+                    statement.setString(2, deployment.getDeployment());
+                    statement.setString(3, deployment.getRevisionUUID());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to update Deployment Mapping entry for API UUID "
+                    + apiUUID, e);
+        }
+    }
+
 
 
     /**
