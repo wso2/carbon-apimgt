@@ -47,7 +47,7 @@ const SwaggerUI = (props) => {
             const { url } = req;
             const { context } = api;
             const patternToCheck = `${context}/*`;
-            req.headers[authorizationHeader] = 'Internal-Key ' + accessTokenProvider();
+            req.headers[authorizationHeader] = 'Bearer ' + accessTokenProvider();
             // }
             if (url.endsWith(patternToCheck)) {
                 req.url = url.substring(0, url.length - 2);

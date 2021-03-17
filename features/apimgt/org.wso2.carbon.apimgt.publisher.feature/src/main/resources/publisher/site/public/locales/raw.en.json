@@ -2,9 +2,6 @@
   "8+ZR29": {
     "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
   },
-  "APis.Details.tryout.help.main": {
-    "defaultMessage": "Test APIs while in the Development stage."
-  },
   "Api.category.dropdown.tooltip": {
     "defaultMessage": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API."
   },
@@ -269,11 +266,17 @@
   "Apis.Details.APIDefinition.APIDefinition.btn.close": {
     "defaultMessage": "Close"
   },
+  "Apis.Details.APIDefinition.APIDefinition.btn.hide.diff": {
+    "defaultMessage": "Hide Diff"
+  },
   "Apis.Details.APIDefinition.APIDefinition.btn.no": {
     "defaultMessage": "CANCEL"
   },
   "Apis.Details.APIDefinition.APIDefinition.btn.reimport": {
     "defaultMessage": "Re-import"
+  },
+  "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": {
+    "defaultMessage": "Show Diff"
   },
   "Apis.Details.APIDefinition.APIDefinition.btn.yes": {
     "defaultMessage": "SAVE"
@@ -488,6 +491,18 @@
   },
   "Apis.Details.AccessControl.roles.help": {
     "defaultMessage": "Enter valid role and press enter"
+  },
+  "Apis.Details.ApiCOnsole.generate.test.key": {
+    "defaultMessage": "GET TEST KEY"
+  },
+  "Apis.Details.ApiConsole.ApiConsole.title": {
+    "defaultMessage": "Try Out"
+  },
+  "Apis.Details.ApiConsole.SelectAppPanel.environment": {
+    "defaultMessage": "Please select an environment"
+  },
+  "Apis.Details.ApiConsole.environment": {
+    "defaultMessage": "Environment"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": {
     "defaultMessage": "Business Information of the API"
@@ -2919,12 +2934,6 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": {
     "defaultMessage": "Error while retrieving the subscriptions"
   },
-  "Apis.Details.TestConsole.TestConsole.info.message": {
-    "defaultMessage": "API should be in prototype(testing) state. Please demote to created state and click on the initialize Test button in the Test Console left menu item."
-  },
-  "Apis.Details.TestConsole.TestConsole.info.title": {
-    "defaultMessage": "API should be in prototype(testing) state."
-  },
   "Apis.Details.components.APIDetailsTopMenu.created.by": {
     "defaultMessage": "Created by:"
   },
@@ -2965,16 +2974,7 @@
     "defaultMessage": "Delete {type}"
   },
   "Apis.Details.index.Tryout": {
-    "defaultMessage": "Test Console"
-  },
-  "Apis.Details.index.Tryout.menu.name": {
-    "defaultMessage": "test console"
-  },
-  "Apis.Details.index.Tryout.not.enable.for.test": {
-    "defaultMessage": "Test Console"
-  },
-  "Apis.Details.index.Tryout.not.prototyped": {
-    "defaultMessage": "Test Console"
+    "defaultMessage": "Try out"
   },
   "Apis.Details.index.api.Config": {
     "defaultMessage": "API configuration"
@@ -3011,9 +3011,6 @@
   },
   "Apis.Details.index.external-stores": {
     "defaultMessage": "external dev portals"
-  },
-  "Apis.Details.index.initTest": {
-    "defaultMessage": "Initialize test"
   },
   "Apis.Details.index.left.menu.scope": {
     "defaultMessage": "Local Scopes"
@@ -3062,12 +3059,6 @@
   },
   "Apis.Details.scopes.Edit.text.editor.edit": {
     "defaultMessage": "Edit"
-  },
-  "Apis.Details.tryout.initialize.test": {
-    "defaultMessage": "Initialize the API for the testing phase"
-  },
-  "Apis.Details.tryout.title": {
-    "defaultMessage": "Start Testing"
   },
   "Apis.Listing.ApiTableView.context": {
     "defaultMessage": "Context"
@@ -3119,6 +3110,9 @@
   },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title": {
     "defaultMessage": "Import GraphQL SDL"
+  },
+  "Apis.Listing.SampleAPI.SampleAPI.published": {
+    "defaultMessage": "Sample PizzaShackAPI API Published successfully"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": {
     "defaultMessage": "REST API"
@@ -3459,9 +3453,6 @@
   "Base.Header.headersearch.HeaderSearch.tooltip.option6": {
     "defaultMessage": "Description [ Syntax - description:xxxx ]"
   },
-  "Base.Header.headersearch.HeaderSearch.tooltip.option7": {
-    "defaultMessage": "Sub-Context [ Syntax - subcontext:xxxx ]"
-  },
   "Base.Header.headersearch.HeaderSearch.tooltip.option8": {
     "defaultMessage": "Documentation Content [ Syntax - doc:xxxx ]"
   },
@@ -3702,6 +3693,9 @@
   "ServiceCatalog.CreateApi.mandatory.field.label": {
     "defaultMessage": "Mandatory fields"
   },
+  "ServiceCatalog.CreateApi.select.protocol": {
+    "defaultMessage": "Select Protocol"
+  },
   "ServiceCatalog.CreateApi.update.btn": {
     "defaultMessage": "Create API"
   },
@@ -3888,6 +3882,18 @@
   "UnexpectedError.title": {
     "defaultMessage": "Internal Server Error"
   },
+  "api.console.gateway.heading": {
+    "defaultMessage": "Gateway"
+  },
+  "api.console.security.heading": {
+    "defaultMessage": "Security"
+  },
+  "api.console.security.type.heading": {
+    "defaultMessage": "Internal key"
+  },
+  "api.gateways": {
+    "defaultMessage": "API Gateways"
+  },
   "app.components.Shared.Banner.back": {
     "defaultMessage": "Back"
   },
@@ -3932,6 +3938,8 @@
   },
   "error.list.500.description": {
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
+  },
+  "internal.token": {
   },
   "sIDiOO": {
     "defaultMessage": "Yes. Delete"
