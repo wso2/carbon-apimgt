@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl;
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
 
 /**
- * Abstract request data collector
+ * Abstract request data collector.
  */
 public abstract class AbstractRequestDataCollector {
     private AnalyticsDataProvider provider;

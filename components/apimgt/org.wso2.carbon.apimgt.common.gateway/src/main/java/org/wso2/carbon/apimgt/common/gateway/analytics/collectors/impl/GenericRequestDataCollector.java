@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.RequestDataCol
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 
 /**
- * Handle all the request and forward to appropriate sub request handlers
+ * Handle all the request and forward to appropriate sub request handlers.
  */
 public class GenericRequestDataCollector implements RequestDataCollector {
     private static final Log log = LogFactory.getLog(GenericRequestDataCollector.class);

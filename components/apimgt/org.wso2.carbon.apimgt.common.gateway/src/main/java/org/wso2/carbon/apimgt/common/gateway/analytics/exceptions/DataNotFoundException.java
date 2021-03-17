@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.exceptions;
 
 /**
- * Exception class to handle data not found cases
+ * Exception class to handle data not found cases.
  */
 public class DataNotFoundException extends AnalyticsException {
     public DataNotFoundException(String message) {

@@ -279,12 +279,8 @@
                             <id>validate</id>
                             <phase>compile</phase>
                             <configuration>
-                                <configLocation>
-                                    https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
-                                </configLocation>
-                                <suppressionsLocation>
-                                    https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
-                                </suppressionsLocation>
+                                <configLocation>${project.parent.parent.basedir}/checkstyle.xml</configLocation>
+                                <suppressionsLocation>${project.parent.parent.basedir}/suppressions.xml</suppressionsLocation>
                                 <encoding>UTF-8</encoding>
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>true</failsOnError>
