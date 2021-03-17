@@ -5433,6 +5433,12 @@
       "value": "Name"
     }
   ],
+  "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.spec.error": [
+    {
+      "type": 0,
+      "value": "Error in resolving the definition!"
+    }
+  ],
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.type": [
     {
       "type": 0,

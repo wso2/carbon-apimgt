@@ -2595,6 +2595,9 @@
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.name": {
     "defaultMessage": "Name"
   },
+  "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.spec.error": {
+    "defaultMessage": "Error in resolving the definition!"
+  },
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.type": {
     "defaultMessage": "Parameter Type"
   },
