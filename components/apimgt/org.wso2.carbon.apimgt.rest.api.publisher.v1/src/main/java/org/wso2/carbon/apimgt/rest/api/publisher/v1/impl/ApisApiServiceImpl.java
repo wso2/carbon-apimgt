@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
@@ -348,7 +349,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
             comment.setParentCommentID(replyTo);
-            comment.setEntryPoint("publisher");
+            comment.setEntryPoint("PUBLISHER");
             comment.setUser(username);
             comment.setApiId(apiId);
             String createdCommentId = apiProvider.addComment(identifier, comment, username);
@@ -379,9 +380,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             String parentCommentID = null;
-            Comment[] comments = apiProvider.getComments(apiTypeWrapper, parentCommentID);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
-                    includeCommenterInfo);
+            CommentList comments = apiProvider.getComments(apiTypeWrapper, parentCommentID, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
@@ -452,9 +452,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment[] comments = apiProvider.getComments(apiTypeWrapper, commentId);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
-                    includeCommenterInfo);
+            CommentList comments = apiProvider.getComments(apiTypeWrapper, commentId, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
@@ -582,7 +581,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId).getApiUUID() != null) {
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
                 apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
@@ -713,7 +712,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId).getApiUUID() != null) {
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
                 apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
@@ -837,7 +836,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId).getApiUUID() != null) {
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
                 apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
             } else {
                 apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
@@ -2054,7 +2053,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifier;
             if (identifier == null) {
-                if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId).getApiUUID() != null) {
+                if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
                     apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId,tenantDomain).getId();
                 } else {
                     apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
@@ -3680,7 +3679,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion,
                                         String serviceVersion, MessageContext messageContext) {
         URI newVersionedApiUri;
-        APIDTO newVersionedApi;
+        APIDTO newVersionedApi = new APIDTO();
         try {
             APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifierFromTable == null) {
@@ -3692,21 +3691,28 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String username = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(username);
+            API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            if (existingAPI == null) {
+                throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
+                        ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+            }
+            if (newVersion.equals(existingAPI.getId().getVersion())) {
+                throw new APIMgtResourceAlreadyExistsException("Version " + newVersion + " exists for api "
+                        + existingAPI.getId().getApiName(), ExceptionCodes.from(API_ALREADY_EXISTS, apiId));
+            }
             if (StringUtils.isNotEmpty(serviceVersion)) {
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
                 String serviceKey = apiProvider.retrieveServiceKeyByApiId(existingAPI.getId().getId(), tenantId);
                 ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-                if (existingAPI == null) {
-                    throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
-                            ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
-                }
-                if (newVersion.equals(existingAPI.getId().getVersion())) {
-                    throw new APIMgtResourceAlreadyExistsException("Version " + newVersion + " exists for api "
-                            + existingAPI.getId().getApiName(), ExceptionCodes.from(API_ALREADY_EXISTS, apiId));
-                }
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
-                newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto, null, service);
+                if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
+                        .DefinitionType.OAS3.equals(service.getDefinitionType())) {
+                    newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto,
+                            null, service);
+                } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
+                    newVersionedApi = importAsyncAPISpecification(service.getEndpointDef(), null, apidto,
+                            null, service);
+                }
             } else {
                 API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, tenantDomain);
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
@@ -3937,7 +3943,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIDTO apiInfo = getAPIByID(apiId, apiProvider);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
-                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString());
+                .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true);
 
         if (apiInfo != null ) {
             List<String> apiPolicies = apiInfo.getPolicies();
@@ -3971,12 +3977,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
-            if (apiRevision != null && !StringUtils.isEmpty(apiRevision.getApiUUID())) {
-                api.setRevision(true);
-                api.setRevisionedApiId(apiRevision.getApiUUID());
-                api.setRevisionId(apiRevision.getId());
-            }
+
             return APIMappingUtil.fromAPItoDTO(api, apiProvider);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -4336,6 +4337,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployment.setRevisionUUID(revisionId);
             apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
+            if (StringUtils.isEmpty(apiRevisionDeploymentDTO.getVhost())) {
+                // vhost is only required when deploying an revision, not required when un-deploying a revision
+                // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
+                RestApiUtil.handleBadRequest(
+                        "Required field 'vhost' not found in deployment", log
+                );
+            }
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
@@ -4444,7 +4452,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate and retrieve the AsyncAPI specification
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, returnContent);
+            validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, returnContent,
+                    false);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
@@ -4461,14 +4470,15 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param url AsyncAPI specification url
      * @param fileInputStream file as input stream
      * @param returnContent whether to return the content of the definition in the response DTO
+     * @param isServiceAPI whether the request is to create API from a service in Service Catalog
      * @return Map with the validation response information. A value with key 'dto' will have the response DTO
      *  of type AsyncAPISpecificationValidationResponseDTO for the REST API. A value with the key 'model' will have the
      *  validation response of type APIDefinitionValidationResponse coming from the impl level
      */
     private Map validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail,
-                                              Boolean returnContent) throws APIManagementException {
+                                          Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url, false);
+        handleInvalidParams(fileInputStream, fileDetail, url, isServiceAPI);
 
         AsyncAPISpecificationValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
@@ -4480,9 +4490,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, returnContent);
         } else if (fileInputStream != null){
             //validate file
-            String fileName = fileDetail.getContentDisposition().getFilename();
+            String fileName = fileDetail != null ? fileDetail.getContentDisposition().getFilename() : StringUtils.EMPTY;
             try {
-                if (fileName.endsWith(APIConstants.YAML_FILE_EXTENSION) || fileName.endsWith(APIConstants.YML_FILE_EXTENSION)){
+                if (isServiceAPI || fileName.endsWith(APIConstants.YAML_FILE_EXTENSION) || fileName
+                        .endsWith(APIConstants.YML_FILE_EXTENSION)){
                     //convert .yml or .yaml to JSON for validation
                     ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
                     Object obj = yamlReader.readValue(fileInputStream, Object.class);
@@ -4525,29 +4536,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleBadRequest("'additionalProperties' is required and should not be null", log);
         }
 
-        //validate and retrieve the AsyncAPI specification
-        Map validationResponseMap = null;
-        try {
-            validationResponseMap = validateAsyncAPISpecification(url, fileInputStream, fileDetail, true);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
-        }
-
-        AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
-                (AsyncAPISpecificationValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
-        APIDefinitionValidationResponse validationResponse =
-                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-
-        if (!validationResponseDTO.isIsValid()) {
-            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
-            throw RestApiUtil.buildBadRequestException(errorDTO);
-        }
-
         // Convert the 'additionalProperties' json into an APIDTO object
         ObjectMapper objectMapper = new ObjectMapper();
         APIDTO apiDTOFromProperties;
         try {
             apiDTOFromProperties = objectMapper.readValue(additionalProperties, APIDTO.class);
+            if (apiDTOFromProperties.getType() == null) {
+                RestApiUtil.handleBadRequest("Required property protocol is not specified for the Async API", log);
+            }
         } catch (IOException e) {
             throw RestApiUtil.buildBadRequestException("Error while parsing 'additionalProperties'", e);
         }
@@ -4568,34 +4564,15 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         //Import the API and Definition
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername());
-            String definitionToAdd = validationResponse.getJsonContent();
-            apiProvider.addAPI(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
-
-            //load topics from AsyncAPI
-            try {
-                apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
-            } catch (FaultGatewaysException e) {
-                e.printStackTrace();
-            }
-
-            APIDTO createdAPIDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
+            APIDTO createdAPIDTO = importAsyncAPISpecification(fileInputStream, url, apiDTOFromProperties, fileDetail,
+                    null);
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdAPIDTO.getId());
             return Response.created(createdApiUri).entity(createdAPIDTO).build();
-
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
-                    apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
-
         return null;
     }
 
@@ -4636,13 +4613,13 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (url != null || fileInputStream != null){
                 //Validate and retrieve the AsyncAPI definition
                 Map validationResponseMap = validateAsyncAPISpecification(url, fileInputStream,
-                        fileDetail, true);
+                        fileDetail, true, false);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
                 if (!validationResponse.isValid()) {
                     RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
                 }
-                updatedAsyncAPIDefinition = updateAsyncAPIDefinition(apiId, validationResponse);
+                updatedAsyncAPIDefinition = PublisherCommonUtils.updateAsyncAPIDefinition(apiId, validationResponse);
             } else {
                 updatedAsyncAPIDefinition = updateAsyncAPIDefinition(apiId, apiDefinition);
             }
@@ -4683,32 +4660,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         if (!response.isValid()) {
             RestApiUtil.handleBadRequest(response.getErrorItems(), log);
         }
-        return updateAsyncAPIDefinition(apiId, response);
-    }
-
-    /**
-     * update AsyncPI definition of the given api
-     *
-     * @param apiId API Id
-     * @param response response of the AsyncAPI definition validation call
-     * @return updated AsyncAPI definition
-     * @throws APIManagementException when error occurred updating AsyncAPI definition
-     * @throws FaultGatewaysException when error occurred publishing API to the gateway
-     */
-    private String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
-            throws APIManagementException, FaultGatewaysException {
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        //this will fall if user does not have access to the API or the API does not exist
-        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-        String apiDefinition = response.getJsonContent();
-        //updating APi with the new AsyncAPI definition
-        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
-        apiProvider.updateAPI(existingAPI);
-        //load new topics
-        apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(existingAPI, apiDefinition));
-        //retrieves the updated AsyncAPI definition
-        return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
+        return PublisherCommonUtils.updateAsyncAPIDefinition(apiId, response);
     }
 
     @Override
@@ -4728,6 +4680,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
                 createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, apiDto, null, service);
+            } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
+                createdApiDTO = importAsyncAPISpecification(service.getEndpointDef(), null, apiDto, null, service);
             }
             if (createdApiDTO != null) {
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -4765,31 +4719,42 @@ public class ApisApiServiceImpl implements ApisApiService {
             String serviceKey = apiProvider.retrieveServiceKeyByApiId(originalAPI.getId().getId(), tenantId);
             ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
             ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
-            String endpointConfig = PublisherCommonUtils.constructEndpointConfigForService(service);
-            api.setEndpointConfig(endpointConfig);
             JSONObject serviceInfo = new JSONObject();
             serviceInfo.put("name", service.getName());
             serviceInfo.put("version", service.getVersion());
             serviceInfo.put("key", service.getKey());
             serviceInfo.put("md5", service.getMd5());
             api.setServiceInfo(serviceInfo);
-            API updatedApi = apiProvider.updateAPI(api, originalAPI);
+            Map validationResponseMap = new HashMap();
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                Map validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null,
+                validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null,
                         true, true);
-                APIDefinitionValidationResponse validationResponse =
-                        (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-                if (!validationResponse.isValid()) {
-                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
-                }
-                PublisherCommonUtils.updateSwagger(apiId, validationResponse, true);
+            } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
+                validationResponseMap = validateAsyncAPISpecification(null, service.getEndpointDef(),
+                        null, true, true);
             } else {
                 RestApiUtil.handleBadRequest("Unsupported definition type provided. Cannot re-import service to " +
                         "API using the service type " + service.getDefinitionType(), log);
             }
+            APIDefinitionValidationResponse validationResponse =
+                    (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+            if (!validationResponse.isValid()) {
+                RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+            }
+            String protocol = validationResponse.getProtocol();
+            if (!APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(protocol)) {
+                api.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service.getServiceUrl(),
+                        protocol));
+            }
+            API updatedApi = apiProvider.updateAPI(api, originalAPI);
+            PublisherCommonUtils.updateAPIDefinition(apiId, validationResponse, service);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
+            if (ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION.getErrorCode() == e.getErrorHandler()
+                    .getErrorCode()) {
+                RestApiUtil.handleInternalServerError("Missing protocol in Async API Definition", log);
+            }
             RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
                     "associated with API with id " + apiId, log);
         } catch (FaultGatewaysException e) {
@@ -4803,8 +4768,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                                            Attachment fileDetail, ServiceEntry service) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
+        boolean isServiceAPI = false;
         try {
-            boolean isServiceAPI = false;
             if (service != null) {
                 isServiceAPI = true;
             }
@@ -4832,12 +4797,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Import the API and Definition
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            if (isServiceAPI) {
+                apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
+            }
             API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
                     RestApiCommonUtil.getLoggedInUsername());
-            if (service != null) {
+            if (isServiceAPI) {
                 apiToAdd.setServiceInfo("key", service.getKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());
-                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service));
+                apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
+                        .getServiceUrl(), null));
             }
             boolean syncOperations = apiDTOFromProperties.getOperations().size() > 0;
             // Rearrange paths according to the API payload and save the OpenAPI definition
@@ -4873,6 +4842,66 @@ public class ApisApiServiceImpl implements ApisApiService {
             // this would provide the updated templates
             addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), RestApiCommonUtil.getLoggedInUserTenantDomain());
             return APIMappingUtil.fromAPItoDTO(addedAPI);
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
+                    apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    private APIDTO importAsyncAPISpecification(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
+                                           Attachment fileDetail, ServiceEntry service) {
+        //validate and retrieve the AsyncAPI specification
+        Map validationResponseMap = null;
+        boolean isServiceAPI = false;
+        try {
+            if (service != null) {
+                isServiceAPI = true;
+            }
+            validationResponseMap = validateAsyncAPISpecification(definitionUrl, definition, fileDetail, true,
+                    isServiceAPI);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+        }
+
+        AsyncAPISpecificationValidationResponseDTO validationResponseDTO =
+                (AsyncAPISpecificationValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        APIDefinitionValidationResponse validationResponse =
+                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+
+        if (!validationResponseDTO.isIsValid()) {
+            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
+            throw RestApiUtil.buildBadRequestException(errorDTO);
+        }
+        //Import the API and Definition
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            String definitionToAdd = validationResponse.getJsonContent();
+            String protocol = validationResponse.getProtocol();
+            if (isServiceAPI) {
+                apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), protocol));
+            }
+            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
+                    RestApiCommonUtil.getLoggedInUsername());
+            if (isServiceAPI) {
+                apiToAdd.setServiceInfo("key", service.getKey());
+                apiToAdd.setServiceInfo("md5", service.getMd5());
+                if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase())) {
+                    apiToAdd.setEndpointConfig(PublisherCommonUtils.constructEndpointConfigForService(service
+                            .getServiceUrl(), protocol));
+                }
+            }
+            apiProvider.addAPI(apiToAdd);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
+
+            //load topics from AsyncAPI
+            try {
+                apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
+            } catch (FaultGatewaysException e) {
+                e.printStackTrace();
+            }
+            return APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +
                     apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion() + " - " + e.getMessage();

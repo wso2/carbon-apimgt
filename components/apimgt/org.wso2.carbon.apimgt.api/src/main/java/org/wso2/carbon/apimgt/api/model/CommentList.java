@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommentList {
+
     private Integer count = null;
     private List<Comment> list = new ArrayList<Comment>();
-    //private PaginationDTO pagination = null;
-    private Integer offset = null;
-    private Integer limit = null;
-    private Integer total = null;
-    private String next = null;
-    private String previous = null;
+    private Pagination pagination = null;
 
-    public Integer getCount(){return this.count; }
+    public Integer getCount() {return count; }
 
-    public void setCount(Integer count){ this.count = count; }
+    public void setCount(Integer count) {this.count = count; }
 
-    public List getList(){return this.list; }
+    public List<Comment> getList() {return list; }
 
-    public void setList(List list){ this.list = list; }
+    public void setList(List<Comment> list) {this.list = list; }
+
+    public Pagination getPagination() {return pagination; }
+
+    public void setPagination(Pagination pagination) {this.pagination = pagination; }
 }

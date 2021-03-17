@@ -163,6 +163,7 @@ class TestConsole extends React.Component {
         super(props);
         this.state = {
             securitySchemeType: 'internalkey',
+            showToken: false,
         };
         this.setSecurityScheme = this.setSecurityScheme.bind(this);
         this.setSelectedEnvironment = this.setSelectedEnvironment.bind(this);
@@ -170,6 +171,7 @@ class TestConsole extends React.Component {
         this.generateKey = this.generateKey.bind(this);
         this.accessTokenProvider = this.accessTokenProvider.bind(this);
         this.handleChanges = this.handleChanges.bind(this);
+        this.handleClickShowToken = this.handleClickShowToken.bind(this);
     }
 
     /**
@@ -237,9 +239,9 @@ class TestConsole extends React.Component {
                 this.setState({
                     settings: urls,
                     host: urls[0].endpoints.https.split('//')[1],
-                    baseUrl: basePath,
+                    apiSettings: settingsObj,
                 });
-                console.log('settings---------', this.state.settings);
+                console.log('settings---------', this.state.apiSettings);
                 this.setState({
                     swagger,
                 });
@@ -296,17 +298,11 @@ class TestConsole extends React.Component {
                 this.setState({
                     settings: urls,
                     host: urls[0].endpoints.https.split('//')[1],
-                    baseUrl: basePath,
                 });
-                console.log('settings---------', this.state.settings);
             });
         promiseSwagger
             .then((swaggerResponse) => {
                 this.setState({ swagger: swaggerResponse.obj });
-                return Api.getSettings();
-            })
-            .then((apiSettings) => {
-                console.log(JSON.stringify(apiSettings));
             });
     }
 
@@ -325,9 +321,30 @@ class TestConsole extends React.Component {
                 console.log('-----generate Key---', JSON.stringify(key));
                 this.setState({
                     key,
+                    showToken: false,
                 });
             });
         return key;
+    }
+
+    /**
+     *
+     * Handle onClick of shown access token
+     * @memberof TryOutController
+     */
+    handleClickShowToken() {
+        const {
+            showToken,
+        } = this.state;
+        if (showToken) {
+            this.setState({
+                showToken: false,
+            });
+        } else {
+            this.setState({
+                showToken: true,
+            });
+        }
     }
 
     /**
@@ -380,12 +397,15 @@ class TestConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            api, swagger, securitySchemeType, selectedEnvironment, environments, key, host, baseUrl, settings,
+            api, swagger, securitySchemeType, selectedEnvironment, environments, key, host, settings,
+            showToken, apiSettings,
         } = this.state;
         const authorizationHeader = 'Authorization';
-        const prefix = 'internalKey';
+        const prefix = 'Bearer';
         console.log('jjjjjjjjj', JSON.stringify(swagger));
-        if (!api || !securitySchemeType || !selectedEnvironment || !environments || !swagger || !settings) {
+        console.log('jjjjjjjjjngs--api setti', JSON.stringify(apiSettings));
+        if (!api || !securitySchemeType || !selectedEnvironment || !environments || !swagger || !settings
+            || !apiSettings) {
             return <Progress />;
         }
         console.log('env------', JSON.stringify(selectedEnvironment));
@@ -395,10 +415,19 @@ class TestConsole extends React.Component {
         console.log('KEY state------', JSON.stringify(this.state.key));
         console.log('schem-------', JSON.stringify(securitySchemeType));
         console.log('settings------', JSON.stringify(settings));
+        console.log('---host------', host);
+        console.log('---api settings------', JSON.stringify(apiSettings));
         const authHeader = `${authorizationHeader}: ${prefix}`;
         if (!swagger.openapi) {
-            swagger.host = host;
-            swagger.basePath = baseUrl;
+            for (let i = 0; i < apiSettings.environment.length; i++) {
+                if (apiSettings.environment[i].name === selectedEnvironment) {
+                    const val = apiSettings.environment[i].endpoints.https.split('//')[1];
+                    console.log(val);
+                    swagger.host = val;
+                }
+            }
+            const basePath = api.context + '/' + api.version;
+            swagger.basePath = basePath;
             swagger.schemes = ['https'];
         } else {
             let servers = [];
@@ -443,7 +472,7 @@ class TestConsole extends React.Component {
                                         sdefaultMessage='Internal Token'
                                     />
                                 )}
-                                type={this.state.key ? 'text' : 'password'}
+                                type={showToken ? 'text' : 'password'}
                                 value={this.state.key}
                                 id='margin-dense'
                                 helperText='Enter access Token'
@@ -456,9 +485,9 @@ class TestConsole extends React.Component {
                                             <IconButton
                                                 edge='end'
                                                 aria-label='Toggle token visibility'
-                                                // onClick={handleClickShowToken}
+                                                onClick={this.handleClickShowToken}
                                             >
-                                                {this.state.key ? <Icon>visibility_off</Icon>
+                                                {showToken ? <Icon>visibility_off</Icon>
                                                     : <Icon>visibility</Icon>}
                                             </IconButton>
                                         </InputAdornment>
@@ -474,7 +503,6 @@ class TestConsole extends React.Component {
                                         </InputAdornment>
                                     ),
                                 }}
-                                // onChange={this.handleChanges}
                             />
                             <>
                                 <Button

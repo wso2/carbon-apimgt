@@ -190,7 +190,7 @@ class Scopes extends React.Component {
                                                 >
                                                     <Icon>edit</Icon>
                                                     <FormattedMessage
-                                                        id='Apis.Details.Documents.Edit.documents.text.editor.edit'
+                                                        id='Apis.Details.scopes.Edit.text.editor.edit'
                                                         defaultMessage='Edit'
                                                     />
                                                 </Button>
@@ -255,7 +255,7 @@ class Scopes extends React.Component {
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             <FormattedMessage
-                                id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                                id='Apis.Details.local.Scopes.heading.scope.heading'
                                 defaultMessage='Local Scopes'
                             />
                         </Typography>
@@ -317,7 +317,7 @@ class Scopes extends React.Component {
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
-                            id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                            id='Apis.Details.local.Scopes.heading.edit.heading'
                             defaultMessage='Local Scopes'
                         />
                     </Typography>

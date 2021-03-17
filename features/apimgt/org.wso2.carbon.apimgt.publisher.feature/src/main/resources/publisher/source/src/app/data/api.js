@@ -2408,7 +2408,10 @@ class API extends Resource {
      * Create API from service
      * @returns {promise} Add response.
      */
-    static createApiFromService(serviceKey, apiMetaData) {
+    static createApiFromService(serviceKey, apiMetaData, type) {
+        if (type != '') {
+            apiMetaData['type'] = type;
+        }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedServiceResponse = apiClient.then(client => {
             return client.apis['APIs'].importServiceFromCatalog(

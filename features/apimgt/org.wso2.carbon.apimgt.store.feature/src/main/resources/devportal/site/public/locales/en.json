@@ -113,6 +113,7 @@
   "Apis.Details.GraphQLConsole.QueryComplexityView.title": "Custom Complexity Values",
   "Apis.Details.InfoBar.Gateway.urls": "Gateway URLs",
   "Apis.Details.InfoBar.default.gateway.urls": "Default Gateway URLs",
+  "Apis.Details.InfoBar.default.gateway.urls.notfound": "No endpoints yet",
   "Apis.Details.InfoBar.keyManagers": "Key Managers",
   "Apis.Details.InfoBar.list.context": "Context",
   "Apis.Details.InfoBar.list.endpoint": "Endpoint",

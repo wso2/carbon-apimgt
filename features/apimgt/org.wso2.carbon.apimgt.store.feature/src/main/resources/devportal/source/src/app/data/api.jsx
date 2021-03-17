@@ -341,7 +341,6 @@ export default class API extends Resource {
      */
     addComment(apiId, comment, replyTo) {
         return this.client.then((client) => {
-            debugger;
             const payload = { apiId ,replyTo};
             return client.apis.Comments.addCommentToAPI(
                 payload,
@@ -355,12 +354,12 @@ export default class API extends Resource {
      * Get all comments for a particular API
      * @param apiId api id of the api to which the comment is added
      */
-    getAllComments(apiId) {
+    getAllComments(apiId, limit, offset) {
         return this.client.then((client) => {
-            return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId ,limit: limit, offset: offset}, this._requestMetaData());
         });
     }
-
+    
     /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to

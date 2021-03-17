@@ -1809,6 +1809,9 @@ public class SQLConstants {
 
     public static final String GET_API_ID_SQL =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? ";
+    public static final String GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER = "SELECT API_ID,API_UUID,API_PROVIDER," +
+            "API_NAME,API_VERSION,CONTEXT,API_TYPE,STATUS FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +
+            "API_VERSION = ? ";
 
     public static final String GET_API_PRODUCT_ID_SQL =
             "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
@@ -2309,17 +2312,9 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND AM_API_COMMENTS.COMMENT_ID = ?";
 
-    public static final String GET_REPLIES_SQL =
+    public static final String GET_IDS_OF_REPLIES_SQL =
             "SELECT " +
-                "AM_API_COMMENTS.COMMENT_ID, " +
-                "AM_API_COMMENTS.COMMENT_TEXT, " +
-                "AM_API_COMMENTS.CREATED_BY, " +
-                "AM_API_COMMENTS.CREATED_TIME, " +
-                "AM_API_COMMENTS.UPDATED_TIME, " +
-                "AM_API_COMMENTS.API_ID, " +
-                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
-                "AM_API_COMMENTS.ENTRY_POINT, " +
-                "AM_API_COMMENTS.CATEGORY " +
+                "AM_API_COMMENTS.COMMENT_ID " +
             "FROM " +
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
@@ -2330,17 +2325,22 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
-    public static final String GET_ROOT_COMMENTS_SQL =
+    public static final String GET_REPLIES_COUNT_SQL =
             "SELECT " +
-                "AM_API_COMMENTS.COMMENT_ID, " +
-                "AM_API_COMMENTS.COMMENT_TEXT, " +
-                "AM_API_COMMENTS.CREATED_BY, " +
-                "AM_API_COMMENTS.CREATED_TIME, " +
-                "AM_API_COMMENTS.UPDATED_TIME, " +
-                "AM_API_COMMENTS.API_ID, " +
-                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
-                "AM_API_COMMENTS.ENTRY_POINT, " +
-                "AM_API_COMMENTS.CATEGORY " +
+                "COUNT(AM_API_COMMENTS.COMMENT_ID) AS COMMENT_COUNT " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID = ?";
+
+    public static final String GET_ROOT_COMMENTS_COUNT_SQL =
+            "SELECT " +
+                "COUNT(AM_API_COMMENTS.COMMENT_ID) AS COMMENT_COUNT " +
             "FROM " +
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
@@ -3269,7 +3269,7 @@ public class SQLConstants {
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
-            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID) VALUES (?,?,?,?,?,?,?,?,?)";
+            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID,STATUS) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
@@ -3433,6 +3433,9 @@ public class SQLConstants {
                     " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID AND " +
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
+    public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
+    public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
+            "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
 
     /** Throttle related constants**/
 
@@ -4055,6 +4058,9 @@ public class SQLConstants {
                 "FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = 'Current API'";
         public static final String REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID =
                 "DELETE FROM AM_API_URL_MAPPING WHERE URL_MAPPING_ID = ?";
+        public static final String CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID = "SELECT 1 FROM " +
+                "AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID IN  (SELECT REVISION_UUID FROM AM_REVISION WHERE " +
+                "API_UUID = ?)";
     }
 
     /**
@@ -4063,15 +4069,14 @@ public class SQLConstants {
     public static class ServiceCatalogConstants {
 
         public static final String ADD_SERVICE = "INSERT INTO AM_SERVICE_CATALOG " +
-                "(UUID, SERVICE_KEY, MD5, SERVICE_NAME, DISPLAY_NAME, SERVICE_VERSION, TENANT_ID, SERVICE_URL, " +
+                "(UUID, SERVICE_KEY, MD5, SERVICE_NAME, SERVICE_VERSION, TENANT_ID, SERVICE_URL, " +
                 "DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, " +
                 "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, " +
-                "SERVICE_DEFINITION, METADATA) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "SERVICE_DEFINITION) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         public static final String UPDATE_SERVICE_BY_KEY = "UPDATE AM_SERVICE_CATALOG SET " +
                 "MD5 = ?," +
                 "SERVICE_NAME = ?," +
-                "DISPLAY_NAME = ?," +
                 "TENANT_ID = ?," +
                 "SERVICE_URL = ?," +
                 "DEFINITION_URL = ?," +
@@ -4080,8 +4085,7 @@ public class SQLConstants {
                 "MUTUAL_SSL_ENABLED = ?," +
                 "LAST_UPDATED_TIME = ?," +
                 "UPDATED_BY = ?," +
-                "SERVICE_DEFINITION = ?," +
-                "METADATA = ? " +
+                "SERVICE_DEFINITION = ?" +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String DELETE_SERVICE_BY_SERVICE_ID = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "AND TENANT_ID = ?";
@@ -4112,7 +4116,6 @@ public class SQLConstants {
                 "   SERVICE_KEY," +
                 "   MD5," +
                 "   SERVICE_NAME," +
-                "   DISPLAY_NAME," +
                 "   SERVICE_VERSION," +
                 "   SERVICE_URL," +
                 "   DEFINITION_TYPE," +

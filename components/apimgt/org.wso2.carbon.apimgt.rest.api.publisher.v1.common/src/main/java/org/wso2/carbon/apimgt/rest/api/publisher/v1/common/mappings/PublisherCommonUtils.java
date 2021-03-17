@@ -765,28 +765,36 @@ public class PublisherCommonUtils {
         return isValid;
     }
 
-    public static String constructEndpointConfigForService(ServiceEntry service) {
+    public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
         StringBuilder sb = new StringBuilder();
-        String endpoint_type = APIDTO.TypeEnum.HTTP.value();
-        switch (service.getDefinitionType()) {
-            case GRAPHQL_SDL:
-                endpoint_type = APIDTO.TypeEnum.GRAPHQL.value();
-            case WSDL1:
-                endpoint_type = APIDTO.TypeEnum.SOAP.value();
-            case WSDL2:
-                endpoint_type = APIDTO.TypeEnum.SOAP.value();
-            case ASYNC_API:
-                // TODO Need to update the endpoint_type for ASYNC_API
+        String endpoint_type = APIDTO.TypeEnum.HTTP.value().toLowerCase();
+        if (StringUtils.isNotEmpty(protocol) && (APIDTO.TypeEnum.SSE.equals(protocol.toUpperCase())
+                || APIDTO.TypeEnum.WS.equals(protocol.toUpperCase()))) {
+            endpoint_type = "ws";
         }
-        if (StringUtils.isNotEmpty(service.getServiceUrl())) {
+        if (StringUtils.isNotEmpty(serviceUrl)) {
             sb.append("{\"endpoint_type\": \"")
                     .append(endpoint_type)
                     .append("\",")
                     .append("\"production_endpoints\": {\"url\": \"")
-                    .append(service.getServiceUrl())
+                    .append(serviceUrl)
                     .append("\"}}");
         } // TODO Need to check on the endpoint security
         return sb.toString();
+    }
+
+    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) {
+        switch (definitionType) {
+            case WSDL1:
+            case WSDL2:
+                return APIDTO.TypeEnum.SOAP;
+            case GRAPHQL_SDL:
+                return APIDTO.TypeEnum.GRAPHQL;
+            case ASYNC_API:
+                return APIDTO.TypeEnum.fromValue(protocol.toUpperCase());
+            default:
+                return APIDTO.TypeEnum.HTTP;
+        }
     }
 
     /**
@@ -934,6 +942,42 @@ public class PublisherCommonUtils {
             throw new APIManagementException("KeyManagers value need to be an array");
         }
         return apiToAdd;
+    }
+
+    public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,
+                                         ServiceEntry service) throws APIManagementException, FaultGatewaysException {
+        if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
+                ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
+            return updateSwagger(apiId, response, true);
+        } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
+            return updateAsyncAPIDefinition(apiId, response);
+        }
+        return null;
+    }
+
+    /**
+     * update AsyncPI definition of the given api
+     *
+     * @param apiId API Id
+     * @param response response of the AsyncAPI definition validation call
+     * @return updated AsyncAPI definition
+     * @throws APIManagementException when error occurred updating AsyncAPI definition
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
+            throws APIManagementException, FaultGatewaysException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        //this will fall if user does not have access to the API or the API does not exist
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        String apiDefinition = response.getJsonContent();
+        //updating APi with the new AsyncAPI definition
+        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
+        apiProvider.updateAPI(existingAPI);
+        //load new topics
+        apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(existingAPI, apiDefinition));
+        //retrieves the updated AsyncAPI definition
+        return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
     }
 
     /**

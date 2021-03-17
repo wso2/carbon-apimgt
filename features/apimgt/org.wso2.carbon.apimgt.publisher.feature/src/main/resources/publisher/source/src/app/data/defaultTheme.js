@@ -157,6 +157,10 @@ export default {
             },
             iconSize: 32,
         },
+        thumbnailTemplates: {
+            active: false,
+            variant: 'plain', // default templates available templates 'plain'.
+        },
         thumbnail: {
             width: 240,
             height: 140,

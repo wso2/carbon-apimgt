@@ -925,10 +925,12 @@
     <Monetization>
         <MonetizationImpl>{{apim.monetization.monetization_impl}}</MonetizationImpl>
         <UsagePublisher>
-            <Granularity>{{apim.monetization.granularity}}</Granularity>
-            <!--Number of days to reduce from the current time to get the last publish time of monetization
-            usgae publish job, when there is no record of the last publish time.-->
-            <PublishTimeDurationInDays>{{apim.monetization.publish_duration}}</PublishTimeDurationInDays>
+             {% if apim.monetization.analytics_query_api_endpoint is defined %}
+                   <AnalyticsQueryAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</AnalyticsQueryAPIEndpoint>
+             {% endif %}
+             {% if apim.monetization.analytics_access_token is defined %}
+                    <AnalyticsAccessToken>{{apim.monetization.analytics_access_token}}</AnalyticsAccessToken>
+             {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
             <AdditionalAttributes>
@@ -1276,7 +1278,9 @@
             <Sequence>_threat_fault_.xml</Sequence>
             <Sequence>_throttle_out_handler_.xml</Sequence>
             <Sequence>_token_fault_.xml</Sequence>
+            <Sequence>webhooksFaultSequence.xml</Sequence>
             <Sequence>_block_api_handler_.xml</Sequence>
+            <Sequence>_backend_failure_handler_.xml</Sequence>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
             {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
             <Sequence>{{sequence}}</Sequence>

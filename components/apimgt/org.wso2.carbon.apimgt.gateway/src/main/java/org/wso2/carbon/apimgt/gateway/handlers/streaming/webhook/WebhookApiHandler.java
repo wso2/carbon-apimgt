@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -45,6 +47,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE_SUBSCRIBE;
 
 /**
  * Handler used for web hook apis. This handler retrieves the topic name, to which subscription request is coming and
@@ -85,6 +89,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
             axisCtx.setProperty(HTTP_METHOD, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
             synCtx.setProperty(APIConstants.API_TYPE, APIConstants.API_TYPE_WEBSUB);
             synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, topicName);
+            synCtx.setProperty(ASYNC_MESSAGE_TYPE, ASYNC_MESSAGE_TYPE_SUBSCRIBE);
             boolean authenticationResolved = super.handleRequest(synCtx);
             ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                     setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
@@ -101,6 +106,8 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
                     payload = synCtx.getEnvelope().getBody().getFirstElement().toString();
                 }
                 synCtx.setProperty(APIConstants.Webhooks.PAYLOAD_PROPERTY, payload);
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+                synCtx.setProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY, tenantDomain);
                 return true;
             } catch (IOException | XMLStreamException e) {
                 log.error("Error while building the message", e);
@@ -157,30 +164,13 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
      * @param errorDescription description of the error
      */
     private void handleFailure(MessageContext messageContext, String errorDescription) {
-
-        OMElement payload = getFaultPayload(errorDescription);
-        Utils.setFaultPayload(messageContext, payload);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
         Mediator sequence =
                 messageContext.getSequence(APIConstants.WebHookProperties.WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
         Utils.sendFault(messageContext, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-    }
-
-    /**
-     * @param description description of the error
-     * @return the OMElement
-     */
-    private OMElement getFaultPayload(String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                                               APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-        OMElement error = fac.createOMElement("error", ns);
-        error.setText(description);
-        payload.addChild(error);
-        return payload;
     }
 
     public void setEventReceiverResourcePath(String eventReceiverResourcePath) {

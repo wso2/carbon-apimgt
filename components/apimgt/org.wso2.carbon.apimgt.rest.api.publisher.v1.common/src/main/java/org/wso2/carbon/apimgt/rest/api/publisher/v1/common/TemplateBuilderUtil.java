@@ -154,8 +154,8 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                         , corsProperties);
             }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
         }
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
         Map<String, String> clientCertificateObject = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         if (clientCertificateDTOS != null) {
@@ -239,7 +239,7 @@ public class TemplateBuilderUtil {
                     , properties);
 
             String extensionHandlerPosition = getExtensionHandlerPosition(tenantDomain);
-            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+            if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.<String, String>emptyMap(), 0);
@@ -668,21 +668,16 @@ public class TemplateBuilderUtil {
                 }
             }
         }
-
-        if (api.isDefaultVersion()) {
-            String defaultAPIConfig = builder.getConfigStringForDefaultAPITemplate(api.getId().getVersion());
-            gatewayAPIDTO.setDefaultAPIDefinition(defaultAPIConfig);
-        }
         setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
         return gatewayAPIDTO;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
-        String sandboxEndpointUrl =
-                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
-        String productionEndpointUrl =
-                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
+        String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url") : null;
+        String productionEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) ?
+                endpointConfiguration.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url") : null;
 
         Map<String, Map<String, String>> perTopicMappings = new HashMap<>();
         for (APIOperationsDTO operation : apidto.getOperations()) {
@@ -690,8 +685,12 @@ public class TemplateBuilderUtil {
             String mapping = operation.getUriMapping() == null ? "" :
                     Paths.get("/", operation.getUriMapping()).toString();
             Map<String, String> endpoints = new HashMap<>();
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
-            endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
+            if (sandboxEndpointUrl != null) {
+                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
+            }
+            if (productionEndpointUrl != null) {
+                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
+            }
             perTopicMappings.put(key, endpoints);
         }
 

@@ -25,7 +25,9 @@ import Typography from '@material-ui/core/Typography';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import ReactDiffViewer from 'react-diff-viewer';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import ServiceCatalog from 'AppData/ServiceCatalog';
 import Button from '@material-ui/core/Button';
 import API from 'AppData/api.js';
 import { FormattedMessage } from 'react-intl';
@@ -47,6 +49,9 @@ export default function DefinitionOutdated(props) {
         classes,
     } = props;
     const [openImport, setOpenImport] = useState(false);
+    const [showDiff, setShowDiff] = useState(false);
+    const [newDefinition, setNewDefinition] = useState('');
+    const [oldDefinition, setOldDefinition] = useState('');
     const { updateAPI } = useContext(APIContext);
     function reimportService() {
         const promisedReimportService = API.reimportService(api.id);
@@ -65,6 +70,34 @@ export default function DefinitionOutdated(props) {
             updateAPI();
         });
     }
+
+    function showdiff() {
+        setShowDiff(true);
+        const promisedServices = ServiceCatalog.searchServices(api.serviceInfo.key);
+        promisedServices.then((data) => {
+            return ServiceCatalog.getServiceDefinition(data.body.list[0].id).then((file) => {
+                setNewDefinition(JSON.stringify(file, null, 2));
+            }).catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                } else {
+                    Alert.error('Something went wrong while getting the Service Definition.');
+                }
+            });
+        }).catch((error) => {
+            console.error(error);
+            Alert.error('ServiceCatalog.Listing.Listing.error.loading');
+        });
+        api.getSwagger(api.id).then((resp) => {
+            setOldDefinition(JSON.stringify(resp.obj, null, 2));
+        }).catch((err) => {
+            console.err(err);
+        });
+    }
+
+    const hideDiff = () => {
+        setShowDiff(false);
+    };
 
     const handleOpen = () => {
         setOpenImport(true);
@@ -93,6 +126,8 @@ export default function DefinitionOutdated(props) {
                     onClose={handleClose}
                     aria-labelledby='alert-dialog-title'
                     aria-describedby='alert-dialog-description'
+                    fullWidth
+                    maxWidth='md'
                 >
                     <DialogTitle id='alert-dialog-title'>
                         <Typography align='left'>
@@ -111,6 +146,15 @@ export default function DefinitionOutdated(props) {
                                 resource or create new version'
                             />
                         </DialogContentText>
+                        {showDiff && (
+                            <ReactDiffViewer
+                                oldValue={oldDefinition}
+                                newValue={newDefinition}
+                                splitView
+                                leftTitle='Outdated Definition'
+                                rightTitle='New Definition'
+                            />
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleClose} color='primary'>
@@ -119,6 +163,21 @@ export default function DefinitionOutdated(props) {
                                 defaultMessage='Cancel'
                             />
                         </Button>
+                        {!showDiff ? (
+                            <Button onClick={showdiff} color='primary'>
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.btn.show.diff'
+                                    defaultMessage='Show Diff'
+                                />
+                            </Button>
+                        ) : (
+                            <Button onClick={hideDiff} color='primary'>
+                                <FormattedMessage
+                                    id='Apis.Details.APIDefinition.APIDefinition.btn.hide.diff'
+                                    defaultMessage='Hide Diff'
+                                />
+                            </Button>
+                        )}
                         <Button
                             onClick={reimportService}
                             color='primary'

@@ -51,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObserver {
     private static final Log log = LogFactory.getLog(TenantServiceCreator.class);
     private String resourceMisMatchSequenceName = "_resource_mismatch_handler_";
-    private static final String blockingSequence = "_auth_failure_handler_";
+    private static final String blockingSequence = "_block_api_handler_";
     private String authFailureHandlerSequenceName = "_auth_failure_handler_";
     private String graphqlAuthFailureHandlerSequenceName = "_graphql_failure_handler_";
     private String sandboxKeyErrorSequenceName = "_sandbox_key_error_";
@@ -61,9 +61,11 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String mainSequenceName = "main";
     private String corsSequenceName = "_cors_request_handler_";
     private String threatFaultSequenceName = "_threat_fault_";
+    private String backendFailureSequence = "_backend_failure_handler_";
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTP = "WebhookServer";
+    private String webHookFaultSequenceName = "webhooksFaultSequence";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
@@ -141,10 +143,20 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                     MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + blockingSequence + ".xml";
             File blockingSequenceXml = new File(blockingSequenceLocation);
             if (!blockingSequenceXml.exists()) {
-                FileUtils.copyFile(new File(synapseConfigRootPath + blockingSequenceLocation + ".xml"),
+                FileUtils.copyFile(new File(synapseConfigRootPath + blockingSequence + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
-                                blockingSequenceLocation + ".xml"));
+                                blockingSequence + ".xml"));
+            }
+            String backEndFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + backendFailureSequence + ".xml";
+            File backendSequenceXml = new File(backEndFailureSequence);
+            if (!backendSequenceXml.exists()) {
+                FileUtils.copyFile(new File(synapseConfigRootPath + backEndFailureSequence + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                backEndFailureSequence + ".xml"));
             }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);
@@ -253,6 +265,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + threatFaultSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + threatFaultSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + webHookFaultSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + webHookFaultSequenceName + ".xml"));
                 FileUtils.copyFile(new File(synapseConfigRootPath + webSocketInboundEp + ".xml"), new File(
                         synapseConfigDir.getAbsolutePath() + File.separator
                                 + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator
