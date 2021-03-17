@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
-import io.swagger.v3.core.util.Json;
+import io.swagger.util.Json;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -1202,7 +1202,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             apiDefinitionJson.put(APIConstants.SWAGGER_PATHS, clonePathMap);
             return Json.mapper().writeValueAsString(apiDefinitionJson);
-        } catch (JsonProcessingException | ParseException e) {
+        } catch (JsonProcessingException | ParseException | JSONException e) {
             String errorMessage = "Error while validating the swagger Definition";
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
