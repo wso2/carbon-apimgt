@@ -42,15 +42,31 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Label;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.*;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
+import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
@@ -58,11 +74,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
-import java.io.*;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +88,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This is a publisher rest api utility class.
+ */
 public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
@@ -91,6 +109,7 @@ public class PublisherCommonUtils {
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
+
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
         if (tokenScopes == null) {
@@ -159,8 +178,9 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>) endpointSecurityProduction
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                    LinkedHashMap<String, String> customParametersHashMap =
+                            (LinkedHashMap<String, String>) endpointSecurityProduction
+                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                     String customParametersString = JSONObject.toJSONString(customParametersHashMap);
                     endpointSecurityProduction
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
@@ -190,8 +210,9 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>) endpointSecuritySandbox
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                    LinkedHashMap<String, String> customParametersHashMap =
+                            (LinkedHashMap<String, String>) endpointSecuritySandbox
+                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                     String customParametersString = JSONObject.toJSONString(customParametersHashMap);
                     endpointSecuritySandbox
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
@@ -357,11 +378,12 @@ public class PublisherCommonUtils {
         apiProvider.updateAPI(apiToUpdate, originalAPI);
 
         return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
-                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());// TODO use returend api
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        // TODO use returend api
     }
 
     /**
-     * Check whether the token has APIDTO class level Scope annotation
+     * Check whether the token has APIDTO class level Scope annotation.
      *
      * @return true if the token has APIDTO class level Scope annotation
      */
@@ -379,10 +401,12 @@ public class PublisherCommonUtils {
 
     /**
      * Override the API DTO field values with the user passed new values considering the field-wise scopes defined as
-     * allowed to update in REST API definition yaml
+     * allowed to update in REST API definition yaml.
      */
     private static JSONObject overrideDTOValues(JSONObject originalApiDtoJson, JSONObject newApiDtoJson, Field field,
-            String[] tokenScopes, Scope[] fieldAnnotatedScopes) throws APIManagementException {
+                                                String[] tokenScopes, Scope[] fieldAnnotatedScopes)
+            throws APIManagementException {
+
         for (String tokenScope : tokenScopes) {
             for (Scope scopeAnt : fieldAnnotatedScopes) {
                 if (scopeAnt.name().equals(tokenScope)) {
@@ -398,7 +422,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Get the API DTO object in which the API field values are overridden with the user passed new values
+     * Get the API DTO object in which the API field values are overridden with the user passed new values.
      *
      * @throws APIManagementException
      */
@@ -448,6 +472,7 @@ public class PublisherCommonUtils {
      * @return List of removed resources that are reused among API Products
      */
     private static List<APIResource> getRemovedProductResources(APIDTO updatedDTO, API existingAPI) {
+
         List<APIOperationsDTO> updatedOperations = updatedDTO.getOperations();
         Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
         List<APIResource> removedReusedResources = new ArrayList<>();
@@ -527,6 +552,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException API Management Exception.
      */
     public static String validateRoles(List<String> inputRoles) throws APIManagementException {
+
         String userName = RestApiCommonUtil.getLoggedInUsername();
         boolean isMatched = false;
         if (inputRoles != null && !inputRoles.isEmpty()) {
@@ -577,7 +603,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * validate user inout scopes
+     * validate user inout scopes.
      *
      * @param api api information
      * @throws APIManagementException throw if validation failure
@@ -633,7 +659,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Add API with the generated swagger from the DTO
+     * Add API with the generated swagger from the DTO.
      *
      * @param apiDto     API DTO of the API
      * @param oasVersion Open API Definition version
@@ -644,8 +670,11 @@ public class PublisherCommonUtils {
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
+
         boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
-        boolean isAsyncAPI = isWSAPI ||APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) || APIDTO.TypeEnum.SSE.equals(apiDto.getType());
+        boolean isAsyncAPI =
+                isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
+                        APIDTO.TypeEnum.SSE.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -687,7 +716,6 @@ public class PublisherCommonUtils {
             }
         }
 
-
         if (!isAsyncAPI) {
             APIDefinition oasParser;
             if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
@@ -716,7 +744,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Validate endpoint configurations of {@link APIDTO} for web socket endpoints
+     * Validate endpoint configurations of {@link APIDTO} for web socket endpoints.
      *
      * @param api api model
      * @return validity of the web socket api
@@ -742,15 +770,16 @@ public class PublisherCommonUtils {
     }
 
     public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
+
         StringBuilder sb = new StringBuilder();
-        String endpoint_type = APIDTO.TypeEnum.HTTP.value().toLowerCase();
+        String endpointType = APIDTO.TypeEnum.HTTP.value().toLowerCase();
         if (StringUtils.isNotEmpty(protocol) && (APIDTO.TypeEnum.SSE.equals(protocol.toUpperCase())
                 || APIDTO.TypeEnum.WS.equals(protocol.toUpperCase()))) {
-            endpoint_type = "ws";
+            endpointType = "ws";
         }
         if (StringUtils.isNotEmpty(serviceUrl)) {
             sb.append("{\"endpoint_type\": \"")
-                    .append(endpoint_type)
+                    .append(endpointType)
                     .append("\",")
                     .append("\"production_endpoints\": {\"url\": \"")
                     .append(serviceUrl)
@@ -760,6 +789,7 @@ public class PublisherCommonUtils {
     }
 
     public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) {
+
         switch (definitionType) {
             case WSDL1:
             case WSDL2:
@@ -774,7 +804,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Prepares the API Model object to be created using the DTO object
+     * Prepares the API Model object to be created using the DTO object.
      *
      * @param body        APIDTO of the API
      * @param apiProvider API Provider
@@ -784,7 +814,7 @@ public class PublisherCommonUtils {
      */
     public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username)
             throws APIManagementException {
-        List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+
         String context = body.getContext();
         //Make sure context starts with "/". ex: /pizza
         context = context.startsWith("/") ? context : ("/" + context);
@@ -812,7 +842,7 @@ public class PublisherCommonUtils {
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
             throw new APIManagementException(
                     "Error occurred while adding API. API with name " + body.getName() + " already exists.",
-                    ExceptionCodes.API_ALREADY_EXISTS);
+                    ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, body.getName()));
         }
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
@@ -840,24 +870,17 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(context)) {
-                        throw new APIManagementException(
-                                "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context, ExceptionCodes.API_ALREADY_EXISTS);
-                    } else {
-                        throw new APIManagementException(
-                                "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context,
-                                ExceptionCodes.API_ALREADY_EXISTS);
-                    }
+                    throw new APIManagementException(
+                            "Error occurred while adding the API. The version already exists: " + version,
+                            ExceptionCodes.from(ExceptionCodes.API_VERSION_ALREADY_EXISTS, version, body.getName()));
                 }
             }
         } else {
             //If no any previous version exists
             if (apiProvider.isDuplicateContextTemplate(context)) {
                 throw new APIManagementException(
-                        "Error occurred while adding the API. A duplicate API context " + "already exists for "
-                                + context, ExceptionCodes.API_ALREADY_EXISTS);
+                        "Error occurred while adding the API. A duplicate API context already exists for "
+                                + context, ExceptionCodes.from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
             }
         }
 
@@ -919,7 +942,9 @@ public class PublisherCommonUtils {
     }
 
     public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,
-                                         ServiceEntry service) throws APIManagementException, FaultGatewaysException {
+                                             ServiceEntry service) throws APIManagementException,
+            FaultGatewaysException {
+
         if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                 ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
             return updateSwagger(apiId, response, true);
@@ -930,9 +955,9 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * update AsyncPI definition of the given api
+     * update AsyncPI definition of the given api.
      *
-     * @param apiId API Id
+     * @param apiId    API Id
      * @param response response of the AsyncAPI definition validation call
      * @return updated AsyncAPI definition
      * @throws APIManagementException when error occurred updating AsyncAPI definition
@@ -940,6 +965,7 @@ public class PublisherCommonUtils {
      */
     public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
             throws APIManagementException, FaultGatewaysException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fall if user does not have access to the API or the API does not exist
@@ -955,7 +981,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * update swagger definition of the given api
+     * update swagger definition of the given api.
      *
      * @param apiId    API Id
      * @param response response of a swagger definition validation call
@@ -965,6 +991,7 @@ public class PublisherCommonUtils {
      */
     public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI)
             throws APIManagementException, FaultGatewaysException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
@@ -1019,12 +1046,13 @@ public class PublisherCommonUtils {
         existingAPI.setStatus(unModifiedAPI.getStatus());
         apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it instead of passing same
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it
+        // instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
     /**
-     * Add GraphQL schema
+     * Add GraphQL schema.
      *
      * @param originalAPI      API
      * @param schemaDefinition GraphQL schema definition to add
@@ -1033,6 +1061,7 @@ public class PublisherCommonUtils {
      */
     public static API addGraphQLSchema(API originalAPI, String schemaDefinition, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
+
         List<APIOperationsDTO> operationListWithOldData = APIMappingUtil
                 .getOperationListWithOldData(originalAPI.getUriTemplates(),
                         extractGraphQLOperationList(schemaDefinition));
@@ -1047,12 +1076,13 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Extract GraphQL Operations from given schema
+     * Extract GraphQL Operations from given schema.
      *
      * @param schema graphQL Schema
      * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
      */
     public static List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
+
         List<APIOperationsDTO> operationArray = new ArrayList<>();
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
@@ -1073,13 +1103,14 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Validate GraphQL Schema
+     * Validate GraphQL Schema.
      *
      * @param filename file name of the schema
      * @param schema   GraphQL schema
      */
     public static GraphQLValidationResponseDTO validateGraphQLSchema(String filename, String schema)
             throws APIManagementException {
+
         String errorMessage;
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
         boolean isValid = false;
@@ -1140,6 +1171,7 @@ public class PublisherCommonUtils {
      */
     public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId)
             throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
@@ -1171,13 +1203,14 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Checks whether the list of tiers are valid given the all valid tiers
+     * Checks whether the list of tiers are valid given the all valid tiers.
      *
      * @param allTiers     All defined tiers
      * @param currentTiers tiers to check if they are a subset of defined tiers
      * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
      */
     public static List<String> getInvalidTierNames(Set<Tier> allTiers, List<String> currentTiers) {
+
         List<String> invalidTiers = new ArrayList<>();
         for (String tierName : currentTiers) {
             boolean isTierValid = false;
@@ -1205,7 +1238,9 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating an existing API Product
      */
     public static APIProduct updateApiProduct(APIProduct originalAPIProduct, APIProductDTO apiProductDtoToUpdate,
-            APIProvider apiProvider, String username) throws APIManagementException, FaultGatewaysException {
+                                              APIProvider apiProvider, String username) throws APIManagementException
+            , FaultGatewaysException {
+
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiProductDtoToUpdate.getPolicies();
@@ -1260,7 +1295,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Add API Product with the generated swagger from the DTO
+     * Add API Product with the generated swagger from the DTO.
      *
      * @param apiProductDTO API Product DTO
      * @param provider      Provider name
@@ -1270,7 +1305,9 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException Error while adding the API Product to gateway
      */
     public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String provider,
-            String username) throws APIManagementException, FaultGatewaysException {
+                                                                         String username)
+            throws APIManagementException, FaultGatewaysException {
+
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         // if not add product
@@ -1328,8 +1365,8 @@ public class PublisherCommonUtils {
         //Check whether the context already exists
         if (apiProvider.isContextExist(context)) {
             throw new APIManagementException(
-                    "Error occurred while adding API Product. API Product with the context " + context
-                            + " already exists.", ExceptionCodes.API_ALREADY_EXISTS);
+                    "Error occurred while adding API Product. API Product with the context " + context + " already " +
+                            "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
@@ -1346,6 +1383,7 @@ public class PublisherCommonUtils {
     }
 
     public static boolean isStreamingAPI(APIDTO apidto) {
+
         return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
                 APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
     }

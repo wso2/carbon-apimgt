@@ -268,6 +268,13 @@ const useStyles = makeStyles((theme) => ({
     warningText: {
         color: '#ff0000',
     },
+    tableCellVhostSelect: {
+        paddingTop: theme.spacing(0),
+        paddingBottom: theme.spacing(0),
+    },
+    vhostSelect: {
+        marginTop: theme.spacing(3),
+    },
 }));
 
 /**
@@ -294,8 +301,11 @@ export default function Environments() {
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState([]);
-    const [selectedVhosts, setVhosts] = useState([]);
-    const [selectedVhostDeploy, setVhostsDeploy] = useState([]);
+    const defaultVhosts = settings.environment.map(
+        (e) => (e.vhosts && e.vhosts.length > 0 ? { env: e.name, vhost: e.vhosts[0].host } : undefined),
+    );
+    const [selectedVhosts, setVhosts] = useState(defaultVhosts);
+    const [selectedVhostDeploy, setVhostsDeploy] = useState(defaultVhosts);
     const [extraRevisionToDelete, setExtraRevisionToDelete] = useState(null);
     const [description, setDescription] = useState('');
     const [mgLabels, setMgLabels] = useState([]);
@@ -308,6 +318,8 @@ export default function Environments() {
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
     const [lastRevisionCount, setLastRevisionCount] = useState(0);
 
+    // allEnvDeployments represents all deployments of the API with mapping
+    // environment -> {revision deployed to env, vhost deployed to env with revisino}
     const allEnvDeployments = [];
     settings.environment.forEach((env) => {
         const revision = allEnvRevision && allEnvRevision.find(
@@ -1286,7 +1298,7 @@ export default function Environments() {
      */
     function getGatewayAccessUrl(vhost, type) {
         const endpoints = { primary: '', secondary: '', combined: '' };
-        if (!vhost && !vhost.host) {
+        if (!vhost) {
             return endpoints;
         }
 
@@ -1509,7 +1521,7 @@ export default function Environments() {
                                                     )}
                                                     title={(
                                                         <Typography variant='subtitle2'>
-                                                            {row.name}
+                                                            {row.displayName}
                                                         </Typography>
                                                     )}
                                                     subheader={(
@@ -1553,6 +1565,9 @@ export default function Environments() {
                                                                         },
                                                                     }}
                                                                     name={row.name}
+                                                                    value={selectedVhostDeploy.find(
+                                                                        (v) => v.env === row.name,
+                                                                    ).vhost}
                                                                     onChange={handleVhostDeploySelect}
                                                                     margin='dense'
                                                                     variant='outlined'
@@ -1636,7 +1651,7 @@ export default function Environments() {
                                                     action={(
                                                         <Checkbox
                                                             id={row.name.split(' ').join('')}
-                                                            value={row.name}
+                                                            value={row.displayName}
                                                             checked={SelectedEnvironment.includes(row.name)}
                                                             onChange={handleChange}
                                                             color='primary'
@@ -1647,7 +1662,7 @@ export default function Environments() {
                                                     )}
                                                     title={(
                                                         <Typography variant='subtitle2'>
-                                                            {row.name}
+                                                            {row.displayName}
                                                         </Typography>
                                                     )}
                                                     subheader={(
@@ -1993,7 +2008,7 @@ export default function Environments() {
                                         </>
                                     ) : (
                                         <>
-                                            <TableCell align='left'>
+                                            <TableCell align='left' className={classes.tableCellVhostSelect}>
                                                 <Tooltip
                                                     title={getVhostHelperText(row.name, selectedVhosts)}
                                                     placement='bottom'
@@ -2017,9 +2032,11 @@ export default function Environments() {
                                                             },
                                                         }}
                                                         name={row.name}
+                                                        value={selectedVhosts.find((v) => v.env === row.name).vhost}
                                                         onChange={handleVhostSelect}
                                                         margin='dense'
                                                         variant='outlined'
+                                                        className={classes.vhostSelect}
                                                         fullWidth
                                                         disabled={api.isRevision
                                                         || !allRevisions || allRevisions.length === 0}

@@ -360,12 +360,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                             return info.isAuthorized();
                         }
                     }
-                    String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
-                    if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-                        info = getApiKeyDataForWSClient(apiKey, tenantDomain, apiContext, version);
-                    } else {
-                        return false;
-                    }
+                    info = getApiKeyDataForWSClient(apiKey, tenantDomain, apiContext, version);
                     if (info == null || !info.isAuthorized()) {
                         return false;
                     }

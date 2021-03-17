@@ -295,7 +295,7 @@ public class SecurityConfigContextTest {
         Map<String, APIDTO> apidtoMap = new HashMap<>();
         apidtoMap.put(apiid, new APIDTO().name("api1").version("v1").provider("admin"));
         SecurityConfigContext securityConfigContext =
-                new SecurityConfigContextWrapper(configcontext, apiProduct, apiManagerConfiguration,apidtoMap);
+                new SecurityConfigContextWrapper(configcontext, apiProduct, apiManagerConfiguration, apidtoMap);
         securityConfigContext.validate();
         VelocityContext velocityContext = securityConfigContext.getContext();
         Assert.assertNotNull(velocityContext.get("endpoint_security"));

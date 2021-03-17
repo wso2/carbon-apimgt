@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -258,7 +259,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
             comment.setParentCommentID(replyTo);
-            comment.setEntryPoint("devPortal");
+            comment.setEntryPoint("DEVPORTAL");
             comment.setUser(username);
             comment.setApiId(apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
@@ -290,9 +291,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             String parentCommentID = null;
-            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
-                    includeCommenterInfo);
+            CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
@@ -314,13 +314,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                    Boolean includeCommenterInfo, Integer limit, Integer offset,
+                                    Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
                                     MessageContext messageContext) throws APIManagementException{
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, limit, offset);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
             if (comment != null) {
                 CommentDTO commentDTO;
@@ -363,9 +363,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, commentId);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
-                    includeCommenterInfo);
+            CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
@@ -697,11 +696,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO api = getAPIByAPIId(apiId, tenant);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
+        String swaggerDefinition = api.getApiDefinition();
         if (api != null) {
             String apiProvider = api.getProvider();
             try {
-                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(),
-                        api.getVersion(), apiProvider, RestApiCommonUtil.getLoggedInUsername());
+                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
+                        swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",

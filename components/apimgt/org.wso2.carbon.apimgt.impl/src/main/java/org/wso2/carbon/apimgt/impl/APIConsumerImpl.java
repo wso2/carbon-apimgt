@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -2802,30 +2803,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
     }
 
-    /*
-     *@see super.getSubscribedAPIsByApplicationId
-     *
-     */
-    @Override
-    public Set<SubscribedAPI> getSubscribedAPIsByApplicationId(Subscriber subscriber, int applicationId, String groupingId) throws APIManagementException {
-        Set<SubscribedAPI> subscribedAPIs = null;
-        try {
-            subscribedAPIs = apiMgtDAO.getSubscribedAPIsByApplicationId(subscriber, applicationId, groupingId);
-            if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
-                for (SubscribedAPI subscribedApi : subscribedAPIs) {
-                    Tier tier = tiers.get(subscribedApi.getTier().getName());
-                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
-                            .getTier().getName());
-                    // We do not need to add the modified object again.
-                }
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationId, e);
-        }
-        return subscribedAPIs;
-    }
-
     @Override
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName,
                                                          int startSubIndex, int endSubIndex, String groupingId)
@@ -3559,15 +3536,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID)
+    public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset)
             throws APIManagementException {
-        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID);
+        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
     }
 
     @Override
@@ -4134,26 +4111,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (UserStoreException e) {
             handleException("Unable to retrieve the tenant information of the current user.", e);
         }
-        //checking for authorized scopes
-        Set<Scope> scopeSet = new LinkedHashSet<Scope>();
-        List<Scope> authorizedScopes = new ArrayList<Scope>();
-        String authScopeString;
-        if (tokenScope != null && tokenScope.length() != 0 &&
-                !APIConstants.OAUTH2_DEFAULT_SCOPE.equals(tokenScope)) {
-            scopeSet.addAll(getScopesByScopeKeys(tokenScope, tenantId));
-            authorizedScopes = getAllowedScopesForUserApplication(userId, scopeSet);
-        }
-
-        if (!authorizedScopes.isEmpty()) {
-            Set<Scope> authorizedScopeSet = new HashSet<Scope>(authorizedScopes);
-            StringBuilder scopeBuilder = new StringBuilder();
-            for (Scope scope : authorizedScopeSet) {
-                scopeBuilder.append(scope.getKey()).append(' ');
-            }
-            authScopeString = scopeBuilder.toString();
-        } else {
-            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
-        }
 
         String keyManagerId = null;
         if (keyManagerName != null){
@@ -4245,7 +4202,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
                     ApplicationUtils
-                            .createOauthAppRequest(applicationName, null, callbackUrl, authScopeString, jsonString,
+                            .createOauthAppRequest(applicationName, null, callbackUrl, tokenScope, jsonString,
                                     applicationTokenType, tenantDomain, keyManagerName);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
@@ -4662,11 +4619,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
         return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
-    }
-
-    public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
-			throws APIManagementException {
-		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
     }
 
     @Override

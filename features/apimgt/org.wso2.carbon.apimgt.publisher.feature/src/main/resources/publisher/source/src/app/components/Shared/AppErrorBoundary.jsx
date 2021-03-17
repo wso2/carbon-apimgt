@@ -130,7 +130,7 @@ class AppErrorBoundary extends React.Component {
                                     <a href={Configurations.app.context}>
                                         <img
                                             src={Configurations.app.context + theme.custom.logo}
-                                            alt={theme.custom.title}
+                                            alt={`${theme.custom.title.prefix} ${theme.custom.title.sufix}`}
                                             style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
                                         />
                                     </a>
@@ -188,7 +188,7 @@ AppErrorBoundary.propTypes = {
     theme: PropTypes.shape({
         custom: PropTypes.shape({
             logo: PropTypes.string,
-            title: PropTypes.string,
+            title: PropTypes.shape({}),
         }),
     }).isRequired,
 };

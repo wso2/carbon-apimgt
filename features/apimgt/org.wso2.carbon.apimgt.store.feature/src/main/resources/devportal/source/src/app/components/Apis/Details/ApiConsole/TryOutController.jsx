@@ -779,7 +779,7 @@ function TryOutController(props) {
                                                             id='Apis.Details.ApiConsole.environment'
                                                         />
                                                     )}
-                                                    value={selectedEnvironment || (environments && environments[0])}
+                                                    value={selectedEnvironment || (environments && environments[0].name)}
                                                     name='selectedEnvironment'
                                                     onChange={handleChanges}
                                                     helperText={(
@@ -804,11 +804,11 @@ function TryOutController(props) {
                                                     {environments && (
                                                         environments.map((env) => (
                                                             <MenuItem
-                                                                value={env}
-                                                                key={env}
+                                                                value={env.name}
+                                                                key={env.name}
                                                                 className={classes.menuItem}
                                                             >
-                                                                {env}
+                                                                {env.displayName}
                                                             </MenuItem>
                                                         )))}
                                                     {containerMngEnvMenuItems}

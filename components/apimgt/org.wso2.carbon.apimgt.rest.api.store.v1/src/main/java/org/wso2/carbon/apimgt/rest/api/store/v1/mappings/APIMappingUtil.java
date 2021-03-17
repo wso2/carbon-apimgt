@@ -478,6 +478,7 @@ public class APIMappingUtil {
 
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
         apiEndpointURLsDTO.setEnvironmentName(environment.getName());
+        apiEndpointURLsDTO.setEnvironmentDisplayName(environment.getDisplayName());
         apiEndpointURLsDTO.setEnvironmentType(environment.getType());
 
         APIURLsDTO apiurLsDTO = new APIURLsDTO();

@@ -35,7 +35,6 @@ public class GatewayAPIDTO implements Serializable {
     private String tenantDomain;
     private String apiId;
     private String apiDefinition;
-    private boolean override;
     private GatewayContentDTO[] sequenceToBeAdd;
     private String[] sequencesToBeRemove;
     private GatewayContentDTO[] localEntriesToBeAdd;
@@ -185,16 +184,6 @@ public class GatewayAPIDTO implements Serializable {
     public void setEndpointEntriesToBeRemove(String[] endpointEntriesToBeRemove) {
 
         this.endpointEntriesToBeRemove = endpointEntriesToBeRemove;
-    }
-
-    public boolean isOverride() {
-
-        return override;
-    }
-
-    public void setOverride(boolean override) {
-
-        this.override = override;
     }
 
     public CredentialDto[] getCredentialsToBeAdd() {

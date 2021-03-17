@@ -140,7 +140,9 @@ class ApiConsole extends React.Component {
             .then((apiResponse) => {
                 apiData = apiResponse.obj;
                 if (apiData.endpointURLs) {
-                    environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
+                    environments = apiData.endpointURLs.map((endpoint) => {
+                        return { name: endpoint.environmentName, displayName: endpoint.environmentDisplayName };
+                    });
                 }
                 containerMngEnvironments = apiData.ingressURLs;
                 if (apiData.scopes) {
@@ -148,7 +150,7 @@ class ApiConsole extends React.Component {
                     this.setState({ scopes: scopeList });
                 }
                 if (environments && environments.length > 0) {
-                    [selectedEnvironment] = environments;
+                    selectedEnvironment = environments[0].name;
                     return this.apiClient.getSwaggerByAPIIdAndEnvironment(apiID, selectedEnvironment);
                 } else if (containerMngEnvironments
                     && containerMngEnvironments.some((env) => env.clusterDetails.length > 0)) {
@@ -388,7 +390,7 @@ class ApiConsole extends React.Component {
         let promiseSwagger;
 
         if (environment) {
-            if (environments.includes(environment)) {
+            if (environments.find((e) => e.name === environment)) {
                 promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, environment);
             } else if (containerMngEnvironments.some((env) => env.clusterDetails.length > 0
                 && env.clusterDetails.some((cluster) => cluster.clusterName === environment))) {

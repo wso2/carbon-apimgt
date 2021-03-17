@@ -123,7 +123,7 @@ class CommentAdd extends React.Component {
         const { content } = this.state;
         const Api = new API();
         const comment = {
-            content: content.trim(),
+            content: content.trim(), category: "general"
         };
 
         // to check whether a string does not contain only white spaces

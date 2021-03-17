@@ -21,6 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.nio.charset.StandardCharsets;
@@ -53,6 +55,20 @@ public class GatewayUtils {
             return keyList.toArray(new String[keyList.size()]);
         }
     }
+
+    public static void setEndpointsToBeRemoved(APIProductIdentifier apiProductIdentifier, String apiUUID,
+                                               GatewayAPIDTO gatewayAPIDTO) {
+
+        String endpointName =
+                apiProductIdentifier.getName() + "--v" + apiProductIdentifier.getVersion().concat("--").concat(apiUUID);
+        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
+                endpointName + "_API" + APIConstants.API_DATA_SANDBOX_ENDPOINTS.replace("_endpoints", "") + "Endpoint",
+                gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
+                endpointName + "_API" + APIConstants.API_DATA_PRODUCTION_ENDPOINTS.replace("_endpoints", "") +
+                        "Endpoint", gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+    }
+
     public static void setEndpointsToBeRemoved(String apiName, String version, GatewayAPIDTO gatewayAPIDTO) {
 
         String endpointName = apiName + "--v" + version;
@@ -94,5 +110,18 @@ public class GatewayUtils {
             log.error(e.getMessage());
         }
         return generatedHash;
+    }
+
+    public static void setCustomSequencesToBeRemoved(APIProductIdentifier apiProductIdentifier,String apiUUID,
+                                                     GatewayAPIDTO gatewayAPIDTO) {
+        String inSequence = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                apiProductIdentifier.getVersion()).concat("--").concat(apiUUID) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(inSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+        String outSequence = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                apiProductIdentifier.getVersion()).concat("--").concat(apiUUID) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(outSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+        String faultSequence = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                apiProductIdentifier.getVersion()).concat("--").concat(apiUUID) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(faultSequence, gatewayAPIDTO.getSequencesToBeRemove()));
     }
 }
