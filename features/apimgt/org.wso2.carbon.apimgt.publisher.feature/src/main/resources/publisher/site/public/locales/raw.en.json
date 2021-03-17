@@ -3955,6 +3955,7 @@
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
   },
   "internal.token": {
+    "defaultMessage": "Internal Token"
   },
   "save": {
     "defaultMessage": "Save"
