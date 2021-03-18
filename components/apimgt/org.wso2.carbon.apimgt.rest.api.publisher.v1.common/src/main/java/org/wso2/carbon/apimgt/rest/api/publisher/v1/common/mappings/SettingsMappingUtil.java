@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.apache.commons.logging.Log;
@@ -28,26 +28,33 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentListDTO;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * This Class used to retrieve Publisher Settings.
+ */
 public class SettingsMappingUtil {
-
 
     private static final Log log = LogFactory.getLog(SettingsMappingUtil.class);
 
     /**
-     * This method feeds data into the settingsDTO
+     * This method feeds data into the settingsDTO.
+     *
      * @param isUserAvailable check if user is logged in
      * @return SettingsDTO
      * @throws APIManagementException
      */
     public SettingsDTO fromSettingstoDTO(Boolean isUserAvailable) throws APIManagementException {
+
         SettingsDTO settingsDTO = new SettingsDTO();
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
         if (isUserAvailable) {
@@ -78,17 +85,16 @@ public class SettingsMappingUtil {
             Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
             ThirdPartyEnvironmentListDTO thirdPartyEnvironmentListDTO = new ThirdPartyEnvironmentListDTO();
             if (thirdPartyEnvironments != null) {
-                thirdPartyEnvironmentListDTO = EnvironmentMappingUtil.fromThirdPartyEnvironmentCollectionToDTO(thirdPartyEnvironments.values());
+                thirdPartyEnvironmentListDTO = EnvironmentMappingUtil.
+                        fromThirdPartyEnvironmentCollectionToDTO(thirdPartyEnvironments.values());
             }
             settingsDTO.setThirdPartyEnvironments(thirdPartyEnvironmentListDTO.getList());
         }
         return settingsDTO;
     }
 
-
-
     /**
-     * This method returns the monetization properties from configuration
+     * This method returns the monetization properties from configuration.
      *
      * @return List<String> monetization properties
      * @throws APIManagementException
@@ -116,12 +122,13 @@ public class SettingsMappingUtil {
     }
 
     /**
-     * This method returns the Security Audit properties from the configuration
+     * This method returns the Security Audit properties from the configuration.
      *
      * @return SecurityAuditAttributeDTO Security Audit Attributes
      * @throws APIManagementException
      */
     private SecurityAuditAttributeDTO getSecurityAuditProperties() throws APIManagementException {
+
         SecurityAuditAttributeDTO properties = new SecurityAuditAttributeDTO();
 
         String username = RestApiCommonUtil.getLoggedInUsername();

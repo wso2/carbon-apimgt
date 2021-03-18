@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Applicatio
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 
 /**
- * Method not allowed faulty request data collector
+ * Method not allowed faulty request data collector.
  */
 public class MethodNotAllowedFaultDataCollector extends UnclassifiedFaultDataCollector {
     private static final Log log = LogFactory.getLog(MethodNotAllowedFaultDataCollector.class);

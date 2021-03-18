@@ -2182,19 +2182,20 @@ public abstract class AbstractAPIManager implements APIManager {
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
+        List<Policy> policiesWithoutUnlimitedTier = new ArrayList<Policy>();
 
-        if (!throttleProperties.isEnableUnlimitedTier()) {
-            List<Policy> policiesWithoutUnlimitedTier = new ArrayList<Policy>();
-
-            if (policies != null) {
-                for (Policy policy : policies) {
-                    if (!APIConstants.UNLIMITED_TIER_NAME.equalsIgnoreCase(policy.getPolicyName())) {
+        if (policies != null) {
+            for (Policy policy : policies) {
+                if (APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())) {
+                    if (throttleProperties.isEnableUnlimitedTier()) {
                         policiesWithoutUnlimitedTier.add(policy);
                     }
+                } else if (!APIConstants.UNAUTHENTICATED_TIER.equals(policy.getPolicyName())) {
+                    policiesWithoutUnlimitedTier.add(policy);
                 }
             }
-            policies = policiesWithoutUnlimitedTier.toArray(new Policy[0]);
         }
+        policies = policiesWithoutUnlimitedTier.toArray(new Policy[0]);
         return policies;
     }
 

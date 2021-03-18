@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums;
 
 /**
- * Enum to denote faulty event types
+ * Enum to denote faulty event types.
  */
 public enum FaultCategory {
     AUTH,

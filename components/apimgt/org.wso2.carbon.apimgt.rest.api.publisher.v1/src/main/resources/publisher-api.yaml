@@ -19,7 +19,7 @@ info:
     This document specifies a **RESTful API** for WSO2 **API Manager** - **Publisher**.
 
     # Authentication
-    Our REST APIs are protected using OAuth2 and access control is achieved through scopes. Before you start invoking
+    The Publisher REST API is protected using OAuth2 and access control is achieved through scopes. Before you start invoking
     the the API you need to obtain an access token with the required scopes. This guide will walk you through the steps
     that you will need to follow to obtain an access token.
     First you need to obtain the consumer key/secret key pair by calling the dynamic client registration (DCR) endpoint. You can add your preferred grant types
@@ -1616,9 +1616,6 @@ paths:
       responses:
         200:
           description: |
-            OK.
-        201:
-          description: |
             Created.
             Successful response with the newly deployed APIRevisionDeployment List object as the entity in the body.
           content:
@@ -1803,10 +1800,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentList'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        406:
-          $ref: '#/components/responses/NotAcceptable'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security: []
       x-code-samples:
@@ -1832,6 +1829,7 @@ paths:
               properties:
                 content:
                   type: string
+                  maxLength: 512
                   description: |
                     Content of the comment
                   example: This is a comment
@@ -1868,8 +1866,12 @@ paths:
           $ref: '#/components/responses/BadRequest'
         401:
           $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_publish
@@ -1916,17 +1918,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-          content: {}
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security: []
       x-code-samples:
@@ -1954,6 +1953,7 @@ paths:
               properties:
                 content:
                   type: string
+                  maxLength: 512
                   description: |
                     Content of the comment
                   example: This is a comment
@@ -1983,20 +1983,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: {}
         400:
           $ref: '#/components/responses/BadRequest'
         401:
           $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
         415:
           $ref: '#/components/responses/UnsupportedMediaType'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_publish
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"'
 
     delete:
@@ -2018,8 +2027,17 @@ paths:
           content: {}
         401:
           $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
+        405:
+          description: |
+            MethodNotAllowed.
+            Request method is known by the server but is not supported by the target resource.
+          content: {}
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
             - apim:api_publish
@@ -2066,22 +2084,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentList'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-          content: {}
         401:
           $ref: '#/components/responses/Unauthorized'
         404:
           $ref: '#/components/responses/NotFound'
         406:
           $ref: '#/components/responses/NotAcceptable'
+        500:
+          $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security: []
       x-code-samples:
         - lang: Curl
-          source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
+          source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
 
   /apis/import-openapi:
     post:
@@ -2242,7 +2257,7 @@ paths:
     post:
       tags:
         - APIs
-      summary: Import API Definition
+      summary: Import a GraphQL SDL
       description: |
         This operation can be used to create api from api definition.APIMgtDAOTest
 
@@ -2521,7 +2536,7 @@ paths:
     post:
       tags:
         - Validation
-      summary: Validate GraphQL API Definition and Retrieve a Summary
+      summary: Validate a GraphQL SDL
       description: |
         This operation can be used to validate a graphQL definition and retrieve a summary.
       requestBody:
@@ -7994,12 +8009,16 @@ components:
           example : 2021-02-12-19:57:25
         category:
           type: string
+          readOnly: true
           default: general
+          example : general
         parentCommentId:
           type: string
+          readOnly: true
           example: 6f38aea2-f41e-4ac9-b3f2-a9493d00ba97
         entryPoint:
           type: string
+          readOnly: true
           enum: [devPortal, publisher]
         commenterInfo:
           $ref: '#/components/schemas/CommenterInfo'
@@ -8011,11 +8030,13 @@ components:
       properties:
         count:
           type: integer
+          readOnly: true
           description: |
             Number of Comments returned.
           example: 1
         list:
           type: array
+          readOnly: true
           items:
             $ref: '#/components/schemas/Comment'
         pagination:
@@ -8669,6 +8690,7 @@ components:
           minLength: 0
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+          readOnly: true
         name:
           maxLength: 255
           minLength: 1

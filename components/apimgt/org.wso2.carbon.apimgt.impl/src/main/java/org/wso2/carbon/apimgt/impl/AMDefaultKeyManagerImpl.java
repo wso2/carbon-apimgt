@@ -72,10 +72,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -699,8 +696,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException {
 
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        return apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
+        return new HashSet<>();
     }
 
     /**

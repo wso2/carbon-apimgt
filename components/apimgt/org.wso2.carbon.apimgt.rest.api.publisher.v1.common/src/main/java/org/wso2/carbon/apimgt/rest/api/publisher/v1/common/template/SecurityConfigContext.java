@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Set the parameters for secured endpoints
+ * Set the parameters for secured endpoints.
  */
 public class SecurityConfigContext extends ConfigContextDecorator {
 
@@ -47,7 +47,8 @@ public class SecurityConfigContext extends ConfigContextDecorator {
     private APIProduct apiProduct;
     private JSONObject productionEndpointSecurity;
     private JSONObject sandboxEndpointSecurity;
-    private Map<String,APIDTO> associatedAPIMap;
+    private Map<String, APIDTO> associatedAPIMap;
+
     public SecurityConfigContext(ConfigContext context, API api) {
 
         super(context);
@@ -185,8 +186,10 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         }
                         endpointSecurityModel.setAlias(alias.concat("--").concat(endpointSecurityEntry.getKey()));
 
-                        if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase(endpointSecurityModel.getType())) {
-                            endpointSecurityModel.setUniqueIdentifier(apiProduct.getId() + "-" + UUID.randomUUID().toString());
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH
+                                .equalsIgnoreCase(endpointSecurityModel.getType())) {
+                            endpointSecurityModel
+                                    .setUniqueIdentifier(apiProduct.getId() + "-" + UUID.randomUUID().toString());
                             endpointSecurityModel.setGrantType(endpointSecurityEntry.getValue().getGrantType());
                             endpointSecurityModel.setTokenUrl(endpointSecurityEntry.getValue().getTokenUrl());
                             endpointSecurityModel.setClientId(endpointSecurityEntry.getValue().getClientId());

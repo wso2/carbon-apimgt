@@ -23,14 +23,13 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClaimDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,9 +49,10 @@ public class SubscriptionMappingUtil {
      */
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription)
             throws APIManagementException {
+
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
-        subscriptionDTO.setApplicationInfo(FromApplicationToApplicationInfoDTO(subscription.getApplication()));
+        subscriptionDTO.setApplicationInfo(fromApplicationToApplicationInfoDTO(subscription.getApplication()));
         subscriptionDTO.setSubscriptionStatus(
                 SubscriptionDTO.SubscriptionStatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setThrottlingPolicy(subscription.getTier().getName());
@@ -64,12 +64,13 @@ public class SubscriptionMappingUtil {
      * Converts a List object of SubscribedAPIs into a DTO
      *
      * @param subscriptions a list of SubscribedAPI objects
-     * @param limit max number of objects returned
-     * @param offset starting index
+     * @param limit         max number of objects returned
+     * @param offset        starting index
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,
                                                                 Integer offset) throws APIManagementException {
+
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
         if (subscriptionDTOs == null) {
@@ -94,11 +95,12 @@ public class SubscriptionMappingUtil {
      * Converts a List object of SubscribedAPIs into a DTO
      *
      * @param subscriptions a list of SubscribedAPI objects
-     * @param query query to filter subscriptions
+     * @param query         query to filter subscriptions
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, String query)
             throws APIManagementException {
+
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
         if (subscriptionDTOs == null) {
@@ -122,13 +124,14 @@ public class SubscriptionMappingUtil {
     /**
      * Get the subscriptions within the specified pagination range
      *
-     * @param subscriptionListDTO   list of all subscription DTOs
-     * @param limit                 max number of objects returned
-     * @param offset                starting index
+     * @param subscriptionListDTO list of all subscription DTOs
+     * @param limit               max number of objects returned
+     * @param offset              starting index
      * @return SubscriptionListDTO object containing SubscriptionDTOs within the pagination range
      */
     public static SubscriptionListDTO getPaginatedSubscriptions(SubscriptionListDTO subscriptionListDTO, Integer limit,
                                                                 Integer offset) {
+
         SubscriptionListDTO paginatedSubscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = paginatedSubscriptionListDTO.getList();
         if (subscriptionDTOs == null) {
@@ -197,6 +200,7 @@ public class SubscriptionMappingUtil {
      */
     public static List<SubscribedAPI> fromUserApplicationAPIUsageArrayToSubscribedAPIList(
             UserApplicationAPIUsage[] allApiUsage) {
+
         List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
 
         for (UserApplicationAPIUsage usage : allApiUsage) {
@@ -213,8 +217,9 @@ public class SubscriptionMappingUtil {
      * @return ApplicationInfoDTO corresponding to the application
      * @throws APIManagementException If an error occurs when getting logged in provider or when getting lightweight API
      */
-    private static ApplicationInfoDTO FromApplicationToApplicationInfoDTO(Application application)
-            throws APIManagementException{
+    private static ApplicationInfoDTO fromApplicationToApplicationInfoDTO(Application application)
+            throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         application = apiProvider.getLightweightApplicationByUUID(application.getUUID());
@@ -231,6 +236,7 @@ public class SubscriptionMappingUtil {
      */
     public static SubscriberInfoDTO fromSubscriberClaimsToDTO(Map<String, String> subscriberClaims,
                                                               String subscriberName) throws APIManagementException {
+
         SubscriberInfoDTO subscriberInfoDTO = new SubscriberInfoDTO();
         subscriberInfoDTO.setName(subscriberName);
         List<ClaimDTO> claimDTOList = new ArrayList<>();

@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 
 /**
- * Operation attribute in analytics event
+ * Operation attribute in analytics event.
  */
 public class Operation {
     private String apiMethod;

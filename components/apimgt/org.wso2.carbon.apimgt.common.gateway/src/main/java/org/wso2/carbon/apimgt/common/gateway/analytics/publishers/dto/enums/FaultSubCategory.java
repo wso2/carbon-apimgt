@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums;
 
 /**
- * SubCategories for fault sub categories enums
+ * SubCategories for fault sub categories enums.
  */
 public interface FaultSubCategory {
 }

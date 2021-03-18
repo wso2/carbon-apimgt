@@ -128,8 +128,7 @@ const APIDetailsTopMenu = (props) => {
  * @returns {zip} Zpi file containing the API directory.
  */
     function exportAPI() {
-        const restApi = new API();
-        return restApi.exportApi(api.id).then((zipFile) => {
+        return api.export().then((zipFile) => {
             return Utils.forceDownload(zipFile);
         }).catch((error) => {
             if (error.response) {
@@ -173,7 +172,7 @@ const APIDetailsTopMenu = (props) => {
         setRevisionId(event.target.value);
     };
 
-    const isDownlodable = ['API'].includes(api.apiType);
+    const isDownloadable = [API.CONSTS.API, API.CONSTS.APIProduct].includes(api.apiType);
     const { settings, user } = useAppContext();
     const { tenantList } = useContext(ApiContext);
     const userNameSplit = user.name.split('@');
@@ -312,9 +311,9 @@ const APIDetailsTopMenu = (props) => {
             {/* end of Page error banner */}
             {isAPIProduct || api.isRevision
                 ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
-            {(isDownlodable) && <VerticalDivider height={70} />}
+            {(isDownloadable) && <VerticalDivider height={70} />}
             <div className={classes.downloadApi}>
-                {(isDownlodable) && (
+                {(isDownloadable) && (
                     <a
                         onClick={exportAPI}
                         onKeyDown='null'

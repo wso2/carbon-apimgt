@@ -29,10 +29,8 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -56,15 +54,11 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 
-import java.text.ParseException;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import javax.cache.Cache;
-import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.X509Certificate;
 
 /**
@@ -265,7 +259,7 @@ public class JWTValidator {
 
         String endUserToken = null;
         boolean valid = false;
-        String jwtTokenCacheKey = jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
+        String jwtTokenCacheKey = jwtInfoDto.getApiContext().concat(":").concat(jwtInfoDto.getVersion()).concat(":")
                 .concat(tokenSignature);
         if (isGatewayTokenCacheEnabled) {
             Object token = getGatewayJWTTokenCache().get(jwtTokenCacheKey);

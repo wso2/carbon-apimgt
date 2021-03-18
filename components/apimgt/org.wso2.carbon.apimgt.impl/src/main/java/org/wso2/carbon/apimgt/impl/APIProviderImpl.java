@@ -3071,7 +3071,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public API createNewAPIVersion(String existingApiId, String newVersion, Boolean isDefaultVersion,
-                                   String tenantDomain) throws DuplicateAPIException, APIManagementException {
+                                   String tenantDomain) throws APIManagementException {
         API existingAPI = getAPIbyUUID(existingApiId, tenantDomain);
 
         if (existingAPI == null) {
@@ -8980,15 +8980,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
-            APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset)
+            throws APIManagementException {
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID)
-            throws APIManagementException {
-        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID);
+    public org.wso2.carbon.apimgt.api.model.CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID,
+                                                                  Integer replyLimit, Integer replyOffset) throws
+            APIManagementException {
+        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
     }
 
     @Override

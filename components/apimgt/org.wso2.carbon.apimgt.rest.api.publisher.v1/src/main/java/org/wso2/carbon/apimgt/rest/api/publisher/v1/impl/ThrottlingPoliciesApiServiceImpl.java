@@ -82,8 +82,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
                                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        SubscriptionPolicy[] subscriptionPolicies = (SubscriptionPolicy[]) apiProvider.getPolicies(userName,
-                PolicyConstants.POLICY_LEVEL_SUB);
+        SubscriptionPolicy[] subscriptionPolicies = Arrays.asList(apiProvider.getPolicies(userName,
+                PolicyConstants.POLICY_LEVEL_SUB)).toArray(new SubscriptionPolicy[0]);
         List<SubscriptionPolicy> subscriptionPolicyList = new ArrayList<>();
         if (Objects.nonNull(tierQuotaTypes) && !tierQuotaTypes.isEmpty()) {
             if (tierQuotaTypes.contains(",")) {

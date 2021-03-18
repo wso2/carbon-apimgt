@@ -104,6 +104,7 @@ class Comments extends Component {
             comments: [],
             totalComments: 0,
             startCommentsToDisplay: 0,
+            apiId:null,
         };
         this.updateCommentList = this.updateCommentList.bind(this);
         this.handleExpandClick = this.handleExpandClick.bind(this);
@@ -119,11 +120,14 @@ class Comments extends Component {
             apiId, theme, match, intl, isOverview, setCount,
         } = this.props;
         if (match) apiId = match.params.apiUuid;
+        this.setState({ apiId: apiId});
 
         const restApi = new API();
+        const limit = theme.custom.commentsLimit;
+        const offset = 0;
 
         restApi
-            .getAllComments(apiId)
+            .getAllComments(apiId, limit, offset)
             .then((result) => {
                 let commentList = result.body.list;
                 if (isOverview) {
@@ -132,19 +136,16 @@ class Comments extends Component {
                         commentList = commentList.slice(commentList.length - 3, commentList.length);
                     }
                 }
-                this.setState({ allComments: commentList, totalComments: commentList.length });
-                if (commentList.length < theme.custom.commentsLimit) {
+                this.setState({ allComments: commentList, totalComments: result.body.pagination.total});
+                if (result.body.pagination.total < theme.custom.commentsLimit) {
                     this.setState({
                         startCommentsToDisplay: 0,
-                        comments: commentList.slice(0, commentList.length),
+                        comments: commentList,
                     });
                 } else {
                     this.setState({
-                        startCommentsToDisplay: commentList.length - theme.custom.commentsLimit,
-                        comments: commentList.slice(
-                            commentList.length - theme.custom.commentsLimit,
-                            commentList.length,
-                        ),
+                        startCommentsToDisplay: result.body.pagination.total - theme.custom.commentsLimit,
+                        comments: commentList, 
                     });
                 }
             })
@@ -162,14 +163,28 @@ class Comments extends Component {
     handleLoadMoreComments() {
         const { totalComments, startCommentsToDisplay, allComments } = this.state;
         const { theme } = this.props;
-        if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
-            this.setState({ startCommentsToDisplay: 0, comments: allComments.slice(0, totalComments) });
-        } else {
-            this.setState({
-                startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
-                comments: allComments.slice(startCommentsToDisplay - theme.custom.commentsLimit, totalComments),
+        const restApi = new API();
+        const limit = theme.custom.commentsLimit;
+        const offset = totalComments-startCommentsToDisplay;
+
+        restApi
+            .getAllComments(this.state.apiId, limit, offset)
+            .then((result) => {
+                const newAllCommentList = allComments.concat(result.body.list);
+                this.setState({ allComments: newAllCommentList, comments: newAllCommentList });
+                if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
+                    this.setState({ startCommentsToDisplay: 0 });
+                } else {
+                    this.setState({
+                        startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
+                    });
+                }
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
             });
-        }
     }
 
     /**

@@ -23,7 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface LabelsApiService {
       public Response labelsGet(MessageContext messageContext) throws APIManagementException;
-      public Response labelsLabelIdDelete(String labelId, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) throws APIManagementException;
+      public Response labelsLabelIdDelete(String labelId, MessageContext messageContext) throws APIManagementException;
       public Response labelsLabelIdPut(String labelId, LabelDTO labelDTO, MessageContext messageContext) throws APIManagementException;
       public Response labelsPost(LabelDTO labelDTO, MessageContext messageContext) throws APIManagementException;
 }

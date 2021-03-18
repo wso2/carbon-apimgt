@@ -22,7 +22,7 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums;
  */
 public class FaultSubCategories {
     /**
-     * Enum for sub categories of other category
+     * Enum for sub categories of other category.
      */
     public enum Other implements FaultSubCategory {
         MEDIATION_ERROR,
@@ -32,7 +32,7 @@ public class FaultSubCategories {
     }
 
     /**
-     * Enum for sub categories of Throttling category
+     * Enum for sub categories of Throttling category.
      */
     public enum Throttling implements FaultSubCategory {
         API_LEVEL_LIMIT_EXCEEDED,
@@ -49,7 +49,7 @@ public class FaultSubCategories {
     }
 
     /**
-     * Enum for sub categories of TargetConnectivity category
+     * Enum for sub categories of TargetConnectivity category.
      */
     public enum TargetConnectivity implements FaultSubCategory {
         CONNECTION_TIMEOUT,
@@ -58,7 +58,7 @@ public class FaultSubCategories {
     }
 
     /**
-     * Enum for sub categories of Authentication category
+     * Enum for sub categories of Authentication category.
      */
     public enum Authentication implements FaultSubCategory {
         AUTHENTICATION_FAILURE,

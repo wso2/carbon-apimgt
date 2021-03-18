@@ -30,22 +30,25 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductSearchResultDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentSearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISearchResultDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SearchResultListDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.util.Map;
 
+/**
+ * This Class used to  map Rest api Search models to Data Models.
+ */
 public class SearchResultMappingUtil {
 
     private static final Log log = LogFactory.getLog(SearchResultMappingUtil.class);
 
     /**
-     * Get API result representation for content search
+     * Get API result representation for content search.
      *
      * @param api API
      * @return APISearchResultDTO
@@ -72,7 +75,7 @@ public class SearchResultMappingUtil {
     }
 
     /**
-     * Get API result representation for content search
+     * Get API result representation for content search.
      *
      * @param apiProduct APIProduct
      * @return APIProductSearchResultDTO
@@ -96,8 +99,9 @@ public class SearchResultMappingUtil {
         apiProductResultDTO.setThumbnailUri(apiProduct.getThumbnailUrl());
         return apiProductResultDTO;
     }
+
     /**
-     * Get Document result representation for content search
+     * Get Document result representation for content search.
      *
      * @param document Api Document
      * @return DocumentSearchResultDTO
@@ -145,7 +149,7 @@ public class SearchResultMappingUtil {
     }
 
     /**
-     * Sets pagination urls for a SearchResultListDTO object given pagination parameters and url parameters
+     * Sets pagination urls for a SearchResultListDTO object given pagination parameters and url parameters.
      *
      * @param resultListDTO a SearchResultListDTO object
      * @param query         search condition
@@ -153,7 +157,8 @@ public class SearchResultMappingUtil {
      * @param offset        starting index
      * @param size          max offset
      */
-    public static void setPaginationParams(SearchResultListDTO resultListDTO, String query, int offset, int limit, int size) {
+    public static void setPaginationParams(SearchResultListDTO resultListDTO, String query, int offset, int limit,
+                                           int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
@@ -183,6 +188,7 @@ public class SearchResultMappingUtil {
 
     public static DocumentSearchResultDTO.SourceTypeEnum mapSourceTypeFromDocumentToDTO
             (Documentation.DocumentSourceType sourceType) throws APIManagementException {
+
         switch (sourceType) {
             case URL:
                 return DocumentSearchResultDTO.SourceTypeEnum.URL;
@@ -200,6 +206,7 @@ public class SearchResultMappingUtil {
 
     public static DocumentSearchResultDTO.VisibilityEnum mapVisibilityFromDocumentToDTO
             (Documentation.DocumentVisibility visibility) throws APIManagementException {
+
         switch (visibility) {
             case API_LEVEL:
                 return DocumentSearchResultDTO.VisibilityEnum.API_LEVEL;

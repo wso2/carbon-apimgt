@@ -274,7 +274,6 @@ class Comment extends React.Component {
                     {comments
                         && comments
                             .slice(0)
-                            .reverse()
                             .map((comment, index) => (
                                 <div key={comment.id} className={classes.contentWrapper}>
                                     {index !== 0 && <Divider light className={classes.divider} />}

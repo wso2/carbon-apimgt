@@ -391,8 +391,6 @@
   "Throttling.Advanced.AddEdit.form.timeUnit.hour": "Hour(s)",
   "Throttling.Advanced.AddEdit.form.timeUnit.minute": "Minute(s)",
   "Throttling.Advanced.AddEdit.form.timeUnit.month": "Month(s)",
-  "Throttling.Advanced.AddEdit.form.timeUnit.second": "Second(s)",
-  "Throttling.Advanced.AddEdit.form.timeUnit.year": "Year(s)",
   "Throttling.Advanced.AddEdit.form.unit.time.help": "Time configuration",
   "Throttling.Advanced.AddEdit.form.unit.time.label": "Unit Time",
   "Throttling.Advanced.AddEdit.form.update.btn": "Update",

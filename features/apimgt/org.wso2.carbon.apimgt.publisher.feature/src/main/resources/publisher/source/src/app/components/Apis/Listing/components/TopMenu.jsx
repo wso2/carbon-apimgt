@@ -136,7 +136,7 @@ function TopMenu(props) {
                             <Typography variant='caption' gutterBottom align='left' component='div'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.displaying'
-                                    defaultMessage='Displaying'
+                                    defaultMessage='Total of'
                                 />
                                 {' '}
                                 {' '}
@@ -160,12 +160,7 @@ function TopMenu(props) {
                             </Button>
                         </Link>
                     ) : (
-                        <APICreateMenu buttonProps={{
-                            variant: 'contained',
-                            color: 'primary',
-                            className: classes.button,
-                        }}
-                        >
+                        <APICreateMenu>
                             <FormattedMessage
                                 id='Apis.Listing.components.TopMenu.create.api'
                                 defaultMessage='Create API'
@@ -202,10 +197,10 @@ TopMenu.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     setListType: PropTypes.func.isRequired,
     listType: PropTypes.string.isRequired,
-    data: PropTypes.shape({ length: PropTypes.number }).isRequired,
+    data: PropTypes.arrayOf(PropTypes.object).isRequired,
     count: PropTypes.number.isRequired,
     theme: PropTypes.shape({
-        custom: PropTypes.string,
+        custom: PropTypes.shape({}),
     }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     showToggle: PropTypes.bool.isRequired,

@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
 
 /**
- * Faulty request data collector
+ * Faulty request data collector.
  */
 public class FaultyRequestDataCollector extends CommonRequestDataCollector implements RequestDataCollector {
     private static final Log log = LogFactory.getLog(FaultyRequestDataCollector.class);

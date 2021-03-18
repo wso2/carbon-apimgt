@@ -50,8 +50,8 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API Category successfully deleted. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response apiCategoriesApiCategoryIdDelete(@ApiParam(value = "API Category UUID ",required=true) @PathParam("apiCategoryId") String apiCategoryId,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.apiCategoriesApiCategoryIdDelete(apiCategoryId, ifMatch, ifUnmodifiedSince, securityContext);
+    public Response apiCategoriesApiCategoryIdDelete(@ApiParam(value = "API Category UUID ",required=true) @PathParam("apiCategoryId") String apiCategoryId) throws APIManagementException{
+        return delegate.apiCategoriesApiCategoryIdDelete(apiCategoryId, securityContext);
     }
 
     @PUT
