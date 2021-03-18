@@ -9,6 +9,7 @@ import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.OperationDTO;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.graphql.api.devportal.security.AuthenticationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,9 @@ public class OperationService {
     private static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
     public List<OperationDTO> getOperationDetails(Map<String, ContextDTO> stringContextDTOMap, String uuid) throws  APIManagementException {
-        String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
+        //String username = "wso2.anonymous.user";
+        String loggedInUserName= AuthenticationContext.getLoggedInUserName();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         String type = stringContextDTOMap.get(uuid).getType();
         OperationMapping operationMapping = new OperationMapping();
         List<OperationDTO> operationList = operationMapping.fromOperationDetailstoOperationDTO(apiConsumer.getURITemplateFromDAO(uuid),type);

@@ -9,6 +9,7 @@ import org.wso2.carbon.graphql.api.devportal.mapping.LabelMapping;
 import org.wso2.carbon.graphql.api.devportal.modules.api.LabelDTO;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.graphql.api.devportal.modules.api.LabelNameDTO;
+import org.wso2.carbon.graphql.api.devportal.security.AuthenticationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,8 @@ public class LabelService {
 
 
         //String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
+        String loggedInUserName= AuthenticationContext.getLoggedInUserName();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         List<Label> labels = apiConsumer.getLabelDataFromDAO();
         LabelMapping labelMapping = new LabelMapping();
         List<LabelDTO> labelData = labelMapping.fromLabeltoLabelDTO(labels,name);

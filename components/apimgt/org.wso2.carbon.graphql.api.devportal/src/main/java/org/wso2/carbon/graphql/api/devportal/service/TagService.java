@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.graphql.api.devportal.mapping.TagMapping;
 import org.wso2.carbon.graphql.api.devportal.modules.tag.TagDTO;
+import org.wso2.carbon.graphql.api.devportal.security.AuthenticationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,8 @@ public class TagService {
     public List<TagDTO> getAllTags() throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(null);
         //String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
+        String loggedInUserName= AuthenticationContext.getLoggedInUserName();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         Set<Tag> tagSet = apiConsumer.getAllTags(requestedTenantDomain);
         TagMapping tagMapping = new TagMapping();
         List<TagDTO> tagDTOList = tagMapping.fromTagToTagDTO(tagSet);

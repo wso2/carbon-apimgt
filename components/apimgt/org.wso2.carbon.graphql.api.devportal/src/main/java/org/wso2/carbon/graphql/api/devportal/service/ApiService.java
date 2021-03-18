@@ -22,6 +22,7 @@ import org.wso2.carbon.graphql.api.devportal.modules.api.ApiDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ApiListingDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.ContextDTO;
 import org.wso2.carbon.graphql.api.devportal.modules.api.Pagination;
+import org.wso2.carbon.graphql.api.devportal.security.AuthenticationContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -96,9 +97,10 @@ public class ApiService {
 
     public ContextDTO getApiTimeDetails(String uuid){
         //String username = "wso2.anonymous.user";
+        String loggedInUserName= AuthenticationContext.getLoggedInUserName();
         APIConsumer apiConsumer = null;
         try {
-            apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
+            apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
@@ -111,7 +113,8 @@ public class ApiService {
 
     public Float getApiRatingFromDAO(String uuid) throws APIManagementException {
         //String username = "wso2.anonymous.user";
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(ANONYMOUS_USER);
+        String loggedInUserName= AuthenticationContext.getLoggedInUserName();
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         Float rating  = apiConsumer.getRatingFromDAO(uuid);
         return rating;
     }
