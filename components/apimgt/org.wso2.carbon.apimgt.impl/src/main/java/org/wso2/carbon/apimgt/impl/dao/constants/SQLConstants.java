@@ -2718,7 +2718,7 @@ public class SQLConstants {
     public static final String CHECK_ARTIFACT_EXISTS = "SELECT 1 FROM AM_GW_API_ARTIFACTS" +
             " WHERE API_ID = ? AND REVISION_ID = ?";
     public static final String ADD_GW_PUBLISHED_LABELS = "INSERT INTO AM_GW_API_DEPLOYMENTS (API_ID,REVISION_ID," +
-            "LABEL) VALUES (?,?,?)";
+            "LABEL,VHOST) VALUES (?,?,?,?)";
     public static final String DELETE_GW_PUBLISHED_LABELS = "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ? AND " +
             "REVISION_ID = ?";
     public static final String DELETE_GW_PUBLISHED_LABELS_BY_API_ID_REVISION_ID_DEPLOYMENT = "DELETE FROM " +
