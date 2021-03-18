@@ -65,6 +65,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTP = "WebhookServer";
+    private String webHookServerHTTPS = "SecureWebhookServer";
     private String webHookFaultSequenceName = "webhooksFaultSequence";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
@@ -279,6 +280,10 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTP + ".xml"), new File(
                         synapseConfigDir.getAbsolutePath() + File.separator
                                 + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator + webHookServerHTTP
+                                + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTPS + ".xml"), new File(
+                        synapseConfigDir.getAbsolutePath() + File.separator
+                                + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator + webHookServerHTTPS
                                 + ".xml"));
             } catch (IOException e) {
                 log.error("Error while copying API manager specific synapse sequences" + e);
