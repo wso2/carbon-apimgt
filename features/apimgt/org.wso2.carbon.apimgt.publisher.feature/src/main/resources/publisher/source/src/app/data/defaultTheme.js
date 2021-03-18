@@ -114,7 +114,6 @@ export default {
     },
     custom: {
         wrapperBackground: '#f9f9f9',
-        starColor: '#f2c73a',
         disableColor: '#D3D3D3',
         leftMenuWidth: 210,
         contentAreaWidth: 1240,
@@ -125,8 +124,6 @@ export default {
         defaultApiView: 'grid', /* Sets the default view for the api listing page ( Other values available = 'list' )
                                                 To disable one option for an example if you want to disable grid
                                                 completely and get rid of the toggle buttons use ['list']. */
-        showApiHelp: false, // API details page has a right hand side panel showing it's related help. Set this
-        // to false if you want to hide it.
         leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
         leftMenuIconSize: 24,
         leftMenuIconMainSize: 52,
@@ -201,10 +198,6 @@ export default {
             menu: {
                 primary: '#34679D',
             },
-        },
-        title: {
-            prefix: '[Publisher]',
-            sufix: '- WSO2 APIM',
         },
         serviceCatalog: {
             onboarding: {
