@@ -324,7 +324,11 @@ public class GatewayArtifactsMgtDAO {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(apiId);
-                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
+                    String label = resultSet.getString("LABEL");
+                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                            resultSet.getString("VHOST"));
+                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
@@ -369,7 +373,11 @@ public class GatewayArtifactsMgtDAO {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
-                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
+                    String label = resultSet.getString("LABEL");
+                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                            resultSet.getString("VHOST"));
+                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
@@ -408,7 +416,11 @@ public class GatewayArtifactsMgtDAO {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
-                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
+                    String label = resultSet.getString("LABEL");
+                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                            resultSet.getString("VHOST"));
+                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
