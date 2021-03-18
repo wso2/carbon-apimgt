@@ -199,6 +199,10 @@ export default {
                 primary: '#34679D',
             },
         },
+        title: {
+            prefix: '[Publisher]',
+            suffix: '- WSO2 APIM',
+        },
         serviceCatalog: {
             onboarding: {
                 buttonText: '#FF7300',
