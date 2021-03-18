@@ -2977,7 +2977,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     solaceApiProducts.add(generateApiProductNameForSolaceBroker(api));
                 }
 
-                // check whether all APIs are solace APIs
+                // check whether all APIs are solace APIs               //Todo: Remove this part
                 if (numberOfExistingApisInApplication == 0) {
                     deployAsSolaceApplication = doesNewApiHasSolaceEnv;
                 } else {
@@ -6646,7 +6646,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 return response3.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
 
-            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
 
                 HttpPost request4 = new HttpPost(baseUrl + "/" + organization + "/developers/" + developerUserName + "/apps");
                 request4.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);

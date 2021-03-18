@@ -2439,7 +2439,7 @@ export default function Environments() {
                                                             onClick={() => deployRevision(selectedRevision.find(
                                                                 (r) => r.env === 'Solace Message Broker',
                                                             ).revision, 'Solace Message Broker',
-                                                            null, selectedRevision.find(
+                                                            '', selectedRevision.find(
                                                                 (r) => r.env === 'Solace Message Broker',
                                                             ).displayOnDevPortal)}
 

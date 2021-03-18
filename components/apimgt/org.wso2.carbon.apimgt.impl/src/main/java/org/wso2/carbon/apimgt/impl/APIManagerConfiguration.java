@@ -37,20 +37,14 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
-import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -121,6 +115,7 @@ public class APIManagerConfiguration {
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
+    private Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = new LinkedHashMap<String, ThirdPartyEnvironment>();
 
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
@@ -453,6 +448,30 @@ public class APIManagerConfiguration {
                                 environment.getName());
                     }
                 }
+            } else if ("ThirdPartyEnvironments".equals(localName)) {
+
+                Iterator thirdPartyEnvironmentIterator = element.getChildrenWithLocalName("ThirdPartyEnvironment");
+                thirdPartyEnvironments = new LinkedHashMap<String, ThirdPartyEnvironment>();
+
+                while (thirdPartyEnvironmentIterator.hasNext()) {
+                    ThirdPartyEnvironment thirdPartyEnvironment = new ThirdPartyEnvironment();
+                    OMElement thirdPartyEnvironmentElem = (OMElement) thirdPartyEnvironmentIterator.next();
+                    thirdPartyEnvironment.setProvider(thirdPartyEnvironmentElem.getAttributeValue(new QName("provider")));
+                    thirdPartyEnvironment.setName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName("EnvironmentName")).getText());
+                    thirdPartyEnvironment.setOrganization(thirdPartyEnvironmentElem.getFirstChildWithName(new QName("Organization")).getText());
+                    OMElement description =
+                            thirdPartyEnvironmentElem.getFirstChildWithName(new QName("Description"));
+                    if (description != null) {
+                        thirdPartyEnvironment.setDescription(description.getText());
+                    } else {
+                        thirdPartyEnvironment.setDescription("");
+                    }
+
+                    if (!thirdPartyEnvironments.containsKey(thirdPartyEnvironment.getName())) {
+                        thirdPartyEnvironments.put(thirdPartyEnvironment.getName(), thirdPartyEnvironment);
+                    }
+                }
+
             } else if (APIConstants.EXTERNAL_API_STORES
                     .equals(localName)) {  //Initialize 'externalAPIStores' config elements
                 Iterator apistoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
@@ -802,6 +821,10 @@ public class APIManagerConfiguration {
     public Map<String, Environment> getApiGatewayEnvironments() {
 
         return apiGatewayEnvironments;
+    }
+
+    public Map<String, ThirdPartyEnvironment> getThirdPartyEnvironments() {
+        return thirdPartyEnvironments;
     }
 
     public RecommendationEnvironment getApiRecommendationEnvironment() {

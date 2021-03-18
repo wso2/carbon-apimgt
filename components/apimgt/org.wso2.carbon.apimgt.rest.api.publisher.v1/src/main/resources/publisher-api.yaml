@@ -10758,6 +10758,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Deployments'
+        thirdPartyEnvironments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyEnvironment'
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object
@@ -11245,6 +11249,36 @@ components:
             For example, list out validation error by each field.
           items:
             $ref: '#/components/schemas/ErrorListItem'
+    ThirdPartyEnvironment:
+      title: ThirdParty Environment
+      required:
+        - name
+        - organization
+        - provider
+      type: object
+      properties:
+        name:
+          type: string
+          example: default
+        organization:
+          type: string
+          example: default
+        provider:
+          type: string
+          example: default
+    ThirdPartyEnvironmentList:
+      title: ThirdParty EnvironmentList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Third party environments returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyEnvironment'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

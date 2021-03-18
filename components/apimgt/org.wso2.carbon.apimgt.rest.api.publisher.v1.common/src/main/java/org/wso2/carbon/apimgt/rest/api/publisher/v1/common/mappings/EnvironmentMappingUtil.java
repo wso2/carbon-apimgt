@@ -22,10 +22,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentEndpointsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
+import org.wso2.carbon.apimgt.impl.dto.ThirdPartyEnvironment;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -146,6 +144,44 @@ public class EnvironmentMappingUtil {
      */
     private static boolean isSecureWebsocketURL(String url) {
         return url.matches("^wss://.*");
+    }
+
+    /**
+     * Converts a List object of Third party environments into DTO
+     *
+     * @param thirdPartyEnvironmentCollection a collection of Environment objects
+     * @return EnvironmentListDTO object containing EnvironmentDTOs
+     */
+    public static ThirdPartyEnvironmentListDTO
+        fromThirdPartyEnvironmentCollectionToDTO(Collection<ThirdPartyEnvironment> thirdPartyEnvironmentCollection) {
+        ThirdPartyEnvironmentListDTO thirdPartyEnvironmentListDTO = new ThirdPartyEnvironmentListDTO();
+        List<ThirdPartyEnvironmentDTO> thirdPartyEnvironmentDTOs = thirdPartyEnvironmentListDTO.getList();
+        if (thirdPartyEnvironmentDTOs == null) {
+            thirdPartyEnvironmentDTOs = new ArrayList<>();
+            thirdPartyEnvironmentListDTO.setList(thirdPartyEnvironmentDTOs);
+        }
+
+        for (ThirdPartyEnvironment thirdPartyEnvironment : thirdPartyEnvironmentCollection) {
+            thirdPartyEnvironmentDTOs.add(fromThirdPartyEnvironmentToDTO(thirdPartyEnvironment));
+        }
+        thirdPartyEnvironmentListDTO.setCount(thirdPartyEnvironmentDTOs.size());
+        return thirdPartyEnvironmentListDTO;
+    }
+
+    /**
+     * Converts an ThirdPartyEnvironment object into ThirdPartyEnvironmentDTO
+     *
+     * @param thirdPartyEnvironment Environment object
+     * @return ThirdPartyEnvironmentDTO object corresponding to the given ThirdPartyEnvironment object
+     */
+    public static ThirdPartyEnvironmentDTO fromThirdPartyEnvironmentToDTO(ThirdPartyEnvironment thirdPartyEnvironment) {
+
+        ThirdPartyEnvironmentDTO thirdPartyEnvironmentDTO = new ThirdPartyEnvironmentDTO();
+        thirdPartyEnvironmentDTO.setName(thirdPartyEnvironment.getName());
+        thirdPartyEnvironmentDTO.setOrganization(thirdPartyEnvironment.getOrganization());
+        thirdPartyEnvironmentDTO.setProvider(thirdPartyEnvironment.getProvider());
+
+        return thirdPartyEnvironmentDTO;
     }
 
 }

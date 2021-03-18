@@ -9971,6 +9971,15 @@ public final class APIUtil {
     }
 
     /**
+     * Get third-party environments defined in the configuration: api-manager.xml
+     * @return map of configured third-party environments against third-party environment name
+     */
+    public static Map<String, ThirdPartyEnvironment> getReadOnlyThirdPartyEnvironments() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getThirdPartyEnvironments();
+    }
+
+    /**
      * Get default (first) vhost of the given read only environment
      * @param environmentName name of the read only environment
      * @return default vhost of environment
