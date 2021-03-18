@@ -1648,135 +1648,6 @@ paths:
           "https://127.0.0.1:9443/api/am/admin/v2/applications/0a043c2b-ee75-4ef3-9e1c-fc2610ccfa8b/change-owner?owner=admin"'
 
   ######################################################
-  # The "Label" resource API
-  ######################################################
-  /labels:
-    get:
-      tags:
-      - Label Collection
-      summary: Get all registered Labels
-      description: |
-        Get all Registered Labels
-      responses:
-        200:
-          description: |
-            OK.
-            Labels returned
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LabelList'
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:label_read
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v2/labels"'
-
-    post:
-      tags:
-      - Label
-      summary: Add a Label
-      description: |
-        Add a new gateway label
-      requestBody:
-        description: |
-          Label object that should to be added
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Label'
-        required: true
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with the newly created object as entity in the body.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Label'
-        400:
-          $ref: '#/components/responses/BadRequest'
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:label_manage
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v2/labels"'
-
-  ######################################################
-  # The "Individual label" resource APIs
-  ######################################################
-  /labels/{labelId}:
-    put:
-      tags:
-      - Label
-      summary: Update a Label
-      description: |
-        Update a Label by label Id
-      parameters:
-      - $ref: '#/components/parameters/labelId'
-      requestBody:
-        description: |
-          Label object with updated information
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Label'
-        required: true
-      responses:
-        200:
-          description: |
-            OK.
-            Label updated.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Label'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:label_manage
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v2/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-
-    delete:
-      tags:
-      - Label
-      summary: Delete a Label
-      description: |
-        Delete a Label by label Id
-      parameters:
-      - $ref: '#/components/parameters/labelId'
-      responses:
-        200:
-          description: |
-            OK.
-            Label successfully deleted.
-          content: {}
-        404:
-          $ref: '#/components/responses/NotFound'
-      security:
-      - OAuth2Security:
-        - apim:admin
-        - apim:label_manage
-      x-code-samples:
-      - lang: Shell
-        source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v2/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-
-  ######################################################
   # The "Environment" resource API
   ######################################################
   /environments:
@@ -3917,43 +3788,6 @@ components:
           type: string
           description: The provider of the API
           example: admin
-    Label:
-      title: Label
-      required:
-      - name
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
-        name:
-          maxLength: 255
-          minLength: 1
-          type: string
-          example: Public
-        description:
-          maxLength: 1024
-          type: string
-          example: Label to use for public Gateway
-        accessUrls:
-          type: array
-          items:
-            type: string
-            example: http://localhost:9443/
-    LabelList:
-      title: Label List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of Labels returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/Label'
     Environment:
       title: Environment
       required:
@@ -4861,14 +4695,6 @@ components:
       required: true
       schema:
         type: string
-    labelId:
-      name: labelId
-      in: path
-      description: |
-        Label UUID
-      required: true
-      schema:
-        type: string
     environmentId:
       name: environmentId
       in: path
@@ -5011,8 +4837,6 @@ components:
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related
               operations
-            apim:label_manage: Manage microgateway labels
-            apim:label_read: Retrieve microgateway labels
             apim:environment_manage: Manage gateway environments
             apim:environment_read: Retrieve gateway environments
             apim:monetization_usage_publish: Retrieve and publish Monetization related

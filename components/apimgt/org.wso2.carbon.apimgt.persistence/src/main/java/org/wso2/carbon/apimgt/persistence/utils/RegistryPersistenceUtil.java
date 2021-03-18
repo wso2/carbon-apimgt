@@ -257,16 +257,6 @@ public class RegistryPersistenceUtil {
                     RegistryPersistenceUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
 
             //attaching micro-gateway labels to the API
-            
-            //clear all the existing labels first
-            artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
-            //if there are labels attached to the API object, add them to the artifact
-            if (api.getGatewayLabels() != null) {
-                List<Label> labelList = api.getGatewayLabels();
-                for (Label label : labelList) {
-                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
-                }
-            }
 
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
@@ -756,7 +746,6 @@ public class RegistryPersistenceUtil {
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
                 api.setMonetizationProperties(jsonObj);
             }
-            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -1198,24 +1187,7 @@ public class RegistryPersistenceUtil {
         }
         return deploymentEnvironmentsSet;
     }
-    
-    public static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
-            throws GovernanceException, APIManagementException {
 
-        String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
-        List<Label> gatewayLabelListForAPI = new ArrayList<>();
-
-        if (labelArray != null && labelArray.length > 0) {
-            for (String labelName : labelArray) {
-                Label label = new Label();
-                //set the name
-                label.setName(labelName);
-                gatewayLabelListForAPI.add(label);
-            }
-        }
-        return gatewayLabelListForAPI;
-    }
-    
     /**
      * This method used to extract environment list configured with non empty URLs.
      *

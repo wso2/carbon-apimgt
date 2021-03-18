@@ -151,11 +151,11 @@ export default class Protected extends Component {
         const {
             custom: {
                 title: {
-                    prefix, sufix,
+                    prefix, suffix,
                 },
             },
         } = localTheme;
-        return (prefix + sufix);
+        return (prefix + suffix);
     }
 
     /**

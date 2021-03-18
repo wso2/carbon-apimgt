@@ -39,7 +39,6 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
-import MicroGateway from 'AppComponents/Apis/Details/Environments/MicroGateway';
 import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
@@ -294,7 +293,6 @@ export default function Environments() {
     } else {
         revisionCount = 5;
     }
-    const [selectedMgLabel, setSelectedMgLabel] = useState([api.labels ? [...api.labels] : []]);
     const [selectedDeployments, setSelectedDeployments] = useState([api.deploymentEnvironments
         ? [...api.deploymentEnvironments] : []]);
     const restApi = new API();
@@ -2170,18 +2168,6 @@ export default function Environments() {
                     </Table>
                 </TableContainer>
 
-                {!api.isWebSocket()
-                    && (
-                        <MicroGateway
-                            selectedMgLabel={selectedMgLabel}
-                            setSelectedMgLabel={setSelectedMgLabel}
-                            mgLabels={mgLabels}
-                            allRevisions={allRevisions}
-                            allEnvRevision={allEnvRevision}
-                            api={api}
-                            updateAPI={updateAPI}
-                        />
-                    )}
                 {
                     allDeployments
                     && (

@@ -197,13 +197,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.applyTag(artifactPath, tag);
                 }
             }
-            
-            List<Label> candidateLabelsList = api.getGatewayLabels();
-            if (candidateLabelsList != null) {
-                for (Label label : candidateLabelsList) {
-                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
-                }
-            }
 
             String apiStatus = api.getStatus();
             saveAPIStatus(registry, artifactPath, apiStatus);

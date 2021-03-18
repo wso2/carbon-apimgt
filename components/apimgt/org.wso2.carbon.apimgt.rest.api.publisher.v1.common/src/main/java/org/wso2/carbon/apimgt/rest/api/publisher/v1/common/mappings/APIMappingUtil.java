@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -1212,16 +1211,6 @@ public class APIMappingUtil {
         setEndpointSecurityFromModelToApiDTO(model, dto, preserveCredentials);
         setMaxTpsFromModelToApiDTO(model, dto);
 
-        //setting micro-gateway labels if there are any
-        if (model.getGatewayLabels() != null) {
-            List<String> labels = new ArrayList<>();
-            List<Label> gatewayLabels = model.getGatewayLabels();
-            for (Label label : gatewayLabels) {
-                String labelName = label.getName();
-                labels.add(labelName);
-            }
-            dto.setLabels(labels);
-        }
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
         if (model.getApiSecurity() != null) {
             dto.setSecurityScheme(Arrays.asList(model.getApiSecurity().split(",")));
