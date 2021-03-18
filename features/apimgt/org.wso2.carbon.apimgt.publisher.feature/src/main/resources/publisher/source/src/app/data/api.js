@@ -2026,13 +2026,30 @@ class API extends Resource {
             return client.apis.APIs.getAPI({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
-            console.log('original object from API1');
             return promiseGet.then(callback);
         } else {
-            console.log('original object from API2' + promiseGet.obj);
             return promiseGet;
         }
     }
+
+    /**
+     * Generate Internal Key
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    static generateInternalKey(id, callback = null) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        const promiseKey = apiClient.then((client) => {
+            return client.apis.APIs.generateInternalAPIKey({ apiId: id }, this._requestMetaData());
+        });
+        if (callback) {
+            return promiseKey.then(callback);
+        } else {
+            return promiseKey;
+        }
+    }
+
 
     /**
      * Get the swagger of an API
@@ -2242,6 +2259,20 @@ class API extends Resource {
                     apiId: apiId,
                 },
             );
+        });
+    }
+
+    /**
+     * Get deployed API revision detail.
+     * @param {string} apiId  Id of the API.
+     */
+    getDeployedRevisions(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+            return apiClient.then(client => {
+                return client.apis['API Revisions'].getAPIRevisionDeployments( {
+                    apiId: apiId,
+            },
+          );
         });
     }
 

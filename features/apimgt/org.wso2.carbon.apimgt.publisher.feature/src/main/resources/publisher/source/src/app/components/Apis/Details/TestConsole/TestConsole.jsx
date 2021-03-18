@@ -20,20 +20,21 @@ import React from 'react';
 import 'AppComponents/Shared/testconsole.css';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Progress from 'AppComponents/Shared/Progress';
 import Typography from '@material-ui/core/Typography';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { FormattedMessage } from 'react-intl';
-import Paper from '@material-ui/core/Paper';
 import 'swagger-ui-react/swagger-ui.css';
-import API from 'AppData/api';
-import AuthManager, { isRestricted } from 'AppData/AuthManager';
-import { TryOutController, SwaggerUI } from 'developer_portal';
+import MenuItem from '@material-ui/core/MenuItem';
+import Progress from 'AppComponents/Shared/Progress';
+import Api from 'AppData/api';
+import Grid from '@material-ui/core/Grid';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Box from '@material-ui/core/Box';
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import TextField from '@material-ui/core/TextField';
 import ApiContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import Utils from 'AppData/Utils';
-import Alert from 'AppComponents/Shared/Alert';
+import SwaggerUI from './SwaggerUI';
 
 /**
  * @inheritdoc
@@ -120,6 +121,33 @@ const styles = (theme) => ({
     messageBox: {
         marginTop: 20,
     },
+    tokenType: {
+        margin: 'auto',
+        display: 'flex',
+        '& .MuiButton-contained.Mui-disabled span.MuiButton-label': {
+            color: '#999999',
+        },
+    },
+    genKeyButton: {
+        width: theme.spacing(20),
+        height: theme.spacing(5),
+        marginTop: theme.spacing(2.5),
+        marginLeft: theme.spacing(2),
+    },
+    gatewayEnvironment: {
+        marginTop: theme.spacing(4),
+    },
+    tooltip: {
+        marginLeft: theme.spacing(1),
+    },
+    menuItem: {
+        color: theme.palette.getContrastText(theme.palette.background.paper),
+    },
+    warningIcon: {
+        color: '#ff9a00',
+        fontSize: 25,
+        marginRight: 10,
+    },
 });
 
 /**
@@ -134,29 +162,16 @@ class TestConsole extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            securitySchemeType: 'TEST',
-            username: '',
-            password: '',
-            scopes: [],
-            selectedKeyType: 'PRODUCTION',
-            keys: [],
-            loading: false,
+            securitySchemeType: 'internalkey',
+            showToken: false,
         };
-        this.accessTokenProvider = this.accessTokenProvider.bind(this);
-        this.updateSwagger = this.updateSwagger.bind(this);
         this.setSecurityScheme = this.setSecurityScheme.bind(this);
         this.setSelectedEnvironment = this.setSelectedEnvironment.bind(this);
-        this.setProductionAccessToken = this.setProductionAccessToken.bind(this);
-        this.setSandboxAccessToken = this.setSandboxAccessToken.bind(this);
-        this.setUsername = this.setUsername.bind(this);
-        this.setPassword = this.setPassword.bind(this);
-        this.setSelectedKeyType = this.setSelectedKeyType.bind(this);
-        this.setKeys = this.setKeys.bind(this);
-        this.updateAccessToken = this.updateAccessToken.bind(this);
-        this.WORKFLOW_STATUS = {
-            CREATED: 'CREATED',
-            APPROVED: 'APPROVED',
-        };
+        this.updateSwagger = this.updateSwagger.bind(this);
+        this.generateKey = this.generateKey.bind(this);
+        this.accessTokenProvider = this.accessTokenProvider.bind(this);
+        this.handleChanges = this.handleChanges.bind(this);
+        this.handleClickShowToken = this.handleClickShowToken.bind(this);
     }
 
     /**
@@ -164,91 +179,64 @@ class TestConsole extends React.Component {
      */
     componentDidMount() {
         const { apiObj } = this.props;
+        const restApi = new Api();
         let apiData;
         let environments;
-        let labels;
         let selectedEnvironment;
         let swagger;
-        let productionAccessToken;
-        let sandboxAccessToken;
-        let apiID;
         let urls;
-        let basePath;
-        const user = AuthManager.getUser();
-        const promisedAPI = API.getAPIById(apiObj.id);
+        const promisedAPI = restApi.getDeployedRevisions(apiObj.id);
         promisedAPI
             .then((apiResponse) => {
-                apiID = apiResponse.obj.id;
-                apiData = apiResponse.obj;
-                if (apiData.gatewayEnvironments) {
-                    environments = apiData.gatewayEnvironments.map((endpoint) => { return endpoint; });
-                }
-                const securtySchemas = apiData.securityScheme;
-                securtySchemas.push('test_auth');
-                securtySchemas.shift();
-                if (apiData.endpointURLs) {
-                    environments = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
-                }
-                if (apiData.labels) {
-                    labels = apiData.labels.map((label) => { return label.name; });
-                }
-                if (apiData.scopes) {
-                    const scopeList = apiData.scopes.map((scope) => { return scope.name; });
-                    this.setState({ scopes: scopeList });
-                }
+                environments = apiResponse.body.map((env) => { return env.name; });
                 if (environments && environments.length > 0) {
                     [selectedEnvironment] = environments;
-                    return API.getSwaggerByAPIIdAndEnvironment(apiResponse.obj.id, selectedEnvironment);
-                } else if (labels && labels.length > 0) {
-                    [selectedEnvironment] = labels;
-                    return API.getSwaggerByAPIIdAndLabel(apiResponse.obj.id, selectedEnvironment);
+                    this.setState({
+                        environments,
+                        selectedEnvironment,
+
+                    });
+                }
+                return Api.getAPIById(apiObj.id);
+            })
+            .then((apiResponse) => {
+                apiData = apiResponse.obj;
+                this.setState({
+                    api: apiData,
+                });
+                if (environments && environments.length > 0) {
+                    [selectedEnvironment] = environments;
+                    return Api.getSwaggerByAPIIdAndEnvironment(apiResponse.obj.id, selectedEnvironment);
                 } else {
-                    return API.getSwaggerByAPIId(apiResponse.obj.id);
+                    return Api.getSwaggerByAPIId(apiResponse.obj.id);
                 }
             })
             .then((swaggerResponse) => {
                 swagger = swaggerResponse.obj;
-                if (user != null) {
-                    this.setState({
-                        api: apiData,
-                        swagger,
-                        environments,
-                        labels,
-                        productionAccessToken,
-                        sandboxAccessToken,
-                    });
-                    return API.getSubscriptions(apiID);
-                } else {
-                    return null;
-                }
+                this.setState({
+                    swagger,
+                });
+                return Api.getSettings();
             })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    Alert.error(error);
-                    console.error(error);
-                }
-                this.setState({ serverError: `${error.statusCode} - ${error.response.body.description}` });
-            });
-        const settingPromise = API.getSettings();
-        settingPromise
-            .then((settingsNew) => {
-                if (settingsNew.environment) {
-                    urls = settingsNew.environment.map((environment) => {
+            .then((settingsObj) => {
+                if (settingsObj.environment) {
+                    urls = settingsObj.environment.map((envo) => {
                         const env = {
-                            name: environment.name,
+                            name: envo.name,
                             endpoints: {
-                                http: environment.endpoints.http + apiData.context + '/' + apiData.version,
-                                https: environment.endpoints.https + apiData.context + '/' + apiData.version,
+                                http: envo.endpoints.http + apiData.context + '/' + apiData.version,
+                                https: envo.endpoints.https + apiData.context + '/' + apiData.version,
                             },
                         };
                         return env;
                     });
-                    basePath = apiData.context + '/' + apiData.version;
                 }
                 this.setState({
                     settings: urls,
-                    host: urls[0].endpoints.https.split('//')[1],
-                    baseUrl: basePath,
+                    apiSettings: settingsObj,
+                });
+                this.setState({
+                    swagger,
                 });
             });
     }
@@ -270,103 +258,79 @@ class TestConsole extends React.Component {
     }
 
     /**
-     * Set Production Access Token
+     * Load the swagger file of the given environment
      * @memberof ApiConsole
      */
-    setProductionAccessToken(productionAccessToken) {
-        this.setState({ productionAccessToken });
-    }
-
-    /**
-     * Set Sandbox Access Token
-     * @memberof ApiConsole
-     */
-    setSandboxAccessToken(sandboxAccessToken) {
-        this.setState({ sandboxAccessToken });
-    }
-
-    /**
-     * Set Username
-     * @memberof ApiConsole
-     */
-    setUsername(username) {
-        this.setState({ username });
-    }
-
-    /**
-     * Set Password
-     * @memberof ApiConsole
-     */
-    setPassword(password) {
-        this.setState({ password });
-    }
-
-    /**
-     * Set Password
-     * @memberof ApiConsole
-     */
-    setSelectedKeyType(selectedKeyType, isUpdateToken) {
-        if (isUpdateToken) {
-            this.setState({ selectedKeyType }, this.updateAccessToken);
-        } else {
-            this.setState({ selectedKeyType });
-        }
-    }
-
-    /**
-     * Set Password
-     * @memberof ApiConsole
-     */
-    setKeys(keys) {
-        this.setState({ keys });
-    }
-
-    handleClick = () => {
-        const { apiObj } = this.props;
-        this.setState({ loading: true });
-        const action = 'Deploy as a Prototype';
-        const promisedUpdate = API.updateLcState(apiObj.id, action);
-        const promisedApi = API.get(apiObj.id);
-        Promise.all([promisedUpdate, promisedApi]).then((values) => {
-            const getResponse = values[1];
-            const apiData = getResponse;
-            apiData.enableStore = false;
-            const token = Utils.generateUUID();
-            apiData.testKey = token;
-            this.context.updateAPI({ enableStore: false, testKey: token });
-        }).catch((error) => {
-            const { response } = error;
-            if (response.body) {
-                const { description } = response.body;
-                Alert.error(description);
-            }
-            console.error(error);
-            this.setState({ loading: false });
-        });
-    };
-
-    /**
-     * Load the swagger file of the selected environemnt
-     * @memberof ApiConsole
-     */
-    updateSwagger() {
+    updateSwagger(environment) {
+        let urls;
         const {
-            selectedEnvironment, api, environments,
+            api,
         } = this.state;
-        let promiseSwagger;
 
-        if (selectedEnvironment) {
-            if (environments.includes(selectedEnvironment)) {
-                promiseSwagger = API.getSwaggerByAPIIdAndEnvironment(api.id, selectedEnvironment);
-            } else {
-                promiseSwagger = API.getSwaggerByAPIIdAndLabel(api.id, selectedEnvironment);
-            }
+        const promiseSwagger = Api.getSwaggerByAPIIdAndEnvironment(api.id, environment);
+        const settingPromise = Api.getSettings();
+        settingPromise
+            .then((settingsNew) => {
+                if (settingsNew.environment) {
+                    urls = settingsNew.environment.map((envo) => {
+                        const env = {
+                            name: envo.name,
+                            endpoints: {
+                                http: envo.endpoints.http + api.context + '/' + api.version,
+                                https: envo.endpoints.https + api.context + '/' + api.version,
+                            },
+                        };
+                        return env;
+                    });
+                }
+                this.setState({
+                    settings: urls,
+                });
+            });
+        promiseSwagger
+            .then((swaggerResponse) => {
+                this.setState({ swagger: swaggerResponse.obj });
+            });
+    }
+
+    /**
+    * Generate Internal-Token
+    */
+    generateKey() {
+        let key;
+        const {
+            api,
+        } = this.state;
+        const promisedAPI = Api.generateInternalKey(api.id);
+        promisedAPI
+            .then((apiResponse) => {
+                key = apiResponse.obj.apikey;
+                this.setState({
+                    key,
+                    showToken: false,
+                });
+            });
+        return key;
+    }
+
+    /**
+     *
+     * Handle onClick of shown access token
+     * @memberof TryOutController
+     */
+    handleClickShowToken() {
+        const {
+            showToken,
+        } = this.state;
+        if (showToken) {
+            this.setState({
+                showToken: false,
+            });
         } else {
-            promiseSwagger = API.getSwaggerByAPIId(api.id);
+            this.setState({
+                showToken: true,
+            });
         }
-        promiseSwagger.then((swaggerResponse) => {
-            this.setState({ swagger: swaggerResponse.obj });
-        });
     }
 
     /**
@@ -377,39 +341,24 @@ class TestConsole extends React.Component {
      */
     accessTokenProvider() {
         const {
-            securitySchemeType, username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
+            securitySchemeType,
         } = this.state;
-        if (securitySchemeType === 'BASIC') {
-            const credentials = username + ':' + password;
-            return btoa(credentials);
+        if (securitySchemeType === 'internalkey') {
+            return this.state.key;
         }
-        if (securitySchemeType === 'TEST') {
-            return this.state.api.testKey;
-        }
-        if (selectedKeyType === 'PRODUCTION') {
-            return productionAccessToken;
-        } else {
-            return sandboxAccessToken;
-        }
+        return null;
     }
 
     /**
-     * Load the access token for given key type
+     * Handle onChange of inputs
+     * @param {*} event event
      * @memberof TryOutController
      */
-    updateAccessToken() {
-        const {
-            keys, selectedKeyType,
-        } = this.state;
-        let accessToken;
-        if (keys.get(selectedKeyType)) {
-            ({ accessToken } = keys.get(selectedKeyType).token);
-        }
-        if (selectedKeyType === 'PRODUCTION') {
-            this.setProductionAccessToken(accessToken);
-        } else {
-            this.setSandboxAccessToken(accessToken);
-        }
+    handleChanges(event) {
+        const { target } = event;
+        const { value } = target;
+        this.setSelectedEnvironment(value);
+        this.updateSwagger(value);
     }
 
     /**
@@ -419,25 +368,24 @@ class TestConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            swagger, api, securitySchemeType, selectedEnvironment, productionAccessToken, sandboxAccessToken,
-            labels, environments, scopes, username, password, selectedKeyType, serverError, settings, host, baseUrl,
-            loading,
+            api, swagger, securitySchemeType, selectedEnvironment, environments, settings,
+            showToken, apiSettings,
         } = this.state;
-        if (serverError) {
-            return (
-                <Typography variant='h4' className={classes.titleSub}>
-                    {serverError}
-                </Typography>
-            );
-        }
-        if (!api || !swagger || !settings) {
+        const authorizationHeader = 'Internal-Key';
+        if (!api || !securitySchemeType || !selectedEnvironment || !environments || !swagger || !settings
+            || !apiSettings) {
             return <Progress />;
         }
-        let authorizationHeader = api.authorizationHeader ? api.authorizationHeader : 'Authorization';
-        authorizationHeader = 'testkey';
+        const authHeader = `${authorizationHeader}`;
         if (!swagger.openapi) {
-            swagger.host = host;
-            swagger.basePath = baseUrl;
+            for (let i = 0; i < apiSettings.environment.length; i++) {
+                if (apiSettings.environment[i].name === selectedEnvironment) {
+                    const val = apiSettings.environment[i].endpoints.https.split('//')[1];
+                    swagger.host = val;
+                }
+            }
+            const basePath = api.context + '/' + api.version;
+            swagger.basePath = basePath;
             swagger.schemes = ['https'];
         } else {
             let servers = [];
@@ -445,149 +393,159 @@ class TestConsole extends React.Component {
             let httpsUrls = [];
             for (let i = 0; i < settings.length; i++) {
                 if (environments.includes(settings[i].name)) {
-                    httpUrls = httpUrls.concat({ url: settings[i].endpoints.http });
-                    httpsUrls = httpsUrls.concat({ url: settings[i].endpoints.https });
+                    if (settings[i].name === selectedEnvironment) {
+                        httpUrls = httpUrls.concat({ url: settings[i].endpoints.http });
+                        httpsUrls = httpsUrls.concat({ url: settings[i].endpoints.https });
+                    }
                 }
             }
             servers = httpUrls.concat(httpsUrls);
             swagger.servers = servers;
         }
-        const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
-        const enableForTest = api.enableStore === false;
         return (
             <>
-                {!isProtoTyped && (
-                    <>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.index.Tryout.not.prototyped'
-                                defaultMessage='Test Console'
-                            />
-                        </Typography>
-                        <Typography variant='caption' component='div' className={classes.helpText}>
-                            <FormattedMessage
-                                id='APis.Details.tryout.help.main'
-                                defaultMessage='Test APIs while in the Development stage.'
-                            />
-                        </Typography>
-                        <div className={classes.messageBox}>
-                            <InlineMessage type='info' height={140}>
-                                <div className={classes.contentWrapper}>
-                                    <Typography variant='h5' component='h3' className={classes.head}>
-                                        <FormattedMessage
-                                            id='Apis.Details.tryout.title'
-                                            defaultMessage='Start Testing'
-                                        />
-                                    </Typography>
-                                    <Typography component='p'>
-                                        <FormattedMessage
-                                            id='Apis.Details.tryout.initialize.test'
-                                            defaultMessage='Initialize the API for the testing phase'
-                                        />
-                                    </Typography>
-                                    <div className={classes.actions}>
-                                        <Button
-                                            variant='contained'
-                                            color='primary'
-                                            className={classes.button}
-                                            disabled={isRestricted([
-                                                'apim:api_create',
-                                                'apim:api_publish',
-                                            ], api)
-                                            || loading}
-                                            onClick={this.handleClick}
+                <Typography variant='h4' component='h1' className={classes.titleSub}>
+                    <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
+                </Typography>
+                <Grid x={12} md={6} className={classes.centerItems}>
+                    <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
+                        <Grid x={12} md={6} item>
+                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.heading'
+                                    defaultMessage='Security'
+                                />
+                            </Typography>
+                            <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.type.heading'
+                                    defaultMessage='Internal key'
+                                />
+                            </Typography>
+                            <TextField
+                                fullWidth
+                                label={(
+                                    <FormattedMessage
+                                        id='internal.token'
+                                        defaultMessage='Internal Token'
+                                    />
+                                )}
+                                type={showToken ? 'text' : 'password'}
+                                value={this.state.key}
+                                id='margin-dense'
+                                helperText='Enter access Token'
+                                margin='normal'
+                                variant='outlined'
+                                name='internal'
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position='end'>
+                                            <IconButton
+                                                edge='end'
+                                                aria-label='Toggle token visibility'
+                                                onClick={this.handleClickShowToken}
+                                            >
+                                                {showToken ? <Icon>visibility_off</Icon>
+                                                    : <Icon>visibility</Icon>}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                    startAdornment: (
+                                        <InputAdornment
+                                            style={{
+                                                minWidth: (authHeader.length * 6),
+                                            }}
+                                            position='start'
                                         >
-
-                                            {loading ? (<CircularProgress size={32} />) : (
+                                            {`${authorizationHeader}`}
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            <>
+                                <Button
+                                    onClick={this.generateKey}
+                                    variant='contained'
+                                    className={classes.genKeyButton}
+                                    name='internalToken'
+                                >
+                                    <FormattedMessage
+                                        id='Apis.Details.ApiCOnsole.generate.test.key'
+                                        defaultMessage='GET TEST KEY '
+                                    />
+                                </Button>
+                            </>
+                        </Grid>
+                    </Box>
+                    <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
+                        <Grid xs={12} md={6} item>
+                            {((environments && environments.length > 0))
+                                && (
+                                    <>
+                                        <Typography
+                                            variant='h5'
+                                            color='textPrimary'
+                                            className={classes.categoryHeading}
+                                        >
+                                            <FormattedMessage
+                                                id='api.console.gateway.heading'
+                                                defaultMessage='Gateway'
+                                            />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            select
+                                            id='environment'
+                                            label={(
                                                 <FormattedMessage
-                                                    id='Apis.Details.index.initTest'
-                                                    defaultMessage='Initialize test'
+                                                    defaultMessage='Environment'
+                                                    id='Apis.Details.ApiConsole.environment'
                                                 />
                                             )}
-                                        </Button>
-                                    </div>
-                                </div>
-                            </InlineMessage>
-                        </div>
-                    </>
-                )}
-                {(isProtoTyped && enableForTest) && (
-                    <Paper className={classes.paper}>
-                        <Typography variant='h4' className={classes.titleSub}>
-                            <FormattedMessage id='Apis.Details.index.Tryout' defaultMessage='Test Console' />
-                        </Typography>
-                        <TryOutController
-                            setSecurityScheme={this.setSecurityScheme}
-                            securitySchemeType={securitySchemeType}
-                            setSelectedEnvironment={this.setSelectedEnvironment}
-                            selectedEnvironment={selectedEnvironment}
-                            productionAccessToken={productionAccessToken}
-                            setProductionAccessToken={this.setProductionAccessToken}
-                            sandboxAccessToken={sandboxAccessToken}
-                            setSandboxAccessToken={this.setSandboxAccessToken}
-                            swagger={swagger}
-                            labels={labels}
-                            environments={environments}
-                            scopes={scopes}
-                            setUsername={this.setUsername}
-                            setPassword={this.setPassword}
-                            username={username}
-                            password={password}
-                            setSelectedKeyType={this.setSelectedKeyType}
-                            selectedKeyType={selectedKeyType}
-                            updateSwagger={this.updateSwagger}
-                            setKeys={this.setKeys}
-                            api={this.state.api}
-                        />
-                        <SwaggerUI
-                            api={this.state.api}
-                            accessTokenProvider={this.accessTokenProvider}
-                            spec={swagger}
-                            authorizationHeader={authorizationHeader}
-                            securitySchemeType={securitySchemeType}
-                        />
-                    </Paper>
-                )}
-                {(isProtoTyped && !enableForTest) && (
-                    <>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.index.Tryout.not.enable.for.test'
-                                defaultMessage='Test Console'
-                            />
-                        </Typography>
-                        <Typography variant='caption' component='div' className={classes.helpText}>
-                            <FormattedMessage
-                                id='APis.Details.tryout.help.main'
-                                defaultMessage='Test APIs while in the Development stage.'
-                            />
-                        </Typography>
-                        <div className={classes.messageBox}>
-                            <InlineMessage type='info' height={120}>
-                                <div className={classes.contentWrapper}>
-                                    <Typography variant='h5' component='h3' className={classes.head}>
-                                        <FormattedMessage
-                                            id='Apis.Details.TestConsole.TestConsole.info.title'
-                                            defaultMessage='API should be in prototype(testing) state.'
-                                        />
-                                    </Typography>
-                                    <Typography component='p'>
-                                        <FormattedMessage
-                                            id='Apis.Details.TestConsole.TestConsole.info.message'
-                                            defaultMessage={
-                                                `API should be in prototype(testing) state. 
-                                            Please demote to created state and click
-                                            on the initialize Test button 
-                                            in the Test Console left menu item.`
-                                            }
-                                        />
-                                    </Typography>
-                                </div>
-                            </InlineMessage>
-                        </div>
-                    </>
-
-                )}
+                                            value={selectedEnvironment || (environments && environments[0])}
+                                            name='selectedEnvironment'
+                                            onChange={this.handleChanges}
+                                            helperText={(
+                                                <FormattedMessage
+                                                    defaultMessage='Please select an environment'
+                                                    id='Apis.Details.ApiConsole.SelectAppPanel.environment'
+                                                />
+                                            )}
+                                            margin='normal'
+                                            variant='outlined'
+                                        >
+                                            {environments && environments.length > 0 && (
+                                                <MenuItem value='' disabled className={classes.menuItem}>
+                                                    <em>
+                                                        <FormattedMessage
+                                                            id='api.gateways'
+                                                            defaultMessage='API Gateways'
+                                                        />
+                                                    </em>
+                                                </MenuItem>
+                                            )}
+                                            {environments && (
+                                                environments.map((env) => (
+                                                    <MenuItem
+                                                        value={env}
+                                                        key={env}
+                                                        className={classes.menuItem}
+                                                    >
+                                                        {env}
+                                                    </MenuItem>
+                                                )))}
+                                        </TextField>
+                                    </>
+                                )}
+                        </Grid>
+                    </Box>
+                    <SwaggerUI
+                        api={this.state.api}
+                        accessTokenProvider={this.accessTokenProvider}
+                        spec={swagger}
+                        authorizationHeader={authorizationHeader}
+                    />
+                </Grid>
             </>
         );
     }
