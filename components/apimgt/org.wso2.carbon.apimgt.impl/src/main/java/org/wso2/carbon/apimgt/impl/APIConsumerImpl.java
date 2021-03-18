@@ -5491,25 +5491,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return getOpenAPIDefinitionForDeployment(api, null, clusterName);
     }
 
-    @Override
-    public String getOpenAPIDefinitionForLabel(API api, String labelName) throws APIManagementException {
-        List<Label> gatewayLabels;
-        String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
-        String definition;
-        if (api.getSwaggerDefinition() != null) {
-            definition = api.getSwaggerDefinition();
-        } else {
-            throw new APIManagementException("Missing API definition in the api " + api.getUuid());
-        }
-
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        gatewayLabels = api.getGatewayLabels();
-        hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
-        return updatedDefinition;
-    }
-
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();

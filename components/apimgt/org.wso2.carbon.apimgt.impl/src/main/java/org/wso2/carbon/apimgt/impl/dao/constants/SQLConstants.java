@@ -2535,24 +2535,6 @@ public class SQLConstants {
             "UPDATE AM_APPLICATION SET GROUP_ID = '' WHERE APPLICATION_ID = ?";
 
 
-    /** Label related constants **/
-
-    public static final String GET_LABEL_BY_TENANT = "select * from AM_LABELS where AM_LABELS.TENANT_DOMAIN= ? ";
-    public static final String GET_LABEL_DETAIL_BY_LABEL_AND_TENANT = "select * from AM_LABELS where TENANT_DOMAIN = " +
-            "? AND NAME = ?";
-
-    public static final String GET_URL_BY_LABEL_ID = "Select * from  AM_LABEL_URLS where LABEL_ID= ? ";
-
-    public static final String ADD_LABEL_SQL = "INSERT INTO AM_LABELS VALUES (?,?,?,?)";
-
-    public static final String ADD_LABEL_URL_MAPPING_SQL = "INSERT INTO AM_LABEL_URLS  VALUES (?,?)";
-
-    public static final String DELETE_LABEL_URL_MAPPING_SQL = "DELETE FROM AM_LABEL_URLS WHERE LABEL_ID = ?";
-
-    public static final String DELETE_LABEL_SQL = "DELETE FROM AM_LABELS WHERE LABEL_ID = ?";
-
-    public static final String UPDATE_LABEL_SQL = "UPDATE AM_LABELS SET NAME = ?, DESCRIPTION = ?  WHERE LABEL_ID = ?";
-
     /** Environment related constants **/
 
     public static final String GET_ENVIRONMENT_BY_TENANT_SQL =

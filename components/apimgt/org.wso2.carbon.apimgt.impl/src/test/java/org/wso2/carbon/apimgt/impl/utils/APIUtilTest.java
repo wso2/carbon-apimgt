@@ -1114,8 +1114,6 @@ public class APIUtilTest {
             ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
             PowerMockito.mockStatic(ApiMgtDAO.class);
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            Mockito.when(apiMgtDAO.getAllLabels(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
-                    .thenReturn(new ArrayList<Label>());
             APIUtil.createAPIArtifactContent(genericArtifact, api);
             Assert.assertTrue(true);
             APIUtil.createAPIArtifactContent(genericArtifact, api);

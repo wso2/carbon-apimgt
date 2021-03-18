@@ -1902,6 +1902,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
     /**
      * Get list of microgateway labels
      */

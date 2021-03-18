@@ -1471,14 +1471,6 @@ public interface APIProvider extends APIManager {
     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 
     /**
-     * Returns labels of a given tenant
-     *
-     * @param tenantDomain    tenant domain
-     * @return A List of labels related to the given tenant
-     */
-    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
-
-    /**
      * Remove pending lifecycle state change task for the given api.
      *
      * @param apiIdentifier api identifier
