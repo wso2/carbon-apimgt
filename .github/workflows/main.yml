@@ -1,12 +1,6 @@
 name: API Manager Build with Test
 
-on:
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:
-    branches:
-      - master
+on: [push]
 
 jobs:
 
