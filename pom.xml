@@ -1643,7 +1643,6 @@
                 <groupId>org.wso2.orbit.org.everit.json</groupId>
                 <artifactId>org.everit.json.schema</artifactId>
                 <version>${everit.version}</version>
-                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>org.wso2.securevault</groupId>

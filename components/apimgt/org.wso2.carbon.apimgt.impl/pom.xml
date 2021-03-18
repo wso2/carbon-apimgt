@@ -428,7 +428,6 @@
         <dependency>
             <groupId>org.wso2.orbit.org.everit.json</groupId>
             <artifactId>org.everit.json.schema</artifactId>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.json</groupId>
