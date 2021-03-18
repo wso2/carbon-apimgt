@@ -250,15 +250,15 @@ paths:
             source: 'curl -k "https://127.0.0.1:9443/api/am/gateway/v2/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com"
             -H "Authorization: Basic YWRtaW46YWRtaW4="'
 
-  /endpoints:
+  /end-points:
 
     #-----------------------------------------------------
     # Get Endpoints
     #-----------------------------------------------------
     get:
-      summary: Get endpoints from the storage for the API
+      summary: Get end-points from the storage for the API
       description: |
-        This operation is used to get the endpoints from the storage. If the Tenant domain is not provided
+        This operation is used to get the end-points from the storage. If the Tenant domain is not provided
         carbon.super will be picked as the Tenant domain.
       operationId: getEndpoints
       parameters:
