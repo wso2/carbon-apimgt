@@ -40,17 +40,11 @@ ApiArtifactApiService delegate = new ApiArtifactApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get API artifact from the storage", notes = "This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = APIArtifactDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
-        })
-    }, tags={ "Get API Artifacts" })
+    @ApiOperation(value = "Get API artifact from the storage", notes = "This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain is not provided carbon.super will be picked as the Tenant domain. ", response = APIArtifactDTO.class, tags={ "Get API Artifacts" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. API artifact successfully retrieved from the storage. ", response = APIArtifactDTO.class),
-        @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = APIArtifactDTO.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ErrorDTO.class) })
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response apiArtifactGet( @NotNull @ApiParam(value = "Name of the API ",required=true)  @QueryParam("apiName") String apiName,  @NotNull @ApiParam(value = "version of the API ",required=true)  @QueryParam("version") String version,  @ApiParam(value = "Tenant Domain of the API ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
         return delegate.apiArtifactGet(apiName, version, tenantDomain, securityContext);
     }

@@ -7,7 +7,7 @@ info:
   title: "WSO2 API Manager - Gateway"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.
-    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.5.176/components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/resources/admin-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.7.206/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway.v1/src/main/resources/gateway-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
   contact:
     name: "WSO2"
     url: "http://wso2.com/products/api-manager/"
@@ -50,14 +50,6 @@ consumes:
 produces:
   - application/json
 
-securityDefinitions:
-  OAuth2Security:
-    type: oauth2
-    flow: password
-    tokenUrl: https://localhost:9443/oauth2/token
-    scopes:
-      apim:api_publish: Publish API
-
 ######################################################
 # The "API Collection" resource APIs
 ######################################################
@@ -65,17 +57,13 @@ paths:
   /redeploy-api:
 
     #-----------------------------------------------------
-    # Deploy the API in the Gateway
+    # Re Deploy the API in the Gateway
     #-----------------------------------------------------
     post:
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\""
-      x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+             -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Re Deploy the API in the gateway
       description: |
         This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super
@@ -98,9 +86,8 @@ paths:
             Tenant Domain of the API
           in: query
           type: string
-
       tags:
-        - Deploy API
+        - ReDeploy API
       responses:
         200:
           description: |
@@ -108,30 +95,10 @@ paths:
             API successfully deployed in the Gateway.
           schema:
             $ref: '#/definitions/DeployResponse'
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.
-          schema:
-            $ref: '#/definitions/DeployResponse'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   /undeploy-api:
 
@@ -139,14 +106,10 @@ paths:
     # Undeploy the API in the Gateway
     #-----------------------------------------------------
     post:
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/gateway/v1/deploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\""
-      x-wso2-request: |
-        POST https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/undeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+             -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Uneploy the API in the gateway
       description: |
         This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will
@@ -169,7 +132,6 @@ paths:
             Tenant Domain of the API
           in: query
           type: string
-
       tags:
         - Undeploy API
       responses:
@@ -179,30 +141,10 @@ paths:
             API successfully undeployed from the Gateway.
           schema:
             $ref: '#/definitions/DeployResponse'
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.
-          schema:
-            $ref: '#/definitions/DeployResponse'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   /api-artifact:
 
@@ -210,14 +152,10 @@ paths:
     # Get API Artifacts
     #-----------------------------------------------------
     get:
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/api-artifact?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+             -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get API artifact from the storage
       description: |
         This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain
@@ -240,7 +178,6 @@ paths:
             Tenant Domain of the API
           in: query
           type: string
-
       tags:
         - Get API Artifacts
       responses:
@@ -250,30 +187,10 @@ paths:
             API artifact successfully retrieved from the storage.
           schema:
             $ref: '#/definitions/APIArtifact'
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.
-          schema:
-            $ref: '#/definitions/APIArtifact'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   /local-entry:
 
@@ -281,14 +198,10 @@ paths:
     # Get local entry for the API
     #-----------------------------------------------------
     get:
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: '"curl -k -X GET "https://127.0.0.1:9443/api/am/gateway/v1/local-entry?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+             -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get Local Entry from the storage
       description: |
         This operation is used to get local entry from the storage.If the Tenant domain is not provided carbon.super
@@ -311,7 +224,6 @@ paths:
             Tenant Domain of the API
           in: query
           type: string
-
       tags:
         - Get API Artifacts
       responses:
@@ -321,44 +233,20 @@ paths:
             Local entry for the API successfully retrieved from the storage.
           schema:
             $ref: '#/definitions/LocalEntry'
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.
-          schema:
-            $ref: '#/definitions/LocalEntry'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   /sequence:
     #-----------------------------------------------------
     # Get sequence for the API
     #-----------------------------------------------------
     get:
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/sequence?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+             -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get sequences from the storage
       description: |
         This operation is used to get the API sequence from the storage. If the Tenant domain is not provided carbon.super
@@ -381,7 +269,6 @@ paths:
             Tenant Domain of the API
           in: query
           type: string
-
       tags:
         - Get API Artifacts
       responses:
@@ -391,30 +278,10 @@ paths:
             Sequences for the API successfully retrieved from the storage.
           schema:
             $ref: '#/definitions/Sequences'
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.
-          schema:
-            $ref: '#/definitions/Sequences'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
   /end-points:
 
@@ -422,14 +289,10 @@ paths:
     # Get API Artifact
     #-----------------------------------------------------
     get:
-      security:
-        - OAuth2Security:
-            - apim:api_publish
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET \"https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\""
-      x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK"
+      x-code-samples:
+        - lang: Curl
+          source: '"curl -k -X POST "https://127.0.0.1:9443/api/am/gateway/v1/end-points?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\"
+             -H "Authorization: Basic YWRtaW46YWRtaW4="'
       summary: Get end-points from the storage for the API
       description: |
         This operation is used to get the end-points from the storage. If the Tenant domain is not provided
@@ -452,7 +315,6 @@ paths:
             Tenant Domain of the API
           in: query
           type: string
-
       tags:
         - Get API Artifacts
       responses:
@@ -462,47 +324,41 @@ paths:
             End-points successfully retrieved from the storage for the API.
           schema:
             $ref: '#/definitions/DeployResponse'
-        202:
-          description: |
-            Accepted.
-            The request has been accepted.
-          schema:
-            $ref: '#/definitions/DeployResponse'
         400:
-          description: |
-            Bad Request.
-            Invalid request or validation error
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/BadRequest'
         404:
-          description: |
-            Not Found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        412:
-          description: |
-            Precondition Failed.
-            The request has not been performed because one of the preconditions is not met.
-          schema:
-            $ref: '#/definitions/Error'
+          $ref: '#/responses/NotFound'
 
 ######################################################
-# Parameters - required by some of the APIs above
+# The response schemas used by the API resources
 ######################################################
-parameters:
+responses:
 
-  # API Identifier
-  # Specified as part of the query string
-  apiId-Q:
-    name: apiId
-    in: query
-    description: |
-      **API ID** consisting of the **UUID** of the API.
-      The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
-      Should be formatted as **provider-name-version**.
-    required: true
-    type: string
+  # Bad Request Error Response Schema
+  BadRequest:
+    description: Bad Request. Invalid request or validation error.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 400
+        message: "Bad Request"
+        description: "Invalid request or validation error"
+        moreInfo: ""
+        error: []
+
+  # Not Found Error Response Schema
+  NotFound:
+    description: Not Found. The specified resource does not exist.
+    schema:
+      $ref: '#/definitions/Error'
+    examples:
+      application/json:
+        code: 404
+        message: "Not Found"
+        description: "The specified resource does not exist"
+        moreInfo: ""
+        error: []
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -518,7 +374,7 @@ definitions:
     properties:
       deployStatus:
         description: |
-          This attribute declares whether deployment task is successfull or failed.
+          This attribute declares whether deployment task is successful or failed.
         type: string
         enum:
           - DEPLOYED
@@ -526,7 +382,7 @@ definitions:
         example: DEPLOYED
       jsonPayload:
         description: |
-          Attributes that returned after the api deployment
+          Attributes that returned after the API deployment
         type: string
 
   #-----------------------------------------------------
@@ -581,14 +437,14 @@ definitions:
         type: array
         items:
           type : string
-          example : "localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
+          example : "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
       UnDeployedLocalEntries:
         description: |
           The local entries which has not been deployed in the gateway
         type: array
         items:
           type : string
-          example: "localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
+          example: "<localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
 
   #-----------------------------------------------------
   # The API Artifact response resource

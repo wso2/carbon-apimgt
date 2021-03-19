@@ -52,7 +52,7 @@ public enum DeployStatusEnum {
     private String jsonPayload = null;
 
   /**
-   * This attribute declares whether deployment task is successfull or failed. 
+   * This attribute declares whether deployment task is successful or failed. 
    **/
   public DeployResponseDTO deployStatus(DeployStatusEnum deployStatus) {
     this.deployStatus = deployStatus;
@@ -60,7 +60,7 @@ public enum DeployStatusEnum {
   }
 
   
-  @ApiModelProperty(example = "DEPLOYED", required = true, value = "This attribute declares whether deployment task is successfull or failed. ")
+  @ApiModelProperty(example = "DEPLOYED", required = true, value = "This attribute declares whether deployment task is successful or failed. ")
   @JsonProperty("deployStatus")
   @NotNull
   public DeployStatusEnum getDeployStatus() {
@@ -71,7 +71,7 @@ public enum DeployStatusEnum {
   }
 
   /**
-   * Attributes that returned after the api deployment 
+   * Attributes that returned after the API deployment 
    **/
   public DeployResponseDTO jsonPayload(String jsonPayload) {
     this.jsonPayload = jsonPayload;
@@ -79,7 +79,7 @@ public enum DeployStatusEnum {
   }
 
   
-  @ApiModelProperty(value = "Attributes that returned after the api deployment ")
+  @ApiModelProperty(value = "Attributes that returned after the API deployment ")
   @JsonProperty("jsonPayload")
   public String getJsonPayload() {
     return jsonPayload;
