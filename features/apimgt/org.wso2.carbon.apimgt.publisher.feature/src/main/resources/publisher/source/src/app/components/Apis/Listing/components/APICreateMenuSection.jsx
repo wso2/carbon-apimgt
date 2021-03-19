@@ -1,8 +1,6 @@
 import React from 'react';
-import blue from '@material-ui/core/colors/blue';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 
 const APICreateMenuSection = (props) => {

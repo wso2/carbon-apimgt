@@ -6457,12 +6457,6 @@
       "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPI.created": [
-    {
-      "type": 0,
-      "value": "Sample PizzaShackAPI API created successfully"
-    }
-  ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
     {
       "type": 0,
@@ -6479,12 +6473,6 @@
     {
       "type": 0,
       "value": "Import GraphQL SDL"
-    }
-  ],
-  "Apis.Listing.SampleAPI.SampleAPI.published": [
-    {
-      "type": 0,
-      "value": "Sample PizzaShackAPI API published successfully"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": [
@@ -6613,6 +6601,66 @@
       "value": "Create New API Product"
     }
   ],
+  "Apis.Listing.SampleAPI.popup.create.complete": [
+    {
+      "type": 0,
+      "value": "API created successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.create.inprogress": [
+    {
+      "type": 0,
+      "value": "Creating sample API ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.deploy.complete": [
+    {
+      "type": 0,
+      "value": "API deployed successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.deploy.inprogress": [
+    {
+      "type": 0,
+      "value": "Deploying sample API ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.publish.complete": [
+    {
+      "type": 0,
+      "value": "API published successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.publish.inprogress": [
+    {
+      "type": 0,
+      "value": "Publishing sample API to developer portal ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.revision.complete": [
+    {
+      "type": 0,
+      "value": "API revision created successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.revision.inprogress": [
+    {
+      "type": 0,
+      "value": "Creating a revision of sample API ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.update.complete": [
+    {
+      "type": 0,
+      "value": "API updated successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.update.inprogress": [
+    {
+      "type": 0,
+      "value": "Updating sample API ..."
+    }
+  ],
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
@@ -6635,6 +6683,12 @@
     {
       "type": 0,
       "value": "Error While Loading APIs"
+    }
+  ],
+  "Apis.Listing.TaskState.generic.error.prefix": [
+    {
+      "type": 0,
+      "value": "Error while"
     }
   ],
   "Apis.Listing.components.ImageGenerator.DocThumb.apiName": [

@@ -16,7 +16,7 @@ const useStyles = makeStyles({
     overlayBox: {
         cursor: 'auto',
         outline: 'none',
-        'border-color': '#f9f9f9',
+        'border-color': '#f9f9f9', // TODO: take from theme ~tmkb
         'box-shadow': '0 0 6px 4px #f9f9f9',
         'border-radius': '5px',
     },

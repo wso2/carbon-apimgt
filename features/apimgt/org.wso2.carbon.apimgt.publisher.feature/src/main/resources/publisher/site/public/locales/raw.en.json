@@ -3072,9 +3072,6 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": {
     "defaultMessage": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
   },
-  "Apis.Listing.SampleAPI.SampleAPI.created": {
-    "defaultMessage": "Sample PizzaShackAPI API created successfully"
-  },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": {
     "defaultMessage": "GraphQL"
   },
@@ -3083,9 +3080,6 @@
   },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title": {
     "defaultMessage": "Import GraphQL SDL"
-  },
-  "Apis.Listing.SampleAPI.SampleAPI.published": {
-    "defaultMessage": "Sample PizzaShackAPI API published successfully"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": {
     "defaultMessage": "REST API"
@@ -3150,6 +3144,36 @@
   "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": {
     "defaultMessage": "Create New API Product"
   },
+  "Apis.Listing.SampleAPI.popup.create.complete": {
+    "defaultMessage": "API created successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.create.inprogress": {
+    "defaultMessage": "Creating sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.deploy.complete": {
+    "defaultMessage": "API deployed successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.deploy.inprogress": {
+    "defaultMessage": "Deploying sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.publish.complete": {
+    "defaultMessage": "API published successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.publish.inprogress": {
+    "defaultMessage": "Publishing sample API to developer portal ..."
+  },
+  "Apis.Listing.SampleAPI.popup.revision.complete": {
+    "defaultMessage": "API revision created successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.revision.inprogress": {
+    "defaultMessage": "Creating a revision of sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.update.complete": {
+    "defaultMessage": "API updated successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.update.inprogress": {
+    "defaultMessage": "Updating sample API ..."
+  },
   "Apis.Listing.SampleAPIProduct.description": {
     "defaultMessage": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
   },
@@ -3161,6 +3185,9 @@
   },
   "Apis.Listing.TableView.TableView.error.loading": {
     "defaultMessage": "Error While Loading APIs"
+  },
+  "Apis.Listing.TaskState.generic.error.prefix": {
+    "defaultMessage": "Error while"
   },
   "Apis.Listing.components.ImageGenerator.DocThumb.apiName": {
     "defaultMessage": "API Name"
@@ -3232,7 +3259,7 @@
     "defaultMessage": "Create API"
   },
   "Apis.Listing.components.TopMenu.displaying": {
-    "defaultMessage": "Total of sdasdasd"
+    "defaultMessage": "Total of"
   },
   "Apis.Listing.components.TopMenu.search.results": {
     "defaultMessage": "Search Result(s)"
