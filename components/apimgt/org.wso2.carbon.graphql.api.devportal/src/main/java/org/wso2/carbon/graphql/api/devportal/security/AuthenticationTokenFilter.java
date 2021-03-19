@@ -24,9 +24,9 @@ public class AuthenticationTokenFilter extends AbstractAuthenticationProcessingF
 
 
         AuthenticationToken token = null;
-        if (header == null || !header.startsWith("Bearer ")) {
-            token = new AuthenticationToken(null);
-        }else{
+        if (header == null ){
+            token = new AuthenticationToken(null); // for the ANONYMOUS_USER
+        }else if (header!=null & header.startsWith("Bearer ")){
             String authenticationToken = header.substring(7);
             token =new AuthenticationToken(authenticationToken);
         }

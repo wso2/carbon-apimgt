@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import org.springframework.core.io.Resource;
 import org.wso2.carbon.graphql.api.devportal.datafetcher.ApiDataFetcherImpl;
+import org.wso2.carbon.graphql.api.devportal.datafetcher.TagDataFetcherImpl;
 
 
 @Component
@@ -27,8 +28,8 @@ public class GraphqlProvider {
     @Autowired
     ApiDataFetcherImpl apiDataFetcher;
 
-//    @Autowired
-//    TagDataFetcherImpl tagDataFetcher;
+    @Autowired
+    TagDataFetcherImpl tagDataFetcher;
 
 
 
@@ -71,7 +72,6 @@ public class GraphqlProvider {
                 .type(LabelDetailsDataFetcher())
                 .type(ScopeInformationDataFetcher())
                 .type(QueryApiListing())
-                //.type(ApiTimeDetailsDataFetcher())
                 .type(APICreatedTimeDataFetcher())
                 .type(APILastUpdateDataFetcher())
                 .build();
@@ -88,12 +88,9 @@ public class GraphqlProvider {
     }
     private TypeRuntimeWiring.Builder queryApiTags(){
         return TypeRuntimeWiring.newTypeWiring("Query")
-                .dataFetcher("getTags", apiDataFetcher.getTagsData());
+                .dataFetcher("getTags", tagDataFetcher.getTagsData());
     }
-//    private TypeRuntimeWiring.Builder ApiTimeDetailsDataFetcher(){
-//        return TypeRuntimeWiring.newTypeWiring("Api")
-//                .dataFetcher("timeDetails",apiDataFetcher.getApiTimeDetails());
-//    }
+
     private TypeRuntimeWiring.Builder ApiDefinitionDataFetcher(){
         return TypeRuntimeWiring.newTypeWiring("Api")
                 .dataFetcher("apiDefinition",apiDataFetcher.getApiDefinition());

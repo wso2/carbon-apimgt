@@ -47,7 +47,7 @@ public class TierMapping {
             stopOnQuotaReached = definedTier.isStopOnQuotaReached();
 
             tierPermission = definedTier.getTierPermission();
-            Map<String, String> monetizationAttributesList = definedTier.getMonetizationAttributes();//nameList.get(i).getMonetizationAttributes();
+            Map<String, String> monetizationAttributesList = definedTier.getMonetizationAttributes();
 
             if (monetizationAttributesList != null) {
                 monetizationAttributes = monetizationAttributesList.toString();
@@ -63,7 +63,7 @@ public class TierMapping {
 
     }
 
-    public List<TierNameDTO> fromTierNametoTierNameDTO(DevPortalAPI devPortalAPI) throws APIPersistenceException {
+    public List<TierNameDTO> fromTierNametoTierNameDTO(DevPortalAPI devPortalAPI)  {
 
         List<TierNameDTO> tierNameDTOS = new ArrayList<>();
 

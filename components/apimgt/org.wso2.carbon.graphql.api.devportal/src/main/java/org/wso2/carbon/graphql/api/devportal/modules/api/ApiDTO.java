@@ -38,7 +38,6 @@ public class ApiDTO {
 
     private List<IngressUrlDTO> ingressUrl;
 
-    //private BusinessDetails test;
 
     public ApiDTO(String uuid, String name, String description, String context, String version, String provider, String type, String transport, boolean hasthumbnail, String environments, String wsdUrl, String status, boolean isSubscriptionAvailable, boolean isDefault, String authorizationHeader, String apiSecurity, boolean isMonetizationEnabled , String throttlingPolicies, String thumbnailUrl, String categories, String keyManagers, BusinessInformationDTO businessInformation, AdvertiseDTO advertiseInfo, List<APIEndpointURLsDTO> apiEndPointInformation, List<TierNameDTO> tierInformation, List<LabelNameDTO> label, List<IngressUrlDTO> ingressUrl) {
         this.uuid = uuid;
@@ -63,16 +62,11 @@ public class ApiDTO {
         this.categories = categories;
         this.keyManagers = keyManagers;
 
-
-
         this.businessInformation = businessInformation;
 
         this.advertiseInfo = advertiseInfo;
-       // this.businessInfo = businessInfo;
 
         this.apiEndPointInformation = apiEndPointInformation;
-
-        //this.test = test;
 
         this.tierInformation = tierInformation;
 

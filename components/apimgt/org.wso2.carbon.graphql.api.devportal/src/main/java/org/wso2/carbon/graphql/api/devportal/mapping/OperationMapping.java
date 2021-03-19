@@ -14,7 +14,6 @@ public class OperationMapping {
         List<OperationDTO> operationList = new ArrayList<>();
         if (APIConstants.APITransportType.GRAPHQL.toString().equals(type)) {
             operationList = new ArrayList<>();
-            ///Set<URITemplate> uriTemplates = apiConsumer.getURITemplateFromDAO(Id);
             for (URITemplate template : uriTemplates) {
                 String target = template.getUriTemplate();
                 String verb = template.getHTTPVerb();

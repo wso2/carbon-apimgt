@@ -6,20 +6,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-public class Tenant implements UserDetails {
+public class User implements UserDetails {
 
-    //private String userName;
-    private String tenantDomain;
-    //private String password;
-    //private Collection<? extends GrantedAuthority> authorities;
+    private String userName;
 
+    public User(String userName){
 
-    public Tenant(String tenantDomain){//, List<GrantedAuthority> grantedAuthorities) {
-
-//        this.userName = userName;
-//        this.password = password;
-        this.tenantDomain= tenantDomain;
-        //this.authorities = grantedAuthorities;
+        this.userName= userName;
     }
 
     @Override
@@ -34,7 +27,7 @@ public class Tenant implements UserDetails {
 
     @Override
     public String getUsername() {
-        return tenantDomain;
+        return userName;
     }
 
     @Override
@@ -63,6 +56,6 @@ public class Tenant implements UserDetails {
     }
 
     public String getTenantDomain() {
-        return tenantDomain;
+        return userName;
     }
 }

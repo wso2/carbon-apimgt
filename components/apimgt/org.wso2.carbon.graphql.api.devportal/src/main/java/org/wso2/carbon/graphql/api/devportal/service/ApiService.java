@@ -6,6 +6,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.Time;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.PersistenceManager;
@@ -33,7 +34,6 @@ public class ApiService {
 
 
     APIPersistence apiPersistenceInstance;
-    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
     public ApiListingDTO getAllApis(int start, int offset) throws APIPersistenceException, APIManagementException {
         PersistenceService persistenceService = new PersistenceService();
@@ -95,15 +95,10 @@ public class ApiService {
         return new Pagination(offset,limit,size,paginatedNext,paginatedPrevious);
     }
 
-    public ContextDTO getApiTimeDetails(String uuid){
-        //String username = "wso2.anonymous.user";
+    public ContextDTO getApiTimeDetails(String uuid) throws APIManagementException{
         String loggedInUserName= AuthenticationContext.getLoggedInUserName();
-        APIConsumer apiConsumer = null;
-        try {
-            apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
-        } catch (APIManagementException e) {
-            e.printStackTrace();
-        }
+        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
+
         Time time = apiConsumer.getTimeDetailsFromDAO(uuid);
         ContextDTO contextDTO = new ContextDTO(time.getUuid(),time.getCreatedTime(),time.getLastUpdate(), time.getType());
         return contextDTO;
@@ -112,18 +107,22 @@ public class ApiService {
     }
 
     public Float getApiRatingFromDAO(String uuid) throws APIManagementException {
-        //String username = "wso2.anonymous.user";
         String loggedInUserName= AuthenticationContext.getLoggedInUserName();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         Float rating  = apiConsumer.getRatingFromDAO(uuid);
         return rating;
     }
-    public String getMonetizationLabel(String tiers) throws APIManagementException{
+    public String getMonetizationLabel(String tiers) throws APIManagementException, UserStoreException {
 
         String[] strParts = tiers.split(",");
         List<String> listTiers = Arrays.asList(strParts);
         Set<String> tierSet = new HashSet<>(listTiers);
-        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+
+        String loggedInUserTenantDomain = AuthenticationContext.getLoggedInTenanDomain();
+
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(loggedInUserTenantDomain);
+
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
         String monetizationLabel = null;
         int free = 0, commercial = 0;

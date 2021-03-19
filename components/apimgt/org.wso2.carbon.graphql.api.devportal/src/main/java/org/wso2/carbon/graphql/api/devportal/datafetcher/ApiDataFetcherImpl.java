@@ -24,18 +24,11 @@ public class ApiDataFetcherImpl {
     OperationService operationService = new OperationService();
     LabelService labelService = new LabelService();
 
-    TagService tagData = new TagService();
-
-    public DataFetcher getTagsData(){
-        return env->tagData.getAllTags();
-    }
-
 
     public DataFetcher getApiListing(){
         return env-> {
             int start = env.getArgument("start");
             int offset = env.getArgument("offset");
-            //String oauth = env.getArgument("oauth");
             return apiService.getAllApis(start,offset);
         };
     }
@@ -50,7 +43,6 @@ public class ApiDataFetcherImpl {
     public DataFetcher getApiFromArtifact(){
         return env->{
             String uuid = env.getArgument("id");
-            //String oauth = env.getArgument("oauth");
             return apiService.getApi(uuid);
         };
     }

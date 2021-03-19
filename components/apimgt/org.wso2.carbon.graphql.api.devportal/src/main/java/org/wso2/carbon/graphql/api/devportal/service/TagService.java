@@ -16,11 +16,9 @@ import java.util.Set;
 public class TagService {
 
 
-    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
     public List<TagDTO> getAllTags() throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(null);
-        //String username = "wso2.anonymous.user";
         String loggedInUserName= AuthenticationContext.getLoggedInUserName();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         Set<Tag> tagSet = apiConsumer.getAllTags(requestedTenantDomain);

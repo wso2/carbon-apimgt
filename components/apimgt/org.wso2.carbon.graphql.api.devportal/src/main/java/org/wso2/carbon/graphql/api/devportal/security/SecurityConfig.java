@@ -47,8 +47,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests().antMatchers("**/graphql/**").permitAll()
                 .and()
-                //.exceptionHandling().authenticationEntryPoint(entryPoint)
-                //.and()
+                .exceptionHandling().authenticationEntryPoint(entryPoint)
+                .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(authenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);

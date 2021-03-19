@@ -19,10 +19,8 @@ import java.util.Set;
 public class OperationService {
 
 
-    private static final String ANONYMOUS_USER = "__wso2.am.anon__";
 
     public List<OperationDTO> getOperationDetails(Map<String, ContextDTO> stringContextDTOMap, String uuid) throws  APIManagementException {
-        //String username = "wso2.anonymous.user";
         String loggedInUserName= AuthenticationContext.getLoggedInUserName();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUserName);
         String type = stringContextDTOMap.get(uuid).getType();

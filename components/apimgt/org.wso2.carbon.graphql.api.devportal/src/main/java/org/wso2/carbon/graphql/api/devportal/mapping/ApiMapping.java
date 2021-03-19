@@ -152,29 +152,6 @@ public class ApiMapping {
         return hasthumbnail;
     }
 
-//    public String getEnvironmentList(String Id) throws APIPersistenceException {
-//
-//        PersistenceService artifactData = new PersistenceService();
-//        Set<String> environmentset = artifactData.getApiFromUUID(Id).getEnvironments();
-//        String environments = null;
-//        if(environmentset!=null){
-//            List<String> environmentList = new ArrayList<>(environmentset);
-//            environments = String.join(",",environmentList);
-//        }else{
-//            environments = null;
-//        }
-//        return environments;
-//
-//
-//    }
-//    public static Set<String> getEnvironments(String environments) {
-//        if(environments != null) {
-//            String[] publishEnvironmentArray = environments.split(",");
-//            return new HashSet<String>(Arrays.asList(publishEnvironmentArray));
-//        }
-//        return null;
-//    }
-
     public String getCatogories(Set<String> catogoriesSet){
         String catogories = null;
 
@@ -362,26 +339,5 @@ public class ApiMapping {
         }
         return apiDeployedIngressURLs;
     }
-//    public Pagination getPaginationData(int offset, int limit) throws APIPersistenceException, APIManagementException {
-//        PersistenceService artifactData = new PersistenceService();
-//        int size = artifactData.apiCount(offset, limit);
-//        String paginatedPrevious = "";
-//        String paginatedNext = "";
-//        String query = "";
-//
-//        Map<String, Integer> paginatedParams = RestApiCommonUtil.getPaginationParams(offset, limit, size);
-//
-//        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-//            paginatedPrevious = RestApiCommonUtil
-//                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-//                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
-//        }
-//
-//        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-//            paginatedNext = RestApiCommonUtil
-//                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-//                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
-//        }
-//        return new Pagination(offset,limit,size,paginatedNext,paginatedPrevious);
-//    }
+
 }
