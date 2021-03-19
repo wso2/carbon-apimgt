@@ -7120,11 +7120,13 @@ public final class APIUtil {
         if (Boolean.parseBoolean(proxyEnabled)) {
             HttpHost host = new HttpHost(proxyHost, Integer.parseInt(proxyPort), protocol);
             DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(host);
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
-                    new UsernamePasswordCredentials(proxyUsername, proxyPassword));
-            clientBuilder = clientBuilder.setRoutePlanner(routePlanner)
-                    .setDefaultCredentialsProvider(credentialsProvider);
+            clientBuilder = clientBuilder.setRoutePlanner(routePlanner);
+            if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
+                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+                        new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+                clientBuilder = clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            }
         }
         return clientBuilder.build();
     }
