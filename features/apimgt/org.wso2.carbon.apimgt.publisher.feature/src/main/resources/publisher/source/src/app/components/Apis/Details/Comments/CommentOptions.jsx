@@ -150,7 +150,7 @@ class CommentOptions extends React.Component {
         const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
         return (
             <Grid container spacing={2} className={classes.verticalSpace} key={comment.id}>
-                {comment.replyTo == null && [
+                {comment.parentCommentId == null && [
                     <Grid item key='key-reply'>
                         <Button
                             size='small'

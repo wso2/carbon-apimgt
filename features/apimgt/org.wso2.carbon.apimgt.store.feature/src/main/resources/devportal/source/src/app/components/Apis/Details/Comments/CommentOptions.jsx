@@ -166,7 +166,7 @@ class CommentOptions extends React.Component {
 
                     ]}
 
-                {comment.replyTo == null && [
+                {comment.parentCommentId == null && [
                     <Grid item key='key-reply'>
                         <Button
                             size='small'
