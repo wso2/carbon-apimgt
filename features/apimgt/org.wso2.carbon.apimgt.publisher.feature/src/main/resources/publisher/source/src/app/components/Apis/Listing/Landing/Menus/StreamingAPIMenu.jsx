@@ -3,13 +3,16 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
+import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
 import Box from '@material-ui/core/Box';
 
 const StreamingAPIMenu = (props) => {
-    const { icon, openList } = props;
+    const { icon, isCreateMenu } = props;
+    const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
+    const dense = isCreateMenu;
     return (
-        <LandingMenu
-            openList={openList}
+        <Component
+            openList={dense}
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.streaming.api'
@@ -19,7 +22,7 @@ const StreamingAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
-                dense={openList}
+                dense={dense}
                 id='itest-id-create-streaming-api-ws'
                 linkTo='/apis/create/streamingapi'
                 helperText={(
@@ -35,7 +38,7 @@ const StreamingAPIMenu = (props) => {
                 />
             </LandingMenuItem>
             <LandingMenuItem
-                dense={openList}
+                dense={dense}
                 id='itest-id-create-streaming-api-web-hook'
                 linkTo='/apis/create/streamingapi'
                 helperText={(
@@ -51,7 +54,7 @@ const StreamingAPIMenu = (props) => {
                 />
             </LandingMenuItem>
             <LandingMenuItem
-                dense={openList}
+                dense={dense}
                 id='itest-id-create-streaming-api-sse'
                 linkTo='/apis/create/streamingapi'
                 helperText={(
@@ -68,7 +71,7 @@ const StreamingAPIMenu = (props) => {
             </LandingMenuItem>
             <Box mt={2} />
             <LandingMenuItem
-                dense={openList}
+                dense={dense}
                 id='itest-id-create-streaming-api-import'
                 linkTo='/apis/create/asyncapi'
                 helperText={(
@@ -83,7 +86,7 @@ const StreamingAPIMenu = (props) => {
                     defaultMessage='Import an AsyncAPI'
                 />
             </LandingMenuItem>
-        </LandingMenu>
+        </Component>
     );
 };
 

@@ -3,13 +3,15 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
+import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
 
 const RestAPIMenu = (props) => {
-    const { icon, openList } = props;
+    const { icon, isCreateMenu } = props;
+    const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
+    const dense = isCreateMenu;
     return (
-        <LandingMenu
-            openList={openList}
+        <Component
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.rest.api'
@@ -19,7 +21,7 @@ const RestAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
-                dense={openList}
+                dense={dense}
                 id='itest-id-landing-rest-create-default'
                 linkTo='/apis/create/rest'
                 helperText={(
@@ -36,7 +38,7 @@ const RestAPIMenu = (props) => {
             </LandingMenuItem>
 
             <LandingMenuItem
-                dense={openList}
+                dense={dense}
                 id='itest-id-landing-upload-oas'
                 linkTo='/apis/create/openapi'
                 helperText={(
@@ -52,8 +54,8 @@ const RestAPIMenu = (props) => {
                 />
             </LandingMenuItem>
 
-            <SampleAPI dense={openList} />
-        </LandingMenu>
+            <SampleAPI dense={dense} />
+        </Component>
     );
 };
 

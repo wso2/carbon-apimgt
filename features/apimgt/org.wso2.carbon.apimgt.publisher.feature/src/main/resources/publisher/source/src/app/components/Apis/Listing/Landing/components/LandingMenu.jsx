@@ -7,8 +7,6 @@ import Configurations from 'Config';
 import Fade from '@material-ui/core/Fade';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import Divider from '@material-ui/core/Divider';
-import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles({
     boxTransition: {
@@ -29,7 +27,7 @@ const useStyles = makeStyles({
 
 const LandingMenu = (props) => {
     const {
-        title, icon, children, openList,
+        title, icon, children,
     } = props;
     const [isHover, setIsHover] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -42,10 +40,6 @@ const LandingMenu = (props) => {
         setIsHover(false);
     };
 
-    let menuListVisibility = 'hidden';
-    if (!isFadeOut || openList) {
-        menuListVisibility = 'visible';
-    }
     return (
         <Grid
             item
@@ -66,7 +60,7 @@ const LandingMenu = (props) => {
                 display='flex'
                 border={1}
                 boxShadow={isHover ? 4 : 1}
-                minHeight={openList ? 300 : 340}
+                minHeight={340}
                 p={1}
                 color={blue[900]}
                 fontSize='h4.fontSize'
@@ -97,9 +91,7 @@ const LandingMenu = (props) => {
                             />
                         </Box>
                     </Grid>
-
                 </Grid>
-
                 <Box
                     position='absolute'
                     top={5}
@@ -109,40 +101,23 @@ const LandingMenu = (props) => {
                     textAlign='center'
                     width='97%'
                     className={overlayBox}
-                    visibility={menuListVisibility}
+                    visibility={isFadeOut && 'hidden'}
                 >
-
                     <Fade
                         onExited={() => setIsFadeOut(true)}
                         timeout={{ enter: 500, exit: 150 }}
-                        in={isCollapsed || openList}
+                        in={isCollapsed}
                     >
                         <Box>
-                            {
-                                !openList && (
-                                    <IconButton
-                                        className={overlayCloseButton}
-                                        onClick={(e) => {
-                                            setIsCollapsed(false);
-                                            e.preventDefault(); e.stopPropagation();
-                                        }}
-                                    >
-                                        <CloseIcon />
-                                    </IconButton>
-                                )
-                            }
-
-                            {openList && (
-                                <Box mb={2}>
-                                    <Typography
-                                        variant='h6'
-                                        align='left'
-                                    >
-                                        {title}
-                                    </Typography>
-                                    <Divider />
-                                </Box>
-                            )}
+                            <IconButton
+                                className={overlayCloseButton}
+                                onClick={(e) => {
+                                    setIsCollapsed(false);
+                                    e.preventDefault(); e.stopPropagation();
+                                }}
+                            >
+                                <CloseIcon />
+                            </IconButton>
                             <Grid
                                 container
                                 direction='row'

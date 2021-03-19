@@ -12,7 +12,6 @@ const useStyles = makeStyles((theme) => ({
         color: theme.custom.landingPage.menu.primary,
         '&:hover': {
             backgroundColor: '#0B78F014',
-            padding: '2px',
             textDecoration: 'none',
         },
     },

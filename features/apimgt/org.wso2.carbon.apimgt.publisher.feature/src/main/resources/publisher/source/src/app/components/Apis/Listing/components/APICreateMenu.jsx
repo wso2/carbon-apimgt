@@ -41,11 +41,14 @@ const useStyles = makeStyles({
         transform: 'translateY(-50%)',
         margin: 'auto',
     },
+    popover: {
+        width: '70vw',
+    },
 });
 
 const APICreateMenu = () => {
     const theme = useTheme();
-    const { dividerCls } = useStyles();
+    const { dividerCls, popover } = useStyles();
     const {
         graphqlIcon,
         restApiIcon,
@@ -60,20 +63,21 @@ const APICreateMenu = () => {
             }}
             menuList={(
                 <Grid
+                    className={popover}
                     container
                     direction='row'
-                    justify='center'
+                    justify='space-around'
                     alignItems='flex-start'
-                    spacing={3}
+                    spacing={2}
                 >
-                    <RestAPIMenu openList icon={restApiIcon} />
-                    <SoapAPIMenu openList icon={soapApiIcon} />
-                    <GraphqlAPIMenu openList icon={graphqlIcon} />
-                    <StreamingAPIMenu openList icon={streamingApiIcon} />
+                    <RestAPIMenu isCreateMenu icon={restApiIcon} />
+                    <SoapAPIMenu isCreateMenu icon={soapApiIcon} />
+                    <GraphqlAPIMenu isCreateMenu icon={graphqlIcon} />
+                    <StreamingAPIMenu isCreateMenu icon={streamingApiIcon} />
                     <Box display={{ xs: 'none', lg: 'block' }} mx={2}>
                         <Divider className={dividerCls} light orientation='vertical' variant='inset' />
                     </Box>
-                    <ServiceCatalogMenu openList icon={streamingApiIcon} />
+                    <ServiceCatalogMenu isCreateMenu icon={streamingApiIcon} />
                 </Grid>
             )}
         >
