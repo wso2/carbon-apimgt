@@ -142,7 +142,11 @@ public class GatewayUtils {
 
     public static String retrieveBasicAuthAlias(String name, String version, String type) {
 
-        return name.concat("--v").concat(version).concat("--").concat("--").concat(type);
+        return name.concat("--v").concat(version).concat("--").concat(type);
+    }
+    public static String retrieveUniqueIdentifier(String name, String version, String type) {
+
+        return name.concat("--v").concat(version).concat("--").concat(type);
     }
 
 }

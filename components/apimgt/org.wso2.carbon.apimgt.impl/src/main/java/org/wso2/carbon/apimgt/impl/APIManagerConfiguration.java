@@ -23,7 +23,6 @@ import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,23 +32,23 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
-import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
+import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
-import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +67,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -113,14 +111,13 @@ public class APIManagerConfiguration {
     private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
-    private static JSONObject redisConfigProperties = new JSONObject();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
-
+    private RedisConfig redisConfig = new RedisConfig();
     public Map<String, ExtensionListener> getExtensionListenerMap() {
 
         return extensionListenerMap;
@@ -343,20 +340,17 @@ public class APIManagerConfiguration {
                 OMElement redisDatabaseId = element.getFirstChildWithName(new QName("RedisDatabaseId"));
                 OMElement redisConnectionTimeout = element.getFirstChildWithName(new QName("RedisConnectionTimeout"));
                 OMElement redisIsSslEnabled = element.getFirstChildWithName(new QName("RedisIsSslEnabled"));
-
-                if (redisHost != null && redisPort != null) {
-                    redisConfigProperties.put("isRedisEnabled", true);
-                    redisConfigProperties.put("host", redisHost.getText());
-                    redisConfigProperties.put("port", Integer.parseInt(redisPort.getText()));
-
-                    if (redisUser != null && redisPassword != null && redisDatabaseId != null
-                            && redisConnectionTimeout != null && redisIsSslEnabled != null) {
-                        redisConfigProperties.put("user", redisUser.getText());
-                        redisConfigProperties.put("password", redisPassword.getText().toCharArray());
-                        redisConfigProperties.put("databaseId", Integer.parseInt(redisDatabaseId.getText()));
-                        redisConfigProperties.put("connectionTimeout", Integer.parseInt(redisConnectionTimeout.getText()));
-                        redisConfigProperties.put("isSslEnabled", Boolean.parseBoolean(redisIsSslEnabled.getText()));
-                    }
+                redisConfig = new RedisConfig();
+                redisConfig.setRedisEnabled(true);
+                redisConfig.setHost(redisHost.getText());
+                redisConfig.setPort(Integer.parseInt(redisPort.getText()));
+                if (redisUser != null && redisPassword != null && redisDatabaseId != null
+                        && redisConnectionTimeout != null && redisIsSslEnabled != null) {
+                    redisConfig.setUser(redisUser.getText());
+                    redisConfig.setPassword(redisPassword.getText().toCharArray());
+                    redisConfig.setDatabaseId(Integer.parseInt(redisDatabaseId.getText()));
+                    redisConfig.setConnectionTimeout(Integer.parseInt(redisConnectionTimeout.getText()));
+                    redisConfig.setSslEnabled(Boolean.parseBoolean(redisIsSslEnabled.getText()));
                 }
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
@@ -426,7 +420,7 @@ public class APIManagerConfiguration {
                     environment.setEndpointsAsVhost();
                     Iterator vhostIterator = environmentElem.getFirstChildWithName(new QName(
                             APIConstants.API_GATEWAY_VIRTUAL_HOSTS)).getChildrenWithLocalName(
-                                    APIConstants.API_GATEWAY_VIRTUAL_HOST);
+                            APIConstants.API_GATEWAY_VIRTUAL_HOST);
                     while (vhostIterator.hasNext()) {
                         OMElement vhostElem = (OMElement) vhostIterator.next();
                         String httpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
@@ -545,7 +539,7 @@ public class APIManagerConfiguration {
                             jsonObject.put(APIConstants.ApplicationAttributes.DESCRIPTION, attribute.getText());
                         } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.TOOLTIP)) {
                             jsonObject.put(APIConstants.ApplicationAttributes.TOOLTIP, attribute.getText());
-                         }else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.TYPE)) {
+                        } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.TYPE)) {
                             jsonObject.put(APIConstants.ApplicationAttributes.TYPE, attribute.getText());
                         } else if (attribute.getLocalName().equals(APIConstants.ApplicationAttributes.DEFAULT) &&
                                 isRequired) {
@@ -1460,9 +1454,9 @@ public class APIManagerConfiguration {
         return workflowProperties;
     }
 
-    public JSONObject getRedisConfigProperties() {
+    public RedisConfig getRedisConfigProperties() {
 
-        return redisConfigProperties;
+        return redisConfig;
     }
 
     /**

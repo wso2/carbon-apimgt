@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators.oauth;
 
-import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,13 +29,14 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.client.TokenResponse;
 import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
-import org.wso2.carbon.apimgt.gateway.utils.redis.RedisConfig;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -47,8 +47,6 @@ import java.util.concurrent.CountDownLatch;
 public class OAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(OAuthMediator.class);
-    public RedisCacheUtils redisCacheUtils;
-    public boolean isRedisEnabled = false;
     public OAuthEndpoint oAuthEndpoint;
     private String tokenEndpointUrl;
     private String uniqueIdentifier;
@@ -58,33 +56,6 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
     private String customParameters;
     private String username;
     private String password;
-
-    /**
-     * This method retrieves the Redis Config Properties from the API Manager Configuration
-     * and passes it to an instance of RedisCacheUtils.
-     */
-    public void getRedisConfig() {
-
-        JSONObject redisConfigProperties = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getRedisConfigProperties();
-
-        RedisConfig redisConfig = new Gson().fromJson(String.valueOf(redisConfigProperties), RedisConfig.class);
-
-        if (redisConfig != null) {
-            isRedisEnabled = redisConfig.isRedisEnabled();
-            if (isRedisEnabled) {
-                if (redisConfig.getUser() != null
-                        && redisConfig.getPassword() != null
-                        && redisConfig.getConnectionTimeout() != 0) {
-                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort(),
-                            redisConfig.getConnectionTimeout(), redisConfig.getUser(),
-                            redisConfig.getPassword(), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
-                } else {
-                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort());
-                }
-            }
-        }
-    }
 
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
@@ -108,21 +79,16 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
         if (APIConstants.GRANT_TYPE_PASSWORD.equalsIgnoreCase(grantType)) {
             if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
                 log.warn("User Credentials are empty OAuthMediator will not work properly.");
+            } else {
+                oAuthEndpoint.setPassword(password.toCharArray());
+                oAuthEndpoint.setUsername(username);
             }
-        } else {
-            oAuthEndpoint.setPassword(password.toCharArray());
-            oAuthEndpoint.setUsername(username);
         }
-
-        getRedisConfig();
     }
 
     @Override
     public void destroy() {
 
-        if (isRedisEnabled) {
-            redisCacheUtils.stopRedisCacheSession();
-        }
     }
 
     @Override
@@ -144,9 +110,10 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         TokenResponse tokenResponse;
-        if (isRedisEnabled) {
+        if (ServiceReferenceHolder.getInstance().isRedisEnabled()) {
             assert oAuthEndpoint != null;
-            tokenResponse = (TokenResponse) redisCacheUtils.getObject(oAuthEndpoint.getId(), TokenResponse.class);
+            tokenResponse = (TokenResponse) ServiceReferenceHolder.getInstance().getRedisCacheUtils()
+                    .getObject(oAuthEndpoint.getId(), TokenResponse.class);
         } else {
             tokenResponse = TokenCache.getInstance().getTokenMap().get(oAuthEndpoint.getId());
         }
@@ -155,10 +122,13 @@ public class OAuthMediator extends AbstractMediator implements ManagedLifecycle 
             Map<String, Object> transportHeaders = (Map<String, Object>) ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext().getProperty("TRANSPORT_HEADERS");
             transportHeaders.put("Authorization", "Bearer " + accessToken);
-            log.debug("Access token set: " + accessToken);
+            if (log.isDebugEnabled()) {
+                log.debug("Access token set: " + GatewayUtils.getMaskedToken(accessToken));
+            }
         } else {
             log.debug("Token Response is empty...");
         }
+        messageContext.setProperty(APIMgtGatewayConstants.OAUTH_ENDPOINT_INSTANCE, oAuthEndpoint);
         return true;
     }
 
