@@ -637,6 +637,10 @@ public final class APIConstants {
         CREATED, MAPPED
     }
 
+    public enum CommentEntryPoint {
+        PUBLISHER, DEVPORTAL
+    }
+
     public static class SubscriptionCreatedStatus {
 
         public static final String SUBSCRIBE = "SUBSCRIBE";
