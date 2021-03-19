@@ -145,6 +145,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
@@ -282,6 +285,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected  ArtifactSaver artifactSaver;
     protected ImportExportAPI importExportAPI;
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
+    private RecommendationEnvironment recommendationEnvironment;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -290,6 +294,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
         this.importExportAPI = ServiceReferenceHolder.getInstance().getImportExportService();
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
+        this.recommendationEnvironment = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiRecommendationEnvironment();
     }
 
     protected String getUserNameWithoutChange() {
@@ -1547,6 +1553,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher
+                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
     }
 
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier) throws APIManagementException {
@@ -1665,6 +1679,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher
+                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+
         return api;
     }
 
@@ -4029,6 +4052,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.getStatus());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
+            // Extracting API details for the recommendation system
+            if (recommendationEnvironment != null) {
+                RecommenderEventPublisher
+                        extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
+                Thread recommendationThread = new Thread(extractor);
+                recommendationThread.start();
+            }
+
         } catch (WorkflowException e) {
             handleException("Failed to execute workflow cleanup task ", e);
         } catch (APIPersistenceException e) {
@@ -5607,6 +5638,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             uuid,apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(providerName), targetStatus);
                     APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
+                    // Extracting API details for the recommendation system
+                    if (recommendationEnvironment != null) {
+                        RecommenderEventPublisher
+                                extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+                        Thread recommendationThread = new Thread(extractor);
+                        recommendationThread.start();
+                    }
                     return response;
                 }
             }
