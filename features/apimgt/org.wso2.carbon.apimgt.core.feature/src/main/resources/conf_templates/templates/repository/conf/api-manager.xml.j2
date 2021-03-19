@@ -1309,7 +1309,13 @@
          </ContainerMgtInfo>
          {% endfor %}
      </ContainerMgt>
-
+    <ProxyConfig>
+        <Enable>{{apim.proxy_config.enable}}</Enable>
+        <Host>{{apim.proxy_config.host}}</Host>
+        <Port>{{apim.proxy_config.port}}</Port>
+        <Username>{{apim.proxy_config.username}}</Username>
+        <Password>{{apim.proxy_config.password}}</Password>
+    </ProxyConfig>
      <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
       change his/her password via devportal. By default this feature is enabled.-->
      <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
