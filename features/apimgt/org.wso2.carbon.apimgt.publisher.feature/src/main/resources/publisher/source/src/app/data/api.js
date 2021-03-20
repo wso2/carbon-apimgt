@@ -1902,16 +1902,6 @@ class API extends Resource {
         });
     }
 
-    // TODO: (renuka) Removed labels Rest API and this also should be removed
-    /**
-     * Get list of microgateway labels
-     */
-    microgatewayLabelsGet() {
-        return this.client.then(client => {
-            return client.apis['Label Collection'].getLabels();
-        });
-    }
-
     /**
      * Get the complexity related details of an API
      */

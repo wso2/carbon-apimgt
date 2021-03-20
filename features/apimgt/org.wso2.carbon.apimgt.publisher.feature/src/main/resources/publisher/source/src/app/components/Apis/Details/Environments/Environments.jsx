@@ -308,7 +308,6 @@ export default function Environments() {
     const [selectedVhostDeploy, setVhostsDeploy] = useState(defaultVhosts);
     const [extraRevisionToDelete, setExtraRevisionToDelete] = useState(null);
     const [description, setDescription] = useState('');
-    const [mgLabels, setMgLabels] = useState([]);
     const [SelectedEnvironment, setSelectedEnvironment] = useState([]);
     const [open, setOpen] = useState(false);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
@@ -348,10 +347,6 @@ export default function Environments() {
                 .then((result) => {
                     setAllDeployments(result.body.list);
                 });
-            restApi.microgatewayLabelsGet()
-                .then((result) => {
-                    setMgLabels(result.body.list);
-                });
             restApi.getRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
                 setLastRevisionCount(result.body.count);
@@ -364,10 +359,6 @@ export default function Environments() {
             restApi.getDeployments()
                 .then((result) => {
                     setAllDeployments(result.body.list);
-                });
-            restApi.microgatewayLabelsGet()
-                .then((result) => {
-                    setMgLabels(result.body.list);
                 });
             restProductApi.getProductRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
@@ -1627,101 +1618,6 @@ export default function Environments() {
                                 ))}
                             </Grid>
                         </Box>
-                        {mgLabels.length > 0 && mgLabels.map((row) => (
-                            <Box mt={2}>
-                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                    <FormattedMessage
-                                        id='Apis.Details.Environments.Environments.gateway.labels.heading'
-                                        defaultMessage='Gateway Labels'
-                                    />
-                                </Typography>
-                                <Grid
-                                    container
-                                    spacing={3}
-                                >
-                                    <Grid item xs={4}>
-                                        <Card
-                                            className={clsx(SelectedEnvironment
-                                                && SelectedEnvironment.includes(row.name)
-                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
-                                            variant='outlined'
-                                        >
-                                            <Box height='100%'>
-                                                <CardHeader
-                                                    action={(
-                                                        <Checkbox
-                                                            id={row.name.split(' ').join('')}
-                                                            value={row.displayName}
-                                                            checked={SelectedEnvironment.includes(row.name)}
-                                                            onChange={handleChange}
-                                                            color='primary'
-                                                            icon={<RadioButtonUncheckedIcon />}
-                                                            checkedIcon={<CheckCircleIcon color='primary' />}
-                                                            inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                                        />
-                                                    )}
-                                                    title={(
-                                                        <Typography variant='subtitle2'>
-                                                            {row.displayName}
-                                                        </Typography>
-                                                    )}
-                                                    subheader={(
-                                                        <Typography
-                                                            variant='body2'
-                                                            color='textSecondary'
-                                                            gutterBottom
-                                                        >
-                                                            {row.type}
-                                                        </Typography>
-                                                    )}
-                                                />
-                                                <CardContent className={classes.cardContentHeight}>
-                                                    <Grid
-                                                        container
-                                                        direction='column'
-                                                        spacing={2}
-                                                    >
-                                                        <Grid item>
-                                                            {allEnvRevision && allEnvRevision.filter(
-                                                                (o1) => {
-                                                                    if (o1.deploymentInfo.filter(
-                                                                        (o2) => o2.name === row.name,
-                                                                    ).length > 0) {
-                                                                        return o1;
-                                                                    }
-                                                                    return null;
-                                                                },
-                                                            ).length !== 0 ? (
-                                                                    allEnvRevision && allEnvRevision.filter(
-                                                                        (o1) => {
-                                                                            if (o1.deploymentInfo.filter(
-                                                                                (o2) => o2.name === row.name,
-                                                                            ).length > 0) {
-                                                                                return o1;
-                                                                            }
-                                                                            return null;
-                                                                        },
-                                                                    ).map((o3) => (
-                                                                        <div>
-                                                                            <Chip
-                                                                                label={o3.displayName}
-                                                                                style={{ backgroundColor: '#15B8CF' }}
-                                                                            />
-                                                                        </div>
-                                                                    ))) : (
-                                                                    // eslint-disable-next-line react/jsx-indent
-                                                                    <div />
-                                                                )}
-                                                        </Grid>
-                                                        <Grid item />
-                                                    </Grid>
-                                                </CardContent>
-                                            </Box>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
-                            </Box>
-                        ))}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseDeployPopup}>
