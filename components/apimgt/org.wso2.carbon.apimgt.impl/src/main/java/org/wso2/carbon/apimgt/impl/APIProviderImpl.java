@@ -8684,14 +8684,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public org.wso2.carbon.apimgt.api.model.CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID,
-                                                                  Integer replyLimit, Integer replyOffset) throws
+                                                                    Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
         return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
     }
 
     @Override
     public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
-            APIManagementException{
+            APIManagementException {
         return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
     }
 

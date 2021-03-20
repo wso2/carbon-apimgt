@@ -461,7 +461,6 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={ "Comments",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Comment updated. ", response = CommentDTO.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),

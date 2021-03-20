@@ -1973,7 +1973,7 @@ paths:
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               schema:
                 type: string
-            Location: #???
+            Location:
               description: |
                 Location to the newly created Comment.
               schema:
@@ -1982,11 +1982,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-          content: {}
         400:
           $ref: '#/components/responses/BadRequest'
         401:
