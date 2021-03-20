@@ -1155,12 +1155,6 @@
       "value": "Enter valid role and press enter"
     }
   ],
-  "Apis.Details.ApiCOnsole.generate.test.key": [
-    {
-      "type": 0,
-      "value": "GET TEST KEY"
-    }
-  ],
   "Apis.Details.ApiConsole.ApiConsole.title": [
     {
       "type": 0,
@@ -1173,10 +1167,28 @@
       "value": "Please select an environment"
     }
   ],
+  "Apis.Details.ApiConsole.deployments.api.gateways": [
+    {
+      "type": 0,
+      "value": "API Gateways"
+    }
+  ],
+  "Apis.Details.ApiConsole.deployments.no": [
+    {
+      "type": 0,
+      "value": "API is not deployed yet! Please deploy the API before trying out"
+    }
+  ],
   "Apis.Details.ApiConsole.environment": [
     {
       "type": 0,
       "value": "Environment"
+    }
+  ],
+  "Apis.Details.ApiConsole.generate.test.key": [
+    {
+      "type": 0,
+      "value": "Generate Key"
     }
   ],
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": [
@@ -1368,7 +1380,7 @@
   "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Configure basic API Product meta informations"
+      "value": "Configure basic API Product meta information"
     }
   ],
   "Apis.Details.Configuration.Configuration.Design.sub.heading": [
@@ -6105,6 +6117,12 @@
       "value": "Error while retrieving the subscriptions"
     }
   ],
+  "Apis.Details.TestConsole.token.label": [
+    {
+      "type": 0,
+      "value": "Internal API Key"
+    }
+  ],
   "Apis.Details.components.APIDetailsTopMenu.created.by": [
     {
       "type": 0,
@@ -8161,28 +8179,10 @@
       "value": "Internal Server Error"
     }
   ],
-  "api.console.gateway.heading": [
-    {
-      "type": 0,
-      "value": "Gateway"
-    }
-  ],
   "api.console.security.heading": [
     {
       "type": 0,
       "value": "Security"
-    }
-  ],
-  "api.console.security.type.heading": [
-    {
-      "type": 0,
-      "value": "Internal key"
-    }
-  ],
-  "api.gateways": [
-    {
-      "type": 0,
-      "value": "API Gateways"
     }
   ],
   "app.components.Shared.Banner.back": [
@@ -8273,12 +8273,6 @@
     {
       "type": 0,
       "value": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-    }
-  ],
-  "internal.token": [
-    {
-      "type": 0,
-      "value": "Internal Token"
     }
   ],
   "save": [

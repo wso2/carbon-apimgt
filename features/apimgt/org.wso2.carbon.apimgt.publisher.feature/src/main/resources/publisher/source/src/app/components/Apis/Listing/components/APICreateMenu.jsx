@@ -32,18 +32,28 @@ import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/Streaming
 import ServiceCatalogMenu from 'AppComponents/Apis/Listing/Landing/Menus/ServiceCatalogMenu';
 import MenuButton from 'AppComponents/Shared/MenuButton';
 
-const useStyles = makeStyles({
-    dividerCls: {
-        height: '180px',
-        position: 'absolute',
-        top: '50%',
-        '-ms-transform': 'translateY(-50%)',
-        transform: 'translateY(-50%)',
-        margin: 'auto',
-    },
-    popover: {
-        width: '70vw',
-    },
+const useStyles = makeStyles((theme) => {
+    return {
+        dividerCls: {
+            height: '180px',
+            position: 'absolute',
+            top: '50%',
+            '-ms-transform': 'translateY(-50%)',
+            transform: 'translateY(-50%)',
+            margin: 'auto',
+        },
+        popover: {
+            [theme.breakpoints.down('sm')]: {
+                width: '95vw',
+            },
+            [theme.breakpoints.up('md')]: {
+                width: '85vw',
+            },
+            [theme.breakpoints.up('lg')]: {
+                width: '65vw',
+            },
+        },
+    };
 });
 
 const APICreateMenu = () => {
@@ -74,7 +84,7 @@ const APICreateMenu = () => {
                     <SoapAPIMenu isCreateMenu icon={soapApiIcon} />
                     <GraphqlAPIMenu isCreateMenu icon={graphqlIcon} />
                     <StreamingAPIMenu isCreateMenu icon={streamingApiIcon} />
-                    <Box display={{ xs: 'none', lg: 'block' }} mx={2}>
+                    <Box display={{ xs: 'none', md: 'block' }} mx={2}>
                         <Divider className={dividerCls} light orientation='vertical' variant='inset' />
                     </Box>
                     <ServiceCatalogMenu isCreateMenu icon={streamingApiIcon} />

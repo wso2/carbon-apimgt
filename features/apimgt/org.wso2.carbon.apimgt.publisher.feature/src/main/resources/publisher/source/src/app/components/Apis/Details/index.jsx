@@ -606,7 +606,7 @@ class Details extends Component {
         }
 
         if (!api) {
-            return <Progress />;
+            return <Progress per={70} message='Loading API data ...' />;
         }
         const { leftMenuIconMainSize } = theme.custom;
 
@@ -801,7 +801,7 @@ class Details extends Component {
                             Icon={<PersonPinCircleOutlinedIcon />}
                         />
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'PUBLISHED' && (
+                            && !isRestricted(['apim:api_publish'], api) && (
                             <div>
                                 <Divider />
                                 <Typography className={classes.headingText}>Test</Typography>

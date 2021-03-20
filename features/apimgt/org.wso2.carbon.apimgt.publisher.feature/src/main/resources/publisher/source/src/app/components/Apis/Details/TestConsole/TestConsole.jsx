@@ -16,540 +16,266 @@
  * under the License.
  */
 
-import React from 'react';
-import 'AppComponents/Shared/testconsole.css';
-import { withStyles } from '@material-ui/core/styles';
+import React, {
+    useState, useEffect, useCallback, useReducer, useMemo,
+} from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 import 'swagger-ui-react/swagger-ui.css';
 import MenuItem from '@material-ui/core/MenuItem';
-import Progress from 'AppComponents/Shared/Progress';
+import cloneDeep from 'lodash.clonedeep';
 import Api from 'AppData/api';
 import Grid from '@material-ui/core/Grid';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import Box from '@material-ui/core/Box';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Paper from '@material-ui/core/Paper';
+import { Link } from 'react-router-dom';
+import LaunchIcon from '@material-ui/icons/Launch';
 import TextField from '@material-ui/core/TextField';
-import ApiContext, { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import Utils from 'AppData/Utils';
+import { usePublisherSettings } from 'AppComponents/Shared/AppContext';
+import Alert from 'AppComponents/Shared/MuiAlert';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import SwaggerUI from './SwaggerUI';
 
-/**
- * @inheritdoc
- * @param {*} theme theme
- */
-const styles = (theme) => ({
-    centerItems: {
-        margin: 'auto',
-    },
-    categoryHeading: {
-        marginBottom: theme.spacing(2),
-        marginLeft: theme.spacing(-5),
-    },
-    contentWrapper: {
-        maxWidth: theme.custom.contentAreaWidth,
-    },
-    buttonIcon: {
-        marginRight: 10,
-    },
-    paper: {
-        margin: theme.spacing(1),
-        padding: theme.spacing(1),
-        '& span, & h5, & label, & td, & li, & div, & input': {
-            color: theme.palette.getContrastText(theme.palette.background.paper),
-        },
-    },
-    grid: {
-        marginTop: theme.spacing(4),
-        marginBottom: theme.spacing(4),
-        paddingRight: theme.spacing(2),
-        justifyContent: 'center',
-    },
-    userNotificationPaper: {
-        padding: theme.spacing(2),
-    },
-    titleSub: {
-        marginLeft: theme.spacing(2),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-        color: theme.palette.getContrastText(theme.palette.background.default),
-    },
-    tryoutHeading: {
-        fontWeight: 400,
-    },
-    noDataMessage: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#888888',
-        width: '100%',
-    },
-    swaggerUIPaper: {
-        showTryout: true,
-        swaggerUIBackground: '#efefef',
-        documentBackground: '#efefef',
-        tokenTextBoxBackground: '#efefef',
-    },
-    stateButton: {
-        marginRight: theme.spacing(),
-    },
-    head: {
-        fontWeight: 200,
-        marginBottom: 20,
-    },
-    emptyBox: {
-        marginTop: theme.spacing(2),
-    },
-    content: {
-        display: 'flex',
-        flex: 1,
-        flexDirection: 'column',
-        marginLeft: theme.custom.leftMenuWidth,
-        paddingBottom: theme.spacing(3),
-    },
-    actions: {
-        padding: '20px 0',
-        '& button': {
-            marginLeft: 0,
-        },
-    },
-    helpText: {
-        paddingTop: theme.spacing(1),
-    },
-    messageBox: {
-        marginTop: 20,
-    },
-    tokenType: {
-        margin: 'auto',
-        display: 'flex',
-        '& .MuiButton-contained.Mui-disabled span.MuiButton-label': {
-            color: '#999999',
-        },
-    },
-    genKeyButton: {
-        width: theme.spacing(20),
-        height: theme.spacing(5),
-        marginTop: theme.spacing(2.5),
-        marginLeft: theme.spacing(2),
-    },
-    gatewayEnvironment: {
-        marginTop: theme.spacing(4),
-    },
-    tooltip: {
-        marginLeft: theme.spacing(1),
-    },
-    menuItem: {
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-    warningIcon: {
-        color: '#ff9a00',
-        fontSize: 25,
-        marginRight: 10,
-    },
-});
+dayjs.extend(relativeTime);
+
+const tasksReducer = (state, action) => {
+    const { name, status } = action;
+    // In the case of a key collision, the right-most (last) object's value wins out
+    return { ...state, [name]: { ...state[name], ...status } };
+};
 
 /**
  * @class TestConsole
  * @extends {React.Component}
  */
-class TestConsole extends React.Component {
-    /**
-     *
-     * @param {*} props the props parameters
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            securitySchemeType: 'internalkey',
-            showToken: false,
-        };
-        this.setSecurityScheme = this.setSecurityScheme.bind(this);
-        this.setSelectedEnvironment = this.setSelectedEnvironment.bind(this);
-        this.updateSwagger = this.updateSwagger.bind(this);
-        this.generateKey = this.generateKey.bind(this);
-        this.accessTokenProvider = this.accessTokenProvider.bind(this);
-        this.handleChanges = this.handleChanges.bind(this);
-        this.handleClickShowToken = this.handleClickShowToken.bind(this);
-    }
+const TestConsole = () => {
+    const [api] = useAPI();
+    const [apiKey, setAPIKey] = useState('');
+    const [deployments, setDeployments] = useState([]);
+    const [selectedDeployment, setSelectedDeployment] = useState();
+    const [oasDefinition, setOasDefinition] = useState();
+    const publisherSettings = usePublisherSettings();
 
-    /**
-     * @memberof ApiConsole
-     */
-    componentDidMount() {
-        const { apiObj } = this.props;
-        const restApi = new Api();
-        let apiData;
-        let environments;
-        let selectedEnvironment;
-        let swagger;
-        let urls;
-        const promisedAPI = restApi.getDeployedRevisions(apiObj.id);
-        promisedAPI
-            .then((apiResponse) => {
-                environments = apiResponse.body.map((env) => { return env.name; });
-                if (environments && environments.length > 0) {
-                    [selectedEnvironment] = environments;
-                    this.setState({
-                        environments,
-                        selectedEnvironment,
+    const [tasksStatus, tasksStatusDispatcher] = useReducer(tasksReducer, {
+        generateKey: { inProgress: false, completed: false, error: false },
+        getOAS: { inProgress: false, completed: false, error: false },
+        getDeployments: { inProgress: false, completed: false, error: false },
+    });
 
-                    });
-                }
-                return Api.getAPIById(apiObj.id);
-            })
-            .then((apiResponse) => {
-                apiData = apiResponse.obj;
-                this.setState({
-                    api: apiData,
-                });
-                if (environments && environments.length > 0) {
-                    [selectedEnvironment] = environments;
-                    return Api.getSwaggerByAPIIdAndEnvironment(apiResponse.obj.id, selectedEnvironment);
-                } else {
-                    return Api.getSwaggerByAPIId(apiResponse.obj.id);
-                }
-            })
-            .then((swaggerResponse) => {
-                swagger = swaggerResponse.obj;
-                this.setState({
-                    swagger,
-                });
-                return Api.getSettings();
-            })
-            .then((settingsObj) => {
-                if (settingsObj.environment) {
-                    urls = settingsObj.environment.map((envo) => {
-                        const env = {
-                            name: envo.name,
-                            endpoints: {
-                                http: envo.endpoints.http + apiData.context + '/' + apiData.version,
-                                https: envo.endpoints.https + apiData.context + '/' + apiData.version,
-                            },
-                        };
-                        return env;
-                    });
-                }
-                this.setState({
-                    settings: urls,
-                    apiSettings: settingsObj,
-                });
-                this.setState({
-                    swagger,
-                });
-            });
-    }
+    const generateInternalKey = useCallback(() => {
+        tasksStatusDispatcher({ name: 'generateKey', status: { inProgress: true } });
+        Api.generateInternalKey(api.id).then((keyResponse) => {
+            const { apikey } = keyResponse.body;
+            setAPIKey(apikey);
+            tasksStatusDispatcher({ name: 'generateKey', status: { inProgress: false, completed: true } });
+        }).catch((error) => tasksStatusDispatcher({ name: 'generateKey', status: { error, inProgress: false } }));
+    }, [api.id]);
 
-    /**
-     * Set SecurityScheme value
-     * @memberof ApiConsole
-     */
-    setSecurityScheme(securityScheme) {
-        this.setState({ securitySchemeType: securityScheme });
-    }
-
-    /**
-     * Set Selected Environment
-     * @memberof ApiConsole
-     */
-    setSelectedEnvironment(selectedEnvironment) {
-        this.setState({ selectedEnvironment });
-    }
-
-    /**
-     * Load the swagger file of the given environment
-     * @memberof ApiConsole
-     */
-    updateSwagger(environment) {
-        let urls;
-        const {
-            api,
-        } = this.state;
-
-        const promiseSwagger = Api.getSwaggerByAPIIdAndEnvironment(api.id, environment);
-        const settingPromise = Api.getSettings();
-        settingPromise
-            .then((settingsNew) => {
-                if (settingsNew.environment) {
-                    urls = settingsNew.environment.map((envo) => {
-                        const env = {
-                            name: envo.name,
-                            endpoints: {
-                                http: envo.endpoints.http + api.context + '/' + api.version,
-                                https: envo.endpoints.https + api.context + '/' + api.version,
-                            },
-                        };
-                        return env;
-                    });
-                }
-                this.setState({
-                    settings: urls,
-                });
-            });
-        promiseSwagger
-            .then((swaggerResponse) => {
-                this.setState({ swagger: swaggerResponse.obj });
-            });
-    }
-
-    /**
-    * Generate Internal-Token
-    */
-    generateKey() {
-        let key;
-        const {
-            api,
-        } = this.state;
-        const promisedAPI = Api.generateInternalKey(api.id);
-        promisedAPI
-            .then((apiResponse) => {
-                key = apiResponse.obj.apikey;
-                this.setState({
-                    key,
-                    showToken: false,
-                });
-            });
-        return key;
-    }
-
-    /**
-     *
-     * Handle onClick of shown access token
-     * @memberof TryOutController
-     */
-    handleClickShowToken() {
-        const {
-            showToken,
-        } = this.state;
-        if (showToken) {
-            this.setState({
-                showToken: false,
-            });
-        } else {
-            this.setState({
-                showToken: true,
-            });
-        }
-    }
-
-    /**
-     *
-     * Provids the access token to the Swagger UI
-     * @returns {*} access token
-     * @memberof ApiConsole
-     */
-    accessTokenProvider() {
-        const {
-            securitySchemeType,
-        } = this.state;
-        if (securitySchemeType === 'internalkey') {
-            return this.state.key;
-        }
-        return null;
-    }
-
-    /**
-     * Handle onChange of inputs
-     * @param {*} event event
-     * @memberof TryOutController
-     */
-    handleChanges(event) {
-        const { target } = event;
-        const { value } = target;
-        this.setSelectedEnvironment(value);
-        this.updateSwagger(value);
-    }
-
-    /**
-     * @inheritdoc
-     * @memberof ApiConsole
-     */
-    render() {
-        const { classes } = this.props;
-        const {
-            api, swagger, securitySchemeType, selectedEnvironment, environments, settings,
-            showToken, apiSettings,
-        } = this.state;
-        const authorizationHeader = 'Internal-Key';
-        if (!api || !securitySchemeType || !selectedEnvironment || !environments || !swagger || !settings
-            || !apiSettings) {
-            return <Progress />;
-        }
-        const authHeader = `${authorizationHeader}`;
-        if (!swagger.openapi) {
-            for (let i = 0; i < apiSettings.environment.length; i++) {
-                if (apiSettings.environment[i].name === selectedEnvironment) {
-                    const val = apiSettings.environment[i].endpoints.https.split('//')[1];
-                    swagger.host = val;
-                }
+    useEffect(() => {
+        tasksStatusDispatcher({ name: 'getDeployments', status: { inProgress: true } });
+        api.getDeployedRevisions().then((deploymentsResponse) => {
+            tasksStatusDispatcher({ name: 'getDeployments', status: { inProgress: false, completed: true } });
+            const currentDeployments = deploymentsResponse.body;
+            setDeployments(currentDeployments);
+            if (currentDeployments && currentDeployments.length > 0) {
+                const [initialDeploymentSelection] = currentDeployments;
+                setSelectedDeployment(initialDeploymentSelection);
             }
-            const basePath = api.context + '/' + api.version;
-            swagger.basePath = basePath;
-            swagger.schemes = ['https'];
-        } else {
-            let servers = [];
-            let httpUrls = [];
-            let httpsUrls = [];
-            for (let i = 0; i < settings.length; i++) {
-                if (environments.includes(settings[i].name)) {
-                    if (settings[i].name === selectedEnvironment) {
-                        httpUrls = httpUrls.concat({ url: settings[i].endpoints.http });
-                        httpsUrls = httpsUrls.concat({ url: settings[i].endpoints.https });
-                    }
+        }).catch((error) => tasksStatusDispatcher({ name: 'getDeployments', status: { inProgress: false, error } }));
+        api.getSwagger().then((swaggerResponse) => setOasDefinition(swaggerResponse.body));
+    }, []);
+
+    const updatedOasDefinition = useMemo(() => {
+        let oasCopy;
+        if (selectedDeployment && oasDefinition) {
+            // TODO: Need to handle Swagger 2.0 as well ~tmkb
+            const selectedGWEnvironment = publisherSettings.environment
+                .find((env) => env.name === selectedDeployment.name);
+            const selectedDeploymentVhost = selectedGWEnvironment.vhosts
+                .find((vhost) => vhost.host === selectedDeployment.vhost);
+            const servers = api.transport.map((transport) => {
+                const transportPort = selectedDeploymentVhost[`${transport}Port`];
+                if (!transportPort) {
+                    console.error(`Can't find ${transport}Port `
+                    + `in selected deployment ( ${selectedDeploymentVhost.name} )`);
                 }
-            }
-            servers = httpUrls.concat(httpsUrls);
-            swagger.servers = servers;
+                const baseURL = `${transport}://${selectedDeployment.vhost}:${transportPort}`;
+                let pathSeparator = '';
+                if (selectedDeploymentVhost.httpContext && !selectedDeploymentVhost.httpContext.startsWith('/')) {
+                    pathSeparator = '/';
+                }
+                const url = `${baseURL}${pathSeparator}`
+                + `${selectedDeploymentVhost.httpContext}${api.context}/${api.version}`;
+                return { url };
+            });
+            oasCopy = cloneDeep(oasDefinition);
+            oasCopy.servers = servers;
+        } else if (oasDefinition) {
+            // If no deployment just show the OAS definition
+            oasCopy = oasDefinition;
         }
-        return (
-            <>
-                <Typography variant='h4' component='h1' className={classes.titleSub}>
-                    <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
-                </Typography>
-                <Grid x={12} md={6} className={classes.centerItems}>
-                    <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
-                        <Grid x={12} md={6} item>
-                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
-                                <FormattedMessage
-                                    id='api.console.security.heading'
-                                    defaultMessage='Security'
-                                />
-                            </Typography>
-                            <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
-                                <FormattedMessage
-                                    id='api.console.security.type.heading'
-                                    defaultMessage='Internal key'
-                                />
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                label={(
-                                    <FormattedMessage
-                                        id='internal.token'
-                                        defaultMessage='Internal Token'
-                                    />
-                                )}
-                                type={showToken ? 'text' : 'password'}
-                                value={this.state.key}
-                                id='margin-dense'
-                                helperText='Enter access Token'
-                                margin='normal'
-                                variant='outlined'
-                                name='internal'
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position='end'>
-                                            <IconButton
-                                                edge='end'
-                                                aria-label='Toggle token visibility'
-                                                onClick={this.handleClickShowToken}
-                                            >
-                                                {showToken ? <Icon>visibility_off</Icon>
-                                                    : <Icon>visibility</Icon>}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                    startAdornment: (
-                                        <InputAdornment
-                                            style={{
-                                                minWidth: (authHeader.length * 6),
-                                            }}
-                                            position='start'
-                                        >
-                                            {`${authorizationHeader}`}
-                                        </InputAdornment>
-                                    ),
-                                }}
+        return oasCopy;
+    }, [selectedDeployment, oasDefinition]);
+
+    /**
+     *
+     * @param {React.SyntheticEventn} event
+     */
+    const deploymentSelectionHandler = (event) => {
+        const selectedGWEnvironment = event.target.value;
+        const currentSelection = deployments.find((deployment) => deployment.name === selectedGWEnvironment);
+        setSelectedDeployment(currentSelection);
+    };
+    const decodedJWT = useMemo(() => Utils.decodeJWT(apiKey), [apiKey]);
+    return (
+        <>
+            <Typography variant='h4' component='h1'>
+                <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
+            </Typography>
+            <Paper elevation={0}>
+                <Box display='flex' justifyContent='center'>
+                    <Grid xs={11} md={6} item>
+                        <Typography variant='h5' color='textPrimary'>
+                            <FormattedMessage
+                                id='api.console.security.heading'
+                                defaultMessage='Security'
                             />
-                            <>
-                                <Button
-                                    onClick={this.generateKey}
-                                    variant='contained'
-                                    className={classes.genKeyButton}
-                                    name='internalToken'
+                        </Typography>
+                        <TextField
+                            fullWidth
+                            label={(
+                                <FormattedMessage
+                                    id='Apis.Details.TestConsole.token.label'
+                                    defaultMessage='Internal API Key'
+                                />
+                            )}
+                            type='password'
+                            value={apiKey}
+                            helperText={decodedJWT ? (
+                                <Box color='success.main'>
+                                    {`Expire ${dayjs.unix(decodedJWT.payload.exp).fromNow()}`}
+                                </Box>
+                            ) : 'Generate or provide an internal API Key'}
+                            margin='normal'
+                            variant='outlined'
+                            name='internal'
+                            multiline
+                            rows={4}
+                            onChange={(e) => setAPIKey(e.target.value)}
+                        />
+                        <Button
+                            onClick={generateInternalKey}
+                            variant='contained'
+                            color='primary'
+                            disabled={tasksStatus.generateKey.inProgress}
+                        >
+                            <FormattedMessage
+                                id='Apis.Details.ApiConsole.generate.test.key'
+                                defaultMessage='Generate Key'
+                            />
+                        </Button>
+                        {tasksStatus.generateKey.inProgress
+                            && (
+                                <Box
+                                    display='inline'
+                                    position='absolute'
+                                    mt={1}
+                                    ml={-8}
                                 >
-                                    <FormattedMessage
-                                        id='Apis.Details.ApiCOnsole.generate.test.key'
-                                        defaultMessage='GET TEST KEY '
+                                    <CircularProgress size={24} />
+                                </Box>
+                            )}
+                    </Grid>
+                </Box>
+                <Box my={3} display='flex' justifyContent='center'>
+                    <Grid xs={11} md={6} item>
+                        {(tasksStatus.getDeployments.completed && !deployments.length) && (
+                            <Alert variant='outlined' severity='error'>
+                                <FormattedMessage
+                                    id='Apis.Details.ApiConsole.deployments.no'
+                                    defaultMessage='API is not deployed yet! Please deploy the API before trying out'
+                                />
+                                <Link to={'/apis/' + api.id + '/deployments'}>
+                                    <LaunchIcon
+                                        color='primary'
+                                        fontSize='small'
                                     />
-                                </Button>
-                            </>
-                        </Grid>
-                    </Box>
-                    <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
-                        <Grid xs={12} md={6} item>
-                            {((environments && environments.length > 0))
-                                && (
-                                    <>
-                                        <Typography
-                                            variant='h5'
-                                            color='textPrimary'
-                                            className={classes.categoryHeading}
-                                        >
+                                </Link>
+                            </Alert>
+                        )}
+                        {((deployments && deployments.length > 0))
+                            && (
+                                <>
+                                    <Typography
+                                        variant='h5'
+                                        color='textPrimary'
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.ApiConsole.deployments.api.gateways'
+                                            defaultMessage='API Gateways'
+                                        />
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        select
+                                        label={(
                                             <FormattedMessage
-                                                id='api.console.gateway.heading'
-                                                defaultMessage='Gateway'
+                                                defaultMessage='Environment'
+                                                id='Apis.Details.ApiConsole.environment'
                                             />
-                                        </Typography>
-                                        <TextField
-                                            fullWidth
-                                            select
-                                            id='environment'
-                                            label={(
-                                                <FormattedMessage
-                                                    defaultMessage='Environment'
-                                                    id='Apis.Details.ApiConsole.environment'
-                                                />
-                                            )}
-                                            value={selectedEnvironment || (environments && environments[0])}
-                                            name='selectedEnvironment'
-                                            onChange={this.handleChanges}
-                                            helperText={(
-                                                <FormattedMessage
-                                                    defaultMessage='Please select an environment'
-                                                    id='Apis.Details.ApiConsole.SelectAppPanel.environment'
-                                                />
-                                            )}
-                                            margin='normal'
-                                            variant='outlined'
-                                        >
-                                            {environments && environments.length > 0 && (
-                                                <MenuItem value='' disabled className={classes.menuItem}>
-                                                    <em>
-                                                        <FormattedMessage
-                                                            id='api.gateways'
-                                                            defaultMessage='API Gateways'
-                                                        />
-                                                    </em>
-                                                </MenuItem>
-                                            )}
-                                            {environments && (
-                                                environments.map((env) => (
-                                                    <MenuItem
-                                                        value={env}
-                                                        key={env}
-                                                        className={classes.menuItem}
-                                                    >
-                                                        {env}
-                                                    </MenuItem>
-                                                )))}
-                                        </TextField>
-                                    </>
-                                )}
-                        </Grid>
-                    </Box>
+                                        )}
+                                        value={(selectedDeployment && selectedDeployment.name) || ''}
+                                        name='selectedEnvironment'
+                                        onChange={deploymentSelectionHandler}
+                                        helperText={(
+                                            <FormattedMessage
+                                                defaultMessage='Please select an environment'
+                                                id='Apis.Details.ApiConsole.SelectAppPanel.environment'
+                                            />
+                                        )}
+                                        margin='normal'
+                                        variant='outlined'
+                                        SelectProps={{
+                                            MenuProps: {
+                                                anchorOrigin: {
+                                                    vertical: 'bottom',
+                                                    horizontal: 'left',
+                                                },
+                                                getContentAnchorEl: null,
+                                            },
+                                        }}
+                                    >
+                                        {deployments.map((deployment) => (
+                                            <MenuItem
+                                                value={deployment.name}
+                                                key={deployment.name}
+                                            >
+                                                {deployment.name}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+                                </>
+                            )}
+                    </Grid>
+                </Box>
+                {updatedOasDefinition ? (
                     <SwaggerUI
-                        api={this.state.api}
-                        accessTokenProvider={this.accessTokenProvider}
-                        spec={swagger}
-                        authorizationHeader={authorizationHeader}
+                        api={api}
+                        accessTokenProvider={() => apiKey}
+                        spec={updatedOasDefinition}
+                        authorizationHeader='Internal-Key'
                     />
-                </Grid>
-            </>
-        );
-    }
-}
+                ) : <CircularProgress />}
+            </Paper>
+        </>
+    );
+};
 TestConsole.propTypes = {
     classes: PropTypes.shape({
         paper: PropTypes.string.isRequired,
@@ -565,6 +291,4 @@ TestConsole.propTypes = {
     }).isRequired,
 };
 
-TestConsole.contextType = ApiContext;
-
-export default withAPI(withStyles(styles)(TestConsole));
+export default TestConsole;

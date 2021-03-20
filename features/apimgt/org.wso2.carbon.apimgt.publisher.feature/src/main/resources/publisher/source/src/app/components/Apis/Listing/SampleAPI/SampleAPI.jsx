@@ -196,7 +196,7 @@ const SampleAPI = (props) => {
                     <Box
                         bgcolor='white'
                         borderRadius='borderRadius'
-                        height={isXsOrBelow ? '35%' : '25%'}
+                        // height={isXsOrBelow ? '35%' : '25%'}
                         width={isXsOrBelow ? 4 / 5 : 1 / 4}
                         className={classes.statusBox}
                         p={2}

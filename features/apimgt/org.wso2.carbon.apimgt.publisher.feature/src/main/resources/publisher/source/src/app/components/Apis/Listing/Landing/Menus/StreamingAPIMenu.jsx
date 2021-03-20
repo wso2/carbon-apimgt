@@ -69,7 +69,6 @@ const StreamingAPIMenu = (props) => {
                     defaultMessage='SSE API'
                 />
             </LandingMenuItem>
-            <Box mt={2} />
             <LandingMenuItem
                 dense={dense}
                 id='itest-id-create-streaming-api-import'

@@ -492,17 +492,23 @@
   "Apis.Details.AccessControl.roles.help": {
     "defaultMessage": "Enter valid role and press enter"
   },
-  "Apis.Details.ApiCOnsole.generate.test.key": {
-    "defaultMessage": "GET TEST KEY"
-  },
   "Apis.Details.ApiConsole.ApiConsole.title": {
     "defaultMessage": "Try Out"
   },
   "Apis.Details.ApiConsole.SelectAppPanel.environment": {
     "defaultMessage": "Please select an environment"
   },
+  "Apis.Details.ApiConsole.deployments.api.gateways": {
+    "defaultMessage": "API Gateways"
+  },
+  "Apis.Details.ApiConsole.deployments.no": {
+    "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
+  },
   "Apis.Details.ApiConsole.environment": {
     "defaultMessage": "Environment"
+  },
+  "Apis.Details.ApiConsole.generate.test.key": {
+    "defaultMessage": "Generate Key"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": {
     "defaultMessage": "Business Information of the API"
@@ -598,7 +604,7 @@
     "defaultMessage": "The header name that is used to send the authorization information. \"Authorization\" is the default header."
   },
   "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": {
-    "defaultMessage": "Configure basic API Product meta informations"
+    "defaultMessage": "Configure basic API Product meta information"
   },
   "Apis.Details.Configuration.Configuration.Design.sub.heading": {
     "defaultMessage": "Configure basic API meta information"
@@ -2919,6 +2925,9 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": {
     "defaultMessage": "Error while retrieving the subscriptions"
   },
+  "Apis.Details.TestConsole.token.label": {
+    "defaultMessage": "Internal API Key"
+  },
   "Apis.Details.components.APIDetailsTopMenu.created.by": {
     "defaultMessage": "Created by:"
   },
@@ -3900,17 +3909,8 @@
   "UnexpectedError.title": {
     "defaultMessage": "Internal Server Error"
   },
-  "api.console.gateway.heading": {
-    "defaultMessage": "Gateway"
-  },
   "api.console.security.heading": {
     "defaultMessage": "Security"
-  },
-  "api.console.security.type.heading": {
-    "defaultMessage": "Internal key"
-  },
-  "api.gateways": {
-    "defaultMessage": "API Gateways"
   },
   "app.components.Shared.Banner.back": {
     "defaultMessage": "Back"
@@ -3956,9 +3956,6 @@
   },
   "error.list.500.description": {
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-  },
-  "internal.token": {
-    "defaultMessage": "Internal Token"
   },
   "save": {
     "defaultMessage": "Save"

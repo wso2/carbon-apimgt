@@ -14,8 +14,7 @@ const APICreateMenuSection = (props) => {
             item
             xs={11}
             sm={5}
-            md={3}
-            lg={2}
+            md={2}
         >
             <Box mb={2}>
                 <Typography
