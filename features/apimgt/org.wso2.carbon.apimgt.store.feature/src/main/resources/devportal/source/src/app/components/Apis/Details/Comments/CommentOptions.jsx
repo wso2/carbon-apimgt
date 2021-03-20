@@ -156,6 +156,7 @@ class CommentOptions extends React.Component {
                                 className={editIndex === -1 ? classes.link : classes.disable}
                                 onClick={() => this.handleClickOpen(comment)}
                                 color='primary'
+                                aria-label={'Delete comment ' + comment.content}
                             >
                                 <FormattedMessage
                                     id='Apis.Details.Comments.CommentOptions.delete'
@@ -173,6 +174,7 @@ class CommentOptions extends React.Component {
                             className={classes.link}
                             onClick={() => this.showAddComment(comment.id)}
                             color='primary'
+                            aria-label={'Reply to comment ' + comment.content}
                         >
                             <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
                         </Button>
