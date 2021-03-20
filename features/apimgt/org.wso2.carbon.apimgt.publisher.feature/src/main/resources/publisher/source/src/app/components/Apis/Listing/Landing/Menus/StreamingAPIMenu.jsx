@@ -4,7 +4,6 @@ import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
 import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
-import Box from '@material-ui/core/Box';
 
 const StreamingAPIMenu = (props) => {
     const { icon, isCreateMenu } = props;
