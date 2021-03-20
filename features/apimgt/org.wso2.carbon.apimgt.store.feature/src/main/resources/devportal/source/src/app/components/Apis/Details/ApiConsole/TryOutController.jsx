@@ -105,7 +105,7 @@ const styles = makeStyles((theme) => ({
  */
 function TryOutController(props) {
     const {
-        securitySchemeType, selectedEnvironment, environments, containerMngEnvironments, labels,
+        securitySchemeType, selectedEnvironment, environments, containerMngEnvironments,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
@@ -353,7 +353,9 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
-                updateSwagger(value);
+                if (api.type !== 'GRAPHQL') {
+                    updateSwagger(value);
+                }
                 if (environmentObject) {
                     const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
                     setURLs(urls);
@@ -753,8 +755,8 @@ function TryOutController(props) {
                             </Box>
                             <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
                                 <Grid xs={12} md={6} item>
-                                    {((environments && environments.length > 0) || (containerMngEnvMenuItems.length > 0)
-                                        || (labels && labels.length > 0))
+                                    {((environments && environments.length > 0)
+                                        || (containerMngEnvMenuItems.length > 0))
                                         && (
                                             <>
                                                 <Typography
@@ -777,7 +779,7 @@ function TryOutController(props) {
                                                             id='Apis.Details.ApiConsole.environment'
                                                         />
                                                     )}
-                                                    value={selectedEnvironment || (environments && environments[0])}
+                                                    value={selectedEnvironment || (environments && environments[0].name)}
                                                     name='selectedEnvironment'
                                                     onChange={handleChanges}
                                                     helperText={(
@@ -802,36 +804,14 @@ function TryOutController(props) {
                                                     {environments && (
                                                         environments.map((env) => (
                                                             <MenuItem
-                                                                value={env}
-                                                                key={env}
+                                                                value={env.name}
+                                                                key={env.name}
                                                                 className={classes.menuItem}
                                                             >
-                                                                {env}
+                                                                {env.displayName}
                                                             </MenuItem>
                                                         )))}
                                                     {containerMngEnvMenuItems}
-                                                    {labels && labels.length > 0 && (
-                                                        <MenuItem value='' disabled>
-                                                            <em>
-                                                                <FormattedMessage
-                                                                    id='gateways'
-                                                                    defaultMessage='Gateways'
-                                                                    className={classes.menuItem}
-                                                                />
-                                                            </em>
-                                                        </MenuItem>
-                                                    )}
-                                                    {labels && (
-                                                        labels.map((label) => (
-                                                            <MenuItem
-                                                                value={label}
-                                                                key={label}
-                                                                className={classes.menuItem}
-                                                            >
-                                                                {label}
-                                                            </MenuItem>
-                                                        ))
-                                                    )}
                                                 </TextField>
                                             </>
                                         )}

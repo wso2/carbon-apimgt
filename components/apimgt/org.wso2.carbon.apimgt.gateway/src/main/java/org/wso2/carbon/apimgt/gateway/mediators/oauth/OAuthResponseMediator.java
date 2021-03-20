@@ -24,7 +24,9 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -77,34 +79,18 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
      */
     private void handleFailure(int errorCodeValue, MessageContext messageContext,
             String errorMessage, String errorDescription) {
-        OMElement payload = getFaultPayload(errorCodeValue, errorMessage, errorDescription);
-        Utils.setFaultPayload(messageContext, payload);
+        messageContext.setProperty(SynapseConstants.ERROR_CODE,errorCodeValue);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE,errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL,errorDescription);
+        Mediator sequence = messageContext.getSequence(APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+            return;
+        }
+
         Utils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * Retrieves the organized fault payload
-     * @param errorCodeValue error code
-     * @param message fault message
-     * @param description description of the fault message
-     * @return the OMElement object containing the payload
-     */
-    private OMElement getFaultPayload(int errorCodeValue, String message, String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(errorCodeValue + "");
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(message);
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(description);
-
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
-    }
 }

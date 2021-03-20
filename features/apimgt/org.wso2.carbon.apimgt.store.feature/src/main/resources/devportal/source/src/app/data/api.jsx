@@ -199,24 +199,6 @@ export default class API extends Resource {
     /**
      * Get the swagger of an API
      * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param labelName {String} Micro gateway label
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
-    }
-
-    /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
      * @param clusterName {String} Container managed cluster name
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
@@ -341,7 +323,6 @@ export default class API extends Resource {
      */
     addComment(apiId, comment, replyTo) {
         return this.client.then((client) => {
-            debugger;
             const payload = { apiId ,replyTo};
             return client.apis.Comments.addCommentToAPI(
                 payload,
@@ -355,12 +336,12 @@ export default class API extends Resource {
      * Get all comments for a particular API
      * @param apiId api id of the api to which the comment is added
      */
-    getAllComments(apiId) {
+    getAllComments(apiId, limit, offset) {
         return this.client.then((client) => {
-            return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId ,limit: limit, offset: offset}, this._requestMetaData());
         });
     }
-
+    
     /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to
@@ -531,14 +512,16 @@ export default class API extends Resource {
     /**
      * Get keys of an application
      * @param applicationId id of the application that needs to get the keys
+     * @param limit subscription count to return
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSubscriptions(apiId, applicationId, callback = null) {
+    getSubscriptions(apiId, applicationId, limit=25, callback = null) {
         const payload = { apiId };
         if (applicationId) {
             payload[applicationId] = applicationId;
         }
+        payload['limit'] = limit;
         const promisedGet = this.client.then((client) => {
             return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
         });
@@ -601,20 +584,6 @@ export default class API extends Resource {
         } else {
             return promiseCreateSubscription;
         }
-    }
-
-    /**
-     * Get the available labels.
-     * @returns {Promise.<TResult>}
-     */
-    labels() {
-        const promiseLabels = this.client.then((client) => {
-            return client.apis['Label (Collection)'].get_labels(
-                {},
-                this._requestMetaData(),
-            );
-        });
-        return promiseLabels;
     }
 
     /**

@@ -58,7 +58,6 @@ public class APIProduct {
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments = new HashSet<>();
-    private List<Label> gatewayLabels = new ArrayList<>();
     private boolean enableSchemaValidation = false;
     private Set<Scope> scopes = new HashSet<>();
 
@@ -527,14 +526,6 @@ public class APIProduct {
                 + ", accessControl=" + accessControl + ", accessControlRoles=" + accessControlRoles + ", state=" + state
                 + ", businessOwner=" + businessOwner + ", businessOwnerEmail=" + businessOwnerEmail + ", tenantDomain="
                 + tenantDomain + ", productResources=" + productResources + "]";
-    }
-
-    public List<Label> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(List<Label> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
     }
 
     public Set<String> getTags() {

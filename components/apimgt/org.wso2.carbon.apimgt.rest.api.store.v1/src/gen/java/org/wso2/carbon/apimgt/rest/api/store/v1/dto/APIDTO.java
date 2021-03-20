@@ -15,7 +15,6 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import javax.validation.constraints.*;
 
@@ -56,7 +55,6 @@ public class APIDTO   {
     private List<APIIngressURLsDTO> ingressURLs = new ArrayList<APIIngressURLsDTO>();
     private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
     private APIBusinessInformationDTO businessInformation = null;
-    private List<LabelDTO> labels = new ArrayList<LabelDTO>();
     private List<String> environmentList = new ArrayList<String>();
     private List<ScopeInfoDTO> scopes = new ArrayList<ScopeInfoDTO>();
     private String avgRating = null;
@@ -485,25 +483,6 @@ public class APIDTO   {
   }
 
   /**
-   * Labels of micro-gateway environments attached to the API. 
-   **/
-  public APIDTO labels(List<LabelDTO> labels) {
-    this.labels = labels;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Labels of micro-gateway environments attached to the API. ")
-      @Valid
-  @JsonProperty("labels")
-  public List<LabelDTO> getLabels() {
-    return labels;
-  }
-  public void setLabels(List<LabelDTO> labels) {
-    this.labels = labels;
-  }
-
-  /**
    * The environment list configured with non empty endpoint URLs for the particular API.
    **/
   public APIDTO environmentList(List<String> environmentList) {
@@ -696,7 +675,6 @@ public class APIDTO   {
         Objects.equals(ingressURLs, API.ingressURLs) &&
         Objects.equals(endpointURLs, API.endpointURLs) &&
         Objects.equals(businessInformation, API.businessInformation) &&
-        Objects.equals(labels, API.labels) &&
         Objects.equals(environmentList, API.environmentList) &&
         Objects.equals(scopes, API.scopes) &&
         Objects.equals(avgRating, API.avgRating) &&
@@ -710,7 +688,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime);
   }
 
   @Override
@@ -741,7 +719,6 @@ public class APIDTO   {
     sb.append("    ingressURLs: ").append(toIndentedString(ingressURLs)).append("\n");
     sb.append("    endpointURLs: ").append(toIndentedString(endpointURLs)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    environmentList: ").append(toIndentedString(environmentList)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    avgRating: ").append(toIndentedString(avgRating)).append("\n");

@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
@@ -225,7 +226,10 @@ public class ExtensionListenerUtil {
         msgInfoDTO.setElectedResource((String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE));
         //Add a payload handler instance for the current message context to consume the payload later
         msgInfoDTO.setPayloadHandler(new SynapsePayloadHandler(messageContext));
-        msgInfoDTO.setMessageId(axis2MC.getLogCorrelationID());
+        Object correlationId = axis2MC.getProperty(CorrelationConstants.CORRELATION_ID);
+        if (correlationId instanceof String){
+            msgInfoDTO.setMessageId((String) correlationId);
+        }
         msgInfoDTO.setHttpMethod((String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
         return msgInfoDTO;
     }

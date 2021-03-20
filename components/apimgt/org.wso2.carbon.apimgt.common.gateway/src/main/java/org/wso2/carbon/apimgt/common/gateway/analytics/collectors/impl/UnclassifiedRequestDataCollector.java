@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataP
 import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.RequestDataCollector;
 
 /**
- * Unclassified request data collector
+ * Unclassified request data collector.
  */
 public class UnclassifiedRequestDataCollector extends CommonRequestDataCollector implements RequestDataCollector {
     private static final Log log = LogFactory.getLog(UnclassifiedRequestDataCollector.class);

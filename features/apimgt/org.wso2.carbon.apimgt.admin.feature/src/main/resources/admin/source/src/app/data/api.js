@@ -449,7 +449,7 @@ class API extends Resource {
      */
     getGatewayEnvironmentList() {
         return this.client.then((client) => {
-            return client.apis["Environment Collection"].get_environments(
+            return client.apis['Environments'].get_environments(
                 this._requestMetaData(),
             );
         });
@@ -460,7 +460,7 @@ class API extends Resource {
      */
     deleteGatewayEnvironment(id) {
         return this.client.then((client) => {
-            return client.apis['Environment'].delete_environments__environmentId_(
+            return client.apis['Environments'].delete_environments__environmentId_(
                 { environmentId: id },
                 this._requestMetaData(),
             );
@@ -476,7 +476,7 @@ class API extends Resource {
             const payload = {
                 'Content-Type': 'application/json',
             };
-            return client.apis['Environment'].post_environments(
+            return client.apis['Environments'].post_environments(
                 payload,
                 { requestBody: data },
                 this._requestMetaData(),
@@ -490,7 +490,7 @@ class API extends Resource {
     updateGatewayEnvironment(id, name, displayName, description, vhosts,  callback = null) {
         return this.client.then((client) => {
             const data = { name, displayName, description, vhosts };
-            return client.apis['Environment'].put_environments__environmentId_(
+            return client.apis['Environments'].put_environments__environmentId_(
                 { environmentId: id },
                 { requestBody: data },
                 this._requestMetaData(),
@@ -498,6 +498,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
     /**
      * Get a list of available Microgateway labels
      */
@@ -509,6 +510,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
      /**
      * Delete a Microgateway Label
      */
@@ -521,6 +523,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
      /**
      * Add a Microgateway Label
      */
@@ -542,6 +545,7 @@ class API extends Resource {
         });
     }
 
+    // TODO: (renuka) Removed labels Rest API and this also should be removed
      /**
      * Update a Microgateway Label
      */

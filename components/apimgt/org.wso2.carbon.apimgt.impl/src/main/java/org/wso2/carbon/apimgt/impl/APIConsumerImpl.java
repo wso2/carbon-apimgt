@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
@@ -74,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -107,6 +109,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -2359,12 +2362,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             	} else {
             		result.put("length", end-start);
             	}
-        	}
-            else if ("subcontext".equalsIgnoreCase(searchType)) {
-                result = APIUtil.searchAPIsByURLPattern(userRegistry, searchTerm, start,end);               ;
-
-            }else {
-            	result=searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
+        	} else {
+            	result = searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
             }
 
         } catch (Exception e) {
@@ -2377,6 +2376,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return result;
     }
 
+    @Deprecated
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String requestedTenantDomain, int start, int end,
             boolean isLazyLoad) throws APIManagementException {
@@ -2801,30 +2801,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Subscriber subscriber = new Subscriber(username);
         Set<String> scopeKeySet = apiMgtDAO.getScopesForApplicationSubscription(subscriber, applicationId);
         return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
-    }
-
-    /*
-     *@see super.getSubscribedAPIsByApplicationId
-     *
-     */
-    @Override
-    public Set<SubscribedAPI> getSubscribedAPIsByApplicationId(Subscriber subscriber, int applicationId, String groupingId) throws APIManagementException {
-        Set<SubscribedAPI> subscribedAPIs = null;
-        try {
-            subscribedAPIs = apiMgtDAO.getSubscribedAPIsByApplicationId(subscriber, applicationId, groupingId);
-            if (subscribedAPIs != null && !subscribedAPIs.isEmpty()) {
-                Map<String, Tier> tiers = APIUtil.getTiers(tenantId);
-                for (SubscribedAPI subscribedApi : subscribedAPIs) {
-                    Tier tier = tiers.get(subscribedApi.getTier().getName());
-                    subscribedApi.getTier().setDisplayName(tier != null ? tier.getDisplayName() : subscribedApi
-                            .getTier().getName());
-                    // We do not need to add the modified object again.
-                }
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to get APIs of " + subscriber.getName() + " under application " + applicationId, e);
-        }
-        return subscribedAPIs;
     }
 
     @Override
@@ -3560,20 +3536,20 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+    public Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
-        return apiMgtDAO.getComment(apiTypeWrapper, commentId, limit, offset);
+        return apiMgtDAO.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
     }
 
     @Override
-    public org.wso2.carbon.apimgt.api.model.Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID)
+    public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset)
             throws APIManagementException {
-        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID);
+        return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
     }
 
     @Override
     public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
-            APIManagementException{
+            APIManagementException {
         return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
     }
 
@@ -4135,26 +4111,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (UserStoreException e) {
             handleException("Unable to retrieve the tenant information of the current user.", e);
         }
-        //checking for authorized scopes
-        Set<Scope> scopeSet = new LinkedHashSet<Scope>();
-        List<Scope> authorizedScopes = new ArrayList<Scope>();
-        String authScopeString;
-        if (tokenScope != null && tokenScope.length() != 0 &&
-                !APIConstants.OAUTH2_DEFAULT_SCOPE.equals(tokenScope)) {
-            scopeSet.addAll(getScopesByScopeKeys(tokenScope, tenantId));
-            authorizedScopes = getAllowedScopesForUserApplication(userId, scopeSet);
-        }
-
-        if (!authorizedScopes.isEmpty()) {
-            Set<Scope> authorizedScopeSet = new HashSet<Scope>(authorizedScopes);
-            StringBuilder scopeBuilder = new StringBuilder();
-            for (Scope scope : authorizedScopeSet) {
-                scopeBuilder.append(scope.getKey()).append(' ');
-            }
-            authScopeString = scopeBuilder.toString();
-        } else {
-            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
-        }
 
         String keyManagerId = null;
         if (keyManagerName != null){
@@ -4246,7 +4202,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Build key manager instance and create oAuthAppRequest by jsonString.
             OAuthAppRequest request =
                     ApplicationUtils
-                            .createOauthAppRequest(applicationName, null, callbackUrl, authScopeString, jsonString,
+                            .createOauthAppRequest(applicationName, null, callbackUrl, tokenScope, jsonString,
                                     applicationTokenType, tenantDomain, keyManagerName);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
@@ -4663,11 +4619,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         Set<String> scopeKeySet = apiMgtDAO.getScopesBySubscribedAPIs(identifiers);
         return new LinkedHashSet<>(APIUtil.getScopes(scopeKeySet, tenantDomain).values());
-    }
-
-    public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
-			throws APIManagementException {
-		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
     }
 
     @Override
@@ -5540,25 +5491,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return getOpenAPIDefinitionForDeployment(api, null, clusterName);
     }
 
-    @Override
-    public String getOpenAPIDefinitionForLabel(API api, String labelName) throws APIManagementException {
-        List<Label> gatewayLabels;
-        String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
-        String definition;
-        if (api.getSwaggerDefinition() != null) {
-            definition = api.getSwaggerDefinition();
-        } else {
-            throw new APIManagementException("Missing API definition in the api " + api.getUuid());
-        }
-
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        gatewayLabels = api.getGatewayLabels();
-        hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
-        return updatedDefinition;
-    }
-
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
 
         RevocationRequestPublisher revocationRequestPublisher = RevocationRequestPublisher.getInstance();
@@ -5570,45 +5502,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
         revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
-    }
-
-    /**
-     * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
-     * @param apiId Id of the API
-     * @param synapseEnvName Name of the synapse gateway environment
-     * @param clusterName Name of the container managed cluster
-     * @return Updated Open API definition
-     * @throws APIManagementException
-     */
-    private String getOpenAPIDefinitionForDeployment(Identifier apiId, String synapseEnvName, String clusterName)
-            throws APIManagementException {
-        String apiTenantDomain;
-        String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
-        String definition = super.getOpenAPIDefinition(apiId, tenantDomain);
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        if (apiId instanceof APIIdentifier) {
-            API api = getLightweightAPI((APIIdentifier) apiId, tenantDomain);
-            //todo: use get api by id, so no need to set scopes or uri templates
-            api.setScopes(oasParser.getScopes(definition));
-            api.setUriTemplates(oasParser.getURITemplates(definition));
-            apiTenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            if (!StringUtils.isEmpty(synapseEnvName)) {
-                hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
-            } else {
-                hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);
-            }
-            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
-        } else if (apiId instanceof APIProductIdentifier) {
-            APIProduct apiProduct = getAPIProduct((APIProductIdentifier) apiId);
-            apiTenantDomain = MultitenantUtils.getTenantDomain(apiProduct.getId().getProviderName());
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
-            apiProduct.setContext(getBasePath(apiTenantDomain, apiProduct.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(apiProduct, definition, hostsWithSchemes);
-        }
-        return updatedDefinition;
     }
 
     /**
@@ -5635,7 +5528,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         apiTenantDomain = MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         if (!StringUtils.isEmpty(synapseEnvName)) {
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(apiTenantDomain, synapseEnvName);
+            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, synapseEnvName);
         } else {
             hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);
         }
@@ -5761,7 +5654,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return Host name to transport scheme mapping
      * @throws APIManagementException if an error occurs when getting host names with schemes
      */
-    private Map<String, String> getHostWithSchemeMappingForEnvironment(String apiTenantDomain, String environmentName)
+    private Map<String, String> getHostWithSchemeMappingForEnvironment(API api, String apiTenantDomain, String environmentName)
             throws APIManagementException {
 
         Map<String, String> domains = getTenantDomainMappings(apiTenantDomain, APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
@@ -5781,15 +5674,28 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 handleResourceNotFoundException("Could not find provided environment '" + environmentName + "'");
             }
 
-            assert environment != null;
-            String[] hostsWithScheme = environment.getApiGatewayEndpoint().split(",");
-            for (String url : hostsWithScheme) {
-                if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, url);
+            List<APIRevisionDeployment> deploymentList = getAPIRevisionDeploymentListOfAPI(api.getUuid());
+            String host = "";
+            for (APIRevisionDeployment deployment : deploymentList) {
+                if (!deployment.isDisplayOnDevportal()) {
+                    continue;
                 }
-                if (url.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, url);
+                if (StringUtils.equals(deployment.getDeployment(), environmentName)) {
+                    host = deployment.getVhost();
                 }
+            }
+            if (StringUtils.isEmpty(host)) {
+                // returns empty server urls
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, "");
+                return hostsWithSchemes;
+            }
+
+            VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)) {
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
+            }
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)) {
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
             }
         }
         return hostsWithSchemes;
@@ -5930,29 +5836,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getKeyMappingFromApplicationIdAndKeyMappingId(applicationId, keyMappingId);
     }
 
-    /**
-     * To check whether the DevPortal Anonymous Mode is enabled. It can be either enabled globally or tenant vice.
-     *
-     * @param tenantDomain Tenant domain
-     * @return whether devportal anonymous mode is enabled or not
-     */
-
-    public boolean isDevPortalAnonymousEnabled(String tenantDomain) {
-
-        try {
-            org.json.simple.JSONObject tenantConfig = APIUtil.getTenantConfig(tenantDomain);
-            Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_ANONYMOUS_MODE);
-            if (value != null) {
-                return Boolean.parseBoolean(value.toString());
-            } else {
-                return APIUtil.isDevPortalAnonymous();
-            }
-        } catch (APIManagementException e) {
-            log.error("Error while retrieving Anonymous config from registry", e);
-        }
-        return true;
-    }
-
     @Override
     public Set<Topic> getTopics(String apiId) throws APIManagementException {
         return apiMgtDAO.getAPITopics(apiId);
@@ -6058,6 +5941,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
+                    mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getId()));
                     apiList.add(mappedAPI);
                 }
                 apiSet.addAll(apiList);
@@ -6073,7 +5957,10 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        return result ;
+        if (APIUtil.isAllowDisplayMultipleVersions()) {
+            return result;
+        }
+        return filterMultipleVersionedAPIs(result);
     }
 
     @Override
@@ -6096,6 +5983,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateDefaultVersion(api);
                     api = addTiersToAPI(api, requestedTenantDomain);
                     return new ApiTypeWrapper(api);
                 }

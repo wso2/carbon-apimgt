@@ -114,7 +114,6 @@ export default {
     },
     custom: {
         wrapperBackground: '#f9f9f9',
-        starColor: '#f2c73a',
         disableColor: '#D3D3D3',
         leftMenuWidth: 210,
         contentAreaWidth: 1240,
@@ -125,8 +124,6 @@ export default {
         defaultApiView: 'grid', /* Sets the default view for the api listing page ( Other values available = 'list' )
                                                 To disable one option for an example if you want to disable grid
                                                 completely and get rid of the toggle buttons use ['list']. */
-        showApiHelp: false, // API details page has a right hand side panel showing it's related help. Set this
-        // to false if you want to hide it.
         leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
         leftMenuIconSize: 24,
         leftMenuIconMainSize: 52,
@@ -157,6 +154,10 @@ export default {
             },
             iconSize: 32,
         },
+        thumbnailTemplates: {
+            active: false,
+            variant: 'plain', // default templates available templates 'plain'.
+        },
         thumbnail: {
             width: 240,
             height: 140,
@@ -186,16 +187,21 @@ export default {
             backgroundChip: '#5aebf9',
         },
         warningColor: '#ffc439',
-        landingPageIcons: {
-            graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
-            restApiIcon: '/site/public/images/landing-icons/restapi.svg',
-            soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
-            streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
-            websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+        landingPage: {
+            icons: {
+                graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
+                restApiIcon: '/site/public/images/landing-icons/restapi.svg',
+                soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
+                streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+                websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+            },
+            menu: {
+                primary: '#34679D',
+            },
         },
         title: {
             prefix: '[Publisher]',
-            sufix: '- WSO2 APIM',
+            suffix: '- WSO2 APIM',
         },
         serviceCatalog: {
             onboarding: {

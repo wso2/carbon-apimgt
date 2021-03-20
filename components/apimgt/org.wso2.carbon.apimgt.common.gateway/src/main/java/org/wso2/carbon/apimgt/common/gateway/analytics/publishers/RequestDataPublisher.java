@@ -20,7 +20,7 @@ import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 
 /**
- * interface for data publisher
+ * interface for data publisher.
  */
 public interface RequestDataPublisher {
 

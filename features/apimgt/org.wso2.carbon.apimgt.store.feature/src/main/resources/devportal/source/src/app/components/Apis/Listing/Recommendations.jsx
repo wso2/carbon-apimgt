@@ -29,7 +29,7 @@ import withSettings from 'AppComponents/Shared/withSettingsContext';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import Alert from 'AppComponents/Shared/Alert';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
-import ImageGenerator from './ImageGenerator';
+import ImageGenerator from './APICards/ImageGenerator';
 import RecommendedApiThumb from './RecommendedApiThumb';
 import { ApiContext } from '../Details/ApiContext';
 

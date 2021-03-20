@@ -136,7 +136,7 @@ public final class JWTUtil {
     }
 
     /**
-     * Utility method to sign a JWT assertion with a particular signature algorithm
+     * Utility method to sign a JWT assertion with a particular signature algorithm.
      *
      * @param assertion          valid JWT assertion
      * @param privateKey         private key which use to sign the JWT assertion

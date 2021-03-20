@@ -124,10 +124,23 @@ public class CacheProvider {
     }
 
     /**
+     * @return Gateway Internal Key cache
+     */
+    public static Cache getGatewayInternalKeyCache() {
+        return getCache(APIConstants.GATEWAY_INTERNAL_KEY_CACHE_NAME);
+    }
+
+    /**
      * @return Gateway API Key data cache
      */
     public static Cache getGatewayApiKeyDataCache() {
         return getCache(APIConstants.GATEWAY_API_KEY_DATA_CACHE_NAME);
+    }
+    /**
+     * @return Gateway Internal Key data cache
+     */
+    public static Cache getGatewayInternalKeyDataCache() {
+        return getCache(APIConstants.GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME);
     }
 
     /**
@@ -135,6 +148,12 @@ public class CacheProvider {
      */
     public static Cache getInvalidGatewayApiKeyCache() {
         return getCache(APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME);
+    }
+    /**
+     * @return Gateway Internal Key invalid data cache
+     */
+    public static Cache getInvalidGatewayInternalKeyCache() {
+        return getCache(APIConstants.GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME);
     }
 
     /**
@@ -255,6 +274,57 @@ public class CacheProvider {
             long defaultCacheTimeout = getDefaultCacheTimeout();
             return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
                     APIConstants.GATEWAY_INVALID_API_KEY_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return gateway key cache for API Keys
+     */
+    public static Cache createGatewayInternalKeyCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INTERNAL_KEY_CACHE_NAME,
+                    Long.parseLong(apimGWCacheExpiry), Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout =
+                    getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.GATEWAY_INTERNAL_KEY_CACHE_NAME,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return gateway key data cache for API Keys
+     */
+    public static Cache createGatewayInternalKeyDataCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME, Long.parseLong(apimGWCacheExpiry),
+                    Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
+     * Create and return gateway invalid key cache for API Keys
+     */
+    public static Cache createInvalidInternalKeyCache() {
+
+        String apimGWCacheExpiry = getApiManagerConfiguration().getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY);
+        if (apimGWCacheExpiry != null) {
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME, Long.parseLong(apimGWCacheExpiry),
+                    Long.parseLong(apimGWCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
+                    APIConstants.GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME, defaultCacheTimeout, defaultCacheTimeout);
         }
     }
 

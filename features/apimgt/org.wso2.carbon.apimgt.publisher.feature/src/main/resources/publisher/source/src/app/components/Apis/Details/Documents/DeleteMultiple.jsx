@@ -89,7 +89,7 @@ function DeleteMultiple(props) {
         >
             <DialogTitle id='alert-dialog-title'>
                 <FormattedMessage
-                    id='Apis.Details.Documents.Delete.document.listing.delete.confirm.title'
+                    id='Apis.Details.Documents.Delete.selected.document.listing.delete.confirm.title'
                     defaultMessage='Delete Selected Documents'
                 />
             </DialogTitle>
@@ -97,7 +97,7 @@ function DeleteMultiple(props) {
                 <DialogContentText id='alert-dialog-description'>
                     <strong>{api.name}</strong>
                     <FormattedMessage
-                        id='Apis.Details.Documents.Delete.document.listing.delete.confirm.body'
+                        id='Apis.Details.Documents.Delete.selected.document.listing.delete.confirm.body'
                         defaultMessage={
                             'Selected documents will be deleted from the API.' +
                             ' You will not be able to undo this action.'

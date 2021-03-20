@@ -22,19 +22,27 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
 /**
- * Set endpoint config in context
+ * Set endpoint config in context.
  */
 public class EndpointConfigContext extends ConfigContextDecorator {
 
     private API api;
-    private JSONObject endpoint_config;
+    private APIProduct apiProduct;
+    private JSONObject endpointConfig;
 
     public EndpointConfigContext(ConfigContext context, API api) {
         super(context);
         this.api = api;
+    }
+
+    public EndpointConfigContext(ConfigContext configcontext, APIProduct apiProduct, API api) {
+        super(configcontext);
+        this.api = api;
+        this.apiProduct = apiProduct;
     }
 
     @Override
@@ -43,12 +51,12 @@ public class EndpointConfigContext extends ConfigContextDecorator {
 
         JSONParser parser = new JSONParser();
         //check if endpoint config exists
-        String config_json = api.getEndpointConfig();
+        String configJson = api.getEndpointConfig();
 
-        if (config_json != null && !"".equals(config_json)) {
+        if (configJson != null && !"".equals(configJson)) {
             try {
-                Object config = parser.parse(config_json);
-                this.endpoint_config = (JSONObject) config;
+                Object config = parser.parse(configJson);
+                this.endpointConfig = (JSONObject) config;
             } catch (ParseException e) {
                 this.handleException("Unable to pass the endpoint JSON config");
             }
@@ -58,19 +66,40 @@ public class EndpointConfigContext extends ConfigContextDecorator {
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
 
-        context.put("endpoint_config", this.endpoint_config);
-        context.put("endpointKey", this.getEndpointKey(api));
+        context.put("endpoint_config", this.endpointConfig);
+        if (apiProduct == null) {
+            context.put("endpointKey", this.getEndpointKey(api));
+        } else {
+            context.put("endpointKey", this.getEndpointKey(apiProduct, api));
+        }
 
-        return context;  //To change body of implemented methods use File | Settings | File Templates.
+
+        return context;
+    }
+
+    private String getEndpointKey(APIProduct apiProduct, API api) {
+
+        return getEndpointKey(apiProduct.getId().getName(), apiProduct.getId().getVersion()).concat("--")
+                .concat(api.getUuid());
     }
 
     /**
-     * Get the endpoint key name
+     * Get the endpoint key name.
      *
      * @param api API that the endpoint belong
      * @return String of endpoint key
      */
     private String getEndpointKey(API api) {
-        return api.getId().getApiName() + "--v" + api.getId().getVersion();
+        return getEndpointKey(api.getId().getApiName(), api.getId().getVersion());
     }
+
+    /**
+     * Get the endpoint key name.
+     *
+     * @return String of endpoint key
+     */
+    private String getEndpointKey(String name, String version) {
+        return name + "--v" + version;
+    }
+
 }

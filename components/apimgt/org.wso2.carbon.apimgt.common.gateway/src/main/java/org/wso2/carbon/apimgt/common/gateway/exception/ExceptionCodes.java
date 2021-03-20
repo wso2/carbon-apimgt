@@ -90,7 +90,7 @@ ExceptionCodes implements ErrorHandler {
     }
 
     /**
-     * Create an ErrorHandler instance with the provided ExceptionCode filled with some dynamic input values
+     * Create an ErrorHandler instance with the provided ExceptionCode filled with some dynamic input values.
      *
      * @param errorHandler ErrorHandler or ExceptionCode object
      * @param params       dynamic values to be filled

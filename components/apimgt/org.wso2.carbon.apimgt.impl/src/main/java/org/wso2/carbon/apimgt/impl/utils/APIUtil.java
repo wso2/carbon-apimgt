@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -198,7 +199,6 @@ import org.wso2.carbon.registry.core.config.Mount;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
-import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
@@ -816,7 +816,6 @@ public final class APIUtil {
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
                 api.setMonetizationProperties(jsonObj);
             }
-            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -853,40 +852,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return api;
-    }
-
-    /**
-     * This method return the gateway labels of an API
-     *
-     * @param artifact        API artifact
-     * @param apiProviderName name of API provider
-     * @return List<Label> list of gateway labels
-     */
-    public static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
-            throws GovernanceException, APIManagementException {
-
-        String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
-        List<Label> gatewayLabelListForAPI = new ArrayList<>();
-
-        if (labelArray != null && labelArray.length > 0) {
-            String tenantDomain = MultitenantUtils.getTenantDomain
-                    (replaceEmailDomainBack(apiProviderName));
-            List<Label> allLabelList = APIUtil.getAllLabels(tenantDomain);
-            for (String labelName : labelArray) {
-                Label label = new Label();
-                //set the name
-                label.setName(labelName);
-                //set the description and access URLs
-                for (Label currentLabel : allLabelList) {
-                    if (labelName.equalsIgnoreCase(currentLabel.getName())) {
-                        label.setDescription(currentLabel.getDescription());
-                        label.setAccessUrls(currentLabel.getAccessUrls());
-                    }
-                }
-                gatewayLabelListForAPI.add(label);
-            }
-        }
-        return gatewayLabelListForAPI;
     }
 
     /**
@@ -1192,30 +1157,6 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a list of scopes when passed the Provider Name and Scope Key
-     *
-     * @param scopeKey
-     * @param provider
-     * @return
-     * @throws APIManagementException
-     */
-    public static Set<Scope> getScopeByScopeKey(String scopeKey, String provider) throws APIManagementException {
-
-        Set<Scope> scopeSet = null;
-        String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomainName);
-            scopeSet = ApiMgtDAO.getInstance().getAPIScopesByScopeKey(scopeKey, tenantId);
-        } catch (UserStoreException e) {
-            String msg = "Error while retrieving Scopes";
-            log.error(msg, e);
-            handleException(msg);
-        }
-        return scopeSet;
-    }
-
-    /**
      * Create Governance artifact from given attributes
      *
      * @param artifact initial governance artifact
@@ -1230,7 +1171,6 @@ public final class APIUtil {
             String apiStatus = api.getStatus();
             artifact.setAttribute(APIConstants.API_OVERVIEW_NAME, api.getId().getApiName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, api.getId().getVersion());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, String.valueOf(api.isDefaultVersion()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
@@ -1356,9 +1296,6 @@ public final class APIUtil {
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
                     APIUtil.getWebsubSubscriptionConfigurationJsonFromDto(api.getWebsubSubscriptionConfiguration()));
-
-            //attaching micro-gateway labels to the API
-            attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
@@ -1506,56 +1443,6 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return artifact;
-    }
-
-    /**
-     * This method is used to attach micro-gateway labels to the given API
-     *
-     * @param artifact     genereic artifact
-     * @param api          API
-     * @param tenantDomain domain name of the tenant
-     * @throws APIManagementException if failed to attach micro-gateway labels
-     */
-    public static void attachLabelsToAPIArtifact(GenericArtifact artifact, API api, String tenantDomain)
-            throws APIManagementException {
-
-        //get all labels in the tenant
-        List<Label> gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
-        //validation is performed here to cover all actions related to API artifact updates
-        if (!gatewayLabelList.isEmpty()) {
-            //put available gateway labels to a list for validation purpose
-            List<String> availableGatewayLabelListNames = new ArrayList<>();
-            for (Label x : gatewayLabelList) {
-                availableGatewayLabelListNames.add(x.getName());
-            }
-            try {
-                //clear all the existing labels first
-                artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
-                //if there are labels attached to the API object, add them to the artifact
-                if (api.getGatewayLabels() != null) {
-                    //validate and add each label to the artifact
-                    List<Label> candidateLabelsList = api.getGatewayLabels();
-                    for (Label label : candidateLabelsList) {
-                        String candidateLabel = label.getName();
-                        //validation step, add the label only if it exists in the available gateway labels
-                        if (availableGatewayLabelListNames.contains(candidateLabel)) {
-                            artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, candidateLabel);
-                        } else {
-                            log.warn("Label name : " + candidateLabel + " does not exist in the tenant : " +
-                                    tenantDomain + ", hence skipping it.");
-                        }
-                    }
-                }
-            } catch (GovernanceException e) {
-                String msg = "Failed to add labels for API : " + api.getId().getApiName();
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
-            }
-        }
     }
 
     /**
@@ -3572,79 +3459,6 @@ public final class APIUtil {
     public static boolean checkUserNameAssertionEnabled() {
 
         return ServiceReferenceHolder.getInstance().getOauthServerConfiguration().isUserNameAssertionEnabled();
-    }
-
-    public static String[] getAvailableKeyStoreTables() throws APIManagementException {
-
-        String[] keyStoreTables = new String[0];
-        Map<String, String> domainMappings = getAvailableUserStoreDomainMappings();
-        if (domainMappings != null) {
-            keyStoreTables = new String[domainMappings.size()];
-            int i = 0;
-            for (Entry<String, String> e : domainMappings.entrySet()) {
-                String value = e.getValue();
-                keyStoreTables[i] = APIConstants.ACCESS_TOKEN_STORE_TABLE + "_" + value.trim();
-                i++;
-            }
-        }
-        return keyStoreTables;
-    }
-
-    public static Map<String, String> getAvailableUserStoreDomainMappings() throws
-            APIManagementException {
-
-        Map<String, String> userStoreDomainMap = new HashMap<String, String>();
-        String domainsStr =
-                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getAccessTokenPartitioningDomains();
-        if (domainsStr != null) {
-            String[] userStoreDomainsArr = domainsStr.split(",");
-            for (String anUserStoreDomainsArr : userStoreDomainsArr) {
-                String[] mapping = anUserStoreDomainsArr.trim().split(":"); //A:foo.com , B:bar.com
-                if (mapping.length < 2) {
-                    throw new APIManagementException("Domain mapping has not defined");
-                }
-                userStoreDomainMap.put(mapping[1].trim(), mapping[0].trim()); //key=domain & value=mapping
-            }
-        }
-        return userStoreDomainMap;
-    }
-
-    public static String getAccessTokenStoreTableFromUserId(String userId)
-            throws APIManagementException {
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        String userStore;
-        if (userId != null) {
-            String[] strArr = userId.split("/");
-            if (strArr.length > 1) {
-                userStore = strArr[0];
-                Map<String, String> availableDomainMappings = getAvailableUserStoreDomainMappings();
-                if (availableDomainMappings != null &&
-                        availableDomainMappings.containsKey(userStore)) {
-                    accessTokenStoreTable = accessTokenStoreTable + "_" +
-                            availableDomainMappings.get(userStore);
-                }
-            }
-        }
-        return accessTokenStoreTable;
-    }
-
-    public static String getAccessTokenStoreTableFromAccessToken(String apiKey)
-            throws APIManagementException {
-
-        String userId = getUserIdFromAccessToken(apiKey); //i.e: 'foo.com/admin' or 'admin'
-        return getAccessTokenStoreTableFromUserId(userId);
-    }
-
-    public static String getUserIdFromAccessToken(String apiKey) {
-
-        String userId = null;
-        String decodedKey = new String(Base64.decodeBase64(apiKey.getBytes(Charset.defaultCharset())), Charset.defaultCharset());
-        String[] tmpArr = decodedKey.split(":");
-        if (tmpArr.length == 2) { //tmpArr[0]= userStoreDomain & tmpArr[1] = userId
-            userId = tmpArr[1];
-        }
-        return userId;
     }
 
     /**
@@ -6150,7 +5964,6 @@ public final class APIUtil {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             api.setCreatedTime(String.valueOf(registry.get(artifactPath).getCreatedTime().getTime()));
-            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, providerName));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -6446,90 +6259,6 @@ public final class APIUtil {
             handleException("Failed to search APIs with type Doc", e);
         }
         return apiDocMap;
-    }
-
-    public static Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
-            throws APIManagementException {
-
-        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        List<API> apiList = new ArrayList<API>();
-        final String searchValue = searchTerm.trim();
-        Map<String, Object> result = new HashMap<String, Object>();
-        int totalLength = 0;
-        String criteria;
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        GenericArtifact[] genericArtifacts = new GenericArtifact[0];
-        GenericArtifactManager artifactManager = null;
-        try {
-            artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Artifact manager is null when searching APIs by URL pattern " + searchTerm;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
-            }
-            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-            if (artifactManager != null) {
-                for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
-                    // "url_template" entry stores in registry,unless we search in each API
-                    criteria = APIConstants.API_URI_PATTERN + i;
-                    listMap.put(criteria, new ArrayList<String>() {
-                        {
-                            add(searchValue);
-                        }
-                    });
-                    genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager
-                            .findGenericArtifacts(listMap));
-                }
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    result.put("apis", apiSet);
-                    result.put("length", 0);
-                    return result;
-                }
-                totalLength = genericArtifacts.length;
-                StringBuilder apiNames = new StringBuilder();
-                for (GenericArtifact artifact : genericArtifacts) {
-                    if (artifact == null) {
-                        log.error("Failed to retrieve an artifact when searching APIs by URL pattern : " + searchTerm +
-                                " , continuing with next artifact.");
-                        continue;
-                    }
-                    if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
-                        String status = APIUtil.getLcStateFromArtifact(artifact);
-                        if (isAllowDisplayAPIsWithMultipleStatus()) {
-                            if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                                API api = APIUtil.getAPI(artifact, registry);
-                                if (api != null) {
-                                    apiList.add(api);
-                                    apiNames.append(api.getId().getApiName());
-                                }
-                            }
-                        } else {
-                            if (APIConstants.PUBLISHED.equals(status)) {
-                                API api = APIUtil.getAPI(artifact, registry);
-                                if (api != null) {
-                                    apiList.add(api);
-                                    apiNames.append(api.getId().getApiName());
-                                }
-                            }
-                        }
-                    }
-                    totalLength = apiList.size();
-                }
-                if (totalLength <= ((start + end) - 1)) {
-                    end = totalLength;
-                }
-                for (int i = start; i < end; i++) {
-                    apiSet.add(apiList.get(i));
-                }
-            }
-        } catch (APIManagementException e) {
-            handleException("Failed to search APIs with input url-pattern", e);
-        } catch (GovernanceException e) {
-            handleException("Failed to search APIs with input url-pattern", e);
-        }
-        result.put("apis", apiSet);
-        result.put("length", totalLength);
-        return result;
     }
 
     /**
@@ -8561,16 +8290,27 @@ public final class APIUtil {
     }
 
     /**
-     * This method is used to get the labels in a given tenant space
+     * This method is used to get the default policy in a given tenant space
      *
      * @param tenantDomain tenant domain name
-     * @return micro gateway labels in a given tenant space
-     * @throws APIManagementException if failed to fetch micro gateway labels
+     * @return default throttling policy for a given tenant
      */
-    public static List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
-
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        return apiMgtDAO.getAllLabels(tenantDomain);
+    public static String getDefaultThrottlingPolicy(String tenantDomain) {
+        String defaultTier = APIConstants.UNLIMITED_TIER;
+        if (!isEnabledUnlimitedTier()) {
+            // Set an available value if the Unlimited policy is disabled
+            try {
+                Map<String, Tier> tierMap = getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                if (tierMap.size() > 0) {
+                    defaultTier = tierMap.keySet().toArray()[0].toString();
+                } else {
+                    log.error("No throttle policies available in the tenant " + tenantDomain);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while getting throttle policies for tenant " + tenantDomain);
+            }
+        }
+        return defaultTier;
     }
 
     public static Map<String, Tier> getTiersFromPolicies(String policyLevel, int tenantId) throws APIManagementException {
@@ -9210,11 +8950,9 @@ public final class APIUtil {
                 for (int i = 0; i < searchCriterias.length; i++) {
                     if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
                         if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX
-                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])
-                                || APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX
                                 .equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
                             throw new APIManagementException("Invalid query. AND based search is not supported for "
-                                    + "doc and subcontext prefixes");
+                                    + "doc prefix");
                         }
                     }
                     if (i == 0) {
@@ -10032,6 +9770,24 @@ public final class APIUtil {
                 .getAPIManagerConfiguration().getApiGatewayEnvironments();
     }
 
+    /**
+     * Get default (first) vhost of the given read only environment
+     * @param environmentName name of the read only environment
+     * @return default vhost of environment
+     */
+    public static VHost getDefaultVhostOfReadOnlyEnvironment(String environmentName) throws APIManagementException {
+        Map<String, Environment> readOnlyEnvironments = getReadOnlyEnvironments();
+        if (readOnlyEnvironments.get(environmentName) == null) {
+            throw new APIManagementException("Configured read only environment not found: "
+                    + environmentName);
+        }
+        if (readOnlyEnvironments.get(environmentName).getVhosts().isEmpty()) {
+            throw new APIManagementException("VHosts not found for the environment: "
+                    + environmentName);
+        }
+        return readOnlyEnvironments.get(environmentName).getVhosts().get(0);
+    }
+
     private static QName getQNameWithIdentityNS(String localPart) {
 
         return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
@@ -10541,6 +10297,19 @@ public final class APIUtil {
         String alias = config.getFirstProperty(APIConstants.API_STORE_API_KEY_ALIAS);
         if (alias == null) {
             log.warn("The configurations related to Api Key alias in APIStore " +
+                    "are missing in api-manager.xml. Hence returning the default value.");
+            return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
+        }
+        return alias;
+    }
+
+    public static String getInternalApiKeyAlias() {
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String alias = config.getFirstProperty(APIConstants.API_PUBLISHER_INTERNAL_API_KEY_ALIAS);
+        if (alias == null) {
+            log.warn("The configurations related to Api Key alias in API Publisher " +
                     "are missing in api-manager.xml. Hence returning the default value.");
             return APIConstants.GATEWAY_PUBLIC_CERTIFICATE_ALIAS;
         }
@@ -12036,24 +11805,6 @@ public final class APIUtil {
             userRoles = filteredUserRoles.toArray(new String[0]);
         }
         return userRoles;
-    }
-
-    public static Environment getEnvironment(String name, String tenantDomain) throws APIManagementException {
-
-        Environment environment = getEnvironments().get(name);
-        if (environment != null) {
-            return environment;
-        }
-        // TODO: (renuka) Do we need to check for following label lookup
-        Label label =
-                ApiMgtDAO.getInstance().getLabelDetailByLabelAndTenantDomain(name, tenantDomain);
-        if (label != null) {
-            environment = new Environment();
-            environment.setName(label.getName());
-            environment.setType(APIConstants.GATEWAY_ENV_TYPE_HYBRID);
-            return environment;
-        }
-        return null;
     }
 
     public static boolean isStreamingApi(API api) {

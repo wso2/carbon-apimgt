@@ -85,7 +85,9 @@ public class DataPublisherUtil {
 
     public static String getEndUserIP(MessageContext messageContext) {
         String clientIp;
-        Map<?, ?> headers = (Map<?, ?>) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
+                .getAxis2MessageContext();
+        Map<?, ?> headers = (Map<?, ?>) axis2MessageContext
                 .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers.containsKey(Constants.HEADER_X_FORWARDED_FOR)) {
             String xForwardForHeader = (String) headers.get(Constants.HEADER_X_FORWARDED_FOR);
@@ -95,7 +97,7 @@ public class DataPublisherUtil {
                 clientIp = clientIp.substring(0, idx);
             }
         } else {
-            clientIp = (String) messageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            clientIp = (String) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
         if (StringUtils.isEmpty(clientIp)) {
             return null;

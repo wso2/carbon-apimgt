@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 
 /**
- * Success event publisher implementation
+ * Success event publisher implementation.
  */
 public class SuccessRequestDataPublisher extends AbstractRequestDataPublisher {
 

@@ -54,6 +54,7 @@ function APICreateRoutes(props) {
                 <Route path='/apis/create/graphQL' component={ApiCreateGraphQL} />
                 <Route path='/apis/create/openapi' component={ApiCreateSwagger} />
                 <Route path='/apis/create/wsdl' component={ApiCreateWSDL} />
+                {/* TODO: Remove ApiCreateWebSocket components and associated routes */}
                 <Route path='/apis/create/ws' component={ApiCreateWebSocket} />
                 <Route path='/apis/create/streamingapi' component={APICreateStreamingAPI} />
                 <Route path='/apis/create/asyncapi' component={APICreateAsyncAPI} />

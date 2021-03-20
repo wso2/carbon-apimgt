@@ -55,8 +55,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response addService(@Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
-        return delegate.addService(catalogEntry, definitionFileInputStream, definitionFileDetail, securityContext);
+    public Response addService(@Multipart(value = "serviceMetadata")  ServiceDTO serviceMetadata,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail, @Multipart(value = "inlineContent", required = false)  String inlineContent) throws APIManagementException{
+        return delegate.addService(serviceMetadata, definitionFileInputStream, definitionFileDetail, inlineContent, securityContext);
     }
 
     @DELETE
@@ -176,7 +176,7 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve/search services", notes = "Retrieve or search services in the service catalog of the user's organization or tenant. Search is supported using the name, version, definitionType and key of the service. Search based on the definition type and key of the service will always be an exact search. If you want to execute an exact search for either name or version the parameter should be given inside double quotation.  `Exact search on name`     curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=%22Pet%20Service%22' -H     'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8'  `Matching search on name`     curl -k -X GET 'https://127.0.0.1:9443/api/am/service-catalog/v0/services?name=Pet%20Service' -H     'Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8' ", response = ServiceListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve/search services", notes = "Retrieve or search services in the service catalog of the user's organization or tenant. Search is supported using the name, version, definitionType and key of the service. Search based on the definition type and key of the service will always be an exact search. If you want to execute an exact search for either name or version the parameter should be given inside double quotation. ", response = ServiceListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "service_catalog:service_view", description = "view access to services in service catalog")
         })
@@ -186,8 +186,8 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response searchServices( @ApiParam(value = "Filter services by the name of the service ")  @QueryParam("name") String name,  @ApiParam(value = "Filter services by version of the service ")  @QueryParam("version") String version,  @ApiParam(value = "Filter services by definitionType ", allowableValues="OAS, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API")  @QueryParam("definitionType") String definitionType,  @ApiParam(value = "Filter services by the display name ")  @QueryParam("displayName") String displayName,  @ApiParam(value = "Comma seperated keys of the services to check ")  @QueryParam("key") String key,  @ApiParam(value = "If this set to true, a minimal set of fields will be provided for each service including the md5 ", defaultValue="false") @DefaultValue("false") @QueryParam("shrink") Boolean shrink,  @ApiParam(value = "", allowableValues="name, definitionType")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum limit of items to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
-        return delegate.searchServices(name, version, definitionType, displayName, key, shrink, sortBy, sortOrder, limit, offset, securityContext);
+    public Response searchServices( @ApiParam(value = "Filter services by the name of the service ")  @QueryParam("name") String name,  @ApiParam(value = "Filter services by version of the service ")  @QueryParam("version") String version,  @ApiParam(value = "Filter services by definitionType ", allowableValues="OAS, WSDL1, WSDL2, GRAPHQL_SDL, ASYNC_API")  @QueryParam("definitionType") String definitionType,  @ApiParam(value = "Comma seperated keys of the services to check ")  @QueryParam("key") String key,  @ApiParam(value = "If this set to true, a minimal set of fields will be provided for each service including the md5 ", defaultValue="false") @DefaultValue("false") @QueryParam("shrink") Boolean shrink,  @ApiParam(value = "", allowableValues="name, definitionType")  @QueryParam("sortBy") String sortBy,  @ApiParam(value = "", allowableValues="asc, desc")  @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "Maximum limit of items to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
+        return delegate.searchServices(name, version, definitionType, key, shrink, sortBy, sortOrder, limit, offset, securityContext);
     }
 
     @PUT
@@ -205,7 +205,7 @@ ServicesApiService delegate = new ServicesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateService(@ApiParam(value = "service key of the service",required=true) @PathParam("serviceKey") String serviceKey, @Multipart(value = "catalogEntry")  ServiceDTO catalogEntry,  @Multipart(value = "definitionFile") InputStream definitionFileInputStream, @Multipart(value = "definitionFile" ) Attachment definitionFileDetail) throws APIManagementException{
-        return delegate.updateService(serviceKey, catalogEntry, definitionFileInputStream, definitionFileDetail, securityContext);
+    public Response updateService(@ApiParam(value = "uuid of the service",required=true) @PathParam("serviceId") String serviceId, @Multipart(value = "serviceMetadata")  ServiceDTO serviceMetadata,  @Multipart(value = "definitionFile", required = false) InputStream definitionFileInputStream, @Multipart(value = "definitionFile" , required = false) Attachment definitionFileDetail, @Multipart(value = "inlineContent", required = false)  String inlineContent) throws APIManagementException{
+        return delegate.updateService(serviceId, serviceMetadata, definitionFileInputStream, definitionFileDetail, inlineContent, securityContext);
     }
 }

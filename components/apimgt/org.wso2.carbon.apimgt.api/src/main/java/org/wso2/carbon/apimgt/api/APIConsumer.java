@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -208,18 +209,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to get API for subscriber
      */
     Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String applicationName, String groupingId)
-            throws APIManagementException;
-
-    /**
-     * Returns a set of SubscribedAPIs filtered by the given application id.
-     *
-     * @param subscriber Subscriber
-     * @param applicationId Application Id
-     * @param groupingId the groupId of the subscriber
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<SubscribedAPI> getSubscribedAPIsByApplicationId(Subscriber subscriber, int applicationId, String groupingId)
             throws APIManagementException;
 
     /**
@@ -425,12 +414,10 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param identifier Api identifier
-     * @param comment comment text
-     * @param user Username of the comment author
+     * @param comment    comment text
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
-     *
-     * @deprecated
-     * This method needs to be removed once the Jaggery web apps are removed.
+     * @deprecated This method needs to be removed once the Jaggery web apps are removed.
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
 
@@ -438,14 +425,14 @@ public interface APIConsumer extends APIManager {
      * This method is to add a comment.
      *
      * @param identifier Api identifier
-     * @param comment comment object
-     * @param user Username of the comment author
+     * @param comment    comment object
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier Api identifier
+     * @param identifier      Api identifier
      * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
@@ -456,27 +443,29 @@ public interface APIConsumer extends APIManager {
      * This method is to get a comment of an API.
      *
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId Comment ID
-     * @param limit
-     * @param offset
+     * @param commentId      Comment ID
+     * @param replyLimit
+     * @param replyOffset
      * @return Comment
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer limit, Integer offset) throws
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
             APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api type wrapper
+     * @param apiTypeWrapper  Api type wrapper
      * @param parentCommentID
+     * @param replyLimit
+     * @param replyOffset
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    Comment[] getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID) throws APIManagementException;
+    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId comment ID
-     * @param comment Comment object
+     * @param commentId      comment ID
+     * @param comment        Comment object
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
@@ -486,7 +475,7 @@ public interface APIConsumer extends APIManager {
      * This method is to delete a comment.
      *
      * @param identifier API Identifier
-     * @param commentId Comment ID
+     * @param commentId  Comment ID
      * @throws APIManagementException if failed to delete comment for identifier
      */
     void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
@@ -495,7 +484,7 @@ public interface APIConsumer extends APIManager {
      * This method is to delete a comment.
      *
      * @param apiTypeWrapper API Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
      */
@@ -796,17 +785,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns the swagger definition of the API for the given microgateway gateway label as a string
-     *
-     * @param api api
-     * @param labelName name of the microgateway label
-     * @return swagger string
-     * @throws APIManagementException if error occurred while obtaining the swagger definition
-     */
-    String getOpenAPIDefinitionForLabel(API api, String labelName)
-            throws APIManagementException;
-
-    /**
      * Returns the swagger definition of the API for the given container managed cluster name as a string
      *
      * @param api api
@@ -876,16 +854,6 @@ public interface APIConsumer extends APIManager {
      */
     Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
             throws APIManagementException;
-
-    /**
-     * Returns a set of scopes for a given space seperated scope key string
-     *
-     * @param scopeKeys a space seperated string of scope keys
-     * @param tenantId  tenant id
-     * @return set of scopes
-     * @throws APIManagementException
-     */
-    Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
     /**
      * Returns the groupId of a specific Application when the Id is provided
@@ -1005,14 +973,6 @@ public interface APIConsumer extends APIManager {
      *
      */
     String getRequestedTenant();
-
-    /**
-     * Checks whether the DevPortal Anonymous Mode is enabled.
-     *
-     * @param tenantDomain       tenant domain
-     * @throws APIManagementException if an error occurs while reading configs
-     */
-    boolean isDevPortalAnonymousEnabled(String tenantDomain) throws APIManagementException;
 
     /**
      *

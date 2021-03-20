@@ -21,9 +21,6 @@ import {makeStyles} from "@material-ui/core/styles/index";
 import {matchPath} from "react-router";
 import Typography from '@material-ui/core/Typography';
 import {FormattedMessage} from 'react-intl';
-import Radio from '@material-ui/core/Radio';
-import {RadioGroup} from '@material-ui/core';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -36,11 +33,6 @@ import _ from 'lodash'
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
-
-import CopyToClipboard from 'react-copy-to-clipboard'
-import IconButton from '@material-ui/core/IconButton';
-import Icon from '@material-ui/core/Icon';
-import TextField from '@material-ui/core/TextField';
 import CancelIcon from '@material-ui/icons/Cancel';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 
@@ -98,32 +90,6 @@ const useStyles = makeStyles((theme) => (
             paddingLeft: '0px',
             paddingTop: '0px',
         },
-        topicRow: {
-            paddingTop: '0px',
-            paddingBottom: '0px',
-            paddingLeft: '0px',
-            paddingRight: '0px'
-        },
-        bootstrapRoot: {
-            padding: 0,
-            'label + &': {
-                marginTop: theme.spacing(3),
-            },
-        },
-        bootstrapInput: {
-            borderRadius: 4,
-            backgroundColor: theme.palette.common.white,
-            border: '1px solid #ced4da',
-            padding: '5px 12px',
-            marginTop: '11px',
-            width: 240,
-            transition: theme.transitions.create(['border-color', 'box-shadow']),
-            '&:focus': {
-                borderColor: '#80bdff',
-                boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-            },
-            fontSize: 12,
-        },
     }
 ));
 
@@ -138,14 +104,7 @@ export default function WebHookDetails(props) {
     const applicationId = props.match.params.applicationId;
     const apiId = match.params.apiId;
 
-    const [allTopics, setAllTopics] = useState('');
     const [subscribedTopics, setSubscribedTopics] = useState('');
-    const [api, setApi] = useState('');
-    const [value, setValue] = React.useState('existing');
-
-    const handleChange = (event) => {
-        setValue(event.target.value);
-    };
 
     const getLogoForDeliveryStatus = (subscription) => {
         switch (subscription.deliveryStatus) {
@@ -158,39 +117,12 @@ export default function WebHookDetails(props) {
         }
     };
 
-    function generateGenericWHSubscriptionUrl(topicName) {
-        const apiEndpointUrl = api.endpointURLs[0].URLs.https;
-        return `${apiEndpointUrl}?hub.topic=${topicName}&hub.callback=https://placeholder.com&hub.mode=subscribe&hub.secret=some_secret&hub.lease_seconds=50000000`;
-    }
-
-    function onCopy(message) {
-        Alert.info(message);
-    }
-
     function getRelativeTIme(standardTime) {
         return dayjs(standardTime).fromNow()
     }
 
     useEffect(() => {
         const apiClient = new Api();
-
-        const promisedApi = apiClient.getAPIById(apiId);
-        promisedApi.then((response) => {
-            setApi(response.obj);
-        }).catch((error) => {
-            console.log(error);
-            Alert.error('Error while retrieving api data');
-        });
-
-        const promisedTopics = apiClient.getAllTopics(apiId);
-        promisedTopics.then((response) => {
-            console.log(response);
-            setAllTopics(response.body);
-        }).catch((error) => {
-            console.log(error);
-            Alert.error('Error while retrieving topics for API');
-        });
-
         const promisedSubscriptions = apiClient.getWebhookubScriptions(apiId, applicationId);
         promisedSubscriptions.then((response) => {
             const sortedSubscriptions = _.groupBy(response.obj.list, 'topic');
@@ -211,13 +143,7 @@ export default function WebHookDetails(props) {
                     />
                 </Typography>
             </div>
-            <RadioGroup aria-label="gender" name="gender1" value={value} row onChange={handleChange}>
-                <FormControlLabel value="existing" control={<Radio/>} label="Existing"/>
-                <FormControlLabel value="all" control={<Radio/>} label="All"/>
-            </RadioGroup>
-            {subscribedTopics && value === 'existing' &&
             <List className={classes.listWrapper}>
-                <Divider/>
                 {Object.keys(subscribedTopics).length < 1 &&
                 <Typography color="textPrimary" display="block">
                     <FormattedMessage
@@ -273,51 +199,6 @@ export default function WebHookDetails(props) {
                     </>
                 ))}
             </List>
-            }
-            {allTopics && value === 'all' &&
-            <List className={classes.listWrapper}>
-                <Divider/>
-                {allTopics.list.map((topic, index) => (
-                    <>
-                        <ListItem className={classes.topicRow}>
-                            <Grid container direction='row'>
-                                <Grid item xs={6}> <ListItemText primary={topic.name} style={{marginTop: '11px'}}/>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <div style={{float: 'right'}}>
-                                        <TextField
-                                            defaultValue={generateGenericWHSubscriptionUrl(topic.name)}
-                                            id='bootstrap-input'
-                                            InputProps={{
-                                                disableUnderline: true,
-                                                readOnly: true,
-                                                classes: {
-                                                    root: classes.bootstrapRoot,
-                                                    input: classes.bootstrapInput,
-                                                },
-                                            }}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                                className: classes.bootstrapFormLabel,
-                                            }}
-                                        />
-                                        <CopyToClipboard
-                                            text={generateGenericWHSubscriptionUrl(topic.name)}
-                                            onCopy={() => onCopy('Subscription url copied for ' + api.endpointURLs[0].environmentName)}
-                                        >
-                                            <IconButton aria-label='Copy to clipboard'>
-                                                <Icon color='secondary'>file_copy</Icon>
-                                            </IconButton>
-                                        </CopyToClipboard>
-                                    </div>
-                                </Grid>
-                            </Grid>
-                        </ListItem>
-                        <Divider component="li"/>
-                    </>
-                ))}
-            </List>
-            }
         </div>
     );
 }

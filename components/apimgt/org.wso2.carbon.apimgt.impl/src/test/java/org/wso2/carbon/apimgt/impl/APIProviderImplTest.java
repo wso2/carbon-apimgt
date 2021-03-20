@@ -2910,11 +2910,6 @@ public class APIProviderImplTest {
         List<API> foundApiList9 = apiProvider.searchAPIs("API", "Description", "admin");
         Assert.assertNotNull(foundApiList9);
         Assert.assertEquals(2, foundApiList9.size());
-
-        //Search by Subcontext
-        List<API> foundApiList10 = apiProvider.searchAPIs("add", "Subcontext", "admin");
-        Assert.assertNotNull(foundApiList10);
-        Assert.assertEquals(1, foundApiList10.size());
     }
 
     @Test
