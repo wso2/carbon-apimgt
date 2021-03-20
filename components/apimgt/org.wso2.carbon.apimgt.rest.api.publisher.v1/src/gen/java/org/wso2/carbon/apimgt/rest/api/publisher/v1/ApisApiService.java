@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
@@ -84,7 +83,6 @@ public interface ApisApiService {
       public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
-      public Response deploymentsGetStatus(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException;

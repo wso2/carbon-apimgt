@@ -1594,24 +1594,6 @@ public interface APIProvider extends APIManager {
     SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
 
     /**
-     * This method is used to publish the api in private jet mode
-     *
-     * @param api           API Object
-     * @param apiIdentifier api identifier
-     * @throws APIManagementException if failed to add the schema as a resource to registry
-     */
-    void publishInPrivateJet(API api, APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * Retrieve the status information of the deployments of APIs cloud clusters
-     * that are currently reused by API Products.
-     *
-     * @param apiId API Identifier
-     * @return a list of Deploymentstatus objects in different cloud environments
-     */
-    List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
-
-    /**
      * Retrieve list of resources of the provided api that are used in other API products
      * @param apiId ID of the API
      * @return APIResource list of resources

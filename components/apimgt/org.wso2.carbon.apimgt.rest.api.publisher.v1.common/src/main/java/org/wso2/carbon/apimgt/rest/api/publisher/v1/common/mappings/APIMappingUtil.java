@@ -44,8 +44,6 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
-import org.wso2.carbon.apimgt.api.model.DeploymentStatus;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
@@ -87,10 +85,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentClusterStatusDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
@@ -103,7 +97,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListD
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PodStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
@@ -232,19 +225,6 @@ public class APIMappingUtil {
                     model.setFaultSequence(policy.getName());
                 }
             }
-        }
-        if (dto.getDeploymentEnvironments() != null) {
-            Set<DeploymentEnvironmentsDTO> deploymentsFromDTO =
-                    new HashSet<DeploymentEnvironmentsDTO>(dto.getDeploymentEnvironments());
-            Set<DeploymentEnvironments> deploymentEnvironments = new HashSet<DeploymentEnvironments>();
-
-            for (DeploymentEnvironmentsDTO deployment : deploymentsFromDTO) {
-                DeploymentEnvironments deploymentEnvironment = new DeploymentEnvironments();
-                deploymentEnvironment.setType(deployment.getType());
-                deploymentEnvironment.setClusterNames(deployment.getClusterName());
-                deploymentEnvironments.add(deploymentEnvironment);
-            }
-            model.setDeploymentEnvironments(deploymentEnvironments);
         }
 
         if (dto.getSubscriptionAvailability() != null) {
@@ -462,50 +442,6 @@ public class APIMappingUtil {
         }
         apiMonetizationInfoDTO.setProperties(monetizationPropertiesMap);
         return apiMonetizationInfoDTO;
-    }
-
-    public static DeploymentStatusListDTO fromDeploymentStatustoDTO(APIIdentifier apiIdentifier)
-            throws APIManagementException {
-        //create DTO form the model
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        API api = apiProvider.getAPI(apiIdentifier);
-
-        DeploymentStatusListDTO deploymentStatusListDTO = new DeploymentStatusListDTO();
-        DeploymentStatusDTO deploymentStatusDTO = new DeploymentStatusDTO();
-        List<DeploymentStatusDTO> deploymentStatuses = new ArrayList<DeploymentStatusDTO>();
-        List<DeploymentClusterStatusDTO> clustersList = new ArrayList<DeploymentClusterStatusDTO>();
-
-        List<DeploymentStatus> deploymentStatusList = apiProvider.getDeploymentStatus(apiIdentifier);
-
-        for (DeploymentStatus status : deploymentStatusList) {
-            DeploymentClusterStatusDTO deploymentClusterStatusDTO = new DeploymentClusterStatusDTO();
-            List<PodStatusDTO> podStatusDTOList = new ArrayList<PodStatusDTO>();
-
-            deploymentClusterStatusDTO.setClusterName(status.getClusterName());
-            deploymentClusterStatusDTO.setPodsRunning(status.getPodsRunning());
-
-            for (Map<String, String> getPodStatus : status.getPodStatus()) {
-                PodStatusDTO podStatusDTO = new PodStatusDTO();
-                podStatusDTO.setName(getPodStatus.get("podName"));
-                podStatusDTO.setStatus(getPodStatus.get("status"));
-                podStatusDTO.setReady(getPodStatus.get("ready"));
-                podStatusDTO.setCreationTimestamp(getPodStatus.get("creationTimestamp"));
-
-                podStatusDTOList.add(podStatusDTO);
-            }
-
-            deploymentClusterStatusDTO.setHealthStatus(podStatusDTOList);
-            clustersList.add(deploymentClusterStatusDTO);
-
-        }
-        deploymentStatusDTO.setClusters(clustersList);
-        deploymentStatusDTO.setType("kubernetes");
-        deploymentStatuses.add(deploymentStatusDTO);
-
-        deploymentStatusListDTO.setList(deploymentStatuses);
-        deploymentStatusListDTO.setCount(deploymentStatuses.size());
-
-        return deploymentStatusListDTO;
     }
 
     /**
@@ -1237,17 +1173,6 @@ public class APIMappingUtil {
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
 
-        if (model.getDeploymentEnvironments() != null && !model.getDeploymentEnvironments().isEmpty()) {
-            List<DeploymentEnvironmentsDTO> deploymentEnvironmentsDTOS = new ArrayList<DeploymentEnvironmentsDTO>();
-            for (DeploymentEnvironments deploymentEnvironment : model.getDeploymentEnvironments()) {
-                DeploymentEnvironmentsDTO deploymentEnvironmentsDTO = new DeploymentEnvironmentsDTO();
-                deploymentEnvironmentsDTO.setType(deploymentEnvironment.getType());
-                deploymentEnvironmentsDTO.setClusterName(deploymentEnvironment.getClusterNames());
-
-                deploymentEnvironmentsDTOS.add(deploymentEnvironmentsDTO);
-            }
-            dto.setDeploymentEnvironments(deploymentEnvironmentsDTOS);
-        }
         return dto;
     }
 
