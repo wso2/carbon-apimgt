@@ -39,7 +39,6 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
-import Kubernetes from 'AppComponents/Apis/Details/Environments/Kubernetes';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
@@ -293,11 +292,8 @@ export default function Environments() {
     } else {
         revisionCount = 5;
     }
-    const [selectedDeployments, setSelectedDeployments] = useState([api.deploymentEnvironments
-        ? [...api.deploymentEnvironments] : []]);
     const restApi = new API();
     const restProductApi = new APIProduct();
-    const [allDeployments, setAllDeployments] = useState([]);
     const [allRevisions, setRevisions] = useState(null);
     const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState([]);
@@ -343,10 +339,6 @@ export default function Environments() {
 
     useEffect(() => {
         if (api && api.apiType !== API.CONSTS.APIProduct) {
-            restApi.getDeployments()
-                .then((result) => {
-                    setAllDeployments(result.body.list);
-                });
             restApi.getRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
                 setLastRevisionCount(result.body.count);
@@ -356,10 +348,6 @@ export default function Environments() {
                 setEnvRevision(result.body.list);
             });
         } else {
-            restApi.getDeployments()
-                .then((result) => {
-                    setAllDeployments(result.body.list);
-                });
             restProductApi.getProductRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
                 setLastRevisionCount(result.body.count);
@@ -2048,20 +2036,6 @@ export default function Environments() {
                         </TableBody>
                     </Table>
                 </TableContainer>
-
-                {
-                    allDeployments
-                    && (
-                        allDeployments.map((clusters) => (clusters.name.toLowerCase() === 'kubernetes' && (
-                            <Kubernetes
-                                clusters={clusters}
-                                selectedDeployments={selectedDeployments}
-                                setSelectedDeployments={setSelectedDeployments}
-                                api={api}
-                            />
-                        )))
-                    )
-                }
             </Box>
         </>
     );
