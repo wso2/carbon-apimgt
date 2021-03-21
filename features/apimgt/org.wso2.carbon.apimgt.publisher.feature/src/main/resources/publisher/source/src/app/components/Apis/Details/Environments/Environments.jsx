@@ -498,8 +498,9 @@ export default function Environments() {
      */
     function deleteRevision(revisionId, revisionName) {
         const lastRev = checkIfDeletingLastRevision(allRevisions, revisionName);
+        let promiseDelete;
         if (api.apiType === API.CONSTS.APIProduct) {
-            restProductApi.deleteProductRevision(api.id, revisionId)
+            promiseDelete = restProductApi.deleteProductRevision(api.id, revisionId)
                 .then(() => {
                     Alert.info(intl.formatMessage({
                         defaultMessage: 'Revision Deleted Successfully',
@@ -522,7 +523,7 @@ export default function Environments() {
                     });
                 });
         } else {
-            restApi.deleteRevision(api.id, revisionId)
+            promiseDelete = restApi.deleteRevision(api.id, revisionId)
                 .then(() => {
                     Alert.info(intl.formatMessage({
                         defaultMessage: 'Revision Deleted Successfully',
@@ -545,6 +546,7 @@ export default function Environments() {
                     });
                 });
         }
+        return promiseDelete;
     }
 
     /**
