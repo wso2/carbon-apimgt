@@ -51,10 +51,10 @@ const tasksReducer = (state, action) => {
 };
 
 /**
- * @class TestConsole
+ * @class TryOutConsole
  * @extends {React.Component}
  */
-const TestConsole = () => {
+const TryOutConsole = () => {
     const [api] = useAPI();
     const [apiKey, setAPIKey] = useState('');
     const [deployments, setDeployments] = useState([]);
@@ -94,28 +94,43 @@ const TestConsole = () => {
     const updatedOasDefinition = useMemo(() => {
         let oasCopy;
         if (selectedDeployment && oasDefinition) {
-            // TODO: Need to handle Swagger 2.0 as well ~tmkb
             const selectedGWEnvironment = publisherSettings.environment
                 .find((env) => env.name === selectedDeployment.name);
             const selectedDeploymentVhost = selectedGWEnvironment.vhosts
                 .find((vhost) => vhost.host === selectedDeployment.vhost);
-            const servers = api.transport.map((transport) => {
-                const transportPort = selectedDeploymentVhost[`${transport}Port`];
-                if (!transportPort) {
-                    console.error(`Can't find ${transport}Port `
+            let pathSeparator = '';
+            if (selectedDeploymentVhost.httpContext && !selectedDeploymentVhost.httpContext.startsWith('/')) {
+                pathSeparator = '/';
+            }
+            oasCopy = cloneDeep(oasDefinition); // If not we are directly mutating the state
+            if (oasDefinition.openapi) { // Assumed as OAS 3.x definition
+                const servers = api.transport.map((transport) => {
+                    const transportPort = selectedDeploymentVhost[`${transport}Port`];
+                    if (!transportPort) {
+                        console.error(`Can't find ${transport}Port `
                     + `in selected deployment ( ${selectedDeploymentVhost.name} )`);
-                }
-                const baseURL = `${transport}://${selectedDeployment.vhost}:${transportPort}`;
-                let pathSeparator = '';
-                if (selectedDeploymentVhost.httpContext && !selectedDeploymentVhost.httpContext.startsWith('/')) {
-                    pathSeparator = '/';
-                }
-                const url = `${baseURL}${pathSeparator}`
+                    }
+                    const baseURL = `${transport}://${selectedDeployment.vhost}:${transportPort}`;
+                    const url = `${baseURL}${pathSeparator}`
                 + `${selectedDeploymentVhost.httpContext}${api.context}/${api.version}`;
-                return { url };
-            });
-            oasCopy = cloneDeep(oasDefinition);
-            oasCopy.servers = servers;
+                    return { url };
+                });
+                oasCopy.servers = servers;
+            } else { // Assume the API definition is Swagger 2
+                let transportPort = selectedDeploymentVhost.httpsPort;
+                if (api.transport.length === 1 && !api.transport.includes('https')) {
+                    transportPort = selectedDeploymentVhost.httpPort;
+                } else if (api.transport.length > 1) {
+                    // TODO: fix When both HTTP and HTTPs transports are available can't switch the port between them
+                    // ~tmkb
+                    console.warn('HTTPS transport port will be used for all other transports');
+                }
+                const host = `${selectedDeploymentVhost.host}:${transportPort}`;
+                const basePath = `${pathSeparator}${selectedDeploymentVhost.httpContext}${api.context}/${api.version}`;
+                oasCopy.schemes = api.transport;
+                oasCopy.basePath = basePath;
+                oasCopy.host = host;
+            }
         } else if (oasDefinition) {
             // If no deployment just show the OAS definition
             oasCopy = oasDefinition;
@@ -133,6 +148,7 @@ const TestConsole = () => {
         setSelectedDeployment(currentSelection);
     };
     const decodedJWT = useMemo(() => Utils.decodeJWT(apiKey), [apiKey]);
+    const isAPIRetired = api.lifeCycleStatus === 'RETIRED';
     return (
         <>
             <Typography variant='h4' component='h1'>
@@ -151,7 +167,7 @@ const TestConsole = () => {
                             fullWidth
                             label={(
                                 <FormattedMessage
-                                    id='Apis.Details.TestConsole.token.label'
+                                    id='Apis.Details.TryOutConsole.token.label'
                                     defaultMessage='Internal API Key'
                                 />
                             )}
@@ -168,12 +184,13 @@ const TestConsole = () => {
                             multiline
                             rows={4}
                             onChange={(e) => setAPIKey(e.target.value)}
+                            disabled={isAPIRetired}
                         />
                         <Button
                             onClick={generateInternalKey}
                             variant='contained'
                             color='primary'
-                            disabled={tasksStatus.generateKey.inProgress}
+                            disabled={tasksStatus.generateKey.inProgress || isAPIRetired}
                         >
                             <FormattedMessage
                                 id='Apis.Details.ApiConsole.generate.test.key'
@@ -195,7 +212,7 @@ const TestConsole = () => {
                 </Box>
                 <Box my={3} display='flex' justifyContent='center'>
                     <Grid xs={11} md={6} item>
-                        {(tasksStatus.getDeployments.completed && !deployments.length) && (
+                        {(tasksStatus.getDeployments.completed && !deployments.length && !isAPIRetired) && (
                             <Alert variant='outlined' severity='error'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.deployments.no'
@@ -207,6 +224,14 @@ const TestConsole = () => {
                                         fontSize='small'
                                     />
                                 </Link>
+                            </Alert>
+                        )}
+                        {isAPIRetired && (
+                            <Alert variant='outlined' severity='error'>
+                                <FormattedMessage
+                                    id='Apis.Details.ApiConsole.deployments.isAPIRetired'
+                                    defaultMessage='Can not Try Out retired APIs!'
+                                />
                             </Alert>
                         )}
                         {((deployments && deployments.length > 0))
@@ -276,7 +301,7 @@ const TestConsole = () => {
         </>
     );
 };
-TestConsole.propTypes = {
+TryOutConsole.propTypes = {
     classes: PropTypes.shape({
         paper: PropTypes.string.isRequired,
         titleSub: PropTypes.string.isRequired,
@@ -291,4 +316,4 @@ TestConsole.propTypes = {
     }).isRequired,
 };
 
-export default TestConsole;
+export default TryOutConsole;

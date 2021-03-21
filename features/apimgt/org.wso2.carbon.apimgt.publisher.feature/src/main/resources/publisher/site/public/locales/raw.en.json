@@ -501,6 +501,9 @@
   "Apis.Details.ApiConsole.deployments.api.gateways": {
     "defaultMessage": "API Gateways"
   },
+  "Apis.Details.ApiConsole.deployments.isAPIRetired": {
+    "defaultMessage": "Can not Try Out retired APIs!"
+  },
   "Apis.Details.ApiConsole.deployments.no": {
     "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
   },
@@ -2925,7 +2928,7 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": {
     "defaultMessage": "Error while retrieving the subscriptions"
   },
-  "Apis.Details.TestConsole.token.label": {
+  "Apis.Details.TryOutConsole.token.label": {
     "defaultMessage": "Internal API Key"
   },
   "Apis.Details.components.APIDetailsTopMenu.created.by": {

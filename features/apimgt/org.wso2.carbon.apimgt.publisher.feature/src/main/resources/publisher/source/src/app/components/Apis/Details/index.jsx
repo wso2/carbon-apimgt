@@ -85,7 +85,7 @@ import Monetization from './Monetization';
 import ExternalStores from './ExternalStores/ExternalStores';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
-import TestConsole from './TestConsole/TestConsole';
+import TryOutConsole from './TryOut/TryOutConsole';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -971,7 +971,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.TRYOUT}
-                                    component={() => <TestConsole apiObj={api} />}
+                                    component={() => <TryOutConsole apiObj={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                                 <Route

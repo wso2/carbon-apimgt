@@ -1173,6 +1173,12 @@
       "value": "API Gateways"
     }
   ],
+  "Apis.Details.ApiConsole.deployments.isAPIRetired": [
+    {
+      "type": 0,
+      "value": "Can not Try Out retired APIs!"
+    }
+  ],
   "Apis.Details.ApiConsole.deployments.no": [
     {
       "type": 0,
@@ -6117,7 +6123,7 @@
       "value": "Error while retrieving the subscriptions"
     }
   ],
-  "Apis.Details.TestConsole.token.label": [
+  "Apis.Details.TryOutConsole.token.label": [
     {
       "type": 0,
       "value": "Internal API Key"
