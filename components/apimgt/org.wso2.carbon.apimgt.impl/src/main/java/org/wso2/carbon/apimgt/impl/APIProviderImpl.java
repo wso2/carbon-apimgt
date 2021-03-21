@@ -901,9 +901,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
 
-        //add labels
-        validateAndSetLables(api);
-
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
 
         //Add default API LC if it is not there
@@ -2971,52 +2968,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiProduct.setApiSecurity(apiSecurity);
     }
 
-    /**
-     * To validate the lables options and set it.
-     *
-     * @param api Relevant API that need to be validated.
-     */
-    private void validateAndSetLables(API api) throws APIManagementException {
-        // get all labels in the tenant
-        List<Label> gatewayLabelList;
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        gatewayLabelList = APIUtil.getAllLabels(tenantDomain);
-        List<Label> filteredLabels = new ArrayList<Label>();
-        // validation is performed here to cover all actions related to API artifact updates
-        if (!gatewayLabelList.isEmpty()) {
-            // put available gateway labels to a list for validation purpose
-            List<String> availableGatewayLabelListNames = new ArrayList<>();
-            for (Label x : gatewayLabelList) {
-                availableGatewayLabelListNames.add(x.getName());
-            }
-
-            // if there are labels attached to the API object, add them to the artifact
-            if (api.getGatewayLabels() != null) {
-                // validate and add each label to the artifact
-                List<Label> candidateLabelsList = api.getGatewayLabels();
-                for (Label label : candidateLabelsList) {
-                    String candidateLabel = label.getName();
-                    // validation step, add the label only if it exists in the available gateway labels
-                    if (availableGatewayLabelListNames.contains(candidateLabel)) {
-                        Label l = new Label();
-                        l.setName(candidateLabel);
-                        filteredLabels.add(l);
-                    } else {
-                        log.warn("Label name : " + candidateLabel + " does not exist in the tenant : " + tenantDomain
-                                + ", hence skipping it.");
-                    }
-                }
-            }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No predefined labels in the tenant : " + tenantDomain + " . Skipped adding all labels");
-            }
-        }
-        api.setGatewayLabels(filteredLabels);
-
-    }
-
     private void checkIfValidTransport(String transport) throws APIManagementException {
         if (!Constants.TRANSPORT_HTTP.equalsIgnoreCase(transport) && !Constants.TRANSPORT_HTTPS.equalsIgnoreCase(transport)
                 && !APIConstants.WS_PROTOCOL.equalsIgnoreCase(transport) && !APIConstants.WSS_PROTOCOL.equalsIgnoreCase(transport)) {
@@ -3813,9 +3764,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String path = APIUtil.saveWSDLResource(registry, api);
                 updateWSDLUriInAPIArtifact(path, artifactManager, artifact, artifactPath);
             }
-
-            //attaching micro-gateway labels to the API
-            APIUtil.attachLabelsToAPIArtifact(artifact, api, tenantDomain);
 
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
             //to gain performance
@@ -5376,18 +5324,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
-    }
-
-    /**
-     * Returns all labels associated with given tenant domain.
-     *
-     * @param tenantDomain tenant domain
-     * @return List<Label>  List of label of given tenant domain.
-     * @throws APIManagementException
-     */
-    @Override
-    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
-        return apiMgtDAO.getAllLabels(tenantDomain);
     }
 
     @Override
@@ -8996,14 +8932,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public org.wso2.carbon.apimgt.api.model.CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID,
-                                                                  Integer replyLimit, Integer replyOffset) throws
+                                                                    Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
         return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
     }
 
     @Override
     public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
-            APIManagementException{
+            APIManagementException {
         return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
     }
 

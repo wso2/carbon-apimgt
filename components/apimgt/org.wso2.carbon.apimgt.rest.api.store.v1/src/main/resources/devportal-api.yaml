@@ -241,7 +241,6 @@ paths:
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/labelName'
         - $ref: '#/components/parameters/environmentName'
         - $ref: '#/components/parameters/clusterName'
         - $ref: '#/components/parameters/If-None-Match'
@@ -399,7 +398,6 @@ paths:
       operationId: getWSDLOfAPI
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/labelName'
         - $ref: '#/components/parameters/environmentName'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
@@ -1044,11 +1042,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-          content: {}
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -3962,12 +3955,6 @@ components:
                     example: ws://localhost:9099/phoneverify/
         businessInformation:
           $ref: '#/components/schemas/APIBusinessInformation'
-        labels:
-          type: array
-          description: |
-            Labels of micro-gateway environments attached to the API.
-          items:
-            $ref: '#/components/schemas/Label'
         environmentList:
           type: array
           description: The environment list configured with non empty endpoint URLs
@@ -4008,22 +3995,6 @@ components:
         lastUpdatedTime:
           type: string
           example: 2020-10-31T13:57:16.229
-    Label:
-      title: Label
-      required:
-        - name
-      type: object
-      properties:
-        name:
-          type: string
-          example: Public
-        description:
-          type: string
-        accessUrls:
-          type: array
-          items:
-            type: string
-            example: http://localhost:9443/
     APIMonetizationInfo:
       title: API monetization object
       required:
@@ -5944,13 +5915,6 @@ components:
         enum:
           - application
           - subscription
-    labelName:
-      name: labelName
-      in: query
-      description: |
-        Name of the API microgateway labels
-      schema:
-        type: string
     environmentName:
       name: environmentName
       in: query

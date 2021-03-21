@@ -138,14 +138,13 @@ paths:
             "provider:wso2" will match an API if the provider of the API contains "wso2".
             "provider:"wso2"" will match an API if the provider of the API is exactly "wso2".
             "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
-            "label:external" will match an API if it contains a Microgateway label called "external".
 
             Also you can use combined modifiers
             Eg.
             name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
 
             Supported attribute modifiers are [**version, context, name, status,
-            description, doc, provider, label**]
+            description, doc, provider**]
 
             If no advanced attribute modifier has been specified,  the API names containing
             the search term will be returned as a result.
@@ -1974,7 +1973,7 @@ paths:
                 Entity Tag of the response resource. Used by caches, or in conditional request.
               schema:
                 type: string
-            Location: #???
+            Location:
               description: |
                 Location to the newly created Comment.
               schema:
@@ -1983,11 +1982,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-          content: {}
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -7343,34 +7337,6 @@ paths:
         $ref: docs/examples/alerts/alerts_config.yaml#/delete
 
   ######################################################
-  # The "Label Collection" resource API
-  ######################################################
-  /labels:
-    get:
-      tags:
-        - Label Collection
-      summary: Get all Registered Labels
-      description: |
-        Get all registered Labels
-      responses:
-        200:
-          description: |
-            OK.
-            Labels returned
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LabelList'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/labels"'
-      operationId: getLabels
-
-  ######################################################
   # The "API Category Collection" resource API
   ######################################################
   /api-categories:
@@ -8367,13 +8333,6 @@ components:
             $ref: '#/components/schemas/DeploymentEnvironments'
           x-otherScopes:
             - apim:api_publish
-        labels:
-          type: array
-          description: |
-            Labels of micro-gateway environments attached to the API.
-          example: []
-          items:
-            type: string
         mediationPolicies:
           type: array
           example:
@@ -10196,38 +10155,6 @@ components:
           type: string
           example: Gold
       description: Meta data of certificate
-    Label:
-      title: Label
-      required:
-        - name
-      type: object
-      properties:
-        name:
-          type: string
-          example: marketing_store
-        description:
-          type: string
-          example: Public microgateway for marketing
-        access_urls:
-          type: array
-          example: https://localhost:9095
-          items:
-            type: string
-    LabelList:
-      title: Label List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of Labels returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/Label'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
     LifecycleState:
       title: Lifecycle State
       type: object

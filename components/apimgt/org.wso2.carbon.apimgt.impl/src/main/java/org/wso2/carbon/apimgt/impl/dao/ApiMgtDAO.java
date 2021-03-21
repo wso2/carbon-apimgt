@@ -7371,7 +7371,7 @@ public class ApiMgtDAO {
      */
     public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer limit, Integer offset) throws APIManagementException {
         CommentList commentList = null;
-        try (Connection connection = APIMgtDBUtil.getConnection()){
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             int id = -1;
             Identifier identifier;
             if (apiTypeWrapper.isAPIProduct()) {
@@ -7409,23 +7409,23 @@ public class ApiMgtDAO {
         int total = 0;
         String sqlQuery;
         String sqlQueryForCount;
-        if (parentCommentID == null){
-            sqlQueryForCount  = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
-        }else {
-            sqlQueryForCount  = SQLConstants.GET_REPLIES_COUNT_SQL;
+        if (parentCommentID == null) {
+            sqlQueryForCount = SQLConstants.GET_ROOT_COMMENTS_COUNT_SQL;
+        } else {
+            sqlQueryForCount = SQLConstants.GET_REPLIES_COUNT_SQL;
         }
         try (PreparedStatement prepStmtForCount = connection.prepareStatement(sqlQueryForCount)) {
             prepStmtForCount.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             prepStmtForCount.setString(2, identifier.getName());
             prepStmtForCount.setString(3, identifier.getVersion());
-            if (parentCommentID != null){
+            if (parentCommentID != null) {
                 prepStmtForCount.setString(4, parentCommentID);
             }
             try (ResultSet resultSetForCount = prepStmtForCount.executeQuery()) {
                 while (resultSetForCount.next()) {
                     total = resultSetForCount.getInt("COMMENT_COUNT");
                 }
-                if (total > 0) {
+                if (total > 0 && limit > 0) {
                     if (parentCommentID == null) {
                         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_ROOT_COMMENTS_SQL");
                     } else {
@@ -7455,8 +7455,17 @@ public class ApiMgtDAO {
                                 comment.setParentCommentID(resultSet.getString("PARENT_COMMENT_ID"));
                                 comment.setEntryPoint(resultSet.getString("ENTRY_POINT"));
                                 comment.setCategory(resultSet.getString("CATEGORY"));
-                                comment.setReplies(getComments(identifier, resultSet.getString("COMMENT_ID"), 3, 0,
-                                        connection));
+                                if (parentCommentID == null) {
+                                    comment.setReplies(getComments(identifier, resultSet.getString("COMMENT_ID")
+                                            , APIConstants.REPLYLIMIT, APIConstants.REPLYOFFSET, connection));
+                                } else {
+                                    CommentList emptyCommentList = new CommentList();
+                                    Pagination emptyPagination = new Pagination();
+                                    emptyCommentList.setPagination(emptyPagination);
+                                    emptyCommentList.getPagination().setTotal(0);
+                                    emptyCommentList.setCount(0);
+                                    comment.setReplies(emptyCommentList);
+                                }
                                 list.add(comment);
                             }
                         }
@@ -7467,7 +7476,7 @@ public class ApiMgtDAO {
                     return commentList;
                 }
             }
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             handleException("Failed to retrieve comments for  " + identifier.getName(), e);
         }
         pagination.setLimit(limit);
@@ -7591,7 +7600,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     public boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()){
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
             Identifier identifier;
             if (apiTypeWrapper.isAPIProduct()) {
                 identifier = apiTypeWrapper.getApiProduct().getId();
@@ -7605,7 +7614,8 @@ public class ApiMgtDAO {
         return false;
     }
 
-    private boolean deleteComment(Identifier identifier, String commentId, Connection connection) throws APIManagementException {
+    private boolean deleteComment(Identifier identifier, String commentId, Connection connection) throws
+            APIManagementException {
         int id = -1;
         String deleteCommentQuery = SQLConstants.DELETE_COMMENT_SQL;
         String getCommentIDsOfReplies = SQLConstants.GET_IDS_OF_REPLIES_SQL;
@@ -7614,7 +7624,8 @@ public class ApiMgtDAO {
             id = getAPIID(identifier, connection);
             if (id == -1) {
                 String msg = "Could not load API record for: " + identifier.getName();
-                throw new APIManagementException(msg);
+                throw new APIManagementException(msg, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, identifier
+                        .getName() + "-" + identifier.getVersion()));
             }
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmtGetReplies = connection.prepareStatement(getCommentIDsOfReplies)) {
@@ -13142,226 +13153,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return application;
-    }
-
-    /**
-     * Returns the Label List for the TenantId.
-     *
-     * @param tenantDomain The tenant domain.
-     * @return List of labels.
-     */
-    public List<Label> getAllLabels(String tenantDomain) throws APIManagementException {
-        List<Label> labelList = new ArrayList<>();
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_LABEL_BY_TENANT)) {
-            try {
-                connection.setAutoCommit(false);
-                statement.setString(1, tenantDomain);
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        String labelId = rs.getString("LABEL_ID");
-                        String labelName = rs.getString("NAME");
-                        String description = rs.getString("DESCRIPTION");
-
-                        Label label = new Label();
-                        label.setLabelId(labelId);
-                        label.setName(labelName);
-                        label.setDescription(description);
-                        label.setAccessUrls(getAccessUrlList(connection, labelId));
-                        labelList.add(label);
-                    }
-                }
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to get Labels of " + tenantDomain, e);
-            } finally {
-                connection.setAutoCommit(true);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get Labels of " + tenantDomain, e);
-        }
-        return labelList;
-    }
-
-    /**
-     * Returns the Label detail for name and the TenantId.
-     *
-     * @param tenantDomain The tenant domain.
-     * @return List of labels.
-     */
-    public Label getLabelDetailByLabelAndTenantDomain(String labelName, String tenantDomain)
-            throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.GET_LABEL_DETAIL_BY_LABEL_AND_TENANT)) {
-            statement.setString(1, tenantDomain);
-            statement.setString(2, labelName);
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    String labelId = rs.getString("LABEL_ID");
-                    String description = rs.getString("DESCRIPTION");
-                    Label label = new Label();
-                    label.setLabelId(labelId);
-                    label.setName(labelName);
-                    label.setDescription(description);
-                    label.setAccessUrls(getAccessUrlList(connection, labelId));
-                    return label;
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get Label of " + tenantDomain, e);
-        }
-        return null;
-    }
-
-    /**
-     * Returns the URL list for label id.
-     *
-     * @param labelId label id.
-     * @return List of string.
-     */
-    private List<String> getAccessUrlList(Connection connection, String labelId) throws APIManagementException {
-        List<String> hostList = new ArrayList<>();
-
-        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.GET_URL_BY_LABEL_ID)) {
-            statement.setString(1, labelId);
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    String host = rs.getString("ACCESS_URL");
-                    hostList.add(host);
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get label list: ", e);
-        }
-        return hostList;
-    }
-
-    /**
-     * Returns the Label.
-     *
-     * @param tenantDomain The tenant domain.
-     * @param label        label object.
-     * @return label.
-     */
-    public Label addLabel(String tenantDomain, Label label) throws APIManagementException {
-        String uuid = UUID.randomUUID().toString();
-        label.setLabelId(uuid);
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_SQL)) {
-            try {
-                connection.setAutoCommit(false);
-
-                statement.setString(1, uuid);
-                statement.setString(2, label.getName());
-                statement.setString(3, label.getDescription());
-                statement.setString(4, tenantDomain);
-                statement.executeUpdate();
-                if (!label.getAccessUrls().isEmpty()) {
-                    insertAccessUrlMappings(connection, uuid, label.getAccessUrls());
-                }
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to add label: " + uuid, e);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to add label: " + uuid, e);
-        }
-        return label;
-    }
-
-    /**
-     * Insert URL to the URL table
-     *
-     * @param uuid    label id.
-     * @param urlList The list of url.
-     * @throws APIManagementException
-     */
-    private void insertAccessUrlMappings(Connection connection, String uuid, List<String> urlList) throws
-            APIManagementException {
-        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.ADD_LABEL_URL_MAPPING_SQL)) {
-            for (String accessUrl : urlList) {
-                statement.setString(1, uuid);
-                statement.setString(2, accessUrl);
-                statement.addBatch();
-            }
-            statement.executeBatch();
-        } catch (SQLException e) {
-            handleException("Failed to add label url : " + uuid, e);
-        }
-    }
-
-    /**
-     * Delete  label.
-     *
-     * @param labelUUID label id.
-     * @throws APIManagementException
-     */
-    public void deleteLabel(String labelUUID) throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_SQL)) {
-            try {
-                connection.setAutoCommit(false);
-                statement.setString(1, labelUUID);
-                statement.executeUpdate();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to delete label : " + labelUUID, e);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to delete label : " + labelUUID, e);
-        }
-    }
-
-    /**
-     * Delete label URL
-     *
-     * @param labelUUID label id.
-     * @throws APIManagementException
-     */
-    private void deleteAccessUrlMappings(Connection connection, String labelUUID) throws APIManagementException {
-        try (PreparedStatement statement = connection.prepareStatement(SQLConstants.DELETE_LABEL_URL_MAPPING_SQL)) {
-            statement.setString(1, labelUUID);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Failed to delete label url : ", e);
-        }
-    }
-
-    /**
-     * Update the label.
-     *
-     * @param label label object.
-     * @return labels.
-     */
-    public Label updateLabel(Label label) throws APIManagementException {
-        List<String> accessURLs = label.getAccessUrls();
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(SQLConstants.UPDATE_LABEL_SQL)) {
-            try {
-                connection.setAutoCommit(false);
-                statement.setString(1, label.getName());
-                statement.setString(2, label.getDescription());
-                statement.setString(3, label.getLabelId());
-
-                deleteAccessUrlMappings(connection, label.getLabelId());
-                insertAccessUrlMappings(connection, label.getLabelId(), accessURLs);
-                statement.executeUpdate();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Failed to update label : ", e);
-            }
-        } catch (SQLException e) {
-            handleException("Failed to update label : ", e);
-        }
-        return label;
     }
 
     /**

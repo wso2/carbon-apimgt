@@ -3549,7 +3549,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws
-            APIManagementException{
+            APIManagementException {
         return apiMgtDAO.editComment(apiTypeWrapper, commentId, comment);
     }
 
@@ -5489,25 +5489,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String getOpenAPIDefinitionForClusterName(API api, String clusterName)
             throws APIManagementException {
         return getOpenAPIDefinitionForDeployment(api, null, clusterName);
-    }
-
-    @Override
-    public String getOpenAPIDefinitionForLabel(API api, String labelName) throws APIManagementException {
-        List<Label> gatewayLabels;
-        String updatedDefinition = null;
-        Map<String,String> hostsWithSchemes;
-        String definition;
-        if (api.getSwaggerDefinition() != null) {
-            definition = api.getSwaggerDefinition();
-        } else {
-            throw new APIManagementException("Missing API definition in the api " + api.getUuid());
-        }
-
-        APIDefinition oasParser = OASParserUtil.getOASParser(definition);
-        gatewayLabels = api.getGatewayLabels();
-        hostsWithSchemes = getHostWithSchemeMappingForLabel(gatewayLabels, labelName);
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
-        return updatedDefinition;
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {

@@ -5,12 +5,6 @@
       "value": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
     }
   ],
-  "APis.Details.tryout.help.main": [
-    {
-      "type": 0,
-      "value": "Test APIs while in the Development stage."
-    }
-  ],
   "Api.category.dropdown.tooltip": [
     {
       "type": 0,
@@ -1159,6 +1153,30 @@
     {
       "type": 0,
       "value": "Enter valid role and press enter"
+    }
+  ],
+  "Apis.Details.ApiCOnsole.generate.test.key": [
+    {
+      "type": 0,
+      "value": "GET TEST KEY"
+    }
+  ],
+  "Apis.Details.ApiConsole.ApiConsole.title": [
+    {
+      "type": 0,
+      "value": "Try Out"
+    }
+  ],
+  "Apis.Details.ApiConsole.SelectAppPanel.environment": [
+    {
+      "type": 0,
+      "value": "Please select an environment"
+    }
+  ],
+  "Apis.Details.ApiConsole.environment": [
+    {
+      "type": 0,
+      "value": "Environment"
     }
   ],
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": [
@@ -6129,18 +6147,6 @@
       "value": "Error while retrieving the subscriptions"
     }
   ],
-  "Apis.Details.TestConsole.TestConsole.info.message": [
-    {
-      "type": 0,
-      "value": "API should be in prototype(testing) state. Please demote to created state and click on the initialize Test button in the Test Console left menu item."
-    }
-  ],
-  "Apis.Details.TestConsole.TestConsole.info.title": [
-    {
-      "type": 0,
-      "value": "API should be in prototype(testing) state."
-    }
-  ],
   "Apis.Details.components.APIDetailsTopMenu.created.by": [
     {
       "type": 0,
@@ -6260,25 +6266,7 @@
   "Apis.Details.index.Tryout": [
     {
       "type": 0,
-      "value": "Test Console"
-    }
-  ],
-  "Apis.Details.index.Tryout.menu.name": [
-    {
-      "type": 0,
-      "value": "test console"
-    }
-  ],
-  "Apis.Details.index.Tryout.not.enable.for.test": [
-    {
-      "type": 0,
-      "value": "Test Console"
-    }
-  ],
-  "Apis.Details.index.Tryout.not.prototyped": [
-    {
-      "type": 0,
-      "value": "Test Console"
+      "value": "Try out"
     }
   ],
   "Apis.Details.index.api.Config": [
@@ -6359,12 +6347,6 @@
     {
       "type": 0,
       "value": "external dev portals"
-    }
-  ],
-  "Apis.Details.index.initTest": [
-    {
-      "type": 0,
-      "value": "Initialize test"
     }
   ],
   "Apis.Details.index.left.menu.scope": [
@@ -6461,18 +6443,6 @@
     {
       "type": 0,
       "value": "Edit"
-    }
-  ],
-  "Apis.Details.tryout.initialize.test": [
-    {
-      "type": 0,
-      "value": "Initialize the API for the testing phase"
-    }
-  ],
-  "Apis.Details.tryout.title": [
-    {
-      "type": 0,
-      "value": "Start Testing"
     }
   ],
   "Apis.Listing.ApiTableView.context": [
@@ -8191,6 +8161,30 @@
       "value": "Internal Server Error"
     }
   ],
+  "api.console.gateway.heading": [
+    {
+      "type": 0,
+      "value": "Gateway"
+    }
+  ],
+  "api.console.security.heading": [
+    {
+      "type": 0,
+      "value": "Security"
+    }
+  ],
+  "api.console.security.type.heading": [
+    {
+      "type": 0,
+      "value": "Internal key"
+    }
+  ],
+  "api.gateways": [
+    {
+      "type": 0,
+      "value": "API Gateways"
+    }
+  ],
   "app.components.Shared.Banner.back": [
     {
       "type": 0,
@@ -8279,6 +8273,12 @@
     {
       "type": 0,
       "value": "The server encountered an internal error or misconfiguration and was unable to complete your request."
+    }
+  ],
+  "internal.token": [
+    {
+      "type": 0,
+      "value": "Internal Token"
     }
   ],
   "save": [

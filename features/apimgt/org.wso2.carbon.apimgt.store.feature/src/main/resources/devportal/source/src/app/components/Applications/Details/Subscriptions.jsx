@@ -368,6 +368,7 @@ class Subscriptions extends React.Component {
     };
     handleClearSearch() {
         this.setState({ searchText: '' });
+        this.searchInputElem.value = '';
     };
     handleEnterPress(e) {
         if (e.keyCode === 13) {
@@ -524,6 +525,7 @@ class Subscriptions extends React.Component {
                                         className={classes.input}
                                         placeholder={intl.formatMessage({ defaultMessage: 'Search APIs', id: 'Applications.Details.Subscriptions.search' })}
                                         inputProps={{ 'aria-label': intl.formatMessage({ defaultMessage: 'Search APIs', id: 'Applications.Details.Subscriptions.search' }) }}
+                                        inputRef= {el => this.searchInputElem = el} 
                                         onChange={this.handleSearchTextTmpChange}
                                         onKeyDown={this.handleEnterPress}
                                     />

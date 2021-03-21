@@ -119,7 +119,7 @@ class Header extends React.Component {
                                 <Link to='/'>
                                     <img
                                         src={Configurations.app.context + theme.custom.logo}
-                                        alt={`${theme.custom.title.prefix} ${theme.custom.title.sufix}`}
+                                        alt={`${theme.custom.title.prefix} ${theme.custom.title.suffix}`}
                                         style={{ height: theme.custom.logoHeight, width: theme.custom.logoWidth }}
                                     />
                                 </Link>

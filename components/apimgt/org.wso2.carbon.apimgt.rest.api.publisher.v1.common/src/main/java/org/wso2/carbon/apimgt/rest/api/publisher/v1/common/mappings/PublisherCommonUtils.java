@@ -49,7 +49,6 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -343,8 +342,6 @@ public class PublisherCommonUtils {
             apiToUpdate.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         }
 
-        //attach micro-geteway labels
-        assignLabelsToDTO(apiDtoToUpdate, apiToUpdate);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         //preserve monetization status in the update flow
@@ -661,28 +658,6 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * This method is used to assign micro gateway labels to the DTO.
-     *
-     * @param apiDTO API DTO
-     * @param api    the API object
-     * @return the API object with labels
-     */
-    public static API assignLabelsToDTO(APIDTO apiDTO, API api) {
-
-        if (apiDTO.getLabels() != null) {
-            List<String> labels = apiDTO.getLabels();
-            List<Label> labelList = new ArrayList<>();
-            for (String label : labels) {
-                Label mgLabel = new Label();
-                mgLabel.setName(label);
-                labelList.add(mgLabel);
-            }
-            api.setGatewayLabels(labelList);
-        }
-        return api;
-    }
-
-    /**
      * Add API with the generated swagger from the DTO.
      *
      * @param apiDto     API DTO of the API
@@ -955,8 +930,6 @@ public class PublisherCommonUtils {
         //  the owner as a different user
         apiToAdd.setApiOwner(provider);
 
-        //attach micro-gateway labels
-        PublisherCommonUtils.assignLabelsToDTO(body, apiToAdd);
         if (body.getKeyManagers() instanceof List) {
             apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
         } else if (body.getKeyManagers() == null) {

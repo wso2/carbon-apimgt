@@ -469,7 +469,7 @@ class Details extends React.Component {
                                     
                                 </>
                             )}
-                            {api.type !== 'WS' && api.type !== 'SSE' && showTryout && (
+                            {showTryout && (
                                     <LeftMenuItem
                                         text={<FormattedMessage id='Apis.Details.index.try.out'
                                             defaultMessage='Try out' />}
