@@ -3497,6 +3497,9 @@ components:
         type:
           type: string
           example: WS
+        createdTime:
+          type: string
+          example: 1614020559444
         provider:
           type: string
           description: |

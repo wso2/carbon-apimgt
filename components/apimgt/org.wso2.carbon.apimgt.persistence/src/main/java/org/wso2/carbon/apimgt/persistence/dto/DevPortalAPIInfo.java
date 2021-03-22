@@ -33,7 +33,15 @@ public class DevPortalAPIInfo {
     private String businessOwner;
     private String status;
     private Set<String> availableTierNames;
-    
+    private String createdTime;
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
     //monetizationCategory which is returned to UI as 'monetizationLabel' is not required. it is derived from the
     // attached tiers.
     public String getId() {
