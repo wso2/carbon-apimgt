@@ -118,8 +118,8 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
     }
 
     private String getContentType(org.apache.axis2.context.MessageContext axisMsgContext) {
-        Object o = axisMsgContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        Map transportHeaders = (Map) o;
+        Object headers = axisMsgContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Map transportHeaders = (Map) headers;
         if (transportHeaders != null) {
             return (String) transportHeaders.get(HTTP.CONTENT_TYPE);
         }
