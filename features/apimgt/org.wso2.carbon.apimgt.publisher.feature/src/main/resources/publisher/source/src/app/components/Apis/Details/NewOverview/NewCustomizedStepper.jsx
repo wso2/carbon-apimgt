@@ -57,6 +57,7 @@ const useColorlibStepIconStyles = makeStyles({
         borderRadius: '50%',
         justifyContent: 'center',
         alignItems: 'center',
+        border: '6px solid #E2E2E2',
     },
     active: {
         backgroundColor: '#50BCEC',
@@ -215,7 +216,8 @@ export default function NewCustomizedStepper() {
                                         <Grid
                                             container
                                             direction='row'
-                                            alignItems='center'
+                                            alignItems='left'
+                                            style={{ marginLeft: '15px' }}
                                             justify='center'
                                         >
                                             <Grid item>
@@ -248,6 +250,7 @@ export default function NewCustomizedStepper() {
                                         container
                                         direction='row'
                                         alignItems='center'
+                                        style={{ marginLeft: '28px' }}
                                         justify='center'
                                     >
                                         <Grid item>
