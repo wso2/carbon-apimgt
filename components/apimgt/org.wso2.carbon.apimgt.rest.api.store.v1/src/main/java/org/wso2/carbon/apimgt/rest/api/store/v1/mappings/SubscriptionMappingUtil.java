@@ -53,10 +53,10 @@ public class SubscriptionMappingUtil {
      * @param subscription SubscribedAPI object
      * @return SubscriptionDTO corresponds to SubscribedAPI object
      */
-    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription)
+    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, String tenantDomain)
             throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
@@ -123,8 +123,8 @@ public class SubscriptionMappingUtil {
      * @param offset starting index
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
-    public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,
-            Integer offset) throws APIManagementException {
+    public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, String tenantDomain,
+            Integer limit, Integer offset) throws APIManagementException {
 
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
@@ -141,7 +141,7 @@ public class SubscriptionMappingUtil {
         for (int i = start; i <= end; i++) {
             try {
                 SubscribedAPI subscription = subscriptions.get(i);
-                subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
+                subscriptionDTOs.add(fromSubscriptionToDTO(subscription, tenantDomain));
             } catch (APIManagementException e) {
                 log.error("Error while obtaining api metadata", e);
             }
