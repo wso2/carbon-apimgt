@@ -18,14 +18,11 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
+import org.apache.http.protocol.HTTP;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
@@ -36,7 +33,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -45,6 +41,7 @@ import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Map;
 
 import static org.apache.axis2.Constants.Configuration.HTTP_METHOD;
 import static org.wso2.carbon.apimgt.impl.APIConstants.AsyncApi.ASYNC_MESSAGE_TYPE;
@@ -66,6 +63,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
 
     private static final Log log = LogFactory.getLog(WebhookApiHandler.class);
     private static final String EMPTY_STRING = "";
+    private static final String TEXT_CONTENT_TYPE = "text/plain";
 
     private String eventReceiverResourcePath = APIConstants.WebHookProperties.DEFAULT_SUBSCRIPTION_RESOURCE_PATH;
     private String topicQueryParamName = APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME;
@@ -100,8 +98,11 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
             try {
                 RelayUtils.buildMessage(axisMsgContext);
                 String payload;
+                String contentType = getContentType(axisMsgContext);
                 if (JsonUtil.hasAJsonPayload(axisMsgContext)) {
                     payload = JsonUtil.jsonPayloadToString(axisMsgContext);
+                } else if (contentType != null && contentType.contains(TEXT_CONTENT_TYPE)) {
+                    payload = synCtx.getEnvelope().getBody().getFirstElement().getText();
                 } else {
                     payload = synCtx.getEnvelope().getBody().getFirstElement().toString();
                 }
@@ -114,6 +115,15 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
                 return false;
             }
         }
+    }
+
+    private String getContentType(org.apache.axis2.context.MessageContext axisMsgContext) {
+        Object o = axisMsgContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        Map transportHeaders = (Map) o;
+        if (transportHeaders != null) {
+            return (String) transportHeaders.get(HTTP.CONTENT_TYPE);
+        }
+        return null;
     }
 
     private String getRequestSubPath(MessageContext synCtx) {
