@@ -29,6 +29,9 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.core.models.Document;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -358,10 +361,12 @@ public class PublisherCommonUtils {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-            // TODO: update the asyncapi.yaml
+             String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
             AsyncApiParser asyncApiParser = new AsyncApiParser();
-            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(originalAPI);
-            apiProvider.saveAsyncApiDefinition(originalAPI, apiDefinition);
+            String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
+            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
+//            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(originalAPI);
+//            apiProvider.saveAsyncApiDefinition(originalAPI, apiDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 

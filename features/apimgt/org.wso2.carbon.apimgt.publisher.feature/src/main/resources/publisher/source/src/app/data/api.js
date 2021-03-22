@@ -915,6 +915,29 @@ class API extends Resource {
         return promised_update;
     }
 
+    // updateAsyncAPIDefinition(definition) {
+    //     alert('updating async api definition!!!');
+    //     const promisedUpdate = this.client.then(client => {
+    //         const payload = {
+    //             apiId: this.id,
+    //             'Content-Type': 'multipart/form-data',
+    //         };
+    //         const requestBody = {
+    //             requestBody: {
+    //                 apiDefinition: JSON.stringify(definition),
+    //             },
+    //         };
+    //         return client.apis['APIs'].updateAsyncAPIDefinition(
+    //             payload,
+    //             requestBody,
+    //             this._requestMetaData({
+    //                 'Content-Type': 'multipart/form-data',
+    //             }),
+    //         );
+    //     });
+    //     return promisedUpdate;
+    // }
+
     /**
      * Delete the current api instance
      * @param id {String} UUID of the API which want to delete
@@ -3221,6 +3244,7 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     updateAsyncAPIDefinition(asyncAPI) {
+        delete asyncAPI.components;
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: this.id,

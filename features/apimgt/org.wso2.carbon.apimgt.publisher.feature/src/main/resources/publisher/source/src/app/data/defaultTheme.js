@@ -138,8 +138,8 @@ export default {
             head: '#9012fe',
             trace: '#785446',
             disabled: '#ebebeb',
-            subscribe: '#61affe',
-            publish: '#49cc90',
+            sub: '#38a169',
+            pub: '#4299e1',
         },
         operationChipColor: {
             query: '#b3e6fe',

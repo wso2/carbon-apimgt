@@ -52,7 +52,6 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
-import Subscription from './components/Subscription';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -152,11 +151,6 @@ function copyAPIConfig(api) {
             accessControlAllowOrigins: [...api.corsConfiguration.accessControlAllowOrigins],
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
-        },
-        websubSubscriptionConfiguration: {
-            secret: api.websubSubscriptionConfiguration.secret,
-            signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
-            signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
         },
     };
     return apiConfigJson;
@@ -286,11 +280,6 @@ export default function RuntimeConfiguration() {
                     nextState.keyManagers = keyManagersConfigured;
                 }
                 return nextState;
-            case 'secret':
-            case 'signingAlgorithm':
-            case 'signatureHeader':
-                nextState.websubSubscriptionConfiguration[action] = value;
-                return nextState;
             default:
                 return state;
         }
@@ -298,11 +287,6 @@ export default function RuntimeConfiguration() {
     const { api, updateAPI } = useContext(APIContext);
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
     const isWebSub = api.type === 'WEBSUB';
-    api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
-        secret: '',
-        signingAlgorithm: '',
-        signatureHeader: '',
-    };
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
@@ -475,9 +459,6 @@ export default function RuntimeConfiguration() {
                                                 isRestricted={isRestricted(['apim:api_create'], api)}
                                             />
                                         </Box>
-                                    )}
-                                    {api.type === 'WEBSUB' && (
-                                        <Subscription api={apiConfig} configDispatcher={configDispatcher} />
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />

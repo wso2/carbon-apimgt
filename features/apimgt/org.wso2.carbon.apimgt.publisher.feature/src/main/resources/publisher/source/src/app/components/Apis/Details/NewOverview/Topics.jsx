@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { withStyles, withTheme } from '@material-ui/core/styles';
+import { withStyles, withTheme, makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
@@ -25,6 +25,7 @@ import Box from '@material-ui/core/Box';
 import { Link } from 'react-router-dom';
 import LaunchIcon from '@material-ui/icons/Launch';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 
 import Typography from '@material-ui/core/Typography';
 import Api from 'AppData/api';
@@ -74,6 +75,30 @@ const styles = {
         overflowY: 'auto',
     },
 };
+
+function VerbElement(props) {
+    const {
+        verb,
+    } = props;
+
+    const useMenuStyles = makeStyles((theme) => {
+        const backgroundColor = theme.custom.resourceChipColors[verb.toLowerCase()];
+        return {
+            customButton: {
+                backgroundColor: '#ffffff',
+                borderColor: backgroundColor,
+                color: backgroundColor,
+                width: theme.spacing(2),
+            },
+        };
+    });
+    const classes = useMenuStyles();
+    return (
+        <Button disableFocusRipple variant='outlined' className={classes.customButton} size='small'>
+            {verb.toUpperCase()}
+        </Button>
+    );
+}
 
 /**
  * Topics component
@@ -147,12 +172,13 @@ class Topics extends React.Component {
                                             <Grid item xs={12}>
                                                 <Grid container direction='row' spacing={1}>
                                                     <Grid item>
+                                                        {/* <RenderMethod method={topic.type} /> */}
+                                                        <VerbElement verb={topic.type.substr(0, 3)} />
+                                                    </Grid>
+                                                    <Grid item>
                                                         <Typography className={classes.heading} variant='body1'>
                                                             {topic.name}
                                                         </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <RenderMethod methods={methods} />
                                                     </Grid>
                                                 </Grid>
                                             </Grid>

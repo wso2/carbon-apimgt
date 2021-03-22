@@ -18,6 +18,10 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.core.models.Document;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -883,7 +887,7 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO    fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
@@ -1104,7 +1108,15 @@ public class APIMappingUtil {
             // Get from asyncapi definition
             List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
-            // TODO: get scopes
+
+            String asyncAPIDefinition;
+            if (model.getAsyncApiDefinition() != null) {
+                asyncAPIDefinition = model.getAsyncApiDefinition();
+            } else {
+                asyncAPIDefinition = apiProvider.getAsyncAPIDefinition(model.getId().getUUID(), tenantDomain);
+            }
+            List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
+            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -1249,6 +1261,44 @@ public class APIMappingUtil {
             dto.setDeploymentEnvironments(deploymentEnvironmentsDTOS);
         }
         return dto;
+    }
+
+    private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) {
+        Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(asyncAPIDefinition);
+        List<ScopeDTO> scopeDTOS = new ArrayList<>();
+
+        if (document.components == null
+                || document.components.securitySchemes == null
+                || document.components.securitySchemes.get("oauth2") == null) {
+            return scopeDTOS;
+        }
+        AaiSecurityScheme securityScheme = document.components.securitySchemes.get("oauth2");
+
+        if (securityScheme.flows == null
+                || securityScheme.flows.implicit == null
+                || securityScheme.flows.implicit.scopes == null) {
+            return scopeDTOS;
+        }
+        Map<String, String> scopes = securityScheme.flows.implicit.scopes;
+        Map<String, String> xScopeBindings =
+                (Map<String, String>) securityScheme.flows.implicit.getExtension("x-scopes-bindings").value;
+
+
+        for (Map.Entry<String, String> aScope : scopes.entrySet()) {
+            ScopeDTO scopeDTO = new ScopeDTO();
+            scopeDTO.setName(aScope.getKey());
+            scopeDTO.setDisplayName(aScope.getKey());
+            scopeDTO.setDescription(aScope.getValue());
+
+            String roles = xScopeBindings.get(aScope.getKey());
+            if (roles == null || roles.isEmpty()) {
+                scopeDTO.setBindings(Collections.emptyList());
+            } else {
+                scopeDTO.setBindings(Arrays.asList((roles).split(",")));
+            }
+            scopeDTOS.add(scopeDTO);
+        }
+        return scopeDTOS;
     }
 
     /**
