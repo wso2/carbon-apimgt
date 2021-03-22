@@ -246,6 +246,7 @@ function DocList(props) {
                                                             inset
                                                             primary={doc.name}
                                                             classes={{ root: classes.docLinkRoot }}
+                                                            aria-label={'View ' + doc.name + ' document'}
                                                         />
                                                     </ListItem>
                                                 ))}
@@ -258,7 +259,11 @@ function DocList(props) {
                     </div>
                 )}
                 <div className={classes.toggleWrapper}>
-                    <Button className={classes.toggler} onClick={toggleDocList}>
+                    <Button
+                        className={classes.toggler}
+                        onClick={toggleDocList}
+                        aria-label='Toggle the document list'
+                    >
                         <div className={classes.togglerTextParent}>
                             <div className={classes.togglerText}>
                                 {showDocList ? (

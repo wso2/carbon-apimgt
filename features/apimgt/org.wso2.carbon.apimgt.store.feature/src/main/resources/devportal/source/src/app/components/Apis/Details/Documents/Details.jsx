@@ -75,15 +75,21 @@ export default function Details(props) {
         <>
             <div className={classes.paper}>
                 {(selectedDoc.sourceType === 'MARKDOWN' || selectedDoc.sourceType === 'INLINE') && (
-                    <Icon className={classes.fullView} onClick={toggleOpen}>
-                        launch
-                    </Icon>
+                    <IconButton
+                        onClick={toggleOpen}
+                        aria-label={'View ' + selectedDoc.name + ' document in full screen'}
+                        className={classes.fullView}
+                    >
+                        <Icon>
+                            launch
+                        </Icon>
+                    </IconButton>
                 )}
                 <View doc={selectedDoc} apiId={apiId} fullScreen={open} />
             </div>
             <Dialog fullScreen open={open} onClose={toggleOpen}>
                 <div square className={classes.popupHeader}>
-                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
+                    <IconButton color='inherit' onClick={toggleOpen} aria-label='Close full screen view'>
                         <Icon>close</Icon>
                     </IconButton>
                     <Typography variant='h4'>{selectedDoc.name}</Typography>
