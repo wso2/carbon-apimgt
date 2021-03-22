@@ -400,7 +400,7 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.topics',
-                                defaultMessage: 'Topics',
+                                defaultMessage: 'topics',
                             })}
                             to={pathPrefix + 'topics'}
                             Icon={<ResourcesIcon />}
