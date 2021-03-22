@@ -30,6 +30,7 @@ public class APIInfoDTO   {
     private String provider = null;
     private String type = null;
     private String lifeCycleStatus = null;
+    private String createdTime = null;
     private String workflowStatus = null;
     private Boolean hasThumbnail = null;
     private List<String> securityScheme = new ArrayList<String>();
@@ -173,6 +174,23 @@ public class APIInfoDTO   {
 
   /**
    **/
+  public APIInfoDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1614020559444", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
   public APIInfoDTO workflowStatus(String workflowStatus) {
     this.workflowStatus = workflowStatus;
     return this;
@@ -240,6 +258,7 @@ public class APIInfoDTO   {
         Objects.equals(provider, apIInfo.provider) &&
         Objects.equals(type, apIInfo.type) &&
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
+        Objects.equals(createdTime, apIInfo.createdTime) &&
         Objects.equals(workflowStatus, apIInfo.workflowStatus) &&
         Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
         Objects.equals(securityScheme, apIInfo.securityScheme);
@@ -247,7 +266,7 @@ public class APIInfoDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme);
+    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, createdTime, workflowStatus, hasThumbnail, securityScheme);
   }
 
   @Override
@@ -263,6 +282,7 @@ public class APIInfoDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");

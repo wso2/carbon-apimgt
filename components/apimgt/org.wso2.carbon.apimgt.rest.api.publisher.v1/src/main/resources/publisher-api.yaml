@@ -6947,6 +6947,9 @@ components:
         lifeCycleStatus:
           type: string
           example: CREATED
+        createdTime:
+          type: string
+          example: 1614020559444
         workflowStatus:
           type: string
           example: APPROVED
