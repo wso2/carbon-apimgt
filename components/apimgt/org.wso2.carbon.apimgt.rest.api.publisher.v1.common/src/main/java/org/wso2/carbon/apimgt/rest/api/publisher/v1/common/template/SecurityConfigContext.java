@@ -110,7 +110,7 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                             new ObjectMapper().convertValue(productionEndpointSecurity,
                                     EndpointSecurityModel.class);
                     endpointSecurityModel = retrieveEndpointSecurityModel(endpointSecurityModel,
-                            api.getId().getApiName(), api.getId().getVersion(),
+                            api.getId().getApiName(), api.getId().getVersion(), api.getUuid(),
                             APIConstants.ENDPOINT_SECURITY_PRODUCTION, null);
                     if (endpointSecurityModel != null) {
                         endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION,
@@ -123,7 +123,7 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                             new ObjectMapper().convertValue(sandboxEndpointSecurity,
                                     EndpointSecurityModel.class);
                     endpointSecurityModel = retrieveEndpointSecurityModel(endpointSecurityModel,
-                            api.getId().getApiName(), api.getId().getVersion(),
+                            api.getId().getApiName(), api.getId().getVersion(), api.getUuid(),
                             APIConstants.ENDPOINT_SECURITY_SANDBOX, null);
                     if (endpointSecurityModel != null) {
                         endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX,
@@ -143,9 +143,8 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                 for (Map.Entry<String, EndpointSecurity> endpointSecurityEntry : endpointSecurityMap.entrySet()) {
                     EndpointSecurityModel endpointSecurityModel =
                             new EndpointSecurityModel(endpointSecurityEntry.getValue());
-                    endpointSecurityModel = retrieveEndpointSecurityModel(endpointSecurityModel,
-                            apidto.getName(), apidto.getVersion(), endpointSecurityEntry.getKey(), alias);
-
+                    endpointSecurityModel = retrieveEndpointSecurityModel(endpointSecurityModel, apidto.getName(),
+                            apidto.getVersion(), apidto.getId(), endpointSecurityEntry.getKey(), alias);
                     stringEndpointSecurityModelMap.put(endpointSecurityEntry.getKey(), endpointSecurityModel);
                 }
                 endpointSecurityModelMap.put(apiProductResource.getApiId(), stringEndpointSecurityModelMap);
@@ -162,18 +161,17 @@ public class SecurityConfigContext extends ConfigContextDecorator {
     }
 
     private EndpointSecurityModel retrieveEndpointSecurityModel(EndpointSecurityModel endpointSecurityModel,
-                                                                String apiName, String version, String type,
-                                                                String prefix) {
+                                                                String apiName, String version, String apiId,
+                                                                String type, String prefix) {
 
         if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH
                     .equalsIgnoreCase(endpointSecurityModel.getType())) {
                 if (StringUtils.isNotEmpty(prefix)) {
                     endpointSecurityModel.setUniqueIdentifier(prefix.concat("--")
-                            .concat(GatewayUtils.retrieveUniqueIdentifier(apiName, version, type)));
+                            .concat(GatewayUtils.retrieveUniqueIdentifier(apiId, type)));
                 } else {
-                    endpointSecurityModel.setUniqueIdentifier(GatewayUtils.retrieveUniqueIdentifier(apiName, version,
-                            type));
+                    endpointSecurityModel.setUniqueIdentifier(GatewayUtils.retrieveUniqueIdentifier(apiId, type));
                 }
                 if (StringUtils.isNotEmpty(prefix)) {
                     endpointSecurityModel.setClientSecretAlias(prefix.concat("--")

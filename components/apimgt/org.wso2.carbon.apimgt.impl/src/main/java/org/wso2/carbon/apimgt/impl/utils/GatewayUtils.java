@@ -144,9 +144,9 @@ public class GatewayUtils {
 
         return name.concat("--v").concat(version).concat("--").concat(type);
     }
-    public static String retrieveUniqueIdentifier(String name, String version, String type) {
+    public static String retrieveUniqueIdentifier(String apiId, String type) {
 
-        return name.concat("--v").concat(version).concat("--").concat(type);
+        return apiId.concat("--").concat(type);
     }
 
 }

@@ -162,6 +162,7 @@ public class SecurityConfigContextTest {
                 "  }\n" +
                 "}";
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
+        api.setUuid(UUID.randomUUID().toString());
         api.setStatus(APIConstants.CREATED);
         api.setContextTemplate("/");
         api.setTransports(Constants.TRANSPORT_HTTP);
@@ -303,7 +304,8 @@ public class SecurityConfigContextTest {
         ConfigContext configcontext = new APIConfigContext(apiProduct);
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE)).thenReturn("true");
         Map<String, APIDTO> apidtoMap = new HashMap<>();
-        apidtoMap.put(apiid, new APIDTO().name("api1").version("v1").provider("admin"));
+        apidtoMap.put(apiid,
+                new APIDTO().name("api1").version("v1").provider("admin").id(UUID.randomUUID().toString()));
         SecurityConfigContext securityConfigContext =
                 new SecurityConfigContextWrapper(configcontext, apiProduct, apiManagerConfiguration, apidtoMap);
         securityConfigContext.validate();
