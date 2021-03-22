@@ -56,7 +56,6 @@ public class SubscriptionMappingUtil {
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription, String tenantDomain)
             throws APIManagementException {
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        //String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
