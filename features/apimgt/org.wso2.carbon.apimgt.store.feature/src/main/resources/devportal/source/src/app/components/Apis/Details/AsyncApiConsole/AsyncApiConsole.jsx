@@ -167,7 +167,7 @@ export default function AsyncApiConsole() {
         return <Progress />;
     }
     if (notFound) {
-        return <FormattedMessage id='Apis.Details.WebhooksConsole.WebhooksConsole.Api.Unavailable' defaultMessage='API Not Found !' />;
+        return <FormattedMessage id='Apis.Details.AsyncApiConsole.AsyncApiConsole.Api.Unavailable' defaultMessage='API Not Found !' />;
     }
 
     let isApiKeyEnabled = false;
@@ -185,7 +185,7 @@ export default function AsyncApiConsole() {
     return (
         <>
             <Typography variant='h4' className={classes.titleSub}>
-                <FormattedMessage id='Apis.Details.WebhooksConsole.WebhooksConsole.title' defaultMessage='Webhooks' />
+                <FormattedMessage id='Apis.Details.AsyncApiConsole.AsyncApiConsole.title' defaultMessage='Try Out' />
             </Typography>
             <Paper className={classes.paper}>
                 <Grid container className={classes.grid}>

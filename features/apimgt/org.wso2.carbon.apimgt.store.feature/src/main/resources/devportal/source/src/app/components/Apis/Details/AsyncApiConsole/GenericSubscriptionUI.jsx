@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import Accordion from '@material-ui/core/ExpansionPanel';
 import AccordionDetails from '@material-ui/core/ExpansionPanelDetails';
 import AccordionSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -73,7 +73,12 @@ const useStyles = makeStyles((theme) => (
 
 export default function GenericSubscriptionUI(props) {
     const classes = useStyles();
-    const { command, topic } = props;
+    const { generateGenericSubscriptionCommand, topic } = props;
+    const [command, setCommand] = useState(generateGenericSubscriptionCommand(topic));
+
+    const handleClick = () => {
+        setCommand(generateGenericSubscriptionCommand(topic));
+    };
 
     return (
         <Accordion className={classes.subscription}>
@@ -107,6 +112,9 @@ export default function GenericSubscriptionUI(props) {
                 </Grid>
             </AccordionDetails>
             <AccordionActions style={{ paddingRight: '18px' }}>
+                <Button size='small' onClick={handleClick}>
+                    <FormattedMessage id='Apis.Details.AsyncApiConsole.Curl' defaultMessage='Generate Curl' />
+                </Button>
                 <CopyToClipboard
                     text={command}
                     onCopy={() => Alert.info(
