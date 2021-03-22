@@ -59,7 +59,6 @@ import org.json.XML;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -69,7 +68,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
-import org.wso2.carbon.apimgt.api.ServiceCatalog;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
@@ -88,7 +86,6 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -134,6 +131,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExternalStoreMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.GraphqlQueryAnalysisMappingUtil;
@@ -145,6 +143,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevenueDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AuditReportDTO;
@@ -153,7 +154,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentStatusListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
@@ -169,16 +169,12 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidat
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
@@ -190,6 +186,9 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.namespace.QName;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -215,10 +214,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.namespace.QName;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 
@@ -3948,19 +3943,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
         return null;
-    }
-
-    /**
-     * Retrieve deployment status of APIs in cloud clusters
-     * @return Deployment status response
-     */
-    @Override
-    public Response deploymentsGetStatus(String apiId,MessageContext messageContext) throws APIManagementException{
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        //APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-        DeploymentStatusListDTO deploymentStatusListDTO = APIMappingUtil.fromDeploymentStatustoDTO(apiIdentifier);
-        return Response.ok().entity(deploymentStatusListDTO).build();
     }
 
     private APIDTO getAPIByID(String apiId, APIProvider apiProvider) {

@@ -3348,7 +3348,6 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn("admin");
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
-        Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS)).thenReturn("[]");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
         Mockito.when(apimgtDAO.getAPIID(apiId)).thenReturn(1);
 

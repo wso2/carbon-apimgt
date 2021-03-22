@@ -105,7 +105,7 @@ const styles = makeStyles((theme) => ({
  */
 function TryOutController(props) {
     const {
-        securitySchemeType, selectedEnvironment, environments, containerMngEnvironments,
+        securitySchemeType, selectedEnvironment, environments,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
@@ -440,35 +440,6 @@ function TryOutController(props) {
         tokenValue = selectedKeyType === 'PRODUCTION' ? productionAccessToken : sandboxAccessToken;
     }
 
-    // The rendering logic of container management menus items are done here
-    // because when grouping container management type and clusters with <> and </>
-    // the handleChange event is not triggered. Hence handle rendering logic here.
-    const containerMngEnvMenuItems = [];
-    if (containerMngEnvironments) {
-        containerMngEnvironments.filter((envType) => envType.clusterDetails.length > 0).forEach((envType) => {
-            // container management system type
-            containerMngEnvMenuItems.push(
-                <MenuItem value='' disabled className={classes.menuItem}>
-                    <em>
-                        {envType.deploymentEnvironmentName}
-                    </em>
-                </MenuItem>,
-            );
-            // clusters of the container management system type
-            envType.clusterDetails.forEach((cluster) => {
-                containerMngEnvMenuItems.push(
-                    <MenuItem
-                        value={cluster.clusterName}
-                        key={cluster.clusterName}
-                        className={classes.menuItem}
-                    >
-                        {cluster.clusterDisplayName}
-                    </MenuItem>,
-                );
-            });
-        });
-    }
-
     const authHeader = `${authorizationHeader}: ${prefix}`;
 
     return (
@@ -755,8 +726,7 @@ function TryOutController(props) {
                             </Box>
                             <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
                                 <Grid xs={12} md={6} item>
-                                    {((environments && environments.length > 0)
-                                        || (containerMngEnvMenuItems.length > 0))
+                                    {(environments && environments.length > 0)
                                         && (
                                             <>
                                                 <Typography
@@ -811,7 +781,6 @@ function TryOutController(props) {
                                                                 {env.displayName}
                                                             </MenuItem>
                                                         )))}
-                                                    {containerMngEnvMenuItems}
                                                 </TextField>
                                             </>
                                         )}
