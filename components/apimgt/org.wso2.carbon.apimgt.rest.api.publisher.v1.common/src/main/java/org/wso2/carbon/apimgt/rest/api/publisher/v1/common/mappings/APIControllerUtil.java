@@ -665,7 +665,7 @@ public class APIControllerUtil {
         // if the endpoint routing policy is not specified, but the endpoints field is specified
         if (StringUtils.isEmpty(routingPolicy)) {
             updatedSOAPEndpointParams.addProperty(ImportExportConstants.ENDPOINT_TYPE_PROPERTY,
-                    ImportExportConstants.SOAP_TYPE_ENDPOINT);
+                    ImportExportConstants.SOAP_ENDPOINT_TYPE_FOR_JSON);
             handleEndpointValues(endpoints, updatedSOAPEndpointParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
         } else if (ImportExportConstants.LOAD_BALANCE_ROUTING_POLICY
