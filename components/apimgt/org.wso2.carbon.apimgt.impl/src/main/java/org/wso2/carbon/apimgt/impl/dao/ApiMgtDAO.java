@@ -15655,7 +15655,10 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to get revision details for revision UUID: " + revisionUUID, e);
         }
-        return apiRevision;
+        if (apiRevision.getRevisionUUID() != null) {
+            return  apiRevision;
+        }
+        return null;
     }
 
     /**
