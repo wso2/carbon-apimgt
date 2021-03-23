@@ -2647,7 +2647,7 @@
     "defaultMessage": "API Level"
   },
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.button.text": {
-    "defaultMessage": "Toggle per api rate limiting"
+    "defaultMessage": "Change rate limiting level"
   },
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.governed.by": {
     "defaultMessage": "Rate limiting is governed by"

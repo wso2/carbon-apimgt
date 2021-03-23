@@ -17,7 +17,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
@@ -148,8 +147,6 @@ return null;
     private APIEndpointSecurityDTO endpointSecurity = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> gatewayEnvironments = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<DeploymentEnvironmentsDTO>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
@@ -849,25 +846,6 @@ return null;
   }
 
   /**
-   * List of selected deployment environments and clusters 
-   **/
-  public APIDTO deploymentEnvironments(List<DeploymentEnvironmentsDTO> deploymentEnvironments) {
-    this.deploymentEnvironments = deploymentEnvironments;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "List of selected deployment environments and clusters ")
-      @Valid
-  @JsonProperty("deploymentEnvironments")
-  public List<DeploymentEnvironmentsDTO> getDeploymentEnvironments() {
-    return deploymentEnvironments;
-  }
-  public void setDeploymentEnvironments(List<DeploymentEnvironmentsDTO> deploymentEnvironments) {
-    this.deploymentEnvironments = deploymentEnvironments;
-  }
-
-  /**
    **/
   public APIDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
     this.mediationPolicies = mediationPolicies;
@@ -1285,7 +1263,6 @@ return null;
         Objects.equals(visibleTenants, API.visibleTenants) &&
         Objects.equals(endpointSecurity, API.endpointSecurity) &&
         Objects.equals(gatewayEnvironments, API.gatewayEnvironments) &&
-        Objects.equals(deploymentEnvironments, API.deploymentEnvironments) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
@@ -1311,7 +1288,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
   }
 
   @Override
@@ -1352,7 +1329,6 @@ return null;
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
-    sb.append("    deploymentEnvironments: ").append(toIndentedString(deploymentEnvironments)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
