@@ -185,7 +185,10 @@ export default function OperationGovernance(props) {
                                     value={sharedScope.scope.name}
                                     dense
                                 >
-                                    <Checkbox checked={operationScopes.includes(sharedScope.scope.name)} color='primary' />
+                                    <Checkbox
+                                        checked={operationScopes.includes(sharedScope.scope.name)}
+                                        color='primary'
+                                    />
                                     {sharedScope.scope.name}
                                 </MenuItem>
                             )) : (
@@ -213,7 +216,12 @@ export default function OperationGovernance(props) {
                             to={`/apis/${api.id}/scopes/create`}
                             target='_blank'
                         >
-                            <Typography style={{ marginLeft: '10px' }} color='primary' display='inline' variant='caption'>
+                            <Typography
+                                style={{ marginLeft: '10px' }}
+                                color='primary'
+                                display='inline'
+                                variant='caption'
+                            >
                                 <FormattedMessage
                                     id={'Apis.Details.Resources.components.operationComponents.'
                                     + 'OperationGovernance.operation.scope.create.new.scope'}

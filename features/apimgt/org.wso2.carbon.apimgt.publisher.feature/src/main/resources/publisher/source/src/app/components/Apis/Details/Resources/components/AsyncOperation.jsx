@@ -123,7 +123,6 @@ function AsyncOperation(props) {
             <ExpansionPanel
                 expanded={isExpanded}
                 onChange={handleExpansion}
-                // disabled={markAsDelete}
                 className={classes.paperStyles}
             >
                 <ExpansionPanelSummary

@@ -17,7 +17,7 @@
  */
 
 import React, {
-    useReducer, useEffect, useState, useMemo,
+    useReducer, useEffect, useState,
 } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -34,9 +34,7 @@ import AsyncOperation from '../Resources/components/AsyncOperation';
 import GroupOfOperations from '../Resources/components/operationComponents/asyncapi/GroupOfOperations';
 import AddOperation from '../Resources/components/AddOperation';
 import SubscriptionConfig from '../Resources/components/operationComponents/asyncapi/SubscriptionConfig';
-import {
-    extractAsyncAPIPathParameters, mapAPIOperations,
-} from '../Resources/operationUtils';
+import { extractAsyncAPIPathParameters } from '../Resources/operationUtils';
 import SaveOperations from '../Resources/components/SaveOperations';
 
 const verbMap = {
@@ -63,8 +61,6 @@ export default function Topics(props) {
     const [sharedScopesByName, setSharedScopesByName] = useState();
     const [asyncAPISpec, setAsyncAPISpec] = useState({});
     const [securityDefScopes, setSecurityDefScopes] = useState({});
-    const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
-
     const isAsyncAPI = api.type === 'WEBSUB' || api.type === 'WS' || api.type === 'SSE';
 
     /**
@@ -91,11 +87,13 @@ export default function Topics(props) {
         if (typeof source === 'object') {
             let o = {};
             Object.entries(source).forEach(([k, v]) => {
-                if (k !== '$ref') {
-                    o[k] = resolveSpec(spec, v);
-                } else {
-                    const resolvedRef = resolveSpec(spec, getRefTarget(spec, v));
-                    o = { ...o, ...resolvedRef };
+                if (v !== null) {
+                    if (k !== '$ref') {
+                        o[k] = resolveSpec(spec, v);
+                    } else {
+                        const resolvedRef = resolveSpec(spec, getRefTarget(spec, v));
+                        o = { ...o, ...resolvedRef };
+                    }
                 }
             });
             return o;
@@ -163,11 +161,13 @@ export default function Topics(props) {
                     [target]: { ...currentOperations[target], 'x-auth-type': updatedOperation['x-auth-type'] },
                 };
             case 'add':
+                // eslint-disable-next-line no-case-declarations
                 const parameters = extractAsyncAPIPathParameters(data.target);
                 // If target is not there add an empty object
                 if (!addedOperations[data.target]) {
                     addedOperations[data.target] = {};
                 }
+                // eslint-disable-next-line no-case-declarations
                 let alreadyExistCount = 0;
                 for (let currentVerb of data.verbs) {
                     currentVerb = verbMap[currentVerb];
@@ -199,7 +199,8 @@ export default function Topics(props) {
                 updatedOperation[verb].message = updatedOperation[verb].message || { };
                 updatedOperation[verb].message.payload = updatedOperation[verb].message.payload || { };
                 updatedOperation[verb].message.payload.type = 'object';
-                updatedOperation[verb].message.payload.properties = updatedOperation[verb].message.payload.properties || { };
+                updatedOperation[verb].message.payload.properties = updatedOperation[verb].message.payload.properties
+                    || { };
                 updatedOperation[verb].message.payload.properties[value.name] = {
                     description: value.description,
                     type: value.type,
@@ -243,20 +244,6 @@ export default function Topics(props) {
         };
     }
     const [operations, operationsDispatcher] = useReducer(operationsReducer, {});
-
-    // can't depends on API id because we need to consider the changes in operations in api object
-    // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
-    // localized to inject local apiThrottlingPolicy data
-    const localAPI = useMemo(
-        () => ({
-            id: api.id,
-            apiThrottlingPolicy,
-            scopes: api.scopes,
-            operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
-            endpointConfig: api.endpointConfig,
-        }),
-        [api, apiThrottlingPolicy],
-    );
 
     /**
      * This method sets the securityDefinitionScopes from the spec
@@ -304,8 +291,10 @@ export default function Topics(props) {
      */
     function updateAsyncAPIDefinition(spec) {
         // Remove unnecessary fields from the spec.
+        // eslint-disable-next-line no-unused-vars
         Object.entries(spec.channels).forEach(([k, v]) => {
             if (v.runtime) {
+                // eslint-disable-next-line no-param-reassign
                 delete v.runtime;
             }
         });

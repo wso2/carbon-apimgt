@@ -17,9 +17,8 @@
  */
 
 import React from 'react';
-import { withStyles, withTheme, makeStyles } from '@material-ui/core/styles';
+import { withStyles, makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import Chip from '@material-ui/core/Chip';
 import { FormattedMessage } from 'react-intl';
 import Box from '@material-ui/core/Box';
 import { Link } from 'react-router-dom';
@@ -29,36 +28,7 @@ import Button from '@material-ui/core/Button';
 
 import Typography from '@material-ui/core/Typography';
 import Api from 'AppData/api';
-
-function RenderMethodBase(props) {
-    const { theme, methods } = props;
-    return methods.map((method) => {
-        let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
-        let chipTextColor = '#000000';
-        if (!chipColor) {
-            console.log('Check the theme settings. The resourceChipColors is not populated properly');
-            chipColor = '#cccccc';
-        } else {
-            chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
-        }
-        return (
-            <Chip
-                label={method.toUpperCase()}
-                style={{
-                    backgroundColor: chipColor, color: chipTextColor, height: 20, marginRight: 5,
-                }}
-            />
-        );
-    });
-}
-
-RenderMethodBase.propTypes = {
-    methods: PropTypes.arrayOf(PropTypes.string).isRequired,
-    theme: PropTypes.shape({}).isRequired,
-    classes: PropTypes.shape({}).isRequired,
-};
-
-const RenderMethod = withTheme(RenderMethodBase);
+import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 
 const styles = {
     root: {
@@ -120,16 +90,31 @@ class Topics extends React.Component {
      *
      */
     componentDidMount() {
-        const { api } = this.props;
-        const { operations } = api;
+        this.restApi.getAsyncAPIDefinition(this.props.api.id)
+            .then((response) => {
+                const topics = [];
+                Object.entries(response.body.channels).forEach(([name, topic]) => {
+                    if (topic.subscribe) {
+                        topics.push({ name, type: 'subscribe' });
+                    }
 
-        const topics = operations.map((op) => {
-            return {
-                name: op.target,
-                // type: op.verb.toUpperCase(),
-            };
-        });
-        this.setState({ topics });
+                    if (topic.publish) {
+                        topics.push({ name, type: 'publish' });
+                    }
+                });
+                this.setState({ topics });
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    this.setState({ notFound: true });
+                } else if (status === 401) {
+                    doRedirectToLogin();
+                }
+            });
     }
 
     /**
@@ -147,6 +132,7 @@ class Topics extends React.Component {
             );
         }
         const { classes, parentClasses, api } = this.props;
+
         return (
             <>
                 <div className={parentClasses.titleWrapper}>
@@ -160,19 +146,13 @@ class Topics extends React.Component {
                 <Box p={1}>
                     <div>
                         {
-                            // /className={classes.contentWrapper}
                             this.state.topics.map((topic) => {
-                                const methods = ['subscribe'];
-                                if (api.type === 'WS') {
-                                    methods.push('publish');
-                                }
                                 return (
                                     <div className={classes.root}>
                                         <Grid container spacing={1}>
                                             <Grid item xs={12}>
                                                 <Grid container direction='row' spacing={1}>
                                                     <Grid item>
-                                                        {/* <RenderMethod method={topic.type} /> */}
                                                         <VerbElement verb={topic.type.substr(0, 3)} />
                                                     </Grid>
                                                     <Grid item>

@@ -36,7 +36,9 @@ import ListPayloadProperties from './ListPayloadProperties';
  * @returns
  */
 export default function PayloadProperties(props) {
-    const { operation, operationsDispatcher, target, verb, disableUpdate } = props;
+    const {
+        operation, operationsDispatcher, target, verb, disableUpdate,
+    } = props;
     return (
         <>
             <Grid item xs={12} md={12}>

@@ -190,6 +190,7 @@ function getOperationScopes(operation, spec) {
 function getAsyncAPIOperationScopes(operation) {
     const scopes = [];
     if (operation['x-scopes']) {
+        // eslint-disable-next-line no-unused-vars
         Object.entries(operation['x-scopes']).forEach(([k, v]) => {
             scopes.push(v);
         });

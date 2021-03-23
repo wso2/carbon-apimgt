@@ -447,17 +447,14 @@ class Details extends Component {
         // TODO: Ideally, The state should hold the corresponding API object
         // which we could call it's `update` method safely ~tmkb
         if (!isEmpty(updatedProperties)) {
-            alert('updatedProperties is not empty.')
             // newApi object has to be provided as the updatedProperties. Then api will be updated.
             promisedUpdate = api.update(updatedProperties);
         } else if (!isAPIProduct) {
-            alert('not api product');
             // Just like calling noArg `setState()` will just trigger a re-render without modifying the state,
             // Calling `updateAPI()` without args wil return the API without any update.
             // Just sync-up the api state with backend
             promisedUpdate = API.get(api.id);
         } else if (isAPIProduct) {
-            alert('api product');
             promisedUpdate = APIProduct.get(api.id);
         }
         return promisedUpdate

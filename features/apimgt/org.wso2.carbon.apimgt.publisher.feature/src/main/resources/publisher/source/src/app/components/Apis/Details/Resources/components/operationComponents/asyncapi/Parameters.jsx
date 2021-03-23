@@ -38,7 +38,7 @@ export default function Parameters(props) {
         operation, spec, target, verb, operationsDispatcher,
     } = props;
     let haveParameters = false;
-    Object.entries(operation.parameters).forEach(([k, v]) => {
+    Object.entries(operation.parameters).forEach(() => {
         haveParameters = true;
     });
     return (

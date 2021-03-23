@@ -772,7 +772,6 @@ class API extends Resource {
      * @deprecated
      */
     updateSwagger(id, swagger) {
-        alert('update swagger() invoked!');
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
@@ -914,29 +913,6 @@ class API extends Resource {
         });
         return promised_update;
     }
-
-    // updateAsyncAPIDefinition(definition) {
-    //     alert('updating async api definition!!!');
-    //     const promisedUpdate = this.client.then(client => {
-    //         const payload = {
-    //             apiId: this.id,
-    //             'Content-Type': 'multipart/form-data',
-    //         };
-    //         const requestBody = {
-    //             requestBody: {
-    //                 apiDefinition: JSON.stringify(definition),
-    //             },
-    //         };
-    //         return client.apis['APIs'].updateAsyncAPIDefinition(
-    //             payload,
-    //             requestBody,
-    //             this._requestMetaData({
-    //                 'Content-Type': 'multipart/form-data',
-    //             }),
-    //         );
-    //     });
-    //     return promisedUpdate;
-    // }
 
     /**
      * Delete the current api instance
@@ -2442,7 +2418,7 @@ class API extends Resource {
                     serviceKey: serviceKey,
                 },
                 { requestBody: apiMetaData},
-                this._requestMetaData() 
+                this._requestMetaData()
             );
         });
         return promisedServiceResponse.then(response => response.body);
@@ -2458,12 +2434,12 @@ class API extends Resource {
         return apiClient.then(
             client => {
                 return client.apis['APIs'].reimportServiceFromCatalog(
-                    {   
+                    {
                         apiId: apiId,
                     },
                     this._requestMetaData(),
                 );
-            });    
+            });
     }
 
     /**
@@ -2476,14 +2452,14 @@ class API extends Resource {
         return apiClient.then(
             client => {
                 return client.apis['APIs'].reimportServiceFromCatalog(
-                    {   
+                    {
                         apiId: apiId,
                     },
                     this._requestMetaData(),
                 );
-            });    
+            });
     }
-    
+
 
     /**
      * Get details of a given API
@@ -3244,7 +3220,6 @@ class API extends Resource {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     updateAsyncAPIDefinition(asyncAPI) {
-        delete asyncAPI.components;
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: this.id,

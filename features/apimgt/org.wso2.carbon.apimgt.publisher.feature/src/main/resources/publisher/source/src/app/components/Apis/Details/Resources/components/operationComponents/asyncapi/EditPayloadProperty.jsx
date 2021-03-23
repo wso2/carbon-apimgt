@@ -25,17 +25,13 @@ import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import Checkbox from '@material-ui/core/Checkbox';
 import Select from '@material-ui/core/Select';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 import { FormattedMessage } from 'react-intl';
 
 const useStyles = makeStyles((theme) => ({
@@ -131,7 +127,8 @@ export default function EditPayloadProperty(props) {
                         >
                             <InputLabel required id='edit-property-type'>
                                 <FormattedMessage
-                                    id='Apis.Details.Topics.components.operationComponents.EditPayloadProperty.data.type'
+                                    id={'Apis.Details.Topics.components.operationComponents.EditPayloadProperty'
+                                    + '.data.type'}
                                     defaultMessage='Data Type'
                                 />
                             </InputLabel>
@@ -175,7 +172,8 @@ export default function EditPayloadProperty(props) {
                             fullWidth
                             label={(
                                 <FormattedMessage
-                                    id='Apis.Details.Topics.components.operationComponents.EditPayloadProperty.description'
+                                    id={'Apis.Details.Topics.components.operationComponents.EditPayloadProperty'
+                                    + '.description'}
                                     defaultMessage='Description'
                                 />
                             )}

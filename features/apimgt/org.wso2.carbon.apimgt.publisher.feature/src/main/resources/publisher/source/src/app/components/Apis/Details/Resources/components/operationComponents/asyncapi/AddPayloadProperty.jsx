@@ -54,7 +54,7 @@ const useStyles = makeStyles(() => ({
  */
 function AddPayloadProperty(props) {
     const {
-        operation, operationsDispatcher, target, verb,
+        operationsDispatcher, target, verb,
     } = props;
 
     /**
@@ -64,11 +64,12 @@ function AddPayloadProperty(props) {
      */
     function newPropertyReducer(state, action) {
         const { type, value } = action;
+        const nextState = { ...state };
         switch (type) {
             case 'name':
             case 'description':
             case 'type':
-                state[type] = value;
+                nextState[type] = value;
                 break;
             case 'clear':
                 return {
@@ -77,9 +78,9 @@ function AddPayloadProperty(props) {
                     type: '',
                 };
             default:
-                return state;
+                return nextState;
         }
-        return state;
+        return nextState;
     }
 
     const [property, newPropertyDispatcher] = useReducer(newPropertyReducer, { });
