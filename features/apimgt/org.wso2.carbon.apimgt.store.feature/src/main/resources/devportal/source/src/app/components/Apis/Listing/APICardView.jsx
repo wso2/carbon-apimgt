@@ -111,7 +111,7 @@ class APICardView extends React.Component {
         const api = new API();
 
         if (searchText && searchText !== '') {
-            return api.getAllAPIs({ query: `${searchText}&status:published`, limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return api.getAllAPIs({ query: `${searchText} status:published`, limit: this.rowsPerPage, offset: page * rowsPerPage });
         } else {
             return api.getAllAPIs({ query: 'status:published', limit: this.rowsPerPage, offset: page * rowsPerPage });
         }
@@ -222,8 +222,8 @@ class APICardView extends React.Component {
             {
                 name: 'throttlingPolicies',
                 label: intl.formatMessage({
-                    id: 'Apis.Listing.APIList.policy',
-                    defaultMessage: 'Policy',
+                    id: 'Apis.Listing.APIList.subscription.status',
+                    defaultMessage: 'Subscription Status',
                 }),
                 options: {
                     customBodyRender: (value, tableMeta, updateValue) => {

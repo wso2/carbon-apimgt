@@ -112,20 +112,10 @@ export default class Protected extends Component {
     }
 
     /**
-     * Handle iframe message
-     * @param {event} e Event
+     * Load Theme file.
+     *
+     * @param {string} tenant tenant name
      */
-    handleMessage(e) {
-        if (e.data === 'changed') {
-            window.location = Configurations.app.context + '/services/auth/login?not-Login';
-        }
-    }
-
-    /**
-         * Load Theme file.
-         *
-         * @param {string} tenant tenant name
-         */
     setTenantTheme(tenant) {
         if (tenant && tenant !== '' && tenant !== 'carbon.super') {
             fetch(`${Configurations.app.context}/site/public/tenant_themes/${tenant}/apim-publisher/defaultTheme.json`)
@@ -153,19 +143,29 @@ export default class Protected extends Component {
     }
 
     /**
-         * Generate page title from theme config.
-         * @param {object} theme object.
-         * @returns {JSX} link dom tag.
-         */
+     * Generate page title from theme config.
+     * @param {object} theme object.
+     * @returns {JSX} link dom tag.
+     */
     getTitle(localTheme) {
         const {
             custom: {
                 title: {
-                    prefix, sufix,
+                    prefix, suffix,
                 },
             },
         } = localTheme;
-        return (prefix + sufix);
+        return (prefix + suffix);
+    }
+
+    /**
+     * Handle iframe message
+     * @param {event} e Event
+     */
+    handleMessage(e) {
+        if (e.data === 'changed') {
+            window.location = Configurations.app.context + '/services/auth/login?not-Login';
+        }
     }
 
     /**

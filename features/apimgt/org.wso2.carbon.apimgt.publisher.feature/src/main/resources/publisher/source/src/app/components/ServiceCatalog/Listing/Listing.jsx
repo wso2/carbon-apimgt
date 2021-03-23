@@ -35,6 +35,7 @@ import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
 import Grid from '@material-ui/core/Grid';
 import Help from '@material-ui/icons/Help';
 import Tooltip from '@material-ui/core/Tooltip';
+import Configurations from 'Config';
 
 const useStyles = makeStyles((theme) => ({
     contentInside: {
@@ -160,22 +161,7 @@ function Listing(props) {
     };
 
     const getDefinitionTypeDisplayName = (definitionType) => {
-        switch (definitionType) {
-            case 'OAS2':
-                return Listing.CONST.OAS2;
-            case 'OAS3':
-                return Listing.CONST.OAS3;
-            case 'WSDL1':
-                return Listing.CONST.WSDL1;
-            case 'WSDL2':
-                return Listing.CONST.WSDL2;
-            case 'GRAPHQL_SDL':
-                return Listing.CONST.GRAPHQL_SDL;
-            case 'ASYNC_API':
-                return Listing.CONST.ASYNC_API;
-            default:
-                return definitionType;
-        }
+        return Configurations.serviceCatalogDefinitionTypes[definitionType] || definitionType;
     };
 
     const columns = [
@@ -187,13 +173,13 @@ function Listing(props) {
             },
         },
         {
-            name: 'displayName',
+            name: 'name',
             label: intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Listing.name',
                 defaultMessage: 'Service',
             }),
             options: {
-                customBodyRender: (value, tableMeta = this) => {
+                customBodyRender: (value, tableMeta) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
                         const serviceId = dataRow.id;
@@ -203,7 +189,7 @@ function Listing(props) {
                                     className={classes.serviceNameLink}
                                     to={'/service-catalog/' + serviceId + '/overview'}
                                 >
-                                    <span>{dataRow.displayName}</span>
+                                    <span>{dataRow.name}</span>
                                 </Link>
                             );
                         }
@@ -221,22 +207,28 @@ function Listing(props) {
                 defaultMessage: 'Service URL',
             }),
             options: {
-                customBodyRender: (value, tableMeta = this) => {
+                customBodyRender: (value, tableMeta) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
                         const { serviceUrl } = dataRow;
                         if (dataRow) {
                             return (
-                                <span style={{
-                                    whiteSpace: 'nowrap',
-                                    textOverflow: 'ellipsis',
-                                    width: '300px',
-                                    display: 'block',
-                                    overflow: 'hidden',
-                                }}
+                                <Tooltip
+                                    placement='top-start'
+                                    title={serviceUrl}
+                                    aria-label='add'
                                 >
-                                    {serviceUrl}
-                                </span>
+                                    <span style={{
+                                        whiteSpace: 'nowrap',
+                                        textOverflow: 'ellipsis',
+                                        width: '300px',
+                                        display: 'block',
+                                        overflow: 'hidden',
+                                    }}
+                                    >
+                                        {serviceUrl}
+                                    </span>
+                                </Tooltip>
                             );
                         }
                     }
@@ -253,7 +245,7 @@ function Listing(props) {
                 defaultMessage: 'Schema Type',
             }),
             options: {
-                customBodyRender: (value, tableMeta = this) => {
+                customBodyRender: (value, tableMeta) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
                         const { definitionType } = dataRow;
@@ -286,14 +278,14 @@ function Listing(props) {
                 defaultMessage: 'Created Time',
             }),
             options: {
-                customBodyRender: (value, tableMeta = this) => {
+                customBodyRender: (value, tableMeta) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
                         const { createdTime } = dataRow;
                         if (dataRow) {
                             return (
                                 <Tooltip
-                                    placement='right'
+                                    placement='top-start'
                                     title={moment(createdTime).format('lll')}
                                     aria-label='add'
                                 >
@@ -315,13 +307,13 @@ function Listing(props) {
                 defaultMessage: 'Number of Usages',
             }),
             options: {
-                customBodyRender: (value, tableMeta = this) => {
+                customBodyRender: (value, tableMeta) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        const { usage, id, displayName } = dataRow;
+                        const { usage, id, name } = dataRow;
                         if (dataRow) {
                             return (
-                                <Usages usageNumber={usage} serviceDisplayName={displayName} serviceId={id} />
+                                <Usages usageNumber={usage} serviceDisplayName={name} serviceId={id} />
                             );
                         }
                     }
@@ -333,21 +325,26 @@ function Listing(props) {
         },
         {
             options: {
-                customBodyRender: (value, tableMeta = this) => {
+                customBodyRender: (value, tableMeta) => {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
-                        const { id, displayName, definitionType } = dataRow;
+                        const {
+                            id, serviceKey, name, definitionType, version, serviceUrl,
+                        } = dataRow;
                         return (
                             <>
                                 <Box display='flex' flexDirection='row'>
                                     <CreateApi
                                         history={history}
                                         serviceId={id}
-                                        serviceDisplayName={displayName}
+                                        serviceKey={serviceKey}
                                         definitionType={definitionType}
+                                        serviceDisplayName={name}
+                                        serviceVersion={version}
+                                        serviceUrl={serviceUrl}
                                     />
                                     <Delete
-                                        serviceDisplayName={displayName}
+                                        serviceDisplayName={name}
                                         serviceId={id}
                                         onDelete={onDelete}
                                     />
@@ -426,19 +423,5 @@ function Listing(props) {
         </>
     );
 }
-
-Listing.CONST = {
-    OAS2: 'Swagger',
-    OAS3: 'Open API V3',
-    WSDL1: 'WSDL 1',
-    WSDL2: 'WSDL 2',
-    GRAPHQL_SDL: 'GraphQL SDL',
-    ASYNC_API: 'AsyncAPI',
-    BASIC: 'Basic',
-    DIGEST: 'Digest',
-    OAUTH2: 'OAuth2',
-    NONE: 'None',
-
-};
 
 export default Listing;

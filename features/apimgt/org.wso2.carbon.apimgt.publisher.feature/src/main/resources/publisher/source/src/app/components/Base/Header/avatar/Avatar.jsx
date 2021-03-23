@@ -48,6 +48,15 @@ class Avatar extends Component {
     }
 
     /**
+     * Do OIDC logout redirection
+     * @param {React.SyntheticEvent} e Click event of the submit button
+     */
+    doOIDCLogout = (e) => {
+        e.preventDefault();
+        window.location = `${Configurations.app.context}/services/logout`;
+    };
+
+    /**
      *
      * Close Avatar dropdown menu
      * @memberof Avatar
@@ -65,15 +74,6 @@ class Avatar extends Component {
     handleClick(event) {
         this.setState({ anchorEl: event.currentTarget });
     }
-
-    /**
-     * Do OIDC logout redirection
-     * @param {React.SyntheticEvent} e Click event of the submit button
-     */
-    doOIDCLogout = (e) => {
-        e.preventDefault();
-        window.location = `${Configurations.app.context}/services/logout`;
-    };
 
     /**
      *

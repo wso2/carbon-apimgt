@@ -19,11 +19,12 @@
 package org.wso2.carbon.apimgt.impl.keymgt;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 
 import java.util.List;
 import java.util.Map;
 
-public interface KeyManagerEventHandler {
+public interface KeyManagerEventHandler extends EventHandler {
 
     boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException;
 

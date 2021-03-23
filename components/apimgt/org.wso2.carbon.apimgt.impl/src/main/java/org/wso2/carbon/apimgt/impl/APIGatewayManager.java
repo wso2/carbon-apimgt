@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -24,29 +23,19 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
-import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
-import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
-import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.LocalEntryAdminClient;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -66,7 +55,12 @@ public class APIGatewayManager {
     private APIGatewayManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        environments = config.getApiGatewayEnvironments();
+        try {
+            environments = APIUtil.getEnvironments();
+        } catch (APIManagementException e) {
+            // TODO (renuka) do we want to set "environments = APIUtil.getReadOnlyEnvironments();"
+            log.error("Error occurred when reading configured gateway environments", e);
+        }
         this.recommendationEnvironment = config.getApiRecommendationEnvironment();
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
     }
@@ -108,31 +102,6 @@ public class APIGatewayManager {
         }
     }
 
-    public Map<String, String> updateLocalEntry(APIProduct apiProduct, String tenantDomain) {
-
-        Map<String, String> failedEnvironmentsMap = new HashMap<>();
-
-        for (String environmentName : apiProduct.getEnvironments()) {
-
-            Environment environment = environments.get(environmentName);
-            try {
-                LocalEntryAdminClient localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
-
-                String definition = apiProduct.getDefinition();
-                localEntryAdminClient.deleteEntry(apiProduct.getUuid());
-                localEntryAdminClient.addLocalEntry("<localEntry key=\"" + apiProduct.getUuid() + "\">" +
-                        definition.replaceAll("&(?!amp;)", "&amp;").
-                                replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-                        + "</localEntry>");
-            } catch (AxisFault e) {
-                failedEnvironmentsMap.put(environmentName, e.getMessage());
-                log.error("Error occurred when publish to gateway " + environmentName, e);
-            }
-        }
-
-        return failedEnvironmentsMap;
-    }
-
     private void sendUnDeploymentEvent(API api, String tenantDomain, Set<String> removedGateways) {
         APIIdentifier apiIdentifier = api.getId();
 
@@ -160,43 +129,6 @@ public class APIGatewayManager {
         APIUtil.sendNotification(deployAPIInGatewayEvent, APIConstants.NotifierType.GATEWAY_PUBLISHED_API.name());
     }
 
-    public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
-
-        Map<String, String> failedEnvironmentsMap = new HashMap<String, String>(0);
-        LocalEntryAdminClient localEntryAdminClient;
-        String localEntryUUId = api.getUUID();
-        if (api.getEnvironments() != null) {
-            for (String environmentName : api.getEnvironments()) {
-                try {
-                    Environment environment = environments.get(environmentName);
-                    APIGatewayAdminClient client = new APIGatewayAdminClient(environment);
-                    APIIdentifier id = api.getId();
-                    if (client.getDefaultApi(tenantDomain, id) != null) {
-                        if (debugEnabled) {
-                            log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
-                                    environment.getName());
-                        }
-                        client.deleteDefaultApi(tenantDomain, api.getId());
-                    }
-                    if (APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
-                        localEntryUUId = localEntryUUId + APIConstants.GRAPHQL_LOCAL_ENTRY_EXTENSION;
-                    }
-                    localEntryAdminClient = new LocalEntryAdminClient(environment, tenantDomain);
-                    localEntryAdminClient.deleteEntry(localEntryUUId);
-                } catch (AxisFault axisFault) {
-                    /*
-                didn't throw this exception to handle multiple gateway publishing
-                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
-                therefore this didn't break the gateway unpublisihing if one gateway unreachable
-                 */
-                    log.error("Error occurred when removing default api from gateway " + environmentName, axisFault);
-                    failedEnvironmentsMap.put(environmentName, axisFault.getMessage());
-                }
-            }
-        }
-        return failedEnvironmentsMap;
-    }
-
     public void deployToGateway(API api, String tenantDomain, Set<String> gatewaysToPublish) {
 
         if (debugEnabled) {
@@ -213,13 +145,6 @@ public class APIGatewayManager {
     }
 
     public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove) {
-
-        // Extracting API details for the recommendation system
-        if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
-            Thread recommendationThread = new Thread(extractor);
-            recommendationThread.start();
-        }
 
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");

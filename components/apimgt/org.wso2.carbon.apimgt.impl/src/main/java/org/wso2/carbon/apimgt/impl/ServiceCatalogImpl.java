@@ -21,12 +21,12 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ServiceCatalog;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 
 import java.util.List;
-import java.util.UUID;
 
 public class ServiceCatalogImpl implements ServiceCatalog {
 
@@ -34,20 +34,18 @@ public class ServiceCatalogImpl implements ServiceCatalog {
 
     @Override
     public String addService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
-        String uuid = UUID.randomUUID().toString();
-        catalogDAO.addServiceEntry(serviceEntry, tenantId, user);
-        return uuid;
+        return catalogDAO.addService(serviceEntry, tenantId, user);
     }
 
     @Override
-    public List<ServiceEntry> importServices(List<ServiceEntry> serviceList, int tenantId, String username)
-            throws APIManagementException {
-        return catalogDAO.importServices(serviceList, tenantId, username);
+    public List<ServiceEntry> importServices(List<ServiceEntry> serviceList, int tenantId, String username,
+                                             boolean overwrite) throws APIManagementException {
+        return catalogDAO.importServices(serviceList, tenantId, username, overwrite);
     }
 
     @Override
-    public String updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
-        return catalogDAO.updateServiceCatalog(serviceEntry, tenantId, user);
+    public void updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
+        catalogDAO.updateService(serviceEntry, tenantId, user);
     }
 
     @Override
@@ -62,8 +60,8 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public void deleteService(String serviceKey, int tenantId) throws APIManagementException {
-        catalogDAO.deleteService(serviceKey, tenantId);
+    public void deleteService(String serviceId, int tenantId) throws APIManagementException {
+        catalogDAO.deleteService(serviceId, tenantId);
     }
 
     @Override
@@ -87,11 +85,6 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public ServiceEntry getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException {
-        return catalogDAO.getServiceResourcesByKey(key, tenantId);
-    }
-
-    @Override
     public ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException {
         return catalogDAO.getServiceByKey(key, tenantId);
     }
@@ -106,5 +99,10 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     public List<ServiceEntry> getServices(ServiceFilterParams filterParams, int tenantId, boolean shrink)
             throws APIManagementException {
         return catalogDAO.getServices(filterParams, tenantId, shrink);
+    }
+
+    @Override
+    public List<API> getServiceUsage(String serviceId, int tenantId) throws APIManagementException {
+        return catalogDAO.getServiceUsage(serviceId, tenantId);
     }
 }

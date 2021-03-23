@@ -215,7 +215,7 @@ class CreateScope extends React.Component {
         if (value && value.length !== '' && value.length >= 512) {
             valid[id].invalid = true;
             valid[id].error = intl.formatMessage({
-                id: 'Scopes.Create.Scope.displayName.length.exceeded',
+                id: 'Scopes.Create.Scope.description.length.exceeded',
                 defaultMessage: 'Exceeds maximum length limit of 512 characters',
             });
         } else {

@@ -206,8 +206,8 @@ class Utils {
      * @memberof Utils
      */
     static getServiceCatalogSwaggerURL() {
-        // return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
-        return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+        return 'https://' + Utils.getCurrentEnvironment().host + Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
+        // return Utils.CONST.SERVICE_CATALOG_SWAGGER_YAML;
     }
 
     /**
@@ -354,6 +354,45 @@ class Utils {
             }, 100);
         }
     }
+
+    /**
+     * Force service definition download in browser
+     *
+     * @static
+     * @param {*} response
+     * @memberof Utils
+     */
+    static downloadServiceDefinition(response) {
+        const fileName = 'service-definition';
+        const contentType = 'application/yaml';
+        const blob = new Blob([JSON.stringify(response)], {
+            type: contentType,
+        });
+        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+            window.navigator.msSaveBlob(blob, fileName);
+        } else {
+            const URL = window.URL || window.webkitURL;
+            const downloadUrl = URL.createObjectURL(blob);
+
+            if (fileName) {
+                const aTag = document.createElement('a');
+                if (typeof aTag.download === 'undefined') {
+                    window.location = downloadUrl;
+                } else {
+                    aTag.href = downloadUrl;
+                    aTag.download = fileName;
+                    document.body.appendChild(aTag);
+                    aTag.click();
+                }
+            } else {
+                window.location = downloadUrl;
+            }
+
+            setTimeout(() => {
+                URL.revokeObjectURL(downloadUrl);
+            }, 100);
+        }
+    }
 }
 
 Utils.CONST = {
@@ -364,7 +403,7 @@ Utils.CONST = {
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
     // SERVICE_CATALOG_SWAGGER_YAML: '/api/service-catalog/v1/swagger.yaml',
-    SERVICE_CATALOG_SWAGGER_YAML: '../../../../../publisher/site/public/serviceCatalog.yaml',
+    SERVICE_CATALOG_SWAGGER_YAML: '/api/am/service-catalog/v0/oas.yaml',
     SWAGGER_YAML: '/api/am/publisher/v2/swagger.yaml',
     PROTOCOL: 'https://',
     API_CLIENT: 'apiClient',

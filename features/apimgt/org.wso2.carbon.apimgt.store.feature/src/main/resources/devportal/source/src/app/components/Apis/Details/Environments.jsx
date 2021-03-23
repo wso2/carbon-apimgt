@@ -173,7 +173,19 @@ class Environments extends React.Component {
         const { urlCopied } = this.state;
 
         if (renderOnlyOne) {
-            const epUrlToRender = api.endpointURLs[0];
+            const epUrlToRender = (api.endpointURLs &&  api.endpointURLs.length > 0 ) ? api.endpointURLs[0] : null;
+
+            if (!epUrlToRender) {
+                return (
+                    <Typography variant='body2'>
+                        <FormattedMessage
+                            id='Apis.Details.InfoBar.default.gateway.urls.notfound'
+                            defaultMessage='No endpoints yet'
+                        />
+                    </Typography>
+                )
+            }
+
             return (
                 <>
                     {(epUrlToRender.URLs.https !== null ||
@@ -322,10 +334,7 @@ class Environments extends React.Component {
                                     <Grid item xs={12}>
                                         <Box>
                                             <Typography variant='body2'>
-                                                {endpoint.environmentName}
-                                                <Typography variant='caption'>
-                                                    ({endpoint.environmentType})
-                                            </Typography>
+                                                {endpoint.environmentDisplayName}
                                             </Typography>
                                         </Box>
                                         <TextField
@@ -507,7 +516,8 @@ class Environments extends React.Component {
                                         endpoint.defaultVersionURLs.https !== null ||
                                         endpoint.defaultVersionURLs.ws !== null ||
                                         endpoint.defaultVersionURLs.wss !== null) && (
-                                        <Typography className={classes.heading}>
+                                        <Typography component='label' htmlFor='bootstrap-input'
+                                                    className={classes.heading}>
                                             <FormattedMessage
                                                 id='Apis.Details.InfoBar.default.gateway.urls'
                                                 defaultMessage='Default Gateway URLs'

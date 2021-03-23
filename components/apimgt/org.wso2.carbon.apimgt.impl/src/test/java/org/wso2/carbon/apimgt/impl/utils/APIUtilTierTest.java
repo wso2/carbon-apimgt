@@ -66,11 +66,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 
 
 @RunWith(PowerMockRunner.class)
@@ -333,7 +332,11 @@ public class APIUtilTierTest {
 
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
-                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
 
         for (String policy : subPolicies) {
             Mockito.when(
@@ -357,7 +360,11 @@ public class APIUtilTierTest {
 
         String[] subPolicies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
-                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
 
         for (String policy : subPolicies) {
             Mockito.when(
@@ -487,7 +494,11 @@ public class APIUtilTierTest {
 
         String[] policies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
-                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
 
         for (String policy : policies) {
             Mockito.when(
@@ -515,7 +526,11 @@ public class APIUtilTierTest {
 
         String[] policies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
-                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_GOLD,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE,
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED};
 
         for (String policy : policies) {
             Mockito.when(

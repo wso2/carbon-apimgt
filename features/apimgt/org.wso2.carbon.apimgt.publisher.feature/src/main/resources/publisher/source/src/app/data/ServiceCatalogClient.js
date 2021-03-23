@@ -41,6 +41,9 @@ class ServiceCatalogClient {
             SwaggerClient.http.withCredentials = true;
             ServiceCatalogClient.spec = SwaggerClient.resolve({
                 url: Utils.getServiceCatalogSwaggerURL(),
+                requestInterceptor: (request) => {
+                    request.headers.Accept = 'text/yaml';
+                },
             });
         }
         this._client = ServiceCatalogClient.spec.then((resolved) => {
@@ -112,7 +115,7 @@ class ServiceCatalogClient {
      */
     _fixSpec(spec) {
         const updatedSpec = spec;
-        updatedSpec.servers = [{ url: window.origin + '/api/am/service-catalog' }];
+        updatedSpec.servers = [{ url: window.origin + '/api/am/service-catalog/v0' }];
         return updatedSpec;
     }
 

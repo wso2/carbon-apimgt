@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.tracing;
 
 import io.opentracing.Tracer;
 
+/**
+ * This interface used to implement OpenTracing Bridge Implementations for APIM.
+ */
 public interface OpenTracer {
 
     Tracer getTracer(String serviceName);

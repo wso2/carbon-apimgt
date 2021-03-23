@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const DefaultConfigurations = {
     direction: 'ltr',
     palette: {
@@ -27,14 +28,18 @@ const DefaultConfigurations = {
         },
         h4: {
             fontWeight: 400,
-            fontSize: '1.3rem'
+            fontSize: '1.3rem',
+        },
+        caption: {
+            fontSize: '0.70rem',
+            color: '#666',
         },
     },
     custom: {
         contentAreaWidth: 1240,
         backgroundImage: '', // Add a watermark background to the content area of the page. Example ( '/devportal/site/public/images/back-light.png')
-        defaultApiView: 'grid',   // Sets the default view for the api listing page ( Other values available = 'list' ). 
-                                    // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
+        defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' ).
+        // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
         page: {
             style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
             width: 1240, // This value is effected only when the page.style = 'fixed'
@@ -70,7 +75,7 @@ const DefaultConfigurations = {
             rootBackground: '#000',
         },
         infoBar: {
-            height: 120,
+            height: 70,
             background: '#ffffff',
             showThumbnail: true,
             starColor: '#f6bf21', // Rating star color
@@ -113,6 +118,10 @@ const DefaultConfigurations = {
             query: '#b3e6fe',
             mutation: '#c1dea0',
             subscription: '#ffcc80',
+        },
+        thumbnailTemplates: {
+            active: false,
+            variant: 'plain', // default templates available templates 'plain'.
         },
         thumbnail: {
             width: 240,
@@ -244,7 +253,7 @@ const DefaultConfigurations = {
                 showTwitter: true,
                 showEmbad: true,
                 showEmail: true,
-            }
+            },
         },
         apiDetailPages: {
             showCredentials: true,
@@ -313,25 +322,42 @@ const DefaultConfigurations = {
                     imageWidth: 24, // in pixles
                     text: 'Sinhala',
                     direction: 'ltr',
-                }
+                },
             ],
             showFlag: true,
             showText: true,
             minWidth: 60, // Width of the language switcher in pixles
         },
         info: {
-            color: '#64b5f6',    
+            color: '#64b5f6',
         },
-        /* 
+        /*
             This is the config for the public teant store.
             Set "active: false" to redirect the teant user to the url
             given by redirectToIfInactive. It will also hide the link
             SWITCH DEV PORTALS link at the header.
         */
-       publicTenantStore: {
+        publicTenantStore: {
             active: true,
             redirectToIfInactive: 'https://wso2.com/api-management/cloud/',
-        }
+        },
+        curlGenerator: {
+            backgroundColor: '#41444e',
+            color: '#fff',
+        },
+        AsyncTryOut: {
+            backgroundColor: '#89b7d1',
+        },
+        overrides: {
+            MuiOutlinedInput: {
+                root: {
+                    borderColor: '#444',
+                },
+                notchedOutline: {
+                    borderColor: '#444',
+                },
+            },
+        },
     },
 };
 

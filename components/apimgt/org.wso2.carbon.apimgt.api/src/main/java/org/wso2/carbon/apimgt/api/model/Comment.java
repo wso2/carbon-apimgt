@@ -25,49 +25,55 @@ import java.util.Date;
  */
 public class Comment {
 
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public Date getCreatedTime() {
-        return createdTime;
-    }
-
-    public void setCreatedTime(Date createdTime) {
-        this.createdTime = createdTime;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getApiId() {
-        return apiId;
-    }
-
-    public void setApiId(String apiId) {
-        this.apiId = apiId;
-    }
-
-    private String user;
-    private String text;
-    private Date createdTime;
     private String id;
+    private String text;
+    private String user;
+    private Date createdTime;
+    private Date updatedTime;
     private String apiId;
+    private String parentCommentID;
+    private String entryPoint;
+    private String category;
+    private CommentList replies;
+
+    public CommentList getReplies(){return this.replies; }
+
+    public void setReplies(CommentList replies) {this.replies = replies; }
+
+    public String getId() {return id; }
+
+    public void setId(String id) {this.id = id; }
+
+    public String getText() {return text; }
+
+    public void setText(String text) {this.text = text; }
+
+    public String getUser() {return user; }
+
+    public void setUser(String user) {this.user = user; }
+
+    public Date getCreatedTime() {return createdTime; }
+
+    public void setCreatedTime(Date createdTime) {this.createdTime = createdTime; }
+
+    public Date getUpdatedTime() {return updatedTime; }
+
+    public void setUpdatedTime(Date updatedTime) {this.updatedTime = updatedTime; }
+
+    public String getApiId() {return apiId; }
+
+    public void setApiId(String apiId) {this.apiId = apiId; }
+
+    public String getParentCommentID() {return parentCommentID; }
+
+    public void setParentCommentID(String parentCommentID) {this.parentCommentID = parentCommentID; }
+
+    public String getEntryPoint() {return entryPoint; }
+
+    public void setEntryPoint(String entryPoint) {this.entryPoint = entryPoint; }
+
+    public String getCategory() {return category; }
+
+    public void setCategory(String category) {this.category = category; }
+
 }

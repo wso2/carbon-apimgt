@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -5,11 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
-import org.wso2.carbon.apimgt.usage.publisher.dto.BotDataDTO;
 
 import javax.cache.Cache;
 import java.util.Arrays;
@@ -21,11 +38,11 @@ import java.util.Map;
  * take headers, pseed body and client IP and log it in seperate log
  * If enabled alert through analytics, will triger an email to admins of the system
  */
-public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
+public class BotDetectionMediator extends AbstractMediator {
     private static final Log log = LogFactory.getLog(BotDetectionMediator.class);
     private static final String BOT_ACCESS_COUNT_CACHE = "BOT_ACCESS_CACHE";
-    private static final Cache botAccessCountCache = APIUtil.getCache(APIConstants.API_MANAGER_CACHE_MANAGER,
-            BOT_ACCESS_COUNT_CACHE, 60, 60);
+    private static final Cache botAccessCountCache = APIUtil
+            .getCache(APIConstants.API_MANAGER_CACHE_MANAGER, BOT_ACCESS_COUNT_CACHE, 60, 60);
     private int throttleLimit = 2;
 
     /**
@@ -40,7 +57,7 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
         org.apache.axis2.context.MessageContext msgContext = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
 
-        String clientIP = DataPublisherUtil.getClientIp(msgContext);
+        String clientIP = DataPublisherUtil.getEndUserIP(messageContext);
         if (isThrottledOut(clientIP)) {
             messageContext.setProperty("BOT_THROTTLED_OUT", true);
             messageContext.setProperty("BOT_IP", clientIP);
@@ -64,24 +81,9 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
 
         String headerSet = getPassedHeaderSet(msgContext);
 
-        log.info(String.format("MessageId : %s | Request Method : %s | Message Body : %s | client Ip : %s | " +
-                "Headers set : %s", messageId, apiMethod, messageBody, clientIP, headerSet));
-
-        /**
-         * check whether analytics enabled or not
-         */
-        if (!enabled) {
-            return true;
-        }
-
-        BotDataDTO botDataDTO = new BotDataDTO();
-        botDataDTO.setCurrentTime(currentTime);
-        botDataDTO.setMessageID(messageId);
-        botDataDTO.setApiMethod(apiMethod);
-        botDataDTO.setHeaderSet(headerSet);
-        botDataDTO.setMessageBody(messageBody);
-        botDataDTO.setClientIp(clientIP);
-        publisher.publishEvent(botDataDTO);
+        log.info(String.format(
+                "MessageId : %s | Request Method : %s | Message Body : %s | client Ip : %s | " + "Headers set : %s",
+                messageId, apiMethod, messageBody, clientIP, headerSet));
         return true;
     }
 
@@ -112,13 +114,5 @@ public class BotDetectionMediator extends APIMgtCommonExecutionPublisher {
             botAccessCountCache.put(clientIp, ++counter);
             return false;
         }
-    }
-
-    public int getThrottleLimit() {
-        return throttleLimit;
-    }
-
-    public void setThrottleLimit(int throttleLimit) {
-        this.throttleLimit = throttleLimit;
     }
 }

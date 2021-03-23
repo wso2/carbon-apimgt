@@ -35,6 +35,7 @@ import { app } from 'Settings';
 import { ApiContext } from './ApiContext';
 import Resources from './Resources';
 import Operations from './Operations';
+import Topics from './Topics';
 import Comments from './Comments/Comments';
 import Sdk from './Sdk';
 import OverviewDocuments from './OverviewDocuments';
@@ -239,22 +240,32 @@ function Overview(props) {
             });
     }, []);
     const getResourcesForAPIs = (apiType, apiObject) => {
-        switch (apiType) {
-            case 'GRAPHQL':
-                return <Operations api={apiObject} />;
-            case 'WS':
-                return '';
-            default:
-                return <Resources api={apiObject} />;
+        if (isAsyncApi(apiType)) {
+            return <Topics api={apiObject}/>
+        } else {
+            switch (apiType) {
+                case 'GRAPHQL':
+                    return <Operations api={apiObject}/>;
+                default:
+                    return <Resources api={apiObject}/>;
+            }
         }
     };
 
+    const isAsyncApi = (apiType) => {
+        return (apiType && (apiType === 'WS' || apiType === 'WEBSUB' || apiType === 'SSE'));
+    };
+
     const getTitleForAPIOperationType = (apiType) => {
-        switch (apiType) {
-            case 'GRAPHQL':
-                return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations' />;
-            default:
-                return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources' />;
+        if (isAsyncApi(apiType)) {
+            return <FormattedMessage id='Apis.Details.Overview.topics.title' defaultMessage='Topics'/>;
+        } else {
+            switch (apiType) {
+                case 'GRAPHQL':
+                    return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations'/>;
+                default:
+                    return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources'/>;
+            }
         }
     };
     if (overviewDocOverride) {
@@ -285,7 +296,7 @@ function Overview(props) {
                     </Paper>
                 </Grid>
                 {/* Resources */}
-                {api.type !== 'WS' && showTryout && (
+                {showTryout && (
                     <Grid item lg={4} md={6} xs={12}>
                         <Paper elevation={0} className={classes.overviewPaper}>
                             <Typography variant='subtitle2' className={classes.sectionTitle}>
@@ -297,7 +308,7 @@ function Overview(props) {
                                 {getResourcesForAPIs(api.type, api)}
                             </Box>
                             <Box>
-                                {!api.advertiseInfo.advertised && (
+                                {!api.advertiseInfo.advertised && (!isAsyncApi(api.type)) ? (
                                     <>
                                         <Divider />
                                         <Link to={'/apis/' + api.id + '/test'} className={classes.button}>
@@ -310,6 +321,23 @@ function Overview(props) {
                                                 <FormattedMessage
                                                     id='Apis.Details.Overview.resources.show.more'
                                                     defaultMessage='Try Out'
+                                                />
+                                            </Button>
+                                        </Link>
+                                    </>
+                                ):(
+                                    <>
+                                        <Divider />
+                                        <Link to={'/apis/' + api.id + '/definition'} className={classes.button}>
+                                            <Button
+                                                id='test'
+                                                size='small'
+                                                color='primary'
+                                                aria-labelledby='test APIOperationTitle'
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.topics.show.more'
+                                                    defaultMessage='View Definition'
                                                 />
                                             </Button>
                                         </Link>
@@ -370,7 +398,7 @@ function Overview(props) {
                         </Box>
                     </Paper>
                 </Grid>)}
-                {api.type !== 'WS' && showSdks && (<Grid item lg={4} md={6} xs={12}>
+                {!isAsyncApi(api.type) && showSdks && (<Grid item lg={4} md={6} xs={12}>
                     <Paper elevation={0} className={classes.overviewPaper}>
                         <Typography variant='subtitle2' className={classes.sectionTitle}>
                             <FormattedMessage
@@ -384,7 +412,7 @@ function Overview(props) {
                         </Box>
                         <Box>
                             <Divider />
-                            <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
+                            <Link to={'/apis/' + api.id + '/sdk'} className={classes.button}>
                                 <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.sdk.generation.show.more'
@@ -431,7 +459,7 @@ function Overview(props) {
                                                 <FormattedMessage
                                                     id={'Apis.Details.Overview' +
                                                         '.subscribe.available'}
-                                                    defaultMessage='Subscription tiers available '
+                                                    defaultMessage='Business plans available '
                                                 />
                                                 {api.tiers.map((tier, index) => (<>
                                                     {tier.tierName}{index !== (api.tiers.length - 1)

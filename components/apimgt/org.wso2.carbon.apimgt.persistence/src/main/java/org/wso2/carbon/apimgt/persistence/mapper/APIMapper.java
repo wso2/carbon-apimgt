@@ -144,30 +144,6 @@ public interface APIMapper {
         return null;
     }
 
-    default List<Label> mapLabelToList(Set<String> labelSet) {
-        List<Label> labels = new ArrayList<Label>();
-        if (labelSet != null) {
-            for (String labelName : labelSet) {
-                Label label = new Label();
-                label.setName(labelName);
-                labels.add(label);
-            }
-        }
-        return labels;
-
-    }
-
-    default Set<String> mapLabelToSet(List<Label> labelList) {
-        Set<String> labelSet = new HashSet<String>();
-        if (labelList != null) {
-            for (Label label : labelList) {
-                labelSet.add(label.getName());
-            }
-        }
-
-        return labelSet;
-    }
-
     default String mapAccessControlRolesToString(Set<String> accessControlRoles) {
         if (accessControlRoles != null) {
             return String.join(",", accessControlRoles);

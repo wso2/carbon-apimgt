@@ -25,6 +25,7 @@ import Cancel from '@material-ui/icons/Cancel';
 import StarRate from '@material-ui/icons/StarRate';
 import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
 import AuthManager from 'AppData/AuthManager';
@@ -71,6 +72,7 @@ const styles = theme => ({
     rateThis: {
         lineHeight: '15px',
         width: 40,
+        marginTop: '-6px',
     },
 });
 
@@ -222,24 +224,29 @@ class StarRatingBar extends React.Component {
                                             {(userRating === 0) ? (
                                                 <FormattedMessage defaultMessage='Rate This' id='Apis.Listing.StarRatingBar.rate.this' />
                                             ) : (
-                                                    <><Box fontSize={22} ml={1}>{userRating}</Box>You</>
+                                                    <Box>
+                                                        <Box fontSize={22} ml={1} mb={1}>{userRating}</Box>
+                                                        <Box>You</Box>
+                                                    </Box>
                                                 )}
                                         </Typography>
                                     </Box>
                                     {showEditing && (<>
-                                        <div className={classes.userRating}>
-                                            {[1, 2, 3, 4, 5].map(i => (
-                                                <StarRate
-                                                    key={i}
-                                                    className={userRating >= i ? classes.starRate : classes.noStarRate}
-                                                    onClick={() => this.doRate(i)}
+                                        <ClickAwayListener onClickAway={this.toggleEditRating}>
+                                            <div className={classes.userRating}>
+                                                {[1, 2, 3, 4, 5].map(i => (
+                                                    <StarRate
+                                                        key={i}
+                                                        className={userRating >= i ? classes.starRate : classes.noStarRate}
+                                                        onClick={() => this.doRate(i)}
+                                                    />
+                                                ))}
+                                                <Cancel
+                                                    className={classes.removeRating}
+                                                    onClick={() => this.removeUserRating()}
                                                 />
-                                            ))}
-                                            <Cancel
-                                                className={classes.removeRating}
-                                                onClick={() => this.removeUserRating()}
-                                            />
-                                        </div>
+                                            </div>
+                                        </ClickAwayListener>
                                     </>)}
                                 </Box>
                             ) : (

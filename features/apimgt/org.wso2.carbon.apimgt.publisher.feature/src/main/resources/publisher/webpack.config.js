@@ -34,6 +34,7 @@ const config = {
         filename: '[name].[contenthash].bundle.js',
         chunkFilename: '[name].[contenthash].bundle.js',
         publicPath: 'site/public/dist/',
+        globalObject: 'this',
     },
     node: {
         fs: 'empty',
@@ -41,9 +42,8 @@ const config = {
     },
     watch: false,
     watchOptions: {
-        aggregateTimeout: 200,
-        poll: true,
-        ignored: ['files/**/*.js', 'node_modules/**'],
+        poll: 1000,
+        ignored: ['files/**/*.js', 'node_modules'],
     },
     devtool: 'source-map', // todo: Commented out the source
     // mapping in case need to speed up the build time & reduce size
@@ -80,7 +80,7 @@ const config = {
                 ],
             },
             {
-                test: /\.css$/,
+                test: /\.css$/i,
                 use: ['style-loader', 'css-loader'],
             },
             {
@@ -98,8 +98,11 @@ const config = {
                 ],
             },
             {
-                test: /\.(woff|woff2|eot|ttf|svg)$/,
-                use: { loader: 'url-loader?limit=100000' },
+                test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+                loader: 'url-loader',
+                options: {
+                    limit: 8192,
+                },
             },
         ],
     },

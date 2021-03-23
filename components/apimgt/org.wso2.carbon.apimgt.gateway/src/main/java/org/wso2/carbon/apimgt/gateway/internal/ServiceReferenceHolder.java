@@ -19,18 +19,21 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
 import org.wso2.carbon.apimgt.impl.throttling.APIThrottleDataService;
 import org.wso2.carbon.apimgt.impl.token.RevokedTokenService;
+import org.wso2.carbon.apimgt.impl.webhooks.SubscriptionsDataService;
 import org.wso2.carbon.apimgt.tracing.TracingService;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.base.api.ServerConfigurationService;
@@ -79,7 +82,11 @@ public class ServiceReferenceHolder {
 
     private JWTValidationService jwtValidationService;
     private KeyManagerDataService keyManagerDataService;
+    private SubscriptionsDataService subscriptionsDataService;
+
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
+    private RedisCacheUtils redisCacheUtils;
+
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
     }
@@ -299,6 +306,18 @@ public class ServiceReferenceHolder {
         this.keyManagerDataService = keyManagerDataService;
     }
 
+    public SubscriptionsDataService getSubscriptionsDataService() {
+        return subscriptionsDataService;
+    }
+
+    public void setSubscriptionsDataService(SubscriptionsDataService subscriptionsDataService) {
+        if (subscriptionsDataService != null) {
+            this.subscriptionsDataService = subscriptionsDataService;
+        } else {
+            this.subscriptionsDataService = null;
+        }
+    }
+
     public void setPublicCert() {
         try {
             KeyStoreManager keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
@@ -342,5 +361,25 @@ public class ServiceReferenceHolder {
     public boolean isTenantLoaded(String tenantDomain) {
 
         return activeTenants.contains(tenantDomain);
+    }
+
+    public void setRedisCacheUtil(RedisCacheUtils redisCacheUtils) {
+
+        this.redisCacheUtils = redisCacheUtils;
+    }
+
+    public RedisCacheUtils getRedisCacheUtils() {
+
+        return redisCacheUtils;
+    }
+
+    public boolean isRedisEnabled() {
+
+        RedisConfig redisConfigProperties = getAPIManagerConfiguration().getRedisConfigProperties();
+        if (redisConfigProperties != null && redisConfigProperties.isRedisEnabled()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

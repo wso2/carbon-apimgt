@@ -304,7 +304,7 @@ class EditScope extends React.Component {
                                 <Link to={url} className={classes.titleLink}>
                                     <Typography variant='h4'>
                                         <FormattedMessage
-                                            id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                                            id='Apis.Details.Scopes.Scopes.heading.edit.scope.heading'
                                             defaultMessage='Scopes'
                                         />
                                     </Typography>

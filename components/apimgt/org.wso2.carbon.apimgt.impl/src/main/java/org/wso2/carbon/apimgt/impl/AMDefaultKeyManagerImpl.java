@@ -72,10 +72,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -178,14 +175,28 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String[] callbackURLs = callBackURL.trim().split("\\s*,\\s*");
             clientInfo.setRedirectUris(Arrays.asList(callbackURLs));
         }
-        clientInfo.setClientName(applicationName);
+
+        String overrideSpName = System.getProperty(APIConstants.APPLICATION.OVERRIDE_SP_NAME);
+        if (StringUtils.isNotEmpty(overrideSpName) && !Boolean.parseBoolean(overrideSpName)) {
+            clientInfo.setClientName(info.getClientName());
+        } else {
+            clientInfo.setClientName(applicationName);
+        }
+        
         //todo: run tests by commenting the type
         if (StringUtils.isEmpty(info.getTokenType())) {
             clientInfo.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         } else {
             clientInfo.setTokenType(info.getTokenType());
         }
-        clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+
+        // Use a generated user as the app owner for cross tenant subscription scenarios, to avoid the tenant admin
+        // being exposed in the JWT token.
+        if (APIUtil.isCrossTenantSubscriptionsEnabled()) {
+            clientInfo.setApplication_owner(APIConstants.DEFAULT_RESERVED_USERNAME);
+        } else {
+            clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
+        }
         if (StringUtils.isNotEmpty(info.getClientId())) {
             if (isUpdate) {
                 clientInfo.setClientId(info.getClientId());
@@ -685,8 +696,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException {
 
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        return apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
+        return new HashSet<>();
     }
 
     /**

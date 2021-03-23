@@ -26,11 +26,15 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertConfigDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AlertTypeDTO;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utility class for alert config/ dto mappings.
- * */
+ */
 public class AlertsMappingUtil {
 
     /**
@@ -38,8 +42,9 @@ public class AlertsMappingUtil {
      *
      * @param configProperties : The alert config properties.
      * @return An AlertConfigDTO object.
-     * */
+     */
     public static AlertConfigDTO toAlertConfigDTO(Map<String, String> configProperties) {
+
         AlertConfigDTO alertConfigDTO = new AlertConfigDTO();
         alertConfigDTO.setConfiguration(configProperties);
         alertConfigDTO.setConfigurationId(getAlertConfigId(configProperties.get("apiName"),
@@ -55,12 +60,13 @@ public class AlertsMappingUtil {
      * ConfigId string : PizzaShackAPI#1.0.0#carbon.super.
      * Base64 encoded: UGl6emFTaGFja0FQSSMxLjAuMCNjYXJib24uc3VwZXI
      *
-     * @param apiName: Name of the api
-     * @param apiVersion: Api version.
+     * @param apiName:     Name of the api
+     * @param apiVersion:  Api version.
      * @param tenantDomain : The tenant domain of the user.
      * @return The configuration id
-     * */
-    private static String getAlertConfigId(String apiName, String apiVersion, String tenantDomain){
+     */
+    private static String getAlertConfigId(String apiName, String apiVersion, String tenantDomain) {
+
         String configId = apiName + "#" + apiVersion + "#" + tenantDomain;
         return Base64.getEncoder().withoutPadding().encodeToString(configId.getBytes());
     }
@@ -70,8 +76,9 @@ public class AlertsMappingUtil {
      *
      * @param configId : The configuration id(base64 encoded)
      * @return A HashMap containing the config parameters.
-     * */
+     */
     public static Map<String, String> configIdToMap(String configId) throws APIManagementException {
+
         String decodedConfigurationId = new String(Base64.getDecoder().decode(configId.getBytes()));
         String[] parameters = decodedConfigurationId.split("#");
         Map<String, String> configMap = new HashMap<>();
@@ -82,12 +89,13 @@ public class AlertsMappingUtil {
     }
 
     /**
-     * Converts impl.dto.AlertTypeDTO to Store api AlertTypeDTO
+     * Converts impl.dto.AlertTypeDTO to Store api AlertTypeDTO.
      *
-     * @param alertTypeDTO: An impl AlertTypeDTO object.
+     * @param alertTypeDTO An impl AlertTypeDTO object
      * @return Api Store Alert Type DTO
-     * */
+     */
     public static AlertTypeDTO alertTypeToAlertTypeDTO(org.wso2.carbon.apimgt.impl.dto.AlertTypeDTO alertTypeDTO) {
+
         AlertTypeDTO storeAlertTypeDTO = new AlertTypeDTO();
         storeAlertTypeDTO.setId(alertTypeDTO.getId());
         storeAlertTypeDTO.setName(alertTypeDTO.getName());
@@ -98,9 +106,11 @@ public class AlertsMappingUtil {
     /**
      * Get a map of API name, version list. This is used to filter the retrieved alert configurations as there can be
      * api visibility restrictions.
+     *
      * @return A map with [api name, version list]
-     * */
+     */
     public static Map<String, List<String>> getAllowedAPIInfo() throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<API> allowedAPIs = apiProvider.getAllAPIs();
         Map<String, List<String>> allowedAPINameVersionMap = new HashMap<>();

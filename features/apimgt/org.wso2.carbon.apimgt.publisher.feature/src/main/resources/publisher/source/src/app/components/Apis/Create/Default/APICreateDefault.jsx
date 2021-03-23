@@ -218,16 +218,24 @@ function APICreateDefault(props) {
                     setIsRevisioning(false);
                     const envList = settings.environment.map((env) => env.name);
                     const body1 = [];
+                    const getFirstVhost = (envName) => {
+                        const env = settings.environment.find(
+                            (e) => e.name === envName && e.vhosts.length > 0,
+                        );
+                        return env && env.vhosts[0].host;
+                    };
                     if (envList && envList.length > 0) {
-                        if (envList.includes('Default')) {
+                        if (envList.includes('Default') && getFirstVhost('Default')) {
                             body1.push({
                                 name: 'Default',
                                 displayOnDevportal: true,
+                                vhost: getFirstVhost('Default'),
                             });
-                        } else {
+                        } else if (getFirstVhost(envList[0])) {
                             body1.push({
                                 name: envList[0],
                                 displayOnDevportal: true,
+                                vhost: getFirstVhost(envList[0]),
                             });
                         }
                     }
@@ -236,18 +244,52 @@ function APICreateDefault(props) {
                         .then(() => {
                             Alert.info('API Revision Deployed Successfully');
                             setIsDeploying(false);
+                            // Publishing API after deploying
+                            setIsPublishing(true);
+                            api.publish()
+                                .then((response) => {
+                                    const { workflowStatus } = response.body;
+                                    if (workflowStatus === APICreateDefault.WORKFLOW_STATUS.CREATED) {
+                                        Alert.info(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
+                                            defaultMessage: 'Lifecycle state change request has been sent',
+                                        }));
+                                    } else {
+                                        Alert.info(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
+                                            defaultMessage: 'API updated successfully',
+                                        }));
+                                    }
+                                    history.push(`/apis/${api.id}/overview`);
+                                })
+                                .catch((error) => {
+                                    if (error.response) {
+                                        Alert.error(error.response.body.description);
+                                        setPageError(error.response.body);
+                                    } else {
+                                        Alert.error(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.publish',
+                                            defaultMessage: 'Something went wrong while publishing the API',
+                                        }));
+                                        setPageError('Something went wrong while publishing the API');
+                                    }
+                                    console.error(error);
+                                })
+                                .finally(() => {
+                                    setIsPublishing(false);
+                                    setIsPublishButtonClicked(false);
+                                });
                         })
                         .catch((error) => {
                             if (error.response) {
                                 Alert.error(error.response.body.description);
                                 setPageError(error.response.body);
                             } else {
-                                const message = 'Something went wrong while deploying the API Revision';
                                 Alert.error(intl.formatMessage({
                                     id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.deploy.revision',
-                                    defaultMessage: message,
+                                    defaultMessage: 'Something went wrong while deploying the API Revision',
                                 }));
-                                setPageError(message);
+                                setPageError('Something went wrong while deploying the API Revision');
                             }
                             console.error(error);
                         })
@@ -260,52 +302,16 @@ function APICreateDefault(props) {
                         Alert.error(error.response.body.description);
                         setPageError(error.response.body);
                     } else {
-                        const message = 'Something went wrong while creating the API Revision';
                         Alert.error(intl.formatMessage({
                             id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.create.revision',
-                            defaultMessage: message,
+                            defaultMessage: 'Something went wrong while creating the API Revision',
                         }));
-                        setPageError(message);
+                        setPageError('Something went wrong while creating the API Revision');
                     }
                     console.error(error);
                 })
                 .finally(() => {
                     setIsRevisioning(false);
-                });
-            setIsPublishing(true);
-            api.publish()
-                .then((response) => {
-                    const { workflowStatus } = response.body;
-                    if (workflowStatus === APICreateDefault.WORKFLOW_STATUS.CREATED) {
-                        Alert.info(intl.formatMessage({
-                            id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
-                            defaultMessage: 'Lifecycle state change request has been sent',
-                        }));
-                    } else {
-                        Alert.info(intl.formatMessage({
-                            id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
-                            defaultMessage: 'API updated successfully',
-                        }));
-                    }
-                    history.push(`/apis/${api.id}/overview`);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        Alert.error(error.response.body.description);
-                        setPageError(error.response.body);
-                    } else {
-                        const message = 'Something went wrong while publishing the API';
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.publish',
-                            defaultMessage: message,
-                        }));
-                        setPageError(message);
-                    }
-                    console.error(error);
-                })
-                .finally(() => {
-                    setIsPublishing(false);
-                    setIsPublishButtonClicked(false);
                 });
         });
     }

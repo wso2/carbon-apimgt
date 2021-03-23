@@ -623,6 +623,23 @@ class APIProduct extends Resource {
     }
 
     /**
+     * export an API Directory as A Zpi file
+     * @returns {promise} Promise Containing the ZPI file of the selected API
+     */
+     export() {
+        const apiZip = this.client.then((client) => {
+            return client.apis['Import Export'].exportAPIProduct({
+                name: this.name,
+                version: '1.0.0'
+            },  this._requestMetaData({
+                    'accept': 'application/zip'
+                })
+            );
+        });
+        return apiZip;
+    }
+
+    /**
      * Undeploy revision.
      *
      * @param {string} apiProductId Id of the API.

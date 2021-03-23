@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.apikey;
 
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
@@ -39,10 +38,8 @@ import org.jaxen.JaxenException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.common.constants.JWTConstants;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTInfoDto;
-import org.wso2.carbon.apimgt.gateway.common.exception.JWTGeneratorException;
-import org.wso2.carbon.apimgt.gateway.common.util.JWTUtil;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
+import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.gateway.dto.JWTTokenPayloadInfo;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -50,7 +47,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationResponse;
 import org.wso2.carbon.apimgt.gateway.handlers.security.Authenticator;
-import org.wso2.carbon.apimgt.gateway.common.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -58,8 +55,8 @@ import org.wso2.carbon.apimgt.gateway.utils.OpenAPIUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTConfigurationDto;
-import org.wso2.carbon.apimgt.gateway.common.dto.JWTValidationInfo;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -144,20 +141,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
-            try {
-                decodedHeader = JWSHeader.parse(new Base64URL(splitToken[0]));
                 signedJWT = SignedJWT.parse(apiKey);
-                tokenIdentifier = signedJWT.getJWTClaimsSet().getJWTID();
-            } catch (IllegalArgumentException e) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Invalid Api Key. Api Key: " + GatewayUtils.getMaskedToken(splitToken[0]), e);
-                }
-                log.error("Invalid JWT token. Failed to decode the Api Key header.");
-                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE , e);
-            }
+                payload = signedJWT.getJWTClaimsSet();
+                decodedHeader = signedJWT.getHeader();
+                tokenIdentifier = payload.getJWTID();
             // Check if the decoded header contains type as 'JWT'.
-            if (!decodedHeader.getType().equals(JOSEObjectType.JWT)) {
+            if (!JOSEObjectType.JWT.equals(decodedHeader.getType())) {
                 if (log.isDebugEnabled()) {
                     log.debug("Invalid Api Key token type. Api Key: " + GatewayUtils.getMaskedToken(splitToken[0]));
                 }
@@ -165,7 +154,12 @@ public class ApiKeyAuthenticator implements Authenticator {
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
             }
+            if (!GatewayUtils.isAPIKey(payload)) {
+                log.error("Invalid Api Key. Internal Key Sent");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+                        APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
 
+            }
             if (decodedHeader.getKeyID() == null) {
                 if (log.isDebugEnabled()){
                     log.debug("Invalid Api Key. Could not find alias in header. Api Key: " +
@@ -488,7 +482,7 @@ public class ApiKeyAuthenticator implements Authenticator {
         String endUserToken = null;
         boolean valid = false;
         String jwtTokenCacheKey =
-                jwtInfoDto.getApicontext().concat(":").concat(jwtInfoDto.getVersion()).concat(":").concat(tokenSignature);
+                jwtInfoDto.getApiContext().concat(":").concat(jwtInfoDto.getVersion()).concat(":").concat(tokenSignature);
         if (isGatewayTokenCacheEnabled) {
             Object token = getGatewayApiKeyCache().get(jwtTokenCacheKey);
             if (token != null) {

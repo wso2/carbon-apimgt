@@ -694,6 +694,34 @@
         }
       }
     },
+    "/webhooks-subscriptions" : {
+      "get" : {
+        "tags" : [ "Retrieving webhooks subscriptions" ],
+        "summary" : "Get webhooks subscriptions",
+        "description" : "This will provide list of webhooks subscriptions from the database.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of webhooks subscriptions",
+            "schema" : {
+              "$ref" : "#/definitions/webhooksSubscriptionsList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/notify" : {
       "post" : {
         "tags" : [ "Notification" ],
@@ -719,6 +747,12 @@
             "description" : "Event Received success",
             "schema" : {
               "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
             }
           }
         }
@@ -1195,6 +1229,87 @@
         }
       }
     },
+    "webhooksSubscriptionsList" : {
+      "properties" : {
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/webhooksSubscription"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Scopes List"
+    },
+    "webhooksSubscription" : {
+      "properties" : {
+        "apiUUID" : {
+          "type" : "string",
+          "description" : "The API UUID"
+        },
+        "apiContext" : {
+          "type" : "string",
+          "description" : "The API context."
+        },
+        "apiVersion" : {
+          "type" : "string",
+          "description" : "The API version."
+        },
+        "tenantDomain" : {
+          "type" : "string",
+          "description" : "The tenant domain."
+        },
+        "tenantId" : {
+          "type" : "integer",
+          "example" : -1234,
+          "description" : "The tenant id."
+        },
+        "appID" : {
+          "type" : "string",
+          "example" : "1",
+          "description" : "The application ID of the subscription."
+        },
+        "callbackURL" : {
+          "type" : "string",
+          "description" : "The callback URL"
+        },
+        "topicName" : {
+          "type" : "string",
+          "description" : "The topic name."
+        },
+        "secret" : {
+          "type" : "string",
+          "description" : "Secret value of the subscription."
+        },
+        "expiryTime" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "the expiry time in millis"
+        },
+        "tier" : {
+          "type" : "string",
+          "example" : "Bronze",
+          "description" : "the subscription tier."
+        },
+        "applicationTier" : {
+          "type" : "string",
+          "example" : "Unlimited",
+          "description" : "the application tier."
+        },
+        "apiTier" : {
+          "type" : "string",
+          "example" : "Bronze",
+          "description" : "the API tier."
+        },
+        "subscriberName" : {
+          "type" : "string",
+          "example" : "admin",
+          "description" : "the subscriber name."
+        }
+      }
+    },
     "Policy" : {
       "properties" : {
         "id" : {
@@ -1482,6 +1597,9 @@
         },
         "bandwidth" : {
           "$ref" : "#/definitions/BandwidthLimit"
+        },
+        "eventCount" : {
+          "$ref" : "#/definitions/EventCountLimit"
         }
       },
       "title" : "Throttle Limit"
@@ -1519,6 +1637,23 @@
             "format" : "int64",
             "example" : 1000,
             "description" : "Maximum number of requests allowed"
+          }
+        }
+      } ]
+    },
+    "EventCountLimit" : {
+      "title" : "Event Count Limit object",
+      "allOf" : [ {
+        "$ref" : "#/components/schemas/ThrottleLimitBase"
+      }, {
+        "type" : "object",
+        "required" : [ "eventCount" ],
+        "properties" : {
+          "eventCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 3000,
+            "description" : "Maximum number of events allowed"
           }
         }
       } ]

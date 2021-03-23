@@ -114,6 +114,24 @@ class ServiceCatalog {
     }
 
     /**
+     * Get details of Service by key
+     * @returns {promise} Service Entry promise.
+     */
+    static searchServiceByKey(key) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+        const promisedServices = serviceCatalog.then(client => {
+            return client.apis['Services'].searchServices(
+                {
+                    key: key,
+                },
+                this._requestMetaData()
+            );
+        });
+        return promisedServices.then(response => response.body);
+    }
+
+    /**
      * Check Existence of a Service
      * @param id {string} UUID of the service.
      * @returns {promise} Promise.
@@ -161,7 +179,7 @@ class ServiceCatalog {
             .client;
         return serviceCatalog.then(client => {
             debugger;
-            return client.apis.Services.deleteService({ serviceKey: id });
+            return client.apis.Services.deleteService({ serviceId: id });
         }).then(response => response.body);
     }
 
@@ -217,13 +235,31 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
         const promisedServices = serviceCatalog.then(client => {
-            // return client.apis['Services'].getServiceById(
-            //     {
-            //         serviceId: id,
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.getServiceById();
+            return client.apis['Services'].getServiceById(
+                {
+                    serviceId: id,
+                },
+                this._requestMetaData()
+            );
+        });
+        return promisedServices.then(response => response.body);
+    }
+
+    /**
+     * Get a service by Name
+     * @param id {string} name of the service.
+     * @returns {promise} Service Entry promise.
+     */
+    static getServiceByName(info) {
+        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
+            .client;
+        const promisedServices = serviceCatalog.then(client => {
+            return client.apis.Services.searchServices(
+                {
+                    name: info.name,
+                },
+                this._requestMetaData()
+            );
         });
         return promisedServices.then(response => response.body);
     }
@@ -237,13 +273,12 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
         const promisedServices = serviceCatalog.then(client => {
-            // return client.apis['Services'].getServiceDefinition(
-            //     {
-            //         serviceId: id,
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.getServiceDefinition();
+            return client.apis.Services.getServiceDefinition(
+                {
+                    serviceId: id,
+                },
+                this._requestMetaData()
+            );
         });
         return promisedServices.then(response => response.body);
     }
@@ -257,13 +292,12 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
         const promisedServices = serviceCatalog.then(client => {
-            // return client.apis['Services'].getAPIUsages(
-            //     {
-            //         serviceId: id,
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.getAPIUsages();
+            return client.apis['Services'].getServiceUsage(
+                {
+                    serviceId: id,
+                },
+                this._requestMetaData()
+            );
         });
         return promisedServices.then(response => response.body);
     }
@@ -287,21 +321,6 @@ class ServiceCatalog {
             return MockResponses.updateService();
         });
         return promisedService.then(response => response.body);
-    }
-
-    // TO DO: This method should ideally be defined as a Publisher REST API. Not a Service Catalog REST API
-    /**
-     * Create API from service
-     * @returns {promise} Add response.
-     */
-    static createApiFromService(serviceId, apiMetaData) {
-        const serviceCatalog = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedServiceResponse = serviceCatalog.then(client => {
-            // return client.apis['APIs'].createApiFromService();
-            return MockResponses.createApiFromService(serviceId, apiMetaData);
-        });
-        return promisedServiceResponse.then(response => response.body);
     }
 }
 

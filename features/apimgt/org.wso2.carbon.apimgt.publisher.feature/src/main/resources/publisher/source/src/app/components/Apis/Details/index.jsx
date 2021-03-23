@@ -35,6 +35,7 @@ import SubscriptionsIcon from '@material-ui/icons/RssFeed';
 import MonetizationIcon from '@material-ui/icons/LocalAtm';
 import StoreIcon from '@material-ui/icons/Store';
 import DashboardIcon from '@material-ui/icons/Dashboard';
+import CommentIcon from '@material-ui/icons/Comment';
 import Box from '@material-ui/core/Box';
 import { withStyles } from '@material-ui/core/styles';
 import { injectIntl, defineMessages } from 'react-intl';
@@ -57,6 +58,7 @@ import Divider from '@material-ui/core/Divider';
 import Overview from './NewOverview/Overview';
 import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
+import Topics from './Configuration/Topics';
 import RuntimeConfigurationWebSocket from './Configuration/RuntimeConfigurationWebSocket';
 import LifeCycle from './LifeCycle/LifeCycle';
 import Documents from './Documents';
@@ -331,7 +333,21 @@ class Details extends Component {
                     </>
                 );
             case 'WS':
-                return '';
+            case 'WEBSUB':
+            case 'SSE':
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.asyncApi.definition',
+                                defaultMessage: 'AsyncAPI Definition',
+                            })}
+                            route='asyncApi definition'
+                            to={pathPrefix + 'asyncApi definition'}
+                            Icon={<CodeIcon />}
+                        />
+                    </>
+                );
             case 'SOAP':
                 return (
                     <>
@@ -377,7 +393,20 @@ class Details extends Component {
                     </>
                 );
             case 'WS':
-                return '';
+            case 'WEBSUB':
+            case 'SSE':
+                return (
+                    <>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.topics',
+                                defaultMessage: 'Topics',
+                            })}
+                            to={pathPrefix + 'topics'}
+                            Icon={<ResourcesIcon />}
+                        />
+                    </>
+                );
             default:
                 return (
                     <>
@@ -477,6 +506,7 @@ class Details extends Component {
         const uuid = match.params.apiUUID || match.params.api_uuid || match.params.apiProdUUID;
         const pathPrefix = '/' + (isAPIProduct ? 'api-products' : 'apis') + '/' + uuid + '/';
         const redirectUrl = pathPrefix;
+        const isAsyncAPI = api && (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
         if (apiNotFound) {
             const { apiUUID } = match.params;
             const resourceNotFoundMessageText = defineMessages({
@@ -539,7 +569,7 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.portal.configuration',
-                                defaultMessage: 'Portal Configuration',
+                                defaultMessage: 'Portal Configurations',
                             })}
                             head='valueOnly'
 
@@ -576,7 +606,7 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.api.Config',
-                                defaultMessage: 'API configuration',
+                                defaultMessage: 'API configurations',
                             })}
                             head='valueOnly'
 
@@ -606,7 +636,7 @@ class Details extends Component {
                             )}
                             {this.getLeftMenuItemForResourcesByType(api.type)}
                             {this.getLeftMenuItemForDefinitionByType(api.type)}
-                            {!isAPIProduct && (
+                            {!isAPIProduct && api.type !== 'WEBSUB' && (
                                 <LeftMenuItem
                                     text={intl.formatMessage({
                                         id: 'Apis.Details.index.endpoints',
@@ -678,28 +708,41 @@ class Details extends Component {
                             Icon={<PersonPinCircleOutlinedIcon />}
                         />
                         {!isAPIProduct && <Divider />}
-                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isRestricted(['apim:api_publish'],
-                            api) && api.lifeCycleStatus !== 'PUBLISHED' && (
+                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
                                     id: 'Apis.Details.index.Tryout',
-                                    defaultMessage: 'test console',
+                                    defaultMessage: 'Try out',
                                 })}
                                 to={pathPrefix + 'test-console'}
                                 iconText='test'
                             />
                         )}
-                        <Divider />
                         {!isAPIProduct && settingsContext.externalStoresEnabled && (
+                            <>
+                                <Divider />
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.external-stores',
+                                        defaultMessage: 'external dev portals',
+                                    })}
+                                    to={pathPrefix + 'external-devportals'}
+                                    Icon={<StoreIcon />}
+                                />
+                            </>
+                        )}
+                        {!isAPIProduct && <Divider />}
+                        {!isAPIProduct && (
                             <LeftMenuItem
                                 text={intl.formatMessage({
-                                    id: 'Apis.Details.index.external-stores',
-                                    defaultMessage: 'external dev portals',
+                                    id: 'Apis.Details.index.comments',
+                                    defaultMessage: 'Comments',
                                 })}
-                                to={pathPrefix + 'external-devportals'}
-                                Icon={<StoreIcon />}
+                                to={pathPrefix + 'comments'}
+                                Icon={<CommentIcon />}
                             />
                         )}
+                        <Divider />
                     </div>
                     <div className={classes.content}>
                         <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
@@ -729,6 +772,10 @@ class Details extends Component {
                                     path={Details.subPaths.SCHEMA_DEFINITION}
                                     component={() => <APIDefinition api={api} />}
                                 />
+                                <Route
+                                    path={Details.subPaths.ASYNCAPI_DEFINITION}
+                                    component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
+                                />
                                 <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION}
@@ -741,6 +788,10 @@ class Details extends Component {
                                 <Route
                                     path={Details.subPaths.RUNTIME_CONFIGURATION_WEBSOCKET}
                                     component={() => <RuntimeConfigurationWebSocket api={api} />}
+                                />
+                                <Route
+                                    path={Details.subPaths.TOPICS}
+                                    component={() => <Topics api={api} updateAPI={this.updateAPI} />}
                                 />
                                 <Route
                                     path={Details.subPaths.CONFIGURATION_PRODUCT}
@@ -823,6 +874,10 @@ class Details extends Component {
                                     component={() => <TestConsole apiObj={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
+                                <Route
+                                    path={Details.subPaths.COMMENTS}
+                                    component={() => <Comments apiObj={api} />}
+                                />
                             </Switch>
                         </div>
                     </div>
@@ -875,6 +930,8 @@ Details.subPaths = {
     EXTERNAL_STORES: '/apis/:api_uuid/external-devportals',
     TRYOUT: '/apis/:api_uuid/test-console',
     QUERYANALYSIS: '/apis/:api_uuid/queryanalysis',
+    TOPICS: '/apis/:api_uuid/topics',
+    ASYNCAPI_DEFINITION: '/apis/:api_uuid/asyncApi definition',
 };
 
 // To make sure that paths will not change by outsiders, Basically an enum

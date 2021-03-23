@@ -42,6 +42,59 @@ import java.util.Set;
 public interface APIProvider extends APIManager {
 
     /**
+     * This method is to add a comment.
+     *
+     * @param identifier Api identifier
+     * @param comment    comment object
+     * @param user       Username of the comment author
+     * @throws APIManagementException if failed to add comment for API
+     */
+    String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
+
+    /**
+     * This method is to get a comment of an API.
+     *
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId      Comment ID
+     * @param replyLimit
+     * @param replyOffset
+     * @return Comment
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    Comment getComment(ApiTypeWrapper apiTypeWrapper, String commentId, Integer replyLimit, Integer replyOffset) throws
+            APIManagementException;
+
+    /**
+     * @param apiTypeWrapper  Api type wrapper
+     * @param parentCommentID
+     * @param replyLimit
+     * @param replyOffset
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
+
+    /**
+     * @param apiTypeWrapper Api Type Wrapper
+     * @param commentId      comment ID
+     * @param comment        Comment object
+     * @return Comments
+     * @throws APIManagementException if failed to get comments for identifier
+     */
+    boolean editComment(ApiTypeWrapper apiTypeWrapper, String commentId, Comment comment) throws APIManagementException;
+
+    /**
+     * This method is to delete a comment.
+     *
+     * @param apiTypeWrapper API Type Wrapper
+     * @param commentId      Comment ID
+     * @return boolean
+     * @throws APIManagementException if failed to delete comment for identifier
+     */
+    boolean deleteComment(ApiTypeWrapper apiTypeWrapper, String commentId) throws APIManagementException;
+
+
+    /**
      * Returns a list of all #{@link org.wso2.carbon.apimgt.api.model.Provider} available on the system.
      *
      * @return Set<Provider>
@@ -384,12 +437,20 @@ public interface APIProvider extends APIManager {
      * @param defaultVersion whether this version is default or not
      * @param orgId          Identifier of an organization
      * @return api created api
-     * @throws DuplicateAPIException  If the API trying to be created already exists
      * @throws APIManagementException If an error occurs while trying to create
      *                                the new version of the API
      */
     API createNewAPIVersion(String apiId, String newVersion, Boolean defaultVersion, String orgId)
-            throws DuplicateAPIException, APIManagementException;
+            throws APIManagementException;
+
+    /**
+     * Retrieve the Key of the Service used in the API
+     * @param apiId Unique Identifier of the API
+     * @param tenantId Logged-in tenant domain
+     * @return Unique key of the service
+     * @throws APIManagementException
+     */
+    String retrieveServiceKeyByApiId(int apiId, int tenantId) throws APIManagementException;
 
     /**
      * Removes a given documentation
@@ -1410,14 +1471,6 @@ public interface APIProvider extends APIManager {
     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 
     /**
-     * Returns labels of a given tenant
-     *
-     * @param tenantDomain    tenant domain
-     * @return A List of labels related to the given tenant
-     */
-    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
-
-    /**
      * Remove pending lifecycle state change task for the given api.
      *
      * @param apiIdentifier api identifier
@@ -1539,24 +1592,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to validate
      */
     SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
-
-    /**
-     * This method is used to publish the api in private jet mode
-     *
-     * @param api           API Object
-     * @param apiIdentifier api identifier
-     * @throws APIManagementException if failed to add the schema as a resource to registry
-     */
-    void publishInPrivateJet(API api, APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * Retrieve the status information of the deployments of APIs cloud clusters
-     * that are currently reused by API Products.
-     *
-     * @param apiId API Identifier
-     * @return a list of Deploymentstatus objects in different cloud environments
-     */
-    List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
 
     /**
      * Retrieve list of resources of the provided api that are used in other API products
@@ -1736,7 +1771,7 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @throws APIManagementException if failed to add APIRevision
      */
-    void addAPIRevisionDeployment(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
 
     /**
      * Get an API Revisions Deployment mapping details by providing deployment name
@@ -1787,7 +1822,16 @@ public interface APIProvider extends APIManager {
     void deleteAPIRevision(String apiId, String apiRevisionId, String orgId) throws APIManagementException;
 
     /**
-     * Adds a new APIRevision to an existing API Product
+<<<<<<<<< Temporary merge branch 1
+     * This method updates the AsyncApi definition in registry
+     *
+     * @param api   API
+     * @param jsonText    AsyncApi definition
+     * @throws APIManagementException
+     */
+    void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException;
+    /**
+    * Adds a new APIRevision to an existing API Product
      *
      * @param apiRevision APIRevision
      * @throws APIManagementException if failed to add APIRevision
@@ -1802,8 +1846,8 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @throws APIManagementException if failed to add APIRevision
      */
-    void addAPIProductRevisionDeployment(String apiProductId, String apiRevisionId,
-                                         List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
+    void deployAPIProductRevision(String apiProductId, String apiRevisionId,
+                                  List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
 
     /**
      * Undeploy revision from provided gateway environments
@@ -1834,4 +1878,5 @@ public interface APIProvider extends APIManager {
      */
     void deleteAPIProductRevision(String apiProductId, String apiRevisionId) throws APIManagementException;
 
+    String generateApiKey(String apiId) throws APIManagementException;
 }

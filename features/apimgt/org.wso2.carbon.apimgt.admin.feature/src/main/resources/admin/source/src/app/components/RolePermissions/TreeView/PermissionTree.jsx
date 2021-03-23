@@ -125,7 +125,7 @@ const useStyles = makeStyles({
 export default function PermissionTreeView(props) {
     const { appMappings, role, onCheck } = props;
     const classes = useStyles();
-    const totalPermissions = appMappings.admin.length + appMappings.store.length + appMappings.publisher.length;
+    const totalPermissions = appMappings.admin.length + appMappings.devportal.length + appMappings.publisher.length;
     return (
         <TreeView
             className={classes.root}
@@ -134,7 +134,7 @@ export default function PermissionTreeView(props) {
             defaultExpandIcon={<PlusSquare />}
         >
 
-            <StyledTreeItem nodeId={0} label={`Permissions (${totalPermissions})`}>
+            <StyledTreeItem nodeId={0} label={`Scope Assignments (${totalPermissions})`}>
                 {
                     Object.entries(appMappings).map(([app, scopes], APIIndex) => {
                         const nodeId = APIIndex + 1; // this is to give unique id for each nodes in the tree

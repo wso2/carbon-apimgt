@@ -15,10 +15,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -67,7 +68,9 @@ public class APIDTO   {
         WS("WS"),
         SOAPTOREST("SOAPTOREST"),
         SOAP("SOAP"),
-        GRAPHQL("GRAPHQL");
+        GRAPHQL("GRAPHQL"),
+        WEBSUB("WEBSUB"),
+        SSE("SSE");
         private String value;
 
         TypeEnum (String v) {
@@ -144,9 +147,6 @@ return null;
     private APIEndpointSecurityDTO endpointSecurity = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> gatewayEnvironments = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<DeploymentEnvironmentsDTO>();
-    private List<String> labels = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
@@ -221,6 +221,7 @@ return null;
     private List<String> accessControlRoles = new ArrayList<String>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
+    private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
     @Scope(name = "apim:api_publish", description="", value ="")
@@ -264,6 +265,7 @@ return null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
+    private APIServiceInfoDTO serviceInfo = null;
 
   /**
    * UUID of the api registry artifact 
@@ -613,7 +615,7 @@ return null;
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -621,7 +623,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -844,43 +846,6 @@ return null;
   }
 
   /**
-   * List of selected deployment environments and clusters 
-   **/
-  public APIDTO deploymentEnvironments(List<DeploymentEnvironmentsDTO> deploymentEnvironments) {
-    this.deploymentEnvironments = deploymentEnvironments;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "List of selected deployment environments and clusters ")
-      @Valid
-  @JsonProperty("deploymentEnvironments")
-  public List<DeploymentEnvironmentsDTO> getDeploymentEnvironments() {
-    return deploymentEnvironments;
-  }
-  public void setDeploymentEnvironments(List<DeploymentEnvironmentsDTO> deploymentEnvironments) {
-    this.deploymentEnvironments = deploymentEnvironments;
-  }
-
-  /**
-   * Labels of micro-gateway environments attached to the API. 
-   **/
-  public APIDTO labels(List<String> labels) {
-    this.labels = labels;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[]", value = "Labels of micro-gateway environments attached to the API. ")
-  @JsonProperty("labels")
-  public List<String> getLabels() {
-    return labels;
-  }
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
-  }
-
-  /**
    **/
   public APIDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
     this.mediationPolicies = mediationPolicies;
@@ -1039,6 +1004,24 @@ return null;
   }
   public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
     this.corsConfiguration = corsConfiguration;
+  }
+
+  /**
+   **/
+  public APIDTO websubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
+    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("websubSubscriptionConfiguration")
+  public WebsubSubscriptionConfigurationDTO getWebsubSubscriptionConfiguration() {
+    return websubSubscriptionConfiguration;
+  }
+  public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
+    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
   }
 
   /**
@@ -1219,6 +1202,24 @@ return null;
     this.keyManagers = keyManagers;
   }
 
+  /**
+   **/
+  public APIDTO serviceInfo(APIServiceInfoDTO serviceInfo) {
+    this.serviceInfo = serviceInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("serviceInfo")
+  public APIServiceInfoDTO getServiceInfo() {
+    return serviceInfo;
+  }
+  public void setServiceInfo(APIServiceInfoDTO serviceInfo) {
+    this.serviceInfo = serviceInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1262,8 +1263,6 @@ return null;
         Objects.equals(visibleTenants, API.visibleTenants) &&
         Objects.equals(endpointSecurity, API.endpointSecurity) &&
         Objects.equals(gatewayEnvironments, API.gatewayEnvironments) &&
-        Objects.equals(deploymentEnvironments, API.deploymentEnvironments) &&
-        Objects.equals(labels, API.labels) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
@@ -1273,6 +1272,7 @@ return null;
         Objects.equals(accessControlRoles, API.accessControlRoles) &&
         Objects.equals(businessInformation, API.businessInformation) &&
         Objects.equals(corsConfiguration, API.corsConfiguration) &&
+        Objects.equals(websubSubscriptionConfiguration, API.websubSubscriptionConfiguration) &&
         Objects.equals(workflowStatus, API.workflowStatus) &&
         Objects.equals(createdTime, API.createdTime) &&
         Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
@@ -1282,12 +1282,13 @@ return null;
         Objects.equals(operations, API.operations) &&
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
         Objects.equals(categories, API.categories) &&
-        Objects.equals(keyManagers, API.keyManagers);
+        Objects.equals(keyManagers, API.keyManagers) &&
+        Objects.equals(serviceInfo, API.serviceInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
   }
 
   @Override
@@ -1328,8 +1329,6 @@ return null;
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
-    sb.append("    deploymentEnvironments: ").append(toIndentedString(deploymentEnvironments)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
@@ -1339,6 +1338,7 @@ return null;
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
+    sb.append("    websubSubscriptionConfiguration: ").append(toIndentedString(websubSubscriptionConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
@@ -1349,6 +1349,7 @@ return null;
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
+    sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -465,6 +465,9 @@ function EndpointSecurity(props) {
                                         )}
                                         value={endpointSecurityInfo.clientId}
                                         onBlur={() => validateAndUpdateSecurityInfo('clientId')}
+                                        InputProps={{
+                                            autoComplete: 'new-password',
+                                        }}
                                     />
                                 </Grid>
 
@@ -505,6 +508,7 @@ function EndpointSecurity(props) {
                                         value={endpointSecurityInfo.clientSecret}
                                         onBlur={() => validateAndUpdateSecurityInfo('clientSecret')}
                                         InputProps={{
+                                            autoComplete: 'new-password',
                                             endAdornment: (
                                                 <InputAdornment position='end'>
                                                     <RemoveRedEye

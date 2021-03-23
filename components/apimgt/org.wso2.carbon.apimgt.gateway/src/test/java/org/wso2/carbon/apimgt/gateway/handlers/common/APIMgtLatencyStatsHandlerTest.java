@@ -31,6 +31,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 @RunWith(PowerMockRunner.class)
@@ -45,6 +46,7 @@ public class APIMgtLatencyStatsHandlerTest {
         MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg,
                 new Axis2SynapseEnvironment(cfgCtx, synCfg));
         synCfg.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, "123456789");
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         APIMgtLatencyStatsHandler apiMgtLatencyStatsHandler = new APIMgtLatencyStatsHandler();
         apiMgtLatencyStatsHandler.handleRequest(synCtx);
         long requestTime = Long.parseLong(String.valueOf(synCtx.getProperty("api.ut.requestTime")));
@@ -59,6 +61,7 @@ public class APIMgtLatencyStatsHandlerTest {
         ConfigurationContext cfgCtx = new ConfigurationContext(axisConfig);
         MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg,
                 new Axis2SynapseEnvironment(cfgCtx, synCfg));
+        synCtx.setProperty(APIMgtGatewayConstants.API_STATUS, APIConstants.PUBLISHED);
         APIMgtLatencyStatsHandler apiMgtLatencyStatsHandler = new APIMgtLatencyStatsHandler();
         apiMgtLatencyStatsHandler.handleRequest(synCtx);
         long requestTime = Long.parseLong(String.valueOf(synCtx.getProperty("api.ut.requestTime")));

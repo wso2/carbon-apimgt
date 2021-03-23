@@ -45,8 +45,9 @@ class MenuButton extends React.Component {
      *
      * @memberof MenuButton
      */
-    handleToggle() {
+    handleToggle(event) {
         this.setState((state) => ({ open: !state.open }));
+        this.anchorEl = event.currentTarget;
     }
 
     /**
@@ -77,9 +78,6 @@ class MenuButton extends React.Component {
             <>
                 <Button
                     id='itest-id-createapi'
-                    buttonRef={(node) => {
-                        this.anchorEl = node;
-                    }}
                     aria-owns={open ? 'menu-list-grow' : null}
                     aria-haspopup='true'
                     onClick={this.handleToggle}
@@ -95,6 +93,15 @@ class MenuButton extends React.Component {
                     anchorEl={this.anchorEl}
                     transition
                     disablePortal
+                    modifiers={{
+                        flip: {
+                            enabled: true,
+                        },
+                        preventOverflow: {
+                            enabled: true,
+                            boundariesElement: 'scrollParent',
+                        },
+                    }}
                     className={classes.position}
                 >
                     {({ TransitionProps, placement }) => (

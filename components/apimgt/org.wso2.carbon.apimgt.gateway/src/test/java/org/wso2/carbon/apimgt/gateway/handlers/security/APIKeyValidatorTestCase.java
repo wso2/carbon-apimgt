@@ -47,7 +47,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -610,11 +609,6 @@ public class APIKeyValidatorTestCase {
         List<VerbInfoDTO> verbInfoDTOList = new ArrayList<>();
         verbInfoDTOList.add(verbInfoDTO);
         return new APIKeyValidator() {
-            @Override
-            protected String getKeyValidatorClientType() {
-
-                return "WSClient";
-            }
 
             @Override
             protected APIManagerConfiguration getApiManagerConfiguration() {
@@ -713,12 +707,6 @@ public class APIKeyValidatorTestCase {
             }
 
             @Override
-            protected String getKeyValidatorClientType() {
-
-                return "WSClient";
-            }
-
-            @Override
             protected APIManagerConfiguration getApiManagerConfiguration() {
 
                 APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
@@ -773,15 +761,6 @@ public class APIKeyValidatorTestCase {
 
     }
 
-    @Test
-    public void testGetKeyValidatorClientType() {
-
-        AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
-        APIKeyValidator apiKeyValidator = new APIKeyValidator() {
-        };
-        apiKeyValidator.getKeyValidatorClientType();
-
-    }
 
     @Test
     public void testDatasourceConfigurationAndCleanup() throws Exception {
@@ -791,11 +770,6 @@ public class APIKeyValidatorTestCase {
         PowerMockito.whenNew(WSAPIKeyDataStore.class).withNoArguments().thenReturn(wsDataStore);
 
         APIKeyValidator wsKeyValidator = new APIKeyValidator() {
-            @Override
-            protected String getKeyValidatorClientType() {
-
-                return "WSClient";
-            }
         };
 
         // test cleanup for WSClient
@@ -1161,11 +1135,7 @@ public class APIKeyValidatorTestCase {
                                                final String tenantDomain) {
 
         APIKeyValidator apiKeyValidator = new APIKeyValidator() {
-            @Override
-            protected String getKeyValidatorClientType() {
 
-                return super.getKeyValidatorClientType();
-            }
 
             @Override
             protected Cache getGatewayKeyCache() {

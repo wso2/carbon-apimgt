@@ -49,10 +49,9 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     }, tags={ "Mediation Policy (Collection)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. List of mediation policies is returned. ", response = MediationListDTO.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response policiesMediationGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "-Not supported yet-")  @QueryParam("query") String query,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.policiesMediationGet(limit, offset, query, accept, ifNoneMatch, securityContext);
+    public Response policiesMediationGet( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "-Not supported yet-")  @QueryParam("query") String query,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
+        return delegate.policiesMediationGet(limit, offset, query, accept, securityContext);
     }
 
     @DELETE
@@ -68,10 +67,9 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation policy successfully deleted. ", response = Void.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response policiesMediationMediationPolicyIdDelete(@ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.policiesMediationMediationPolicyIdDelete(mediationPolicyId, ifMatch, ifUnmodifiedSince, securityContext);
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response policiesMediationMediationPolicyIdDelete(@ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId) throws APIManagementException{
+        return delegate.policiesMediationMediationPolicyIdDelete(mediationPolicyId, securityContext);
     }
 
     @GET
@@ -86,11 +84,10 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     }, tags={ "Mediation Policy (Individual)",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation Policy returned. ", response = MediationDTO.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response policiesMediationMediationPolicyIdGet(@ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-Modified-Since") String ifModifiedSince) throws APIManagementException{
-        return delegate.policiesMediationMediationPolicyIdGet(mediationPolicyId, accept, ifNoneMatch, ifModifiedSince, securityContext);
+    public Response policiesMediationMediationPolicyIdGet(@ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
+        return delegate.policiesMediationMediationPolicyIdGet(mediationPolicyId, accept, securityContext);
     }
 
     @PUT
@@ -107,10 +104,9 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Successful response with updated mediation policy object ", response = MediationDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response policiesMediationMediationPolicyIdPut(@ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Mediation policy object that needs to be updated " ,required=true) MediationDTO mediationDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.policiesMediationMediationPolicyIdPut(mediationPolicyId, contentType, mediationDTO, ifMatch, ifUnmodifiedSince, securityContext);
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response policiesMediationMediationPolicyIdPut(@ApiParam(value = "Mediation policy Id ",required=true) @PathParam("mediationPolicyId") String mediationPolicyId,  @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "Mediation policy object that needs to be updated " ,required=true) MediationDTO mediationDTO) throws APIManagementException{
+        return delegate.policiesMediationMediationPolicyIdPut(mediationPolicyId, contentType, mediationDTO, securityContext);
     }
 
     @POST
@@ -126,9 +122,8 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Mediation policy added successfully. ", response = MediationDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response policiesMediationPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "mediation policy to upload" ,required=true) MediationDTO mediationDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch,  @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future). " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince) throws APIManagementException{
-        return delegate.policiesMediationPost(contentType, mediationDTO, ifMatch, ifUnmodifiedSince, securityContext);
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response policiesMediationPost( @NotNull  @ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType, @ApiParam(value = "mediation policy to upload" ,required=true) MediationDTO mediationDTO) throws APIManagementException{
+        return delegate.policiesMediationPost(contentType, mediationDTO, securityContext);
     }
 }

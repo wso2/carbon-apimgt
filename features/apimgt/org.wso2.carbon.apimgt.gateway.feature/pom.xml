@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>6.8.215-SNAPSHOT</version>
+        <version>9.0.77-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -100,16 +100,16 @@
             <type>war</type>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
@@ -245,9 +245,6 @@
                                 <bundleDef>com.github.ben-manes.caffeine:caffeine:${caffeine.version}</bundleDef>
                                 <bundleDef>commons-codec:commons-codec</bundleDef>
                                 <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
                                     org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}
                                 </bundleDef>
                                 <bundleDef>
@@ -304,6 +301,8 @@
                                 <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
                                 <bundleDef>org.apache.servicemix.bundles:org.apache.servicemix.bundles.jedis:${servicemix.bundles.jedis.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.io.swagger.v3:swagger-parser:${swagger.parser.v3.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.com.atlassian.oai:swagger-request-validator-core:${org.wso2.orbit.atlassian.oai.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>
