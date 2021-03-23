@@ -18,8 +18,10 @@
 package org.wso2.carbon.apimgt.gateway.listeners;
 
 import org.apache.axis2.context.ConfigurationContext;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
@@ -39,12 +41,19 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.Artifac
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.jms.listener.utils.JMSTransportHandler;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.base.CarbonBaseUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.ServerShutdownHandler;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Class for loading synapse artifacts to memory on initial server startup
@@ -62,6 +71,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private boolean isAPIsDeployedInSyncMode = false;
     private int syncModeDeploymentCount = 0;
     private int retryCount = 10;
+    private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
+    private String webHookServerHTTPS = "SecureWebhookServer";
+    private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
+    private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/tenants/";
+    private String synapseDeploymentPath = "synapse-configs/default";
 
     public GatewayStartupListener() {
 
@@ -143,6 +157,31 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION, new GatewayJMSMessageListener());
         jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_ASYNC_WEBHOOKS_DATA,
                 new GatewayJMSMessageListener());
+        copyTenantArtifacts();
+    }
+
+    private void copyTenantArtifacts() {
+        Path directory = Paths.get(tenantsRootPath);
+        try {
+            Files.walk(directory, 1).filter(entry -> !entry.equals(directory))
+                    .filter(Files::isDirectory).forEach(subdirectory ->
+            {
+                try {
+                    FileUtils.copyFile(new File(synapseConfigRootPath + securedWebSocketInboundEp + ".xml"),
+                            new File( subdirectory.toAbsolutePath().toString() + File.separator +
+                                    synapseDeploymentPath+ File.separator + MultiXMLConfigurationBuilder.
+                                    INBOUND_ENDPOINT_DIR + File.separator + securedWebSocketInboundEp + ".xml"));
+                    FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTPS + ".xml"),
+                            new File(subdirectory.toAbsolutePath().toString() + File.separator +
+                                    synapseDeploymentPath + File.separator + MultiXMLConfigurationBuilder.
+                                    INBOUND_ENDPOINT_DIR + File.separator + webHookServerHTTPS + ".xml"));
+                } catch (IOException e) {
+                    log.error("Error while copying tenant artifacts", e);
+                }
+            });
+        } catch (IOException e) {
+            log.error("Error while retrieving tenants root folders ", e);
+        }
     }
 
     private void retrieveAndDeployArtifacts(String tenantDomain) {
