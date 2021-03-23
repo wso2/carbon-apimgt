@@ -61,7 +61,8 @@ public class ImportUtils {
      * Retrieve Application Definition as JSON.
      *
      * @param pathToArchive Path Application archive
-     * @throws IOException If an error occurs while reading the file
+     * @throws IOException            If an error occurs while reading the file
+     * @throws APIManagementException If an error occurs while fetching the application definition
      */
     public static String getApplicationDefinitionAsJson(String pathToArchive) throws IOException,
             APIManagementException {
