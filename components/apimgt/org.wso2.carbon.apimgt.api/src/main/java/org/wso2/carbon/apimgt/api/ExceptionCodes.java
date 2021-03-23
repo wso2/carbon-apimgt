@@ -432,11 +432,13 @@ public enum ExceptionCodes implements ErrorHandler {
     ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty"),
 
     // API import/export related codes
-    ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
+    ERROR_READING_META_DATA(900907, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
-    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the params file", 400,
+    ERROR_READING_PARAMS_FILE(900908, "Error while reading meta information from the params file", 400,
             "Error while reading meta information from the params file"),
-    NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
+    ERROR_FETCHING_DEFINITION_FILE(900909, "Cannot find the definition file of the project", 400,
+            "Cannot find the yaml/json file with the project definition."),
+    NO_API_ARTIFACT_FOUND(900910, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
 
     //AsyncApi related error codes
