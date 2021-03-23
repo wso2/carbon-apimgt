@@ -118,19 +118,15 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function getSteps() {
-    return ['Develop', 'Deploy', 'Test', 'Publish'];
-}
 
 export default function NewCustomizedStepper() {
     const classes = useStyles();
     const [api, updateAPI] = useAPI();
     const [isUpdating, setUpdating] = useState(false);
     const [deploymentsAvailable, setDeploymentsAvailable] = useState(false);
-    const [lifecycleState, setlifecycleState] = useState(null);
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
-    const steps = getSteps();
+    const steps = ['Develop', 'Deploy', 'Test', 'Publish'];
 
     let activeStep = 0;
     if (api && (api.type === 'WEBSUB' || isEndpointAvailable) && isTierAvailable && !deploymentsAvailable) {
@@ -138,18 +134,14 @@ export default function NewCustomizedStepper() {
     } else if ((api && !isEndpointAvailable && api.type !== 'WEBSUB') || (api && !isTierAvailable)) {
         activeStep = 0;
     } else if (api && (isEndpointAvailable || api.type === 'WEBSUB') && isTierAvailable
-        && deploymentsAvailable && lifecycleState !== 'Published') {
+        && deploymentsAvailable && api.lifeCycleStatus !== 'PUBLISHED') {
         activeStep = 3;
-    } else if (lifecycleState === 'Published' && api
+    } else if (api.lifeCycleStatus === 'PUBLISHED' && api
         && (isEndpointAvailable || api.type === 'WEBSUB') && isTierAvailable && deploymentsAvailable) {
         activeStep = 4;
     }
 
     useEffect(() => {
-        api.getLcState(api.id)
-            .then((result) => {
-                setlifecycleState(result.body.state);
-            });
         api.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
             setDeploymentsAvailable(result.body.count > 0);
         });
@@ -331,7 +323,7 @@ export default function NewCustomizedStepper() {
                             )}
                             {label === 'Test' && (
                                 <Tooltip
-                                    title={lifecycleState === 'Published' ? 'Cannot use test option while API'
+                                    title={api.lifeCycleStatus === 'PUBLISHED' ? 'Cannot use test option while API'
                                         + ' is in published state' : ''}
                                     placement='bottom'
                                 >
@@ -349,7 +341,8 @@ export default function NewCustomizedStepper() {
                                                 />
                                             </Typography>
                                         </Grid>
-                                        {lifecycleState === 'Published' || !deploymentsAvailable || !isEndpointAvailable
+                                        {api.lifeCycleStatus === 'PUBLISHED' || !deploymentsAvailable
+                                            || !isEndpointAvailable
                                             || !isTierAvailable
                                             || (api.type !== 'HTTP' && api.type !== 'SOAP')
                                             ? (
@@ -372,7 +365,7 @@ export default function NewCustomizedStepper() {
                             )}
                             {label === 'Publish' && (
                                 <div>
-                                    {lifecycleState !== 'Published' ? (
+                                    {api.lifeCycleStatus !== 'PUBLISHED' ? (
                                         <Button
                                             size='small'
                                             variant='contained'
