@@ -325,6 +325,14 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
+    public APIStateChangeResponse changeLifeCycleStatus(String orgId, String uuid, String action, Map<String, Boolean> checklist)
+            throws APIManagementException, FaultGatewaysException {
+        checkPublishPermission();
+        checkAccessControlPermission(APIUtil.getAPIIdentifierFromUUID(uuid));
+        return super.changeLifeCycleStatus(orgId, uuid, action, checklist);
+    }
+
+    @Override
     public boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName,
             boolean checkItemValue) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
