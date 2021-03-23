@@ -39,6 +39,7 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
@@ -274,6 +275,9 @@ const useStyles = makeStyles((theme) => ({
     vhostSelect: {
         marginTop: theme.spacing(3),
     },
+    textCount: {
+        marginTop: '-20px',
+    },
 }));
 
 /**
@@ -283,6 +287,8 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
+    const theme = useTheme();
+    const { maxCommentLength } = theme.custom;
     const intl = useIntl();
     const { api, updateAPI } = useContext(APIContext);
     const { settings } = useAppContext();
@@ -312,6 +318,7 @@ export default function Environments() {
     const [revisionToRestore, setRevisionToRestore] = useState([]);
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
     const [lastRevisionCount, setLastRevisionCount] = useState(0);
+    const [currentLength, setCurrentLength] = useState(0);
 
     // allEnvDeployments represents all deployments of the API with mapping
     // environment -> {revision deployed to env, vhost deployed to env with revisino}
@@ -467,6 +474,7 @@ export default function Environments() {
         }
         if (event.target.name === 'description') {
             setDescription(event.target.value);
+            setCurrentLength(event.target.value.length);
         }
     };
 
@@ -1454,6 +1462,7 @@ export default function Environments() {
                                 variant='outlined'
                                 label='Description'
                                 value={description}
+                                inputProps={{ maxLength: maxCommentLength }}
                                 helperText={(
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.revision.description.deploy'
@@ -1466,6 +1475,9 @@ export default function Environments() {
                                 rowsMax={4}
                                 onChange={handleChange}
                             />
+                            <Typography className={classes.textCount} align='right'>
+                                {currentLength + '/' + maxCommentLength}
+                            </Typography>
                         </Box>
                         <Box mt={2}>
                             <Typography variant='h6' align='left' className={classes.sectionTitle}>
@@ -1782,6 +1794,7 @@ export default function Environments() {
                                 variant='outlined'
                                 label='Description'
                                 value={description}
+                                inputProps={{ maxLength: maxCommentLength }}
                                 helperText={(
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.revision.description.create'
@@ -1794,6 +1807,9 @@ export default function Environments() {
                                 rowsMax={4}
                                 onChange={handleChange}
                             />
+                            <Typography className={classes.textCount} align='right'>
+                                {currentLength + '/' + maxCommentLength}
+                            </Typography>
                         </Box>
                     </DialogContent>
                     <DialogActions>
