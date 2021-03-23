@@ -658,7 +658,7 @@ class Details extends Component {
                                     expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
                                 >
                                     <Typography className={classes.leftLInkText}>
-                                        Portal Configuration
+                                        Portal Configurations
                                     </Typography>
                                 </AccordianSummary>
                                 <AccordionDetails>
@@ -710,7 +710,7 @@ class Details extends Component {
                                     expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
                                 >
                                     <Typography className={classes.leftLInkText}>
-                                        API Configuration
+                                        API Configurations
                                     </Typography>
                                 </AccordianSummary>
                                 <AccordionDetails>
@@ -811,7 +811,7 @@ class Details extends Component {
                                 <LeftMenuItem
                                     text={intl.formatMessage({
                                         id: 'Apis.Details.index.Tryout.menu.name',
-                                        defaultMessage: 'test console',
+                                        defaultMessage: 'TryOut',
                                     })}
                                     to={pathPrefix + 'test-console'}
                                     iconText='test'
