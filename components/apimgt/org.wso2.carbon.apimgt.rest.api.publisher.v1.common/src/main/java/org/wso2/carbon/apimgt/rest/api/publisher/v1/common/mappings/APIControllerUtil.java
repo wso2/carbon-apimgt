@@ -51,7 +51,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This Class Used for API Controller related operations.
@@ -145,6 +147,7 @@ public class APIControllerUtil {
         HashMap<String, Object> endpointConfig;
         try {
             endpointConfig = mapper.readValue(jsonObject.toString(), HashMap.class);
+            convertValuesToStrings(endpointConfig);
         } catch (JsonProcessingException e) {
             String errorMessage = "Error while reading endpointConfig information in the params file.";
             throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
@@ -186,6 +189,24 @@ public class APIControllerUtil {
             handleSubscriptionPolicies(policies, importedApiDto, null);
         }
         return importedApiDto;
+    }
+
+    /**
+     * This method will be used to convert any integer values to strings in a particular map of values.
+     *
+     * @param keyValuePairs Map to be validated and converted
+     */
+    private static void convertValuesToStrings(Map<String, Object> keyValuePairs) {
+        Iterator it = keyValuePairs.entrySet().iterator();
+        while (it.hasNext()) {
+            HashMap.Entry pair = (HashMap.Entry) it.next();
+            if (pair.getValue() instanceof Integer && pair.getKey() instanceof String) {
+                keyValuePairs.replace(pair.getKey().toString(), pair.getValue().toString());
+            }
+            if (pair.getValue() instanceof Map) {
+                convertValuesToStrings((Map) pair.getValue());
+            }
+        }
     }
 
     /**
