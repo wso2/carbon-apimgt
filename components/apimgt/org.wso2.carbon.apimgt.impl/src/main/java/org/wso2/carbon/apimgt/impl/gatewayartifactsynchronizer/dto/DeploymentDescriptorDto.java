@@ -20,6 +20,10 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * DeploymentDescriptorDto represents deployment descriptor file created
+ * inside the zip file of API zip files.
+ */
 public class DeploymentDescriptorDto {
     private Set<ApiProjectDto> deployments = new HashSet<>();
 

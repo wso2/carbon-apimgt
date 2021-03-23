@@ -22,9 +22,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * ApiProjectDto represents a deployment of an API.
+ * apiFile: File name of the zip.
+ * environments: Environments the API is deployed to.
+ */
 public class ApiProjectDto {
     private String apiFile;
-    private Set<LabelDto> labels = new HashSet<>();
+    private Set<EnvironmentDto> environments = new HashSet<>();
 
     public String getApiFile() {
         return apiFile;
@@ -34,12 +39,12 @@ public class ApiProjectDto {
         this.apiFile = apiFile;
     }
 
-    public Set<LabelDto> getLabels() {
-        return labels;
+    public Set<EnvironmentDto> getEnvironments() {
+        return environments;
     }
 
-    public void setLabels(Set<LabelDto> labels) {
-        this.labels = labels;
+    public void setEnvironments(Set<EnvironmentDto> environments) {
+        this.environments = environments;
     }
 
     @Override

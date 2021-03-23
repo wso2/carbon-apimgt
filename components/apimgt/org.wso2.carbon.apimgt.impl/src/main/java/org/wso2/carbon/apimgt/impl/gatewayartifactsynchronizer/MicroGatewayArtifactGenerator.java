@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.ApiProjectDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.DeploymentDescriptorDto;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.LabelDto;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto.EnvironmentDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
@@ -71,14 +71,14 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         apiProjectDto = new ApiProjectDto();
                         deploymentsMap.put(fileName, apiProjectDto);
                         apiProjectDto.setApiFile(fileName);
-                        apiProjectDto.setLabels(new HashSet<>());
+                        apiProjectDto.setEnvironments(new HashSet<>());
                     }
-                    // label is unique for a revision in a deployment
-                    // create new label
-                    LabelDto label = new LabelDto();
-                    label.setName(apiRuntimeArtifactDto.getLabel());
-                    label.setVhost(apiRuntimeArtifactDto.getVhost());
-                    apiProjectDto.getLabels().add(label); // ignored if the name of the label is same
+                    // environment is unique for a revision in a deployment
+                    // create new environment
+                    EnvironmentDto environment = new EnvironmentDto();
+                    environment.setName(apiRuntimeArtifactDto.getLabel());
+                    environment.setVhost(apiRuntimeArtifactDto.getVhost());
+                    apiProjectDto.getEnvironments().add(environment); // ignored if the name of the environment is same
                 }
             }
             descriptorDto.setDeployments(new HashSet<>(deploymentsMap.values()));

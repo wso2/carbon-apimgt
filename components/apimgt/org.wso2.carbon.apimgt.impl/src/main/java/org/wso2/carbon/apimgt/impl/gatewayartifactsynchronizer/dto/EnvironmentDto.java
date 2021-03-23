@@ -19,7 +19,12 @@ package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class LabelDto {
+/**
+ * EnvironmentDto represents a gateway environment.
+ * name: Name of the environment.
+ * vhost: Deployed Vhost.
+ */
+public class EnvironmentDto {
     private String name;
     private String vhost;
 
@@ -45,13 +50,13 @@ public class LabelDto {
             return true;
         }
 
-        if (!(obj instanceof LabelDto)) {
+        if (!(obj instanceof EnvironmentDto)) {
             return false;
         }
 
-        LabelDto labelDto = (LabelDto) obj;
+        EnvironmentDto environmentDto = (EnvironmentDto) obj;
         // check only name (environment name or label name), no need to consider vhost
-        return StringUtils.equals(this.name, labelDto.name);
+        return StringUtils.equals(this.name, environmentDto.name);
     }
 
     @Override
