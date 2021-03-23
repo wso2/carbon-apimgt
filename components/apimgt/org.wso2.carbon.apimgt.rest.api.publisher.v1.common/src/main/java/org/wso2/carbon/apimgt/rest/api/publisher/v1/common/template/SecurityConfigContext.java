@@ -32,11 +32,11 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Set the parameters for secured endpoints.
@@ -103,59 +103,31 @@ public class SecurityConfigContext extends ConfigContextDecorator {
             Map<String, EndpointSecurityModel> endpointSecurityModelMap = new HashMap<>();
             endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, new EndpointSecurityModel());
             endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, new EndpointSecurityModel());
-            String alias = api.getId().getProviderName() + "--" + api.getId().getApiName()
-                    + api.getId().getVersion();
 
-            if (api.isEndpointSecured()) {
-                EndpointSecurityModel endpointSecurityModel = new EndpointSecurityModel();
-                endpointSecurityModel.setEnabled(true);
-                endpointSecurityModel.setUsername(api.getEndpointUTUsername());
-                endpointSecurityModel.setPassword(api.getEndpointUTPassword());
-                if (api.isEndpointAuthDigest()) {
-                    endpointSecurityModel.setType(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
-                } else {
-                    endpointSecurityModel.setType(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
-                }
-                endpointSecurityModel.setAlias(alias);
-                String unpw = api.getEndpointUTUsername() + ":" + api.getEndpointUTPassword();
-                endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(unpw.getBytes())));
-                endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityModel);
-                endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecurityModel);
-            } else {
-                if (StringUtils.isNotEmpty(api.getEndpointConfig())) {
-                    if (productionEndpointSecurity != null) {
-                        EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
-                                .convertValue(productionEndpointSecurity, EndpointSecurityModel.class);
-                        if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
-                            if (StringUtils.isNotBlank(endpointSecurityModel.getUsername())
-                                    && StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
-                                endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
-                                        endpointSecurityModel.getUsername().concat(":")
-                                                .concat(endpointSecurityModel.getPassword()).getBytes())));
-                            }
-                            endpointSecurityModel.setUniqueIdentifier(api.getId() + "-" + UUID.randomUUID().toString());
-                            endpointSecurityModel.setAlias(
-                                    alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
-                            endpointSecurityModelMap
-                                    .put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityModel);
-                        }
+            if (StringUtils.isNotEmpty(api.getEndpointConfig())) {
+                if (productionEndpointSecurity != null) {
+                    EndpointSecurityModel endpointSecurityModel =
+                            new ObjectMapper().convertValue(productionEndpointSecurity,
+                                    EndpointSecurityModel.class);
+                    endpointSecurityModel = retrieveEndpointSecurityModel(endpointSecurityModel,
+                            api.getId().getApiName(), api.getId().getVersion(), api.getUuid(),
+                            APIConstants.ENDPOINT_SECURITY_PRODUCTION, null);
+                    if (endpointSecurityModel != null) {
+                        endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                                endpointSecurityModel);
                     }
-                    if (sandboxEndpointSecurity != null) {
-                        EndpointSecurityModel endpointSecurityModel = new ObjectMapper()
-                                .convertValue(sandboxEndpointSecurity, EndpointSecurityModel.class);
-                        if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
-                            if (StringUtils.isNotBlank(endpointSecurityModel.getUsername()) &&
-                                    StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
-                                endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
-                                        endpointSecurityModel.getUsername().concat(":")
-                                                .concat(endpointSecurityModel.getPassword()).getBytes())));
-                            }
-                            endpointSecurityModel.setUniqueIdentifier(api.getId() + "-" + UUID.randomUUID().toString());
-                            endpointSecurityModel.setAlias(
-                                    alias.concat("--").concat(APIConstants.ENDPOINT_SECURITY_SANDBOX));
-                            endpointSecurityModelMap
-                                    .put(APIConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecurityModel);
-                        }
+                }
+
+                if (sandboxEndpointSecurity != null) {
+                    EndpointSecurityModel endpointSecurityModel =
+                            new ObjectMapper().convertValue(sandboxEndpointSecurity,
+                                    EndpointSecurityModel.class);
+                    endpointSecurityModel = retrieveEndpointSecurityModel(endpointSecurityModel,
+                            api.getId().getApiName(), api.getId().getVersion(), api.getUuid(),
+                            APIConstants.ENDPOINT_SECURITY_SANDBOX, null);
+                    if (endpointSecurityModel != null) {
+                        endpointSecurityModelMap.put(APIConstants.ENDPOINT_SECURITY_SANDBOX,
+                                endpointSecurityModel);
                     }
                 }
             }
@@ -164,42 +136,15 @@ public class SecurityConfigContext extends ConfigContextDecorator {
             Map<String, Map<String, EndpointSecurityModel>> endpointSecurityModelMap = new HashMap<>();
             for (APIProductResource apiProductResource : apiProduct.getProductResources()) {
                 APIDTO apidto = associatedAPIMap.get(apiProductResource.getApiId());
-                String alias = apidto.getProvider() + "--" + apidto.getName() + apidto.getVersion();
+                String alias = apiProduct.getId().getName() + "--v" + apiProduct.getId().getVersion();
 
                 Map<String, EndpointSecurityModel> stringEndpointSecurityModelMap = new HashMap<>();
                 Map<String, EndpointSecurity> endpointSecurityMap = apiProductResource.getEndpointSecurityMap();
                 for (Map.Entry<String, EndpointSecurity> endpointSecurityEntry : endpointSecurityMap.entrySet()) {
-                    EndpointSecurityModel endpointSecurityModel = new EndpointSecurityModel();
-                    if (endpointSecurityEntry.getValue().isEnabled()) {
-                        endpointSecurityModel.setEnabled(endpointSecurityEntry.getValue().isEnabled());
-                        endpointSecurityModel.setUsername(endpointSecurityEntry.getValue().getUsername());
-                        endpointSecurityModel.setPassword(endpointSecurityEntry.getValue().getPassword());
-                        endpointSecurityModel.setType(endpointSecurityEntry.getValue().getType());
-                        endpointSecurityModel
-                                .setAdditionalProperties(endpointSecurityEntry.getValue().getAdditionalProperties());
-                        if (StringUtils.isNotBlank(endpointSecurityModel.getUsername())
-                                && StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
-                            endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
-                                    endpointSecurityModel.getUsername().concat(":")
-                                            .concat(endpointSecurityModel.getPassword())
-                                            .getBytes())));
-                        }
-                        endpointSecurityModel.setAlias(alias.concat("--").concat(endpointSecurityEntry.getKey()));
-
-                        if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH
-                                .equalsIgnoreCase(endpointSecurityModel.getType())) {
-                            endpointSecurityModel
-                                    .setUniqueIdentifier(apiProduct.getId() + "-" + UUID.randomUUID().toString());
-                            endpointSecurityModel.setGrantType(endpointSecurityEntry.getValue().getGrantType());
-                            endpointSecurityModel.setTokenUrl(endpointSecurityEntry.getValue().getTokenUrl());
-                            endpointSecurityModel.setClientId(endpointSecurityEntry.getValue().getClientId());
-                            endpointSecurityModel.setClientSecret(endpointSecurityEntry.getValue().getClientSecret());
-                            if (endpointSecurityEntry.getValue().getCustomParameters() != null) {
-                                endpointSecurityModel.setCustomParameters(
-                                        endpointSecurityEntry.getValue().getCustomParameters());
-                            }
-                        }
-                    }
+                    EndpointSecurityModel endpointSecurityModel =
+                            new EndpointSecurityModel(endpointSecurityEntry.getValue());
+                    endpointSecurityModel = retrieveEndpointSecurityModel(endpointSecurityModel, apidto.getName(),
+                            apidto.getVersion(), apidto.getId(), endpointSecurityEntry.getKey(), alias);
                     stringEndpointSecurityModelMap.put(endpointSecurityEntry.getKey(), endpointSecurityModel);
                 }
                 endpointSecurityModelMap.put(apiProductResource.getApiId(), stringEndpointSecurityModelMap);
@@ -213,5 +158,50 @@ public class SecurityConfigContext extends ConfigContextDecorator {
     protected APIManagerConfiguration getApiManagerConfiguration() {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+    }
+
+    private EndpointSecurityModel retrieveEndpointSecurityModel(EndpointSecurityModel endpointSecurityModel,
+                                                                String apiName, String version, String apiId,
+                                                                String type, String prefix) {
+
+        if (endpointSecurityModel != null && endpointSecurityModel.isEnabled()) {
+            if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH
+                    .equalsIgnoreCase(endpointSecurityModel.getType())) {
+                if (StringUtils.isNotEmpty(prefix)) {
+                    endpointSecurityModel.setUniqueIdentifier(prefix.concat("--")
+                            .concat(GatewayUtils.retrieveUniqueIdentifier(apiId, type)));
+                } else {
+                    endpointSecurityModel.setUniqueIdentifier(GatewayUtils.retrieveUniqueIdentifier(apiId, type));
+                }
+                if (StringUtils.isNotEmpty(prefix)) {
+                    endpointSecurityModel.setClientSecretAlias(prefix.concat("--")
+                            .concat(GatewayUtils.retrieveOauthClientSecretAlias(apiName, version, type)));
+                } else {
+                    endpointSecurityModel.setClientSecretAlias(GatewayUtils.retrieveOauthClientSecretAlias(apiName,
+                            version, type));
+                }
+                if (StringUtils.isNotEmpty(prefix)) {
+                    endpointSecurityModel.setPasswordAlias(prefix.concat("--")
+                            .concat(GatewayUtils.retrieveOAuthPasswordAlias(apiName, version, type)));
+                } else {
+                    endpointSecurityModel.setPasswordAlias(GatewayUtils.retrieveOAuthPasswordAlias(apiName,
+                            version, type));
+                }
+            }
+            if (StringUtils.isNotBlank(endpointSecurityModel.getUsername())
+                    && StringUtils.isNotBlank(endpointSecurityModel.getPassword())) {
+                endpointSecurityModel.setBase64EncodedPassword(new String(Base64.encodeBase64(
+                        endpointSecurityModel.getUsername().concat(":")
+                                .concat(endpointSecurityModel.getPassword()).getBytes())));
+            }
+            if (StringUtils.isNotEmpty(prefix)) {
+                endpointSecurityModel.setAlias(prefix.concat("--")
+                        .concat(GatewayUtils.retrieveBasicAuthAlias(apiName, version, type)));
+            } else {
+                endpointSecurityModel.setAlias(GatewayUtils.retrieveBasicAuthAlias(apiName, version, type));
+            }
+            return endpointSecurityModel;
+        }
+        return null;
     }
 }

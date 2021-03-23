@@ -5538,7 +5538,7 @@
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.button.text": [
     {
       "type": 0,
-      "value": "Toggle per api rate limiting"
+      "value": "Change rate limiting level"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.governed.by": [
