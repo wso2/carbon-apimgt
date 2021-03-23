@@ -3238,7 +3238,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Import the API and Definition
         try {
-            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, apiDTOFromProperties, fileDetail, null);
+            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
+                    apiDTOFromProperties, fileDetail, null);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3704,7 +3705,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                    newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto,
+                    newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, null, apidto,
                             null, service);
                 } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                     newVersionedApi = importAsyncAPISpecification(service.getEndpointDef(), null, apidto,
@@ -4461,7 +4462,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private Map validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail,
                                           Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url, isServiceAPI);
+        handleInvalidParams(fileInputStream, fileDetail, url, null, isServiceAPI);
 
         AsyncAPISpecificationValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
@@ -4662,7 +4663,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDTO createdApiDTO = null;
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, apiDto, null, service);
+                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, null, apiDto, null, service);
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 createdApiDTO = importAsyncAPISpecification(service.getEndpointDef(), null, apiDto, null, service);
             }
@@ -4711,7 +4712,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Map validationResponseMap = new HashMap();
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null,
+                validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, null,
                         true, true);
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 validationResponseMap = validateAsyncAPISpecification(null, service.getEndpointDef(),
@@ -4747,8 +4748,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
-                                           Attachment fileDetail, ServiceEntry service) {
+    private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
+                                           APIDTO apiDTOFromProperties, Attachment fileDetail, ServiceEntry service) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         boolean isServiceAPI = false;
@@ -4756,8 +4757,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (service != null) {
                 isServiceAPI = true;
             }
-            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, true,
-                    isServiceAPI);
+            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
+                    true, isServiceAPI);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
