@@ -317,7 +317,7 @@ export default function Environments() {
     const [revisionToRestore, setRevisionToRestore] = useState([]);
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
     const [lastRevisionCount, setLastRevisionCount] = useState(0);
-    const [deployedToSolace, setDeployedToSolace] = useState(false);
+    // const [deployedToSolace, setDeployedToSolace] = useState(false);
 
     // allEnvDeployments represents all deployments of the API with mapping
     // environment -> {revision deployed to env, vhost deployed to env with revisino}
@@ -330,6 +330,17 @@ export default function Environments() {
         const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
         allEnvDeployments[env.name] = { revision, vhost };
     });
+
+    const allThirdPartyEnvironmentsMap = [];
+    const allThirdPartyEnvironments = [];
+    settings.thirdPartyEnvironments.forEach((env) => {
+        const revision = allEnvRevision && allEnvRevision.find(
+            (r) => r.deploymentInfo.some((e) => e.name === env.name),
+        );
+        allThirdPartyEnvironmentsMap[env.name] = { revision };
+        allThirdPartyEnvironments.push(env);
+    });
+    console.log(allThirdPartyEnvironmentsMap);
 
     const extractLastRevisionNumber = (list, lastRev) => {
         if (lastRev !== null) {
@@ -355,9 +366,9 @@ export default function Environments() {
                 });
             restApi.getRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
-                if (result.body.list[0].deploymentInfo[0].name === 'Solace Message Broker') {
-                    setDeployedToSolace(true);
-                }
+                // if (result.body.list[0].deploymentInfo[0].name === 'Solace Message Broker') {
+                //     setDeployedToSolace(true);
+                // }
                 setLastRevisionCount(result.body.count);
                 extractLastRevisionNumber(result.body.list, null);
             });
@@ -447,6 +458,21 @@ export default function Environments() {
     const isDisplayOnDevPortalChecked = (env) => {
         if (allEnvDeployments[env].revision) {
             return allEnvDeployments[env].revision.deploymentInfo.find((r) => r.name === env).displayOnDevportal;
+        }
+
+        const oldRevision = selectedRevision.find((r) => r.env === env);
+        let displayOnDevPortal = true;
+        if (oldRevision) {
+            displayOnDevPortal = oldRevision.displayOnDevPortal;
+        }
+        return displayOnDevPortal;
+    };
+
+    const isDisplayOnDevPortalCheckedForThirdPartyEnv = (env) => {
+        if (allThirdPartyEnvironmentsMap[env].revision) {
+            return allThirdPartyEnvironmentsMap[env].revision.deploymentInfo.find(
+                (r) => r.name === env,
+            ).displayOnDevportal;
         }
 
         const oldRevision = selectedRevision.find((r) => r.env === env);
@@ -2182,12 +2208,13 @@ export default function Environments() {
                     )
                 }
             </Box>
-            {(api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE') && (
+            {(api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE')
+            && (allThirdPartyEnvironments.length > 0) && (
                 <Box mx='auto' mt={5}>
                     <Typography variant='h6' className={classes.sectionTitle}>
                         <FormattedMessage
-                            id='Apis.Details.Third.Party.Brokers'
-                            defaultMessage='Third-Party Message Brokers'
+                            id='Apis.Details.Third.Party.Environments'
+                            defaultMessage='Third-Party Messaging Environments'
                         />
                     </Typography>
                     <TableContainer component={Paper}>
@@ -2196,8 +2223,8 @@ export default function Environments() {
                                 <TableRow>
                                     <TableCell align='left'>
                                         <FormattedMessage
-                                            id='Apis.Details.Third.Party.Brokers.broker.name'
-                                            defaultMessage='Provider'
+                                            id='Apis.Details.Third.Party.Brokers.broker.environment'
+                                            defaultMessage='Environment'
                                         />
                                     </TableCell>
                                     <TableCell align='left'>
@@ -2208,8 +2235,8 @@ export default function Environments() {
                                     </TableCell>
                                     <TableCell align='left'>
                                         <FormattedMessage
-                                            id='Apis.Details.Third.Party.Brokers.broker.environment'
-                                            defaultMessage='Environment'
+                                            id='Apis.Details.Third.Party.Brokers.broker.name'
+                                            defaultMessage='Provider'
                                         />
                                     </TableCell>
                                     {api && api.isDefaultVersion !== true
@@ -2239,145 +2266,24 @@ export default function Environments() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {settings.environment.map((row) => (
+                                {settings.thirdPartyEnvironments.map((row) => (
                                     <TableRow key={row.name}>
                                         <TableCell component='th' scope='row'>
-                                            {/* {row.name} */}
-                                            Solace Message Broker
+                                            {row.name}
                                         </TableCell>
                                         <TableCell align='left'>
-                                            {/* {row.type} */}
-                                            WSO2
+                                            {row.organization}
                                         </TableCell>
-                                        {/* {api.isWebSocket() ? (
-                                            <>
-                                                <TableCell
-                                                    align='left'
-                                                    className={classes.primaryEndpoint}
-                                                >
-                                                    {row.endpoints.ws}
-                                                    <div className={classes.secondaryEndpoint}>
-                                                        {row.endpoints.wss}
-                                                    </div>
-                                                </TableCell>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <TableCell align='left' className={classes.primaryEndpoint}>
-                                                    {row.endpoints.http}
-                                                    <div className={classes.secondaryEndpoint}>
-                                                        {row.endpoints.https}
-                                                    </div>
-                                                </TableCell>
-                                            </>
-                                        )} */}
                                         <TableCell align='left'>
-                                            {/* {row.type} */}
-                                            devEnv
+                                            {row.provider}
                                         </TableCell>
-                                        {/* <TableCell align='left'> */}
-                                        {/*    {allEnvRevision && allEnvRevision.filter( */}
-                                        {/*        (o1) => { */}
-                                        {/*            if (o1.deploymentInfo.filter( */}
-                                        {/*                (o2) => o2.name === 'Solace Message Broker', */}
-                                        {/*            ).length > 0) { */}
-                                        {/*                return o1; */}
-                                        {/*            } */}
-                                        {/*            return null; */}
-                                        {/*        }, */}
-                                        {/*    ).length !== 0 ? ( */}
-                                        {/*            allEnvRevision && allEnvRevision.filter( */}
-                                        {/*                (o1) => { */}
-                                        {/*                    if (o1.deploymentInfo.filter( */}
-                                        {/*                        (o2) => o2.name === 'Solace Message Broker', */}
-                                        {/*                    ).length > 0) { */}
-                                        {/*                        return o1; */}
-                                        {/*                    } */}
-                                        {/*                    return null; */}
-                                        {/*                }, */}
-                                        {/*            ).map((o3) => ( */}
-                                        {/*                <div> */}
-                                        {/*                    <Chip */}
-                                        {/*                        label={o3.displayName} */}
-                                        {/*                        style={{ backgroundColor: '#15B8CF' }} */}
-                                        {/*                    /> */}
-                                        {/*                    <Button */}
-                                        {/*                        className={classes.button1} */}
-                                        {/*                        variant='outlined' */}
-                                        {/*                        disabled={api.isRevision} */}
-                                        {/*                        onClick={() => undeployRevision(o3.id, */}
-                                        {/*                            'Solace Message Broker')} */}
-                                        {/*                        size='small' */}
-                                        {/*                    > */}
-                                        {/*                        <FormattedMessage */}
-                                        {/* eslint-disable-next-line max-len */}
-                                        {/*                            id='Apis.Details.Third.Party.Brokers.undeploy.btn' */}
-                                        {/*                            defaultMessage='Undeploy' */}
-                                        {/*                        /> */}
-                                        {/*                    </Button> */}
-                                        {/*                </div> */}
-                                        {/*            ))) : ( */}
-                                        {/*        // eslint-disable-next-line react/jsx-indent */}
-                                        {/*            <div> */}
-                                        {/*                <TextField */}
-                                        {/*                    id='revision-selector' */}
-                                        {/*                    select */}
-                                        {/*                    label={( */}
-                                        {/*                        <FormattedMessage */}
-                                        {/* eslint-disable-next-line max-len */}
-                                        {/*                            id='Apis.Details.Third.Party.Broker.select.table' */}
-                                        {/*                            defaultMessage='Select Revision' */}
-                                        {/*                        /> */}
-                                        {/*                    )} */}
-                                        {/*                    SelectProps={{ */}
-                                        {/*                        MenuProps: { */}
-                                        {/*                            anchorOrigin: { */}
-                                        {/*                                vertical: 'bottom', */}
-                                        {/*                                horizontal: 'left', */}
-                                        {/*                            }, */}
-                                        {/*                            getContentAnchorEl: null, */}
-                                        {/*                        }, */}
-                                        {/*                    }} */}
-                                        {/*                    name='selectRevision' */}
-                                        {/*                    onChange={handleSelectForBrokers} */}
-                                        {/*                    margin='dense' */}
-                                        {/*                    variant='outlined' */}
-                                        {/*                    style={{ width: '50%' }} */}
-                                        {/*                    disabled={api.isRevision */}
-                                        {/*                || !allRevisions || allRevisions.length === 0} */}
-                                        {/*                > */}
-                                        {/*                     eslint-disable-next-line max-len */}
-                                        {/*                    {allRevisions && allRevisions.length !== 0 && allRevisions.map( */}
-                                        {/*                        (number) => ( */}
-                                        {/*                            <MenuItem value={number.id}> */}
-                                        {/*                                {number.displayName} */}
-                                        {/*                            </MenuItem> */}
-                                        {/*                        ), */}
-                                        {/*                    )} */}
-                                        {/*                </TextField> */}
-                                        {/*                <Button */}
-                                        {/*                    className={classes.button2} */}
-                                        {/*                    disabled={api.isRevision || !selectedRevision} */}
-                                        {/*                    variant='outlined' */}
-                                        {/*                    onClick={() => deployRevision(selectedRevision, */}
-                                        {/*                        'Solace Message Broker')} */}
-
-                                        {/*                > */}
-                                        {/*                    <FormattedMessage */}
-                                        {/* eslint-disable-next-line max-len */}
-                                        {/*                        id='Apis.Details.Third.Party.Broker.deploy.button' */}
-                                        {/*                        defaultMessage='Deploy' */}
-                                        {/*                    /> */}
-                                        {/*                </Button> */}
-                                        {/*            </div> */}
-                                        {/*        )} */}
-                                        {/* </TableCell> */}
                                         <TableCell align='left' style={{ width: '300px' }}>
-                                            {deployedToSolace
+                                            {allThirdPartyEnvironmentsMap[row.name].revision != null
                                                 ? (
                                                     <div>
                                                         <Chip
-                                                            label='Revision1'
+                                                            label={allThirdPartyEnvironmentsMap[row.name]
+                                                                .revision.displayName}
                                                             style={{ backgroundColor: '#15B8CF' }}
                                                         />
                                                         <Button
@@ -2385,7 +2291,8 @@ export default function Environments() {
                                                             variant='outlined'
                                                             disabled={api.isRevision}
                                                             onClick={() => undeployRevision(
-                                                                allEnvDeployments[row.name].revision.id, row.name,
+                                                                allThirdPartyEnvironmentsMap[row.name]
+                                                                    .revision.id, row.name,
                                                             )}
                                                             size='small'
                                                         >
@@ -2416,7 +2323,7 @@ export default function Environments() {
                                                                     getContentAnchorEl: null,
                                                                 },
                                                             }}
-                                                            name='Solace Message Broker'
+                                                            name={row.name}
                                                             onChange={handleSelectForBrokers}
                                                             margin='dense'
                                                             variant='outlined'
@@ -2436,14 +2343,14 @@ export default function Environments() {
                                                         <Button
                                                             className={classes.button2}
                                                             disabled={api.isRevision || !selectedRevision.some(
-                                                                (r) => r.env === 'Solace Message Broker' && r.revision,
+                                                                (r) => r.env === row.name && r.revision,
                                                             )}
                                                             variant='outlined'
                                                             onClick={() => deployRevision(selectedRevision.find(
-                                                                (r) => r.env === 'Solace Message Broker',
-                                                            ).revision, 'Solace Message Broker',
-                                                            '', selectedRevision.find(
-                                                                (r) => r.env === 'Solace Message Broker',
+                                                                (r) => r.env === row.name,
+                                                            ).revision, row.name,
+                                                            ' ', selectedRevision.find(
+                                                                (r) => r.env === row.name,
                                                             ).displayOnDevPortal)}
 
                                                         >
@@ -2458,10 +2365,10 @@ export default function Environments() {
                                         </TableCell>
                                         <TableCell align='left'>
                                             <Switch
-                                                checked={row.showInApiConsole}
-                                                onChange={handleChange}
+                                                checked={isDisplayOnDevPortalCheckedForThirdPartyEnv(row.name)}
+                                                onChange={(e) => handleDisplayOnDevPortal(e, row.name)}
                                                 disabled={api.isRevision}
-                                                name='checkedA'
+                                                name='displayOnDevPortal'
                                             />
                                         </TableCell>
                                     </TableRow>

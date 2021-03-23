@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import io.apicurio.datamodels.Library;
-import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -54,55 +52,17 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.TierPermission;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -113,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
+import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.utils.APIAPIProductNameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
@@ -145,7 +106,6 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -181,7 +141,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -2938,7 +2897,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (APIConstants.PUBLISHED.equals(state)) {
 
             assert api != null;
-            if (APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(api.getType()) ||
+            /*if (APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(api.getType()) ||
                     APIConstants.API_TYPE_SSE.equalsIgnoreCase(api.getType()) || APIConstants.API_TYPE_WS.equalsIgnoreCase(api.getType())) {
 
                 final String solaceProviderName = "Solace Message Broker";
@@ -2975,7 +2934,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 boolean alreadyApiDeployedInSolace = false;
                 if (deployAsSolaceApplication) {
                     try {
-                        alreadyApiDeployedInSolace = checkApiAndApiProductAlreadyDeployedInSolace(api);
+                        alreadyApiDeployedInSolace = checkApiProductAlreadyDeployedInSolace(api);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -3001,6 +2960,44 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 } else {
                     throw new APIManagementException("Error caused while deploying application to Solace Broker");
                 }
+            }*/
+
+            if (APIConstants.API_TYPE_WEBSUB.equalsIgnoreCase(api.getType()) ||
+                    APIConstants.API_TYPE_SSE.equalsIgnoreCase(api.getType()) || APIConstants.API_TYPE_WS.equalsIgnoreCase(api.getType())) {
+
+                boolean solaceDeploymentFromRevision = false;
+                ThirdPartyEnvironment deployedEnvironment = null;
+
+                List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
+                for (APIRevisionDeployment deployment : deployments) {
+                    if (deployment.isDisplayOnDevportal()) {
+                        String environmentName = deployment.getDeployment();
+                        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+                        if (thirdPartyEnvironments.containsKey(environmentName)) {
+                            deployedEnvironment = thirdPartyEnvironments.get(environmentName);
+                            if ("solace".equalsIgnoreCase(thirdPartyEnvironments.get(environmentName).getProvider())) {
+                                solaceDeploymentFromRevision = true;
+                            }
+                        }
+                    }
+                }
+
+                ArrayList<String> solaceApiProducts = new ArrayList<>();
+
+                if (solaceDeploymentFromRevision) {
+                    // check whether new subscribing API already registered and exists as an API product
+                    try {
+                        boolean doesApiProductDeployedInSolace = false;
+                        doesApiProductDeployedInSolace = checkApiProductAlreadyDeployedInSolace(api, deployedEnvironment.getOrganization());
+                        solaceApiProducts.add(generateApiProductNameForSolaceBroker(api));
+                        if (doesApiProductDeployedInSolace) {
+                            deployApplicationToSolaceBroker(application, solaceApiProducts, deployedEnvironment);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
             }
 
             subscriptionId = apiMgtDAO.addSubscription(apiTypeWrapper, applicationId,
@@ -6497,13 +6494,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return api.getId().getName() + "-" + apiContextParts[1] + "-" + apiContextParts[2];
     }
 
-    private boolean checkApiAndApiProductAlreadyDeployedInSolace(API api) throws IOException {
-        //Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
+    private boolean checkApiProductAlreadyDeployedInSolace(API api, String organization) throws IOException {
+        /*Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
         String organization = "WSO2";
         String environment = "devEnv";
-        String developerUserName = "dev-1";
-        String apiNameWithContext = generateApiProductNameForSolaceBroker(api);
-        String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1";
+        String developerUserName = "dev-1";*/
+        /*String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1";
         String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
         HttpClient httpClient = HttpClients.createDefault();
 
@@ -6537,12 +6533,36 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // } else {
         //    System.out.println("Error retrieving API");
         //}
+        return false;*/
+
+        String apiNameWithContext = generateApiProductNameForSolaceBroker(api);
+        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+        HttpResponse response = solaceAdminApis.apiProductGet(organization, apiNameWithContext);
+
+        // api product created - if
+        if (response != null) {
+
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                log.info("API product found in Solace Broker");
+                return true;
+            } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                log.error("API product not found in Solace broker");
+                log.error(EntityUtils.toString(response.getEntity()));
+                throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+            } else {
+                log.error("Cannot find API product in Solace Broker");
+                log.error(EntityUtils.toString(response.getEntity()));
+                throw new HttpResponseException(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
+            }
+
+        }
+
         return false;
     }
 
-    private boolean deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts) throws IOException {
+    private void deployApplicationToSolaceBroker(Application application, ArrayList<String> apiProducts, ThirdPartyEnvironment deployment) throws IOException {
 
-        String organization = "WSO2";
+        /*String organization = "WSO2";
         String environment = "devEnv";
         String developerUserName = "dev-1";
         String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1";
@@ -6601,7 +6621,57 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             System.out.println("Problem on finding developer");
         }
-        return false;
+        return false;*/
+
+        SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
+
+        // check existence of the developer
+        HttpResponse response1 = solaceAdminApis.developerGet(deployment.getOrganization());
+        if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+            log.info("Developer found in Solace Broker");
+
+            //check application status
+            HttpResponse response2 = solaceAdminApis.applicationGet(deployment.getOrganization(), application);
+            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+
+                // app already exists
+                log.info("Solace application '" +application.getName()+ "' already exists in Solace. Updating Application......");
+                HttpResponse response3 = solaceAdminApis.applicationPatch(deployment.getOrganization(), application, apiProducts);
+
+                if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    log.info("Solace application '" +application.getName()+ "' updated successfully");
+                } else {
+                    log.error("Error while updating Solace application '" +application.getName()+ "'");
+                    throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine().getReasonPhrase());
+                }
+
+            } else if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+
+                // create new app
+                log.info("Solace application '" +application.getName()+ "' not found in Solace Broker. Creating new application......");
+                HttpResponse response4 = solaceAdminApis.createApplication(deployment.getOrganization(), application, apiProducts);
+
+                if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                    log.info("Solace application '" +application.getName()+ "' created successfully");
+                } else {
+                    log.error("Error while creating Solace application '" +application.getName()+ "'");
+                    throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.getStatusLine().getReasonPhrase());
+                }
+
+            } else {
+
+                log.error("Error while searching for application '" +application.getName()+ "'");
+                throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
+            }
+
+        } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+            log.error("Developer not found in Solace Broker");
+            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().getReasonPhrase());
+        } else {
+            log.error("Error while finding developer in Solace Broker");
+            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().getReasonPhrase());
+        }
     }
 
     private org.json.JSONObject buildRequestBodyForCreatingApp(String appName, ArrayList<String> apiProducts) {
