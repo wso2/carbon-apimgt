@@ -106,13 +106,7 @@ public class APIMappingUtil {
             dto.setLastUpdatedTime(String.valueOf(timeStamp));
         }
 
-        String createdTimeStamp = model.getCreatedTime();
-        if (null != createdTimeStamp) {
-            Date date = new Date(Long.valueOf(createdTimeStamp));
-            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            String dateFormatted = formatter.format(date);
-            dto.setCreatedTime(dateFormatted);
-        }
+        dto.setCreatedTime(model.getCreatedTime());
 
         String apiDefinition = null;
         if (model.isAsync()) {
@@ -749,6 +743,7 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(api.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiInfoDTO.setBusinessInformation(apiBusinessInformationDTO);
+        apiInfoDTO.setCreatedTime(api.getCreatedTime());
         //        if (api.getScopes() != null) {
         //            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
         //        }

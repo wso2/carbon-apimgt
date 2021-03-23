@@ -669,6 +669,7 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
+        apiInfoDTO.setCreatedTime(api.getCreatedTime());
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
             apiInfoDTO.setHasThumbnail(true);
         } else {
@@ -1220,11 +1221,6 @@ public class APIMappingUtil {
             Date lastUpdateDate = model.getLastUpdated();
             Timestamp timeStamp = new Timestamp(lastUpdateDate.getTime());
             dto.setLastUpdatedTime(String.valueOf(timeStamp));
-        }
-        if (null != model.getCreatedTime()) {
-            Date created = new Date(Long.parseLong(model.getCreatedTime()));
-            Timestamp timeStamp = new Timestamp(created.getTime());
-            dto.setCreatedTime(String.valueOf(timeStamp));
         }
         dto.setWorkflowStatus(model.getWorkflowStatus());
 

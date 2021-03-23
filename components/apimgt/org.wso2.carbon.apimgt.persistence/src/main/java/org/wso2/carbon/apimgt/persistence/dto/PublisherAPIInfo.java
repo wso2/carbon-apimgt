@@ -32,6 +32,24 @@ public class PublisherAPIInfo {
     private String status;
     private String type;
     private String thumbnail; // thumbnail is not required for normal ApiGet
+    private String createdTime;
+    private String description;
+
+    public String getCreatedTime() {
+        return createdTime;
+    }
+
+    public void setCreatedTime(String createdTime) {
+        this.createdTime = createdTime;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getApiName() {
         return apiName;
