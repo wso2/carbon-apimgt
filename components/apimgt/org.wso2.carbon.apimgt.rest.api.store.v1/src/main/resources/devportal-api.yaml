@@ -242,7 +242,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/environmentName'
-        - $ref: '#/components/parameters/clusterName'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
       responses:
@@ -1042,11 +1041,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-        304:
-          description: |
-            Not Modified.
-            Empty body because the client has already the latest version of the requested resource.
-          content: {}
         400:
           $ref: '#/components/responses/BadRequest'
         401:
@@ -3894,18 +3888,6 @@ components:
           example: {}
         monetization:
           $ref: '#/components/schemas/APIMonetizationInfo'
-        ingressURLs:
-          type: array
-          items:
-            type: object
-            properties:
-              deploymentEnvironmentName:
-                type: string
-                example: kubernetes
-              clusterDetails:
-                type: array
-                items:
-                  $ref: '#/components/schemas/APIDeploymentClusterInfo'
         endpointURLs:
           type: array
           items:
@@ -5636,27 +5618,6 @@ components:
             - name
           items:
             type: string
-    APIDeploymentClusterInfo:
-      title: API Deployments ClusterInfo object
-      required:
-        - clusterName
-        - ingressURL
-      type: object
-      properties:
-        clusterName:
-          type: string
-          description: |
-            Name of the cluster
-          example: minikube
-        clusterDisplayName:
-          type: string
-          description: |
-            Display name of the cluster
-          example: Minikube Cluster
-        ingressURL:
-          type: string
-          description: ingress URL
-          example: http://wso2.com:9443
     CurrentAndNewPasswords:
       title: Current and new passowrd of the user
       type: object
@@ -5925,13 +5886,6 @@ components:
       in: query
       description: |
         Name of the API gateway environment.
-      schema:
-        type: string
-    clusterName:
-      name: clusterName
-      in: query
-      description: |
-        Name of the container managed cluster name.
       schema:
         type: string
     limit:

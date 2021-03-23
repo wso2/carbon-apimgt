@@ -45,8 +45,8 @@ public interface APIProvider extends APIManager {
      * This method is to add a comment.
      *
      * @param identifier Api identifier
-     * @param comment comment object
-     * @param user Username of the comment author
+     * @param comment    comment object
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
@@ -55,7 +55,7 @@ public interface APIProvider extends APIManager {
      * This method is to get a comment of an API.
      *
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @param replyLimit
      * @param replyOffset
      * @return Comment
@@ -65,7 +65,7 @@ public interface APIProvider extends APIManager {
             APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api type wrapper
+     * @param apiTypeWrapper  Api type wrapper
      * @param parentCommentID
      * @param replyLimit
      * @param replyOffset
@@ -76,8 +76,8 @@ public interface APIProvider extends APIManager {
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId comment ID
-     * @param comment Comment object
+     * @param commentId      comment ID
+     * @param comment        Comment object
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
@@ -87,7 +87,7 @@ public interface APIProvider extends APIManager {
      * This method is to delete a comment.
      *
      * @param apiTypeWrapper API Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
      */
@@ -1592,24 +1592,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to validate
      */
     SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
-
-    /**
-     * This method is used to publish the api in private jet mode
-     *
-     * @param api           API Object
-     * @param apiIdentifier api identifier
-     * @throws APIManagementException if failed to add the schema as a resource to registry
-     */
-    void publishInPrivateJet(API api, APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * Retrieve the status information of the deployments of APIs cloud clusters
-     * that are currently reused by API Products.
-     *
-     * @param apiId API Identifier
-     * @return a list of Deploymentstatus objects in different cloud environments
-     */
-    List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
 
     /**
      * Retrieve list of resources of the provided api that are used in other API products

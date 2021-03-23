@@ -659,11 +659,6 @@ class API extends Resource {
         return promised_status;
     }
 
-    getDeployments() {
-        return this.client.then(client => {
-            return client.apis['Deployments'].deploymentsGet();
-        });
-    }
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
@@ -1899,16 +1894,6 @@ class API extends Resource {
     getTenantsByState(state) {
         return this.client.then(client => {
             return client.apis['Tenants'].getTenantsByState({ state });
-        });
-    }
-
-    // TODO: (renuka) Removed labels Rest API and this also should be removed
-    /**
-     * Get list of microgateway labels
-     */
-    microgatewayLabelsGet() {
-        return this.client.then(client => {
-            return client.apis['Label Collection'].getLabels();
         });
     }
 

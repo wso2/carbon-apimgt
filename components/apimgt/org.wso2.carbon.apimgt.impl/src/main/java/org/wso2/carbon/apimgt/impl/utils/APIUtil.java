@@ -105,14 +105,12 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -144,7 +142,6 @@ import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.clients.UserInformationRecoveryClient;
-import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -804,13 +801,6 @@ public final class APIUtil {
                     (APIConstants.Monetization.API_MONETIZATION_STATUS)));
             String monetizationInfo = artifact.getAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
 
-            //set selected clusters which API needs to be deployed
-            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
-            Set<DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
-            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-                api.setDeploymentEnvironments(deploymentEnvironments);
-            }
-
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
@@ -1005,11 +995,6 @@ public final class APIUtil {
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
             api.setAuthorizationHeader(artifact.getAttribute(APIConstants.API_OVERVIEW_AUTHORIZATION_HEADER));
             api.setApiSecurity(artifact.getAttribute(APIConstants.API_OVERVIEW_API_SECURITY));
-            String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
-            Set<DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
-            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-                api.setDeploymentEnvironments(deploymentEnvironments);
-            }
 
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -1324,12 +1309,6 @@ public final class APIUtil {
                     !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
-
-//          set deployments selected
-            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
-            String json = new Gson().toJson(deploymentEnvironments);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS, json);
-
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
@@ -6593,23 +6572,6 @@ public final class APIUtil {
     }
 
     /**
-     * This method used to set selected deployment environment values to governance artifact of API .
-     *
-     * @param deployments DeploymentEnvironments attributes value
-     */
-    public static Set<DeploymentEnvironments> extractDeploymentsForAPI(String deployments) {
-
-        HashSet<DeploymentEnvironments> deploymentEnvironmentsSet = new HashSet<>();
-        if (deployments != null && !"null".equals(deployments)) {
-            Type deploymentEnvironmentsSetType = new TypeToken<HashSet<DeploymentEnvironments>>() {
-            }.getType();
-            deploymentEnvironmentsSet = new Gson().fromJson(deployments, deploymentEnvironmentsSetType);
-            return deploymentEnvironmentsSet;
-        }
-        return deploymentEnvironmentsSet;
-    }
-
-    /**
      * This method used to set environment values to governance artifact of API .
      *
      * @param api API object with the attributes value
@@ -11366,79 +11328,6 @@ public final class APIUtil {
         APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         return apimConfig.getContainerMgtAttributes();
-    }
-
-    /**
-     * This method is used to get deployment clusters' configurations from api-manager.xml/tenant-conf.json and format
-     *
-     * @return JSONArray with configurations
-     */
-    public static JSONArray getAllClustersFromConfig() throws APIManagementException {
-
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        JSONArray containerMgt = new JSONArray();
-        //get cluster Details from deployment.toml
-        JSONArray containerMgtFromToml = getClusterInfoFromAPIMConfig();
-
-        if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            if (containerMgtFromToml != null && !containerMgtFromToml.isEmpty()) {
-                for (Object apimConfig : containerMgtFromToml) {
-                    if (!((JSONObject) apimConfig).containsKey(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO)) {
-                        containerMgtFromToml.remove(apimConfig);
-                    }
-                }
-            }
-            return containerMgtFromToml;
-        } else {
-            //read from tenant-conf.json
-            try {
-                APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
-                String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain,
-                        APIConstants.API_TENANT_CONF_LOCATION);
-                JSONParser jsonParser = new JSONParser();
-                JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
-                JSONArray containerMgtInfoFromTenant = new JSONArray();
-                JSONObject containerMgtObj = new JSONObject();
-                JSONArray containerMgtInfo = (JSONArray) (tenantConf.get(ContainerBasedConstants.CONTAINER_MANAGEMENT));
-                if (containerMgtInfo != null) {
-                    for (Object containerMgtInfoObj : containerMgtInfo) {
-                        JSONObject containerMgtDetails = (JSONObject) containerMgtInfoObj;
-                        JSONArray clustersInfo = (JSONArray) containerMgtDetails.
-                                get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO);
-                        for (Object clusterInfo : clustersInfo) {
-                            //check if the clusters defined in tenant-conf.json
-                            if (!"".equals(((JSONObject) clusterInfo).get(ContainerBasedConstants.CLUSTER_NAME))) {
-                                containerMgtInfoFromTenant.add(clusterInfo);
-                            }
-                        }
-                        if (!containerMgtInfoFromTenant.isEmpty()) {
-                            containerMgtObj
-                                    .put(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO, containerMgtInfoFromTenant);
-                            for (Object apimConfig : containerMgtFromToml) {
-                                //get class name from the api-manager.xml
-                                if (containerMgtDetails.get(ContainerBasedConstants.TYPE).toString().equalsIgnoreCase(
-                                        ((JSONObject) apimConfig).get(ContainerBasedConstants.TYPE).toString())) {
-                                    containerMgtObj.put(ContainerBasedConstants.CLASS_NAME,
-                                            ((JSONObject) apimConfig).get(ContainerBasedConstants.CLASS_NAME));
-                                }
-                            }
-                            containerMgtObj.put(ContainerBasedConstants.TYPE,
-                                    containerMgtDetails.get(ContainerBasedConstants.TYPE));
-                        }
-                        containerMgt.add(containerMgtObj);
-                    }
-                }
-                return containerMgt;
-            } catch (RegistryException e) {
-                handleException("Couldn't read tenant configuration from tenant registry", e);
-            } catch (UserStoreException e) {
-                handleException("Couldn't read tenant configuration from tenant registry", e);
-            } catch (ParseException e) {
-                handleException("Couldn't parse tenant configuration for reading extension handler position", e);
-            }
-        }
-
-        return containerMgt;
     }
 
     public static String getX509certificateContent(Certificate certificate)

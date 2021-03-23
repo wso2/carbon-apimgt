@@ -41,7 +41,7 @@ import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 import Wizard from './Credentials/Wizard/Wizard';
 import User from '../../../data/User';
-import CONSTANTS from 'AppData/Constants'
+import CONSTANTS from 'AppData/Constants';
 
 
 const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));

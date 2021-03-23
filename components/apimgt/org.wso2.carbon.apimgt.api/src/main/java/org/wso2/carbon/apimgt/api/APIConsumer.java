@@ -414,12 +414,10 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param identifier Api identifier
-     * @param comment comment text
-     * @param user Username of the comment author
+     * @param comment    comment text
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
-     *
-     * @deprecated
-     * This method needs to be removed once the Jaggery web apps are removed.
+     * @deprecated This method needs to be removed once the Jaggery web apps are removed.
      */
     void addComment(APIIdentifier identifier, String comment, String user) throws APIManagementException;
 
@@ -427,14 +425,14 @@ public interface APIConsumer extends APIManager {
      * This method is to add a comment.
      *
      * @param identifier Api identifier
-     * @param comment comment object
-     * @param user Username of the comment author
+     * @param comment    comment object
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
 
     /**
-     * @param identifier Api identifier
+     * @param identifier      Api identifier
      * @param parentCommentID
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
@@ -445,7 +443,7 @@ public interface APIConsumer extends APIManager {
      * This method is to get a comment of an API.
      *
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @param replyLimit
      * @param replyOffset
      * @return Comment
@@ -455,7 +453,7 @@ public interface APIConsumer extends APIManager {
             APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api type wrapper
+     * @param apiTypeWrapper  Api type wrapper
      * @param parentCommentID
      * @param replyLimit
      * @param replyOffset
@@ -466,8 +464,8 @@ public interface APIConsumer extends APIManager {
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId comment ID
-     * @param comment Comment object
+     * @param commentId      comment ID
+     * @param comment        Comment object
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
@@ -477,7 +475,7 @@ public interface APIConsumer extends APIManager {
      * This method is to delete a comment.
      *
      * @param identifier API Identifier
-     * @param commentId Comment ID
+     * @param commentId  Comment ID
      * @throws APIManagementException if failed to delete comment for identifier
      */
     void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException;
@@ -486,7 +484,7 @@ public interface APIConsumer extends APIManager {
      * This method is to delete a comment.
      *
      * @param apiTypeWrapper API Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
      */
@@ -787,17 +785,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns the swagger definition of the API for the given container managed cluster name as a string
-     *
-     * @param api api
-     * @param clusterName name of the container managed cluster
-     * @return swagger string
-     * @throws APIManagementException if error occurred while obtaining the swagger definition
-     */
-    String getOpenAPIDefinitionForClusterName(API api, String clusterName)
-            throws APIManagementException;
-
-    /**
      * Revokes the oldAccessToken generating a new one.
      *
      * @param oldAccessToken          Token to be revoked
@@ -1022,17 +1009,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
      */
     String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName)
-            throws APIManagementException;
-
-    /**
-     * Returns the AsyncAPI definition of the API for the given container managed cluster name as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @param clusterName name of the container managed cluster
-     * @return AsyncAPI definition string
-     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
-     */
-    String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName)
             throws APIManagementException;
 
     /**
