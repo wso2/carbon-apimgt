@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Slide from '@material-ui/core/Slide';
 import Icon from '@material-ui/core/Icon';
 import classNames from 'classnames';
 import ReactSafeHtml from 'react-safe-html';
 import { app } from 'Settings';
 
-const styles = theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         position: 'relative',
         display: 'flex',
@@ -59,10 +58,15 @@ const styles = theme => ({
         fontWeight: theme.typography.fontWeightLight,
         fontSize: theme.typography.body1.fontSize,
     },
-});
-
-function Carousel(props) {
-    const { theme } = props;
+}));
+/**
+ * Renders Carousel view..
+ * @param {JSON} props Parent pros.
+ * @returns {JSX} renders Carousel view.
+ */
+function Carousel() {
+    const classes = useStyles();
+    const theme = useTheme();
     const [counter, setCounter] = useState(0);
     const [slideDirection, setSlideDirection] = useState('left');
     const content = theme.custom.landingPage.carousel.slides;
@@ -82,14 +86,21 @@ function Carousel(props) {
             setCounter(counter + 1);
         }
     };
-    const { classes } = props;
 
     return (
         <div className={classes.root}>
-            <div className={classNames(classes.arrowLeft, classes.arrows)} onClick={handleLeftArrow}>
+            <div
+                className={classNames(classes.arrowLeft, classes.arrows)}
+                onKeyDown={handleLeftArrow}
+                onClick={handleLeftArrow}
+            >
                 <Icon>chevron_left</Icon>
             </div>
-            <div className={classNames(classes.arrowRight, classes.arrows)} onClick={handleRightArrow}>
+            <div
+                className={classNames(classes.arrowRight, classes.arrows)}
+                onKeyDown={handleLeftArrow}
+                onClick={handleRightArrow}
+            >
                 <Icon>chevron_right</Icon>
             </div>
             {content.map((slide, index) => (
@@ -97,16 +108,26 @@ function Carousel(props) {
                     direction={slideDirection}
                     in={counter === index}
                     timeout={{ enter: 500, exit: 0 }}
-                    key={index}
+                    key={slide.src}
                     mountOnEnter
                     unmountOnExit
                 >
                     <div className={classes.slideContainer}>
                         <div className={classNames(classes.slideContentWrapper, 'slideContentWrapper')}>
-                            <div className={classNames(classes.slideContentTitle, 'slideContentTitle')}><ReactSafeHtml html={slide.title} /></div>
+                            <div className={
+                                classNames(classes.slideContentTitle,
+                                    'slideContentTitle')
+                            }
+                            >
+                                <ReactSafeHtml html={slide.title} />
+                            </div>
                             <div className={classes.slideContentContent}><ReactSafeHtml html={slide.content} /></div>
                         </div>
-                        <img className={classes.imageBox} src={app.context + slide.src} />
+                        <img
+                            alt='slider'
+                            className={classes.imageBox}
+                            src={app.context + slide.src}
+                        />
                     </div>
                 </Slide>
             ))}
@@ -114,9 +135,4 @@ function Carousel(props) {
     );
 }
 
-Carousel.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles, { withTheme: true })(Carousel);
+export default Carousel;
