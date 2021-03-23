@@ -125,7 +125,7 @@ export default {
                                                 To disable one option for an example if you want to disable grid
                                                 completely and get rid of the toggle buttons use ['list']. */
         leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-        leftMenuIconSize: 24,
+        leftMenuIconSize: 20,
         leftMenuIconMainSize: 52,
         leftMenuTextStyle: 'capitalize',
         resourceChipColors: { // https://github.com/swagger-api/swagger-ui/blob/master/src/style/_variables.scss#L45-L52

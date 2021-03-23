@@ -2301,8 +2301,23 @@
   "Apis.Details.Operations.operation.operationName": {
     "defaultMessage": "Operation"
   },
+  "Apis.Details.Overview.CustomizedStepper.Deploy": {
+    "defaultMessage": "Deploy"
+  },
   "Apis.Details.Overview.CustomizedStepper.Deployments": {
     "defaultMessage": "Deployments"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Develop": {
+    "defaultMessage": "Develop"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Endpoint": {
+    "defaultMessage": "Endpoint"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Test": {
+    "defaultMessage": "Test"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Tier": {
+    "defaultMessage": "Business Plan"
   },
   "Apis.Details.Overview.CustomizedStepper.blocked": {
     "defaultMessage": "Blocked"
@@ -2324,6 +2339,9 @@
   },
   "Apis.Details.Overview.CustomizedStepper.prototyped": {
     "defaultMessage": "Prototyped"
+  },
+  "Apis.Details.Overview.CustomizedStepper.publish": {
+    "defaultMessage": "Published (Current API)"
   },
   "Apis.Details.Overview.CustomizedStepper.published": {
     "defaultMessage": "Published"
@@ -2982,9 +3000,6 @@
   "Apis.Details.index.Tryout": {
     "defaultMessage": "Try out"
   },
-  "Apis.Details.index.api.Config": {
-    "defaultMessage": "API configurations"
-  },
   "Apis.Details.index.api.definition2": {
     "defaultMessage": "API definition"
   },
@@ -3032,9 +3047,6 @@
   },
   "Apis.Details.index.overview": {
     "defaultMessage": "overview"
-  },
-  "Apis.Details.index.portal.configuration": {
-    "defaultMessage": "Portal Configurations"
   },
   "Apis.Details.index.properties": {
     "defaultMessage": "properties"
