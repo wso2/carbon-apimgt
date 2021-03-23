@@ -3239,6 +3239,9 @@ public abstract class AbstractAPIManager implements APIManager {
                                 if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
                                     oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
                                 }
+                                if (oAuthApplicationInfo.getCallBackURL().equalsIgnoreCase("null")) {
+                                    oAuthApplicationInfo.setCallBackURL("");
+                                }
                                 if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
                                         storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
                                     if (storedOAuthApplicationInfo
