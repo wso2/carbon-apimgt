@@ -21,35 +21,46 @@ import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Icon from '@material-ui/core/Icon';
-import { ListItemIcon, List, ListItem, ListItemText } from '@material-ui/core';
+import {
+    ListItemIcon, List, ListItem, ListItemText,
+} from '@material-ui/core';
 import { withTheme } from '@material-ui/core/styles';
-import CustomIcon from '../../Shared/CustomIcon';
 import AuthManager from 'AppData/AuthManager';
+import CustomIcon from '../../Shared/CustomIcon';
 
 /**
  * GlobalNavBar
- *
  * @param {*} props Properties
- * @returns {React.Component}
+ * @returns {React.Component} Renders global navbar
  */
 function GlobalNavBar(props) {
     const {
-        classes, theme, intl, drawerView, selected, iconWidth, strokeColorSelected, strokeColor
+        classes, theme, intl, drawerView, selected, iconWidth, strokeColorSelected, strokeColor,
     } = props;
     const { custom: { landingPage: { active: landingPageActive, activeForAnonymous } } } = theme;
     const isUserFound = AuthManager.getUser();
     return (
-        <List className={classes.listRootInline} component='nav' >
-            {landingPageActive && (isUserFound && !activeForAnonymous ||  activeForAnonymous)
+        <List className={classes.listRootInline} component='nav'>
+            {landingPageActive && ((isUserFound && !activeForAnonymous) || activeForAnonymous)
                 && (
-                    <Link to='/home' className={classNames({ [classes.selected]: selected === 'home', [classes.links]: true })}>
-                        <ListItem button classes={{root: classes.listItemRoot}}>
+                    <Link
+                        to='/home'
+                        className={classNames({
+                            [classes.selected]: selected === 'home',
+                            [classes.links]: true,
+                        })}
+                    >
+                        <ListItem button classes={{ root: classes.listItemRoot }}>
                             <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                                 <Icon
-                                    style={{ fontSize: iconWidth, color: selected === 'home' ? strokeColorSelected : strokeColor }}
+                                    style={{
+                                        fontSize: iconWidth,
+                                        color: selected === 'home'
+                                            ? strokeColorSelected : strokeColor,
+                                    }}
                                     className={classes.listText}
                                 >
-                                home
+                                    home
                                 </Icon>
                             </ListItemIcon>
                             <ListItemText
@@ -66,14 +77,14 @@ function GlobalNavBar(props) {
                                 })}
                             />
                         </ListItem>
-                        {(selected === 'home' && !drawerView) && (<div className={classes.triangleDown}></div>)}
+                        {(selected === 'home' && !drawerView) && (<div className={classes.triangleDown} />)}
                     </Link>
                 ) }
             <Link
                 to={(theme.custom.tagWise.active && theme.custom.tagWise.style === 'page') ? '/api-groups' : '/apis'}
                 className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
             >
-                <ListItem button classes={{root: classes.listItemRoot}}>
+                <ListItem button classes={{ root: classes.listItemRoot }}>
                     <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                         <CustomIcon
                             width={iconWidth}
@@ -97,10 +108,17 @@ function GlobalNavBar(props) {
                         })}
                     />
                 </ListItem>
-                {(selected === 'apis' && !drawerView) && (<div className={classes.triangleDown}></div>)}
+                {(selected === 'apis' && !drawerView) && (<div className={classes.triangleDown} />)}
             </Link>
-            <Link id='itest-link-to-applications' to='/applications' className={classNames({ [classes.selected]: selected === 'applications', [classes.links]: true })}>
-                <ListItem button classes={{root: classes.listItemRoot}}>
+            <Link
+                id='itest-link-to-applications'
+                to='/applications'
+                className={classNames({
+                    [classes.selected]: selected === 'applications',
+                    [classes.links]: true,
+                })}
+            >
+                <ListItem button classes={{ root: classes.listItemRoot }}>
                     <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                         <CustomIcon
                             width={iconWidth}
@@ -124,7 +142,7 @@ function GlobalNavBar(props) {
                         })}
                     />
                 </ListItem>
-                {(selected === 'applications' && !drawerView) && (<div className={classes.triangleDown}></div>)}
+                {(selected === 'applications' && !drawerView) && (<div className={classes.triangleDown} />)}
             </Link>
         </List>
     );

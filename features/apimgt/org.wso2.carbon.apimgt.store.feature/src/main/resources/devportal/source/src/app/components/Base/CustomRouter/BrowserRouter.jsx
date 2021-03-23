@@ -32,8 +32,6 @@ import PropTypes from 'prop-types';
  * @extends {React.Component}
  */
 class BrowserRouter extends React.Component {
-    static contextType = SettingsContext
-
     /**
      * Creates an instance of BrowserRouter.
      * @param {*} props properties
@@ -56,10 +54,10 @@ class BrowserRouter extends React.Component {
      * domain from the context and append it to the query param list
      * @param {*} originalPath request path or object with path details
      * @memberof BrowserRouter
-     * @returns {String}
+     * @returns {String} returns the updated path
      */
     pathInterceptor = (originalPath) => {
-        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } }} = Settings;
+        const { app: { customUrl: { tenantDomain: customUrlEnabledDomain } } } = Settings;
         if (customUrlEnabledDomain !== 'null') {
             return originalPath;
         }
@@ -93,6 +91,8 @@ class BrowserRouter extends React.Component {
         );
     }
 }
+BrowserRouter.contextType = SettingsContext;
+
 BrowserRouter.propTypes = {
     children: PropTypes.node.isRequired,
 };

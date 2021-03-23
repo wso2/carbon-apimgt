@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import { app } from 'Settings';
 import Carousel from './Carousel';
 import ApisWithTag from './ApisWithTag';
 import ParallaxScroll from './ParallaxScroll';
 import Contact from './Contact';
 
-const styles = theme => ({
+const styles = () => ({
     root: {
         flexGrow: 1,
         margin: '0 100px',
@@ -21,17 +20,24 @@ const styles = theme => ({
         flexDirection: 'column',
     },
 });
-
+/**
+ * Renders landing view..
+ * @param {JSON} props Parent pros.
+ * @returns {JSX} renders landing view.
+ */
 function Landing(props) {
     const { classes, theme } = props;
-    const { custom: { landingPage: 
-        { 
-            carousel: { active: carouselActive }, 
-            listByTag: {active: listByTagActive, content: listByTagContent},
-            parallax: {active: parallaxActive},
-            contact: {active: contactActive},
-        }
-    } } =  theme;
+    const {
+        custom: {
+            landingPage:
+            {
+                carousel: { active: carouselActive },
+                listByTag: { active: listByTagActive, content: listByTagContent },
+                parallax: { active: parallaxActive },
+                contact: { active: contactActive },
+            },
+        },
+    } = theme;
     return (
         <div className={classes.superRoot}>
             <div className={classes.root}>
@@ -56,9 +62,11 @@ function Landing(props) {
                     )}
                 </Grid>
             </div>
-            {parallaxActive && <div className={classes.fullWidthBack}>
-                <ParallaxScroll index={0} />
-            </div>}
+            {parallaxActive && (
+                <div className={classes.fullWidthBack}>
+                    <ParallaxScroll index={0} />
+                </div>
+            )}
             <div className={classes.root}>
                 <Grid container spacing={3}>
                     {listByTagActive && listByTagContent.length > 1 && (
@@ -76,23 +84,25 @@ function Landing(props) {
                     )}
                 </Grid>
             </div>
-            {parallaxActive && <div className={classes.fullWidthBack}>
-                <ParallaxScroll index={1} />
-            </div>}
-            {contactActive && <div className={classes.root}>
-                <Typography variant='h2' gutterBottom>
-                    Contact Us
-              </Typography>
-                <Contact />
-            </div>}
+            {parallaxActive && (
+                <div className={classes.fullWidthBack}>
+                    <ParallaxScroll index={1} />
+                </div>
+            )}
+            {contactActive && (
+                <div className={classes.root}>
+                    <Typography variant='h2' gutterBottom>Contact Us</Typography>
+                    <Contact />
+                </div>
+            )}
 
         </div>
     );
 }
 
 Landing.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
+    theme: PropTypes.shape({}).isRequired,
 };
 
 export default withStyles(styles, { withTheme: true })(Landing);
