@@ -136,6 +136,7 @@ function EndpointOverview(props) {
         swaggerDef,
         updateSwagger,
         saveAndRedirect,
+        setIsEndpointUrlAvailable,
     } = props;
     const { endpointConfig, endpointSecurity } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
@@ -282,6 +283,38 @@ function EndpointOverview(props) {
             setEndpointSecurityInfo(endpointSecurity);
         }
     }, [props]);
+
+    useEffect(() => {
+        if (endpointConfig && (endpointConfig.endpoint_type === 'http' || endpointConfig.endpoint_type === 'address')) {
+            if (
+                endpointCategory.prod
+                && endpointConfig.production_endpoints
+                && endpointConfig.production_endpoints.url && endpointConfig.production_endpoints.url !== ''
+                && endpointCategory.sandbox
+                && endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints.url !== ''
+            ) {
+                setIsEndpointUrlAvailable(true);
+            } else if (
+                endpointCategory.prod
+                && endpointConfig.production_endpoints
+                && endpointConfig.production_endpoints && endpointConfig.production_endpoints.url !== ''
+                && !endpointCategory.sandbox
+                && !endpointConfig.sandbox_endpoints
+            ) {
+                setIsEndpointUrlAvailable(true);
+            } else if (
+                endpointCategory.sandbox
+                && endpointConfig.sandbox_endpoints
+                && endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints.url !== ''
+                && !endpointCategory.production
+                && !endpointConfig.production_endpoints
+            ) {
+                setIsEndpointUrlAvailable(true);
+            } else {
+                setIsEndpointUrlAvailable(false);
+            }
+        }
+    }, [endpointConfig, endpointCategory]);
 
     const getEndpoints = (type) => {
         if (epConfig[type]) {
