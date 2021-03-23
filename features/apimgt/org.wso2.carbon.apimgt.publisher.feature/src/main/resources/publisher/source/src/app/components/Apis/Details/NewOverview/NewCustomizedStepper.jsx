@@ -11,16 +11,16 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import Alert from 'AppComponents/Shared/Alert';
 import Grid from '@material-ui/core/Grid';
 import StepConnector from '@material-ui/core/StepConnector';
-import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { Link } from 'react-router-dom';
 import grey from '@material-ui/core/colors/grey';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import AuthManager from 'AppData/AuthManager';
 import Typography from '@material-ui/core/Typography';
-
 
 const ColorlibConnector = withStyles({
     alternativeLabel: {
@@ -195,81 +195,91 @@ export default function NewCustomizedStepper() {
                                                 <CloseIcon className={classes.iconFalse} />
                                             )}
                                         </Grid>
-                                        <Grid item style={{ marginBottom: '3px', marginLeft: '3px' }}>
-                                            <Typography variant='h7'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.CustomizedStepper.Develop'
-                                                    defaultMessage=' Develop'
-                                                />
-                                            </Typography>
-                                        </Grid>
+                                        <Box ml={1} mb={1}>
+                                            <Grid>
+                                                <Typography variant='h7'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.CustomizedStepper.Develop'
+                                                        defaultMessage=' Develop'
+                                                    />
+                                                </Typography>
+                                            </Grid>
+                                        </Box>
                                     </Grid>
                                     {api.type !== 'WEBSUB' && (
+                                        <Box ml={3}>
+                                            <Grid
+                                                container
+                                                direction='row'
+                                                justify='center'
+                                                style={{ marginLeft: '2px' }}
+                                            >
+                                                <Grid item>
+                                                    {isEndpointAvailable ? (
+                                                        <CheckIcon className={classes.iconTrue} />
+                                                    ) : (
+                                                        <CloseIcon className={classes.iconFalse} />
+                                                    )}
+                                                </Grid>
+                                                <Box ml={1} mb={1}>
+                                                    <Grid item>
+                                                        <Typography variant='h7'>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Overview.CustomizedStepper.Endpoint'
+                                                                defaultMessage=' Endpoint'
+                                                            />
+                                                        </Typography>
+                                                    </Grid>
+                                                </Box>
+                                                <Box ml={1} mb={1}>
+                                                    <Grid item>
+                                                        <Link to={'/apis/' + api.id + '/endpoints'}>
+                                                            <LaunchIcon
+                                                                color='primary'
+                                                                fontSize='small'
+                                                            />
+                                                        </Link>
+                                                    </Grid>
+                                                </Box>
+                                            </Grid>
+                                        </Box>
+                                    )}
+                                    <Box ml={6}>
                                         <Grid
                                             container
                                             direction='row'
-                                            alignItems='left'
-                                            style={{ marginLeft: '15px' }}
                                             justify='center'
+                                            style={{ marginLeft: '2px' }}
                                         >
                                             <Grid item>
-                                                {isEndpointAvailable ? (
+                                                {isTierAvailable ? (
                                                     <CheckIcon className={classes.iconTrue} />
                                                 ) : (
                                                     <CloseIcon className={classes.iconFalse} />
                                                 )}
                                             </Grid>
-                                            <Grid item style={{ marginBottom: '3px', marginLeft: '3px' }}>
-                                                <Typography variant='h7'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.CustomizedStepper.Endpoint'
-                                                        defaultMessage=' Endpoint'
-                                                    />
-                                                </Typography>
-                                            </Grid>
+                                            <Box ml={1}>
+                                                <Grid item>
+                                                    <Typography variant='h7'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Overview.CustomizedStepper.Tier'
+                                                            defaultMessage=' Business Plan'
+                                                        />
+                                                    </Typography>
+                                                </Grid>
+                                            </Box>
                                             <Grid item>
-                                                <Link to={'/apis/' + api.id + '/endpoints'}>
-                                                    <LaunchIcon
-                                                        style={{ marginLeft: '10px' }}
-                                                        color='primary'
-                                                        fontSize='small'
-                                                    />
+                                                <Link to={'/apis/' + api.id + '/subscriptions'}>
+                                                    <Box ml={1}>
+                                                        <LaunchIcon
+                                                            color='primary'
+                                                            fontSize='small'
+                                                        />
+                                                    </Box>
                                                 </Link>
                                             </Grid>
                                         </Grid>
-                                    )}
-                                    <Grid
-                                        container
-                                        direction='row'
-                                        alignItems='center'
-                                        style={{ marginLeft: '28px' }}
-                                        justify='center'
-                                    >
-                                        <Grid item>
-                                            {isTierAvailable ? (
-                                                <CheckIcon className={classes.iconTrue} />
-                                            ) : (
-                                                <CloseIcon className={classes.iconFalse} />
-                                            )}
-                                        </Grid>
-                                        <Grid item style={{ marginBottom: '3px', marginLeft: '3px' }}>
-                                            <Typography variant='h7'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.CustomizedStepper.Tier'
-                                                    defaultMessage=' Business Plan'
-                                                />
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                                <LaunchIcon
-                                                    style={{ marginLeft: '10px' }}
-                                                    color='primary'
-                                                    fontSize='small'
-                                                />
-                                            </Link>
-                                        </Grid>
-                                    </Grid>
+                                    </Box>
                                 </div>
                             )}
                             {label === 'Deploy' && (
@@ -283,38 +293,44 @@ export default function NewCustomizedStepper() {
                                         alignItems='center'
                                         justify='center'
                                     >
-                                        <Grid item>
-                                            {deploymentsAvailable ? (
-                                                <CheckIcon className={classes.iconTrue} />
-                                            ) : (
-                                                <CloseIcon className={classes.iconFalse} />
-                                            )}
-                                        </Grid>
-                                        <Grid item style={{ marginBottom: '3px', marginLeft: '3px' }}>
-                                            <Typography variant='h7'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.CustomizedStepper.Deploy'
-                                                    defaultMessage=' Deploy'
-                                                />
-                                            </Typography>
-                                        </Grid>
+                                        <Box mb={1}>
+                                            <Grid item>
+                                                {deploymentsAvailable ? (
+                                                    <CheckIcon className={classes.iconTrue} />
+                                                ) : (
+                                                    <CloseIcon className={classes.iconFalse} />
+                                                )}
+                                            </Grid>
+                                        </Box>
+                                        <Box ml={1} mb={1}>
+                                            <Grid item>
+                                                <Typography variant='h7'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.CustomizedStepper.Deploy'
+                                                        defaultMessage=' Deploy'
+                                                    />
+                                                </Typography>
+                                            </Grid>
+                                        </Box>
                                         <Grid item>
                                             {(((api.type !== 'WEBSUB' && !isEndpointAvailable))
                                             || !isTierAvailable
                                             || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED')
                                                 ? (
-                                                    <LaunchIcon
-                                                        style={{ marginLeft: '10px' }}
-                                                        color='default'
-                                                        fontSize='small'
-                                                    />
-                                                ) : (
-                                                    <Link to={'/apis/' + api.id + '/deployments'}>
+                                                    <Box ml={1}>
                                                         <LaunchIcon
-                                                            style={{ marginLeft: '10px' }}
-                                                            color='primary'
+                                                            color='default'
                                                             fontSize='small'
                                                         />
+                                                    </Box>
+                                                ) : (
+                                                    <Link to={'/apis/' + api.id + '/deployments'}>
+                                                        <Box ml={1}>
+                                                            <LaunchIcon
+                                                                color='primary'
+                                                                fontSize='small'
+                                                            />
+                                                        </Box>
                                                     </Link>
                                                 )}
                                         </Grid>
@@ -346,18 +362,20 @@ export default function NewCustomizedStepper() {
                                             || !isTierAvailable
                                             || (api.type !== 'HTTP' && api.type !== 'SOAP')
                                             ? (
-                                                <LaunchIcon
-                                                    style={{ marginLeft: '10px' }}
-                                                    color='default'
-                                                    fontSize='small'
-                                                />
-                                            ) : (
-                                                <Link to={'/apis/' + api.id + '/test-console'}>
+                                                <Box ml={1}>
                                                     <LaunchIcon
-                                                        style={{ marginLeft: '10px' }}
-                                                        color='primary'
+                                                        color='default'
                                                         fontSize='small'
                                                     />
+                                                </Box>
+                                            ) : (
+                                                <Link to={'/apis/' + api.id + '/test-console'}>
+                                                    <Box ml={1}>
+                                                        <LaunchIcon
+                                                            color='primary'
+                                                            fontSize='small'
+                                                        />
+                                                    </Box>
                                                 </Link>
                                             )}
                                     </Grid>
@@ -390,14 +408,16 @@ export default function NewCustomizedStepper() {
                                             <Grid item>
                                                 <CheckIcon className={classes.iconTrue} />
                                             </Grid>
-                                            <Grid item style={{ marginBottom: '3px', marginLeft: '3px' }}>
-                                                <Typography variant='h7'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.CustomizedStepper.publish'
-                                                        defaultMessage=' Published (Current API)'
-                                                    />
-                                                </Typography>
-                                            </Grid>
+                                            <Box ml={1}>
+                                                <Grid item>
+                                                    <Typography variant='h7'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Overview.CustomizedStepper.publish'
+                                                            defaultMessage=' Published (Current API)'
+                                                        />
+                                                    </Typography>
+                                                </Grid>
+                                            </Box>
                                         </Grid>
                                     )}
                                 </div>
@@ -416,5 +436,3 @@ NewCustomizedStepper.propTypes = {
         id: PropTypes.string,
     }).isRequired,
 };
-
-NewCustomizedStepper.contextType = ApiContext;
