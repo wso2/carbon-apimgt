@@ -265,6 +265,8 @@
         <!-- Enable Analytics for API Manager -->
         <Enabled>{{apim.analytics.enable}}</Enabled>
 
+        <AuthToken>{{apim.analytics.auth_token}}</AuthToken>
+
         <!-- Event publisher implementation -->
         {% if apim.analytics.reporter_impl is defined %}
         <ReporterClass>{{apim.analytics.reporter_impl}}</ReporterClass>
