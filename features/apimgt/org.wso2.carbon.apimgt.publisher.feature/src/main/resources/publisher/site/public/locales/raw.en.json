@@ -3156,6 +3156,12 @@
   "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": {
     "defaultMessage": "Create New API Product"
   },
+  "Apis.Listing.SampleAPI.continue.on.close": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Listing.SampleAPI.continue.on.error": {
+    "defaultMessage": "Continue"
+  },
   "Apis.Listing.SampleAPI.popup.create.complete": {
     "defaultMessage": "API created successfully!"
   },
@@ -3741,9 +3747,6 @@
   "ServiceCatalog.Listing.Delete.ok.yes": {
     "defaultMessage": "Yes"
   },
-  "ServiceCatalog.Listing.Listing.created.time": {
-    "defaultMessage": "Created Time"
-  },
   "ServiceCatalog.Listing.Listing.error.delete": {
     "defaultMessage": "Error while deleting service"
   },
@@ -3753,26 +3756,8 @@
   "ServiceCatalog.Listing.Listing.heading": {
     "defaultMessage": "Service Catalog"
   },
-  "ServiceCatalog.Listing.Listing.help.tooltip": {
-    "defaultMessage": "The Service Catalog enables API-first Integration"
-  },
-  "ServiceCatalog.Listing.Listing.name": {
-    "defaultMessage": "Service"
-  },
-  "ServiceCatalog.Listing.Listing.schema.type": {
-    "defaultMessage": "Schema Type"
-  },
   "ServiceCatalog.Listing.Listing.service.deleted.successfully": {
     "defaultMessage": "Service deleted successfully!"
-  },
-  "ServiceCatalog.Listing.Listing.service.url": {
-    "defaultMessage": "Service URL"
-  },
-  "ServiceCatalog.Listing.Listing.usage": {
-    "defaultMessage": "Number of Usages"
-  },
-  "ServiceCatalog.Listing.Listing.version": {
-    "defaultMessage": "Version"
   },
   "ServiceCatalog.Listing.Onboarding.Heading1.description": {
     "defaultMessage": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
@@ -3894,11 +3879,38 @@
   "ServiceCatalog.Listing.Usages.usage": {
     "defaultMessage": "Usages of {serviceName}"
   },
+  "ServiceCatalog.Listing.components.ServiceCard.schema": {
+    "defaultMessage": "Schema"
+  },
+  "ServiceCatalog.Listing.components.ServiceCard.type": {
+    "defaultMessage": "Type"
+  },
+  "ServiceCatalog.Listing.components.ServiceCard.version": {
+    "defaultMessage": "Version"
+  },
   "ServiceCatalog.Listing.onboarding.create.new": {
     "defaultMessage": "Service Catalog"
   },
   "ServiceCatalog.Listing.onboarding.description": {
     "defaultMessage": "Enabling API-first Integration"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": {
+    "defaultMessage": "Created Time"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.name": {
+    "defaultMessage": "Service"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.schema.type": {
+    "defaultMessage": "Schema Type"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.service.url": {
+    "defaultMessage": "Service URL"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.usage": {
+    "defaultMessage": "Number of Usages"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.version": {
+    "defaultMessage": "Version"
   },
   "Settings.Alerts.Alerts.configure.alert": {
     "defaultMessage": "Configurations"

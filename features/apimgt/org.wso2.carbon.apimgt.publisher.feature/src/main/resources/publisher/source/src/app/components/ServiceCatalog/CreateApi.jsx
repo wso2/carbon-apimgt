@@ -27,6 +27,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
+import { useHistory } from 'react-router-dom';
 import APIValidation from 'AppData/APIValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
@@ -122,7 +123,6 @@ function reducer(state, { field, value }) {
  */
 function CreateApi(props) {
     const {
-        history,
         isOverview,
         serviceDisplayName,
         serviceKey,
@@ -132,6 +132,7 @@ function CreateApi(props) {
     } = props;
     const classes = useStyles();
     const intl = useIntl();
+    const history = useHistory();
     const [open, setOpen] = useState(false);
     const [pageError, setPageError] = useState(null);
     const [type, setType] = useState('');

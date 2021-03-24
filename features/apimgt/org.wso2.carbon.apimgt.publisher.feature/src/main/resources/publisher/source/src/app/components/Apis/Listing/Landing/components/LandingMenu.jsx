@@ -52,7 +52,7 @@ const LandingMenu = (props) => {
                 className={boxTransition}
                 onMouseOver={onMouseOver}
                 onMouseOut={onMouseOut}
-                bgcolor='white'
+                bgcolor='background.paper'
                 justifyContent='center'
                 alignItems='center'
                 borderRadius={8}

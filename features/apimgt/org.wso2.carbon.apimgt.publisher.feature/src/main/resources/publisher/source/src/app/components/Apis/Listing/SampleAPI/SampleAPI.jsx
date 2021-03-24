@@ -32,7 +32,12 @@ import TaskState from 'AppComponents/Apis/Listing/SampleAPI/components/TaskState
 import { makeStyles } from '@material-ui/core/styles';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core';
-import { getSampleAPIData, getSampleOpenAPI } from './SamplePizzaShack.js';
+import { Link as RouterLink } from 'react-router-dom';
+import Link from '@material-ui/core/Link';
+import Button from '@material-ui/core/Button';
+
+import { getSampleAPIData, getSampleOpenAPI } from 'AppData/SamplePizzaShack';
+
 
 const useStyles = makeStyles({
     modal: {
@@ -45,8 +50,19 @@ const useStyles = makeStyles({
     },
 });
 
+const initialTaskStates = {
+    create: { inProgress: true, completed: false, errors: false },
+    update: { inProgress: false, completed: false, errors: false },
+    revision: { inProgress: false, completed: false, errors: false },
+    deploy: { inProgress: false, completed: false, errors: false },
+    publish: { inProgress: false, completed: false, errors: false },
+};
+
 const tasksReducer = (state, action) => {
     const { name, status } = action;
+    if (name === 'reset') {
+        return initialTaskStates;
+    }
     // In the case of a key collision, the right-most (last) object's value wins out
     return { ...state, [name]: { ...state[name], ...status } };
 };
@@ -60,13 +76,7 @@ const tasksReducer = (state, action) => {
 
 const SampleAPI = (props) => {
     const { dense } = props;
-    const [tasksStatus, tasksStatusDispatcher] = useReducer(tasksReducer, {
-        create: { inProgress: true, completed: false, errors: false },
-        update: { inProgress: false, completed: false, errors: false },
-        revision: { inProgress: false, completed: false, errors: false },
-        deploy: { inProgress: false, completed: false, errors: false },
-        publish: { inProgress: false, completed: false, errors: false },
-    });
+    const [tasksStatus, tasksStatusDispatcher] = useReducer(tasksReducer, initialTaskStates);
     const [showStatus, setShowStatus] = useState(false);
     const [newSampleAPI, setNewSampleAPI] = useState();
     const classes = useStyles();
@@ -144,19 +154,17 @@ const SampleAPI = (props) => {
 
             // Deploy a revision of sample API -- 5th API call
             await taskManager(sampleAPI.publish(), 'publish');
-        } else {
-            console.log('');
         }
     };
 
     const allDone = !AuthManager.isNotPublisher() ? Object.values(tasksStatus)
         .map((tasks) => tasks.completed)
         .reduce((done, current) => current && done) : tasksStatus.create.completed;
-    if (allDone) {
+    const anyErrors = Object.values(tasksStatus).map((tasks) => tasks.errors).find((error) => error !== false);
+    if (allDone && !anyErrors) {
         const url = '/apis/' + newSampleAPI.id + '/overview';
         return <Redirect to={url} />;
     }
-    // const inProgressTask = Object.entries(tasksStatus).find(([, status]) => status.inProgress === true);
     return (
         <>
             <LandingMenuItem
@@ -194,9 +202,8 @@ const SampleAPI = (props) => {
             >
                 <Fade in={showStatus}>
                     <Box
-                        bgcolor='white'
+                        bgcolor='background.paper'
                         borderRadius='borderRadius'
-                        // height={isXsOrBelow ? '35%' : '25%'}
                         width={isXsOrBelow ? 4 / 5 : 1 / 4}
                         className={classes.statusBox}
                         p={2}
@@ -302,6 +309,37 @@ const SampleAPI = (props) => {
                             >
                                 Publish API
                             </TaskState>
+                            {anyErrors && (
+                                <>
+                                    <Grid item xs={8} />
+                                    <Grid item xs={2}>
+                                        <Button
+                                            onClick={() => {
+                                                setShowStatus(false);
+                                                tasksStatusDispatcher({ name: 'reset' });
+                                            }}
+                                            variant='outlined'
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.continue.on.close'
+                                                defaultMessage='Close'
+                                            />
+                                        </Button>
+                                    </Grid>
+                                    <Grid item xs={2}>
+                                        <Link
+                                            underline='none'
+                                            component={RouterLink}
+                                            to={newSampleAPI ? '/apis/' + newSampleAPI.id + '/overview' : '/'}
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.continue.on.error'
+                                                defaultMessage='Continue'
+                                            />
+                                        </Link>
+                                    </Grid>
+                                </>
+                            )}
                         </Grid>
                     </Box>
                 </Fade>
