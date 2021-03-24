@@ -2305,8 +2305,8 @@ public class ImportUtils {
      * @throws FaultGatewaysException If an error occurs when updating the API to overwrite
      * @throws IOException            If an error occurs when loading the swagger file
      */
-    private static APIProduct updateApiProductSwagger(String pathToArchive, String apiProductId, APIProduct importedApiProduct,
-            APIProvider apiProvider, String orgId)
+    private static APIProduct updateApiProductSwagger(String pathToArchive, String apiProductId, APIProduct
+            importedApiProduct, APIProvider apiProvider, String orgId)
             throws APIManagementException, FaultGatewaysException, IOException {
 
         String swaggerContent = loadSwaggerFile(pathToArchive);

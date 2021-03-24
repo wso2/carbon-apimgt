@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -1238,8 +1237,8 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating an existing API Product
      */
     public static APIProduct updateApiProduct(APIProduct originalAPIProduct, APIProductDTO apiProductDtoToUpdate,
-                                              APIProvider apiProvider, String username, String orgId) throws APIManagementException
-            , FaultGatewaysException {
+                                              APIProvider apiProvider, String username, String orgId)
+            throws APIManagementException, FaultGatewaysException {
 
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
@@ -1374,7 +1373,8 @@ public class PublisherCommonUtils {
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
-        apiProvider.addAPIProductSwagger(createdProduct.getUuid(), apiToProductResourceMapping, createdProduct, tenantDomain);
+        apiProvider.addAPIProductSwagger(createdProduct.getUuid(), apiToProductResourceMapping, createdProduct,
+                tenantDomain);
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
