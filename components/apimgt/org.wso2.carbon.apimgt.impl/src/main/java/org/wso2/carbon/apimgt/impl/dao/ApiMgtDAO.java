@@ -3391,12 +3391,13 @@ public class ApiMgtDAO {
     /**
      * @param providerName Name of the provider
      * @param identifier APIIdentifier which contains API name and version
+     * @param organizationId UUID of the organization
      * @return UserApplicationAPIUsage of given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get
      *                                                           UserApplicationAPIUsage for given provider
      */
-    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier)
-            throws APIManagementException {
+    public UserApplicationAPIUsage[] getAllAPIUsageByProviderAndApiId(String providerName, APIIdentifier identifier,
+                                        String organizationId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
@@ -3409,6 +3410,7 @@ public class ApiMgtDAO {
             ps.setString(1, APIUtil.replaceEmailDomainBack(providerName));
             ps.setString(2, identifier.getApiName());
             ps.setString(3, identifier.getVersion());
+            ps.setString(4, organizationId);
             result = ps.executeQuery();
 
             Map<String, UserApplicationAPIUsage> userApplicationUsages = new TreeMap<String, UserApplicationAPIUsage>();
@@ -7758,7 +7760,7 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier)
+    public Set<URITemplate> getURITemplatesOfAPI(APIIdentifier identifier, String organizationId)
             throws APIManagementException {
         Map<Integer, URITemplate> uriTemplates = new LinkedHashMap<>();
         Map<Integer, Set<String>> scopeToURITemplateId = new HashMap<>();
@@ -7769,7 +7771,9 @@ public class ApiMgtDAO {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 ps.setString(2, identifier.getName());
                 ps.setString(3, identifier.getVersion());
-                ps.setString(4, identifier.getUUID());
+                ps.setString(4, organizationId);
+                ps.setString(5, identifier.getUUID());
+
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -7828,6 +7832,7 @@ public class ApiMgtDAO {
                 ps.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 ps.setString(2, identifier.getName());
                 ps.setString(3, identifier.getVersion());
+                ps.setString(4, organizationId);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         Integer uriTemplateId = rs.getInt("URL_MAPPING_ID");
@@ -15155,7 +15160,7 @@ public class ApiMgtDAO {
         List<APIProductResource> productMappings = new ArrayList<>();
         APIIdentifier apiIdentifier = api.getId();
 
-        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier);
+        Set<URITemplate> uriTemplatesOfAPI = getURITemplatesOfAPI(apiIdentifier, api.getOrganizationId());
 
         for (URITemplate uriTemplate : uriTemplatesOfAPI) {
             Set<APIProductIdentifier> apiProductIdentifiers = uriTemplate.retrieveUsedByProducts();

@@ -39,6 +39,7 @@ public class SubscribedAPI {
     private String subCreatedStatus;
     private List<APIKey> keys = new ArrayList<APIKey>();
     private String uuid;
+    private String organizationId;
 
     private String createdTime;
     private String updatedTime;
@@ -64,6 +65,14 @@ public class SubscribedAPI {
 
     public Application getApplication() {
         return application;
+    }
+
+    public String getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(String organizationId) {
+        this.organizationId = organizationId;
     }
 
     public void setSubStatus(String status) {

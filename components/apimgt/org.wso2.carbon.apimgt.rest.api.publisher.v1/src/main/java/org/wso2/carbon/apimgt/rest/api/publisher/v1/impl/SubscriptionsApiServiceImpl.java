@@ -153,7 +153,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted subscriptions
      */
-    public Response getSubscriptions(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query,
+    public Response getSubscriptions(String apiId, String organizationId, Integer limit, Integer offset, String ifNoneMatch, String query,
             MessageContext messageContext) {
         // pre-processing
         // setting default limit and offset if they are null
@@ -175,7 +175,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 } else {
                     apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 }
-                apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+                apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier, organizationId);
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 apiUsages = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToSubscribedAPIList(allApiUsage);

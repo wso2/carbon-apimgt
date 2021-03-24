@@ -4322,6 +4322,7 @@ paths:
         `GET https://127.0.0.1:9443/api/am/publisher/v2/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
       parameters:
         - $ref: '#/components/parameters/apiId-Q-Opt'
+        - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/If-None-Match'

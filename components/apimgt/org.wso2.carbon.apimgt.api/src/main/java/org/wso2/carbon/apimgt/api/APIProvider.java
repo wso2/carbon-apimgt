@@ -163,7 +163,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
-    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException;
+    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId, String organizationId) throws APIManagementException;
 
     /**
      * Returns usage details of a particular api product published by a provider

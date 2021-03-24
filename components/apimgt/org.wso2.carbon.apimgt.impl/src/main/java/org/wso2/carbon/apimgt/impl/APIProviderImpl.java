@@ -471,14 +471,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Returns usage details of a particular API
      *
      * @param apiId API identifier
+     * @param organizationId UUID of the Organization
      * @return UserApplicationAPIUsages for given provider
      * @throws org.wso2.carbon.apimgt.api.APIManagementException If failed to get UserApplicationAPIUsage
      */
     @Override
-    public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException {
+    public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId, String organizationId) throws APIManagementException {
         APIIdentifier apiIdEmailReplaced = new APIIdentifier(APIUtil.replaceEmailDomain(apiId.getProviderName()),
                 apiId.getApiName(), apiId.getVersion());
-        UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(apiId.getProviderName(), apiId);
+        UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProviderAndApiId(apiId.getProviderName(),
+                apiId, organizationId);
         List<SubscribedAPI> subscribedAPIs = new ArrayList<SubscribedAPI>();
         for (UserApplicationAPIUsage usage : allApiResult) {
             for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
@@ -1867,7 +1869,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the existing local scope keys attached for the API
         Set<String> oldLocalScopeKeys = apiMgtDAO.getAllLocalScopeKeysForAPI(apiIdentifier, tenantId);
         // Get the existing URI templates for the API
-        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier);
+        Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier, api.getOrganizationId());
         // Get the new local scope keys from URI templates
         Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(apiIdentifier, tenantId, uriTemplates);
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
@@ -4260,7 +4262,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get local scopes for the given API which are not already assigned for different versions of the same API
         Set<String> localScopeKeysToDelete = apiMgtDAO.getUnversionedLocalScopeKeysForAPI(apiIdentifier, tenantId);
         // Get the URI Templates for the given API to detach the resources scopes from
-        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier);
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier, api.getOrganizationId());
         // Detach all the resource scopes from the API resources in KM
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -9228,7 +9230,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException {
         List<APIResource> usedProductResources = new ArrayList<>();
-        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiId);
+        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiId, null);
         for (URITemplate uriTemplate : uriTemplates) {
             // If existing URITemplate is used by any API Products
             if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {
