@@ -24,7 +24,7 @@ import { TagCloud } from 'react-tagcloud';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     clickablePointer: {
         cursor: 'pointer',
         padding: theme.spacing(1),
@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
  * Component used to handle API Tag Cloud
  * @class ApiTagCloud
  * @extends {React.Component}
- * @param {any} value @inheritDoc
+ * @param {JSON} props @inheritDoc
  */
 function ApiTagCloud(props) {
     const classes = useStyles();
@@ -60,9 +60,9 @@ function ApiTagCloud(props) {
     const { allTags } = props;
     let apisTagWithoutGroups = null;
     if (allTags.count !== 0) {
-        // Remve the tags with a sufix '-group' to ignore the
+        // Remove the tags with a sufix '-group' to ignore the
         if (active) {
-            apisTagWithoutGroups = allTags.filter(item => item.value.search(key) === -1);
+            apisTagWithoutGroups = allTags.filter((item) => item.value.search(key) === -1);
         } else {
             apisTagWithoutGroups = allTags;
         }
@@ -80,7 +80,7 @@ function ApiTagCloud(props) {
 
     return (
         apisTagWithoutGroups && (
-            <React.Fragment>
+            <>
                 <Typography variant='h6' gutterBottom className={classes.filterTitle}>
                     <FormattedMessage defaultMessage='Tags' id='Apis.Listing.ApiTagCloud.title' />
                 </Typography>
@@ -91,9 +91,9 @@ function ApiTagCloud(props) {
                     tags={apisTagWithoutGroups}
                     shuffle={false}
                     className={classes.clickablePointer}
-                    onClick={tag => handleOnClick(tag)}
+                    onClick={(tag) => handleOnClick(tag)}
                 />
-            </React.Fragment>
+            </>
         )
     );
 }
@@ -101,8 +101,6 @@ function ApiTagCloud(props) {
 ApiTagCloud.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     tag: PropTypes.shape({}).isRequired,
-    listType: PropTypes.string.isRequired,
-    apiType: PropTypes.string.isRequired,
     allTags: PropTypes.shape({}).isRequired,
 };
 
