@@ -1,3 +1,8 @@
+/**
+ * ***NOTE: These sample data are share between API Sample and Service catalog sample deployments, Please test both ends
+ * if you are changing anything here!
+ */
+
 const getSampleOpenAPI = () => ({
     openapi: '3.0.0',
     info: {
@@ -433,4 +438,13 @@ const getSampleAPIData = () => {
     };
 };
 
-export { getSampleOpenAPI, getSampleAPIData };
+const getSampleServiceMeta = () => ({
+    name: 'Pizzashack-Endpoint',
+    description: 'A Catalog Entry that exposes a REST endpoint',
+    version: 'v1',
+    serviceKey: 'Pizzashack-Endpoint-1.0.0',
+    serviceUrl: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
+    definitionType: 'OAS3',
+});
+
+export { getSampleOpenAPI, getSampleAPIData, getSampleServiceMeta };

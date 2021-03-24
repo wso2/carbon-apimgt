@@ -44,7 +44,7 @@ import Utils from 'AppData/Utils';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
-    <Suspense fallback={<Progress per={50} message='Loading components ...' />}>
+    <Suspense fallback={<Progress per={30} message='Loading components ...' />}>
         <Apis />
     </Suspense>
 );

@@ -85,7 +85,7 @@ import Monetization from './Monetization';
 import ExternalStores from './ExternalStores/ExternalStores';
 import { APIProvider } from './components/ApiContext';
 import CreateNewVersion from './NewVersion/NewVersion';
-import TestConsole from './TestConsole/TestConsole';
+import TryOutConsole from './TryOut/TryOutConsole';
 
 const styles = (theme) => ({
     LeftMenu: {
@@ -606,7 +606,7 @@ class Details extends Component {
         }
 
         if (!api) {
-            return <Progress />;
+            return <Progress per={70} message='Loading API data ...' />;
         }
         const { leftMenuIconMainSize } = theme.custom;
 
@@ -801,7 +801,7 @@ class Details extends Component {
                             Icon={<PersonPinCircleOutlinedIcon />}
                         />
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'PUBLISHED' && (
+                            && !isRestricted(['apim:api_publish'], api) && (
                             <div>
                                 <Divider />
                                 <Typography className={classes.headingText}>Test</Typography>
@@ -971,7 +971,7 @@ class Details extends Component {
                                 />
                                 <Route
                                     path={Details.subPaths.TRYOUT}
-                                    component={() => <TestConsole apiObj={api} />}
+                                    component={() => <TryOutConsole apiObj={api} />}
                                 />
                                 <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
                                 <Route

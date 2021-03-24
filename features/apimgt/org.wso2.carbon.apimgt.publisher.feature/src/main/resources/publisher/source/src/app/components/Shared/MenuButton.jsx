@@ -15,6 +15,7 @@ const styles = (theme) => ({
         marginRight: theme.spacing(2),
     },
     position: {
+        display: 'inherit',
         zIndex: theme.zIndex.apiCreateMenu,
     },
 });

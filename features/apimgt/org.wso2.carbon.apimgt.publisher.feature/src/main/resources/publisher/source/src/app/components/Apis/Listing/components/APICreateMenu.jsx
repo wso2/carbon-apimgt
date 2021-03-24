@@ -32,20 +32,35 @@ import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/Streaming
 import ServiceCatalogMenu from 'AppComponents/Apis/Listing/Landing/Menus/ServiceCatalogMenu';
 import MenuButton from 'AppComponents/Shared/MenuButton';
 
-const useStyles = makeStyles({
-    dividerCls: {
-        height: '180px',
-        position: 'absolute',
-        top: '50%',
-        '-ms-transform': 'translateY(-50%)',
-        transform: 'translateY(-50%)',
-        margin: 'auto',
-    },
+const useStyles = makeStyles((theme) => {
+    return {
+        dividerCls: {
+            height: '180px',
+            position: 'absolute',
+            top: '50%',
+            '-ms-transform': 'translateY(-50%)',
+            transform: 'translateY(-50%)',
+            margin: 'auto',
+        },
+        popover: {
+            [theme.breakpoints.down('sm')]: {
+                width: '95vw',
+            },
+            [theme.breakpoints.up('md')]: {
+                width: '85vw',
+            },
+            [theme.breakpoints.up('lg')]: {
+                width: '65vw',
+            },
+            paddingTop: theme.spacing(2),
+            paddingBottom: theme.spacing(2),
+        },
+    };
 });
 
 const APICreateMenu = () => {
     const theme = useTheme();
-    const { dividerCls } = useStyles();
+    const { dividerCls, popover } = useStyles();
     const {
         graphqlIcon,
         restApiIcon,
@@ -60,20 +75,21 @@ const APICreateMenu = () => {
             }}
             menuList={(
                 <Grid
+                    className={popover}
                     container
                     direction='row'
-                    justify='center'
+                    justify='space-around'
                     alignItems='flex-start'
-                    spacing={3}
+                    spacing={2}
                 >
-                    <RestAPIMenu openList icon={restApiIcon} />
-                    <SoapAPIMenu openList icon={soapApiIcon} />
-                    <GraphqlAPIMenu openList icon={graphqlIcon} />
-                    <StreamingAPIMenu openList icon={streamingApiIcon} />
-                    <Box display={{ xs: 'none', lg: 'block' }} mx={2}>
+                    <RestAPIMenu isCreateMenu icon={restApiIcon} />
+                    <SoapAPIMenu isCreateMenu icon={soapApiIcon} />
+                    <GraphqlAPIMenu isCreateMenu icon={graphqlIcon} />
+                    <StreamingAPIMenu isCreateMenu icon={streamingApiIcon} />
+                    <Box display={{ xs: 'none', md: 'block' }} mx={2}>
                         <Divider className={dividerCls} light orientation='vertical' variant='inset' />
                     </Box>
-                    <ServiceCatalogMenu openList icon={streamingApiIcon} />
+                    <ServiceCatalogMenu isCreateMenu icon={streamingApiIcon} />
                 </Grid>
             )}
         >
