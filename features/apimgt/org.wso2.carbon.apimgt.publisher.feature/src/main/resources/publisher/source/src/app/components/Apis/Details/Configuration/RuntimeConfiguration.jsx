@@ -126,41 +126,74 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Object} Deep copy of an object
  */
 function copyAPIConfig(api) {
-    const apiConfigJson = {
-        id: api.id,
-        name: api.name,
-        description: api.description,
-        lifeCycleStatus: api.lifeCycleStatus,
-        accessControl: api.accessControl,
-        authorizationHeader: api.authorizationHeader,
-        responseCachingEnabled: api.responseCachingEnabled,
-        cacheTimeout: api.cacheTimeout,
-        visibility: api.visibility,
-        isDefaultVersion: api.isDefaultVersion,
-        enableSchemaValidation: api.enableSchemaValidation,
-        accessControlRoles: [...api.accessControlRoles],
-        visibleRoles: [...api.visibleRoles],
-        tags: [...api.tags],
-        maxTps: api.maxTps,
-        wsdlUrl: api.wsdlUrl,
-        transport: [...api.transport],
-        securityScheme: [...api.securityScheme],
-        keyManagers: [...api.keyManagers || []],
-        corsConfiguration: {
-            corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
-            accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
-            accessControlAllowOrigins: [...api.corsConfiguration.accessControlAllowOrigins],
-            accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
-            accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
-        },
-        websubSubscriptionConfiguration: {
-            secret: api.websubSubscriptionConfiguration.secret,
-            signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
-            signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
-        },
-    };
+    let apiConfigJson;
+    if (api.isAPIProduct()) {
+        apiConfigJson = {
+            id: api.id,
+            name: api.name,
+            description: api.description,
+            lifeCycleStatus: api.lifeCycleStatus,
+            accessControl: api.accessControl,
+            authorizationHeader: api.authorizationHeader,
+            responseCachingEnabled: api.responseCachingEnabled,
+            cacheTimeout: api.cacheTimeout,
+            visibility: api.visibility,
+            isDefaultVersion: api.isDefaultVersion,
+            enableSchemaValidation: api.enableSchemaValidation,
+            accessControlRoles: [...api.accessControlRoles],
+            visibleRoles: [...api.visibleRoles],
+            tags: [...api.tags],
+            maxTps: api.maxTps,
+            wsdlUrl: api.wsdlUrl,
+            transport: [...api.transport],
+            securityScheme: [...api.securityScheme],
+            keyManagers: [...(api.keyManagers || [])],
+            corsConfiguration: {
+                corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
+                accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
+                accessControlAllowOrigins: [...api.corsConfiguration.accessControlAllowOrigins],
+                accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
+                accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
+            },
+        };
+    } else {
+        apiConfigJson = {
+            id: api.id,
+            name: api.name,
+            description: api.description,
+            lifeCycleStatus: api.lifeCycleStatus,
+            accessControl: api.accessControl,
+            authorizationHeader: api.authorizationHeader,
+            responseCachingEnabled: api.responseCachingEnabled,
+            cacheTimeout: api.cacheTimeout,
+            visibility: api.visibility,
+            isDefaultVersion: api.isDefaultVersion,
+            enableSchemaValidation: api.enableSchemaValidation,
+            accessControlRoles: [...api.accessControlRoles],
+            visibleRoles: [...api.visibleRoles],
+            tags: [...api.tags],
+            maxTps: api.maxTps,
+            wsdlUrl: api.wsdlUrl,
+            transport: [...api.transport],
+            securityScheme: [...api.securityScheme],
+            keyManagers: [...(api.keyManagers || [])],
+            corsConfiguration: {
+                corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
+                accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
+                accessControlAllowOrigins: [...api.corsConfiguration.accessControlAllowOrigins],
+                accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
+                accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
+            },
+            apiwebsubSubscriptionConfiguration: {
+                secret: api.websubSubscriptionConfiguration.secret,
+                signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
+                signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
+            },
+        };
+    }
     return apiConfigJson;
 }
+
 /**
  * This component handles the basic configurations UI in the API details page
  *
@@ -298,11 +331,13 @@ export default function RuntimeConfiguration() {
     const { api, updateAPI } = useContext(APIContext);
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
     const isWebSub = api.type === 'WEBSUB';
-    api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
-        secret: '',
-        signingAlgorithm: '',
-        signatureHeader: '',
-    };
+    if (!api.isAPIProduct()) {
+        api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
+            secret: '',
+            signingAlgorithm: '',
+            signatureHeader: '',
+        };
+    }
 
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
