@@ -22,6 +22,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import net.minidev.json.JSONObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -148,11 +149,11 @@ public class JWTValidatorImplTest {
         signedJWTInfo.setSignedJWT(signedJWT);
         Calendar now = Calendar.getInstance();
         now.add(Calendar.HOUR, 1);
+        JSONObject transportCertHash = new JSONObject();
+        transportCertHash.put("x5t#S256", "9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1");
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .expirationTime(now.getTime())
-                .claim(APIConstants.CNF, "{\n" +
-                        "         \"x5t#S256\": \"9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1\"\n" +
-                        "       }")
+                .claim(APIConstants.CNF, transportCertHash)
                 .build();
         signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
     }
