@@ -649,6 +649,7 @@ class Details extends Component {
                         <div className={classes.root}>
                             <Accordion
                                 defaultExpanded
+                                elevation={0}
                                 classes={{ expanded: classes.expanded }}
                             >
                                 <AccordianSummary
@@ -700,6 +701,7 @@ class Details extends Component {
                                 </AccordionDetails>
                             </Accordion>
                             <Accordion
+                                elevation={0}
                                 defaultExpanded
                                 classes={{ expanded: classes.expanded }}
                             >
@@ -801,14 +803,14 @@ class Details extends Component {
                             Icon={<PersonPinCircleOutlinedIcon />}
                         />
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && !isRestricted(['apim:api_publish'], api) && (
+                            && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'RETIRED' && (
                             <div>
                                 <Divider />
                                 <Typography className={classes.headingText}>Test</Typography>
                                 <LeftMenuItem
                                     text={intl.formatMessage({
                                         id: 'Apis.Details.index.Tryout.menu.name',
-                                        defaultMessage: 'TryOut',
+                                        defaultMessage: 'Try Out',
                                     })}
                                     to={pathPrefix + 'test-console'}
                                     iconText='test'

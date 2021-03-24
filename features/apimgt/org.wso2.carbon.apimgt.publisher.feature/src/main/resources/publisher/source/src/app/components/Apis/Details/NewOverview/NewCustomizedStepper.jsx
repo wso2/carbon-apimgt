@@ -124,6 +124,8 @@ export default function NewCustomizedStepper() {
     const [api, updateAPI] = useAPI();
     const [isUpdating, setUpdating] = useState(false);
     const [deploymentsAvailable, setDeploymentsAvailable] = useState(false);
+    const isPrototypedAvailable = api.endpointConfig !== null
+    && api.endpointConfig.implementation_status === 'prototyped';
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
     const steps = ['Develop', 'Deploy', 'Test', 'Publish'];
@@ -134,10 +136,11 @@ export default function NewCustomizedStepper() {
     } else if ((api && !isEndpointAvailable && api.type !== 'WEBSUB') || (api && !isTierAvailable)) {
         activeStep = 0;
     } else if (api && (isEndpointAvailable || api.type === 'WEBSUB') && isTierAvailable
-        && deploymentsAvailable && api.lifeCycleStatus !== 'PUBLISHED') {
+        && deploymentsAvailable && (api.lifeCycleStatus !== 'PUBLISHED' && api.lifeCycleStatus !== 'PROTOTYPED')) {
         activeStep = 3;
-    } else if (api.lifeCycleStatus === 'PUBLISHED' && api
-        && (isEndpointAvailable || api.type === 'WEBSUB') && isTierAvailable && deploymentsAvailable) {
+    } else if ((api.lifeCycleStatus === 'PUBLISHED' || api.lifeCycleStatus === 'PROTOTYPED') && api
+        && (isEndpointAvailable || api.type === 'WEBSUB' || isPrototypedAvailable)
+        && isTierAvailable && deploymentsAvailable) {
         activeStep = 4;
     }
 
@@ -173,6 +176,125 @@ export default function NewCustomizedStepper() {
                 console.log(errorResponse);
                 Alert.error(JSON.stringify(errorResponse.message));
             });
+    }
+
+    /**
+     * This function renders the final lifecycle state
+     * @param {*} state
+     */
+    function finalLifecycleState(state) {
+        switch (state) {
+            case 'PUBLISHED':
+                return (
+                    <>
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='center'
+                            justify='center'
+                        >
+                            <Grid item>
+                                <CheckIcon className={classes.iconTrue} />
+                            </Grid>
+                            <Box ml={1}>
+                                <Grid item>
+                                    <Typography variant='h7'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.CustomizedStepper.publish'
+                                            defaultMessage=' Published (Current API)'
+                                        />
+                                    </Typography>
+                                </Grid>
+                            </Box>
+                        </Grid>
+                    </>
+                );
+            case 'PROTOTYPED':
+                return (
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.prototyped'
+                                defaultMessage='Prototyped'
+                            />
+                        </b>
+                    </Typography>
+                );
+            case 'BLOCKED':
+                return (
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.blocked'
+                                defaultMessage='Blocked'
+                            />
+                        </b>
+                    </Typography>
+                );
+            case 'DEPRECATED':
+                return (
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.deprecated'
+                                defaultMessage='Deprecated'
+                            />
+                        </b>
+                    </Typography>
+                );
+            case 'RETIRED':
+                return (
+                    <Typography variant='h7'>
+                        <b>
+                            <FormattedMessage
+                                id='Apis.Details.Overview.CustomizedStepper.retired'
+                                defaultMessage='Retired'
+                            />
+                        </b>
+                    </Typography>
+                );
+            default:
+                return (
+                    <>
+                        {isPrototypedAvailable ? (
+                            <Button
+                                size='small'
+                                variant='contained'
+                                color='primary'
+                                onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
+                                disabled={api.workflowStatus === 'CREATED'
+                                    || AuthManager.isNotPublisher()
+                                    || !deploymentsAvailable}
+                            >
+                                Deploy as a prototype
+                                {isUpdating && <CircularProgress size={20} />}
+                            </Button>
+                        ) : (
+                            <Button
+                                size='small'
+                                variant='contained'
+                                color='primary'
+                                onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
+                                disabled={((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable)
+                                    || !deploymentsAvailable
+                                    || api.isRevision || AuthManager.isNotPublisher()
+                                    || api.workflowStatus === 'CREATED'}
+                            >
+                                Publish
+                                {isUpdating && <CircularProgress size={20} />}
+                            </Button>
+                        )}
+                        {api.workflowStatus === 'CREATED' && (
+                            <Typography variant='caption' color='error'>
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.CustomizedStepper.pending'
+                                    defaultMessage='The request is pending'
+                                />
+                            </Typography>
+                        )}
+                    </>
+                );
+        }
     }
 
     return (
@@ -339,8 +461,8 @@ export default function NewCustomizedStepper() {
                             )}
                             {label === 'Test' && (
                                 <Tooltip
-                                    title={api.lifeCycleStatus === 'PUBLISHED' ? 'Cannot use test option while API'
-                                        + ' is in published state' : ''}
+                                    title={api.lifeCycleStatus === 'RETIERD' ? 'Cannot use test option while API'
+                                        + ' is in retired state' : ''}
                                     placement='bottom'
                                 >
                                     <Grid
@@ -357,7 +479,7 @@ export default function NewCustomizedStepper() {
                                                 />
                                             </Typography>
                                         </Grid>
-                                        {api.lifeCycleStatus === 'PUBLISHED' || !deploymentsAvailable
+                                        {api.lifeCycleStatus === 'RETIERD' || !deploymentsAvailable
                                             || !isEndpointAvailable
                                             || !isTierAvailable
                                             || (api.type !== 'HTTP' && api.type !== 'SOAP')
@@ -382,45 +504,9 @@ export default function NewCustomizedStepper() {
                                 </Tooltip>
                             )}
                             {label === 'Publish' && (
-                                <div>
-                                    {api.lifeCycleStatus !== 'PUBLISHED' ? (
-                                        <Button
-                                            size='small'
-                                            variant='contained'
-                                            color='primary'
-                                            onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
-                                            disabled={((api.type !== 'WEBSUB' && !isEndpointAvailable))
-                                                || !deploymentsAvailable
-                                                || !isTierAvailable
-                                                || api.isRevision || AuthManager.isNotPublisher()
-                                                || api.workflowStatus === 'CREATED'}
-                                        >
-                                            Publish
-                                            {isUpdating && <CircularProgress size={20} />}
-                                        </Button>
-                                    ) : (
-                                        <Grid
-                                            container
-                                            direction='row'
-                                            alignItems='center'
-                                            justify='center'
-                                        >
-                                            <Grid item>
-                                                <CheckIcon className={classes.iconTrue} />
-                                            </Grid>
-                                            <Box ml={1}>
-                                                <Grid item>
-                                                    <Typography variant='h7'>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.Overview.CustomizedStepper.publish'
-                                                            defaultMessage=' Published (Current API)'
-                                                        />
-                                                    </Typography>
-                                                </Grid>
-                                            </Box>
-                                        </Grid>
-                                    )}
-                                </div>
+                                <>
+                                    {finalLifecycleState(api.lifeCycleStatus)}
+                                </>
                             )}
                         </StepLabel>
                     </Step>
