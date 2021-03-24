@@ -33,11 +33,6 @@ import StarRatingSummary from 'AppComponents/Apis/Details/StarRatingSummary';
 import Rating from '@material-ui/lab/Rating';
 import { FormattedMessage } from 'react-intl';
 
-/**
- *
- *
- * @param {*} theme
- */
 const styles = (theme) => ({
     starRate: {
         fontSize: 25,
@@ -181,8 +176,6 @@ class StarRatingBar extends React.Component {
     }
 
     /**
-     *
-     *
      * @memberof StarRatingBar
      */
     removeUserRating() {
@@ -205,14 +198,15 @@ class StarRatingBar extends React.Component {
             });
     }
 
+    /**
+     * @memberof StarRatingBar
+     */
     toggleEditRating() {
-        this.setState({ showEditing: !this.state.showEditing });
+        this.setState((prevState) => ({ showEditing: !prevState.showEditing }));
     }
 
     /**
-     *
-     *
-     * @returns
+     * @returns {JSX} star rating bar
      * @memberof StarRatingBar
      */
     render() {
