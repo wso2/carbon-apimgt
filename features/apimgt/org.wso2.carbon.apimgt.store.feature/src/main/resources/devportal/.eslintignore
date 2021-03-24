@@ -8,7 +8,6 @@ source/src/app/data/*
 /source/src/app/components/Apis/Details/AsyncApiConsole/AsyncApiUI.jsx
 /source/src/app/components/Apis/Details/Comments/*
 /source/src/app/components/Apis/Details/Definitions/*
-/source/src/app/components/Apis/Listing/*
 /source/src/app/components/Apis/Apis.jsx
 /source/src/app/components/Applications/*
 /source/src/app/components/Login/*

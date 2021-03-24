@@ -3,6 +3,11 @@ import { useTheme } from '@material-ui/core/styles';
 import ApiThumbClassic from 'AppComponents/Apis/Listing/APICards/ApiThumbClassic';
 import APIThumbPlain from 'AppComponents/Apis/Listing/APICards/APIThumbPlain';
 
+/**
+ * Render no api section
+ * @param {JSON} props properties passed from parent
+ * @returns {void}
+ */
 export default function ApiThumb(props) {
     const theme = useTheme();
     const { custom } = theme;
@@ -13,5 +18,5 @@ export default function ApiThumb(props) {
     }
     return (
         <APIThumbPlain {...props} />
-    )
+    );
 }

@@ -38,7 +38,7 @@ import { FormattedMessage } from 'react-intl';
  *
  * @param {*} theme
  */
-const styles = theme => ({
+const styles = (theme) => ({
     starRate: {
         fontSize: 25,
         color: theme.custom.infoBar.starColor,
@@ -83,6 +83,11 @@ const styles = theme => ({
  * @extends {React.Component}
  */
 class StarRatingBar extends React.Component {
+    /**
+     *Creates an instance of RecommendedApiThumb.
+     * @param {JSON} props properties
+     * @memberof StarRatingBar
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -97,19 +102,26 @@ class StarRatingBar extends React.Component {
         this.doRate = this.doRate.bind(this);
         this.toggleEditRating = this.toggleEditRating.bind(this);
     }
-    componentDidUpdate(prevProps) {
-        // Typical usage (don't forget to compare props):
-        if (this.props.ratingUpdate !== prevProps.ratingUpdate) {
-            this.getApiRating();
-        }
-    }
+
+
     /**
-     *
-     *
+     * Component did mount callback.
      * @memberof StarRatingBar
      */
     componentDidMount() {
         this.getApiRating();
+    }
+
+    /**
+     * Component did mount callback.
+     * @param {JSON} prevProps previous instance properties
+     * @memberof StarRatingBar
+     */
+    componentDidUpdate(prevProps) {
+        const { ratingUpdate } = this.props;
+        if (ratingUpdate !== prevProps.ratingUpdate) {
+            this.getApiRating();
+        }
     }
 
     /**
@@ -131,11 +143,13 @@ class StarRatingBar extends React.Component {
                     count: response.body.count,
                     total: response.body.pagination.total,
                 });
-                if (setRatingUpdate) setRatingUpdate({
-                    avgRating: response.body.avgRating,
-                    count: response.body.count,
-                    total: response.body.pagination.total
-                });
+                if (setRatingUpdate) {
+                    setRatingUpdate({
+                        avgRating: response.body.avgRating,
+                        count: response.body.count,
+                        total: response.body.pagination.total,
+                    });
+                }
             });
         }
     }
@@ -194,6 +208,7 @@ class StarRatingBar extends React.Component {
     toggleEditRating() {
         this.setState({ showEditing: !this.state.showEditing });
     }
+
     /**
      *
      *
@@ -202,7 +217,7 @@ class StarRatingBar extends React.Component {
      */
     render() {
         const {
-            avgRating, userRating, count, total, showEditing
+            avgRating, userRating, count, total, showEditing,
         } = this.state;
         const {
             classes, isEditable, showSummary, apiRating,
@@ -213,28 +228,29 @@ class StarRatingBar extends React.Component {
                 {showSummary ? (
                     <StarRatingSummary avgRating={avgRating} reviewCount={total} returnCount={count} />
                 ) : (
-                        <>
-                            {isEditable ? (
-                                <Box position='relative'>
-                                    <Box onClick={this.toggleEditRating} display='flex' style={{ cursor: 'pointer' }}>
-                                        {(userRating === 0) 
-                                        ? (<StarBorderIcon style={{ fontSize: 30 }} />) 
-                                        : (<StarIcon style={{ fontSize: 30, color: '#75d5fa'}} />)}
-                                        <Typography variant='body2' className={classes.rateThis}>
-                                            {(userRating === 0) ? (
-                                                <FormattedMessage defaultMessage='Rate This' id='Apis.Listing.StarRatingBar.rate.this' />
-                                            ) : (
-                                                    <Box>
-                                                        <Box fontSize={22} ml={1} mb={1}>{userRating}</Box>
-                                                        <Box>You</Box>
-                                                    </Box>
-                                                )}
-                                        </Typography>
-                                    </Box>
-                                    {showEditing && (<>
+                    <>
+                        {isEditable ? (
+                            <Box position='relative'>
+                                <Box onClick={this.toggleEditRating} display='flex' style={{ cursor: 'pointer' }}>
+                                    {(userRating === 0)
+                                        ? (<StarBorderIcon style={{ fontSize: 30 }} />)
+                                        : (<StarIcon style={{ fontSize: 30, color: '#75d5fa' }} />)}
+                                    <Typography variant='body2' className={classes.rateThis}>
+                                        {(userRating === 0) ? (
+                                            <FormattedMessage defaultMessage='Rate This' id='Apis.Listing.StarRatingBar.rate.this' />
+                                        ) : (
+                                            <Box>
+                                                <Box fontSize={22} ml={1} mb={1}>{userRating}</Box>
+                                                <Box>You</Box>
+                                            </Box>
+                                        )}
+                                    </Typography>
+                                </Box>
+                                {showEditing && (
+                                    <>
                                         <ClickAwayListener onClickAway={this.toggleEditRating}>
                                             <div className={classes.userRating}>
-                                                {[1, 2, 3, 4, 5].map(i => (
+                                                {[1, 2, 3, 4, 5].map((i) => (
                                                     <StarRate
                                                         key={i}
                                                         className={userRating >= i ? classes.starRate : classes.noStarRate}
@@ -247,30 +263,31 @@ class StarRatingBar extends React.Component {
                                                 />
                                             </div>
                                         </ClickAwayListener>
-                                    </>)}
-                                </Box>
-                            ) : (
-                                    <>
-                                        <Rating
-                                            name='half-rating'
-                                            value={apiRatingNumber}
-                                            precision={0.1}
-                                            readOnly
-                                            classes={{ iconEmpty: classes.iconEmpty, iconFilled: classes.iconFilled }}
-                                        />
-                                        <Typography variant='caption' gutterBottom align='left' component='div'>
-                                            {`${avgRating}/5.0 (${total}`}
-                                            {total === 1 ? (
-                                                <FormattedMessage defaultMessage='user' id='Apis.Listing.StarRatingBar.user' />
-                                            ) : (
-                                                    <FormattedMessage defaultMessage='users' id='Apis.Listing.StarRatingBar.users' />
-                                                )}
-                                            {')'}
-                                        </Typography>
                                     </>
                                 )}
-                        </>
-                    )}
+                            </Box>
+                        ) : (
+                            <>
+                                <Rating
+                                    name='half-rating'
+                                    value={apiRatingNumber}
+                                    precision={0.1}
+                                    readOnly
+                                    classes={{ iconEmpty: classes.iconEmpty, iconFilled: classes.iconFilled }}
+                                />
+                                <Typography variant='caption' gutterBottom align='left' component='div'>
+                                    {`${avgRating}/5.0 (${total}`}
+                                    {total === 1 ? (
+                                        <FormattedMessage defaultMessage='user' id='Apis.Listing.StarRatingBar.user' />
+                                    ) : (
+                                        <FormattedMessage defaultMessage='users' id='Apis.Listing.StarRatingBar.users' />
+                                    )}
+                                    {')'}
+                                </Typography>
+                            </>
+                        )}
+                    </>
+                )}
             </>
         );
     }
@@ -290,7 +307,7 @@ StarRatingBar.propTypes = {
     showSummary: PropTypes.bool.isRequired,
     apiRating: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.number
+        PropTypes.number,
     ]),
     ratingUpdate: PropTypes.number,
     setRatingUpdate: PropTypes.func,
