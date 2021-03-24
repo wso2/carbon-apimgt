@@ -60,13 +60,11 @@ export default function DisplayDevportal(props) {
     };
 
     return (
-        <>
-            <Switch
-                checked={check}
-                onChange={handleDisplayOnDevPortal}
-                disabled={api.isRevision}
-                name={name}
-            />
-        </>
+        <Switch
+            checked={check}
+            onChange={handleDisplayOnDevPortal}
+            disabled={api.isRevision}
+            name={name}
+        />
     );
 }
