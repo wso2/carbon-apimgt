@@ -1557,7 +1557,7 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /apis/{apiId}/deployed-revision:
+  /apis/{apiId}/deployments:
     #--------------------------------------------
     # List available deployed revision deployment details of an API
     #--------------------------------------------
@@ -1588,7 +1588,47 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployed-revision"'
+                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
+
+  /apis/{apiId}/deployments/{deploymentId}:
+    #--------------------------------------------
+    # Change Display On Devportal Field
+    #--------------------------------------------
+    put:
+      tags:
+        - API Revisions
+      summary: Update Deployment
+      description: |
+        Update deployment devportal visibility
+      operationId: updateAPIDeployment
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/deploymentId'
+      requestBody:
+        description: Deployment object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIRevisionDeployment'
+      responses:
+        200:
+          description: |
+            Created.
+            Successful response with the newly updated APIRevisionDeployment List object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionDeployment'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
+                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
 
   /apis/{apiId}/deploy-revision:
     #--------------------------------------------
@@ -6553,7 +6593,7 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /api-products/{apiProductId}/deployed-revision:
+  /api-products/{apiProductId}/deployments:
     #--------------------------------------------
     # List available deployed revision deployment details of an API Product
     #--------------------------------------------
@@ -6584,7 +6624,47 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployed-revision"'
+                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
+
+  /api-products/{apiProductId}/deployments/{deploymentId}:
+    #--------------------------------------------
+    # Change Display On Devportal Field
+    #--------------------------------------------
+    put:
+      tags:
+        - API Product Revisions
+      summary: Update Deployment
+      description: |
+        Update deployment devportal visibility
+      operationId: updateAPIProductDeployment
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/deploymentId'
+      requestBody:
+        description: Deployment object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIRevisionDeployment'
+      responses:
+        200:
+          description: |
+            Created.
+            Successful response with the newly updated APIRevisionDeployment List object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionDeployment'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
+                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
 
   /api-products/{apiProductId}/deploy-revision:
     #--------------------------------------------
@@ -8560,7 +8640,6 @@ components:
           minLength: 0
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
-          readOnly: true
         name:
           maxLength: 255
           minLength: 1
@@ -11282,6 +11361,14 @@ components:
       in: query
       description: |
         Revision Number of an API
+      schema:
+        type: string
+    deploymentId:
+      name: deploymentId
+      in: path
+      description: |
+        Base64 URL encoded value of the name of an environment
+      required: true
       schema:
         type: string
     policyName:

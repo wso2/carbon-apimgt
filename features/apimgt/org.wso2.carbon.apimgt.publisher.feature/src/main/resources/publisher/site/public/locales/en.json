@@ -4837,10 +4837,40 @@
       "value": "Operation"
     }
   ],
+  "Apis.Details.Overview.CustomizedStepper.Deploy": [
+    {
+      "type": 0,
+      "value": "Deploy"
+    }
+  ],
   "Apis.Details.Overview.CustomizedStepper.Deployments": [
     {
       "type": 0,
       "value": "Deployments"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Develop": [
+    {
+      "type": 0,
+      "value": "Develop"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Test": [
+    {
+      "type": 0,
+      "value": "Test"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Tier": [
+    {
+      "type": 0,
+      "value": "Business Plan"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.blocked": [
@@ -4883,6 +4913,12 @@
     {
       "type": 0,
       "value": "Prototyped"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.publish": [
+    {
+      "type": 0,
+      "value": "Published (Current API)"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.published": [
@@ -6269,12 +6305,6 @@
       "value": "Try out"
     }
   ],
-  "Apis.Details.index.api.Config": [
-    {
-      "type": 0,
-      "value": "API configurations"
-    }
-  ],
   "Apis.Details.index.api.definition2": [
     {
       "type": 0,
@@ -6377,12 +6407,6 @@
     {
       "type": 0,
       "value": "overview"
-    }
-  ],
-  "Apis.Details.index.portal.configuration": [
-    {
-      "type": 0,
-      "value": "Portal Configurations"
     }
   ],
   "Apis.Details.index.properties": [

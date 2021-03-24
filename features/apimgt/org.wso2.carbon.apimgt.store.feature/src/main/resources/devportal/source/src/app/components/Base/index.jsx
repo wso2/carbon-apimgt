@@ -20,7 +20,7 @@
 
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import { injectIntl } from 'react-intl';
+import { injectIntl, FormattedMessage } from 'react-intl';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -32,20 +32,19 @@ import {
 import Icon from '@material-ui/core/Icon';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { findDOMNode } from 'react-dom';
 import Typography from '@material-ui/core/Typography';
 import Popper from '@material-ui/core/Popper';
 import Grow from '@material-ui/core/Grow';
 import Paper from '@material-ui/core/Paper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import { FormattedMessage } from 'react-intl';
+
 import Drawer from '@material-ui/core/Drawer';
 import HeaderSearch from 'AppComponents/Base/Header/Search/HeaderSearch';
 import Settings, { useSettingsContext } from 'AppComponents/Shared/SettingsContext';
 import { app } from 'Settings';
 import ReactSafeHtml from 'react-safe-html';
 import AuthManager from '../../data/AuthManager';
-import LanuageSelector from './Header/LanuageSelector';
+import LanguageSelector from './Header/LanuageSelector';
 import GlobalNavBar from './Header/GlobalNavbar';
 import VerticalDivider from '../Shared/VerticalDivider';
 
@@ -137,7 +136,7 @@ const styles = (theme) => {
             marginRight: theme.spacing(),
             '&.material-icons': {
                 fontSize: theme.spacing(2),
-            }
+            },
         },
         banner: {
             color: theme.custom.banner.color,
@@ -155,6 +154,9 @@ const styles = (theme) => {
         listRootInline: {
             padding: 0,
             display: 'flex',
+            [theme.breakpoints.down('sm')]: {
+                flexDirection: 'column',
+            }
         },
         listItemTextRoot: {
             padding: 0,
@@ -202,7 +204,7 @@ const styles = (theme) => {
         },
         logoutLink: {
             color: theme.palette.getContrastText(theme.palette.background.paper),
-        }
+        },
     };
 };
 
@@ -212,8 +214,6 @@ const styles = (theme) => {
  * @extends {React.Component}
  */
 class Layout extends React.Component {
-    static contextType = Settings;
-
     /**
      * @inheritdoc
      * @param {*} props
@@ -221,22 +221,29 @@ class Layout extends React.Component {
      */
     constructor(props) {
         super(props);
+        this.state = {
+            openNavBar: false,
+            openUserMenu: false,
+            selected: 'home',
+        };
         this.toggleGlobalNavBar = this.toggleGlobalNavBar.bind(this);
         const { history } = props;
         history.listen((location) => {
-            this.ditectCurrentMenu(location);
+            this.detectCurrentMenu(location);
         });
     }
 
-    state = {
-        nightMode: false,
-        themeIndex: 0,
-        left: false,
-        openNavBar: false,
-        openUserMenu: false,
-        selected: 'home',
-    };
-    ditectCurrentMenu = (location) => {
+    /**
+     * Component did mount callback.
+     * @returns {void}
+     */
+    componentDidMount() {
+        const { history: { location }, theme } = this.props;
+        document.body.style.backgroundColor = theme.custom.page.emptyAreadBackground || '#ffffff';
+        this.detectCurrentMenu(location);
+    }
+
+    detectCurrentMenu = (location) => {
         const { pathname } = location;
         if (/\/apis$/g.test(pathname) || /\/apis\//g.test(pathname)) {
             this.setState({ selected: 'apis' });
@@ -248,15 +255,7 @@ class Layout extends React.Component {
             this.setState({ selected: 'settings' });
         }
     };
-    componentWillMount() {
-        const { theme } = this.props;
-        document.body.style.backgroundColor = theme.custom.page.emptyAreadBackground || '#ffffff';
-    }
 
-    componentDidMount() {
-        const { history: { location } } = this.props;
-        this.ditectCurrentMenu(location);
-    }
 
     handleRequestCloseUserMenu = () => {
         this.setState({ openUserMenu: false });
@@ -274,7 +273,6 @@ class Layout extends React.Component {
     handleClickButton = (key) => {
         this.setState({
             [key]: true,
-            anchorEl: findDOMNode(this.button),
         });
     };
 
@@ -284,9 +282,6 @@ class Layout extends React.Component {
         });
     };
 
-    toggleGlobalNavBar(event) {
-        this.setState({ openNavBar: !this.state.openNavBar });
-    }
 
     handleToggleUserMenu = () => {
         this.setState((state) => ({ openUserMenu: !state.openUserMenu }));
@@ -322,12 +317,21 @@ class Layout extends React.Component {
     };
 
     /**
-     * @inheritdoc
-     * @returns {Component}
-     * @memberof Layout
+     * toggleGlobalNavBar callback.
+     * @returns {void}
+     */
+    toggleGlobalNavBar() {
+        this.setState((prevState) => ({ openNavBar: !prevState.openNavBar }));
+    }
+
+    /**
+     * Render callback.
+     * @returns {JSX} returns the JSX
      */
     render() {
-        const { classes, theme, children, intl } = this.props;
+        const {
+            classes, theme, children,
+        } = this.props;
         const {
             custom: {
                 banner: {
@@ -349,6 +353,16 @@ class Layout extends React.Component {
 
         const user = AuthManager.getUser();
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
+        let username = null;
+
+        if(user) {
+            username = user.name;
+            const count = (username.match(/@/g) || []).length;
+            if (user.name.endsWith('@carbon.super') && count <= 1) {
+                username = user.name.replace('@carbon.super', '');
+            }
+        }
+        
         const commonStyle = {
             style: { top: 64 },
         };
@@ -456,28 +470,28 @@ class Layout extends React.Component {
                                 {showSearch && (<HeaderSearch id='headerSearch' />)}
                                 {tenantDomain && customUrlEnabledDomain === 'null' && tenantDomain !== 'INVALID'
                                     && publicTenantStoreVisible && (
-                                        <Link
-                                            style={{
-                                                textDecoration: 'none',
-                                                color: '#ffffff',
-                                            }}
-                                            to='/'
-                                            onClick={() => setTenantDomain('INVALID')}
-                                            id='gotoPubulicDevPortal'
-                                        >
-                                            <Button className={classes.publicStore}>
-                                                <Icon className={classes.icons}>public</Icon>
-                                                <Hidden mdDown>
-                                                    <FormattedMessage
-                                                        id='Base.index.go.to.public.store'
-                                                        defaultMessage='Switch Dev Portals'
-                                                    />
-                                                </Hidden>
-                                            </Button>
-                                        </Link>
-                                    )}
+                                    <Link
+                                        style={{
+                                            textDecoration: 'none',
+                                            color: '#ffffff',
+                                        }}
+                                        to='/'
+                                        onClick={() => setTenantDomain('INVALID')}
+                                        id='gotoPubulicDevPortal'
+                                    >
+                                        <Button className={classes.publicStore}>
+                                            <Icon className={classes.icons}>public</Icon>
+                                            <Hidden mdDown>
+                                                <FormattedMessage
+                                                    id='Base.index.go.to.public.store'
+                                                    defaultMessage='Switch Dev Portals'
+                                                />
+                                            </Hidden>
+                                        </Button>
+                                    </Link>
+                                )}
                                 <VerticalDivider height={64} />
-                                {languageSwitchActive && <LanuageSelector />}
+                                {languageSwitchActive && <LanguageSelector />}
                                 {user ? (
                                     <>
                                         <div className={classes.linkWrapper}>
@@ -492,7 +506,7 @@ class Layout extends React.Component {
                                                 id='userToggleButton'
                                             >
                                                 <Icon className={classes.icons}>person</Icon>
-                                                {user.name}
+                                                {username}
                                             </Button>
                                             <Popper
                                                 id='userPopup'
@@ -533,20 +547,21 @@ class Layout extends React.Component {
                                                                             />
                                                                         </Link>
                                                                     </MenuItem>
-                                                                    {this.getPasswordChangeEnabled() ?
-                                                                        <MenuItem className={classes.logoutLink}>
-                                                                            <Link
-                                                                                to={'/settings/change-password/'}
-                                                                                onClick={this.handleCloseUserMenu}
-                                                                            >
-                                                                                <FormattedMessage
-                                                                                    id='Base.index.settingsMenu.changePassword'
-                                                                                    defaultMessage='Change Password'
-                                                                                />
-                                                                            </Link>
-                                                                        </MenuItem> :
-                                                                        null
-                                                                    }
+                                                                    {this.getPasswordChangeEnabled()
+                                                                        ? (
+                                                                            <MenuItem className={classes.logoutLink}>
+                                                                                <Link
+                                                                                    to='/settings/change-password/'
+                                                                                    onClick={this.handleCloseUserMenu}
+                                                                                >
+                                                                                    <FormattedMessage
+                                                                                        id='Base.index.settingsMenu.changePassword'
+                                                                                        defaultMessage='Change Password'
+                                                                                    />
+                                                                                </Link>
+                                                                            </MenuItem>
+                                                                        )
+                                                                        : null}
                                                                     <MenuItem onClick={this.doOIDCLogout} className={classes.logoutLink}>
                                                                         <FormattedMessage
                                                                             id='Base.index.logout'
@@ -562,15 +577,15 @@ class Layout extends React.Component {
                                         </div>
                                     </>
                                 ) : (
-                                        <div className={classes.linkWrapper}>
-                                            <a href={app.context + '/services/configs'}>
-                                                <Button id="itest-devportal-sign-in" className={classes.userLink}>
-                                                    <Icon>person</Icon>
-                                                    <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
-                                                </Button>
-                                            </a>
-                                        </div>
-                                    )}
+                                    <div className={classes.linkWrapper}>
+                                        <a href={app.context + '/services/configs'}>
+                                            <Button id='itest-devportal-sign-in' className={classes.userLink}>
+                                                <Icon>person</Icon>
+                                                <FormattedMessage id='Base.index.sign.in' defaultMessage=' Sign-in' />
+                                            </Button>
+                                        </a>
+                                    </div>
+                                )}
                             </Toolbar>
                         </AppBar>
                         <div className={classes.contentWrapper}>{children}</div>
@@ -580,16 +595,18 @@ class Layout extends React.Component {
                         <footer className={classes.footer} id='footer'>
                             {footerHTML && footerHTML !== '' ? (
                                 <>
-                                    {<ReactSafeHtml html={footerHTML} />}
+                                    <ReactSafeHtml html={footerHTML} />
                                 </>
-                            ) : (<Typography noWrap>
-                                {footerText && footerText !== '' ? <span>{footerText}</span> : (
-                                    <FormattedMessage
-                                        id='Base.index.copyright.text'
-                                        defaultMessage='WSO2 API-M v4.0.0 | © 2021 WSO2 Inc'
-                                    />
-                                )}
-                            </Typography>)}
+                            ) : (
+                                <Typography noWrap>
+                                    {footerText && footerText !== '' ? <span>{footerText}</span> : (
+                                        <FormattedMessage
+                                            id='Base.index.copyright.text'
+                                            defaultMessage='WSO2 API-M v4.0.0 | © 2021 WSO2 Inc'
+                                        />
+                                    )}
+                                </Typography>
+                            )}
                         </footer>
                     )}
                 </div>
@@ -597,6 +614,7 @@ class Layout extends React.Component {
         );
     }
 }
+Layout.contextType = Settings;
 
 Layout.propTypes = {
     classes: PropTypes.shape({}).isRequired,

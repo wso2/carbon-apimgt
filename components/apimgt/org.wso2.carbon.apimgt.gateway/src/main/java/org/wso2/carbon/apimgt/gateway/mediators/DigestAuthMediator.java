@@ -399,7 +399,6 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             if (StringUtils.isEmpty(wwwHeader)) {
                 String errorDesc = "Digest authentication is not supported by the backend";
                 log.error(HttpHeaders.WWW_AUTHENTICATE + " header is not found. " + errorDesc);
-                messageContext.setProperty(SynapseConstants.ERROR_CODE, GraphQLConstants.GRAPHQL_INVALID_QUERY);
                 messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Unauthenticated at backend level");
                 messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDesc);
                 Mediator sequence = messageContext.getSequence(APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
