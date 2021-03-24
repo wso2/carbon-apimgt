@@ -287,11 +287,9 @@ function EndpointOverview(props) {
     useEffect(() => {
         const prodEpSpecified = endpointCategory.prod
             && endpointConfig.production_endpoints
-            && endpointConfig.production_endpoints
             && endpointConfig.production_endpoints.url !== '';
         const sandboxEptNotSpecified = !endpointCategory.sandbox && !endpointConfig.sandbox_endpoints;
         const sandboxEpSpecified = endpointCategory.sandbox
-            && endpointConfig.sandbox_endpoints
             && endpointConfig.sandbox_endpoints
             && endpointConfig.sandbox_endpoints.url !== '';
         const productionEptNotSpecified = !endpointCategory.production && !endpointConfig.production_endpoints;
