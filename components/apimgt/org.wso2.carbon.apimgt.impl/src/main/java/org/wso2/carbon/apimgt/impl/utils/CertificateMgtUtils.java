@@ -866,22 +866,20 @@ public class CertificateMgtUtils {
     public static Optional<X509Certificate> convert(javax.security.cert.X509Certificate cert) {
 
         if (cert != null) {
-            try {
-                byte[] encoded = cert.getEncoded();
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(encoded);
+            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(cert.getEncoded())) {
+
                 java.security.cert.CertificateFactory certificateFactory
                         = java.security.cert.CertificateFactory.getInstance("X.509");
                 return Optional.of((java.security.cert.X509Certificate) certificateFactory.generateCertificate(
                         byteArrayInputStream));
             } catch (javax.security.cert.CertificateEncodingException e) {
                 log.error("Error while decoding the certificate ", e);
-                return Optional.ofNullable(null);
             } catch (java.security.cert.CertificateException e) {
                 log.error("Error while generating the certificate", e);
-                return Optional.ofNullable(null);
+            } catch (IOException e) {
+                log.error("Error while retrieving the encoded certificate", e);
             }
-        } else {
-            return Optional.ofNullable(null);
         }
+        return Optional.ofNullable(null);
     }
 }
