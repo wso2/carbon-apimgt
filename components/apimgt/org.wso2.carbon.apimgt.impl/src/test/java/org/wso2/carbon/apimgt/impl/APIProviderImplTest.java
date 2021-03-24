@@ -255,6 +255,7 @@ public class APIProviderImplTest {
                 .getAPIManagerConfiguration();
         GatewayArtifactSynchronizerProperties synchronizerProperties = new GatewayArtifactSynchronizerProperties();
         Mockito.when(config.getGatewayArtifactSynchronizerProperties()).thenReturn(synchronizerProperties);
+        Mockito.when(config.getApiRecommendationEnvironment()).thenReturn(null);
 
         PowerMockito.when(APIUtil.replaceSystemProperty(Mockito.anyString())).thenAnswer((Answer<String>) invocation -> {
             Object[] args = invocation.getArguments();
@@ -1378,6 +1379,11 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
         Map<String, String> failedToPubGWEnv = new HashMap<String, String>();
 
+        APIManagerConfigurationService configurationService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()).thenReturn(configurationService);
+        PowerMockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        PowerMockito.when(apiManagerConfiguration.getApiRecommendationEnvironment()).thenReturn(null);
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apiPersistenceInstance, apimgtDAO, scopesDAO,
                 null, null);
         UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
@@ -3348,7 +3354,6 @@ public class APIProviderImplTest {
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn("admin");
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).thenReturn("API1");
         Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).thenReturn("1.0.0");
-        Mockito.when(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS)).thenReturn("[]");
         Mockito.when(apiArtifact.getLifecycleState()).thenReturn("CREATED");
         Mockito.when(apimgtDAO.getAPIID(apiId)).thenReturn(1);
 

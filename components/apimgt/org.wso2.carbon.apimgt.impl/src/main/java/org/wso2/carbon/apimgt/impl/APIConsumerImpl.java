@@ -57,6 +57,8 @@ import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -73,13 +75,10 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
-import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
-import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
-import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
@@ -132,7 +131,6 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -159,6 +157,9 @@ import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.wsdl.Definition;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -168,7 +169,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -189,11 +189,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.validation.constraints.NotNull;
-import javax.wsdl.Definition;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -3052,6 +3047,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
             int id = apiMgtDAO.getAPIID(identifier);
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
@@ -5482,13 +5480,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
             throws APIManagementException {
-        return getOpenAPIDefinitionForDeployment(api, environmentName, null);
-    }
-
-    @Override
-    public String getOpenAPIDefinitionForClusterName(API api, String clusterName)
-            throws APIManagementException {
-        return getOpenAPIDefinitionForDeployment(api, null, clusterName);
+        return getOpenAPIDefinitionForDeployment(api, environmentName);
     }
 
     public void revokeAPIKey(String apiKey, long expiryTime, String tenantDomain) throws APIManagementException {
@@ -5505,13 +5497,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * Get server URL updated Open API definition for given deployment (synapse gateway or container managed cluster)
-     * @param synapseEnvName Name of the synapse gateway environment
-     * @param clusterName Name of the container managed cluster
+     * Get server URL updated Open API definition for given synapse gateway environment
+     * @param environmentName Name of the synapse gateway environment
      * @return Updated Open API definition
      * @throws APIManagementException
      */
-    private String getOpenAPIDefinitionForDeployment(API api, String synapseEnvName, String clusterName)
+    private String getOpenAPIDefinitionForDeployment(API api, String environmentName)
             throws APIManagementException {
         String apiTenantDomain;
         String updatedDefinition = null;
@@ -5527,11 +5518,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         api.setUriTemplates(oasParser.getURITemplates(definition));
         apiTenantDomain = MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        if (!StringUtils.isEmpty(synapseEnvName)) {
-            hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, synapseEnvName);
-        } else {
-            hostsWithSchemes = getHostWithSchemeMappingForClusterName(clusterName);
-        }
+        hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
         api.setContext(getBasePath(apiTenantDomain, api.getContext()));
         updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes);
         return updatedDefinition;
@@ -5699,84 +5686,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return hostsWithSchemes;
-    }
-
-    /**
-     * Get gateway host names with transport scheme mapping.
-     *
-     * @param gatewayLabels gateway label list
-     * @param labelName     Label name
-     * @return Hostname with transport schemes
-     * @throws APIManagementException If an error occurs when getting gateway host names.
-     */
-    private Map<String, String> getHostWithSchemeMappingForLabel(List<Label> gatewayLabels, String labelName)
-            throws APIManagementException {
-
-        Map<String, String> hostsWithSchemes = new HashMap<>();
-        Label labelObj = null;
-        for (Label label : gatewayLabels) {
-            if (label.getName().equals(labelName)) {
-                labelObj = label;
-                break;
-            }
-        }
-        if (labelObj == null) {
-            handleException(
-                    "Could not find provided label '" + labelName);
-            return null;
-        }
-
-        List<String> accessUrls = labelObj.getAccessUrls();
-        for (String url : accessUrls) {
-            if (url.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, url);
-            }
-            if (url.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, url);
-            }
-        }
-        return hostsWithSchemes;
-    }
-
-    /**
-     * Get host names with transport scheme mapping from Container Manged Clusters in api-manager.xml or from the tenant
-     * custom url config in registry.
-     *
-     * @param clusterName Name of the container manged cluster
-     * @return Host name to transport scheme mapping
-     * @throws APIManagementException if an error occurs when getting host names with schemes
-     */
-    private Map<String, String> getHostWithSchemeMappingForClusterName(@NotNull String clusterName)
-            throws APIManagementException {
-        // hostsWithSchemes
-        Map<String, String> hostsWithSchemes = new HashMap<>();
-
-        // get ingress URL from tenant configs
-        JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
-        for (Object clusterConfig : clusterConfigs) {
-            JSONArray containerMgtInfoArray = (JSONArray) (((JSONObject) clusterConfig)
-                    .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
-            for (Object containerMgtInfoObj : containerMgtInfoArray) {
-                JSONObject containerMgtInfo = (JSONObject) containerMgtInfoObj;
-                if (clusterName.equals(containerMgtInfo.get(ContainerBasedConstants.CLUSTER_NAME))) {
-                    String ingressURL = (String) ((JSONObject)containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
-                            .get(ContainerBasedConstants.ACCESS_URL);
-                    ingressURL = ingressURL.replaceAll("/$", "");
-                    if (ingressURL.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX)) {
-                        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, ingressURL);
-                    }
-                    if (ingressURL.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                        hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, ingressURL);
-                    }
-                    return hostsWithSchemes;
-                }
-            }
-        }
-
-        // cluster name not found
-        handleResourceNotFoundException(
-                "Container managed cluster with cluster name '" + clusterName + "' does not exist");
-        return null;
     }
 
     private String getBasePath(String apiTenantDomain, String basePath) throws APIManagementException {
@@ -6233,7 +6142,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     @Override
     public String getAsyncAPIDefinitionForEnvironment(Identifier apiId, String environmentName) throws APIManagementException {
-        return getAsyncAPIDefinitionForDeployment(apiId, environmentName, null);
+        return getAsyncAPIDefinitionForDeployment(apiId, environmentName);
     }
 
     @Override
@@ -6255,11 +6164,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName) throws APIManagementException {
-        return getAsyncAPIDefinitionForDeployment(apiId, null, clusterName);
-    }
-
-    @Override
     public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
         return super.getAsyncAPIDefinition(apiId);
     }
@@ -6270,14 +6174,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * Get server URL updated AsyncAPI definition for given deployment (synapse gateway or container managed cluster)
+     * Get server URL updated AsyncAPI definition for given synapse gateway environment
      * @param apiId Id of the API
-     * @param synapseEnvName Name of the synapse gateway environment
-     * @param clusterName Name of the container managed cluster
+     * @param environmentName Name of the synapse gateway environment
      * @return Updated AsyncAPI definition
      * @throws APIManagementException
      */
-    private String getAsyncAPIDefinitionForDeployment(Identifier apiId, String synapseEnvName, String clusterName)
+    private String getAsyncAPIDefinitionForDeployment(Identifier apiId, String environmentName)
             throws APIManagementException {
         String apiTenantDomain;
         String updatedDefinition = null;
@@ -6288,11 +6191,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             API api = getLightweightAPI((APIIdentifier) apiId);
             apiTenantDomain = MultitenantUtils.getTenantDomain(
                     APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-            if (!StringUtils.isEmpty(synapseEnvName)) {
-                hostsWithSchemes = getHostWithSchemeMappingForEnvironmentWS(apiTenantDomain, synapseEnvName);
-            } else {
-                hostsWithSchemes = getHostWithSchemeMappingForClusterNameWs(clusterName);
-            }
+            hostsWithSchemes = getHostWithSchemeMappingForEnvironmentWS(apiTenantDomain, environmentName);
             updatedDefinition = asyncAPIParser.getAsyncApiDefinitionForStore(api, definition, hostsWithSchemes);
         }
         return updatedDefinition;
@@ -6339,47 +6238,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return hostsWithSchemes;
-    }
-
-    /**
-     * Get host names with transport scheme mapping from Container Manged Clusters in api-manager.xml or from the tenant
-     * custom url config in registry. (For WebSockets)
-     *
-     * @param clusterName Name of the container manged cluster
-     * @return Host name to transport scheme mapping
-     * @throws APIManagementException if an error occurs when getting host names with schemes
-     */
-    private Map<String, String> getHostWithSchemeMappingForClusterNameWs(@NotNull String clusterName)
-            throws APIManagementException {
-        //hostsWithSchemes
-        Map<String, String> hostsWithSchemes = new HashMap<>();
-
-        //get ingress URL from tenant configs
-        JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
-        for (Object clusterConfig : clusterConfigs) {
-            JSONArray containerMgtInfoArray = (JSONArray) (((JSONObject) clusterConfig)
-                    .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
-            for (Object containerMgtInfoObj : containerMgtInfoArray) {
-                JSONObject containerMgtInfo = (JSONObject) containerMgtInfoObj;
-                if (clusterName.equals(containerMgtInfo.get(ContainerBasedConstants.CLUSTER_NAME))) {
-                    String ingressURL = (String) ((JSONObject)containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
-                            .get(ContainerBasedConstants.ACCESS_URL);
-                    ingressURL = ingressURL.replaceAll("/$", "");
-                    if (ingressURL.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX)) {
-                        hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, ingressURL);
-                    }
-                    if (ingressURL.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)) {
-                        hostsWithSchemes.put(APIConstants.WS_PROTOCOL, ingressURL);
-                    }
-                    return hostsWithSchemes;
-                }
-            }
-        }
-
-        //cluster name not found
-        handleResourceNotFoundException(
-                "Container managed cluster with cluster name '" + clusterName + "' does not exist");
-        return null;
     }
 
     /**

@@ -1557,7 +1557,7 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /apis/{apiId}/deployed-revision:
+  /apis/{apiId}/deployments:
     #--------------------------------------------
     # List available deployed revision deployment details of an API
     #--------------------------------------------
@@ -1588,7 +1588,47 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployed-revision"'
+                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
+
+  /apis/{apiId}/deployments/{deploymentId}:
+    #--------------------------------------------
+    # Change Display On Devportal Field
+    #--------------------------------------------
+    put:
+      tags:
+        - API Revisions
+      summary: Update Deployment
+      description: |
+        Update deployment devportal visibility
+      operationId: updateAPIDeployment
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/deploymentId'
+      requestBody:
+        description: Deployment object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIRevisionDeployment'
+      responses:
+        200:
+          description: |
+            Created.
+            Successful response with the newly updated APIRevisionDeployment List object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionDeployment'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
+                "https://127.0.0.1:9443/api/am/publisher/v2/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
 
   /apis/{apiId}/deploy-revision:
     #--------------------------------------------
@@ -2118,6 +2158,9 @@ paths:
                 additionalProperties:
                   type: string
                   description: Additional attributes specified as a stringified JSON with API's schema
+                inlineAPIDefinition:
+                  type: string
+                  description: Inline content of the OpenAPI definition
       responses:
         201:
           description: |
@@ -2348,6 +2391,9 @@ paths:
                   type: string
                   description: OpenAPI definition as a file
                   format: binary
+                inlineAPIDefinition:
+                  type: string
+                  description: Inline content of the OpenAPI definition
       responses:
         200:
           description: |
@@ -6553,7 +6599,7 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /api-products/{apiProductId}/deployed-revision:
+  /api-products/{apiProductId}/deployments:
     #--------------------------------------------
     # List available deployed revision deployment details of an API Product
     #--------------------------------------------
@@ -6584,7 +6630,47 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployed-revision"'
+                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments"'
+
+  /api-products/{apiProductId}/deployments/{deploymentId}:
+    #--------------------------------------------
+    # Change Display On Devportal Field
+    #--------------------------------------------
+    put:
+      tags:
+        - API Product Revisions
+      summary: Update Deployment
+      description: |
+        Update deployment devportal visibility
+      operationId: updateAPIProductDeployment
+      parameters:
+        - $ref: '#/components/parameters/apiProductId'
+        - $ref: '#/components/parameters/deploymentId'
+      requestBody:
+        description: Deployment object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIRevisionDeployment'
+      responses:
+        200:
+          description: |
+            Created.
+            Successful response with the newly updated APIRevisionDeployment List object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionDeployment'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -d @data.json
+                "https://127.0.0.1:9443/api/am/publisher/v2/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deployments/UHJvZHVjdGlvbiBhbmQgU2FuZGJveA"'
 
   /api-products/{apiProductId}/deploy-revision:
     #--------------------------------------------
@@ -7634,87 +7720,6 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v2/key-managers"'
       operationId: getAllKeyManagers
 
-  ######################################################
-  # The "Deployments" resource APIs
-  ######################################################
-  /deployments:
-    get:
-      tags:
-        - Deployments
-      summary: Retrieve Deployment Environments Details
-      description: |
-        This operation can be used to retrieve cloud clusters information defines in tenant-conf.json file.
-
-        With that you can deploy an API to selected cloud environments.
-      operationId: deploymentsGet
-      responses:
-        200:
-          description: |
-            OK. Successful response with the list of deployment environments information in the body.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeploymentList'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/deployments"'
-
-  /apis/{apiId}/deployments:
-    get:
-      tags:
-        - DeploymentStatus
-      summary: Retrieve Deployment Status Details
-      description: |
-        This operation can be used to retrieve the status of deployments in cloud clusters.
-
-        With that you can get the status of the deployed APIs in cloud environments.
-      operationId: deploymentsGetStatus
-      parameters:
-        - $ref: '#/components/parameters/apiId'
-      responses:
-        200:
-          description: |
-            OK. Successful response with the list of deployment environments information in the body.
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeploymentStatusList'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalServerError'
-      security:
-        - OAuth2Security:
-            - apim:api_view
-      x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v2/apis/92bc1330-1848-4fe8-b992-c792186c212e/deployments/"'
-
   /apis/validate-asyncapi:
     post:
       tags:
@@ -8325,14 +8330,6 @@ components:
             type: string
           x-otherScopes:
             - apim:api_publish
-        deploymentEnvironments:
-          type: array
-          description: |
-            List of selected deployment environments and clusters
-          items:
-            $ref: '#/components/schemas/DeploymentEnvironments'
-          x-otherScopes:
-            - apim:api_publish
         mediationPolicies:
           type: array
           example:
@@ -8649,7 +8646,6 @@ components:
           minLength: 0
           type: string
           example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
-          readOnly: true
         name:
           maxLength: 255
           minLength: 1
@@ -10703,10 +10699,6 @@ components:
             Is Cross Tenant Subscriptions Enabled
           example: false
           default: false
-        deployments:
-          type: array
-          items:
-            $ref: '#/components/schemas/Deployments'
     SecurityAuditAttribute:
       title: SecurityAuditAttributeDTO
       type: object
@@ -11013,135 +11005,6 @@ components:
           type: integer
           format: int32
           example: 3600
-    DeploymentList:
-      title: Deployment List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of deployment clusters returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/Deployments'
-    Deployments:
-      title: Deployments
-      required:
-        - clusters
-        - name
-      type: object
-      properties:
-        name:
-          type: string
-          example: Kubernetes
-        clusters:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeploymentClusterInfo'
-    DeploymentClusterInfo:
-      title: DeploymentClusterInfo
-      required:
-        - accessURL
-        - clusterName
-        - displayName
-        - properties
-      type: object
-      properties:
-        clusterName:
-          type: string
-          example: minikube
-        accessURL:
-          type: string
-          example: https://api.com
-        displayName:
-          type: string
-          example: kubernetes-minikube
-        properties:
-          type: object
-          additionalProperties:
-            type: string
-    DeploymentStatusList:
-      title: DeploymentStatus List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Status of the deployments returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeploymentStatus'
-    DeploymentStatus:
-      title: DeploymentStatus
-      required:
-        - clusters
-        - type
-      type: object
-      properties:
-        type:
-          type: string
-          example: Kubernetes
-        clusters:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeploymentClusterStatus'
-    DeploymentClusterStatus:
-      title: DeploymentClusterStatus
-      required:
-        - clusterName
-        - healthStatus
-        - podsRunning
-      type: object
-      properties:
-        clusterName:
-          type: string
-          example: Minikube
-        podsRunning:
-          type: integer
-        healthStatus:
-          type: array
-          items:
-            $ref: '#/components/schemas/PodStatus'
-    DeploymentEnvironments:
-      title: DeploymentEnvironments
-      required:
-        - clusterName
-        - type
-      type: object
-      properties:
-        type:
-          type: string
-          example: Kubernetes
-        clusterName:
-          type: array
-          example:
-            - minikube
-          items:
-            type: string
-    PodStatus:
-      title: PodStatus
-      required:
-        - name
-        - ready
-        - status
-      type: object
-      properties:
-        name:
-          type: string
-          example: petStore-677bb7cc65-shb2f
-        ready:
-          type: string
-          example: 1/1
-        status:
-          type: string
-          example: running
-        creationTimestamp:
-          type: string
-          example: 2020-05-12T06:12:00Z
     AsyncAPISpecificationValidationResponse:
       title: AsyncAPI Specification Validation Response
       required:
@@ -11504,6 +11367,14 @@ components:
       in: query
       description: |
         Revision Number of an API
+      schema:
+        type: string
+    deploymentId:
+      name: deploymentId
+      in: path
+      description: |
+        Base64 URL encoded value of the name of an environment
+      required: true
       schema:
         type: string
     policyName:

@@ -3629,12 +3629,6 @@
       "value": "Revisions"
     }
   ],
-  "Apis.Details.Environments.Environments.Kubernetes": [
-    {
-      "type": 0,
-      "value": "Kubernetes"
-    }
-  ],
   "Apis.Details.Environments.Environments.api.gateways.heading": [
     {
       "type": 0,
@@ -3723,12 +3717,6 @@
     {
       "type": 0,
       "value": "Deployed Revision"
-    }
-  ],
-  "Apis.Details.Environments.Environments.gateway.labels.heading": [
-    {
-      "type": 0,
-      "value": "Gateway Labels"
     }
   ],
   "Apis.Details.Environments.Environments.new.revision.name.heading1": [
@@ -3898,72 +3886,6 @@
     }
   ],
   "Apis.Details.Environments.Environments.undeploy.btn": [
-    {
-      "type": 0,
-      "value": "Undeploy"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.GatewayLabels": [
-    {
-      "type": 0,
-      "value": "Gateway Labels"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.access.url": [
-    {
-      "type": 0,
-      "value": "Access URL"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.deploy.button": [
-    {
-      "type": 0,
-      "value": "Deploy"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.deployed.revision": [
-    {
-      "type": 0,
-      "value": "Deployed Revision"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.description": [
-    {
-      "type": 0,
-      "value": "Description"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.devportal.display": [
-    {
-      "type": 0,
-      "value": "Display in devportal"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.label": [
-    {
-      "type": 0,
-      "value": "Label"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.labels.emptym1": [
-    {
-      "type": 0,
-      "value": "Gateway labels are not available."
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.labels.emptym2": [
-    {
-      "type": 0,
-      "value": "You can request the administrator to add labels."
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.select.table": [
-    {
-      "type": 0,
-      "value": "Select Revision"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.undeploy.btn": [
     {
       "type": 0,
       "value": "Undeploy"
@@ -4837,10 +4759,40 @@
       "value": "Operation"
     }
   ],
+  "Apis.Details.Overview.CustomizedStepper.Deploy": [
+    {
+      "type": 0,
+      "value": "Deploy"
+    }
+  ],
   "Apis.Details.Overview.CustomizedStepper.Deployments": [
     {
       "type": 0,
       "value": "Deployments"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Develop": [
+    {
+      "type": 0,
+      "value": "Develop"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Test": [
+    {
+      "type": 0,
+      "value": "Test"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Tier": [
+    {
+      "type": 0,
+      "value": "Business Plan"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.blocked": [
@@ -4883,6 +4835,12 @@
     {
       "type": 0,
       "value": "Prototyped"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.publish": [
+    {
+      "type": 0,
+      "value": "Published (Current API)"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.published": [
@@ -5538,7 +5496,7 @@
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.button.text": [
     {
       "type": 0,
-      "value": "Toggle per api rate limiting"
+      "value": "Change rate limiting level"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.rate.limiting.governed.by": [
@@ -6263,16 +6221,10 @@
       "value": "type"
     }
   ],
-  "Apis.Details.index.Tryout": [
+  "Apis.Details.index.Tryout.menu.name": [
     {
       "type": 0,
-      "value": "Try out"
-    }
-  ],
-  "Apis.Details.index.api.Config": [
-    {
-      "type": 0,
-      "value": "API configurations"
+      "value": "TryOut"
     }
   ],
   "Apis.Details.index.api.definition2": [
@@ -6377,12 +6329,6 @@
     {
       "type": 0,
       "value": "overview"
-    }
-  ],
-  "Apis.Details.index.portal.configuration": [
-    {
-      "type": 0,
-      "value": "Portal Configurations"
     }
   ],
   "Apis.Details.index.properties": [

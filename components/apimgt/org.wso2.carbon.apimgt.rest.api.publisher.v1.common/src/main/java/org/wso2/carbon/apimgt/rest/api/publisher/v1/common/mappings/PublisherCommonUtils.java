@@ -188,7 +188,7 @@ public class PublisherCommonUtils {
                         String apiSecret = endpointSecurityProduction
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
 
-                        if (!apiSecret.equals("")) {
+                        if (StringUtils.isNotEmpty(apiSecret)) {
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecurityProduction
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
@@ -220,7 +220,7 @@ public class PublisherCommonUtils {
                         String apiSecret = endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
                                 .toString();
 
-                        if (!apiSecret.equals("")) {
+                        if (StringUtils.isNotEmpty(apiSecret)) {
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecuritySandbox
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);

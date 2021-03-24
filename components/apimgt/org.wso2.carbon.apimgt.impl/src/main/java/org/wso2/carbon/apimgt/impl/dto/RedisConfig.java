@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.gateway.utils.redis;
+package org.wso2.carbon.apimgt.impl.dto;
 
 /**
  * RedisConfig Model class for connection properties of a Redis Server

@@ -146,13 +146,6 @@ public class APIGatewayManager {
 
     public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove) {
 
-        // Extracting API details for the recommendation system
-        if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
-            Thread recommendationThread = new Thread(extractor);
-            recommendationThread.start();
-        }
-
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");
         }

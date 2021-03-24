@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const DefaultConfigurations = {
     direction: 'ltr',
     palette: {
@@ -27,7 +28,7 @@ const DefaultConfigurations = {
         },
         h4: {
             fontWeight: 400,
-            fontSize: '1.3rem'
+            fontSize: '1.3rem',
         },
         caption: {
             fontSize: '0.70rem',
@@ -37,7 +38,7 @@ const DefaultConfigurations = {
     custom: {
         contentAreaWidth: 1240,
         backgroundImage: '', // Add a watermark background to the content area of the page. Example ( '/devportal/site/public/images/back-light.png')
-        defaultApiView: 'grid',   // Sets the default view for the api listing page ( Other values available = 'list' ). 
+        defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' ).
         // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
         page: {
             style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
@@ -252,7 +253,7 @@ const DefaultConfigurations = {
                 showTwitter: true,
                 showEmbad: true,
                 showEmail: true,
-            }
+            },
         },
         apiDetailPages: {
             showCredentials: true,
@@ -321,7 +322,7 @@ const DefaultConfigurations = {
                     imageWidth: 24, // in pixles
                     text: 'Sinhala',
                     direction: 'ltr',
-                }
+                },
             ],
             showFlag: true,
             showText: true,
@@ -330,7 +331,7 @@ const DefaultConfigurations = {
         info: {
             color: '#64b5f6',
         },
-        /* 
+        /*
             This is the config for the public teant store.
             Set "active: false" to redirect the teant user to the url
             given by redirectToIfInactive. It will also hide the link

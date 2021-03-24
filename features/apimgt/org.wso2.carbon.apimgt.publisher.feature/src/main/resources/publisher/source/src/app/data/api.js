@@ -659,11 +659,6 @@ class API extends Resource {
         return promised_status;
     }
 
-    getDeployments() {
-        return this.client.then(client => {
-            return client.apis['Deployments'].deploymentsGet();
-        });
-    }
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
@@ -1902,16 +1897,6 @@ class API extends Resource {
         });
     }
 
-    // TODO: (renuka) Removed labels Rest API and this also should be removed
-    /**
-     * Get list of microgateway labels
-     */
-    microgatewayLabelsGet() {
-        return this.client.then(client => {
-            return client.apis['Label Collection'].getLabels();
-        });
-    }
-
     /**
      * Get the complexity related details of an API
      */
@@ -2399,6 +2384,28 @@ class API extends Resource {
                         apiId: apiId,
                         revisionId: revisionId
                     },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Change displayInDevportal.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {string} deploymentId Id of the deployment.
+     * @param {Object} body Revision Object.
+     * */
+    displayInDevportalAPI(apiId, deploymentId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].updateAPIDeployment(
+                    {
+                        apiId: apiId,
+                        deploymentId: deploymentId
+                    },
+                    { requestBody: body},
                     this._requestMetaData(),
                 );
             });
