@@ -285,29 +285,21 @@ function EndpointOverview(props) {
     }, [props]);
 
     useEffect(() => {
+        const prodEpSpecified = endpointCategory.prod
+            && endpointConfig.production_endpoints
+            && endpointConfig.production_endpoints
+            && endpointConfig.production_endpoints.url !== '';
+        const sandboxEptNotSpecified = !endpointCategory.sandbox && !endpointConfig.sandbox_endpoints;
+        const sandboxEpSpecified = endpointCategory.sandbox
+            && endpointConfig.sandbox_endpoints
+            && endpointConfig.sandbox_endpoints
+            && endpointConfig.sandbox_endpoints.url !== '';
+        const productionEptNotSpecified = !endpointCategory.production && !endpointConfig.production_endpoints;
         if (endpointConfig && (endpointConfig.endpoint_type === 'http' || endpointConfig.endpoint_type === 'address')) {
             if (
-                endpointCategory.prod
-                && endpointConfig.production_endpoints
-                && endpointConfig.production_endpoints.url && endpointConfig.production_endpoints.url !== ''
-                && endpointCategory.sandbox
-                && endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints.url !== ''
-            ) {
-                setIsEndpointUrlAvailable(true);
-            } else if (
-                endpointCategory.prod
-                && endpointConfig.production_endpoints
-                && endpointConfig.production_endpoints && endpointConfig.production_endpoints.url !== ''
-                && !endpointCategory.sandbox
-                && !endpointConfig.sandbox_endpoints
-            ) {
-                setIsEndpointUrlAvailable(true);
-            } else if (
-                endpointCategory.sandbox
-                && endpointConfig.sandbox_endpoints
-                && endpointConfig.sandbox_endpoints && endpointConfig.sandbox_endpoints.url !== ''
-                && !endpointCategory.production
-                && !endpointConfig.production_endpoints
+                (prodEpSpecified && sandboxEpSpecified)
+                || (prodEpSpecified && sandboxEptNotSpecified)
+                || (sandboxEpSpecified && productionEptNotSpecified)
             ) {
                 setIsEndpointUrlAvailable(true);
             } else {
