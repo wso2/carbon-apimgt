@@ -863,8 +863,8 @@ public interface APIProvider extends APIManager {
      * @param apiProduct   API Product
      * @throws APIManagementException
      */
-    void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException;
+    void addAPIProductSwagger(String apiProductId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+            APIProduct apiProduct, String orgId) throws APIManagementException;
 
     /**
      * This method updates the swagger definition of an API Product in registry
@@ -873,8 +873,8 @@ public interface APIProvider extends APIManager {
      * @param apiProduct   API Product
      * @throws APIManagementException
      */
-    void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException, FaultGatewaysException;
+    void updateAPIProductSwagger(String apiProductId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+            APIProduct apiProduct, String orgId) throws APIManagementException, FaultGatewaysException;
 
     /**
      * This method validates the existence of all the resource level throttling tiers in URI templates of API

@@ -1701,4 +1701,24 @@ public class RegistryPersistenceUtil {
         return apiProduct;
     }
 
+    public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+            String adminUserName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getRealmConfiguration().getAdminUserName();
+            if (!tenantDomain.contentEquals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                return adminUserName.concat("@").concat(tenantDomain);
+            }
+            return adminUserName;
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error in getting tenant admin username", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
 }
