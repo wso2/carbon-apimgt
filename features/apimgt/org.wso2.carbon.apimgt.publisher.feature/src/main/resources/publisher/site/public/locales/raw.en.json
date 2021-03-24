@@ -2971,7 +2971,7 @@
     "defaultMessage": "Delete {type}"
   },
   "Apis.Details.index.Tryout.menu.name": {
-    "defaultMessage": "TryOut"
+    "defaultMessage": "Try Out"
   },
   "Apis.Details.index.api.definition2": {
     "defaultMessage": "API definition"
@@ -3878,6 +3878,9 @@
   },
   "ServiceCatalog.Listing.Usages.usage": {
     "defaultMessage": "Usages of {serviceName}"
+  },
+  "ServiceCatalog.Listing.components.ServiceCard.create.api": {
+    "defaultMessage": "Create API"
   },
   "ServiceCatalog.Listing.components.ServiceCard.type": {
     "defaultMessage": "Type"

@@ -52,6 +52,8 @@ const useStyles = makeStyles((theme) => {
             [theme.breakpoints.up('lg')]: {
                 width: '65vw',
             },
+            paddingTop: theme.spacing(2),
+            paddingBottom: theme.spacing(2),
         },
     };
 });

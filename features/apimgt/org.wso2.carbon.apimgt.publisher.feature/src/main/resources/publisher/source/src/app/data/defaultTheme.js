@@ -72,7 +72,7 @@ export default {
     palette: {
         primary: {
             // light: will be calculated from palette.primary.main,
-            main: '#15b8cf',
+            main: '#006E9C',
             // dark: will be calculated from palette.primary.main,
             // contrastText: will be calculated to contrast with palette.primary.main
         },

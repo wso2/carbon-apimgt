@@ -26,6 +26,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
 import { useHistory } from 'react-router-dom';
 import APIValidation from 'AppData/APIValidation';
@@ -123,6 +126,7 @@ function reducer(state, { field, value }) {
  */
 function CreateApi(props) {
     const {
+        isIconButton,
         isOverview,
         serviceDisplayName,
         serviceKey,
@@ -176,7 +180,9 @@ function CreateApi(props) {
 
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    const toggleOpen = () => {
+    const toggleOpen = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         setOpen(!open);
     };
     const handleClose = () => {
@@ -312,20 +318,44 @@ function CreateApi(props) {
 
     return (
         <>
-            <Button
-                color='primary'
-                variant={isOverview ? 'contained' : 'outlined'}
-                className={isOverview ? classes.topMarginSpacing : classes.buttonStyle}
-                onClick={toggleOpen}
-            >
-                <Typography className={!isOverview && classes.textStyle}>
-                    <FormattedMessage
-                        id='ServiceCatalog.CreateApi.create.api'
-                        defaultMessage='Create API'
-                    />
-                </Typography>
-            </Button>
+            {isIconButton && (
+                <Tooltip
+                    interactive
+                    title={(
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.components.ServiceCard.create.api'
+                            defaultMessage='Create API'
+                        />
+                    )}
+                >
+                    <IconButton
+                        disableRipple
+                        disableFocusRipple
+                        color='primary'
+                        onClick={toggleOpen}
+                        aria-label='add to favorites'
+                    >
+                        <AddCircleIcon />
+                    </IconButton>
+                </Tooltip>
+            )}
+            {!isIconButton && (
+                <Button
+                    color='primary'
+                    variant={isOverview ? 'contained' : 'outlined'}
+                    className={isOverview ? classes.topMarginSpacing : classes.buttonStyle}
+                    onClick={toggleOpen}
+                >
+                    <Typography className={!isOverview && classes.textStyle}>
+                        <FormattedMessage
+                            id='ServiceCatalog.CreateApi.create.api'
+                            defaultMessage='Create API'
+                        />
+                    </Typography>
+                </Button>
+            )}
             <Dialog
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                 open={open}
                 onClose={handleClose}
                 maxWidth='sm'

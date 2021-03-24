@@ -13,6 +13,10 @@ import IconButton from '@material-ui/core/IconButton';
 import { Link as RouterLink } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Tooltip from '@material-ui/core/Tooltip';
+import Chip from '@material-ui/core/Chip';
+
+import CreateAPIButton from '../../CreateApi';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -29,14 +33,14 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: '#F6F7F9',
         backgroundSize: 'contain',
         boxShadow: '0px 1px 3px #00000033',
-        // boxShadow: theme.shadows[1], // Lowest shadow
     },
     typeIcon: {
         width: theme.spacing(3),
         height: theme.spacing(3),
     },
-    deleteAction: {
-        padding: 0,
+    usageChip: {
+        width: theme.spacing(5),
+        // boxShadow: theme.shadows[1], // Lowest shadow
     },
 }));
 
@@ -77,31 +81,38 @@ export default function ServiceCard(props) {
         ASYNC_API: asyncapi,
     }), []);
     return (
-        <Link color='inherit' underline='none' component={RouterLink} to={`/service-catalog/${service.id}/overview`}>
-            <Paper
-                elevation={raised ? 3 : 1}
-                classes={{ root: classes.root }}
-                onMouseOver={() => setRaised(true)}
-                onMouseOut={() => setRaised(false)}
+        <Paper
+            elevation={raised ? 3 : 1}
+            classes={{ root: classes.root }}
+            onMouseOver={() => setRaised(true)}
+            onMouseOut={() => setRaised(false)}
+        >
+            <Link
+                color='inherit'
+                underline='none'
+                component={RouterLink}
+                to={`/service-catalog/${service.id}/overview`}
             >
                 <CardMedia
                     className={classes.media}
                     image={`${Configurations.app.context}/site/public/images/service_catalog/`
                         + 'wso2micro-integrator-active_bright.png'}
-                    title='Paella dish'
+                    title={service.name}
                 />
                 <Box p={1} pb={0}>
-                    <Typography variant='h5' component='h2'>
-                        {service.name}
-                        <Box pt={1} pb={3} fontSize='body2.fontSize' color='text.secondary'>
-                            <FormattedMessage
-                                id='ServiceCatalog.Listing.components.ServiceCard.version'
-                                defaultMessage='Version'
-                            />
-                            {' '}
-                            {service.version}
-                        </Box>
-                    </Typography>
+                    <Tooltip placement='top-start' interactive title={service.name}>
+                        <Typography display='block' noWrap variant='h5' component='h2'>
+                            {service.name}
+                        </Typography>
+                    </Tooltip>
+                    <Box pt={1} pb={3} fontFamily='fontFamily' fontSize='body2.fontSize' color='text.secondary'>
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.components.ServiceCard.version'
+                            defaultMessage='Version'
+                        />
+                        {' '}
+                        <b>{service.version}</b>
+                    </Box>
                     <Grid
                         container
                         direction='row'
@@ -113,21 +124,9 @@ export default function ServiceCard(props) {
                                 container
                                 direction='row'
                                 justify='flex-start'
-                                alignItems='flex-end'
+                                alignItems='center'
                             >
                                 <Grid item>
-                                    <Box pb={1.2} pr={0.5}>
-                                        {iconsMapping[service.definitionType] && (
-                                            <Avatar
-                                                alt={service.definitionType}
-                                                src={`${Configurations.app.context}`
-                                                + `${iconsMapping[service.definitionType]}`}
-                                                className={classes.typeIcon}
-                                            />
-                                        )}
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={6}>
                                     <Box
                                         fontWeight='fontWeightLight'
                                         fontSize='subtitle1.fontSize'
@@ -139,22 +138,84 @@ export default function ServiceCard(props) {
                                             defaultMessage='Type'
                                         />
                                     </Box>
-                                    <Box pb={1} pt={0.5} fontFamily='fontFamily'>
-
+                                </Grid>
+                                <Grid item>
+                                    <Box pl={1} pr={0.5}>
+                                        {iconsMapping[service.definitionType] && (
+                                            <Avatar
+                                                alt={service.definitionType}
+                                                src={`${Configurations.app.context}`
+                                                + `${iconsMapping[service.definitionType]}`}
+                                                className={classes.typeIcon}
+                                            />
+                                        )}
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <Box fontWeight='fontWeightMedium' color='text.secondary' fontFamily='fontFamily'>
                                         {service.definitionType}
                                     </Box>
                                 </Grid>
-
                             </Grid>
                         </Grid>
                     </Grid>
                 </Box>
-                <Box display='flex' className={classes.deleteAction} pr={1} flexDirection='row-reverse'>
-                    <IconButton id={service.id} onClick={handelDelete} aria-label='add to favorites'>
-                        <DeleteIcon />
-                    </IconButton>
+                <Box mt={2}>
+                    <Grid
+                        container
+                        direction='row'
+                        justify='space-between'
+                        alignItems='center'
+                    >
+                        <Box pl={1}>
+                            <Grid item>
+                                <Chip
+                                    className={classes.usageChip}
+                                    color='primary'
+                                    label={(
+                                        <Box
+                                            fontFamily='fontFamily'
+                                            color='text.primary'
+                                        >
+                                            {service.usage}
+                                        </Box>
+                                    )}
+                                    size='small'
+                                    variant='outlined'
+                                />
+                                <Box
+                                    fontFamily='fontFamily'
+                                    color='text.primary'
+                                    fontSize='body2.fontSize'
+                                    display='inline'
+                                    ml={1}
+                                >
+                                    APIs
+                                </Box>
+                            </Grid>
+                        </Box>
+                        <Grid item>
+                            <CreateAPIButton
+                                isIconButton
+                                serviceDisplayName={service.name}
+                                serviceKey={service.serviceKey}
+                                definitionType={service.definitionType}
+                                serviceVersion={service.serviceVersion}
+                                serviceUrl={service.serviceUrl}
+                            />
+                            <IconButton
+                                disableRipple
+                                disableFocusRipple
+                                id={service.id}
+                                onClick={handelDelete}
+                                aria-label='add to favorites'
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </Grid>
+                    </Grid>
                 </Box>
-            </Paper>
-        </Link>
+            </Link>
+        </Paper>
     );
 }
