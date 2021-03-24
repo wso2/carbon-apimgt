@@ -31,7 +31,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableContainer from '@material-ui/core/TableContainer';
-import Switch from '@material-ui/core/Switch';
 import clsx from 'clsx';
 import TableRow from '@material-ui/core/TableRow';
 import Alert from 'AppComponents/Shared/Alert';
@@ -61,6 +60,7 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
+import DisplayDevportal from './DisplayDevportal';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -321,8 +321,9 @@ export default function Environments() {
             (r) => r.deploymentInfo.some((e) => e.name === env.name),
         );
         const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
+        const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
         const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
-        allEnvDeployments[env.name] = { revision, vhost };
+        allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
 
     const extractLastRevisionNumber = (list, lastRev) => {
@@ -395,30 +396,6 @@ export default function Environments() {
         }
         revisions.push({ env: event.target.name, revision: event.target.value, displayOnDevPortal });
         setRevision(revisions);
-    };
-
-    const handleDisplayOnDevPortal = (event, env) => {
-        const revisions = selectedRevision.filter((r) => r.env !== env);
-        const oldRevision = selectedRevision.find((r) => r.env === env);
-        revisions.push({
-            env: oldRevision.env,
-            revision: oldRevision.revision,
-            displayOnDevPortal: event.target.checked,
-        });
-        setRevision(revisions);
-    };
-
-    const isDisplayOnDevPortalChecked = (env) => {
-        if (allEnvDeployments[env].revision) {
-            return allEnvDeployments[env].revision.deploymentInfo.find((r) => r.name === env).displayOnDevportal;
-        }
-
-        const oldRevision = selectedRevision.find((r) => r.env === env);
-        let displayOnDevPortal = true;
-        if (oldRevision) {
-            displayOnDevPortal = oldRevision.displayOnDevPortal;
-        }
-        return displayOnDevPortal;
     };
 
     const handleVhostSelect = (event) => {
@@ -2026,11 +2003,10 @@ export default function Environments() {
                                             )}
                                     </TableCell>
                                     <TableCell align='left'>
-                                        <Switch
-                                            checked={isDisplayOnDevPortalChecked(row.name)}
-                                            onChange={(e) => handleDisplayOnDevPortal(e, row.name)}
-                                            disabled={api.isRevision}
-                                            name='displayOnDevPortal'
+                                        <DisplayDevportal
+                                            name={row.name}
+                                            api={api}
+                                            EnvDeployments={allEnvDeployments[row.name]}
                                         />
                                     </TableCell>
                                 </TableRow>

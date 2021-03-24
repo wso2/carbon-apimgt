@@ -1725,9 +1725,6 @@
   "Apis.Details.Environments.Environments.Deployments": {
     "defaultMessage": "Revisions"
   },
-  "Apis.Details.Environments.Environments.Kubernetes": {
-    "defaultMessage": "Kubernetes"
-  },
   "Apis.Details.Environments.Environments.api.gateways.heading": {
     "defaultMessage": "API Gateways"
   },
@@ -1772,9 +1769,6 @@
   },
   "Apis.Details.Environments.Environments.gateway.deployed.revision": {
     "defaultMessage": "Deployed Revision"
-  },
-  "Apis.Details.Environments.Environments.gateway.labels.heading": {
-    "defaultMessage": "Gateway Labels"
   },
   "Apis.Details.Environments.Environments.new.revision.name.heading1": {
     "defaultMessage": "Revision Name:"
@@ -1846,39 +1840,6 @@
     "defaultMessage": "Select Access URL"
   },
   "Apis.Details.Environments.Environments.undeploy.btn": {
-    "defaultMessage": "Undeploy"
-  },
-  "Apis.Details.Environments.MicroGateway.GatewayLabels": {
-    "defaultMessage": "Gateway Labels"
-  },
-  "Apis.Details.Environments.MicroGateway.access.url": {
-    "defaultMessage": "Access URL"
-  },
-  "Apis.Details.Environments.MicroGateway.deploy.button": {
-    "defaultMessage": "Deploy"
-  },
-  "Apis.Details.Environments.MicroGateway.deployed.revision": {
-    "defaultMessage": "Deployed Revision"
-  },
-  "Apis.Details.Environments.MicroGateway.description": {
-    "defaultMessage": "Description"
-  },
-  "Apis.Details.Environments.MicroGateway.devportal.display": {
-    "defaultMessage": "Display in devportal"
-  },
-  "Apis.Details.Environments.MicroGateway.label": {
-    "defaultMessage": "Label"
-  },
-  "Apis.Details.Environments.MicroGateway.labels.emptym1": {
-    "defaultMessage": "Gateway labels are not available."
-  },
-  "Apis.Details.Environments.MicroGateway.labels.emptym2": {
-    "defaultMessage": "You can request the administrator to add labels."
-  },
-  "Apis.Details.Environments.MicroGateway.select.table": {
-    "defaultMessage": "Select Revision"
-  },
-  "Apis.Details.Environments.MicroGateway.undeploy.btn": {
     "defaultMessage": "Undeploy"
   },
   "Apis.Details.Environments.deploy.vhost": {
@@ -2997,8 +2958,8 @@
   "Apis.Details.components.DeleteApiButton.title": {
     "defaultMessage": "Delete {type}"
   },
-  "Apis.Details.index.Tryout": {
-    "defaultMessage": "Try out"
+  "Apis.Details.index.Tryout.menu.name": {
+    "defaultMessage": "TryOut"
   },
   "Apis.Details.index.api.definition2": {
     "defaultMessage": "API definition"
