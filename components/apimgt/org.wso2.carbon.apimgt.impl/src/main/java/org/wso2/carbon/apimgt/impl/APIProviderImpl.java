@@ -9367,6 +9367,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void updateAPIDisplayOnDevportal(String apiId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment)
+            throws APIManagementException {
+
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
+                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
+        Set<APIRevisionDeployment> environmentsToUpdate = new HashSet<>();
+        for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
+            if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                    apiRevisionDeployment.getDeployment())) {
+                environmentsToUpdate.add(apiRevisionDeployment);
+            }
+        }
+        // if the provided deployment doesn't exist we are not adding to update list
+        if (environmentsToUpdate.size() > 0) {
+            apiMgtDAO.updateAPIRevisionDeployment(apiId, environmentsToUpdate);
+        } else {
+            throw new APIMgtResourceNotFoundException("deployment with " + apiRevisionDeployment.getDeployment() +
+                    " not found", ExceptionCodes.from(ExceptionCodes.EXISTING_DEPLOYMENT_NOT_FOUND,
+                    apiRevisionDeployment.getDeployment()));
+        }
+    }
+
     private API getAPIbyUUID(String apiId, APIRevision apiRevision)
             throws APIManagementException {
 
@@ -9379,8 +9412,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIRevisionDeployment getAPIRevisionDeployment(String name) throws APIManagementException {
-         return apiMgtDAO.getAPIRevisionDeploymentByName(name);
+    public APIRevisionDeployment getAPIRevisionDeployment(String name, String revisionId) throws APIManagementException {
+         return apiMgtDAO.getAPIRevisionDeploymentByNameAndRevsionID(name,revisionId);
     }
 
     @Override
@@ -9610,6 +9643,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
         }
 
+    }
+
+    @Override
+    public void updateAPIProductDisplayOnDevportal(String apiProductId, String apiRevisionId,
+                                                   APIRevisionDeployment apiRevisionDeployment) throws APIManagementException {
+
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + apiProductId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiProductId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
+                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
+        Set<APIRevisionDeployment> environmentsToUpdate = new HashSet<>();
+        for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
+            if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                    apiRevisionDeployment.getDeployment())) {
+                environmentsToUpdate.add(apiRevisionDeployment);
+            }
+        }
+        // if the provided deployment doesn't exist we are not adding to update list
+
+        if (environmentsToUpdate.size() > 0) {
+            apiMgtDAO.updateAPIRevisionDeployment(apiProductId, environmentsToUpdate);
+        } else {
+            throw new APIMgtResourceNotFoundException("deployment with " + apiRevisionDeployment.getDeployment() +
+                    " not found", ExceptionCodes.from(ExceptionCodes.EXISTING_DEPLOYMENT_NOT_FOUND,
+                    apiRevisionDeployment.getDeployment()));
+        }
     }
 
     @Override
