@@ -1323,6 +1323,7 @@ public class SQLConstants {
             "   AND API.API_ID = SUBS.API_ID " +
             "   AND API.API_NAME = ? " +
             "   AND API.API_VERSION = ? " +
+            "   AND API.ORGANIZATION_ID= ? " +
             "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
             " ORDER BY " +
             "   APP.NAME";
@@ -2229,6 +2230,7 @@ public class SQLConstants {
             "  API.API_PROVIDER = ? AND " +
             "  API.API_NAME = ? AND " +
             "  API.API_VERSION = ?  AND " +
+            "  API.ORGANIZATION_ID = ?  AND " +
                     "AUM.REVISION_UUID IS NULL " +
             " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
@@ -2249,6 +2251,7 @@ public class SQLConstants {
                     "  API.API_PROVIDER = ? AND " +
                     "  API.API_NAME = ? AND " +
                     "  API.API_VERSION = ?  AND " +
+                    "  API.ORGANIZATION_ID = ?  AND " +
                     "AUM.REVISION_UUID = ? " +
                     " ORDER BY AUM.URL_MAPPING_ID ASC ";
 

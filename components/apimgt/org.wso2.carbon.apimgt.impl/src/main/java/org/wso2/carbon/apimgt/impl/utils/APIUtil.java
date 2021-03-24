@@ -488,7 +488,8 @@ public final class APIUtil {
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
+                    api.getOrganizationId());
 
             for (URITemplate uriTemplate : uriTemplates) {
                 List<Scope> oldTemplateScopes = uriTemplate.retrieveAllScopes();
@@ -729,7 +730,8 @@ public final class APIUtil {
             Map<String, Scope> scopeToKeyMapping = getAPIScopes(api.getId(), tenantDomainName);
             api.setScopes(new LinkedHashSet<>(scopeToKeyMapping.values()));
 
-            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+            Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId(),
+                    api.getOrganizationId());
 
             // AWS Lambda: get paths
             OASParserUtil oasParserUtil = new OASParserUtil();

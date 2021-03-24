@@ -26,6 +26,6 @@ public interface SubscriptionsApiService {
       public Response blockSubscription(String subscriptionId, String blockState, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response getSubscriberInfoBySubscriptionId(String subscriptionId, MessageContext messageContext) throws APIManagementException;
       public Response getSubscriptionUsage(String subscriptionId, MessageContext messageContext) throws APIManagementException;
-      public Response getSubscriptions(String apiId, Integer limit, Integer offset, String ifNoneMatch, String query, MessageContext messageContext) throws APIManagementException;
+      public Response getSubscriptions(String apiId, String organizationId, Integer limit, Integer offset, String ifNoneMatch, String query, MessageContext messageContext) throws APIManagementException;
       public Response unBlockSubscription(String subscriptionId, String ifMatch, MessageContext messageContext) throws APIManagementException;
 }
