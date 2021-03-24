@@ -156,7 +156,7 @@ const styles = (theme) => {
             display: 'flex',
             [theme.breakpoints.down('sm')]: {
                 flexDirection: 'column',
-            }
+            },
         },
         listItemTextRoot: {
             padding: 0,
@@ -355,14 +355,14 @@ class Layout extends React.Component {
         // TODO: Refer to fix: https://github.com/mui-org/material-ui/issues/10076#issuecomment-361232810 ~tmkb
         let username = null;
 
-        if(user) {
+        if (user) {
             username = user.name;
             const count = (username.match(/@/g) || []).length;
             if (user.name.endsWith('@carbon.super') && count <= 1) {
                 username = user.name.replace('@carbon.super', '');
             }
         }
-        
+
         const commonStyle = {
             style: { top: 64 },
         };
