@@ -3879,9 +3879,6 @@
   "ServiceCatalog.Listing.Usages.usage": {
     "defaultMessage": "Usages of {serviceName}"
   },
-  "ServiceCatalog.Listing.components.ServiceCard.schema": {
-    "defaultMessage": "Schema"
-  },
   "ServiceCatalog.Listing.components.ServiceCard.type": {
     "defaultMessage": "Type"
   },

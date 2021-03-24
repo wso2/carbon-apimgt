@@ -6625,6 +6625,18 @@
       "value": "Create New API Product"
     }
   ],
+  "Apis.Listing.SampleAPI.continue.on.close": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "Apis.Listing.SampleAPI.continue.on.error": [
+    {
+      "type": 0,
+      "value": "Continue"
+    }
+  ],
   "Apis.Listing.SampleAPI.popup.create.complete": [
     {
       "type": 0,
@@ -7831,12 +7843,6 @@
       "value": "Yes"
     }
   ],
-  "ServiceCatalog.Listing.Listing.created.time": [
-    {
-      "type": 0,
-      "value": "Created Time"
-    }
-  ],
   "ServiceCatalog.Listing.Listing.error.delete": [
     {
       "type": 0,
@@ -7855,46 +7861,10 @@
       "value": "Service Catalog"
     }
   ],
-  "ServiceCatalog.Listing.Listing.help.tooltip": [
-    {
-      "type": 0,
-      "value": "The Service Catalog enables API-first Integration"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.name": [
-    {
-      "type": 0,
-      "value": "Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.schema.type": [
-    {
-      "type": 0,
-      "value": "Schema Type"
-    }
-  ],
   "ServiceCatalog.Listing.Listing.service.deleted.successfully": [
     {
       "type": 0,
       "value": "Service deleted successfully!"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.service.url": [
-    {
-      "type": 0,
-      "value": "Service URL"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.usage": [
-    {
-      "type": 0,
-      "value": "Number of Usages"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.version": [
-    {
-      "type": 0,
-      "value": "Version"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.Heading1.description": [
@@ -8149,6 +8119,18 @@
       "value": "serviceName"
     }
   ],
+  "ServiceCatalog.Listing.components.ServiceCard.type": [
+    {
+      "type": 0,
+      "value": "Type"
+    }
+  ],
+  "ServiceCatalog.Listing.components.ServiceCard.version": [
+    {
+      "type": 0,
+      "value": "Version"
+    }
+  ],
   "ServiceCatalog.Listing.onboarding.create.new": [
     {
       "type": 0,
@@ -8159,6 +8141,42 @@
     {
       "type": 0,
       "value": "Enabling API-first Integration"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": [
+    {
+      "type": 0,
+      "value": "Created Time"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.name": [
+    {
+      "type": 0,
+      "value": "Service"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.schema.type": [
+    {
+      "type": 0,
+      "value": "Schema Type"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.service.url": [
+    {
+      "type": 0,
+      "value": "Service URL"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.usage": [
+    {
+      "type": 0,
+      "value": "Number of Usages"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.version": [
+    {
+      "type": 0,
+      "value": "Version"
     }
   ],
   "Settings.Alerts.Alerts.configure.alert": [

@@ -17,8 +17,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Alert from 'AppComponents/Shared/Alert';
@@ -30,8 +29,6 @@ import ServiceCatalogTopMenu from 'AppComponents/ServiceCatalog/Listing/componen
 import ServicesCardView from 'AppComponents/ServiceCatalog/Listing/components/ServicesCardView';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import Help from '@material-ui/icons/Help';
-import Tooltip from '@material-ui/core/Tooltip';
 
 
 /**
