@@ -2390,6 +2390,28 @@ class API extends Resource {
     }
 
     /**
+     * Change displayInDevportal.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {string} deploymentId Id of the deployment.
+     * @param {Object} body Revision Object.
+     * */
+    displayInDevportalAPI(apiId, deploymentId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].updateAPIDeployment(
+                    {
+                        apiId: apiId,
+                        deploymentId: deploymentId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
      * Create API from service
      * @returns {promise} Add response.
      */
