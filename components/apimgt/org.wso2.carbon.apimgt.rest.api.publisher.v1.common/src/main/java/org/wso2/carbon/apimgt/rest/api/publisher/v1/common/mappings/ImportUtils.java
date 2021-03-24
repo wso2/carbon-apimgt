@@ -630,8 +630,6 @@ public class ImportUtils {
         JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
         JsonObject configObject = configElement.getAsJsonObject();
 
-        configObject = preProcessEndpointConfig(configObject);
-
         // Locate the "provider" within the "id" and set it as the current user
         String apiName = configObject.get(ImportExportConstants.API_NAME_ELEMENT).getAsString();
 
@@ -667,45 +665,6 @@ public class ImportUtils {
         JsonObject jsonObject = retrievedAPIProductDtoJson(pathToArchive);
 
         return new Gson().fromJson(jsonObject, APIProductDTO.class);
-    }
-
-    /**
-     * This function will preprocess endpoint config security.
-     *
-     * @param configObject Data object from the API/API Product configuration
-     * @return API config object with pre processed endpoint config
-     */
-    private static JsonObject preProcessEndpointConfig(JsonObject configObject) {
-
-        if (configObject.has(ImportExportConstants.ENDPOINT_CONFIG)) {
-            JsonObject endpointConfig = configObject.get(ImportExportConstants.ENDPOINT_CONFIG).getAsJsonObject();
-            if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
-                JsonObject endpointSecurity = endpointConfig.get(APIConstants.ENDPOINT_SECURITY).getAsJsonObject();
-                if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
-                    JsonObject endpointSecuritySandbox = endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)
-                            .getAsJsonObject();
-                    if (endpointSecuritySandbox.has(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS)) {
-                        String customParameters = endpointSecuritySandbox
-                                .get(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS).toString();
-                        endpointSecuritySandbox.remove(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS);
-                        endpointSecuritySandbox
-                                .addProperty(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS, customParameters);
-                    }
-                }
-                if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
-                    JsonObject endpointSecuritySandbox = endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION)
-                            .getAsJsonObject();
-                    if (endpointSecuritySandbox.has(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS)) {
-                        String customParameters = endpointSecuritySandbox
-                                .get(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS).toString();
-                        endpointSecuritySandbox.remove(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS);
-                        endpointSecuritySandbox
-                                .addProperty(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS, customParameters);
-                    }
-                }
-            }
-        }
-        return configObject;
     }
 
     /**
