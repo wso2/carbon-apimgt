@@ -49,7 +49,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.UUID;
 
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
@@ -186,7 +185,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public MetaInfo getMetaInfo() {
         MetaInfo metaInfo = new MetaInfo();
-        metaInfo.setCorrelationId(UUID.randomUUID().toString());
+        Object correlationId  = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(Constants.CORRELATION_ID);
+        if (correlationId instanceof String){
+            metaInfo.setCorrelationId((String) correlationId);
+        }
         metaInfo.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
         Map<String, String> configMap = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
                 .getAPIAnalyticsConfiguration().getReporterProperties();

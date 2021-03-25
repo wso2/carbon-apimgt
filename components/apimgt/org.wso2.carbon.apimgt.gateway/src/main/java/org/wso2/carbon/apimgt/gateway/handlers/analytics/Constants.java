@@ -58,4 +58,6 @@ public class Constants {
     public static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 
     public static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
+
+    public static final String CORRELATION_ID = "correlation_id";
 }
