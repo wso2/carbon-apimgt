@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
@@ -11,7 +11,8 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import Alert from 'AppComponents/Shared/Alert';
 import Grid from '@material-ui/core/Grid';
 import StepConnector from '@material-ui/core/StepConnector';
-import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { Link } from 'react-router-dom';
@@ -128,6 +129,14 @@ export default function NewCustomizedStepper() {
     && api.endpointConfig.implementation_status === 'prototyped';
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
+    const { tenantList } = useContext(ApiContext);
+    const { settings, user } = useAppContext();
+    const userNameSplit = user.name.split('@');
+    const tenantDomain = userNameSplit[userNameSplit.length - 1];
+    let devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview`;
+    if (tenantList && tenantList.length > 0) {
+        devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
+    }
     const steps = ['Develop', 'Deploy', 'Test', 'Publish'];
 
     let activeStep = 0;
@@ -205,6 +214,33 @@ export default function NewCustomizedStepper() {
                                         />
                                     </Typography>
                                 </Grid>
+                            </Box>
+                        </Grid>
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='center'
+                            justify='center'
+                        >
+                            <Box mt={1}>
+                                <Typography variant='h7' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.CustomizedStepper.view.devportal'
+                                        defaultMessage='View in devportal'
+                                    />
+                                </Typography>
+                            </Box>
+                            <Box ml={1} mt={1}>
+                                <a
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    href={devportalUrl}
+                                >
+                                    <LaunchIcon
+                                        color='primary'
+                                        fontSize='small'
+                                    />
+                                </a>
                             </Box>
                         </Grid>
                     </>
