@@ -72,7 +72,7 @@ export default {
     palette: {
         primary: {
             // light: will be calculated from palette.primary.main,
-            main: '#15b8cf',
+            main: '#006E9C',
             // dark: will be calculated from palette.primary.main,
             // contrastText: will be calculated to contrast with palette.primary.main
         },
@@ -193,7 +193,6 @@ export default {
                 restApiIcon: '/site/public/images/landing-icons/restapi.svg',
                 soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
                 streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
-                websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
             },
             menu: {
                 primary: '#34679D',
@@ -207,6 +206,12 @@ export default {
             onboarding: {
                 buttonText: '#FF7300',
                 buttonBorder: '#FCA574',
+            },
+            icons: {
+                graphql: '/site/public/images/service_catalog/icons/graphql.svg',
+                asyncapi: '/site/public/images/service_catalog/icons/async.svg',
+                oas3: '/site/public/images/service_catalog/icons/oas3.png',
+                swagger: '/site/public/images/service_catalog/icons/swagger.svg',
             },
         },
     },

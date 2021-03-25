@@ -31,7 +31,7 @@ const ServiceCatalogComponent = () => {
                 exact
                 path='/service-catalog'
                 key={Date.now()}
-                component={(props) => <Listing {...props} />}
+                component={Listing}
             />
             <Route
                 path='/service-catalog/:service_uuid/overview'

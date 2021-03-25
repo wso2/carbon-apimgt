@@ -362,7 +362,6 @@ class Layout extends React.Component {
                 username = user.name.replace('@carbon.super', '');
             }
         }
-
         const commonStyle = {
             style: { top: 64 },
         };

@@ -2158,6 +2158,9 @@ paths:
                 additionalProperties:
                   type: string
                   description: Additional attributes specified as a stringified JSON with API's schema
+                inlineAPIDefinition:
+                  type: string
+                  description: Inline content of the OpenAPI definition
       responses:
         201:
           description: |
@@ -2388,6 +2391,9 @@ paths:
                   type: string
                   description: OpenAPI definition as a file
                   format: binary
+                inlineAPIDefinition:
+                  type: string
+                  description: Inline content of the OpenAPI definition
       responses:
         200:
           description: |
