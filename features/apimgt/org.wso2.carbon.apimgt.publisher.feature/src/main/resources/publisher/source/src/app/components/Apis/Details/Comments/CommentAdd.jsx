@@ -98,7 +98,7 @@ class CommentAdd extends React.Component {
     handleClickCancel() {
         this.setState({ content: '' });
         const { handleShowReply } = this.props;
-        handleShowReply(-1);
+        handleShowReply();
     }
 
     /**
@@ -149,7 +149,7 @@ class CommentAdd extends React.Component {
             Alert.error('You cannot enter a blank comment');
         }
         this.setState({ currentLength: 0 });
-        handleShowReply(-1);
+        handleShowReply();
     }
 
     /**

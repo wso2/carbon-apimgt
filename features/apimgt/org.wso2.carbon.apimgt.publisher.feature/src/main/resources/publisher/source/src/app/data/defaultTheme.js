@@ -179,7 +179,7 @@ export default {
         },
         // lifeCycleImage: '/site/public/images/logo.svg',
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
-        adminRole: 'admin',
+        adminRole: 'admin@carbon.super',
         commentsLimit: 5,
         maxCommentLength: 256,
         productSampleProgess: {
