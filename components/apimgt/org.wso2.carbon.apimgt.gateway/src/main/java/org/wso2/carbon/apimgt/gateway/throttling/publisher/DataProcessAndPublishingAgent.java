@@ -11,6 +11,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -237,7 +238,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         //Publish jwt claims
         if (getThrottleProperties().isEnableJwtConditions()) {
             if (authenticationContext.getCallerToken() != null) {
-                Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
+                Map<String, String> assertions = JWTUtil.getJWTClaims(authenticationContext.getCallerToken());
                 if (assertions != null) {
                     jsonObMap.putAll(assertions);
                 }
