@@ -93,7 +93,7 @@ jobs:
           if-no-files-found: warn
 
   show-report:
-    if: always()
+    if: always() && ${{ github.event.label.name != 'Type/React-UI' }}
     needs: build-product
     runs-on: 'ubuntu-latest'
     steps:
