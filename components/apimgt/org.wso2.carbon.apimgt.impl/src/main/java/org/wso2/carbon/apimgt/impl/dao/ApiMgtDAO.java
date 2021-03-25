@@ -8884,8 +8884,8 @@ public class ApiMgtDAO {
     public APIKey getKeyMappingFromApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException {
 
-        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE FROM AM_APPLICATION_KEY_MAPPING " +
-                "WHERE APPLICATION_ID=? AND UUID = ?";
+        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE,CREATE_MODE FROM " +
+                "AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID=? AND UUID = ?";
         Set<APIKey> apiKeyList = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -8899,6 +8899,11 @@ public class ApiMgtDAO {
                     apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
                     apiKey.setType(resultSet.getString("KEY_TYPE"));
                     apiKey.setState(resultSet.getString("STATE"));
+                    String createMode = resultSet.getString("CREATE_MODE");
+                    if (StringUtils.isEmpty(createMode)) {
+                        createMode = APIConstants.OAuthAppMode.CREATED.name();
+                    }
+                    apiKey.setCreateMode(createMode);
                     return apiKey;
                 }
             }
