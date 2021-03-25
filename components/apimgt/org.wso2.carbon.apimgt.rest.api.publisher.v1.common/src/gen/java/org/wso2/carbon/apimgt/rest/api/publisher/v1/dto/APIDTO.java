@@ -266,6 +266,7 @@ return null;
     private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
+    private Boolean advertiseOnly = null;
 
   /**
    * UUID of the api registry artifact 
@@ -1220,6 +1221,24 @@ return null;
     this.serviceInfo = serviceInfo;
   }
 
+  /**
+   * Whether this is an advertise only API 
+   **/
+  public APIDTO advertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether this is an advertise only API ")
+  @JsonProperty("advertiseOnly")
+  public Boolean isAdvertiseOnly() {
+    return advertiseOnly;
+  }
+  public void setAdvertiseOnly(Boolean advertiseOnly) {
+    this.advertiseOnly = advertiseOnly;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1283,12 +1302,13 @@ return null;
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
-        Objects.equals(serviceInfo, API.serviceInfo);
+        Objects.equals(serviceInfo, API.serviceInfo) &&
+        Objects.equals(advertiseOnly, API.advertiseOnly);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseOnly);
   }
 
   @Override
@@ -1350,6 +1370,7 @@ return null;
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
+    sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("}");
     return sb.toString();
   }

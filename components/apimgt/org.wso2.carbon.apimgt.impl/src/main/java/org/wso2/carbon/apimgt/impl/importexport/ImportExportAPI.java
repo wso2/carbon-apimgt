@@ -34,22 +34,23 @@ public interface ImportExportAPI {
     /**
      * Used to export API artifact
      *
-     * @param apiId                 UUID of API.
-     * @param name                  name of API.
-     * @param version               version of API.
-     * @param revisionNum           revision number.
-     * @param providerName          provider of API.
-     * @param preserveStatus        Preserve API status on export
-     * @param format                Format of output documents. Can be YAML or JSON
-     * @param preserveDocs          Preserve documentation on Export.
-     * @param exportLatestRevision  Export the latest revision.
+     * @param apiId                UUID of API.
+     * @param name                 name of API.
+     * @param version              version of API.
+     * @param revisionNum          revision number.
+     * @param providerName         provider of API.
+     * @param preserveStatus       Preserve API status on export
+     * @param format               Format of output documents. Can be YAML or JSON
+     * @param preserveDocs         Preserve documentation on Export.
+     * @param exportLatestRevision Export the latest revision.
+     * @param isAdvertiseOnly      Whether an advertise only API.
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
-                          boolean preserveStatus, ExportFormat format, boolean preserveDocs,
-                          boolean preserveCredentials, boolean exportLatestRevision)
+            boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
+            boolean exportLatestRevision, boolean isAdvertiseOnly)
             throws APIManagementException, APIImportExportException;
 
 

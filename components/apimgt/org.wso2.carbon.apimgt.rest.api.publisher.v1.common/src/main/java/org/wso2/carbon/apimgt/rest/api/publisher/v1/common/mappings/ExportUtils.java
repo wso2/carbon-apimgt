@@ -148,10 +148,15 @@ public class ExportUtils {
      */
     public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
                                  String userName, ExportFormat exportFormat, boolean preserveStatus,
-                                 boolean preserveDocs)
+                                 boolean preserveDocs, boolean isAdvertiseOnly)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
+        // If explicitly advertise only property has been specified as true, make it true in API DTO as well.
+        if (isAdvertiseOnly) {
+            setAdvertiseOnlySpecificPropertiesToDTO(apiDtoToReturn);
+        }
+
         try {
             // Create temp location for storing API data
             File exportFolder = CommonUtil.createTempDirectory(apiIdentifier);
@@ -178,15 +183,17 @@ public class ExportUtils {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
             }
 
-            addSequencesToArchive(archivePath, api);
-
             // Set API status to created if the status is not preserved
             if (!preserveStatus) {
                 apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
             }
 
             addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
-            addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
+
+            if (!apiDtoToReturn.isAdvertiseOnly()) {
+                addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
+                addSequencesToArchive(archivePath, api);
+            }
             addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
 
             // Export mTLS authentication related certificates
@@ -200,6 +207,16 @@ public class ExportUtils {
         } catch (RegistryException e) {
             throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         }
+    }
+
+    /**
+     * Set the properties specific to advertise only APIs
+     *
+     * @param apiDto API DTO to export
+     */
+    private static void setAdvertiseOnlySpecificPropertiesToDTO(APIDTO apiDto) {
+        apiDto.setAdvertiseOnly(Boolean.TRUE);
+        apiDto.setMediationPolicies(null);
     }
 
     /**
@@ -997,7 +1014,7 @@ public class ExportUtils {
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
-                    isStatusPreserved, preserveDocs);
+                    isStatusPreserved, preserveDocs, Boolean.FALSE);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }

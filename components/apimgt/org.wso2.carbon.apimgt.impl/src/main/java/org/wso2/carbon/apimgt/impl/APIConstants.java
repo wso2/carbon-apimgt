@@ -2227,7 +2227,7 @@ public final class APIConstants {
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
         public static final String REST_API_ADMIN_VERSION = "v0.17";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
-        public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
+        public static final String REST_API_PUBLISHER_API_IMPORT_RESOURCE = "/apis/import";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
         public static final String IMPORT_API_OVERWRITE = "overwrite";
         public static final String IMPORT_API_ARCHIVE_FILE = "file";

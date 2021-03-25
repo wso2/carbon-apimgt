@@ -8564,6 +8564,11 @@ components:
             outdated:
               type: boolean
               example: false
+        advertiseOnly:
+          description: |
+            Whether this is an advertise only API
+          type: boolean
+          example: false
       x-scopes:
         - apim:api_create
         - apim:api_import_export

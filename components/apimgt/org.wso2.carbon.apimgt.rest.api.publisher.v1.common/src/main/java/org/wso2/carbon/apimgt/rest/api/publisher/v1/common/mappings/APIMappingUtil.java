@@ -204,6 +204,9 @@ public class APIMappingUtil {
         if (dto.isEnableStore() != null) {
             model.setEnableStore(dto.isEnableStore());
         }
+        if (dto.isAdvertiseOnly() != null) {
+            model.setAdvertiseOnly(dto.isAdvertiseOnly());
+        }
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
         } else {
@@ -859,6 +862,7 @@ public class APIMappingUtil {
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableStore(model.isEnableStore());
+        dto.setAdvertiseOnly(model.isAdvertiseOnly());
         dto.setTestKey(model.getTestKey());
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {
             dto.setResponseCachingEnabled(Boolean.TRUE);

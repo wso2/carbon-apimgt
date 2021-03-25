@@ -53,9 +53,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
-                          boolean preserveStatus,
-                          ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-                          boolean exportLatestRevision)
+            boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
+            boolean exportLatestRevision, boolean isAdvertiseOnly)
             throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -95,7 +94,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs);
+                preserveDocs, isAdvertiseOnly);
     }
 
     @Override
@@ -111,7 +110,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         api.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs);
+                preserveDocs, Boolean.FALSE);
 
     }
 
