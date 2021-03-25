@@ -267,6 +267,13 @@
 
         <AuthToken>{{apim.analytics.auth_token}}</AuthToken>
 
+        {% if apim.analytics.response_schema_name is defined %}
+        <ResponseSchemaName>{{apim.analytics.response_schema_name}}</ResponseSchemaName>
+        {% endif %}
+        {% if apim.analytics.fault_schema_name is defined %}
+        <FaultSchemaName>{{apim.analytics.fault_schema_name}}</FaultSchemaName>
+        {% endif %}
+
         <!-- Event publisher implementation -->
         {% if apim.analytics.reporter_impl is defined %}
         <ReporterClass>{{apim.analytics.reporter_impl}}</ReporterClass>

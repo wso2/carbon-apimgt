@@ -20,16 +20,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.AnalyticsDataPublisher;
 
-import java.util.Map;
-
 /**
  * Configuration holder.
  */
 public class AnalyticsServiceReferenceHolder {
     private static final Log log = LogFactory.getLog(AnalyticsServiceReferenceHolder.class);
     private static final AnalyticsServiceReferenceHolder instance = new AnalyticsServiceReferenceHolder();
-
-    private Map<String, String> configurations;
+    private AnalyticsCommonConfiguration analyticsCommonConfiguration;
 
     private AnalyticsServiceReferenceHolder() {
 
@@ -39,14 +36,14 @@ public class AnalyticsServiceReferenceHolder {
         return instance;
     }
 
-    public Map<String, String> getConfigurations() {
-        return configurations;
+    public AnalyticsCommonConfiguration getConfigurations() {
+        return analyticsCommonConfiguration;
     }
 
-    public void setConfigurations(Map<String, String> configurations) {
-        this.configurations = configurations;
+    public void setConfigurations(AnalyticsCommonConfiguration analyticsCommonConfiguration) {
+        this.analyticsCommonConfiguration = analyticsCommonConfiguration;
         // initialize data publisher at server start up
-        AnalyticsDataPublisher.getInstance().initialize(configurations);
+        AnalyticsDataPublisher.getInstance().initialize(analyticsCommonConfiguration);
         log.debug("Analytics data publisher initialized.");
     }
 }
