@@ -195,8 +195,6 @@ function ProductResourcesEdit(props) {
     const [selectedApiPaths, setSelectedApiPaths] = useState([]);
     const [selectedApi, setSelectedApi] = useState(null);
     const [fromSearch, setFromSearch] = useState(false);
-    // Initialize the rest api libraries
-    const apiRestClient = new API();
 
     /**
      * This method is filtering apis base on the searchText entered. In no searchText provided it will give all apis.
@@ -271,7 +269,8 @@ function ProductResourcesEdit(props) {
     // Get the api swagger after an api is selected
     const getApiSwagger = (apiSelected) => {
         const { id } = apiSelected;
-        const promisedAPI = apiRestClient.getSwagger(id);
+        const chosenAPI = new API(apiSelected);
+        const promisedAPI = chosenAPI.getSwagger();
         promisedAPI
             .then((response) => {
                 if (response.obj.paths !== undefined) {
