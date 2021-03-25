@@ -2070,21 +2070,23 @@ public class APIMappingUtil {
      * @return a set of operations from a given swagger definition
      */
     private static List<APIOperationsDTO> getOperationsFromAPI(API api) {
-
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
             APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
 
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
-                String uriMapping = api.getWsUriMapping().get(
-                        operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
-                operationsDTO.setUriMapping(uriMapping);
+                Map<String, String> wsUriMappings = api.getWsUriMapping();
+                if (wsUriMappings != null) {
+                    String wsUriMapping = wsUriMappings
+                            .get(operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
+                    if (wsUriMapping != null) {
+                        operationsDTO.setUriMapping(wsUriMapping);
+                    }
+                }
             }
             operationsDTOList.add(operationsDTO);
         }
-
         return operationsDTOList;
     }
 

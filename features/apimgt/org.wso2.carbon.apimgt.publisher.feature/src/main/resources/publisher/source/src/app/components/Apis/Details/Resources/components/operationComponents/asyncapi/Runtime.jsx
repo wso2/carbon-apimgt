@@ -37,7 +37,7 @@ export default function Runtime(props) {
     operation.runtime = operation.runtime || { };
 
     const buildCallbackURL = () => {
-        return `https://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
+        return `http://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
             + `webhooks_events_receiver_resource?topic=${target.toLowerCase()}`;
     };
 

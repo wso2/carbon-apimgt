@@ -362,8 +362,6 @@ public class PublisherCommonUtils {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
-//            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(originalAPI);
-//            apiProvider.saveAsyncApiDefinition(originalAPI, apiDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 

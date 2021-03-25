@@ -197,9 +197,6 @@ export default function Resources(props) {
             }
             case 'add': {
                 const parameters = extractPathParameters(data.target, openAPISpec);
-                console.log('// ========== parameters ===========');
-                console.log(parameters);
-                console.log('============= parameters ======== //');
                 if (!addedOperations[data.target]) {
                     // If target is not there add an empty object
                     addedOperations[data.target] = {};

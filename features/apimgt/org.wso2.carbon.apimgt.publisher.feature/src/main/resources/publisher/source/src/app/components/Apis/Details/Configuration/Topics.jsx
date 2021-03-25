@@ -167,6 +167,7 @@ export default function Topics(props) {
                 if (!addedOperations[data.target]) {
                     addedOperations[data.target] = {};
                 }
+                addedOperations[data.target].parameters = parameters;
                 // eslint-disable-next-line no-case-declarations
                 let alreadyExistCount = 0;
                 for (let currentVerb of data.verbs) {
@@ -177,10 +178,7 @@ export default function Topics(props) {
                         console.warn(message);
                         alreadyExistCount++;
                     } else {
-                        addedOperations[data.target] = {
-                            parameters,
-                            [currentVerb]: { },
-                        };
+                        addedOperations[data.target][currentVerb] = { };
                     }
                 }
                 if (alreadyExistCount === data.verbs.length) {
@@ -190,7 +188,8 @@ export default function Topics(props) {
                 return addedOperations;
             case 'parameter':
                 updatedOperation.parameters = updatedOperation.parameters || { };
-                updatedOperation.parameters[value.name] = value;
+                updatedOperation.parameters[value.name] = { ...value };
+                delete updatedOperation.parameters[value.name].name;
                 return {
                     ...currentOperations,
                     [target]: { ...currentOperations[target], parameters: updatedOperation.parameters },
@@ -461,7 +460,7 @@ export default function Topics(props) {
                                         alignItems='stretch'
                                     >
                                         {operation.subscribe && (
-                                            <Grid key={target} item md={12}>
+                                            <Grid key={target + '_subscribe'} item md={12}>
                                                 <AsyncOperation
                                                     target={target}
                                                     verb='subscribe'
@@ -475,7 +474,7 @@ export default function Topics(props) {
                                             </Grid>
                                         )}
                                         {operation.publish && (
-                                            <Grid key={target} item md={12}>
+                                            <Grid key={target + '_publish'} item md={12}>
                                                 <AsyncOperation
                                                     target={target}
                                                     verb='publish'

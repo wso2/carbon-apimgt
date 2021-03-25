@@ -117,7 +117,7 @@ export default function ApiCreateAsyncAPI(props) {
 
     const protocolKeys = {
         WebSocket: 'WS',
-        'Server Sent Events (SSE)': 'SSE',
+        SSE: 'SSE',
         WebSub: 'WEBSUB',
     };
 

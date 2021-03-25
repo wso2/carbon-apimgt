@@ -1711,8 +1711,9 @@ public class AsyncApiParser extends APIDefinition {
             document.components.securitySchemes = new HashMap<>();
         }
 
-        Aai20SecurityScheme oauth2SecurityScheme = new Aai20SecurityScheme(document.components, "oauth2");
-        oauth2SecurityScheme.type = "oauth2";
+        Aai20SecurityScheme oauth2SecurityScheme = new Aai20SecurityScheme(document.components,
+                APIConstants.DEFAULT_API_SECURITY_OAUTH2);
+        oauth2SecurityScheme.type = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
 
         if (oauth2SecurityScheme.flows == null) {
             oauth2SecurityScheme.flows = new Aai20OAuthFlows(oauth2SecurityScheme);
@@ -1733,11 +1734,11 @@ public class AsyncApiParser extends APIDefinition {
         oauth2SecurityScheme.flows.implicit.scopes = scopes;
 
         Extension xScopeBindings = oauth2SecurityScheme.flows.implicit.createExtension();
-        xScopeBindings.name = "x-scopes-bindings";
+        xScopeBindings.name = APIConstants.SWAGGER_X_SCOPES_BINDINGS;
         xScopeBindings.value = scopeBindings;
-        oauth2SecurityScheme.flows.implicit.addExtension("x-scopes-bindings", xScopeBindings);
+        oauth2SecurityScheme.flows.implicit.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, xScopeBindings);
 
-        document.components.securitySchemes.put("oauth2", oauth2SecurityScheme);
+        document.components.securitySchemes.put(APIConstants.DEFAULT_API_SECURITY_OAUTH2, oauth2SecurityScheme);
 
         return Library.writeDocumentToJSONString(document);
     }
