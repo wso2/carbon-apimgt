@@ -650,7 +650,7 @@ class TokenManager extends React.Component {
                         variant='contained'
                         color='primary'
                         className={classes.cleanUpButton}
-                        onClick={this.cleanUpKeys(selectedTab, keys.get(selectedTab).keyMappingId)}
+                        onClick={() => this.cleanUpKeys(selectedTab, keys.get(selectedTab).keyMappingId)}
                     >
                         <FormattedMessage
                             defaultMessage='Clean up'
