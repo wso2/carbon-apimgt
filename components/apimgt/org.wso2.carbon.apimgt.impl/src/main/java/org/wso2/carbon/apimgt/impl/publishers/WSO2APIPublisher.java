@@ -134,7 +134,7 @@ public class WSO2APIPublisher implements APIPublisher {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             apiArchive = importExportAPI.exportAPI(api.getUuid(), api.getId().getName(), api.getId().getVersion(),
                     String.valueOf(api.getRevisionId()), api.getId().getProviderName(), Boolean.TRUE, ExportFormat.JSON,
-                    true, true, Boolean.FALSE, Boolean.TRUE);
+                    Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE);
             if (log.isDebugEnabled()) {
                 log.debug("API successfully exported to file: " + apiArchive.getName());
             }
