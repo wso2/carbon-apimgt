@@ -326,18 +326,20 @@ const SampleAPI = (props) => {
                                             />
                                         </Button>
                                     </Grid>
-                                    <Grid item xs={2}>
-                                        <Link
-                                            underline='none'
-                                            component={RouterLink}
-                                            to={newSampleAPI ? '/apis/' + newSampleAPI.id + '/overview' : '/'}
-                                        >
-                                            <FormattedMessage
-                                                id='Apis.Listing.SampleAPI.continue.on.error'
-                                                defaultMessage='Continue'
-                                            />
-                                        </Link>
-                                    </Grid>
+                                    {newSampleAPI && (
+                                        <Grid item xs={2}>
+                                            <Link
+                                                underline='none'
+                                                component={RouterLink}
+                                                to={`/apis/${newSampleAPI.id}/overview`}
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Listing.SampleAPI.continue.on.error'
+                                                    defaultMessage='Continue'
+                                                />
+                                            </Link>
+                                        </Grid>
+                                    )}
                                 </>
                             )}
                         </Grid>

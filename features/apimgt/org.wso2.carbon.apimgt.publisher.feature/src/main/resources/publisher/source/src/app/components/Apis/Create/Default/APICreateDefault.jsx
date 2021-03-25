@@ -337,8 +337,8 @@ function APICreateDefault(props) {
                 <FormattedMessage
                     id='Apis.Create.Default.APICreateDefault.api.sub.heading'
                     defaultMessage={
-                        'Create an API by providing a Name, a Version, a Context,'
-                        + ' Backend Endpoint(s) (optional), and Business Plans (optional).'
+                        'Create an API by providing a Name, a Version, a Context and'
+                        + ' Backend Endpoint (optional)'
                     }
                 />
             </Typography>
@@ -376,10 +376,7 @@ function APICreateDefault(props) {
                 <Typography variant='caption'>
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.webSocket.sub.heading'
-                        defaultMessage={
-                            'Create a WebSocket API by providing a Name, a Context,'
-                            + ' and Business Plans (optional).'
-                        }
+                        defaultMessage='Create a WebSocket API by providing a Name, and a Context.'
                     />
                 </Typography>
             </>
