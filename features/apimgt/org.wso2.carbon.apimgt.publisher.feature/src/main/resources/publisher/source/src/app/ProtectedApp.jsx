@@ -44,7 +44,7 @@ import Utils from 'AppData/Utils';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
-    <Suspense fallback={<Progress per={50} message='Loading components ...' />}>
+    <Suspense fallback={<Progress per={30} message='Loading components ...' />}>
         <Apis />
     </Suspense>
 );
@@ -151,11 +151,11 @@ export default class Protected extends Component {
         const {
             custom: {
                 title: {
-                    prefix, sufix,
+                    prefix, suffix,
                 },
             },
         } = localTheme;
-        return (prefix + sufix);
+        return (prefix + suffix);
     }
 
     /**

@@ -31,11 +31,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.DigestAuthConstants;
 
@@ -396,7 +399,13 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             if (StringUtils.isEmpty(wwwHeader)) {
                 String errorDesc = "Digest authentication is not supported by the backend";
                 log.error(HttpHeaders.WWW_AUTHENTICATE + " header is not found. " + errorDesc);
-                Utils.setFaultPayload(messageContext, getFaultPayload("Unauthenticated at backend level", errorDesc));
+                messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Unauthenticated at backend level");
+                messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDesc);
+                Mediator sequence = messageContext.getSequence(APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+                // Invoke the custom error handler specified by the user
+                if (sequence != null) {
+                    sequence.mediate(messageContext);
+                }
                 Utils.sendFault(messageContext, HttpStatus.SC_UNAUTHORIZED);
                 return false;
             }

@@ -24,10 +24,12 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Link from '@material-ui/core/Link';
+import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Alert from 'AppComponents/Shared/Alert';
 import Configurations from 'Config';
+import { getSampleServiceMeta, getSampleOpenAPI } from 'AppData/SamplePizzaShack';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -74,28 +76,23 @@ function Onboarding(props) {
     const intl = useIntl();
     const { history } = props;
 
-    /**
-     * Function for adding a sample service
-     */
-    const addSample = () => {
-        const promisedService = ServiceCatalog.addSampleService();
+    const handleOnClick = () => {
+        const serviceMetadata = getSampleServiceMeta();
+        const inlineContent = getSampleOpenAPI();
+        const promisedService = ServiceCatalog.addService(serviceMetadata, inlineContent);
         promisedService.then(() => {
             Alert.info(intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Onboarding.add.sample.success',
                 defaultMessage: 'Sample Service added successfully!',
             }));
+            // Reload the listing page
+            history.push('/service-catalog');
         }).catch(() => {
             Alert.error(intl.formatMessage({
                 id: 'ServiceCatalog.Listing.Onboarding.error.creating.sample.service',
                 defaultMessage: 'Error while creating Sample Service',
             }));
         });
-    };
-
-    const handleOnClick = () => {
-        addSample();
-        // Reload the listing page
-        history.push('/service-catalog');
     };
 
     return (
@@ -105,7 +102,7 @@ function Onboarding(props) {
                     <Box textAlign='center' mb={2}>
                         <Typography variant='h6'>
                             <FormattedMessage
-                                id='Apis.Listing.SampleAPI.SampleAPI.create.new'
+                                id='ServiceCatalog.Listing.onboarding.create.new'
                                 defaultMessage='Service Catalog'
                             />
                         </Typography>
@@ -115,7 +112,7 @@ function Onboarding(props) {
                     <Box textAlign='center'>
                         <Typography variant='body2'>
                             <FormattedMessage
-                                id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
+                                id='ServiceCatalog.Listing.onboarding.description'
                                 defaultMessage='Enabling API-first Integration'
                             />
                         </Typography>
@@ -205,7 +202,7 @@ function Onboarding(props) {
                                 />
                             </Typography>
                             <Typography variant='body1'>
-                                <Link
+                                <Button
                                     style={{ textDecoration: 'none' }}
                                     className={classes.links}
                                     onClick={handleOnClick}
@@ -215,7 +212,7 @@ function Onboarding(props) {
                                         id='ServiceCatalog.Listing.Onboarding.add.sample.service'
                                         defaultMessage='Add Sample Service'
                                     />
-                                </Link>
+                                </Button>
                             </Typography>
                         </Box>
                     </Box>

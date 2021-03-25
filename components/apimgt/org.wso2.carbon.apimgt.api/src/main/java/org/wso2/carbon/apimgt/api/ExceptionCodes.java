@@ -29,34 +29,42 @@ import java.util.Arrays;
 public enum ExceptionCodes implements ErrorHandler {
 
     // API, Application related codes
-    API_ALREADY_EXISTS(900300, "The API already exists.", 409, " The API already exists"),
-    APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, " The application already exists"),
-    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, " Error occurred while persisting/retrieving data"),
-    APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, " Error occurred while changing " +
+    API_NAME_ALREADY_EXISTS(900250, "The API name already exists.", 409, "An API with name '%s' already exists"),
+    API_CONTEXT_ALREADY_EXISTS(900251, "The API context already exists.", 409, "An API with context '%s' already exists"),
+    API_VERSION_ALREADY_EXISTS(900252, "The API version already exists.", 409, "An API with version '%s' already exists for API '%s'"),
+
+    API_PRODUCT_CONTEXT_ALREADY_EXISTS(900275, "The API Product context already exists.", 409, "An API Product with context '%s' already exists"),
+
+    API_ALREADY_EXISTS(900300, "The API already exists.", 409, "The API already exists"),
+    APPLICATION_ALREADY_EXISTS(900301, "The application already exists.", 409, "The application already exists"),
+    APIMGT_DAO_EXCEPTION(900302, "Internal server error.", 500, "Error occurred while persisting/retrieving data"),
+    APIMGT_LIFECYCLE_EXCEPTION(900303, "Lifecycle exception occurred", 500, "Error occurred while changing " +
             "lifecycle state"),
-    TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, " The tier cannot be null"),
-    TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, " The tier name is invalid"),
+    TIER_CANNOT_BE_NULL(900304, "The tier cannot be null.", 400, "The tier cannot be null"),
+    TIER_NAME_INVALID(900305, "The tier name is invalid.", 400, "The tier name is invalid"),
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
-    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id %s not found"),
+    API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
     SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
-    UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be " +
-            "done"),
+    UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
             + "update the API"),
     DOCUMENT_CONTENT_NOT_FOUND(900314, "Document content not found", 404, "Document content not found"),
     DOCUMENT_NOT_FOUND(900315, "Document not found", 404, "Document not found"),
+    DOCUMENT_INVALID_SOURCE_TYPE(900319, "Invalid document source type", 500, "Source type of the document '%s' is invalid"),
+
     API_EXPORT_ERROR(900316, "API export Error", 500, "Error while exporting the given APIs"),
     API_IMPORT_ERROR(900317, "API import Error", 500, "Error while importing the given APIs"),
     SUBSCRIPTION_STATE_INVALID(900318, "Invalid state change for subscription", 400, "Invalid state change for " +
             "subscription"),
-    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, " Error occurred while retrieving data"),
+    APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, "Error occurred while retrieving data"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
-    STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, " Status cannot be null"),
+    STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, "Status cannot be null"),
     RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
     RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
+    DOCUMENT_INVALID_VISIBILITY(900326, "Invalid document visibility type", 500, "Visibility type of the document '%s' is invalid"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
     COMPOSITE_API_ALREADY_EXISTS(900328, "A Composite API already exists.", 409,
             "A Composite API already exists for this application"),
@@ -99,7 +107,8 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_CREATING_API_REVISION(900352, "Can not create API Revision ", 400, "Failed to create API revision registry artifacts: %s "),
     ERROR_DELETING_API_REVISION(900353, "Can not delete API Revision ", 400, "Failed to delete API revision registry artifacts: %s "),
     ERROR_RESTORING_API_REVISION(900354, "Can not restore API Revision ", 400, "Failed to restore API revision registry artifacts: %s "),
-
+    DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
+    EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -124,9 +133,9 @@ public enum ExceptionCodes implements ErrorHandler {
 
     // Gateway related codes
     API_DEFINITION_MALFORMED(900500, "ApiDefinition not found", 400, "Failed to retrieve API Definition"),
-    TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, " Error generate service config"),
-    GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, " Error occurred while publishing to Gateway"),
-    BROKER_EXCEPTION(900503, "Broker Connection Error", 500, " Error occurred while obtaining broker connection"),
+    TEMPLATE_EXCEPTION(900501, "Service configuration Error", 500, "Error generate service config"),
+    GATEWAY_EXCEPTION(900502, "Gateway publishing Error", 500, "Error occurred while publishing to Gateway"),
+    BROKER_EXCEPTION(900503, "Broker Connection Error", 500, "Error occurred while obtaining broker connection"),
     INVALID_GATEWAY_ENVIRONMENT(900504, "Invalid Gateway Environment", 400, "Gateway Environment with name '%s' not found"),
     NO_GATEWAY_ENVIRONMENTS_ADDED(900505, "No Gateway Environments Available", 400, "No gateway environments " +
             "available for the API : %s."),
@@ -425,8 +434,8 @@ public enum ExceptionCodes implements ErrorHandler {
     // API import/export related codes
     ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
-    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the api_params.yaml file", 400,
-            "Error while reading meta information from the api_params.yaml file"),
+    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the params file", 400,
+            "Error while reading meta information from the params file"),
     NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
 
@@ -438,7 +447,10 @@ public enum ExceptionCodes implements ErrorHandler {
             "Gateway type not found available Gateway types : " + "%s"),
 
     SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE(900910, "Service import is failed" , 412, "Cannot update existing services " +
-                                                    "when overwrite is false");
+                                                    "when overwrite is false"),
+    MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION(900911, "Missing protocol in Async API Definition", 400,
+            "Missing protocol in Async API Definition");
+
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

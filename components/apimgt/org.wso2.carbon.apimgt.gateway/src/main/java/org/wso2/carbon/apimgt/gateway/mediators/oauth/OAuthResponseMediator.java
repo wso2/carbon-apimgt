@@ -18,20 +18,20 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators.oauth;
 
-import org.apache.axiom.om.OMAbstractFactory;
-import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMNamespace;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.transport.passthru.TargetResponse;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.mediators.oauth.conf.OAuthEndpoint;
 
 /**
  * OAuthResponseMediator to handle error responses from OAuth 2.0 protected backends
@@ -50,18 +50,22 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
 
     @Override
     public boolean mediate(MessageContext messageContext) {
+
         if (messageContext != null) {
-            TargetResponse targetResponse = (TargetResponse) ((Axis2MessageContext)messageContext)
+            TargetResponse targetResponse = (TargetResponse) ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext().getProperty("pass-through.Target-Response");
             int statusCode = targetResponse.getStatus();
             if (statusCode == 401) {
-                try {
-                    OAuthTokenGenerator.generateToken(OAuthMediator.oAuthEndpoint, null);
-                    log.error("OAuth 2.0 access token has been rejected by the backend...");
-                    handleFailure(APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR, messageContext,
-                            APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE, "Please try again");
-                } catch (APISecurityException e) {
-                    log.error("Error when generating oauth 2.0 access token...", e);
+                Object oauthEndpointObject = messageContext.getProperty(APIMgtGatewayConstants.OAUTH_ENDPOINT_INSTANCE);
+                if (oauthEndpointObject instanceof OAuthEndpoint) {
+                    try {
+                        OAuthTokenGenerator.generateToken((OAuthEndpoint) oauthEndpointObject, null);
+                        log.error("OAuth 2.0 access token has been rejected by the backend...");
+                        handleFailure(APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR, messageContext,
+                                APISecurityConstants.OAUTH_TEMPORARY_SERVER_ERROR_MESSAGE, "Please try again");
+                    } catch (APISecurityException e) {
+                        log.error("Error when generating oauth 2.0 access token...", e);
+                    }
                 }
             }
         }
@@ -70,41 +74,27 @@ public class OAuthResponseMediator extends AbstractMediator implements ManagedLi
 
     /**
      * Sends a fault response to the DevPortal console
-     * @param errorCodeValue error code of the failure
-     * @param messageContext message context of the request
-     * @param errorMessage error message of the failure
+     *
+     * @param errorCodeValue   error code of the failure
+     * @param messageContext   message context of the request
+     * @param errorMessage     error message of the failure
      * @param errorDescription error description of the failure
      */
     private void handleFailure(int errorCodeValue, MessageContext messageContext,
-            String errorMessage, String errorDescription) {
-        OMElement payload = getFaultPayload(errorCodeValue, errorMessage, errorDescription);
-        Utils.setFaultPayload(messageContext, payload);
+                               String errorMessage, String errorDescription) {
+
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCodeValue);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
+        Mediator sequence = messageContext.getSequence(APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+            return;
+        }
+
         Utils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * Retrieves the organized fault payload
-     * @param errorCodeValue error code
-     * @param message fault message
-     * @param description description of the fault message
-     * @return the OMElement object containing the payload
-     */
-    private OMElement getFaultPayload(int errorCodeValue, String message, String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(errorCodeValue + "");
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(message);
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(description);
-
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
-    }
 }

@@ -50,7 +50,7 @@ public class SearchApiServiceImpl implements SearchApiService {
     private static final Log log = LogFactory.getLog(SearchApiServiceImpl.class);
 
     public Response search(String organizationId,Integer limit, Integer offset, String query, String ifNoneMatch,
-                              MessageContext messageContext) {
+                              MessageContext messageContext) throws APIManagementException {
         SearchResultListDTO resultListDTO = new SearchResultListDTO();
         List<SearchResultDTO> allmatchedResults = new ArrayList<>();
 
@@ -58,12 +58,11 @@ public class SearchApiServiceImpl implements SearchApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "*" : query;
 
-        try {
-            if (!query.contains(":")) {
-                query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
-            }
+        if (!query.contains(":")) {
+            query = (APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":" + query);
+        }
 
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             Map<String, Object> result = null;
@@ -89,44 +88,39 @@ public class SearchApiServiceImpl implements SearchApiService {
                 apis.addAll((Collection<?>) apiSearchResults);
             }
 
-            for (Object searchResult : apis) {
-                if (searchResult instanceof API) {
-                    API api = (API) searchResult;
-                    SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIToAPIResultDTO(api);
-                    allmatchedResults.add(apiResult);
-                } else if (searchResult instanceof APIProduct) {
-                    APIProduct apiproduct = (APIProduct) searchResult;
-                    SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIProductToAPIResultDTO(apiproduct);
-                    allmatchedResults.add(apiResult);
-                } else if (searchResult instanceof Map.Entry) {
-                    Map.Entry pair = (Map.Entry) searchResult;
-                    SearchResultDTO docResult;
-                    if (pair.getValue() instanceof API) {
-                        docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
-                                (Documentation) pair.getKey(), (API) pair.getValue());
-                    } else {
-                        docResult = SearchResultMappingUtil.fromDocumentationToProductDocumentResultDTO(
-                                (Documentation) pair.getKey(), (APIProduct) pair.getValue());
-                    }
-                    allmatchedResults.add(docResult);
+        for (Object searchResult : apis) {
+            if (searchResult instanceof API) {
+                API api = (API) searchResult;
+                SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIToAPIResultDTO(api);
+                allmatchedResults.add(apiResult);
+            } else if (searchResult instanceof APIProduct) {
+                APIProduct apiproduct = (APIProduct) searchResult;
+                SearchResultDTO apiResult = SearchResultMappingUtil.fromAPIProductToAPIResultDTO(apiproduct);
+                allmatchedResults.add(apiResult);
+            } else if (searchResult instanceof Map.Entry) {
+                Map.Entry pair = (Map.Entry) searchResult;
+                SearchResultDTO docResult;
+                if (pair.getValue() instanceof API) {
+                    docResult = SearchResultMappingUtil.fromDocumentationToDocumentResultDTO(
+                            (Documentation) pair.getKey(), (API) pair.getValue());
+                } else {
+                    docResult = SearchResultMappingUtil.fromDocumentationToProductDocumentResultDTO(
+                            (Documentation) pair.getKey(), (APIProduct) pair.getValue());
                 }
+                allmatchedResults.add(docResult);
             }
-
-            Object totalLength = result.get("length");
-            Integer length = 0;
-            if (totalLength != null) {
-                length = (Integer) totalLength;
-            }
-
-            List<Object> allmatchedObjectResults = new ArrayList<>(allmatchedResults);
-            resultListDTO.setList(allmatchedObjectResults);
-            resultListDTO.setCount(allmatchedResults.size());
-            SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
-
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving search results";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+
+        Object totalLength = result.get("length");
+        Integer length = 0;
+        if (totalLength != null) {
+            length = (Integer) totalLength;
+        }
+
+        List<Object> allmatchedObjectResults = new ArrayList<>(allmatchedResults);
+        resultListDTO.setList(allmatchedObjectResults);
+        resultListDTO.setCount(allmatchedResults.size());
+        SearchResultMappingUtil.setPaginationParams(resultListDTO, query, offset, limit, length);
 
         return Response.ok().entity(resultListDTO).build();
     }

@@ -115,7 +115,7 @@ public class APIClientGenerationManager {
 
         String specFileLocation = tempDirectoryLocation + File.separator + UUID.randomUUID().toString() +
                 APIConstants.JSON_FILE_EXTENSION;
-        //the below swaggerSpecFile will be deleted when cleaning the temp directory by the caller
+        //The below swaggerSpecFile will be deleted when cleaning the temp directory by the caller
         File swaggerSpecFile = new File(specFileLocation);
         FileWriter fileWriter = null;
         BufferedWriter bufferedWriter = null;

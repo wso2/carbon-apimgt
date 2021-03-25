@@ -90,8 +90,6 @@ public class API implements Serializable {
     private String visibleRoles;
     private String visibleTenants;
 
-    private List<Label> gatewayLabels;
-
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
     private String endpointUTUsername;
@@ -170,11 +168,6 @@ public class API implements Serializable {
      * Property to indicate the monetization status of the particular API.
      */
     private boolean isMonetizationEnabled = false;
-
-    /**
-     * Property to hold selected deployment environments of the  particular API.
-     */
-    private Set<DeploymentEnvironments> deploymentEnvironments;
 
     // Used for endpoint environments configured with non empty URLs
     private Set<String> environmentList;
@@ -741,14 +734,6 @@ public class API implements Serializable {
         this.visibleTenants = visibleTenants;
     }
 
-    public List<Label> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(List<Label> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
-    }
-
     public boolean isApiHeaderChanged() {
         return apiHeaderChanged;
     }
@@ -1195,14 +1180,6 @@ public class API implements Serializable {
         this.keyManagers = keyManagers;
     }
 
-    public Set<DeploymentEnvironments> getDeploymentEnvironments() {
-        return deploymentEnvironments;
-    }
-
-    public void setDeploymentEnvironments(Set<DeploymentEnvironments> deploymentEnvironments) {
-        this.deploymentEnvironments = deploymentEnvironments;
-    }
-    
     public Mediation getInSequenceMediation() {
         return inSequenceMediation;
     }

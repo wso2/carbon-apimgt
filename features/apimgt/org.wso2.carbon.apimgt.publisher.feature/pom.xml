@@ -72,6 +72,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <skip>${npm.build.skip}</skip>
@@ -87,6 +88,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <skip>${npm.build.skip}</skip>
@@ -103,6 +105,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>../</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <skip>${npm.build.skip}</skip>
@@ -119,6 +122,7 @@
                         </goals>
                         <phase>compile</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <skip>${npm.build.skip}</skip>
@@ -135,6 +139,7 @@
                         </goals>
                         <phase>test</phase>
                         <configuration>
+                            <skip>${npm.build.skip}</skip>
                             <workingDirectory>src/main/resources/publisher</workingDirectory>
                             <executable>${npm.executable}</executable>
                             <skip>${npm.build.skip}</skip>

@@ -72,6 +72,7 @@ export default function Resources(props) {
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
     const [arns, setArns] = useState([]);
     const [resolvedSpec, setResolvedSpec] = useState({ spec: {}, errors: [] });
+    const [focusOperationLevel, setFocusOperationLevel] = useState(false);
 
     /**
      *
@@ -563,6 +564,8 @@ export default function Resources(props) {
                         value={apiThrottlingPolicy}
                         onChange={setApiThrottlingPolicy}
                         isAPIProduct={api.isAPIProduct()}
+                        focusOperationLevel={focusOperationLevel}
+                        setFocusOperationLevel={setFocusOperationLevel}
                     />
                 </Grid>
             )}
@@ -620,6 +623,7 @@ export default function Resources(props) {
                                                     {...operationProps}
                                                     resolvedSpec={resolvedSpec.spec}
                                                     sharedScopes={sharedScopes}
+                                                    setFocusOperationLevel={setFocusOperationLevel}
                                                 />
                                             </Grid>
                                         ) : null;

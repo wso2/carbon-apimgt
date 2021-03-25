@@ -105,6 +105,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new API Product revision", notes = "Create a new API Product revision ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -156,8 +157,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/revisions/{revisionId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a revision of an API Product", notes = "Delete a revision of an API Product ", response = APIRevisionListDTO.class, authorizations = {
+    @ApiOperation(value = "Delete Revision", notes = "Delete a revision of an API Product ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -173,8 +175,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/deploy-revision")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Deploy a revision", notes = "Deploy a revision ", response = Void.class, authorizations = {
+    @ApiOperation(value = "Deploy Revision", notes = "Deploy an API Product Revision ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -280,8 +283,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/revisions/{revisionId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve a revision of an API Product", notes = "Retrieve a revision of an API Product ", response = APIRevisionDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve Revision", notes = "Retrieve a revision of an API Product ", response = APIRevisionDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -293,11 +297,12 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiProductId}/deploy-revision")
+    @Path("/{apiProductId}/deployments")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "List available deployed revision deployment details of an API Product", notes = "List available deployed revision deployment details of an API Product ", response = APIRevisionDeploymentListDTO.class, authorizations = {
+    @ApiOperation(value = "List Deployments", notes = "List available deployed revision deployment details of an API Product ", response = APIRevisionDeploymentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -312,8 +317,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/revisions")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "List available revisions of an API Product", notes = "List available revisions of an API Product ", response = APIRevisionListDTO.class, authorizations = {
+    @ApiOperation(value = "List Revisions", notes = "List available revisions of an API Product ", response = APIRevisionListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
@@ -419,8 +425,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/restore-revision")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Restore a revision", notes = "Restore a revision to the working copy of the API Product ", response = APIProductDTO.class, authorizations = {
+    @ApiOperation(value = "Restore Revision", notes = "Restore a revision to the Current API of the API Product ", response = APIProductDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "API Product Revisions",  })
@@ -435,8 +442,9 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     @Path("/{apiProductId}/undeploy-revision")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Un-Deploy a revision", notes = "Un-Deploy a revision ", response = Void.class, authorizations = {
+    @ApiOperation(value = "UnDeploy Revision", notes = "UnDeploy an API Product Revision ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_product_import_export", description = "Import and export API Products related operations")
         })
@@ -466,6 +474,23 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response updateAPIProduct(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "API object that needs to be added" ,required=true) APIProductDTO apIProductDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.updateAPIProduct(apiProductId, apIProductDTO, ifMatch, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiProductId}/deployments/{deploymentId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update Deployment", notes = "Update deployment devportal visibility ", response = APIRevisionDeploymentDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Product Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. Successful response with the newly updated APIRevisionDeployment List object as the entity in the body. ", response = APIRevisionDeploymentDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response updateAPIProductDeployment(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Base64 URL encoded value of the name of an environment ",required=true) @PathParam("deploymentId") String deploymentId, @ApiParam(value = "Deployment object that needs to be updated" ) APIRevisionDeploymentDTO apIRevisionDeploymentDTO) throws APIManagementException{
+        return delegate.updateAPIProductDeployment(apiProductId, deploymentId, apIRevisionDeploymentDTO, securityContext);
     }
 
     @PUT

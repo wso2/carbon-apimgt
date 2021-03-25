@@ -50,8 +50,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Application owner changed successfully. ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response applicationsApplicationIdChangeOwnerPost( @NotNull @ApiParam(value = "",required=true)  @QueryParam("owner") String owner, @ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId) throws APIManagementException{
         return delegate.applicationsApplicationIdChangeOwnerPost(owner, applicationId, securityContext);
     }
@@ -69,10 +68,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = Void.class),
         @ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = WorkflowResponseDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response applicationsApplicationIdDelete(@ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId,  @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future). " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
-        return delegate.applicationsApplicationIdDelete(applicationId, ifMatch, securityContext);
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdDelete(@ApiParam(value = "Application UUID ",required=true) @PathParam("applicationId") String applicationId) throws APIManagementException{
+        return delegate.applicationsApplicationIdDelete(applicationId, securityContext);
     }
 
     @GET
@@ -88,10 +86,9 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     }, tags={ "Application (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Application list returned. ", response = ApplicationListDTO.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response applicationsGet( @ApiParam(value = "username of the application creator ")  @QueryParam("user") String user,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource (Will be supported in future). " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Application Name ")  @QueryParam("name") String name,  @ApiParam(value = "Tenant domain of the applications to get. This has to be specified only if it is required to get applications of a tenant other than the requester's tenant. So, if not specified, the default will be set as the requester's tenant domain. This cross tenant Application access is allowed only for super tenant admin users **only at a migration process**. ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
-        return delegate.applicationsGet(user, limit, offset, accept, ifNoneMatch, name, tenantDomain, securityContext);
+    public Response applicationsGet( @ApiParam(value = "username of the application creator ")  @QueryParam("user") String user,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Application Name ")  @QueryParam("name") String name,  @ApiParam(value = "Tenant domain of the applications to get. This has to be specified only if it is required to get applications of a tenant other than the requester's tenant. So, if not specified, the default will be set as the requester's tenant domain. This cross tenant Application access is allowed only for super tenant admin users **only at a migration process**. ")  @QueryParam("tenantDomain") String tenantDomain) throws APIManagementException{
+        return delegate.applicationsGet(user, limit, offset, accept, name, tenantDomain, securityContext);
     }
 }

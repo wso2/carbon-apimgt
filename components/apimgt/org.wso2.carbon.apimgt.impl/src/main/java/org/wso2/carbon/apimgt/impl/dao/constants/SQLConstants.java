@@ -37,18 +37,6 @@ public class SQLConstants {
     public static final String GET_VERSIONS_MATCHES_API_NAME_AND_ORGANIZATION_SQL=
             "SELECT API_VERSION FROM AM_API WHERE API_NAME = ? AND ORGANIZATION_ID = ?";
 
-    public static final String GET_USER_ID_FROM_CONSUMER_KEY_SQL =
-            " SELECT " +
-            "   SUBS.USER_ID " +
-            " FROM " +
-            "   AM_SUBSCRIBER SUBS, " +
-            "   AM_APPLICATION APP, " +
-            "   AM_APPLICATION_KEY_MAPPING MAP " +
-            " WHERE " +
-            "   APP.SUBSCRIBER_ID   = SUBS.SUBSCRIBER_ID " +
-            "   AND MAP.APPLICATION_ID = APP.APPLICATION_ID " +
-            "   AND MAP.CONSUMER_KEY   = ? ";
-
     public static final String GET_APPLICATION_REGISTRATION_SQL =
             " SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = " +
                     "? AND KEY_MANAGER = ?";
@@ -63,16 +51,6 @@ public class SQLConstants {
             " INSERT INTO " +
             "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE,KEY_MANAGER,UUID) " +
             " VALUES(?,?,?,?,?)";
-
-    public static final String GET_OAUTH_APPLICATION_SQL =
-            " SELECT CONSUMER_SECRET, USERNAME, TENANT_ID, APP_NAME, APP_NAME, CALLBACK_URL, GRANT_TYPES " +
-            " FROM IDN_OAUTH_CONSUMER_APPS " +
-            " WHERE CONSUMER_KEY = ?";
-
-    public static final String GET_OWNER_FOR_CONSUMER_APP_SQL =
-            " SELECT USERNAME, USER_DOMAIN, TENANT_ID " +
-            " FROM IDN_OAUTH_CONSUMER_APPS " +
-            " WHERE CONSUMER_KEY = ?";
 
     public static final String GET_SUBSCRIBED_APIS_OF_USER_SQL =
             " SELECT " +
@@ -224,194 +202,6 @@ public class SQLConstants {
             "   AND APP.SUBSCRIBER_ID=SB.SUBSCRIBER_ID " +
             "   AND API.API_ID = SP.API_ID" +
             "   AND SP.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
-
-    public static final String CHANGE_ACCESS_TOKEN_STATUS_PREFIX = "UPDATE ";
-
-    public static final String CHANGE_ACCESS_TOKEN_STATUS_DEFAULT_SUFFIX =
-            "   IAT , AM_SUBSCRIBER SB," +
-            "   AM_SUBSCRIPTION SP , AM_APPLICATION APP," +
-            "   AM_API API" +
-            " SET " +
-            "   IAT.TOKEN_STATE=? " +
-            " WHERE " +
-            "   SB.USER_ID=?" +
-            "   AND SB.TENANT_ID=?" +
-            "   AND API.API_PROVIDER=?" +
-            "   AND API.API_NAME=?" +
-            "   AND API.API_VERSION=?" +
-            "   AND SP.ACCESS_TOKEN=IAT.ACCESS_TOKEN" +
-            "   AND SB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID" +
-            "   AND APP.APPLICATION_ID = SP.APPLICATION_ID" +
-            "   AND API.API_ID = SP.API_ID";
-
-    public static final String CHANGE_ACCESS_TOKEN_STATUS_CASE_INSENSITIVE_SUFFIX =
-            "   IAT , AM_SUBSCRIBER SB," +
-            "   AM_SUBSCRIPTION SP , " +
-            "   AM_APPLICATION APP, AM_API API " +
-            " SET" +
-            "   IAT.TOKEN_STATE=? " +
-            " WHERE " +
-            "   LOWER(SB.USER_ID)=LOWER(?)" +
-            "   AND SB.TENANT_ID=?" +
-            "   AND API.API_PROVIDER=?" +
-            "   AND API.API_NAME=?" +
-            "   AND API.API_VERSION=?" +
-            "   AND SP.ACCESS_TOKEN=IAT.ACCESS_TOKEN" +
-            "   AND SB.SUBSCRIBER_ID=APP.SUBSCRIBER_ID" +
-            "   AND APP.APPLICATION_ID = SP.APPLICATION_ID" +
-            "   AND API.API_ID = SP.API_ID";
-
-    public static final String VALIDATE_KEY_SQL_PREFIX =
-            " SELECT " +
-            "   IAT.VALIDITY_PERIOD, " +
-            "   IAT.TIME_CREATED ," +
-            "   IAT.TOKEN_STATE," +
-            "   IAT.USER_TYPE," +
-            "   IAT.AUTHZ_USER," +
-            "   IAT.USER_DOMAIN," +
-            "   IAT.TIME_CREATED," +
-            "   ISAT.TOKEN_SCOPE," +
-            "   SUB.TIER_ID," +
-            "   SUBS.USER_ID," +
-            "   SUB.SUB_STATUS," +
-            "   APP.APPLICATION_ID," +
-            "   APP.NAME," +
-            "   APP.APPLICATION_TIER," +
-            "   AKM.KEY_TYPE," +
-            "   API.API_NAME," +
-            "   AKM.CONSUMER_KEY," +
-            "   API.API_PROVIDER" +
-            " FROM ";
-
-    public static final String VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
-            " SELECT " +
-            "   SUB.TIER_ID," +
-            "   SUBS.USER_ID," +
-            "   SUB.SUB_STATUS," +
-            "   APP.APPLICATION_ID," +
-            "   APP.NAME," +
-            "   APP.APPLICATION_TIER," +
-            "   APP.TOKEN_TYPE," +
-            "   AKM.KEY_TYPE," +
-            "   API.API_NAME," +
-            "   API.API_PROVIDER " +
-            " FROM " +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIBER SUBS," +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API " +
-            " WHERE " +
-            "   API.CONTEXT = ? " +
-            "   AND AKM.CONSUMER_KEY = ? " +
-            "   AND AKM.KEY_MANAGER = ? " +
-            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-            "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
-
-    public static final String VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
-            " SELECT " +
-            "   SUB.TIER_ID," +
-            "   SUBS.USER_ID," +
-            "   SUB.SUB_STATUS," +
-            "   APP.APPLICATION_ID," +
-            "   APP.NAME," +
-            "   APP.APPLICATION_TIER," +
-            "   APP.TOKEN_TYPE," +
-            "   AKM.KEY_TYPE," +
-            "   API.API_NAME," +
-            "   API.API_PROVIDER" +
-            " FROM " +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIBER SUBS," +
-            "   AM_APPLICATION APP," +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_API API" +
-            " WHERE " +
-            "   API.CONTEXT = ? " +
-            "   AND AKM.CONSUMER_KEY = ? " +
-            "   AND AKM.KEY_MANAGER = ? " +
-            "   AND API.API_VERSION = ? " +
-            "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-            "   AND API.API_ID = SUB.API_ID" +
-            "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
-
-    public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_DEFAULT_SQL =
-            " SELECT " +
-                    "   SUB.TIER_ID," +
-                    "   SUBS.USER_ID," +
-                    "   SUB.SUB_STATUS," +
-                    "   APP.APPLICATION_ID," +
-                    "   APP.NAME," +
-                    "   APP.APPLICATION_TIER," +
-                    "   APP.TOKEN_TYPE," +
-                    "   AKM.KEY_TYPE," +
-                    "   API.API_NAME," +
-                    "   API.API_TIER," +
-                    "   API.API_PROVIDER," +
-                    "   APS.RATE_LIMIT_COUNT," +
-                    "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID," +
-                    "   APS.MAX_DEPTH,"+
-                    "   APS.MAX_COMPLEXITY" +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUB," +
-                    "   AM_SUBSCRIBER SUBS," +
-                    "   AM_APPLICATION APP," +
-                    "   AM_APPLICATION_KEY_MAPPING AKM," +
-                    "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS" +
-                    " WHERE " +
-                    "   API.CONTEXT = ? " +
-                    "   AND AKM.CONSUMER_KEY = ? " +
-                    "   AND AKM.KEY_MANAGER = ? " +
-                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                    "   AND API.API_ID = SUB.API_ID" +
-                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID" +
-                    "   AND APS.TENANT_ID = ? ";
-
-    public static final String ADVANCED_VALIDATE_SUBSCRIPTION_KEY_VERSION_SQL =
-            " SELECT " +
-                    "   SUB.TIER_ID," +
-                    "   SUBS.USER_ID," +
-                    "   SUB.SUB_STATUS," +
-                    "   APP.APPLICATION_ID," +
-                    "   APP.NAME," +
-                    "   APP.APPLICATION_TIER," +
-                    "   APP.TOKEN_TYPE," +
-                    "   AKM.KEY_TYPE," +
-                    "   API.API_NAME," +
-                    "   API.API_TIER," +
-                    "   API.API_PROVIDER," +
-                    "   APS.RATE_LIMIT_COUNT," +
-                    "   APS.RATE_LIMIT_TIME_UNIT," +
-                    "   APS.STOP_ON_QUOTA_REACH," +
-                    "   API.API_ID," +
-                    "   APS.MAX_DEPTH,"+
-                    "   APS.MAX_COMPLEXITY" +
-                    " FROM " +
-                    "   AM_SUBSCRIPTION SUB," +
-                    "   AM_SUBSCRIBER SUBS," +
-                    "   AM_APPLICATION APP," +
-                    "   AM_APPLICATION_KEY_MAPPING AKM," +
-                    "   AM_API API," +
-                    "   AM_POLICY_SUBSCRIPTION APS" +
-                    " WHERE " +
-                    "   API.CONTEXT = ? " +
-                    "   AND AKM.CONSUMER_KEY = ? " +
-                    "   AND AKM.KEY_MANAGER = ? " +
-                    "   AND APS.TENANT_ID = ? " +
-                    "   AND API.API_VERSION = ? " +
-                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                    "   AND API.API_ID = SUB.API_ID" +
-                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID" +
-                    "   AND APS.NAME = SUB.TIER_ID";
 
     public static final String ADD_SUBSCRIBER_SQL =
             " INSERT" +
@@ -586,20 +376,6 @@ public class SQLConstants {
             " WHERE " +
             "   LOWER(USER_ID) = LOWER(?) " +
             "   AND TENANT_ID = ?";
-
-    public static final String GET_API_BY_CONSUMER_KEY_SQL =
-            " SELECT" +
-            "   API.API_PROVIDER," +
-            "   API.API_NAME," +
-            "   API.API_VERSION " +
-            " FROM" +
-            "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIPTION_KEY_MAPPING SKM, " +
-            "   AM_API API " +
-            " WHERE" +
-            "   SKM.ACCESS_TOKEN=?" +
-            "   AND SKM.SUBSCRIPTION_ID=SUB.SUBSCRIPTION_ID" +
-            "   AND API.API_ID = SUB.API_ID";
 
     public static final String GET_SUBSCRIBED_APIS_SQL =
             " SELECT " +
@@ -783,127 +559,6 @@ public class SQLConstants {
             "   AND API.API_ID=SUBS.API_ID " +
             "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
-    public static final String GET_API_KEY_BY_SUBSCRIPTION_SQL =
-            " SELECT " +
-            "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN," +
-            "   SKM.KEY_TYPE AS TOKEN_TYPE " +
-            " FROM" +
-            "   AM_SUBSCRIPTION_KEY_MAPPING SKM " +
-            " WHERE" +
-            "   SKM.SUBSCRIPTION_ID = ?";
-
-    public static final String GET_SCOPE_BY_TOKEN_SQL =
-            " SELECT ISAT.TOKEN_SCOPE " +
-            " FROM " +
-            APIConstants.ACCESS_TOKEN_STORE_TABLE + " IAT," +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT " +
-            " WHERE " +
-            "   IAT.ACCESS_TOKEN= ?" +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID";
-
-    public static final String IS_ACCESS_TOKEN_EXISTS_PREFIX = " SELECT ACCESS_TOKEN " + " FROM ";
-
-    public static final String IS_ACCESS_TOKEN_EXISTS_SUFFIX = " WHERE ACCESS_TOKEN= ? ";
-
-    public static final String IS_ACCESS_TOKEN_REVOKED_PREFIX = " SELECT TOKEN_STATE " + " FROM ";
-
-    public static final String IS_ACCESS_TOKE_REVOKED_SUFFIX = " WHERE ACCESS_TOKEN= ? ";
-
-    public static final String GET_ACCESS_TOKEN_DATA_PREFIX =
-            " SELECT " +
-            "   IAT.ACCESS_TOKEN, " +
-            "   IAT.AUTHZ_USER, " +
-            "   IAT.USER_DOMAIN, " +
-            "   ISAT.TOKEN_SCOPE, " +
-            "   ICA.CONSUMER_KEY, " +
-            "   IAT.TIME_CREATED, " +
-            "   IAT.VALIDITY_PERIOD " +
-            " FROM ";
-
-    public static final String GET_ACCESS_TOKEN_DATA_SUFFIX =
-            "   IAT, " +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT, " +
-            APIConstants.CONSUMER_KEY_SECRET_TABLE + " ICA " +
-            " WHERE IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            "   AND IAT.ACCESS_TOKEN= ? " +
-            "   AND IAT.TOKEN_STATE='ACTIVE' ";
-
-    public static final String GET_TOKEN_SQL_PREFIX =
-            " SELECT " +
-            "   IAT.ACCESS_TOKEN, " +
-            "   IAT.AUTHZ_USER, " +
-            "   IAT.USER_DOMAIN, " +
-            "   ISAT.TOKEN_SCOPE, " +
-            "   ICA.CONSUMER_KEY, " +
-            "   IAT.TIME_CREATED, " +
-            "   IAT.VALIDITY_PERIOD " +
-            " FROM ";
-
-    public static final String GET_TOKEN_SQL_SUFFIX =
-            "   IAT, " +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT, " +
-            APIConstants.CONSUMER_KEY_SECRET_TABLE + " ICA " +
-            " WHERE " +
-            "   IAT.TOKEN_STATE='ACTIVE' " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            " ORDER BY IAT.TOKEN_ID";
-
-    public static final String GET_ACCESS_TOKEN_BY_USER_PREFIX =
-            " SELECT " +
-            "   IAT.ACCESS_TOKEN, " +
-            "   IAT.AUTHZ_USER, " +
-            "   IAT.USER_DOMAIN, " +
-            "   ISAT.TOKEN_SCOPE, " +
-            "   ICA.CONSUMER_KEY, " +
-            "   IAT.TIME_CREATED, " +
-            "   IAT.VALIDITY_PERIOD " +
-            " FROM ";
-
-    public static final String GET_ACCESS_TOKEN_BY_USER_SUFFIX =
-            "   IAT, " +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT, " +
-            APIConstants.CONSUMER_KEY_SECRET_TABLE + " ICA " +
-            " WHERE IAT.AUTHZ_USER= ? " +
-            "   AND IAT.TOKEN_STATE='ACTIVE'" +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            " ORDER BY IAT.TOKEN_ID";
-
-    public static final String GET_TOKEN_BY_DATE_PREFIX =
-            " SELECT " +
-            "   IAT.ACCESS_TOKEN, " +
-            "   IAT.AUTHZ_USER, " +
-            "   IAT.USER_DOMAIN, " +
-            "   ISAT.TOKEN_SCOPE, " +
-            "   ICA.CONSUMER_KEY, " +
-            "   IAT.TIME_CREATED, " +
-            "   IAT.VALIDITY_PERIOD " +
-            " FROM ";
-
-    public static final String GET_TOKEN_BY_DATE_AFTER_SUFFIX =
-            " IAT, " +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT, " +
-            APIConstants.CONSUMER_KEY_SECRET_TABLE + " ICA " +
-            " WHERE " +
-            "   IAT.TOKEN_STATE='ACTIVE' " +
-            "   AND IAT.TIME_CREATED >= ? " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            " ORDER BY IAT.TOKEN_ID";
-
-    public static final String GET_TOKEN_BY_DATE_BEFORE_SUFFIX =
-            "   IAT, " +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT, " +
-            APIConstants.CONSUMER_KEY_SECRET_TABLE + " ICA " +
-            " WHERE " +
-            "   IAT.TOKEN_STATE='ACTIVE' " +
-            "   AND IAT.TIME_CREATED <= ? " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            " ORDER BY IAT.TOKEN_ID";
-
     public static final String GET_CLIENT_OF_APPLICATION_SQL =
             " SELECT  CONSUMER_KEY,KEY_MANAGER " +
             " FROM AM_APPLICATION_KEY_MAPPING " +
@@ -914,61 +569,6 @@ public class SQLConstants {
             " FROM AM_APPLICATION_KEY_MAPPING " +
             " WHERE APPLICATION_ID = ?";
 
-    public static final String GET_ACCESS_TOKEN_INFO_BY_CONSUMER_KEY_PREFIX =
-            "   ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-            "   ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
-            "   ICA.GRANT_TYPES AS GRANT_TYPES," +
-            "   ICA.CALLBACK_URL AS CALLBACK_URL," +
-            "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-            "   IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-            "   ISAT.TOKEN_SCOPE AS TOKEN_SCOPE" +
-            " FROM   ";
-
-    public static final String GET_ACCESS_TOKEN_INFO_BY_CONSUMER_KEY_SUFFIX =
-            "   IAT, " +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA " +
-            " WHERE" +
-            "   ICA.CONSUMER_KEY = ? " +
-            "   AND IAT.USER_TYPE = ? " +
-            "   AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "   AND (IAT.TOKEN_STATE = 'ACTIVE' OR IAT.TOKEN_STATE = 'EXPIRED' OR IAT.TOKEN_STATE = 'REVOKED') " +
-            " ORDER BY IAT.TIME_CREATED DESC";
-
-    public static final String GET_ACCESS_TOKEN_INFO_BY_CONSUMER_KEY_ORACLE_PREFIX =
-            " SELECT " +
-            "   CONSUMER_KEY, " +
-            "   CONSUMER_SECRET, " +
-            "   GRANT_TYPES, " +
-            "   CALLBACK_URL, " +
-            "   ACCESS_TOKEN, " +
-            "   VALIDITY_PERIOD, " +
-            "   TOKEN_SCOPE "+
-            " FROM (" +
-            "   SELECT " +
-            "       ICA.CONSUMER_KEY AS CONSUMER_KEY, " +
-            "       ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
-            "       ICA.GRANT_TYPES AS GRANT_TYPES, " +
-            "       ICA.CALLBACK_URL AS CALLBACK_URL, " +
-            "       IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
-            "       IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
-            "       ISAT.TOKEN_SCOPE AS TOKEN_SCOPE " +
-            "   FROM ";
-
-    public static final String GET_ACCESS_TOKEN_INFO_BY_CONSUMER_KEY_ORACLE_SUFFIX =
-            "       IAT, " +
-            APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE + " ISAT," +
-            "       IDN_OAUTH_CONSUMER_APPS ICA " +
-            "   WHERE " +
-            "       ICA.CONSUMER_KEY = ? " +
-            "       AND IAT.USER_TYPE = ? " +
-            "       AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            "       AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-            "       AND (IAT.TOKEN_STATE = 'ACTIVE' OR IAT.TOKEN_STATE = 'EXPIRED' OR IAT.TOKEN_STATE = 'REVOKED') " +
-            "   ORDER BY IAT.TIME_CREATED DESC) ";
-
-    //--------------------New tier permission management
 
     public static final String GET_THROTTLE_TIER_PERMISSION_ID_SQL =
             " SELECT THROTTLE_TIER_PERMISSIONS_ID " +
@@ -1033,40 +633,6 @@ public class SQLConstants {
             " SELECT PERMISSIONS_TYPE, ROLES " +
             " FROM AM_TIER_PERMISSIONS " +
             " WHERE TIER = ? AND TENANT_ID = ?";
-
-    public static final String GET_KEY_SQL_PREFIX =
-            " SELECT " +
-            "   ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-            "   ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
-            "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-            "   AKM.KEY_TYPE AS TOKEN_TYPE " +
-            " FROM" +
-            "   AM_APPLICATION_KEY_MAPPING AKM,";
-
-    public static final String GET_KEY_SQL_SUFFIX =
-            "   IAT," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA " +
-            " WHERE" +
-            "   AKM.APPLICATION_ID = ? " +
-            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-            "   AND ICA.ID = IAT.CONSUMER_KEY_ID";
-
-    public static final String GET_KEY_SQL_OF_SUBSCRIPTION_ID_PREFIX =
-            " SELECT " +
-            "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-            "   IAT.TOKEN_STATE AS TOKEN_STATE " +
-            " FROM" +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   AM_SUBSCRIPTION SM,";
-
-    public static final String GET_KEY_SQL_OF_SUBSCRIPTION_ID_SUFFIX =
-            "   IAT," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA " +
-            " WHERE" +
-            "   SM.SUBSCRIPTION_ID = ? " +
-            "   AND SM.APPLICATION_ID= AKM.APPLICATION_ID " +
-            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-            "   AND ICA.ID = IAT.CONSUMER_KEY_ID";
 
     public static final String GET_SUBSCRIBERS_OF_PROVIDER_SQL =
             " SELECT " +
@@ -1144,18 +710,6 @@ public class SQLConstants {
                     " , TIER_ID = ? " +
                     " , SUB_STATUS = ? " +
                     " WHERE SUBSCRIPTION_ID = ?";
-
-    public static final String UPDATE_REFRESHED_APPLICATION_ACCESS_TOKEN_PREFIX = "UPDATE ";
-
-    public static final String UPDATE_REFRESHED_APPLICATION_ACCESS_TOKEN_SUFFIX =
-            " SET " +
-            "   USER_TYPE=?, " +
-            "   VALIDITY_PERIOD=? " +
-            " WHERE " +
-            "   ACCESS_TOKEN=?";
-
-    public static final String DELETE_ACCSS_ALLOWED_DOMAINS_SQL =
-            " DELETE FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY=?";
 
     public static final String GET_REGISTRATION_APPROVAL_STATUS_SQL =
             " SELECT KEY_MANAGER,STATE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE =?";
@@ -1357,51 +911,6 @@ public class SQLConstants {
                     "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
                     " ORDER BY " +
                     "   APP.NAME";
-
-    public static final String GET_SUBSCRIBER_BY_ID_SQL =
-            " SELECT" +
-            "   SB.USER_ID, " +
-            "   SB.DATE_SUBSCRIBED" +
-            " FROM " +
-            "   AM_SUBSCRIBER SB , " +
-            "   AM_SUBSCRIPTION SP, " +
-            "   AM_APPLICATION APP, " +
-            "   AM_SUBSCRIPTION_KEY_MAPPING SKM" +
-            " WHERE " +
-            "   SKM.ACCESS_TOKEN=?" +
-            "   AND SP.APPLICATION_ID=APP.APPLICATION_ID" +
-            "   AND APP.SUBSCRIBER_ID=SB.SUBSCRIBER_ID" +
-            "   AND SP.SUBSCRIPTION_ID=SKM.SUBSCRIPTION_ID";
-
-    public static final String GET_OAUTH_CONSUMER_SQL =
-            " SELECT " +
-            "   ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-            "   ICA.CONSUMER_SECRET AS CONSUMER_SECRET " +
-            " FROM " +
-            "   AM_SUBSCRIBER SB," +
-            "   AM_APPLICATION APP, " +
-            "   AM_APPLICATION_KEY_MAPPING AKM," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA " +
-            " WHERE " +
-            "   SB.USER_ID=? " +
-            "   AND SB.TENANT_ID=? " +
-            "   AND APP.NAME=? " +
-            "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
-            "   AND AKM.APPLICATION_ID = APP.APPLICATION_ID" +
-            "   AND ICA.USERNAME = SB.USER_ID" +
-            "   AND ICA.TENANT_ID = SB.TENANT_ID" +
-            "   AND ICA.APP_NAME = APP.NAME";
-
-    public static final String ADD_OAUTH_CONSUMER_SQL =
-            " INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
-            " (CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION, APP_NAME, CALLBACK_URL) " +
-            " VALUES (?,?,?,?,?,?,?) ";
-
-    public static final String UPDATE_OAUTH_CONSUMER_SQL =
-            " UPDATE IDN_OAUTH_CONSUMER_APPS SET CALLBACK_URL = ? WHERE APP_NAME = ?";
-
-    public static final String GET_ALL_OAUTH_CONSUMER_APPS_SQL =
-            "SELECT * FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY=?";
 
     public static final String GET_API_RATING_SQL =
             "SELECT RATING FROM AM_API_RATINGS WHERE API_ID= ? AND SUBSCRIBER_ID=? ";
@@ -1713,9 +1222,6 @@ public class SQLConstants {
             " WHERE" +
             "   APPLICATION_ID = ?";
 
-    public static final String REMOVE_APPLICATION_FROM_SUBSCRIPTION_KEY_MAPPINGS_SQL =
-            "DELETE FROM AM_SUBSCRIPTION_KEY_MAPPING WHERE SUBSCRIPTION_ID = ?";
-
     public static final String REMOVE_APPLICATION_FROM_SUBSCRIPTIONS_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE APPLICATION_ID = ?";
 
@@ -1814,6 +1320,9 @@ public class SQLConstants {
 
     public static final String GET_API_ID_SQL =
             "SELECT API.API_ID FROM AM_API API WHERE API.API_PROVIDER = ? AND API.API_NAME = ? AND API.API_VERSION = ? ";
+    public static final String GET_LIGHT_WEIGHT_API_INFO_BY_API_IDENTIFIER = "SELECT API_ID,API_UUID,API_PROVIDER," +
+            "API_NAME,API_VERSION,CONTEXT,API_TYPE,STATUS FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND " +
+            "API_VERSION = ? ";
 
     public static final String GET_API_PRODUCT_ID_SQL =
             "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
@@ -1884,23 +1393,15 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
-            "   API.CONTEXT AS CONTEXT," +
-            "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN," +
-            "   SKM.KEY_TYPE AS KEY_TYPE" +
+            "   API.CONTEXT AS CONTEXT" +
             " FROM" +
             "   AM_SUBSCRIPTION SUB," +
-            "   AM_SUBSCRIPTION_KEY_MAPPING SKM, " +
             "   AM_API API " +
             " WHERE" +
             "   API.API_PROVIDER = ?" +
             "   AND API.API_NAME = ?" +
             "   AND API.API_VERSION = ?" +
-            "   AND SKM.SUBSCRIPTION_ID = SUB.SUBSCRIPTION_ID" +
             "   AND API.API_ID = SUB.API_ID";
-
-    public static final String ADD_SUBSCRIPTION_KEY_MAPPING_SQL =
-            " INSERT INTO AM_SUBSCRIPTION_KEY_MAPPING (SUBSCRIPTION_ID, ACCESS_TOKEN, KEY_TYPE)" +
-            " VALUES (?,?,?)";
 
     public static final String GET_APPLICATION_DATA_SQL =
             " SELECT" +
@@ -2170,26 +1671,6 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
-    public static final String REMOVE_ACCESS_TOKEN_PREFIX = "UPDATE ";
-
-    public static final String REVOKE_ACCESS_TOKEN_SUFFIX =
-            " SET TOKEN_STATE" + "='REVOKED' WHERE ACCESS_TOKEN= ? ";
-
-    public static final String GET_API_BY_ACCESS_TOKEN_PREFIX =
-            " SELECT AMA.API_ID, API_NAME, API_PROVIDER, API_VERSION " +
-            " FROM AM_API AMA, ";
-
-    public static final String GET_API_BY_ACCESS_TOKEN_SUFFIX =
-            " IAT, " +
-            "   AM_APPLICATION_KEY_MAPPING AKM, " +
-            "   AM_SUBSCRIPTION AMS, " +
-            "   IDN_OAUTH_CONSUMER_APPS ICA " +
-            " WHERE IAT.ACCESS_TOKEN = ? " +
-            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-            "   AND IAT.CONSUMER_KEY_ID = ICA.ID " +
-            "   AND AKM.APPLICATION_ID = AMS.APPLICATION_ID " +
-            "   AND AMA.API_ID = AMS.API_ID";
-
     public static final String GET_APPLICATION_BY_TIER_SQL =
             " SELECT DISTINCT AMS.APPLICATION_ID,NAME,SUBSCRIBER_ID " +
             " FROM " +
@@ -2234,6 +1715,25 @@ public class SQLConstants {
                     "AUM.REVISION_UUID IS NULL " +
             " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
+    public static final String GET_URL_TEMPLATES_OF_API_WITH_PRODUCT_MAPPINGS_SQL =
+            " SELECT " +
+                    "  AUM.URL_MAPPING_ID," +
+                    "   AUM.URL_PATTERN," +
+                    "   AUM.HTTP_METHOD," +
+                    "   AUM.AUTH_SCHEME," +
+                    "   AUM.THROTTLING_TIER," +
+                    "   AUM.MEDIATION_SCRIPT," +
+                    "   ARSM.SCOPE_NAME " +
+                    " FROM " +
+                    "   AM_API_URL_MAPPING AUM " +
+                    " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                    " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
+                    " WHERE " +
+                    "  API.API_PROVIDER = ? AND " +
+                    "  API.API_NAME = ? AND " +
+                    "  API.API_VERSION = ? " +
+                    " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
     public static final String GET_URL_TEMPLATES_OF_API_REVISION_SQL =
             " SELECT " +
                     "  AUM.URL_MAPPING_ID," +
@@ -2271,29 +1771,21 @@ public class SQLConstants {
             "   WHERE API.API_PROVIDER = ? AND " +
             "   API.API_NAME = ? AND API.API_VERSION = ? AND AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
 
-    public static final String GET_AUTHORIZED_DOMAINS_PREFIX =
-            "SELECT AKDM.AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, ";
-
-    public static final String GET_AUTHORIZED_DOMAINS_SUFFIX =
-            "   IOAT, " +
-            "   IDN_OAUTH_CONSUMER_APPS IOCA " +
-            " WHERE " +
-            "   IOAT.ACCESS_TOKEN  = ? " +
-            "   AND IOAT.CONSUMER_KEY_ID = IOCA.ID " +
-            "   AND IOCA.CONSUMER_KEY = AKDM.CONSUMER_KEY";
-
-    public static final String GET_AUTHORIZED_DOMAINS_BY_ACCESS_KEY_SQL =
-            "SELECT AUTHZ_DOMAIN FROM AM_APP_KEY_DOMAIN_MAPPING WHERE CONSUMER_KEY = ? ";
-
-    public static final String GET_CONSUMER_KEY_BY_ACCESS_TOKEN_PREFIX =
-            "SELECT ICA.CONSUMER_KEY FROM ";
-
-    public static final String GET_CONSUMER_KEY_BY_ACCESS_TOKEN_SUFFIX =
-            "   IAT," +
-            "   IDN_OAUTH_CONSUMER_APPS ICA" +
-            " WHERE " +
-            "   IAT.ACCESS_TOKEN = ? " +
-            "   AND ICA.ID = IAT.CONSUMER_KEY_ID";
+    public static final String GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL =
+            " SELECT " +
+                    "  API.API_PROVIDER," +
+                    "  API.API_NAME," +
+                    "  API.API_VERSION," +
+                    "  APM.URL_MAPPING_ID  " +
+                    "  FROM " +
+                    "  AM_API API " +
+                    "  INNER JOIN AM_API_PRODUCT_MAPPING APM ON API.API_ID = APM.API_ID " +
+                    "  WHERE APM.URL_MAPPING_ID IN " +
+                    "   (SELECT AUM.URL_MAPPING_ID " +
+                    "   FROM AM_API_URL_MAPPING AUM " +
+                    "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                    "   WHERE API.API_PROVIDER = ? AND " +
+                    "   API.API_NAME = ? AND API.API_VERSION = ? AND APM.REVISION_UUID = 'Current API')";
 
     public static final String ADD_COMMENT_SQL =
             " INSERT INTO " +
@@ -2329,17 +1821,9 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND AM_API_COMMENTS.COMMENT_ID = ?";
 
-    public static final String GET_REPLIES_SQL =
+    public static final String GET_IDS_OF_REPLIES_SQL =
             "SELECT " +
-                "AM_API_COMMENTS.COMMENT_ID, " +
-                "AM_API_COMMENTS.COMMENT_TEXT, " +
-                "AM_API_COMMENTS.CREATED_BY, " +
-                "AM_API_COMMENTS.CREATED_TIME, " +
-                "AM_API_COMMENTS.UPDATED_TIME, " +
-                "AM_API_COMMENTS.API_ID, " +
-                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
-                "AM_API_COMMENTS.ENTRY_POINT, " +
-                "AM_API_COMMENTS.CATEGORY " +
+                "AM_API_COMMENTS.COMMENT_ID " +
             "FROM " +
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
@@ -2350,17 +1834,22 @@ public class SQLConstants {
                 "AND API.API_ID = AM_API_COMMENTS.API_ID " +
                 "AND PARENT_COMMENT_ID = ?";
 
-    public static final String GET_ROOT_COMMENTS_SQL =
+    public static final String GET_REPLIES_COUNT_SQL =
             "SELECT " +
-                "AM_API_COMMENTS.COMMENT_ID, " +
-                "AM_API_COMMENTS.COMMENT_TEXT, " +
-                "AM_API_COMMENTS.CREATED_BY, " +
-                "AM_API_COMMENTS.CREATED_TIME, " +
-                "AM_API_COMMENTS.UPDATED_TIME, " +
-                "AM_API_COMMENTS.API_ID, " +
-                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
-                "AM_API_COMMENTS.ENTRY_POINT, " +
-                "AM_API_COMMENTS.CATEGORY " +
+                "COUNT(AM_API_COMMENTS.COMMENT_ID) AS COMMENT_COUNT " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID = ?";
+
+    public static final String GET_ROOT_COMMENTS_COUNT_SQL =
+            "SELECT " +
+                "COUNT(AM_API_COMMENTS.COMMENT_ID) AS COMMENT_COUNT " +
             "FROM " +
                 "AM_API_COMMENTS, " +
                 "AM_API API " +
@@ -2601,75 +2090,10 @@ public class SQLConstants {
                     "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID " +
                     "WHERE AUM.REVISION_UUID IS NULL AND AUM.API_ID IN (";
 
-    public static final String GET_SCOPES_BY_SCOPE_KEY_SQL =
-            "SELECT " +
-            "   IAS.SCOPE_ID, " +
-            "   IAS.NAME, " +
-            "   IAS.DISPLAY_NAME, " +
-            "   IAS.DESCRIPTION, " +
-            "   IAS.TENANT_ID, " +
-            "   B.SCOPE_BINDING " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE IAS " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
-            " WHERE" +
-            "   NAME = ? AND TENANT_ID = ?";
-
-    public static final String GET_SCOPES_BY_SCOPE_KEYS_PREFIX =
-            "SELECT " +
-            "   IAS.SCOPE_ID, " +
-            "   IAS.NAME, " +
-            "   IAS.DISPLAY_NAME, " +
-            "   IAS.DESCRIPTION, " +
-            "   IAS.TENANT_ID, " +
-            "   B.SCOPE_BINDING " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE IAS " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
-            " WHERE" +
-            "   NAME IN (";
-
-    public static final String GET_SCOPES_BY_SCOPE_KEYS_PREFIX_ORACLE =
-            "SELECT " +
-            "   IAS.SCOPE_ID, " +
-            "   IAS.NAME, " +
-            "   IAS.DISPLAY_NAME, " +
-            "   IAS.DESCRIPTION, " +
-            "   IAS.TENANT_ID, " +
-            "   B.SCOPE_BINDING " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE IAS " +
-            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
-            " WHERE" +
-            "   NAME IN (";
-
-    public static final String GET_SCOPES_BY_SCOPE_KEYS_SUFFIX = ") AND TENANT_ID = ?";
-
     public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
             "SELECT AUM.URL_MAPPING_ID, ARSM.SCOPE_NAME FROM AM_API_URL_MAPPING AUM " +
                     "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                     "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
-
-    public static final String GET_SUBSCRIBED_APIS_FROM_CONSUMER_KEY =
-        "SELECT SUB.API_ID "
-                + "FROM AM_SUBSCRIPTION SUB, AM_APPLICATION_KEY_MAPPING AKM "
-                + "WHERE AKM.CONSUMER_KEY = ? AND AKM.APPLICATION_ID = SUB.APPLICATION_ID";
-
-    public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
-            "SELECT DISTINCT A.NAME, D.SCOPE_BINDING "
-                    + "FROM ("
-                    + " (IDN_OAUTH2_SCOPE A "
-                    + "     INNER JOIN "
-                    + "  AM_API_RESOURCE_SCOPE_MAPPING B1 ON A.TENANT_ID = B1.TENANT_ID "
-                    + "     INNER JOIN "
-                    + "  AM_API_RESOURCE_SCOPE_MAPPING B2 ON A.NAME = B2.SCOPE_NAME "
-                    + "     INNER JOIN "
-                    + "  AM_API_URL_MAPPING C ON B1.URL_MAPPING_ID = C.URL_MAPPING_ID"
-                    + " ) LEFT JOIN "
-                    + " IDN_OAUTH2_SCOPE_BINDING D ON A.SCOPE_ID = D.SCOPE_ID"
-                    + ") WHERE C.REVISION_UUID IS NULL AND C.API_ID IN (";
-
-    public static final String CLOSING_BRACE = ")";
 
     public static final String GET_SCOPES_FOR_API_LIST = "SELECT "
             + "ARSM.SCOPE_NAME, AUM.API_ID "
@@ -2685,19 +2109,6 @@ public class SQLConstants {
             + "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID "
             + "WHERE AUM.API_ID IN ( $paramList ) AND AUM.REVISION_UUID IS NULL";
 
-    public static final String GET_USERS_FROM_OAUTH_TOKEN_SQL =
-            "SELECT " +
-            "   DISTINCT AMS.USER_ID, " +
-            "   AKM.CONSUMER_KEY " +
-            " FROM " +
-            "   AM_APPLICATION_KEY_MAPPING AKM, " +
-            "   AM_APPLICATION, " +
-            "   AM_SUBSCRIBER AMS " +
-            " WHERE " +
-            "   AKM.CONSUMER_KEY = ? " +
-            "   AND AKM.APPLICATION_ID = AA.APPLICATION_ID " +
-            "   AND AA.SUBSCRIBER_ID = AMS.SUBSCRIBER_ID";
-
     public static final String REMOVE_SUBSCRIPTION_BY_APPLICATION_ID_SQL =
             "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? ";
 
@@ -2712,19 +2123,6 @@ public class SQLConstants {
 
     public static final String GET_API_NAME_DIFF_CASE_MATCHING_CONTEXT_SQL =
             "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ? AND NOT (API_NAME = ?)";
-
-    public static final String GET_ACTIVE_TOKEN_OF_CONSUMER_KEY_SQL =
-            " SELECT " +
-            "   IOAT.ACCESS_TOKEN" +
-            " FROM " +
-            "   IDN_OAUTH2_ACCESS_TOKEN IOAT" +
-            " INNER JOIN " +
-            "   IDN_OAUTH_CONSUMER_APPS IOCA " +
-            " ON " +
-            "   IOCA.ID = IOAT.CONSUMER_KEY_ID" +
-            " WHERE" +
-            "   IOCA.CONSUMER_KEY = ?" +
-            "   AND IOAT.TOKEN_STATE = 'ACTIVE'";
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL =
             "SELECT COUNT(CONTEXT_TEMPLATE) AS CTX_COUNT FROM AM_API WHERE LOWER(CONTEXT_TEMPLATE) = ?";
@@ -2763,17 +2161,6 @@ public class SQLConstants {
             "   AND API.API_NAME=? " +
             "   AND ES.STORE_ID =? " +
             " ORDER By API.CREATED_TIME ASC";
-
-    public static final String GET_ACTIVE_TOKENS_OF_USER_PREFIX =
-            "SELECT IOAT.ACCESS_TOKEN FROM ";
-
-    public static final String GET_ACTIVE_TOKENS_OF_USER_SUFFIX =
-            "   IOAT" +
-            " WHERE" +
-            "   LOWER(IOAT.AUTHZ_USER) = ?" +
-            "   AND IOAT.TENANT_ID = ?" +
-            "   AND IOAT.TOKEN_STATE = 'ACTIVE'" +
-            "   AND LOWER(IOAT.USER_DOMAIN) = ?";
 
     public static final String GET_ALL_ALERT_TYPES =
             "SELECT " +
@@ -3195,17 +2582,6 @@ public class SQLConstants {
 
     public static final String GET_API_DETAILS_SQL = "SELECT * FROM AM_API ";
 
-    public static final String GET_ACCESS_TOKENS_BY_USER_SQL = "SELECT AKM.CONSUMER_KEY, CON_APP.CONSUMER_SECRET, TOKEN.ACCESS_TOKEN " +
-            "FROM " +
-            "IDN_OAUTH_CONSUMER_APPS CON_APP, AM_APPLICATION APP, IDN_OAUTH2_ACCESS_TOKEN  TOKEN, AM_APPLICATION_KEY_MAPPING AKM " +
-            "WHERE TOKEN.AUTHZ_USER =? " +
-            "AND APP.NAME =? " +
-            "AND APP.CREATED_BY =? " +
-            "AND TOKEN.TOKEN_STATE = 'ACTIVE' " +
-            "AND TOKEN.CONSUMER_KEY_ID = CON_APP.ID " +
-            "AND CON_APP.CONSUMER_KEY=AKM.CONSUMER_KEY " +
-            "AND AKM.APPLICATION_ID = APP.APPLICATION_ID";
-
 
     public static final String REMOVE_GROUP_ID_MAPPING_SQL =
             "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ? ";
@@ -3219,24 +2595,6 @@ public class SQLConstants {
     public static final String REMOVE_MIGRATED_GROUP_ID_SQL =
             "UPDATE AM_APPLICATION SET GROUP_ID = '' WHERE APPLICATION_ID = ?";
 
-
-    /** Label related constants **/
-
-    public static final String GET_LABEL_BY_TENANT = "select * from AM_LABELS where AM_LABELS.TENANT_DOMAIN= ? ";
-    public static final String GET_LABEL_DETAIL_BY_LABEL_AND_TENANT = "select * from AM_LABELS where TENANT_DOMAIN = " +
-            "? AND NAME = ?";
-
-    public static final String GET_URL_BY_LABEL_ID = "Select * from  AM_LABEL_URLS where LABEL_ID= ? ";
-
-    public static final String ADD_LABEL_SQL = "INSERT INTO AM_LABELS VALUES (?,?,?,?)";
-
-    public static final String ADD_LABEL_URL_MAPPING_SQL = "INSERT INTO AM_LABEL_URLS  VALUES (?,?)";
-
-    public static final String DELETE_LABEL_URL_MAPPING_SQL = "DELETE FROM AM_LABEL_URLS WHERE LABEL_ID = ?";
-
-    public static final String DELETE_LABEL_SQL = "DELETE FROM AM_LABELS WHERE LABEL_ID = ?";
-
-    public static final String UPDATE_LABEL_SQL = "UPDATE AM_LABELS SET NAME = ?, DESCRIPTION = ?  WHERE LABEL_ID = ?";
 
     /** Environment related constants **/
 
@@ -3295,7 +2653,7 @@ public class SQLConstants {
     public static final String ADD_API_PRODUCT =
             "INSERT INTO "
             + "AM_API(API_PROVIDER, API_NAME, API_VERSION, CONTEXT,"
-            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID) VALUES (?,?,?,?,?,?,?,?,?)";
+            + "API_TIER, CREATED_BY, CREATED_TIME, API_TYPE, API_UUID,STATUS) VALUES (?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_RESOURCES_OF_PRODUCT =
             "SELECT API_UM.URL_MAPPING_ID, API_UM.URL_PATTERN, API_UM.HTTP_METHOD, API_UM.AUTH_SCHEME, " +
@@ -3342,7 +2700,8 @@ public class SQLConstants {
     public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "
             + "(UUID, NAME, DESCRIPTION, TENANT_ID) VALUES (?,?,?,?)";
 
-    public static final String GET_CATEGORIES_BY_TENANT_ID_SQL = "SELECT * FROM AM_API_CATEGORIES WHERE TENANT_ID = ?";
+    public static final String GET_CATEGORIES_BY_TENANT_ID_SQL = "SELECT UUID, NAME, DESCRIPTION FROM AM_API_CATEGORIES "
+            + "WHERE TENANT_ID = ? ORDER BY NAME";
 
     public static final String IS_API_CATEGORY_NAME_EXISTS = "SELECT COUNT(UUID) AS API_CATEGORY_COUNT FROM "
             + "AM_API_CATEGORIES WHERE LOWER(NAME) = LOWER(?) AND TENANT_ID = ?";
@@ -3416,7 +2775,7 @@ public class SQLConstants {
     public static final String DELETE_GW_PUBLISHED_API_DETAILS = "DELETE FROM AM_GW_PUBLISHED_API_DETAILS WHERE " +
             "API_ID = ?";
     public static final String RETRIEVE_ARTIFACTS_BY_APIID_AND_LABEL =
-            "SELECT DISTINCT AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS" +
+            "SELECT AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID,AM_GW_PUBLISHED_API_DETAILS" +
                     ".TENANT_DOMAIN AS TENANT_DOMAIN," +
                     "AM_GW_PUBLISHED_API_DETAILS" +
                     ".API_PROVIDER AS API_PROVIDER," +
@@ -3426,12 +2785,12 @@ public class SQLConstants {
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_API_DEPLOYMENTS.API_ID= ? AND AM_GW_API_DEPLOYMENTS.LABEL IN (_GATEWAY_LABELS_) AND " +
-                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?" +
+                    "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ? " +
                     "AND AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
                     "AM_GW_API_ARTIFACTS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND" +
                     " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID";
     public static final String RETRIEVE_ARTIFACTS_BY_LABEL =
-            "SELECT DISTINCT AM_GW_API_DEPLOYMENTS.API_ID AS API_ID,AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
+            "SELECT AM_GW_API_DEPLOYMENTS.API_ID AS API_ID,AM_GW_API_DEPLOYMENTS.REVISION_ID AS REVISION_ID," +
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN AS TENANT_DOMAIN," +
                     "AM_GW_PUBLISHED_API_DETAILS" +
                     ".API_PROVIDER AS API_PROVIDER," +
@@ -3459,6 +2818,9 @@ public class SQLConstants {
                     " AM_GW_API_ARTIFACTS.REVISION_ID=AM_GW_API_DEPLOYMENTS.REVISION_ID AND " +
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
+    public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
+    public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
+            "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
 
     /** Throttle related constants**/
 
@@ -3988,7 +3350,7 @@ public class SQLConstants {
         public static final String INSERT_URL_MAPPINGS = "INSERT INTO AM_API_URL_MAPPING(API_ID, HTTP_METHOD," +
                 " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER, REVISION_UUID) VALUES(?,?,?,?,?,?)";
         public static final String GET_CLIENT_CERTIFICATES = "SELECT ALIAS, CERTIFICATE," +
-                " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API' AND REMOVED IS FALSE";
+                " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API'";
         public static final String INSERT_CLIENT_CERTIFICATES = "INSERT INTO AM_API_CLIENT_CERTIFICATE(TENANT_ID, " +
                 "ALIAS, API_ID, CERTIFICATE, REMOVED, TIER_NAME, REVISION_UUID) VALUES(?,?,?,?,?,?,?)";
         public static final String GET_GRAPHQL_COMPLEXITY = "SELECT TYPE, FIELD, COMPLEXITY_VALUE " +
@@ -4020,8 +3382,8 @@ public class SQLConstants {
                         " VALUES (?,?,?,?)";
         public static final String DELETE_API_REVISION_DEPLOYMENTS_MAPPING_BY_REVISION_UUID =
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
-        public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_TYPE
-                = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ?";
+        public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_REVISION_UUID
+                = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ? ";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_API_UUID
@@ -4032,6 +3394,8 @@ public class SQLConstants {
                 "ADRM.REVISION_UUID = AR.REVISION_UUID WHERE AR.API_UUID = ?";
         public static final String REMOVE_API_REVISION_DEPLOYMENT_MAPPING =
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ?";
+        public static final String UPDATE_API_REVISION_DEPLOYMENT_MAPPING =
+                " UPDATE AM_DEPLOYMENT_REVISION_MAPPING SET DISPLAY_ON_DEVPORTAL = ? WHERE NAME = ? AND REVISION_UUID = ? ";
         public static final String REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID =
                 "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID IS NULL";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
@@ -4045,9 +3409,9 @@ public class SQLConstants {
                 "WHERE API_ID = ? AND REVISION_UUID IS NULL AND HTTP_METHOD = ? AND AUTH_SCHEME = ? AND URL_PATTERN = ? " +
                 "AND THROTTLING_TIER = ? ";
         public static final String REMOVE_CURRENT_API_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_API_ID =
-                "DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API' AND REMOVED IS FALSE";
+                "DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API'";
         public static final String GET_CLIENT_CERTIFICATES_BY_REVISION_UUID = "SELECT ALIAS, CERTIFICATE," +
-                " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID = ? AND REMOVED IS FALSE";
+                " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String INSERT_CLIENT_CERTIFICATES_AS_CURRENT_API = "INSERT INTO AM_API_CLIENT_CERTIFICATE(TENANT_ID, " +
                 "ALIAS, API_ID, CERTIFICATE, REMOVED, TIER_NAME, REVISION_UUID) VALUES(?,?,?,?,?,?,?)";
         public static final String REMOVE_CURRENT_API_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_API_ID =
@@ -4059,7 +3423,7 @@ public class SQLConstants {
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_API_URL_MAPPING_BY_REVISION_UUID =
                 "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_API_CLIENT_CERTIFICATE_BY_REVISION_UUID =
-                "DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID = ? AND REMOVED IS FALSE";
+                "DELETE FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String REMOVE_REVISION_ENTRIES_IN_AM_GRAPHQL_COMPLEXITY_BY_REVISION_UUID =
                 "DELETE FROM AM_GRAPHQL_COMPLEXITY WHERE API_ID = ? AND REVISION_UUID = ?";
         public static final String REMOVE_CURRENT_API_ENTRIES_IN_AM_API_PRODUCT_MAPPING_BY_API_PRODUCT_ID =
@@ -4081,6 +3445,9 @@ public class SQLConstants {
                 "FROM AM_API_PRODUCT_MAPPING WHERE API_ID = ? AND REVISION_UUID = 'Current API'";
         public static final String REMOVE_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING_BY_URL_MAPPING_ID =
                 "DELETE FROM AM_API_URL_MAPPING WHERE URL_MAPPING_ID = ?";
+        public static final String CHECK_API_REVISION_DEPLOYMENT_AVAILABILITY_BY_API_UUID = "SELECT 1 FROM " +
+                "AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID IN  (SELECT REVISION_UUID FROM AM_REVISION WHERE " +
+                "API_UUID = ?)";
     }
 
     /**
@@ -4089,15 +3456,14 @@ public class SQLConstants {
     public static class ServiceCatalogConstants {
 
         public static final String ADD_SERVICE = "INSERT INTO AM_SERVICE_CATALOG " +
-                "(UUID, SERVICE_KEY, MD5, SERVICE_NAME, DISPLAY_NAME, SERVICE_VERSION, TENANT_ID, SERVICE_URL, " +
+                "(UUID, SERVICE_KEY, MD5, SERVICE_NAME, SERVICE_VERSION, TENANT_ID, SERVICE_URL, " +
                 "DEFINITION_TYPE, DEFINITION_URL, DESCRIPTION, " +
                 "SECURITY_TYPE, MUTUAL_SSL_ENABLED, CREATED_TIME, LAST_UPDATED_TIME, CREATED_BY, UPDATED_BY, " +
-                "SERVICE_DEFINITION, METADATA) " +
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "SERVICE_DEFINITION) " +
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         public static final String UPDATE_SERVICE_BY_KEY = "UPDATE AM_SERVICE_CATALOG SET " +
                 "MD5 = ?," +
                 "SERVICE_NAME = ?," +
-                "DISPLAY_NAME = ?," +
                 "TENANT_ID = ?," +
                 "SERVICE_URL = ?," +
                 "DEFINITION_URL = ?," +
@@ -4106,8 +3472,7 @@ public class SQLConstants {
                 "MUTUAL_SSL_ENABLED = ?," +
                 "LAST_UPDATED_TIME = ?," +
                 "UPDATED_BY = ?," +
-                "SERVICE_DEFINITION = ?," +
-                "METADATA = ? " +
+                "SERVICE_DEFINITION = ?" +
                 "WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
         public static final String DELETE_SERVICE_BY_SERVICE_ID = "DELETE FROM AM_SERVICE_CATALOG WHERE UUID = ? " +
                 "AND TENANT_ID = ?";
@@ -4138,7 +3503,6 @@ public class SQLConstants {
                 "   SERVICE_KEY," +
                 "   MD5," +
                 "   SERVICE_NAME," +
-                "   DISPLAY_NAME," +
                 "   SERVICE_VERSION," +
                 "   SERVICE_URL," +
                 "   DEFINITION_TYPE," +

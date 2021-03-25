@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Faul
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
 
 /**
- * Abstract faulty request data collector
+ * Abstract faulty request data collector.
  */
 public abstract class AbstractFaultDataCollector extends CommonRequestDataCollector implements FaultDataCollector {
     protected FaultCategory subType;

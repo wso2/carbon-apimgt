@@ -76,7 +76,7 @@ function AddEditGWEnvironment(props) {
     const classes = useStyles();
 
     const defaultVhost = {
-        host: '', httpContext: '', httpsPort: 443, httpPort: 80, wssPort: 8099, wsPort: 9099, isNew: true,
+        host: '', httpContext: '', httpsPort: 8243, httpPort: 8280, wssPort: 8099, wsPort: 9099, isNew: true,
     };
     const [initialState, setInitialState] = useState({
         displayName: '',

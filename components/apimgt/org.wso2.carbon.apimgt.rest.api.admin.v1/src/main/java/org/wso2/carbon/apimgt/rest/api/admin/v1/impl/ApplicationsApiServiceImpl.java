@@ -66,7 +66,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, MessageContext messageContext) throws APIManagementException {
+    public Response applicationsApplicationIdDelete(String applicationId, MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
@@ -84,7 +84,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String ifNoneMatch,
+    public Response applicationsGet(String user, Integer limit, Integer offset, String accept,
                                     String name, String appTenantDomain, MessageContext messageContext) {
 
         // To store the initial value of the user (specially if it is null or empty)

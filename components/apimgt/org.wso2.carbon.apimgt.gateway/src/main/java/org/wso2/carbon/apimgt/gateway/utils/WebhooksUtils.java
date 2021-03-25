@@ -38,8 +38,11 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhooksAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -139,7 +142,7 @@ public class WebhooksUtils {
      */
     public static List<WebhooksDTO> getSubscribersListFromInMemoryMap(MessageContext messageContext)
             throws URISyntaxException {
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain(true);
+        String tenantDomain = (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY);
         String apiKey = WebhooksUtils.generateAPIKey(messageContext, tenantDomain);
         String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(APIConstants.TRANSPORT_URL_IN);
@@ -187,13 +190,6 @@ public class WebhooksUtils {
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, httpErrorCode);
 
         Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
-
-        // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
-            return;
-        }
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         // This property need to be set to avoid sending the content in pass-through pipe (request message)
@@ -206,33 +202,29 @@ public class WebhooksUtils {
             // in the payload.
             log.error("Error occurred while consuming and discarding the message", axisFault);
         }
-
-        if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+            return;
         }
-
         sendFault(messageContext, httpErrorCode);
-    }
-
-    public static OMElement getFaultPayload(int throttleErrorCode, String message, String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APIThrottleConstants.API_THROTTLE_NS,
-                APIThrottleConstants.API_THROTTLE_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(String.valueOf(throttleErrorCode));
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(message);
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(description);
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
     }
 
     public static void sendFault(MessageContext messageContext, int httpErrorCode) {
         Utils.sendFault(messageContext, httpErrorCode);
+    }
+
+    public static void publishAnalyticsData(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axisCtx =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
+        WebhooksAnalyticsDataProvider provider = new WebhooksAnalyticsDataProvider(messageContext);
+        GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
+        try {
+            dataCollector.collectData();
+        } catch (AnalyticsException e) {
+            log.error("Error occurred when collecting data", e);
+        }
     }
 }

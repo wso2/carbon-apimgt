@@ -53,7 +53,7 @@ public class FaultCodeClassifier {
         return null;
     }
 
-    private FaultSubCategory getAuthFaultSubCategory(int errorCode) {
+    protected FaultSubCategory getAuthFaultSubCategory(int errorCode) {
         switch (errorCode) {
         case APISecurityConstants.API_AUTH_GENERAL_ERROR:
         case APISecurityConstants.API_AUTH_INVALID_CREDENTIALS:
@@ -73,7 +73,7 @@ public class FaultCodeClassifier {
         }
     }
 
-    private FaultSubCategory getTargetFaultSubCategory(int errorCode) {
+    protected FaultSubCategory getTargetFaultSubCategory(int errorCode) {
         switch (errorCode) {
         case SynapseConstants.NHTTP_CONNECTION_TIMEOUT:
         case SynapseConstants.NHTTP_CONNECT_TIMEOUT:
@@ -85,7 +85,7 @@ public class FaultCodeClassifier {
         }
     }
 
-    private FaultSubCategory getThrottledFaultSubCategory(int errorCode) {
+    protected FaultSubCategory getThrottledFaultSubCategory(int errorCode) {
         switch (errorCode) {
         case APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE:
             return FaultSubCategories.Throttling.API_LEVEL_LIMIT_EXCEEDED;
@@ -112,7 +112,7 @@ public class FaultCodeClassifier {
         }
     }
 
-    private FaultSubCategory getOtherFaultSubCategory(int errorCode) {
+    protected FaultSubCategory getOtherFaultSubCategory(int errorCode) {
         if (isMethodNotAllowed()) {
             return FaultSubCategories.Other.METHOD_NOT_ALLOWED;
         } else if (isResourceNotFound()) {

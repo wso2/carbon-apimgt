@@ -449,7 +449,7 @@ class API extends Resource {
      */
     getGatewayEnvironmentList() {
         return this.client.then((client) => {
-            return client.apis["Environment Collection"].get_environments(
+            return client.apis['Environments'].get_environments(
                 this._requestMetaData(),
             );
         });
@@ -460,7 +460,7 @@ class API extends Resource {
      */
     deleteGatewayEnvironment(id) {
         return this.client.then((client) => {
-            return client.apis['Environment'].delete_environments__environmentId_(
+            return client.apis['Environments'].delete_environments__environmentId_(
                 { environmentId: id },
                 this._requestMetaData(),
             );
@@ -476,7 +476,7 @@ class API extends Resource {
             const payload = {
                 'Content-Type': 'application/json',
             };
-            return client.apis['Environment'].post_environments(
+            return client.apis['Environments'].post_environments(
                 payload,
                 { requestBody: data },
                 this._requestMetaData(),
@@ -490,70 +490,8 @@ class API extends Resource {
     updateGatewayEnvironment(id, name, displayName, description, vhosts,  callback = null) {
         return this.client.then((client) => {
             const data = { name, displayName, description, vhosts };
-            return client.apis['Environment'].put_environments__environmentId_(
+            return client.apis['Environments'].put_environments__environmentId_(
                 { environmentId: id },
-                { requestBody: data },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * Get a list of available Microgateway labels
-     */
-    getMicrogatewayLabelList() {
-        return this.client.then((client) => {
-            return client.apis['Label Collection'].get_labels(
-                this._requestMetaData(),
-            );
-        });
-    }
-
-     /**
-     * Delete a Microgateway Label
-     */
-    deleteMicrogatewayLabel(id) {
-        return this.client.then((client) => {
-            return client.apis['Label'].delete_labels__labelId_(
-                { labelId: id },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-     /**
-     * Add a Microgateway Label
-     */
-    addMicrogatewayLabel(name, description, hosts,  callback = null) {
-        return this.client.then((client) => {
-            const data = {
-                name: name,
-                description: description,
-                accessUrls: hosts,
-            };
-            const payload = {
-                'Content-Type': 'application/json',
-            };
-            return client.apis['Label'].post_labels(
-                payload,
-                { requestBody: data },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-     /**
-     * Update a Microgateway Label
-     */
-    updateMicrogatewayLabel(id, name, description, hosts,  callback = null) {
-        return this.client.then((client) => {
-            const data = {
-                name: name,
-                description: description,
-                accessUrls: hosts,
-            };
-            return client.apis['Label'].put_labels__labelId_(
-                { labelId: id },
                 { requestBody: data },
                 this._requestMetaData(),
             );

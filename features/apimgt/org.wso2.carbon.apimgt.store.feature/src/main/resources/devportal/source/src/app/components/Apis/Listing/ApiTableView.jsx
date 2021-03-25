@@ -35,20 +35,13 @@ import Alert from 'AppComponents/Shared/Alert';
 import Icon from '@material-ui/core/Icon';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import DefaultConfigurations from '../../../../defaultTheme';
-import ImageGenerator from './ImageGenerator';
+import ImageGenerator from './APICards/ImageGenerator';
 import ApiThumb from './ApiThumb';
-import DocThumb from './DocThumb';
+import DocThumb from './APICards/DocThumb';
 import { ApiContext } from '../Details/ApiContext';
 import NoApi from './NoApi';
 
 const styles = (theme) => ({
-    rowImageOverride: {
-        '& .material-icons': {
-            marginTop: 5,
-            color: `${theme.custom.thumbnail.iconColor} !important`,
-            fontSize: `${theme.custom.thumbnail.listViewIconSize}px !important`,
-        },
-    },
     apiNameLink: {
         display: 'flex',
         alignItems: 'center',
@@ -56,6 +49,11 @@ const styles = (theme) => ({
             marginLeft: theme.spacing(1),
         },
         color: theme.palette.getContrastText(theme.custom.listView.tableBodyEvenBackgrund),
+        '& .material-icons': {
+            marginTop: 5,
+            color: `${theme.custom.thumbnail.iconColor} !important`,
+            fontSize: `${theme.custom.thumbnail.listViewIconSize}px !important`,
+        },
     },
 });
 /**
@@ -82,10 +80,37 @@ class ApiTableView extends React.Component {
         this.pageType = null;
     }
 
+    /**
+     * Component mount call back
+     * @returns {void}
+     */
+    componentDidMount() {
+        this.apiType = this.context.apiType;
+        this.getData();
+    }
+
+    /**
+     * Component update call back
+     * @param {JSON} prevProps properties from previous state of the component
+     * @returns {void}
+     */
+    componentDidUpdate(prevProps) {
+        const { query, selectedTag } = this.props;
+        if (
+            this.apiType !== this.context.apiType
+            || query !== prevProps.query
+            || prevProps.selectedTag !== selectedTag
+        ) {
+            this.page = 0;
+            this.apiType = this.context.apiType;
+            this.getData();
+        }
+    }
+
     getMuiTheme = () => {
         const { gridView, theme } = this.props;
         let themeAdditions = {};
-        let muiTheme = {
+        const muiTheme = {
             overrides: {
                 MUIDataTable: {
                     root: {
@@ -133,21 +158,21 @@ class ApiTableView extends React.Component {
                 MUIDataTablePagination: {
                     root: {
                         color: theme.palette.getContrastText(theme.palette.background.default),
-                        
+
                     },
                 },
                 MuiMenuItem: {
                     root: {
                         color: theme.palette.getContrastText(theme.palette.background.default),
-                    }
+                    },
                 },
                 MUIDataTableToolbar: {
                     root: {
                         '& svg': {
                             color: theme.palette.getContrastText(theme.palette.background.default),
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             },
         };
         if (gridView) {
@@ -190,33 +215,15 @@ class ApiTableView extends React.Component {
                 },
             };
         }
-        const systemTheme = merge({}, DefaultConfigurations, Configurations, {custom: cloneDeep(theme.custom)});
+        const systemTheme = merge({}, DefaultConfigurations, Configurations, { custom: cloneDeep(theme.custom) });
         const dataTableTheme = merge({}, muiTheme, systemTheme, themeAdditions);
         return createMuiTheme(dataTableTheme);
     };
 
-    componentDidMount() {
-        this.apiType = this.context.apiType;
-        this.getData();
-    }
-
-    componentDidUpdate(prevProps) {
-        const { query, selectedTag } = this.props;
-        if (
-            this.apiType !== this.context.apiType
-            || query !== prevProps.query
-            || prevProps.selectedTag !== selectedTag
-        ) {
-            this.page = 0;
-            this.apiType = this.context.apiType;
-            this.getData();
-        }
-    }
-
     // get data
     getData = () => {
         const { intl } = this.props;
-        this.setState({loading: true})
+        this.setState({ loading: true });
         this.xhrRequest()
             .then((data) => {
                 const { body } = data;
@@ -249,7 +256,6 @@ class ApiTableView extends React.Component {
     xhrRequest = () => {
         const { query, selectedTag } = this.props;
         const { page, rowsPerPage } = this;
-        const { apiType } = this.context;
         const api = new API();
         const searchParam = new URLSearchParams(query);
         const searchQuery = searchParam.get('query');
@@ -279,7 +285,7 @@ class ApiTableView extends React.Component {
                     data: list,
                 });
             })
-            .catch((e) => {
+            .catch(() => {
                 Alert.error(intl.formatMessage({
                     defaultMessage: 'Error While Loading APIs',
                     id: 'Apis.Listing.ApiTableView.error.loading',
@@ -315,6 +321,7 @@ class ApiTableView extends React.Component {
                             const artifact = tableViewObj.state.data[tableMeta.rowIndex];
                             return <ImageGenerator api={artifact} width={30} height={30} />;
                         }
+                        return <span />;
                     },
                     sort: false,
                     filter: false,
@@ -360,7 +367,6 @@ class ApiTableView extends React.Component {
                                 return (
                                     <Link
                                         to={'/apis/' + apiId + '/overview'}
-                                        className={classes.rowImageOverride}
                                         className={classes.apiNameLink}
                                     >
                                         <CustomIcon width={16} height={16} icon='api' strokeColor={strokeColor} />
@@ -370,6 +376,7 @@ class ApiTableView extends React.Component {
                                 );
                             }
                         }
+                        return <span />;
                     },
                     sort: false,
                     filter: false,
@@ -412,26 +419,34 @@ class ApiTableView extends React.Component {
                                     <>
                                         <div>{tableMeta.rowData[9].businessOwner}</div>
                                         <Typography variant='caption'>
-                                            <FormattedMessage defaultMessage='(Business Owner)' id='Apis.Listing.ApiTableView.business.owner.caption' />
+                                            <FormattedMessage
+                                                defaultMessage='(Business Owner)'
+                                                id='Apis.Listing.ApiTableView.business.owner.caption'
+                                            />
                                         </Typography>
                                     </>
                                 );
                             } else {
                                 return (
                                     <>
-                                        {value &&
-                                        <>
-                                            <div>{value}</div>
-                                            <Typography variant='caption'>
-                                                <FormattedMessage defaultMessage='(Provider)' id='Apis.Listing.ApiTableView.provider.caption' />
-                                            </Typography>
-                                        </>
-                                        }
+                                        {value
+                                        && (
+                                            <>
+                                                <div>{value}</div>
+                                                <Typography variant='caption'>
+                                                    <FormattedMessage
+                                                        defaultMessage='(Provider)'
+                                                        id='Apis.Listing.ApiTableView.provider.caption'
+                                                    />
+                                                </Typography>
+                                            </>
+                                        )}
                                     </>
                                 );
                             }
                         }
-                    }
+                        return <span />;
+                    },
                 },
             },
             {
@@ -469,6 +484,7 @@ class ApiTableView extends React.Component {
                                 }
                             }
                         }
+                        return <span />;
                     },
                     sort: false,
                     display: showRating ? 'true' : 'excluded',
@@ -503,13 +519,15 @@ class ApiTableView extends React.Component {
                     case 'changePage':
                         this.changePage(tableState.page);
                         break;
+                    default:
+                        break;
                 }
             },
             selectableRows: 'none',
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
-                const { page, count } = this;
-                if (page * numberOfRows > count) {
+                const { page: pageInner, count: countInner } = this;
+                if (pageInner * numberOfRows > countInner) {
                     this.page = 0;
                 }
                 this.rowsPerPage = numberOfRows;
@@ -518,14 +536,23 @@ class ApiTableView extends React.Component {
             },
         };
         if (gridView) {
-            options.customRowRender = (data, dataIndex, rowIndex, tableViewObj = this) => {
+            options.customRowRender = (_data, dataIndex, rowIndex, tableViewObj = this) => {
                 const artifact = tableViewObj.state.data[dataIndex];
                 if (artifact) {
                     if (artifact.type === 'DOC') {
                         return <tr key={rowIndex}><td><DocThumb doc={artifact} /></td></tr>;
                     } else {
-                        return <tr key={rowIndex}><td><ApiThumb api={artifact} customHeight={theme.custom.thumbnail.height}
-                        customWidth={theme.custom.thumbnail.width} /></td></tr>;
+                        return (
+                            <tr key={rowIndex}>
+                                <td>
+                                    <ApiThumb
+                                        api={artifact}
+                                        customHeight={theme.custom.thumbnail.height}
+                                        customWidth={theme.custom.thumbnail.width}
+                                    />
+                                </td>
+                            </tr>
+                        );
                     }
                 }
                 return <span />;

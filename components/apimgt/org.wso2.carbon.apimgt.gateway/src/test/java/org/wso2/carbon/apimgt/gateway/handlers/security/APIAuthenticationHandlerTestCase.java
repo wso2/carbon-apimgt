@@ -161,8 +161,7 @@ public class APIAuthenticationHandlerTestCase {
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
-        PowerMockito.when(GatewayUtils.getApiProviderFromContextAndVersion(Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyString())).thenReturn(Mockito.anyString());
+        PowerMockito.when(GatewayUtils.getApiProviderFromContextAndVersion(messageContext)).thenReturn(Mockito.anyString());
         APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler() {
             @Override
             protected AuthenticationContext getAuthenticationContext(MessageContext messageContext) {
@@ -285,19 +284,10 @@ public class APIAuthenticationHandlerTestCase {
             }
 
             @Override
-            protected void setSOAPFault(MessageContext messageContext, APISecurityException e) {
-
-            }
-
-            @Override
             protected void sendFault(MessageContext messageContext, int status) {
 
             }
 
-            @Override
-            protected void setFaultPayload(MessageContext messageContext, APISecurityException e) {
-                getFaultPayload(e);
-            }
         };
     }
 

@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -45,6 +46,7 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
     @Test
     public void testHandleRequest() {
         MessageContext msgCtx1 = Mockito.mock(MessageContext.class);
+        Mockito.when(msgCtx1.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.PUBLISHED);
         APIMgtGoogleAnalyticsTrackingHandler apiMgtGoogleAnalyticsTrackingHandler
                 = new APIMgtGoogleAnalyticsTrackingHandler();
         try {
@@ -56,7 +58,7 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
         SynapseConfiguration synapseConfiguration = Mockito.mock(SynapseConfiguration.class);
         Mockito.when(msgCtx.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when(synapseConfiguration.getEntryDefinition("abc")).thenReturn(null);
-
+        Mockito.when(msgCtx.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.PUBLISHED);
         apiMgtGoogleAnalyticsTrackingHandler.setConfigKey("abc");
         //test when entry is null
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(msgCtx));
@@ -123,6 +125,7 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         OMElement entryvalue1 = Mockito.mock(OMElement.class);
         Mockito.when(msgCtx.getEntry("abc")).thenReturn(entryvalue1);
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.API_STATUS)).thenReturn(APIConstants.PUBLISHED);
 
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(messageContext));
 

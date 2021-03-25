@@ -111,7 +111,7 @@ function Edit(props) {
 
     const formSaveCallback = () => {
         return validateOwner().then(() => {
-            return restApi.updateApplicationOwner(dataRow.id, owner)
+            return restApi.updateApplicationOwner(dataRow.applicationId, owner)
                 .then(() => {
                     return (
                         <FormattedMessage

@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
- * analytics event data
+ * analytics event data.
  */
 public class Event {
     @JsonUnwrapped

@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 
 /**
- * Meta info attribute in analytics event
+ * Meta info attribute in analytics event.
  */
 public class MetaInfo {
     private String correlationId;

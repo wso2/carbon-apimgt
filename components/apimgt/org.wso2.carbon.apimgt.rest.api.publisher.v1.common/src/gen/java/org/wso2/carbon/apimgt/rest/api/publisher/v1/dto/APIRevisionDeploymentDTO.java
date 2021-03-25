@@ -36,7 +36,7 @@ public class APIRevisionDeploymentDTO   {
   
   @ApiModelProperty(example = "c26b2b9b-4632-4ca4-b6f3-521c8863990c", value = "")
   @JsonProperty("revisionUuid")
-  public String getRevisionUuid() {
+ @Size(min=0,max=255)  public String getRevisionUuid() {
     return revisionUuid;
   }
   public void setRevisionUuid(String revisionUuid) {
@@ -53,7 +53,7 @@ public class APIRevisionDeploymentDTO   {
   
   @ApiModelProperty(example = "default", value = "")
   @JsonProperty("name")
-  public String getName() {
+ @Size(min=1,max=255)  public String getName() {
     return name;
   }
   public void setName(String name) {

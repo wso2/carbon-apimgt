@@ -124,6 +124,9 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 subscriptionListDTO = SubscriptionMappingUtil
                         .fromSubscriptionListToDTO(subscribedAPIList, limit, offset, organizationId);
 
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit,
+                        offset, subscribedAPIList.size());
+
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -450,6 +453,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String organizationId, String ifNoneMatch,
                                                    MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);

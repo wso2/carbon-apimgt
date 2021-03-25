@@ -623,6 +623,23 @@ class APIProduct extends Resource {
     }
 
     /**
+     * export an API Directory as A Zpi file
+     * @returns {promise} Promise Containing the ZPI file of the selected API
+     */
+     export() {
+        const apiZip = this.client.then((client) => {
+            return client.apis['Import Export'].exportAPIProduct({
+                name: this.name,
+                version: '1.0.0'
+            },  this._requestMetaData({
+                    'accept': 'application/zip'
+                })
+            );
+        });
+        return apiZip;
+    }
+
+    /**
      * Undeploy revision.
      *
      * @param {string} apiProductId Id of the API.
@@ -682,6 +699,28 @@ class APIProduct extends Resource {
                 );
             });
         return promiseRestoreRevision;  
+    }
+
+    /**
+    * Change displayInDevportal.
+    *
+    * @param {string} apiProductId Id of the API.
+    * @param {string} deploymentId Id of the API.
+    * @param {Object} body Revision Object.
+    * */
+    displayInDevportalProduct(apiProductId, deploymentId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Product Revisions'].updateAPIProductDeployment(
+                    {
+                        apiProductId: apiProductId,
+                        deploymentId: deploymentId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
     }
 
     /**

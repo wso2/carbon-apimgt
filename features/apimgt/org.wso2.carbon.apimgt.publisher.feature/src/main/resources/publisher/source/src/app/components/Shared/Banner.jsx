@@ -62,16 +62,14 @@ function Banner(props) {
     }
 
     const handleShowClick = () => {
-        // eslint-disable-next-line no-unused-expressions
-        (show === true) ? setShow(false) : setShow(true);
+        setShow(!show);
     };
 
     let bannerIcon = null;
     let { description } = message;
 
     let title;
-    // TODO Check for an instance of FormattedMessage as well ~tmkb
-    if (typeof message === 'string' || message instanceof String) {
+    if (typeof message === 'string' || message instanceof String || message.type === FormattedMessage) {
         description = message;
         const [first, ...rest] = type;
         title = `${first.toUpperCase()}${rest.join('')}`; // Capitalize the first letter
@@ -120,8 +118,11 @@ function Banner(props) {
                                 <Grid item style={{ paddingLeft: '8.5%' }}>
                                     <Typography variant='subtitle2' display='block' gutterBottom>
                                         Identified Errors
-                                        {/* eslint-disable-next-line max-len */}
-                                        {errors.map((error) => <Typography variant='body1'>{error.message}</Typography>)}
+                                        {errors && errors.map((error) => (
+                                            <Typography variant='body1'>
+                                                {error.message}
+                                            </Typography>
+                                        ))}
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -142,14 +143,16 @@ function Banner(props) {
                                     </Button>
                                 </>
                             )}
-                            {!disableClose && (
+                            {!disableActions && !disableClose && (
                                 <Button onClick={onClose || (() => setIsOpen(false))} color='primary'>
                                     CLOSE
                                 </Button>
                             )}
-                            <Button color='primary' onClick={handleShowClick}>
-                                {show ? 'HIDE ERRORS' : 'SHOW ERRORS'}
-                            </Button>
+                            {!disableActions && (
+                                <Button color='primary' onClick={handleShowClick}>
+                                    {show ? 'HIDE ERRORS' : 'SHOW ERRORS'}
+                                </Button>
+                            )}
                         </Grid>
                     </Grid>
                 </Paper>

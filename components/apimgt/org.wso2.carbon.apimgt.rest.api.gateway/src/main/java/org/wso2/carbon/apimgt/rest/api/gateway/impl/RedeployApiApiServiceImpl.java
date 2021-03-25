@@ -33,7 +33,7 @@ public class RedeployApiApiServiceImpl implements RedeployApiApiService {
     private static final Log log = LogFactory.getLog(RedeployApiApiServiceImpl.class);
     private boolean debugEnabled = log.isDebugEnabled();
 
-    public Response redeployApiPost(String apiName, String version, String tenantDomain,
+    public Response redployAPI(String apiName, String version, String tenantDomain,
                                     MessageContext messageContext) {
 
         tenantDomain = RestApiCommonUtil.getValidateTenantDomain(tenantDomain);
