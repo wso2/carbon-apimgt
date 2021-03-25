@@ -29,7 +29,6 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -56,9 +55,7 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.dto.APIData;
 import org.wso2.carbon.apimgt.gateway.dto.IPRange;
-import org.wso2.carbon.apimgt.gateway.dto.ResourceData;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
@@ -82,8 +79,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -97,7 +92,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1321,40 +1315,19 @@ public class GatewayUtils {
         }
     }
 
-    public static void setWebsocketEndpointsToBeRemoved(GatewayAPIDTO gatewayAPIDTO, APIData apiData)
-            throws XMLStreamException {
-        final String FILTER_MEDIATOR_LOCAL_NAME = "filter";
-        final String SEND_MEDIATOR_LOCAL_NAME = "send";
-        final String KEY_QNAME_STRING = "key";
-        for (ResourceData resource : apiData.getResources()) {
-            /*
-             * Extract endpoint key from this <resource> of a Websocket API, which has to be deleted.
-             * The resource contains the endpoint as follows:
-             *   <inSequence>
-             *     <filter>
-             *       <then|else>
-             *         <send>
-             *           <endpoint key="ENDPOINT_KEY">
-             */
-            String inSeqXml = resource.getInSeqXml();
-            OMElement inSeqOmElement = AXIOMUtil.stringToOM(inSeqXml);
-            Iterator inSeqChildrenIterator = inSeqOmElement.getChildren();
-            while (inSeqChildrenIterator.hasNext()) {
-                Object inSeqChild = inSeqChildrenIterator.next();
-                if (inSeqChild instanceof OMElement &&
-                        FILTER_MEDIATOR_LOCAL_NAME.equals(((OMElement) inSeqChild).getLocalName())) {
-                    Iterator filterChildrenIterator = ((OMElement) inSeqChild).getChildren();
-                    while (filterChildrenIterator.hasNext()) {
-                        OMElement thenElseElement = (OMElement) filterChildrenIterator.next();
-                        OMElement sendElement = thenElseElement.getFirstElement();
-                        if (SEND_MEDIATOR_LOCAL_NAME.equals(sendElement.getLocalName())) {
-                            OMElement endpointElement = sendElement.getFirstElement();
-                            String endpointKey = endpointElement.getAttributeValue(QName.valueOf(KEY_QNAME_STRING));
-                            gatewayAPIDTO.setEndpointEntriesToBeRemove(
-                                    org.wso2.carbon.apimgt.impl.utils.GatewayUtils.addStringToList(endpointKey,
-                                            gatewayAPIDTO.getEndpointEntriesToBeRemove()));
-                        }
-                    }
+    public static void setWebsocketEndpointsToBeRemoved(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)
+            throws AxisFault {
+        String apiName = gatewayAPIDTO.getName();
+        String apiVersion = gatewayAPIDTO.getVersion();
+        if (apiName != null && apiVersion != null) {
+            String prefix = apiName.concat("--v").concat(apiVersion).concat("_API");
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+            String[] endpoints = endpointAdminServiceProxy.getEndpoints();
+            for (String endpoint : endpoints) {
+                if (endpoint.startsWith(prefix)) {
+                    gatewayAPIDTO.setEndpointEntriesToBeRemove(
+                            org.wso2.carbon.apimgt.impl.utils.GatewayUtils.addStringToList(endpoint,
+                                    gatewayAPIDTO.getEndpointEntriesToBeRemove()));
                 }
             }
         }

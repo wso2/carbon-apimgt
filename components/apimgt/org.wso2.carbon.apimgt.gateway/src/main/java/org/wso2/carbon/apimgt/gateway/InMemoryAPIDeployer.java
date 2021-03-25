@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.gateway.dto.APIData;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
@@ -48,7 +47,6 @@ import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -286,7 +284,8 @@ public class InMemoryAPIDeployer {
                                                 "_graphQL"), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                     }
                     if (APIConstants.APITransportType.WS.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
-                        setWebsocketEndpointsToBeRemoved(gatewayAPIDTO, apiGatewayAdmin);
+                        org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.setWebsocketEndpointsToBeRemoved(
+                                gatewayAPIDTO, gatewayEvent.getTenantDomain());
                     } else {
                         GatewayUtils.setEndpointsToBeRemoved(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion(),
                                 gatewayAPIDTO);
@@ -307,15 +306,6 @@ public class InMemoryAPIDeployer {
         }
     }
 
-    private void setWebsocketEndpointsToBeRemoved(GatewayAPIDTO gatewayAPIDTO, APIGatewayAdmin apiGatewayAdmin)
-            throws AxisFault, ArtifactSynchronizerException {
-        APIData apiData = apiGatewayAdmin.getApi(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion());
-        try {
-            org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.setWebsocketEndpointsToBeRemoved(gatewayAPIDTO, apiData);
-        } catch (XMLStreamException e) {
-            throw new ArtifactSynchronizerException("Error while unDeploying api ", e);
-        }
-    }
 
     public void cleanDeployment(String artifactRepositoryPath) {
 
