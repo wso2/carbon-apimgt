@@ -26,12 +26,8 @@
 
     <modules>
         <module>service-stubs/apimgt</module>
-        <module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
-        <module>components/forum</module>
         <module>features/apimgt</module>
-        <module>features/forum</module>
-        <module>features/categories</module>
     </modules>
 
     <build>
@@ -1158,19 +1154,6 @@
                 <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.application.mgt.stub</artifactId>
                 <version>${carbon.commons.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.forum</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.forum.server.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
             </dependency>
 
             <dependency>
