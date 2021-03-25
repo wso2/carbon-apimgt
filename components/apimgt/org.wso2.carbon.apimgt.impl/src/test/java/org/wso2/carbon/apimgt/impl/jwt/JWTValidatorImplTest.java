@@ -20,6 +20,8 @@ package org.wso2.carbon.apimgt.impl.jwt;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import net.minidev.json.JSONObject;
@@ -58,6 +60,7 @@ import java.net.URLDecoder;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.security.cert.CertificateEncodingException;
 import javax.security.cert.CertificateException;
@@ -68,7 +71,7 @@ import static org.testng.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({JWTUtil.class, APIManagerConfiguration.class, ServiceReferenceHolder.class,
-        APIManagerConfigurationService.class, APIUtil.class})
+        APIManagerConfigurationService.class, APIUtil.class, X509CertUtils.class})
 public class JWTValidatorImplTest {
 
     private final JWSAlgorithm jwsAlgorithm = JWSAlgorithm.RS256;
@@ -133,6 +136,9 @@ public class JWTValidatorImplTest {
             "ztxBTi4NOuEOG6RHtbxnssFz76ShPIRB4ugMSLXO2Q==\n" +
             "-----END CERTIFICATE-----";
 
+
+    private static final String CERT_HASH =  "9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1";
+
     SignedJWT signedJWT;
     JWSHeader jwsHeader;
     SignedJWTInfo signedJWTInfo;
@@ -150,21 +156,26 @@ public class JWTValidatorImplTest {
         Calendar now = Calendar.getInstance();
         now.add(Calendar.HOUR, 1);
         JSONObject transportCertHash = new JSONObject();
-        transportCertHash.put("x5t#S256", "9a0c3570ac7392bee14a408ecb38978852a86d38cbc087feeeeaab2c9a07b9f1");
+        transportCertHash.put("x5t#S256", CERT_HASH);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .expirationTime(now.getTime())
                 .claim(APIConstants.CNF, transportCertHash)
                 .build();
         signedJWTInfo.setJwtClaimsSet(jwtClaimsSet);
+        System.setProperty("javax.net.ssl.trustStore", CertificateManagerImplTest.class.getClassLoader().getResource
+                ("security/client-truststore.jks").getPath());
+        System.setProperty("javax.net.ssl.trustStorePassword", PASSWORD);
     }
 
     @Test
+    @PrepareForTest({CertificateMgtUtils.class, JWTUtil.class, APIManagerConfiguration.class,
+            ServiceReferenceHolder.class,
+            APIManagerConfigurationService.class, APIUtil.class, X509CertUtils.class})
     public void testValidateToken() {
 
         TokenIssuerDto tokenIssuerDto = new TokenIssuerDto("https://localhost:9444/services");
         Mockito.when(signedJWT.getHeader()).thenReturn(jwsHeader);
         PowerMockito.mockStatic(JWTUtil.class);
-        byte[] encodedCertificate = "sdnjnkjdsn".getBytes();
         byte[] encodedCertificateUnmatched = "aaaaaaaaaaaaaaaa".getBytes();
         try {
             PowerMockito.when(JWTUtil.verifyTokenSignature(signedJWT, KeyId)).thenReturn(true);
@@ -177,6 +188,8 @@ public class JWTValidatorImplTest {
         PowerMockito.mockStatic(APIManagerConfiguration.class);
         PowerMockito.mockStatic(APIManagerConfigurationService.class);
         PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(CertificateMgtUtils.class);
+        PowerMockito.mockStatic(X509CertUtils.class);
         APIManagerConfiguration apiManagerConfiguration = PowerMockito.mock(APIManagerConfiguration.class);
         ServiceReferenceHolder serviceReferenceHolder = PowerMockito.mock(ServiceReferenceHolder.class);
         APIManagerConfigurationService apiManagerConfigurationService = PowerMockito.mock(APIManagerConfigurationService.class);
@@ -207,6 +220,9 @@ public class JWTValidatorImplTest {
                 Mockito.mock(org.apache.axis2.context.MessageContext.class);
 
         X509Certificate x509Certificate = Mockito.mock(X509Certificate.class);
+        java.security.cert.X509Certificate x509CertificateJava = Mockito.mock(java.security.cert.X509Certificate.class);
+        PowerMockito.when(CertificateMgtUtils.convert(x509Certificate)).thenReturn(Optional.of(x509CertificateJava));
+
         X509Certificate[] sslCertObject = new X509Certificate[]{x509Certificate};
         Mockito.when(axis2MsgCntxt.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509)).thenReturn(sslCertObject);
 
@@ -215,12 +231,15 @@ public class JWTValidatorImplTest {
                 .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         X509Certificate x509CertificateUnMatched = Mockito.mock(X509Certificate.class);
-        try {
-            Mockito.when(x509Certificate.getEncoded()).thenReturn(encodedCertificate);
-            Mockito.when(x509CertificateUnMatched.getEncoded()).thenReturn(encodedCertificateUnmatched);
-        } catch (CertificateEncodingException e) {
-            log.error("error while encoding certificates");
-        }
+        java.security.cert.X509Certificate x509CertificateUnMatchedJava =
+                Mockito.mock(java.security.cert.X509Certificate.class);
+        PowerMockito.when(CertificateMgtUtils.convert(x509CertificateUnMatched))
+                .thenReturn(Optional.of(x509CertificateUnMatchedJava));
+
+
+        PowerMockito.when(X509CertUtils.computeSHA256Thumbprint(x509CertificateJava)).thenReturn(new Base64URL(CERT_HASH));
+        PowerMockito.when(X509CertUtils.computeSHA256Thumbprint(x509CertificateUnMatchedJava))
+                .thenReturn(new Base64URL(encodedCertificateUnmatched.toString()));
         signedJWTInfo.setX509ClientCertificate(x509CertificateUnMatched);
 
         // Mock the properties read from the deployment.toml
@@ -246,11 +265,6 @@ public class JWTValidatorImplTest {
         // Test when certificate bound access token validation is enabled and cnf thumbprint validation is successful
         // when client certificate is added in the trust store
         signedJWTInfo.setX509ClientCertificate(null);
-        System.setProperty("javax.net.ssl.trustStore", CertificateManagerImplTest.class.getClassLoader().getResource
-                ("security/client-truststore.jks").getPath());
-        System.setProperty("javax.net.ssl.trustStorePassword", PASSWORD);
-        CertificateMgtUtils.getInstance().addCertificateToTrustStore(BASE64_ENCODED_CERT, alias);
-
         headers.put(BASE64_ENCODED_CLIENT_CERTIFICATE_HEADER, BASE64_ENCODED_CERT);
 
     }
