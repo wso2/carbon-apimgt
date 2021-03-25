@@ -34,6 +34,15 @@ public class DevPortalAPIInfo {
     private String status;
     private Set<String> availableTierNames;
     private String createdTime;
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getCreatedTime() {
         return createdTime;
