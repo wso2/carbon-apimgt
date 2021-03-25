@@ -87,18 +87,24 @@ export default function AsyncApiConsole() {
                         return endpoint.environmentName;
                     });
                     setEnvironments(environment);
+                } else {
+                    setEnvironments([]);
                 }
                 if (apiData.labels) {
                     const Label = apiData.labels.map((label) => {
                         return label.name;
                     });
                     setLabels(Label);
+                } else {
+                    setLabels([]);
                 }
                 if (apiData.scopes) {
                     const scopeList = apiData.scopes.map((scope) => {
                         return scope.name;
                     });
                     setScopes(scopeList);
+                } else {
+                    setScopes([]);
                 }
             })
             .catch((error) => {
