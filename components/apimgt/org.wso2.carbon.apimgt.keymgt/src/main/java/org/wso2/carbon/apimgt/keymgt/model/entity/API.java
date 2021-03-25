@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Entity for keeping API related information.
@@ -36,7 +37,38 @@ public class API implements CacheableEntity<String> {
     private String context = null;
     private String policy = null;
     private String apiType = null;
+    private String status;
     private boolean isDefaultVersion = false;
+
+    public API() {
+    }
+
+    /**
+     *
+     * @param uuid
+     * @param apiId
+     * @param provider
+     * @param name
+     * @param version
+     * @param context
+     * @param policy
+     * @param apiType
+     * @param status
+     * @param isDefaultVersion
+     */
+    public API(String uuid, Integer apiId, String provider, String name, String version, String context,
+               String policy, String apiType, String status, boolean isDefaultVersion) {
+        this.uuid = uuid;
+        this.apiId = apiId;
+        this.provider = provider;
+        this.name = name;
+        this.version = version;
+        this.context = context;
+        this.policy = policy;
+        this.apiType = apiType;
+        this.status = status;
+        this.isDefaultVersion = isDefaultVersion;
+    }
 
     private List<URLMapping> urlMappings = new ArrayList<>();
 
@@ -132,9 +164,20 @@ public class API implements CacheableEntity<String> {
 
     @Override
     public String toString() {
-        return "API [apiId=" + apiId + ", provider=" + provider + ", name=" + name + ", version=" + version
-                + ", context=" + context + ", policy=" + policy + ", apiType=" + apiType + ", urlMappings="
-                + urlMappings + "]";
+
+        return "API{" +
+                "uuid='" + uuid + '\'' +
+                ", apiId=" + apiId +
+                ", provider='" + provider + '\'' +
+                ", name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                ", context='" + context + '\'' +
+                ", policy='" + policy + '\'' +
+                ", apiType='" + apiType + '\'' +
+                ", status='" + status + '\'' +
+                ", isDefaultVersion=" + isDefaultVersion +
+                ", urlMappings=" + urlMappings +
+                '}';
     }
 
     public boolean isDefaultVersion() {
@@ -153,5 +196,15 @@ public class API implements CacheableEntity<String> {
     public void setUuid(String uuid) {
 
         this.uuid = uuid;
+    }
+
+    public String getStatus() {
+
+        return status;
+    }
+
+    public void setStatus(String status) {
+
+        this.status = status;
     }
 }

@@ -499,7 +499,9 @@ public abstract class AbstractAPIManager implements APIManager {
     protected void loadTenantRegistry(int apiTenantId) throws RegistryException {
         APIUtil.loadTenantRegistry(apiTenantId);
     }
-
+    protected void populateDefaultVersion(API api) throws APIManagementException{
+        apiMgtDAO.setDefaultVersion(api);
+    }
     /**
      * Get API by registry artifact id
      *
@@ -2180,19 +2182,20 @@ public abstract class AbstractAPIManager implements APIManager {
         APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         ThrottleProperties throttleProperties = apiManagerConfiguration.getThrottleProperties();
+        List<Policy> policiesWithoutUnlimitedTier = new ArrayList<Policy>();
 
-        if (!throttleProperties.isEnableUnlimitedTier()) {
-            List<Policy> policiesWithoutUnlimitedTier = new ArrayList<Policy>();
-
-            if (policies != null) {
-                for (Policy policy : policies) {
-                    if (!APIConstants.UNLIMITED_TIER_NAME.equalsIgnoreCase(policy.getPolicyName())) {
+        if (policies != null) {
+            for (Policy policy : policies) {
+                if (APIConstants.UNLIMITED_TIER.equals(policy.getPolicyName())) {
+                    if (throttleProperties.isEnableUnlimitedTier()) {
                         policiesWithoutUnlimitedTier.add(policy);
                     }
+                } else if (!APIConstants.UNAUTHENTICATED_TIER.equals(policy.getPolicyName())) {
+                    policiesWithoutUnlimitedTier.add(policy);
                 }
             }
-            policies = policiesWithoutUnlimitedTier.toArray(new Policy[0]);
         }
+        policies = policiesWithoutUnlimitedTier.toArray(new Policy[0]);
         return policies;
     }
 
@@ -2217,8 +2220,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         // Filtering the queries related with custom properties
         for (String query : searchQueries) {
-            if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
-                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+            if (searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 subQuery = query;
                 break;
             }
@@ -2302,8 +2304,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 } else {
                     result.put("length", end - start);
                 }
-            } else if (subQuery != null && subQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
-                result = searchAPIsByURLPattern(userRegistry, subQuery.split("=")[1], start, end);
             } else if (searchQuery != null && searchQuery.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX)) {
                 result = searchPaginatedAPIsByContent(userRegistry, tenantIDLocal, searchQuery, start, end, isLazyLoad);
             } else {
@@ -2320,20 +2320,6 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return result;
-    }
-
-    /**
-     * To search API With URL pattern
-     * @param registry Registry to search.
-     * @param searchTerm Term to be searched.
-     * @param start Start index
-     * @param end End index.
-     * @return All the APIs, that matches given criteria
-     * @throws APIManagementException API Management Exception.
-     */
-    protected Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
-            throws APIManagementException {
-        return APIUtil.searchAPIsByURLPattern(registry, searchTerm, start, end);
     }
 
     /**
@@ -3253,6 +3239,9 @@ public abstract class AbstractAPIManager implements APIManager {
                                 if (StringUtils.isEmpty(oAuthApplicationInfo.getCallBackURL())) {
                                     oAuthApplicationInfo.setCallBackURL(storedOAuthApplicationInfo.getCallBackURL());
                                 }
+                                if ("null".equalsIgnoreCase(oAuthApplicationInfo.getCallBackURL())) {
+                                    oAuthApplicationInfo.setCallBackURL("");
+                                }
                                 if (oAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) == null &&
                                         storedOAuthApplicationInfo.getParameter(APIConstants.JSON_GRANT_TYPES) != null) {
                                     if (storedOAuthApplicationInfo
@@ -3722,56 +3711,6 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return apiDocContent;
 
-    }
-
-    public String extractQuery(String searchQuery) {
-        String[] searchQueries = searchQuery.split("&");
-        StringBuilder filteredQuery = new StringBuilder();
-
-        // Filtering the queries related with custom properties
-        for (String query : searchQueries) {
-            if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX) ||
-                    searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                filteredQuery.append(query);
-                break;
-            }
-            // If the query does not contains "=" then it is an errornous scenario.
-            if (query.contains("=")) {
-                String[] searchKeys = query.split("=");
-
-                if (searchKeys.length >= 2) {
-                    if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
-                        if (log.isDebugEnabled()) {
-                            log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
-                                    + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
-                        }
-                        searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
-                    }
-
-                    // Ideally query keys for label and  category searchs are as below
-                    //      label -> labels_labelName
-                    //      category -> apiCategories_categoryName
-                    // Since these are not user friendly we allow to use prefixes label and api-category. And label and
-                    // category search should only return results that exactly match.
-                    if (searchKeys[0].equals(APIConstants.LABEL_SEARCH_TYPE_PREFIX)) {
-                        searchKeys[0] = APIConstants.API_LABELS_GATEWAY_LABELS;
-                        searchKeys[1] = searchKeys[1].replace("*", "");
-                    } else if (searchKeys[0].equals(APIConstants.CATEGORY_SEARCH_TYPE_PREFIX)) {
-                        searchKeys[0] = APIConstants.API_CATEGORIES_CATEGORY_NAME;
-                        searchKeys[1] = searchKeys[1].replace("*", "");
-                    }
-
-                    if (filteredQuery.length() == 0) {
-                        filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
-                    } else {
-                        filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
-                    }
-                }
-            } else {
-                filteredQuery.append(query);
-            }
-        }
-        return filteredQuery.toString();
     }
 
     protected void populateAPIInformation(String uuid, String requestedTenantDomain, Organization org, API api)

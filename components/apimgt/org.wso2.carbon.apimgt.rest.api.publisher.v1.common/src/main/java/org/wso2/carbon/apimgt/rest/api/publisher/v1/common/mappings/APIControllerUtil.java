@@ -20,12 +20,11 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.Gson;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,6 +34,9 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -42,6 +44,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.APIAndAPIProductCommonUtil
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,14 +52,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * This Class Used for API Controller related operations.
+ */
 public class APIControllerUtil {
 
     private static final Log log = LogFactory.getLog(APIAndAPIProductCommonUtil.class);
 
     /**
-     * Method will check the archive and extract environment related params
+     * Method will check the archive and extract environment related params.
      *
      * @param pathToArchive String of the archive project
      * @return JsonObject of environment parameters
@@ -65,7 +73,8 @@ public class APIControllerUtil {
     public static JsonObject resolveAPIControllerEnvParams(String pathToArchive) throws IOException {
 
         String jsonParamsContent;
-        jsonParamsContent = getParamsDefinitionAsJSON(pathToArchive);
+        jsonParamsContent = ImportUtils
+                .getFileContentAsJson(pathToArchive + ImportExportConstants.INTERMEDIATE_PARAMS_FILE_LOCATION);
         if (StringUtils.isEmpty(jsonParamsContent)) {
             return null;
         }
@@ -74,39 +83,40 @@ public class APIControllerUtil {
     }
 
     /**
-     * Retrieve API params file as JSON.
+     * Method retrieve the params configurations dependent APIs of an API Product.
      *
-     * @param pathToArchive Path to API or API Product archive
-     * @return String JsonString of environment parameters
-     * @throws IOException If an error occurs while reading the file
+     * @param path Path of the archive project
+     * @return JsonObject of environment parameters of the dependent APIs
+     * @throws IOException If an error occurs when resolving API controller environment parameters
      */
-    public static String getParamsDefinitionAsJSON(String pathToArchive) throws IOException {
+    public static JsonObject getDependentAPIsParams(String path) throws IOException {
 
-        String jsonContent = null;
-        String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_API_PARAMS_FILE_LOCATION;
-        String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_API_PARAMS_FILE_LOCATION;
-
-        // load yaml representation first,if it is present
-        if (CommonUtil.checkFileExistence(pathToYamlFile)) {
-            if (log.isDebugEnabled()) {
-                log.debug("Found api params definition file " + pathToYamlFile);
-            }
-            String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
-            if (StringUtils.isNotEmpty(yamlContent)) {
-                jsonContent = CommonUtil.yamlToJson(yamlContent);
-            }
-        } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-            // load as a json fallback
-            if (log.isDebugEnabled()) {
-                log.debug("Found api params definition file " + pathToJsonFile);
-            }
-            jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+        JsonObject paramsConfigObject = APIControllerUtil.resolveAPIControllerEnvParams(path);
+        JsonObject dependentAPIsParams = null;
+        if (paramsConfigObject != null && paramsConfigObject.has(ImportExportConstants.DEPENDENT_APIS_FIELD)) {
+            dependentAPIsParams = paramsConfigObject.get(ImportExportConstants.DEPENDENT_APIS_FIELD).getAsJsonObject();
         }
-        return jsonContent;
+        return dependentAPIsParams;
     }
 
     /**
-     * This method will be used to add Extracted environment parameters to the imported Api object
+     * Method retrieve the params configurations for a dependent API of an API Product specified by the.
+     * API directory name
+     *
+     * @param dependentAPIsParams Env params array of dependent APIs of the API Product
+     * @param apiDirectoryName    Dependent API directory name
+     * @return JsonObject of environment parameters of the dependent API
+     */
+    public static JsonObject getDependentAPIParams(JsonObject dependentAPIsParams, String apiDirectoryName) {
+
+        if (dependentAPIsParams.has(apiDirectoryName)) {
+            return dependentAPIsParams.get(apiDirectoryName).getAsJsonObject();
+        }
+        return null;
+    }
+
+    /**
+     * This method will be used to add Extracted environment parameters to the imported Api object.
      *
      * @param pathToArchive  Path to API or API Product archive
      * @param importedApiDto APIDTO object to be imported
@@ -123,7 +133,7 @@ public class APIControllerUtil {
 
         API importedApi = APIMappingUtil.fromDTOtoAPI(importedApiDto, importedApiDto.getProvider());
 
-        // if endpointType field is not specified in the api_params.yaml, it will be considered as HTTP/REST
+        // if endpointType field is not specified in the params file, it will be considered as HTTP/REST
         JsonElement endpointTypeElement = envParams.get(ImportExportConstants.ENDPOINT_TYPE_FIELD);
         String endpointType = null;
         if (endpointTypeElement != null) {
@@ -134,12 +144,19 @@ public class APIControllerUtil {
 
         //Handle multiple end points
         JsonObject jsonObject = setupMultipleEndpoints(envParams, endpointType);
+
+        // Handle endpoint security configs
+        if (envParams.get(ImportExportConstants.ENDPOINT_SECURITY_FIELD) != null) {
+            handleEndpointSecurityConfigs(envParams, jsonObject);
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String, Object> endpointConfig;
         try {
             endpointConfig = mapper.readValue(jsonObject.toString(), HashMap.class);
+            convertValuesToStrings(endpointConfig);
         } catch (JsonProcessingException e) {
-            String errorMessage = "Error while reading endpointConfig information in the api_params.yaml.";
+            String errorMessage = "Error while reading endpointConfig information in the params file.";
             throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
         }
         importedApiDto.setEndpointConfig(endpointConfig);
@@ -152,29 +169,7 @@ public class APIControllerUtil {
         }
 
         //handle mutualSSL certificates
-        JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
-        if (clientCertificates != null) {
-            try {
-                List<String> apiSecurity = importedApiDto.getSecurityScheme();
-                if (!apiSecurity.isEmpty()) {
-                    if (!apiSecurity.contains(ImportExportConstants.MUTUAL_SSL_ENABLED)) {
-                        // if the apiSecurity field does not have mutualssl type, append it
-                        apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
-                    }
-                } else {
-                    // if the apiSecurity field is empty, assign the value as "mutualssl"
-                    apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
-                }
-                importedApiDto.securityScheme(apiSecurity);
-                String jsonString = clientCertificates.toString();
-                handleClientCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), importedApi.getId(),
-                        pathToArchive);
-            } catch (IOException e) {
-                //Error is logged and when generating certificate details and certs in the archive
-                String errorMessage = "Error while generating meta information of client certificates from path.";
-                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            }
-        }
+        handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);
 
         //handle endpoint certificates
         JsonElement endpointCertificates = envParams.get(ImportExportConstants.ENDPOINT_CERTIFICATES_FIELD);
@@ -189,86 +184,198 @@ public class APIControllerUtil {
             }
         }
 
-        //handle security configs
-        JsonElement securityConfigs = envParams.get(ImportExportConstants.ENDPOINT_SECURITY_FIELD);
-        if (securityConfigs != null) {
-            handleEndpointSecurityConfigs(envParams, importedApiDto);
-        }
-
         // handle available subscription policies
         JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
         if (policies != null && !policies.isJsonNull()) {
-            handleSubscriptionPolicies(policies, importedApiDto);
+            handleSubscriptionPolicies(policies, importedApiDto, null);
         }
         return importedApiDto;
     }
 
     /**
-     * This method will be used to add Endpoint security related environment parameters to imported Api object
+     * This method will be used to convert any integer values to strings in a particular map of values.
      *
-     * @param importedApiDto APIDTO object to be updated
+     * @param keyValuePairs Map to be validated and converted
+     */
+    private static void convertValuesToStrings(Map<String, Object> keyValuePairs) {
+        Iterator it = keyValuePairs.entrySet().iterator();
+        while (it.hasNext()) {
+            HashMap.Entry pair = (HashMap.Entry) it.next();
+            if (pair.getValue() instanceof Integer && pair.getKey() instanceof String) {
+                keyValuePairs.replace(pair.getKey().toString(), pair.getValue().toString());
+            }
+            if (pair.getValue() instanceof Map) {
+                convertValuesToStrings((Map) pair.getValue());
+            }
+        }
+    }
+
+    /**
+     * This method will be used to generate ClientCertificates and meta information related to client certs.
+     *
+     * @param envParams             Env params object with required parameters
+     * @param importedApiDto        Imported API DTO (this will be null for API Products)
+     * @param importedApiProductDto Imported API Product DTO (this will be null for APIs)
+     * @param identifier            API Identifier/API Product Identifier of the imported API/API Product
+     * @param pathToArchive         String of the archive project
+     * @throws APIManagementException If an error while generating client certificate information
+     */
+    private static void handleMutualSslCertificates(JsonObject envParams, APIDTO importedApiDto,
+                                                    APIProductDTO importedApiProductDto, Identifier identifier,
+                                                    String pathToArchive)
+            throws APIManagementException {
+
+        JsonElement clientCertificates = envParams.get(ImportExportConstants.MUTUAL_SSL_CERTIFICATES_FIELD);
+        if (clientCertificates != null) {
+            try {
+                List<String> apiSecurity = (importedApiDto != null) ?
+                        importedApiDto.getSecurityScheme() :
+                        importedApiProductDto.getSecurityScheme();
+                if (!apiSecurity.isEmpty()) {
+                    if (!apiSecurity.contains(ImportExportConstants.MUTUAL_SSL_ENABLED)) {
+                        // if the apiSecurity field does not have mutualssl type, append it
+                        apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
+                    }
+                } else {
+                    // if the apiSecurity field is empty, assign the value as "mutualssl"
+                    apiSecurity.add(ImportExportConstants.MUTUAL_SSL_ENABLED);
+                }
+
+                if (importedApiDto != null) {
+                    importedApiDto.securityScheme(apiSecurity);
+                } else {
+                    importedApiProductDto.securityScheme(apiSecurity);
+                }
+
+                String jsonString = clientCertificates.toString();
+                handleClientCertificates(new JsonParser().parse(jsonString).getAsJsonArray(), identifier,
+                        pathToArchive);
+            } catch (IOException e) {
+                //Error is logged and when generating certificate details and certs in the archive
+                String errorMessage = "Error while generating meta information of client certificates from path.";
+                throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
+            }
+        }
+    }
+
+    /**
+     * This method will be used to add extracted environment parameters to the imported API Product DTO object.
+     *
+     * @param importedApiProductDto API Product DTO object to be imported
+     * @param envParams             Env params object with required parameters
+     * @return APIProductDTO Updated API Product DTO Object
+     */
+    public static APIProductDTO injectEnvParamsToAPIProduct(APIProductDTO importedApiProductDto, JsonObject envParams,
+                                                            String pathToArchive)
+            throws APIManagementException {
+
+        if (envParams == null || envParams.isJsonNull()) {
+            return importedApiProductDto;
+        }
+
+        APIProduct importedApiProduct =
+                APIMappingUtil.fromDTOtoAPIProduct(importedApiProductDto, importedApiProductDto.getProvider());
+        //handle mutualSSL certificates
+        handleMutualSslCertificates(envParams, null, importedApiProductDto, importedApiProduct.getId(), pathToArchive);
+
+        // handle available subscription policies
+        JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
+        if (policies != null && !policies.isJsonNull()) {
+            handleSubscriptionPolicies(policies, null, importedApiProductDto);
+        }
+        return importedApiProductDto;
+    }
+
+    /**
+     * This method will be used to add Endpoint security related environment parameters to imported Api object.
+     *
      * @param envParams      Env params object with required parameters
+     * @param endpointConfig Endpoint config object to be updated
      * @throws APIManagementException If an error occurs when setting security env parameters
      */
-    private static void handleEndpointSecurityConfigs(JsonObject envParams, APIDTO importedApiDto)
+    private static void handleEndpointSecurityConfigs(JsonObject envParams, JsonObject endpointConfig)
             throws APIManagementException {
-        // If the user has set (either true or false) the enabled field under security in api_params.yaml,
+        // If the user has set (either true or false) the enabled field under security in the params file,
         // the following code should be executed.
         JsonObject security = envParams.getAsJsonObject(ImportExportConstants.ENDPOINT_SECURITY_FIELD);
         if (security == null) {
             return;
         }
-        String securityEnabled = security.get(ImportExportConstants.ENDPOINT_SECURITY_ENABLED).getAsString();
-        boolean isSecurityEnabled = Boolean.parseBoolean(securityEnabled);
-        //set endpoint security details to API
-        APIEndpointSecurityDTO apiEndpointSecurityDTO = new APIEndpointSecurityDTO();
 
-        // If endpoint security is enabled
-        if (isSecurityEnabled) {
-            // Check whether the username, password and type fields have set in api_params.yaml
-            JsonElement username = security.get(ImportExportConstants.ENDPOINT_UT_USERNAME);
-            JsonElement password = security.get(ImportExportConstants.ENDPOINT_UT_PASSWORD);
-            JsonElement type = security.get(ImportExportConstants.ENDPOINT_SECURITY_TYPE);
+        String[] endpointTypes = { APIConstants.ENDPOINT_SECURITY_PRODUCTION, APIConstants.ENDPOINT_SECURITY_SANDBOX };
+        for (String endpointType : endpointTypes) {
+            if (security.has(endpointType)) {
+                JsonObject endpointSecurityDetails = security.get(endpointType).getAsJsonObject();
+                if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_ENABLED)) {
+                    String securityEnabled = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED)
+                            .getAsString();
 
-            if (username == null) {
-                throw new APIManagementException("You have enabled endpoint security but the username is not found "
-                        + "in the api_params.yaml. Please specify username field for and continue...",
-                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            } else if (password == null) {
-                throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for and continue...",
-                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            } else if (type == null) {
-                throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the api_params.yaml. Please specify password field for and continue...",
-                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            } else {
-                apiEndpointSecurityDTO.setPassword(password.toString());
-                apiEndpointSecurityDTO.setUsername(username.getAsString());
-                //setup security type (basic or digest)
-                if (StringUtils.equals(type.getAsString(), ImportExportConstants.ENDPOINT_DIGEST_SECURITY_TYPE)) {
-                    apiEndpointSecurityDTO.setType(APIEndpointSecurityDTO.TypeEnum.DIGEST);
-                } else if (StringUtils.equals(type.getAsString(), ImportExportConstants.ENDPOINT_BASIC_SECURITY_TYPE)) {
-                    apiEndpointSecurityDTO.setType(APIEndpointSecurityDTO.TypeEnum.BASIC);
-                } else {
-                    // If the type is not either basic or digest, return an error
-                    throw new APIManagementException("Invalid endpoint security type found in the api_params.yaml. "
-                            + "Should be either basic or digest"
-                            + "Please specify correct security types field for and continue...",
-                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                    // Set endpoint security details to API
+                    if (Boolean.parseBoolean(securityEnabled)) {
+                        // Check whether the username, password and type fields have set in the params file
+                        JsonElement type = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_TYPE);
+                        if (endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_USERNAME) == null) {
+                            throw new APIManagementException(
+                                    "You have enabled endpoint security but the username is not found "
+                                            + "in the params file. Please specify username field for and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                        } else if (endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) == null) {
+                            throw new APIManagementException(
+                                    "You have enabled endpoint security but the password is not found "
+                                            + "in the params file. Please specify password field for and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                        } else if (type == null) {
+                            throw new APIManagementException(
+                                    "You have enabled endpoint security but the password is not found "
+                                            + "in the params file. Please specify password field for and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                        } else {
+                            // Setup security type (basic or digest)
+                            endpointSecurityDetails.remove(APIConstants.ENDPOINT_SECURITY_TYPE);
+                            if (StringUtils.equals(type.getAsString().toLowerCase(),
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST)) {
+                                endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                        APIEndpointSecurityDTO.TypeEnum.DIGEST.toString());
+                            } else if (StringUtils.equals(type.getAsString().toLowerCase(),
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC)) {
+                                endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                        APIEndpointSecurityDTO.TypeEnum.BASIC.toString());
+                            } else {
+                                // If the type is not either basic or digest, return an error
+                                throw new APIManagementException(
+                                        "Invalid endpoint security type found in the params file. "
+                                                + "Should be either basic or digest"
+                                                + "Please specify correct security types field for and continue...",
+                                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                            }
+                        }
+                    }
                 }
+            } else {
+                // Even though the security field is defined, if either production/sandbox is not defined under that,
+                // set endpoint security to none. Otherwise the security will be blank if you check from the UI.
+                JsonObject endpointSecurityForNotDefinedEndpointType = new JsonObject();
+                endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE);
+                endpointSecurityForNotDefinedEndpointType
+                        .addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.FALSE);
+                security.add(endpointType, endpointSecurityForNotDefinedEndpointType);
             }
-            importedApiDto.setEndpointSecurity(apiEndpointSecurityDTO);
         }
+        endpointConfig.add(APIConstants.ENDPOINT_SECURITY, security);
     }
 
     /**
-     * This method will add the defined available subscription policies in an environment to the particular imported API
+     * This method will add the defined available subscription policies in an environment to the particular imported
+     * API.
      *
-     * @param importedApiDto API DTO object to be updated
-     * @param policies       policies with the values
+     * @param importedApiDto        API DTO object to be updated
+     * @param importedApiProductDto API Product DTO object to be updated
+     * @param policies              policies with the values
      */
-    private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto) {
+    private static void handleSubscriptionPolicies(JsonElement policies, APIDTO importedApiDto,
+                                                   APIProductDTO importedApiProductDto) {
+
         JsonArray definedPolicies = policies.getAsJsonArray();
         List<String> policiesListToAdd = new ArrayList<>();
         for (JsonElement definedPolicy : definedPolicies) {
@@ -279,16 +386,20 @@ public class APIControllerUtil {
                 }
             }
         }
-        // If the policies are not defined in api_params.yaml, the values in the api.yaml should be considered.
+        // If the policies are not defined in params file, the values in the api.yaml should be considered.
         // Hence, this if statement will prevent setting the policies in api.yaml to an empty array if the policies
-        // are not properly defined in the api_params.yaml
+        // are not properly defined in the params file
         if (policiesListToAdd.size() > 0) {
-            importedApiDto.setPolicies(policiesListToAdd);
+            if (importedApiDto != null) {
+                importedApiDto.setPolicies(policiesListToAdd);
+            } else {
+                importedApiProductDto.setPolicies(policiesListToAdd);
+            }
         }
     }
 
     /**
-     * This method will be used to add gateway environments to imported Api object
+     * This method will be used to add gateway environments to imported Api object.
      *
      * @param gatewayEnvironments Json array of gateway environments extracted from env params file
      * @return Gateway Environment list
@@ -303,7 +414,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to extract endpoint configurations from the env params file
+     * This method will be used to extract endpoint configurations from the env params file.
      *
      * @param endpointType Endpoint type
      * @param envParams    JsonObject of Env params  with required parameters
@@ -353,7 +464,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will handle the Dynamic and AWS endpoint configs
+     * This method will handle the Dynamic and AWS endpoint configs.
      *
      * @param envParams                 Json object of Env parameters
      * @param defaultProductionEndpoint Default production endpoint json object
@@ -363,7 +474,9 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleDynamicAndAwsEndpoints(JsonObject envParams, JsonObject defaultProductionEndpoint,
-            JsonObject defaultSandboxEndpoint, String endpointType) throws APIManagementException {
+                                                           JsonObject defaultSandboxEndpoint, String endpointType)
+            throws APIManagementException {
+
         JsonObject endpointsObject = null;
         if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
             endpointsObject = envParams.get(ImportExportConstants.ENDPOINTS_FIELD).getAsJsonObject();
@@ -390,7 +503,8 @@ public class APIControllerUtil {
             //add dynamic endpoint configs as endpoint configs
             return updatedDynamicEndpointParams;
 
-        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {// if endpoint type is AWS Lambda
+            // if endpoint type is AWS Lambda
+        } else if (ImportExportConstants.AWS_TYPE_ENDPOINT.equals(endpointType)) {
             //if aws config is not provided
             if (envParams.get(ImportExportConstants.AWS_LAMBDA_ENDPOINT_JSON_PROPERTY) == null) {
                 throw new APIManagementException(
@@ -428,7 +542,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will handle the HTTP/REST endpoint configurations
+     * This method will handle the HTTP/REST endpoint configurations.
      *
      * @param envParams                 Json object of Env parameters
      * @param defaultProductionEndpoint Default production endpoint json object
@@ -438,9 +552,11 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleRestEndpoints(String routingPolicy, JsonObject envParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
+                                                  JsonObject defaultProductionEndpoint,
+                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
-        // if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual scenario
+        // if the endpoint routing policy is not specified, but the endpoints field is specified, this is the usual
+        // scenario
         JsonObject updatedRESTEndpointParams = new JsonObject();
         JsonObject endpoints = null;
         if (envParams.get(ImportExportConstants.ENDPOINTS_FIELD) != null) {
@@ -549,7 +665,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will handle the HTTP/SOAP endpoint configurations
+     * This method will handle the HTTP/SOAP endpoint configurations.
      *
      * @param envParams                 Json object of Env parameters
      * @param defaultProductionEndpoint Default production endpoint json object
@@ -559,7 +675,8 @@ public class APIControllerUtil {
      * @throws APIManagementException If an error occurs when extracting endpoint configurations
      */
     private static JsonObject handleSoapEndpoints(String routingPolicy, JsonObject envParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
+                                                  JsonObject defaultProductionEndpoint,
+                                                  JsonObject defaultSandboxEndpoint) throws APIManagementException {
 
         JsonObject updatedSOAPEndpointParams = new JsonObject();
         JsonObject endpoints = null;
@@ -569,7 +686,7 @@ public class APIControllerUtil {
         // if the endpoint routing policy is not specified, but the endpoints field is specified
         if (StringUtils.isEmpty(routingPolicy)) {
             updatedSOAPEndpointParams.addProperty(ImportExportConstants.ENDPOINT_TYPE_PROPERTY,
-                    ImportExportConstants.SOAP_TYPE_ENDPOINT);
+                    ImportExportConstants.SOAP_ENDPOINT_TYPE_FOR_JSON);
             handleEndpointValues(endpoints, updatedSOAPEndpointParams, defaultProductionEndpoint,
                     defaultSandboxEndpoint);
         } else if (ImportExportConstants.LOAD_BALANCE_ROUTING_POLICY
@@ -682,7 +799,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will production and sandbox endpoint values
+     * This method will production and sandbox endpoint values.
      *
      * @param endpointConfigs           Endpoint configurations to be updated
      * @param updatedEndpointParams     Updated endpoint parameters object
@@ -690,7 +807,8 @@ public class APIControllerUtil {
      * @param defaultSandboxEndpoint    Default sandbox endpoint json object
      */
     private static void handleEndpointValues(JsonObject endpointConfigs, JsonObject updatedEndpointParams,
-            JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint) throws APIManagementException {
+                                             JsonObject defaultProductionEndpoint, JsonObject defaultSandboxEndpoint)
+            throws APIManagementException {
 
         //check api params file to get provided endpoints
         if (endpointConfigs == null) {
@@ -727,7 +845,7 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to extract endpoint configurations from env params file
+     * This method will be used to extract endpoint configurations from env params file.
      *
      * @param failoverEndpoints JsonArray of SOAP Failover endpoints
      * @return JsonArray of updated SOAP Failover endpoints
@@ -743,12 +861,13 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to extract endpoint configurations from env params file
+     * This method will be used to extract endpoint configurations from env params file.
      *
      * @param soapEndpoint JsonElement of SOAP endpoints
      * @return JsonObject of updated SOAP endpoints
      */
     private static JsonObject handleSoapProdAndSandboxEndpointValues(JsonElement soapEndpoint) {
+
         JsonObject soapEndpointObj = null;
         if (soapEndpoint == null) {
             return null;
@@ -763,17 +882,19 @@ public class APIControllerUtil {
     }
 
     /**
-     * This method will be used to generate ClientCertificates and meta information related to client certs
+     * This method will be used to generate ClientCertificates and meta information related to client certs.
      *
      * @param certificates  JsonArray of client-certificates
-     * @param apiIdentifier APIIdentifier if the importedApi
+     * @param identifier    API Identifier/API Product Identifier of the imported API/API Product
      * @param pathToArchive String of the archive project
      * @throws IOException            If an error occurs when generating new certs and yaml file or when moving certs
      * @throws APIManagementException If an error while generating new directory
      */
-    private static void handleClientCertificates(JsonArray certificates, APIIdentifier apiIdentifier,
-            String pathToArchive) throws IOException, APIManagementException {
+    private static void handleClientCertificates(JsonArray certificates, Identifier identifier,
+                                                 String pathToArchive) throws IOException, APIManagementException {
 
+        APIIdentifier apiIdentifier = new APIIdentifier(identifier.getProviderName(), identifier.getName(),
+                identifier.getVersion());
         List<ClientCertificateDTO> certs = new ArrayList<>();
 
         for (JsonElement certificate : certificates) {
@@ -815,14 +936,14 @@ public class APIControllerUtil {
         String metadataFilePath = pathToArchive + ImportExportConstants.CLIENT_CERTIFICATES_META_DATA_FILE_PATH;
         try {
             CommonUtil.writeDtoToFile(metadataFilePath, ExportFormat.JSON,
-                    ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, jsonElement);
+                    ImportExportConstants.TYPE_CLIENT_CERTIFICATES, jsonElement);
         } catch (APIImportExportException e) {
             throw new APIManagementException(e);
         }
     }
 
     /**
-     * This method will be used to generate Endpoint certificates and meta information related to endpoint certs
+     * This method will be used to generate Endpoint certificates and meta information related to endpoint certs.
      *
      * @param certificates  JsonArray of endpoint-certificates
      * @param pathToArchive String of the archive project
@@ -881,5 +1002,4 @@ public class APIControllerUtil {
             throw new APIManagementException(e);
         }
     }
-
 }

@@ -78,9 +78,6 @@ function Social() {
             },
         },
     } = theme;
-    if (!active) {
-        return <span />;
-    }
     return (
         <>
             <div className={classes.oneFlex} />
@@ -119,10 +116,10 @@ function Social() {
                         </a>
                     </>
                 )}
-                {(slack || github) && (
+                {active && (slack || github) && (
                     <div className={classes.divider} />
                 )}
-                {showFacebook && (
+                {active && showFacebook && (
                     <a
                         className={classes.socialLink}
                         id='facebook'
@@ -138,7 +135,7 @@ function Social() {
                     </a>
                 )}
                 {/* Twitter */}
-                {showTwitter && (
+                {active && showTwitter && (
                     <a
                         className={classes.socialLink}
                         id='Twitter'
@@ -154,7 +151,7 @@ function Social() {
                     </a>
                 )}
                 {/* Reddit */}
-                {showReddit && (
+                {active && showReddit && (
                     <a
                         className={classes.socialLink}
                         id='Reddit'
@@ -169,14 +166,14 @@ function Social() {
                         />
                     </a>
                 )}
-                {showEmbad && (
+                {active && showEmbad && (
                     <>
                         <div className={classes.divider} />
                         {/* TODO: Fix spelling mistake ~tmkb */}
                         <EmbadCode />
                     </>
                 )}
-                {showEmail && (
+                {active && showEmail && (
                     <>
                         <div className={classes.divider} />
                         <a href={`mailto:?Subject=${apiName}&body=Link+:+${apiUrl}"`} className={classes.codeIcon}>

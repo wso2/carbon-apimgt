@@ -27,6 +27,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +37,7 @@ public class AsyncApiParserUtil {
     
     private static final APIDefinition asyncApiParser = new AsyncApiParser();
     private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
+    private static final String PATH_SEPARATOR = "/";
 
     public static APIDefinitionValidationResponse validateAsyncAPISpecification(
             String schemaToBeValidated, boolean returnJSONContent) throws APIManagementException {
@@ -206,24 +208,42 @@ public class AsyncApiParserUtil {
         AaiDocument definition = (AaiDocument) Library.readDocumentFromJSONString(definitionJSON);
         if (definition.getChannels().size() > 0) {
             for (String topic : definition.channels.keySet()) {
-                if (definition.channels.get(topic).publish != null && definition.channels.get(topic).subscribe != null) {
+                /*if (definition.channels.get(topic).publish != null && definition.channels.get(topic).subscribe != null) {
                     URITemplate uriTemplateSub = new URITemplate();
                     uriTemplateSub.setUriTemplate(topic);
                     uriTemplateSub.setHTTPVerb("SUBSCRIBE");
+                    uriTemplateSub.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplateSub.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                     uriTemplates.add(uriTemplateSub);
                     URITemplate uriTemplatePub = new URITemplate();
                     uriTemplatePub.setUriTemplate(topic);
                     uriTemplatePub.setHTTPVerb("PUBLISH");
+                    uriTemplatePub.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplatePub.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                     uriTemplates.add(uriTemplatePub);
                 } else if (definition.channels.get(topic).publish != null) {
                     URITemplate uriTemplate = new URITemplate();
                     uriTemplate.setUriTemplate(topic);
                     uriTemplate.setHTTPVerb("PUBLISH");
+                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                     uriTemplates.add(uriTemplate);
                 } else if (definition.channels.get(topic).subscribe != null) {
                     URITemplate uriTemplate = new URITemplate();
                     uriTemplate.setUriTemplate(topic);
                     uriTemplate.setHTTPVerb("SUBSCRIBE");
+                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
+                    uriTemplates.add(uriTemplate);
+                }*/
+
+                if (definition.channels.get(topic).subscribe != null) {
+                    URITemplate uriTemplate = new URITemplate();
+                    topic = Paths.get(PATH_SEPARATOR, topic).toString();
+                    uriTemplate.setUriTemplate(topic);
+                    uriTemplate.setHTTPVerb("SUBSCRIBE");
+                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
                     uriTemplates.add(uriTemplate);
                 }
             }

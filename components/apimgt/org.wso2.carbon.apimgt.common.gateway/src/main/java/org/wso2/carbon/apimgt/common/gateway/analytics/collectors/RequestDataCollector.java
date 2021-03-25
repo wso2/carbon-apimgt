@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.common.gateway.analytics.collectors;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
 
 /**
- * interface to request handlers
+ * interface to request handlers.
  */
 public interface RequestDataCollector {
     void collectData() throws AnalyticsException;

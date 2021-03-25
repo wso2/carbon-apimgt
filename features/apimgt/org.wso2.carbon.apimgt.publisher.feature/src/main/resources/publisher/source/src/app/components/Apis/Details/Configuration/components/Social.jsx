@@ -51,8 +51,7 @@ export default function Social(props) {
                 helperText={(
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Social.giturl.help'
-                        defaultMessage={`You need to enable social feature to view this from devportal. 
-                        Set custom.social.showSharing.active to true. Refer documentation for more information`}
+                        defaultMessage='This GitHub URL will be available in the API overview page in developer portal'
                     />
                 )}
                 style={{ marginTop: 0 }}
@@ -73,8 +72,8 @@ export default function Social(props) {
                 helperText={(
                     <FormattedMessage
                         id='Apis.Details.Configuration.components.Social.slack_url.help'
-                        defaultMessage={`You need to enable social feature to view this from devportal. 
-                        Set custom.social.showSharing.active to true. Refer documentation for more information`}
+                        defaultMessage={'This Slack Channel URL will be available in the'
+                        + ' API overview page in developer portal'}
                     />
                 )}
                 style={{ marginTop: 0 }}

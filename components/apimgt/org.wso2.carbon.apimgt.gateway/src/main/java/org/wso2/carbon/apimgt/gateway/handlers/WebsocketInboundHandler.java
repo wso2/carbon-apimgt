@@ -33,7 +33,6 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import org.apache.axiom.util.UIDGenerator;
 import org.apache.axis2.AxisFault;
@@ -43,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.api.API;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.api.Resource;
@@ -59,9 +59,12 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.JWTValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiException;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketAnalyticsMetricsHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
@@ -72,20 +75,11 @@ import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.cache.Cache;
 
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.DEFAULT_RESOURCE_NAME;
@@ -111,19 +105,31 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private String apiName;
     private String keyType;
     private API api;
-    private static final AttributeKey<Map<String, Object>> WSO2_PROPERTIES = AttributeKey.valueOf("WSO2_PROPERTIES");
+    private String electedRoute;
+    private AuthenticationContext authContext;
+    private WebSocketAnalyticsMetricsHandler metricsHandler;
+    private org.wso2.carbon.apimgt.keymgt.model.entity.API electedAPI;
 
     public WebsocketInboundHandler() {
         initializeDataPublisher();
     }
 
     private void initializeDataPublisher() {
-        // ignore publisher initialization
+        if (APIUtil.isAnalyticsEnabled()) {
+            metricsHandler = new WebSocketAnalyticsMetricsHandler();
+        }
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (APIUtil.isAnalyticsEnabled()) {
+            WebSocketUtils.setApiPropertyToChannel(ctx,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.REQUEST_START_TIME_PROPERTY,
+                    System.currentTimeMillis());
+            WebSocketUtils.setApiPropertyToChannel(ctx,
+                    org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_IP_PROPERTY, getRemoteIP(ctx));
+        }
 
         //check if the request is a handshake
         if (msg instanceof FullHttpRequest) {
@@ -142,12 +148,28 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             useragent = useragent != null ? useragent : "-";
             headers.add(HttpHeaders.USER_AGENT, useragent);
 
-            if (validateOAuthHeader(req, matchingResource)) {
-                setApiPropertiesToChannel(ctx);
+            boolean isOAuthHeaderValid;
+            try {
+                isOAuthHeaderValid = validateOAuthHeader(req, matchingResource);
+            } catch (APISecurityException e) {
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishHandshakeAuthErrorEvent(ctx, e.getMessage());
+                }
+                throw e;
+            }
+
+            if (isOAuthHeaderValid) {
+                setApiAuthPropertiesToChannel(ctx);
                 if (StringUtils.isNotEmpty(token)) {
                     ((FullHttpRequest) msg).headers().set(APIMgtGatewayConstants.WS_JWT_TOKEN_HEADER, token);
                 }
                 ctx.fireChannelRead(msg);
+                if (APIUtil.isAnalyticsEnabled()) {
+                    WebSocketUtils.setApiPropertyToChannel(ctx,
+                            org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.USER_AGENT_PROPERTY, useragent);
+                    WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE, matchingResource);
+                    publishHandshakeEvent(ctx);
+                }
 
                 // publish google analytics data
                 GoogleAnalyticsData.DataBuilder gaData = new GoogleAnalyticsData.DataBuilder(null, null, null, null)
@@ -167,6 +189,9 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 httpResponse.headers().set("content-type", "text/plain; charset=UTF-8");
                 httpResponse.headers().set("content-length", httpResponse.content().readableBytes());
                 ctx.writeAndFlush(httpResponse);
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishHandshakeAuthErrorEvent(ctx, APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Authentication Failure for the websocket context: " + apiContext);
                 }
@@ -185,10 +210,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 String clientIp = getRemoteIP(ctx);
                 // publish analytics events if analytics is enabled
                 if (APIUtil.isAnalyticsEnabled()) {
-                    publishRequestEvent(clientIp, true);
+                    publishPublishEvent(ctx);
                 }
             } else {
                 ctx.writeAndFlush(new TextWebSocketFrame("Websocket frame throttled out"));
+                if (APIUtil.isAnalyticsEnabled()) {
+                    publishPublishThrottledEvent(ctx);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Inbound Websocket frame is throttled. " + ctx.channel().toString());
                 }
@@ -318,6 +346,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
                     keyType = info.getType();
                     infoDTO = info;
+                    authContext = authenticationContext;
                     return authenticationContext.isAuthenticated();
                 } else {
                     log.debug("The token was identified as an OAuth token");
@@ -331,12 +360,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                             return info.isAuthorized();
                         }
                     }
-                    String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
-                    if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
-                        info = getApiKeyDataForWSClient(apiKey, tenantDomain, apiContext, version);
-                    } else {
-                        return false;
-                    }
+                    info = getApiKeyDataForWSClient(apiKey, tenantDomain, apiContext, version);
                     if (info == null || !info.isAuthorized()) {
                         return false;
                     }
@@ -362,11 +386,19 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     protected void setApiPropertiesToChannel(ChannelHandlerContext ctx) {
-        Map<String, Object> apiPropertiesMap = new HashMap();
+        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
         apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API, apiName);
         apiPropertiesMap.put(RESTConstants.PROCESSED_API, api);
+        apiPropertiesMap.put(RESTConstants.REST_API_CONTEXT, apiContext);
+        apiPropertiesMap.put(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
+    }
+
+    protected void setApiAuthPropertiesToChannel(ChannelHandlerContext ctx) {
+        Map<String, Object> apiPropertiesMap = WebSocketUtils.getApiProperties(ctx);
         apiPropertiesMap.put(APIConstants.API_KEY_TYPE, keyType);
-        ctx.channel().attr(WSO2_PROPERTIES).set(apiPropertiesMap);
+        apiPropertiesMap.put(APISecurityUtils.API_AUTH_CONTEXT, authContext);
+        ctx.channel().attr(WebSocketUtils.WSO2_PROPERTIES).set(apiPropertiesMap);
     }
 
     protected APIKeyValidationInfoDTO getApiKeyDataForWSClient(String key, String domain, String apiContextUri,
@@ -412,19 +444,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             remoteIP = remoteIP.substring(1, remoteIP.indexOf(":"));
         }
         JSONObject jsonObMap = new JSONObject();
-        if (remoteIP != null && remoteIP.length() > 0) {
-            try {
-                InetAddress address = APIUtil.getAddress(remoteIP);
-                if (address instanceof Inet4Address) {
-                    jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
-                } else if (address instanceof Inet6Address) {
-                    jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(remoteIP));
-                }
-            } catch (UnknownHostException e) {
-                //ignore the error and log it
-                log.error("Error while parsing host IP " + remoteIP, e);
-            }
-        }
+        Utils.setRemoteIp(jsonObMap, remoteIP);
         jsonObMap.put(APIThrottleConstants.MESSAGE_SIZE, msg.content().capacity());
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -432,9 +452,6 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             boolean isThrottled = WebsocketUtil.isThrottled(resourceLevelThrottleKey, subscriptionLevelThrottleKey,
                                                             applicationLevelThrottleKey);
             if (isThrottled) {
-                if (APIUtil.isAnalyticsEnabled()) {
-                    // Ignore data publishing
-                }
                 return false;
             }
         } finally {
@@ -468,6 +485,58 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      */
     public void publishRequestEvent(String clientIp, boolean isThrottledOut) {
         //ignore data publishing
+    }
+
+    private void publishHandshakeEvent(ChannelHandlerContext ctx) {
+        metricsHandler.handleHandshake(ctx);
+    }
+
+    private void publishPublishEvent(ChannelHandlerContext ctx) {
+        metricsHandler.handlePublish(ctx);
+    }
+
+    public void publishSubscribeEvent(ChannelHandlerContext ctx) {
+        metricsHandler.handleSubscribe(ctx);
+    }
+
+    private void publishResourceNotFoundEvent(ChannelHandlerContext ctx) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants.RESOURCE_NOT_FOUND_ERROR_CODE);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE,
+                "No matching resource found to dispatch the request");
+        metricsHandler.handleHandshake(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    private void publishHandshakeAuthErrorEvent(ChannelHandlerContext ctx, String errorMessage) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, errorMessage);
+        metricsHandler.handleHandshake(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    private void publishPublishThrottledEvent(ChannelHandlerContext ctx) {
+        addThrottledErrorPropertiesToChannel(ctx);
+        metricsHandler.handlePublish(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    public void publishSubscribeThrottledEvent(ChannelHandlerContext ctx) {
+        addThrottledErrorPropertiesToChannel(ctx);
+        metricsHandler.handleSubscribe(ctx);
+        removeErrorPropertiesFromChannel(ctx);
+    }
+
+    private void addThrottledErrorPropertiesToChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_CODE,
+                APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE);
+        WebSocketUtils.setApiPropertyToChannel(ctx, SynapseConstants.ERROR_MESSAGE, "Message Throttled Out");
+    }
+
+    private void removeErrorPropertiesFromChannel(ChannelHandlerContext ctx) {
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_CODE);
+        WebSocketUtils.removeApiPropertyFromChannel(ctx, SynapseConstants.ERROR_MESSAGE);
     }
 
     private void removeTokenFromQuery(Map<String, List<String>> parameters) {
@@ -520,36 +589,34 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             throws WebSocketApiException, AxisFault, URISyntaxException {
 
         MessageContext synCtx = getMessageContext(tenantDomain);
-        API selectedApi = getApi(fullRequestPath, synCtx);
-        if (selectedApi == null) {
+        api = getApi(fullRequestPath, synCtx);
+        if (api == null) {
             handleError(ctx, "No matching API found to dispatch the request");
             return null;
         }
-        if (StringUtils.EMPTY.equals(selectedApi.getVersion())) {
-            // this is a call to default api
-            findAndUpdateApiName(selectedApi);
-            selectedApi = synCtx.getConfiguration().getAPI(apiName);
-            if (selectedApi == null) {
-                handleError(ctx, "API missing for default version");
-                return null;
-            }
-            reConstructFullUriWithVersion(selectedApi.getContext(), req, synCtx);
-        }
-        api = selectedApi;
-        apiContext = selectedApi.getContext();
+        reConstructFullUriWithVersion(req, synCtx);
+        apiContext = api.getContext();
         Resource selectedResource = null;
-        Utils.setSubRequestPath(selectedApi, synCtx);
-        Set<Resource> acceptableResources = new LinkedHashSet<>(Arrays.asList(selectedApi.getResources()));
+        Utils.setSubRequestPath(api, synCtx);
+        Set<Resource> acceptableResources = new LinkedHashSet<>(Arrays.asList(api.getResources()));
         if (!acceptableResources.isEmpty()) {
             for (RESTDispatcher dispatcher : ApiUtils.getDispatchers()) {
                 Resource resource = dispatcher.findResource(synCtx, acceptableResources);
                 if (resource != null) {
                     selectedResource = resource;
+                    if (APIUtil.isAnalyticsEnabled()) {
+                        WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS,
+                                WebSocketUtils.getEndpointUrl(resource, synCtx));
+                    }
                     break;
                 }
             }
         }
+        setApiPropertiesToChannel(ctx);
         if (selectedResource == null) {
+            if (APIUtil.isAnalyticsEnabled()) {
+                publishResourceNotFoundEvent(ctx);
+            }
             handleError(ctx, "No matching resource found to dispatch the request");
         }
         String resource = selectedResource.getDispatcherHelper().getString();
@@ -559,38 +626,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         return resource;
     }
 
-    private void findAndUpdateApiName(API defaultAPI) {
-
-        Set<Resource> resources = new LinkedHashSet<>(Arrays.asList(defaultAPI.getResources()));
-        for (Resource resource : resources) {
-            String dispatchPath = resource.getDispatcherHelper().getString();
-            if (dispatchPath.startsWith(DEFAULT_RESOURCE_NAME)) {
-                version = dispatchPath.substring(DEFAULT_RESOURCE_NAME.length());
-                break;
-            }
-        }
-        apiName = apiName + ":v" + version;
-        if (log.isDebugEnabled()) {
-            log.debug("Name of API corresponding to default invocation : " + apiName);
-            log.debug("Version of API corresponding to default invocation : " + version);
-        }
-    }
-
-    private void reConstructFullUriWithVersion(String apiContext, FullHttpRequest req, MessageContext synCtx) {
-
-        StringBuilder newUrl = new StringBuilder();
-        int versionInsertionIndex = apiContext.split(URL_SEPARATOR).length - 2; // leaving preceding empty part
-        String[] uriParts = fullRequestPath.split(URL_SEPARATOR);
-        for (int index = 0; index < uriParts.length; index++) {
-            newUrl.append(URL_SEPARATOR);
-            newUrl.append(uriParts[index]);
-            if (index == versionInsertionIndex) {
-                newUrl.append(URL_SEPARATOR);
-                newUrl.append(version);
-            }
-        }
-        // updating url for request dispatch
-        fullRequestPath = newUrl.toString().substring(1);  // removing additional '/' at the beginning
+    private void reConstructFullUriWithVersion(FullHttpRequest req, MessageContext synCtx) {
+        fullRequestPath = fullRequestPath.replace(electedRoute, electedAPI.getContext());
         req.setUri(fullRequestPath);
         org.apache.axis2.context.MessageContext axis2MsgCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
         axis2MsgCtx.setProperty(Constants.Configuration.TRANSPORT_IN_URL, fullRequestPath);
@@ -619,20 +656,19 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
      * @return String The api name
      */
     private API getApi(String requestPath, MessageContext synCtx) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("Retrieving apis for inbound : " + inboundName);
-        }
-        for (API apiObject : synCtx.getEnvironment().getSynapseConfiguration().getAPIs(inboundName)) {
-            if (ApiUtils.matchApiPath(requestPath, apiObject.getContext())) {
-                apiName = apiObject.getName();
-                if (apiObject.getVersionStrategy().getVersion() != null && !"".equals(apiObject.getVersionStrategy().
-                        getVersion())) {
-                    apiName = apiName + ":v" + apiObject.getVersionStrategy().getVersion();
-                }
-                version = apiObject.getVersion();
-                return apiObject;
-            }
+        TreeMap<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> selectedAPIS =
+                Utils.getSelectedAPIList(requestPath, tenantDomain);
+        if (selectedAPIS.size() > 0) {
+            String selectedPath = selectedAPIS.firstKey();
+            org.wso2.carbon.apimgt.keymgt.model.entity.API selectedAPI = selectedAPIS.get(selectedPath);
+            API api = synCtx.getEnvironment().getSynapseConfiguration()
+                    .getAPI(GatewayUtils.getQualifiedApiName(selectedAPI.getApiName(),
+                            selectedAPI.getApiVersion()));
+            version = selectedAPI.getApiVersion();
+            apiName = selectedAPI.getApiName();
+            electedRoute = selectedPath;
+            electedAPI = selectedAPI;
+            return api;
         }
         return null;
     }

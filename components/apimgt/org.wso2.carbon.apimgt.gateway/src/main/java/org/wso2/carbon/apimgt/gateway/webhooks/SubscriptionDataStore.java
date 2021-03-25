@@ -25,7 +25,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtl;
+import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksListDTO;
@@ -53,6 +53,7 @@ public class SubscriptionDataStore {
     public static final int retrievalRetries = 15;
     private static final Log log = LogFactory.getLog(SubscriptionDataStore.class);
     private Map<String, Map<String, WebhooksDTO>> subscribersMap;
+    private Map<String, Boolean> throttlingStatusMap;
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public SubscriptionDataStore(String tenantDomain) {
@@ -70,11 +71,14 @@ public class SubscriptionDataStore {
      */
     private void initializeStore() {
         this.subscribersMap = new ConcurrentHashMap<>();
+        this.throttlingStatusMap = new ConcurrentHashMap<>();
         executor.submit(() -> {
             List<WebhooksDTO> subscriptions = loadSubscriptions();
             for (WebhooksDTO subscriber: subscriptions) {
-                String subscriptionKey = subscriber.getApiKey() + "_" + subscriber.getTopicName();
+                String subscriptionKey = subscriber.getApiUUID() + "_" + subscriber.getTopicName();
+                String throttleKey = subscriber.getAppID() + "_" + subscriber.getApiUUID();
                 addSubscriber(subscriptionKey, subscriber);
+                throttlingStatusMap.put(throttleKey, false);
             }
         });
     }
@@ -98,16 +102,40 @@ public class SubscriptionDataStore {
     }
 
     /**
+     * This method is used to update the throttling status in the in memeory map.
+     *
+     * @param key           the throttling key (appID + apiUUID).
+     * @param status        the subscriber.
+     */
+    public void updateThrottleStatus(String key, boolean status) {
+        throttlingStatusMap.replace(key, status);
+    }
+
+    /**
+     * This method is used to get the throttling status from the in memeory map.
+     *
+     * @param key           the throttling key (appID + apiUUID).
+     * @return  status
+     */
+    public boolean getThrottleStatus(String key) {
+        if (throttlingStatusMap.containsKey(key)) {
+            return throttlingStatusMap.get(key);
+        }
+        return false;
+    }
+
+    /**
      * remove subscriber from the in memmory map.
      *
      * @param key               the subscription key (api key + topic name).
      * @param subscriber        the subscriber.
      */
     public void removeSubscriber(String key, WebhooksDTO subscriber) {
-        List<WebhooksDTO> subscriberList = getSubscribers(key);
-        if (subscriberList != null) {
-            subscriberList.removeIf(existingSubscriber -> existingSubscriber.getCallbackURL().equals(
+        Map<String, WebhooksDTO> existingSubscribers = subscribersMap.get(key);
+        if (existingSubscribers != null) {
+            existingSubscribers.values().removeIf(existingSubscriber -> existingSubscriber.getCallbackURL().equals(
                     subscriber.getCallbackURL()));
+            subscribersMap.replace(key, existingSubscribers);
         }
     }
 
@@ -119,11 +147,11 @@ public class SubscriptionDataStore {
     private String invokeService() {
         try {
             // The resource resides in the throttle web app. Hence reading throttle configs
-            String url = WebhooksUtl.getEventHubConfiguration().getServiceUrl().concat(APIConstants.
+            String url = WebhooksUtils.getEventHubConfiguration().getServiceUrl().concat(APIConstants.
                     INTERNAL_WEB_APP_EP).concat(APIConstants.Webhooks.GET_SUBSCRIPTIONS_URL);
             HttpGet method = new HttpGet(url);
-            byte[] credentials = Base64.encodeBase64((WebhooksUtl.getEventHubConfiguration().getUsername() + ":" +
-                    WebhooksUtl.getEventHubConfiguration().getPassword()).getBytes(StandardCharsets.UTF_8));
+            byte[] credentials = Base64.encodeBase64((WebhooksUtils.getEventHubConfiguration().getUsername() + ":" +
+                    WebhooksUtils.getEventHubConfiguration().getPassword()).getBytes(StandardCharsets.UTF_8));
             method.setHeader("Authorization", "Basic " + new String(credentials, StandardCharsets.UTF_8));
             method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
             URL eventHubURL = new URL(url);
@@ -179,11 +207,12 @@ public class SubscriptionDataStore {
     public List<WebhooksDTO> getSubscribers(String api) {
         Map<String, WebhooksDTO> subscribers = subscribersMap.get(api);
         if (subscribers != null) {
-            List<WebhooksDTO> subscriberList = new ArrayList<WebhooksDTO>(subscribersMap.get(api).values());
+            Map<String, WebhooksDTO> existingSubscribers = subscribersMap.get(api);
             long now = Instant.now().toEpochMilli();
-            subscriberList.removeIf(existingSubscriber -> existingSubscriber.getExpiryTime() != 0 &&
+            existingSubscribers.values().removeIf(existingSubscriber -> existingSubscriber.getExpiryTime() != 0 &&
                     existingSubscriber.getExpiryTime() < now);
-            return subscriberList;
+            subscribersMap.replace(api, existingSubscribers);
+            return new ArrayList<WebhooksDTO>(existingSubscribers.values());
         }
         return null;
     }

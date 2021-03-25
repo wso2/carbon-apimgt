@@ -19,8 +19,9 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
-import MaterialIcons from 'MaterialIcons';
 import Background from './Background';
+
+import getIcon from './APICards/ImageUtils';
 
 const styles = {
     icon: {},
@@ -57,22 +58,12 @@ class ImageGenerator extends PureComponent {
         let str = api;
         if (typeof api === 'object') str = api.name;
         if (!str) str = 'default';
-        let count;
         let colorPair;
         let randomBackgroundIndex;
-        let IconElement;
         const colorPairs = theme.custom.thumbnail.backgrounds;
 
         // Creating the icon
-        if (key && category) {
-            IconElement = key;
-        } else if (api.type === 'DOC') {
-            IconElement = theme.custom.thumbnail.document.icon;
-        } else {
-            count = MaterialIcons.categories[0].icons.length;
-            const randomIconIndex = (str.charCodeAt(0) + str.charCodeAt(str.length - 1)) % count;
-            IconElement = MaterialIcons.categories[0].icons[randomIconIndex].id;
-        }
+        const iconElement = getIcon(key, category, theme, api);
 
         if (api.type === 'DOC') {
             colorPair = theme.custom.thumbnail.document.backgrounds;
@@ -86,9 +77,11 @@ class ImageGenerator extends PureComponent {
         return (
             <div className={classes.iconWrapper} style={{ width }}>
                 <Icon className={classes.icon} style={{ fontSize: height, marginLeft: -height / 2, color }}>
-                    {IconElement}
+                    {iconElement}
                 </Icon>
-                <Background width={width} height={height} colorPair={colorPair} />
+                {(!theme.custom.thumbnailTemplates || !theme.custom.thumbnailTemplates.active) && (
+                    <Background width={width} height={height} colorPair={colorPair} />
+                )}
             </div>
         );
     }

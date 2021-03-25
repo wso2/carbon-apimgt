@@ -18,43 +18,52 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 
 /**
- * Application attribute in analytics event
+ * Application attribute in analytics event.
  */
 public class Application {
+
     private String keyType;
     private String applicationId;
     private String applicationName;
     private String applicationOwner;
 
     public String getKeyType() {
+
         return keyType;
     }
 
     public void setKeyType(String keyType) {
+
         this.keyType = keyType;
     }
 
     public String getApplicationId() {
+
         return applicationId;
     }
 
     public void setApplicationId(String applicationId) {
+
         this.applicationId = applicationId;
     }
 
     public String getApplicationName() {
+
         return applicationName;
     }
 
     public void setApplicationName(String applicationName) {
+
         this.applicationName = applicationName;
     }
 
     public String getApplicationOwner() {
+
         return applicationOwner;
     }
 
     public void setApplicationOwner(String applicationOwner) {
+
         this.applicationOwner = applicationOwner;
     }
 }

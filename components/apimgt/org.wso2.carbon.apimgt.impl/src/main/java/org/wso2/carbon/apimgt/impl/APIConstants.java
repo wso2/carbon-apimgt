@@ -18,15 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.wso2.carbon.apimgt.api.model.VHost;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.namespace.QName;
 
 /**
@@ -230,12 +227,6 @@ public final class APIConstants {
     public static final String DOC_OWNER_VISIBILITY = "OWNER_ONLY";
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
-    public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
-    public static final String TOKEN_SCOPE_ASSOCIATION_TABLE = "IDN_OAUTH2_ACCESS_TOKEN_SCOPE";
-    public static final String CONSUMER_KEY_SECRET_TABLE = "IDN_OAUTH_CONSUMER_APPS";
-
-    public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
-
     public static final String EXTERNAL_API_STORES_LOCATION =
             APIMGT_REGISTRY_LOCATION + "/externalstores/external-api-stores.xml";
 
@@ -340,13 +331,6 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
-    public static final String API_OVERVIEW_ENDPOINT_OAUTH = "overview_endpointOAuth";
-    public static final String API_OVERVIEW_ENDPOINT_GRANT_TYPE = "overview_grantType";
-    public static final String API_OVERVIEW_ENDPOINT_HTTP_METHOD = "overview_httpMethod";
-    public static final String API_OVERVIEW_ENDPOINT_TOKEN_URL = "overview_endpointTokenUrl";
-    public static final String API_OVERVIEW_ENDPOINT_CLIENT_ID = "overview_clientId";
-    public static final String API_OVERVIEW_ENDPOINT_CLIENT_SECRET = "overview_clientSecret";
-    public static final String API_OVERVIEW_ENDPOINT_CUSTOM_PARAMETERS = "overview_customParameters";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
     public static final String API_OVERVIEW_INSEQUENCE = "overview_inSequence";
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
@@ -362,7 +346,6 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
-    public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
     public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
@@ -486,8 +469,8 @@ public final class APIConstants {
     public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
     public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
     public static final String HASH_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EnableTokenHashMode";
-    public static final String TOKEN_ENDPOINT_CONTEXT = OAUTH_CONFIGS +"TokenEndPointName";
-    public static final String REVOKE_ENDPOINT_CONTEXT = OAUTH_CONFIGS +"RevokeEndpointName";
+    public static final String TOKEN_ENDPOINT_CONTEXT = OAUTH_CONFIGS + "TokenEndPointName";
+    public static final String REVOKE_ENDPOINT_CONTEXT = OAUTH_CONFIGS + "RevokeEndpointName";
     public static final String DEFAULT_MODIFIED_ENDPOINT_PASSWORD = "*****"; //5 stars
     public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
     public static final String OVERVIEW_ELEMENT = "overview";
@@ -613,6 +596,9 @@ public final class APIConstants {
             = "overview_websubSubscriptionConfiguration";
     public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
     public static final String API_TYPE_WS = "WS";
+    public static final String GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME = "gatewayInternalKeyDataCache";
+    public static final String GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME = "gatewayInvalidInternalKeyCache";
+    public static final String GRANT_TYPE_PASSWORD = "password";
 
     public static class TokenStatus {
 
@@ -743,9 +729,9 @@ public final class APIConstants {
     public static final String KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM = "{scope_name}";
     public static final String KEY_MANAGER_OAUTH2_SCOPES_REST_API_SCOPE_NAME = "/name/"
             + KEY_MANAGER_OAUTH2_SCOPES_SCOPE_NAME_PARAM;
-    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = { "internal_application_mgt_create",
+    public static final String[] KEY_MANAGER_OAUTH2_REST_API_MGT_SCOPES = {"internal_application_mgt_create",
             "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view",
-            "internal_user_mgt_list" };
+            "internal_user_mgt_list"};
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
 
     public static final String TOKEN_URL = "TokenURL";
@@ -773,9 +759,6 @@ public final class APIConstants {
     public static final String API_RESTAPI_ETAG_SKIP_URI_URI = API_RESTAPI_ETAG_SKIP_URI + "URI";
     public static final String API_RESTAPI_ETAG_SKIP_URI_HTTPMETHOD = API_RESTAPI_ETAG_SKIP_URI + "HTTPMethods";
 
-    public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
-    public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
-
     public static final String JWT_EXPIRY_TIME = API_KEY_VALIDATOR + "JWTExpiryTime";
 
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
@@ -789,6 +772,8 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_ALL_APIS = API_STORE + "DisplayAllAPIs";
     public static final String API_STORE_DISPLAY_MULTIPLE_VERSIONS = API_STORE + "DisplayMultipleVersions";
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
+    public static final int REPLYLIMIT = 3;
+    public static final int REPLYOFFSET = 0;
     public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
     public static final String STORE_TOKEN_DISPLAY_URL = API_STORE + "StoreTokenDisplayURL";
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
@@ -816,6 +801,7 @@ public final class APIConstants {
             + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String API_PUBLISHER_SUBSCRIBER_CLAIMS = API_PUBLISHER + "SubscriberClaims";
+    public static final String API_PUBLISHER_INTERNAL_API_KEY_ALIAS = API_PUBLISHER + "InternalKeyAlias";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";
@@ -1053,6 +1039,7 @@ public final class APIConstants {
     public static final String GATEWAY_BASIC_AUTH_RESOURCE_CACHE_NAME = "gatewayBasicAuthResourceCache";
     public static final String GATEWAY_CERTIFICATE_CACHE_NAME = "gatewayCertificateCache";
     public static final String GATEWAY_API_KEY_CACHE_NAME = "gatewayApiKeyCache";
+    public static final String GATEWAY_INTERNAL_KEY_CACHE_NAME = "gatewayInternalKeyCache";
     public static final String GATEWAY_API_KEY_DATA_CACHE_NAME = "gatewayApiKeyKeyCache";
     public static final String GATEWAY_INVALID_API_KEY_CACHE_NAME = "gatewayInvalidApiKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
@@ -1250,20 +1237,21 @@ public final class APIConstants {
     public static final String GRAPHQL_SWAGGER_QUERY = "query";
     public static final String GRAPHQL_MUTATION = "Mutation";
     public static final String GRAPHQL_SUBSCRIPTION = "Subscription";
-    public static final String SCOPE_ROLE_MAPPING = "ScopeRoleMapping";
-    public static final String SCOPE_OPERATION_MAPPING = "ScopeOperationMapping";
-    public static final String OPERATION_THROTTLING_MAPPING = "OperationThrottlingMapping";
-    public static final String OPERATION_AUTH_SCHEME_MAPPING = "OperationAuthSchemeMapping";
+    public static final String SCOPE_ROLE_MAPPING = "WSO2ScopeRoleMapping";
+    public static final String SCOPE_OPERATION_MAPPING = "WSO2ScopeOperationMapping";
+    public static final String OPERATION_THROTTLING_MAPPING = "WSO2OperationThrottlingMapping";
+    public static final String OPERATION_AUTH_SCHEME_MAPPING = "WSO2OperationAuthSchemeMapping";
     public static final String OPERATION_SECURITY_ENABLED = "Enabled";
     public static final String OPERATION_SECURITY_DISABLED = "Disabled";
     public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
-    public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "GraphQLAccessControlPolicy";
+    public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String MAXIMUM_QUERY_COMPLEXITY = "max_query_complexity";
     public static final String MAXIMUM_QUERY_DEPTH = "max_query_depth";
     public static final String GRAPHQL_MAX_DEPTH = "graphQLMaxDepth";
     public static final String GRAPHQL_MAX_COMPLEXITY = "graphQLMaxComplexity";
+    public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
 
     //URI Authentication Schemes
     public static final Set<String> GRAPHQL_SUPPORTED_METHOD_LIST =
@@ -1387,6 +1375,12 @@ public final class APIConstants {
 
     public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
     public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
+
+    public static final String PROXY_ENABLE = "ProxyConfig.Enable";
+    public static final String PROXY_HOST = "ProxyConfig.Host";
+    public static final String PROXY_PORT = "ProxyConfig.Port";
+    public static final String PROXY_USERNAME = "ProxyConfig.Username";
+    public static final String PROXY_PASSWORD = "ProxyConfig.Password";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -1716,8 +1710,9 @@ public final class APIConstants {
     //Advanced throttling related constants
     public static final String TIME_UNIT_SECOND = "sec";
     public static final String TIME_UNIT_MINUTE = "min";
-    public static final String TIME_UNIT_HOUR = "hour";
-    public static final String TIME_UNIT_DAY = "day";
+    public static final String TIME_UNIT_HOUR = "hours";
+    public static final String TIME_UNIT_DAY = "days";
+    public static final String TIME_UNIT_MONTH = "months";
 
     public static final String SUBSCRIPTION_TIERS = "availableTiers";
 
@@ -1737,11 +1732,35 @@ public final class APIConstants {
     public static final String DEFAULT_SUB_POLICY_UNLIMITED = "Unlimited";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED = "Unauthenticated";
 
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD = "AsyncGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER = "AsyncSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE = "AsyncBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED = "AsyncUnlimited";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD = "AsyncWHGold";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER = "AsyncWHSilver";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE = "AsyncWHBronze";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED = "AsyncWHUnlimited";
+
     public static final String DEFAULT_SUB_POLICY_GOLD_DESC = "Allows 5000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_SILVER_DESC = "Allows 2000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_BRONZE_DESC = "Allows 1000 requests per minute";
     public static final String DEFAULT_SUB_POLICY_UNLIMITED_DESC = "Allows unlimited requests";
     public static final String DEFAULT_SUB_POLICY_UNAUTHENTICATED_DESC = "Allows 500 request(s) per minute";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC = "Allows 50000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC = "Allows 25000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC = "Allows 5000 events per day";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_UNLIMITED_DESC = "Allows unlimited events";
+
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_GOLD_DESC = "Allows 10000 events per month and " +
+            "1000 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_SILVER_DESC = "Allows 5000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_BRONZE_DESC = "Allows 1000 events per month and " +
+            "500 active subscriptions";
+    public static final String DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED_DESC = "Allows unlimited events and " +
+            "unlimited active subscriptions";
 
     public static final String DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN = "50KPerMin";
     public static final String DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN = "20KPerMin";
@@ -1787,7 +1806,6 @@ public final class APIConstants {
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
     public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
-    public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
@@ -1960,7 +1978,6 @@ public final class APIConstants {
         public static final String EXPIRY_TIME = "exp";
         public static final String JWT_KID = "kid";
         public static final String SIGNATURE_ALGORITHM = "alg";
-        public static final String TOKEN_TYPE = "typ";
         public static final String BACKEND_TOKEN = "backendJwt";
         public static final String SUBSCRIBED_APIS = "subscribedAPIs";
         public static final String API_CONTEXT = "context";
@@ -1976,6 +1993,9 @@ public final class APIConstants {
         public static final String AUTHORIZED_USER_TYPE = "aut";
         public static final String ISSUER_IDENTIFIER = "iss";
         public static final String END_USERNAME = "sub";
+        public static final String INTERNAL_KEY_TOKEN_TYPE = "InternalKey";
+        public static final String TOKEN_TYPE = "token_type";
+        public static final String API_KEY_TOKEN_TYPE = "apiKey";
     }
 
     public static final String SIGNATURE_ALGORITHM_RS256 = "RS256";
@@ -2005,7 +2025,7 @@ public final class APIConstants {
     public static final String[] WEBSUB_DEFAULT_METHODS = {"post"};
     public static final String[] WEBSUB_SUPPORTED_METHODS = { "subscribe" };
     public static final String[] SSE_SUPPORTED_METHODS = { "subscribe" };
-    public static final String[] WS_SUPPORTED_METHODS = { "subscribe", "publish" };
+    public static final String[] WS_SUPPORTED_METHODS = { "subscribe" };
 
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
@@ -2041,7 +2061,7 @@ public final class APIConstants {
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     // Reserved keywords for search.
     public static final String[] API_SEARCH_PREFIXES = {DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
-            NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
+            NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
             VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
             API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
             CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase()};
@@ -2078,7 +2098,7 @@ public final class APIConstants {
 
     /**
      * Constants for correlation logging
-     * */
+     */
     public static final String CORRELATION_ID = "Correlation-ID";
     public static final String ENABLE_CORRELATION_LOGS = "enableCorrelationLogs";
     public static final String CORRELATION_LOGGER = "correlation";
@@ -2230,8 +2250,7 @@ public final class APIConstants {
 
     /**
      * Constants for trust store access
-     *
-     * */
+     */
     public static final String TRUST_STORE_PASSWORD = "Security.TrustStore.Password";
     public static final String TRUST_STORE_LOCATION = "Security.TrustStore.Location";
     public static final String INTERNAL_WEB_APP_EP = "/internal/data/v1";
@@ -2260,8 +2279,7 @@ public final class APIConstants {
     public static final String APPLICATION_TOKEN_TYPE_JWT = "JWT";
     /**
      * Constants for the recommendation system
-     *
-     * */
+     */
     public static final String API_RECOMMENDATION = "APIRecommendations";
     public static final String RECOMMENDATION_ENDPOINT = "recommendationAPI";
     public static final String AUTHENTICATION_ENDPOINT = "authenticationEndpoint";
@@ -2304,6 +2322,7 @@ public final class APIConstants {
 
     public static final String CLONED_ITERATION_INDEX_PROPERTY = "CLONED_ITERATION_INDEX";
     public static final String TENANT_DOMAIN_INFO_PROPERTY = "tenant.info.domain";
+    public static final String TENANT_ID_INFO_PROPERTY = "tenant.info.id";
 
     public static class CertificateReLoaderConfiguration {
 
@@ -2331,7 +2350,7 @@ public final class APIConstants {
         public static final String CLAIM_MAPPINGS = "ClaimMappings";
         public static final String CLAIM_MAPPING = "ClaimMapping";
         public static final String CONSUMER_KEY_CLAIM = "ConsumerKeyClaim";
-        
+
 
         public static class JWKSConfiguration {
 
@@ -2486,6 +2505,7 @@ public final class APIConstants {
         SCOPE_UPDATE,
         SCOPE_DELETE,
         ENDPOINT_CERTIFICATE_ADD,
+        ENDPOINT_CERTIFICATE_UPDATE,
         ENDPOINT_CERTIFICATE_REMOVE,
         GA_CONFIG_UPDATE
     }
@@ -2510,21 +2530,18 @@ public final class APIConstants {
         public static final String SYNAPSE_ATTRIBUTES = "/synapse-attributes";
         public static final String GATEAY_SYNAPSE_ARTIFACTS = "/runtime-artifacts";
         public static final String DATA_SOURCE_NAME = "DataSourceName";
-        public static final String DATA_RETRIEVAL_MODE= "DataRetrievalMode";
+        public static final String DATA_RETRIEVAL_MODE = "DataRetrievalMode";
         public static final String GATEWAY_STARTUP_SYNC = "sync";
-        public static final String GATEWAY_STARTUP_ASYNC= "async";
+        public static final String GATEWAY_STARTUP_ASYNC = "async";
         public static final String API_ID = "apiId";
         public static final String LABEL = "label";
         public static final String LABELS = "labels";
 
     }
 
-    public static class ContainerMgtAttributes {
-
-        public static final String DEPLOYMENTS = "Deployments";
-        public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
-        public static final String CONTAINER_MANAGEMENT_INFO = "ContainerMgtInfo";
-
+    public static class AsyncApi {
+        public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
+        public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "init-request:";
     }
 
     public static class TopicNames {
@@ -2539,28 +2556,44 @@ public final class APIConstants {
     }
 
     public static class Webhooks {
-        public static final String API_UUID = "API_UUID";
-        public static final String APPLICATION_ID = "APPLICATION_ID";
-        public static final String TENANT_DOMAIN = "TENANT_DOMAIN";
-        public static final String CALLBACK = "HUB_CALLBACK_URL";
-        public static final String SECRET = "HUB_SECRET";
-        public static final String TOPIC = "HUB_TOPIC";
-        public static final String MODE = "HUB_MODE";
-        public static final String WH_SUBSCRIPTION_ID = "WH_SUBSCRIPTION_ID";
+        public static final String API_UUID_COLUMN = "API_UUID";
+        public static final String APPLICATION_ID_COLUMN = "APPLICATION_ID";
+        public static final String CALLBACK_COLUMN = "HUB_CALLBACK_URL";
+        public static final String SECRET_COLUMN = "HUB_SECRET";
+        public static final String TOPIC_COLUMN = "HUB_TOPIC";
+        public static final String EXPIRY_AT_COLUMN = "EXPIRY_AT";
+        public static final String WH_SUBSCRIPTION_ID_COLUMN = "WH_SUBSCRIPTION_ID";
+        public static final String CONNECTIONS_COUNT_COLUMN = "CONNECTIONS_COUNT";
+        public static final String SUB_COUNT_COLUMN = "SUB_COUNT";
+        public static final String API_CONTEXT_COLUMN = "API_CONTEXT";
+        public static final String API_VERSION_COLUMN = "API_VERSION";
+        public static final String API_TIER_COLUMN = "API_TIER";
+        public static final String SUB_TIER_COLUMN = "SUB_TIER";
+        public static final String APPLICATION_TIER_COLUMN = "APPLICATION_TIER";
+        public static final String SUBSCRIBER_COLUMN = "SUBSCRIBER";
+        public static final String TENANT_ID_COLUMN = "TENANT_ID";
         public static final String SUBSCRIBE_MODE = "subscribe";
         public static final String UNSUBSCRIBE_MODE = "unsubscribe";
-        public static final String LEASE_SECONDS = "HUB_LEASE_SECONDS";
-        public static final String UPDATED_AT = "UPDATED_AT";
-        public static final String EXPIRY_AT = "EXPIRY_AT";
-        public static final String API_KEY_PROPERTY = "apiKey";
-        public static final String APP_ID_PROPERTY = "appID";
-        public static final String TENANT_DOMAIN_PROPERTY = "tenantDomain";
-        public static final String CALLBACK_PROPERTY = "callback";
-        public static final String TOPIC_PROPERTY = "topic";
-        public static final String MODE_PROPERTY = "mode";
-        public static final String SECRET_PROPERTY = "secret";
-        public static final String LEASE_SECONDS_PROPERTY = "leaseSeconds";
-        public static final String STATUS_PROPERTY = "status";
+        public static final String UPDATED_AT = "updatedAt";
+        public static final String EXPIRY_AT = "expireAt";
+        public static final String API_UUID = "apiUUID";
+        public static final String APP_ID = "appID";
+        public static final String TENANT_DOMAIN = "tenantDomain";
+        public static final String TENANT_ID = "tenantId";
+        public static final String CALLBACK = "callback";
+        public static final String TOPIC = "topic";
+        public static final String MODE = "mode";
+        public static final String SECRET = "secret";
+        public static final String LEASE_SECONDS = "leaseSeconds";
+        public static final String STATUS = "status";
+        public static final String TIER = "tier";
+        public static final String APPLICATION_TIER = "applicationTier";
+        public static final String API_TIER = "apiTier";
+        public static final String SUBSCRIBER_NAME = "subscriberName";
+        public static final String API_NAME = "apiName";
+        public static final String API_CONTEXT = "apiContext";
+        public static final String API_VERSION = "apiVersion";
+        public static final String IS_THROTTLED = "isThrottled";
         public static final String SUBSCRIPTION_EVENT_TYPE = "subscriptionEventType";
         public static final String DELIVERY_EVENT_TYPE = "diliveryStatusEventType";
         public static final String GET_SUBSCRIPTIONS_URL = "/webhooks-subscriptions";
@@ -2570,7 +2603,6 @@ public final class APIConstants {
         public static final String HUB_MODE_QUERY_PARAM = "hub.mode";
         public static final String HUB_LEASE_SECONDS_QUERY_PARAM = "hub.lease_seconds";
         public static final String TOPIC_QUERY_PARAM = "topic";
-        public static final String STATUS = "STATUS";
         public static final String SUBSCRIBERS_LIST_PROPERTY = "SUBSCRIBERS_LIST";
         public static final String SUBSCRIBERS_COUNT_PROPERTY = "SUBSCRIBERS_COUNT";
         public static final String SUBSCRIBER_CALLBACK_PROPERTY = "SUBSCRIBER_CALLBACK";
@@ -2643,7 +2675,6 @@ public final class APIConstants {
         public static final String SERVICE_KEY = "SERVICE_KEY";
         public static final String MD5 = "MD5";
         public static final String SERVICE_VERSION = "SERVICE_VERSION";
-        public static final String SERVICE_DISPLAY_NAME = "DISPLAY_NAME";
         public static final String SERVICE_URL = "SERVICE_URL";
         public static final String DEFINITION_TYPE = "DEFINITION_TYPE";
         public static final String DEFINITION_URL = "DEFINITION_URL";
@@ -2673,5 +2704,10 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+    }
+
+    public static class GatewayArtifactConstants {
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
 }

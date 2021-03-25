@@ -393,6 +393,24 @@ class Utils {
             }, 100);
         }
     }
+
+    /**
+     * Simply split the token by dots `.` and parse it as a JSON object
+     * @param {String} token raw token string
+     * @returns {JSON} decoded JWT token in JSON format
+     */
+    static decodeJWT(token) {
+        const [header, payload, signature] = token.split('.');
+        try {
+            return {
+                header: JSON.parse(atob(header)),
+                payload: JSON.parse(atob(payload)),
+                signature,
+            };
+        } catch (e) {
+            return null;
+        }
+    }
 }
 
 Utils.CONST = {

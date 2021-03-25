@@ -24,20 +24,29 @@ import java.io.Serializable;
  */
 public class WebhooksDTO implements Serializable {
 
-    private String apiKey;
+    private String apiUUID;
+    private String apiContext;
+    private String apiVersion;
     private String appID;
     private String callbackURL;
     private String tenantDomain;
+    private int tenantId;
     private String topicName;
     private String secret;
     private long expiryTime;
+    private String tier;
+    private String applicationTier;
+    private String apiTier;
+    private String subscriberName;
+    private String apiName;
+    private boolean isThrottled;
 
-    public String getApiKey() {
-        return apiKey;
+    public String getApiUUID() {
+        return apiUUID;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void setApiUUID(String apiUUID) {
+        this.apiUUID = apiUUID;
     }
 
     public String getAppID() {
@@ -86,5 +95,77 @@ public class WebhooksDTO implements Serializable {
 
     public void setTenantDomain(String tenantDomain) {
         this.tenantDomain = tenantDomain;
+    }
+
+    public String getApiContext() {
+        return apiContext;
+    }
+
+    public void setApiContext(String apiContext) {
+        this.apiContext = apiContext;
+    }
+
+    public String getApiVersion() {
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+    }
+
+    public String getTier() {
+        return tier;
+    }
+
+    public void setTier(String tier) {
+        this.tier = tier;
+    }
+
+    public String getApplicationTier() {
+        return applicationTier;
+    }
+
+    public void setApplicationTier(String applicationTier) {
+        this.applicationTier = applicationTier;
+    }
+
+    public String getApiTier() {
+        return apiTier;
+    }
+
+    public void setApiTier(String apiTier) {
+        this.apiTier = apiTier;
+    }
+
+    public String getSubscriberName() {
+        return subscriberName;
+    }
+
+    public void setSubscriberName(String subscriberName) {
+        this.subscriberName = subscriberName;
+    }
+
+    public String getApiName() {
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+        this.apiName = apiName;
+    }
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public boolean isThrottled() {
+        return isThrottled;
+    }
+
+    public void setThrottled(boolean throttled) {
+        isThrottled = throttled;
     }
 }

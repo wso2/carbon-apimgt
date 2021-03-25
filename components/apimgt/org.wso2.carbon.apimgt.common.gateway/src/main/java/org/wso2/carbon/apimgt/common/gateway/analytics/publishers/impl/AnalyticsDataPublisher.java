@@ -24,40 +24,31 @@ import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsConfigurationHolder;
 import org.wso2.carbon.apimgt.common.gateway.analytics.Constants;
 
 import java.util.Map;
 
 /**
- * Analytics event publisher for APIM
+ * Analytics event publisher for APIM.
  */
 public class AnalyticsDataPublisher {
-    private static final Log log = LogFactory.getLog(AnalyticsDataPublisher.class);
 
+    private static final Log log = LogFactory.getLog(AnalyticsDataPublisher.class);
+    private static AnalyticsDataPublisher instance = new AnalyticsDataPublisher();
     private CounterMetric successMetricReporter;
     private CounterMetric faultyMetricReporter;
-
-    private static AnalyticsDataPublisher instance;
 
     private AnalyticsDataPublisher() {
 
     }
 
     public static AnalyticsDataPublisher getInstance() {
-        if (instance == null) {
-            synchronized (AnalyticsDataPublisher.class) {
-                if (instance == null) {
-                    instance = new AnalyticsDataPublisher();
-                    instance.init();
-                }
-            }
-        }
+
         return instance;
     }
 
-    private void init() {
-        Map<String, String> configs = AnalyticsConfigurationHolder.getInstance().getConfigurations();
+    public void initialize(Map<String, String> configs) {
+
         String reporterClass = configs.get("publisher.reporter.class");
         try {
             MetricReporter metricReporter;
@@ -77,10 +68,18 @@ public class AnalyticsDataPublisher {
     }
 
     public CounterMetric getSuccessMetricReporter() {
+
+        if (this.successMetricReporter == null) {
+            throw new RuntimeException("AnalyticsDataPublisher is not initialized.");
+        }
         return successMetricReporter;
     }
 
     public CounterMetric getFaultyMetricReporter() {
+
+        if (this.faultyMetricReporter == null) {
+            throw new RuntimeException("AnalyticsDataPublisher is not initialized.");
+        }
         return faultyMetricReporter;
     }
 }

@@ -145,7 +145,7 @@ function copyAPIConfig(api) {
         wsdlUrl: api.wsdlUrl,
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
-        keyManagers: [...api.keyManagers || []],
+        keyManagers: [...(api.keyManagers || [])],
         corsConfiguration: {
             corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
             accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
@@ -153,14 +153,18 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        websubSubscriptionConfiguration: {
+    };
+    if (!api.isAPIProduct()) {
+        apiConfigJson.apiwebsubSubscriptionConfiguration = {
             secret: api.websubSubscriptionConfiguration.secret,
             signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
             signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
-        },
-    };
+        };
+    }
     return apiConfigJson;
 }
+
+
 /**
  * This component handles the basic configurations UI in the API details page
  *
@@ -298,12 +302,6 @@ export default function RuntimeConfiguration() {
     const { api, updateAPI } = useContext(APIContext);
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
     const isWebSub = api.type === 'WEBSUB';
-    api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
-        secret: '',
-        signingAlgorithm: '',
-        signatureHeader: '',
-    };
-
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));

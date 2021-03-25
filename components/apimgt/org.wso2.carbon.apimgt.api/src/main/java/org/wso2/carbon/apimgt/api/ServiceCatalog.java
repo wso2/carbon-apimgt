@@ -53,10 +53,9 @@ public interface ServiceCatalog {
      * @param serviceEntry ServiceCatalogInfo
      * @param tenantId     Tenant Identifier
      * @param user         Logged in user name
-     * @return ServiceCatalogId UUID of the created Service Catalog ID
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    String updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException;
+    void updateService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException;
 
     /**
      * Returns details of an Service Catalog
@@ -113,16 +112,6 @@ public interface ServiceCatalog {
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
     String getMD5HashByKey(String key, int tenantId) throws APIManagementException;
-
-    /**
-     * Get metadata and endpoint definition resources of a service endpoint
-     *
-     * @param key Service key unique to each tenant
-     * @param tenantId Tenant Identifier
-     * @return EndPointInfo Endpoint resources
-     * @throws APIManagementException if failed to add ServiceCatalogInfo
-     */
-    ServiceEntry getEndPointResourcesByKey(String key, int tenantId) throws APIManagementException;
 
     /**
      * Get information of a service endpoint by key

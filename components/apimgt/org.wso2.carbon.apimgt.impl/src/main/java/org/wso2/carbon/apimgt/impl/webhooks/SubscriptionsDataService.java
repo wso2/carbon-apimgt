@@ -27,11 +27,13 @@ The interface of webhooks subscription operations
  */
 public interface SubscriptionsDataService {
 
-    void addSubscription(String apiKey, String applicationID, String tenantDomain,  String callback,
-                                String secret, String topicName, long expiredAt);
+    void addSubscription(String apiKey, String topicName, String tenantDomain, WebhooksDTO subscriber);
 
-    void removeSubscription(String apiKey, String applicationID, String tenantDomain, String callback,
-                                   String secret, String topicName);
+    void removeSubscription(String apiKey, String topicName, String tenantDomain, WebhooksDTO subscriber);
 
     List<WebhooksDTO> getSubscriptionsList(String apiKey, String tenantDomain);
+
+    void updateThrottleStatus(String appID, String apiUUID, String tenantDomain, boolean status);
+
+    boolean getThrottleStatus(String appID, String apiUUID, String tenantDomain);
 }

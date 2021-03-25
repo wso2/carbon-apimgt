@@ -32,7 +32,6 @@ public final class APIConstants {
     public static final String API_OVERVIEW_TYPE = "overview_type";
     public static final String API_OVERVIEW_VERSION = "overview_version";
     public static final String API_OVERVIEW_VERSION_TYPE = "overview_versionType";
-    public static final String API_OVERVIEW_IS_DEFAULT_VERSION = "overview_isDefaultVersion";
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
     public static final String API_OVERVIEW_CONTEXT_TEMPLATE = "overview_contextTemplate";
     public static final String API_OVERVIEW_DESCRIPTION = "overview_description";
@@ -238,7 +237,6 @@ public final class APIConstants {
     public static final String LCSTATE_SEARCH_TYPE_KEY = "lcState=";
     public static final String ENABLE_STORE_SEARCH_TYPE_KEY = "enableStore=(true OR null)";
     public static final String LCSTATE_SEARCH_KEY = "lcState";
-    public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
@@ -257,7 +255,7 @@ public final class APIConstants {
 
     // Reserved keywords for search.
     public static final String[] API_SEARCH_PREFIXES = {DOCUMENTATION_SEARCH_TYPE_PREFIX, TAGS_SEARCH_TYPE_PREFIX,
-                                    NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
+                                    NAME_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
                                     VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
                                     API_STATUS.toLowerCase(), CONTENT_SEARCH_TYPE_PREFIX, TYPE_SEARCH_TYPE_PREFIX, LABEL_SEARCH_TYPE_PREFIX,
                                     CATEGORY_SEARCH_TYPE_PREFIX, ENABLE_STORE.toLowerCase()};

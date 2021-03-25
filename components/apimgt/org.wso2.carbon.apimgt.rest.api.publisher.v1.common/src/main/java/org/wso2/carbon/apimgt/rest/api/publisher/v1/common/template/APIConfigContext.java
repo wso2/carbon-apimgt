@@ -24,8 +24,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
 /**
- * This will initialise a velocity context to used in the template
- * and populate it with api name, version and context and a reference to api
+ * This will initialise a velocity context to used in the template and populate it with api name, version and context
+ * and a reference to api
  */
 public class APIConfigContext extends ConfigContext {
 
@@ -80,11 +80,6 @@ public class APIConfigContext extends ConfigContext {
         // customise how the synapse config is generated.
         context.put("apiObj", api);
 
-        if (APIConstants.BLOCKED.equals(api.getStatus())) {
-            context.put("apiIsBlocked", Boolean.TRUE);
-        } else {
-            context.put("apiIsBlocked", Boolean.FALSE);
-        }
         String apiSecurity = api.getApiSecurity();
         if (apiSecurity == null || apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
             context.put("apiIsOauthProtected", Boolean.TRUE);

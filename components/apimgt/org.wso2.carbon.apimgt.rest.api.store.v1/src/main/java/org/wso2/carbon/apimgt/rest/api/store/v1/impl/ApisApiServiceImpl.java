@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.model.APIRating;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -242,7 +243,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response addCommentToAPI(String apiId, PostRequestBodyDTO postRequestBodyDTO, String replyTo,
-                                    MessageContext messageContext) throws APIManagementException{
+                                    MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -258,7 +259,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
             comment.setParentCommentID(replyTo);
-            comment.setEntryPoint("devPortal");
+            comment.setEntryPoint("DEVPORTAL");
             comment.setUser(username);
             comment.setApiId(apiId);
             String createdCommentId = apiConsumer.addComment(identifier, comment, username);
@@ -284,15 +285,14 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getAllCommentsOfAPI(String apiId, String xWSO2Tenant, Integer limit, Integer offset,
                                         Boolean includeCommenterInfo, MessageContext messageContext)
-            throws APIManagementException{
+            throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             String parentCommentID = null;
-            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
-                    includeCommenterInfo);
+            CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
@@ -314,13 +314,13 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getCommentOfAPI(String commentId, String apiId, String xWSO2Tenant, String ifNoneMatch,
-                                    Boolean includeCommenterInfo, Integer limit, Integer offset,
-                                    MessageContext messageContext) throws APIManagementException{
+                                    Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
+                                    MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, limit, offset);
+            Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
 
             if (comment != null) {
                 CommentDTO commentDTO;
@@ -358,14 +358,13 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit,
                                         Integer offset, String ifNoneMatch, Boolean includeCommenterInfo,
-                                        MessageContext messageContext) throws APIManagementException{
+                                        MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
-            Comment[] comments = apiConsumer.getComments(apiTypeWrapper, commentId);
-            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, limit, offset,
-                    includeCommenterInfo);
+            CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
@@ -387,7 +386,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO,
-                                     MessageContext messageContext) throws APIManagementException{
+                                     MessageContext messageContext) throws APIManagementException {
         String username = RestApiCommonUtil.getLoggedInUsername();
         String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -395,18 +394,20 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
-                if ( comment.getUser().equals(username)) {
+                if (comment.getUser().equals(username)) {
                     boolean commentEdited = false;
-                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment.getCategory()))){
+                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment
+                            .getCategory()))) {
                         comment.setCategory(patchRequestBodyDTO.getCategory());
                         commentEdited = true;
                     }
-                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment.getText()))){
+                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment
+                            .getText()))) {
                         comment.setText(patchRequestBodyDTO.getContent());
                         commentEdited = true;
                     }
-                    if (commentEdited){
-                        if (apiConsumer.editComment(apiTypeWrapper, commentId, comment)){
+                    if (commentEdited) {
+                        if (apiConsumer.editComment(apiTypeWrapper, commentId, comment)) {
                             Comment editedComment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
                             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
@@ -416,20 +417,15 @@ public class ApisApiServiceImpl implements ApisApiService {
                             return Response.ok(uri).entity(commentDTO).build();
                         }
                     } else {
-                        return Response.notModified("Not Modified").type(MediaType.APPLICATION_JSON).build();
+                        return Response.ok().build();
                     }
                 } else {
-                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId)
+                            , log);
                 }
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
                         String.valueOf(commentId), log);
-            }
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + apiId, e, log);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving comment content location for API " + apiId;
@@ -449,15 +445,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(apiId, requestedTenantDomain);
             Comment comment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
             if (comment != null) {
-                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
-                if ( Arrays.asList(tokenScopes).contains("apim:app_import_export")|| comment.getUser().equals(username)) {
+                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+                if (Arrays.asList(tokenScopes).contains("apim:app_import_export") || comment.getUser().equals(username)) {
                     if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
                         obj.put("message", "The comment has been deleted");
                         return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
                     } else {
-                        return Response.status(405, "Method Not Allowed").type(MediaType.APPLICATION_JSON).build();
+                        return Response.status(405, "Method Not Allowed").type(MediaType
+                                .APPLICATION_JSON).build();
                     }
                 } else {
                     return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
@@ -697,11 +695,12 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO api = getAPIByAPIId(apiId, tenant);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
+        String swaggerDefinition = api.getApiDefinition();
         if (api != null) {
             String apiProvider = api.getProvider();
             try {
-                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(),
-                        api.getVersion(), apiProvider, RestApiCommonUtil.getLoggedInUsername());
+                sdkArtifacts = apiClientGenerationManager.generateSDK(language, api.getName(), api.getVersion(),
+                        swaggerDefinition);
                 //Create the sdk response.
                 File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
@@ -720,28 +719,18 @@ public class ApisApiServiceImpl implements ApisApiService {
      * Retrieves the swagger document of an API
      *
      * @param apiId API identifier
-     * @param labelName name of the gateway label
      * @param environmentName name of the gateway environment
-     * @param clusterName name of the container managed cluster
      * @param ifNoneMatch If-None-Match header value
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param messageContext CXF message context
-     * @return Swagger document of the API for the given label or gateway environment
+     * @return Swagger document of the API for the given cluster or gateway environment
      */
     @Override
-    public Response apisApiIdSwaggerGet(String apiId, String labelName, String environmentName, String clusterName,
+    public Response apisApiIdSwaggerGet(String apiId, String environmentName,
             String ifNoneMatch, String xWSO2Tenant, MessageContext messageContext) {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-
-            if (StringUtils.isNotEmpty(labelName) ?
-                    StringUtils.isNotEmpty(environmentName) || StringUtils.isNotEmpty(clusterName) :
-                    StringUtils.isNotEmpty(environmentName) && StringUtils.isNotEmpty(clusterName)) {
-                RestApiUtil.handleBadRequest(
-                        "Only one of 'labelName', 'environmentName' or 'clusterName' can be provided", log
-                );
-            }
 
             API api = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain);
             if (api.getUuid() == null) {
@@ -754,9 +743,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(apiId, requestedTenantDomain));
             }
 
-            // gets the first available environment if any of label, environment or cluster name is not provided
-            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)
-                    && StringUtils.isEmpty(clusterName)) {
+            // gets the first available environment if environment is not provided
+            if (StringUtils.isEmpty(environmentName)) {
                 Map<String, Environment> existingEnvironments = APIUtil.getEnvironments();
 
                 // find a valid environment name from API
@@ -798,10 +786,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     throw e;
                 }
-            } else if (StringUtils.isNotEmpty(labelName)) {
-                apiSwagger = apiConsumer.getOpenAPIDefinitionForLabel(api, labelName);
-            } else if (StringUtils.isNotEmpty(clusterName)) {
-                apiSwagger = apiConsumer.getOpenAPIDefinitionForClusterName(api, clusterName);
             } else {
                 apiSwagger = api.getSwaggerDefinition();
             }
@@ -1053,7 +1037,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getWSDLOfAPI(String apiId, String labelName, String environmentName, String ifNoneMatch,
+    public Response getWSDLOfAPI(String apiId, String environmentName, String ifNoneMatch,
                                  String xWSO2Tenant, MessageContext messageContext) throws APIManagementException {
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
@@ -1062,7 +1046,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         List<Environment> environments = APIUtil.getEnvironmentsOfAPI(api);
         if (environments != null && environments.size() > 0) {
-            if (StringUtils.isEmpty(labelName) && StringUtils.isEmpty(environmentName)) {
+            if (StringUtils.isEmpty(environmentName)) {
                 environmentName = api.getEnvironments().iterator().next();
             }
 
@@ -1132,12 +1116,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)
                             || APIConstants.DEPRECATED.equals(status)) {
 
-                APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
-                List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apiId);
-                if (!apidto.isIsAWSAPI()) {
-                    apidto.setEndpointURLs(APIMappingUtil.fromAPIRevisionListToEndpointsList(apidto, revisionDeployments));
-                }
-                return apidto;
+                return APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }

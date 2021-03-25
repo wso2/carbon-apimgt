@@ -72,7 +72,7 @@ export default {
     palette: {
         primary: {
             // light: will be calculated from palette.primary.main,
-            main: '#15b8cf',
+            main: '#006E9C',
             // dark: will be calculated from palette.primary.main,
             // contrastText: will be calculated to contrast with palette.primary.main
         },
@@ -114,7 +114,6 @@ export default {
     },
     custom: {
         wrapperBackground: '#f9f9f9',
-        starColor: '#f2c73a',
         disableColor: '#D3D3D3',
         leftMenuWidth: 210,
         contentAreaWidth: 1240,
@@ -125,10 +124,8 @@ export default {
         defaultApiView: 'grid', /* Sets the default view for the api listing page ( Other values available = 'list' )
                                                 To disable one option for an example if you want to disable grid
                                                 completely and get rid of the toggle buttons use ['list']. */
-        showApiHelp: false, // API details page has a right hand side panel showing it's related help. Set this
-        // to false if you want to hide it.
         leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-        leftMenuIconSize: 24,
+        leftMenuIconSize: 20,
         leftMenuIconMainSize: 52,
         leftMenuTextStyle: 'capitalize',
         resourceChipColors: { // https://github.com/swagger-api/swagger-ui/blob/master/src/style/_variables.scss#L45-L52
@@ -141,6 +138,8 @@ export default {
             head: '#9012fe',
             trace: '#785446',
             disabled: '#ebebeb',
+            subscribe: '#61affe',
+            publish: '#49cc90',
         },
         operationChipColor: {
             query: '#b3e6fe',
@@ -154,6 +153,10 @@ export default {
                 inactive: '#e0e0e0',
             },
             iconSize: 32,
+        },
+        thumbnailTemplates: {
+            active: false,
+            variant: 'plain', // default templates available templates 'plain'.
         },
         thumbnail: {
             width: 240,
@@ -184,21 +187,31 @@ export default {
             backgroundChip: '#5aebf9',
         },
         warningColor: '#ffc439',
-        landingPageIcons: {
-            graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
-            restApiIcon: '/site/public/images/landing-icons/restapi.svg',
-            soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
-            streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
-            websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
+        landingPage: {
+            icons: {
+                graphqlIcon: '/site/public/images/landing-icons/graphqlapi.svg',
+                restApiIcon: '/site/public/images/landing-icons/restapi.svg',
+                soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
+                streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+            },
+            menu: {
+                primary: '#34679D',
+            },
         },
         title: {
             prefix: '[Publisher]',
-            sufix: '- WSO2 APIM',
+            suffix: '- WSO2 APIM',
         },
         serviceCatalog: {
             onboarding: {
                 buttonText: '#FF7300',
                 buttonBorder: '#FCA574',
+            },
+            icons: {
+                graphql: '/site/public/images/service_catalog/icons/graphql.svg',
+                asyncapi: '/site/public/images/service_catalog/icons/async.svg',
+                oas3: '/site/public/images/service_catalog/icons/oas3.png',
+                swagger: '/site/public/images/service_catalog/icons/swagger.svg',
             },
         },
     },
