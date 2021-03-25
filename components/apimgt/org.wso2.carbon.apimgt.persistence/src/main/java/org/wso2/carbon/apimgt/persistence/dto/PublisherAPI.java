@@ -90,6 +90,7 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
+    private boolean isAWSAPI;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
         return soapToRestSequences;
@@ -537,6 +538,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setWsUriMapping(Map<String, String> wsUriMapping) {
         this.wsUriMapping = wsUriMapping;
+    }
+
+    public boolean isAWSAPI() {
+        return isAWSAPI;
+    }
+
+    public void setAWSAPI(boolean AWSAPI) {
+        isAWSAPI = AWSAPI;
     }
 
     @Override

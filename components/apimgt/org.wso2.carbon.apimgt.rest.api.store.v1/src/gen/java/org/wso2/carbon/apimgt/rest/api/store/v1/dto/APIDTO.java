@@ -43,6 +43,7 @@ public class APIDTO   {
     private String wsdlUri = null;
     private String lifeCycleStatus = null;
     private Boolean isDefaultVersion = null;
+    private Boolean isAWSAPI = null;
     private String type = null;
     private List<String> transport = new ArrayList<String>();
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
@@ -249,6 +250,23 @@ public class APIDTO   {
   }
   public void setIsDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
+  }
+
+  /**
+   **/
+  public APIDTO isAWSAPI(Boolean isAWSAPI) {
+    this.isAWSAPI = isAWSAPI;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("isAWSAPI")
+  public Boolean isIsAWSAPI() {
+    return isAWSAPI;
+  }
+  public void setIsAWSAPI(Boolean isAWSAPI) {
+    this.isAWSAPI = isAWSAPI;
   }
 
   /**
@@ -683,6 +701,7 @@ public class APIDTO   {
         Objects.equals(wsdlUri, API.wsdlUri) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(isAWSAPI, API.isAWSAPI) &&
         Objects.equals(type, API.type) &&
         Objects.equals(transport, API.transport) &&
         Objects.equals(operations, API.operations) &&
@@ -710,7 +729,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, isAWSAPI, type, transport, operations, authorizationHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, ingressURLs, endpointURLs, businessInformation, labels, environmentList, scopes, avgRating, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime);
   }
 
   @Override
@@ -728,6 +747,7 @@ public class APIDTO   {
     sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    isAWSAPI: ").append(toIndentedString(isAWSAPI)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");

@@ -214,6 +214,10 @@ public class APIMappingUtil {
         } else {
             model.setResponseCache(APIConstants.DISABLED);
         }
+        if (dto.isIsAWSAPI()) {
+            model.setAdvertiseOnly(true);
+        }
+        model.setAWSAPI(dto.isIsAWSAPI());
         if (dto.getCacheTimeout() != null) {
             model.setCacheTimeout(dto.getCacheTimeout());
         } else {
@@ -904,7 +908,8 @@ public class APIMappingUtil {
             dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
         }
         dto.setDescription(model.getDescription());
-
+        dto.setIsAWSAPI(model.isAWSAPI());
+        dto.setAdvertiseOnly(model.isAdvertiseOnly());
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setIsRevision(model.isRevision());
         dto.setRevisionedApiId(model.getRevisionedApiId());

@@ -1134,7 +1134,9 @@ public class ApisApiServiceImpl implements ApisApiService {
 
                 APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, requestedTenantDomain);
                 List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apiId);
-                apidto.setEndpointURLs(APIMappingUtil.fromAPIRevisionListToEndpointsList(apidto, revisionDeployments));
+                if (!apidto.isIsAWSAPI()) {
+                    apidto.setEndpointURLs(APIMappingUtil.fromAPIRevisionListToEndpointsList(apidto, revisionDeployments));
+                }
                 return apidto;
             } else {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);

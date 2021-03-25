@@ -8104,6 +8104,12 @@ components:
         isDefaultVersion:
           type: boolean
           example: false
+        isAWSAPI:
+          type: boolean
+          example: false
+        advertiseOnly:
+          type: boolean
+          example: false
         isRevision:
           type: boolean
           example: false

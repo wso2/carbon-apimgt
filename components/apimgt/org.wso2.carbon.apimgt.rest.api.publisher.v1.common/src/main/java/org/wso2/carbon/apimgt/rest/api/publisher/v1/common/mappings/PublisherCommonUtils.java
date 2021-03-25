@@ -825,6 +825,9 @@ public class PublisherCommonUtils {
         } else if (body.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character", ExceptionCodes.INVALID_CONTEXT);
         }
+        if (body.isIsAWSAPI() == null) {
+            body.setIsAWSAPI(false);
+        }
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
             throw new APIManagementException(
                     "Error occurred while adding API. API with name " + body.getName() + " already exists.",

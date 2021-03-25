@@ -83,6 +83,7 @@ public class APIMappingUtil {
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isDefaultVersion());
+        dto.setIsAWSAPI(model.isAWSAPI());
         dto.setLifeCycleStatus(model.getStatus());
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
@@ -917,11 +918,6 @@ public class APIMappingUtil {
                         }
                     }
                 } else {
-
-                    //Set<String> tagSet = api.getTags();
-                    //if (tagSet.contains("aws")) {
-                    //    api.setAwsApi(true);
-                    //}
                     AbstractAPIManager abstractAPIManager = new AbstractAPIManager() {
                         @Override
                         public API getLightweightAPIByUUID(String uuid, String orgId) throws APIManagementException {

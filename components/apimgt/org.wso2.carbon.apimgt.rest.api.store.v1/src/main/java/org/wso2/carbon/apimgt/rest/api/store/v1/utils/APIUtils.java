@@ -18,12 +18,18 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.AbstractAPIManager;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -59,76 +65,95 @@ public class APIUtils {
 
         Set<String> apiTransports = new HashSet<>(Arrays.asList(api.getTransports().split(",")));
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-
-        for (String environmentName : environmentsPublishedByAPI) {
-            Environment environment = environments.get(environmentName);
-            if (environment != null) {
-                APIURLsDTO apiURLsDTO = new APIURLsDTO();
-                APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
-                String[] gwEndpoints = null;
-                if ("WS".equalsIgnoreCase(api.getType())) {
-                    gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
-                } else {
-                    gwEndpoints = environment.getApiGatewayEndpoint().split(",");
-                }
-                Map<String, String> domains = new HashMap<>();
-                if (tenantDomain != null) {
-                    domains = apiConsumer.getTenantDomainMappings(tenantDomain,
-                            APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
-                }
-
-                String customGatewayUrl = null;
-                if (domains != null) {
-                    customGatewayUrl = domains.get(APIConstants.CUSTOM_URL);
-                }
-
-                for (String gwEndpoint : gwEndpoints) {
-                    StringBuilder endpointBuilder = new StringBuilder(gwEndpoint);
-
-                    if (customGatewayUrl != null) {
-                        int index = endpointBuilder.indexOf("//");
-                        endpointBuilder.replace(index + 2, endpointBuilder.length(), customGatewayUrl);
-                        endpointBuilder.append(api.getContext().replace("/t/" + tenantDomain, ""));
+        APIURLsDTO apiURLsDTO = new APIURLsDTO();
+        if (!api.isAWSAPI()) {
+            for (String environmentName : environmentsPublishedByAPI) {
+                Environment environment = environments.get(environmentName);
+                if (environment != null) {
+                    APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
+                    String[] gwEndpoints = null;
+                    if ("WS".equalsIgnoreCase(api.getType())) {
+                        gwEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
                     } else {
-                        endpointBuilder.append(api.getContext());
+                        gwEndpoints = environment.getApiGatewayEndpoint().split(",");
+                    }
+                    Map<String, String> domains = new HashMap<>();
+                    if (tenantDomain != null) {
+                        domains = apiConsumer.getTenantDomainMappings(tenantDomain,
+                                APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
                     }
 
-                    if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
-                        apiURLsDTO.setHttp(endpointBuilder.toString());
-                    } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
-                        apiURLsDTO.setHttps(endpointBuilder.toString());
-                    } else if (gwEndpoint.contains("ws:")) {
-                        apiURLsDTO.setWs(endpointBuilder.toString());
-                    } else if (gwEndpoint.contains("wss:")) {
-                        apiURLsDTO.setWss(endpointBuilder.toString());
+                    String customGatewayUrl = null;
+                    if (domains != null) {
+                        customGatewayUrl = domains.get(APIConstants.CUSTOM_URL);
                     }
 
-                    if (api.isDefaultVersion()) {
-                        int index = endpointBuilder.lastIndexOf(api.getId().getVersion());
-                        endpointBuilder.replace(index, endpointBuilder.length(), "");
+                    for (String gwEndpoint : gwEndpoints) {
+                        StringBuilder endpointBuilder = new StringBuilder(gwEndpoint);
+
+                        if (customGatewayUrl != null) {
+                            int index = endpointBuilder.indexOf("//");
+                            endpointBuilder.replace(index + 2, endpointBuilder.length(), customGatewayUrl);
+                            endpointBuilder.append(api.getContext().replace("/t/" + tenantDomain, ""));
+                        } else {
+                            endpointBuilder.append(api.getContext());
+                        }
+
                         if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
-                            apiDefaultVersionURLsDTO.setHttp(endpointBuilder.toString());
+                            apiURLsDTO.setHttp(endpointBuilder.toString());
                         } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
-                            apiDefaultVersionURLsDTO.setHttps(endpointBuilder.toString());
+                            apiURLsDTO.setHttps(endpointBuilder.toString());
                         } else if (gwEndpoint.contains("ws:")) {
-                            apiDefaultVersionURLsDTO.setWs(endpointBuilder.toString());
+                            apiURLsDTO.setWs(endpointBuilder.toString());
                         } else if (gwEndpoint.contains("wss:")) {
-                            apiDefaultVersionURLsDTO.setWss(endpointBuilder.toString());
+                            apiURLsDTO.setWss(endpointBuilder.toString());
+                        }
+
+                        if (api.isDefaultVersion()) {
+                            int index = endpointBuilder.lastIndexOf(api.getId().getVersion());
+                            endpointBuilder.replace(index, endpointBuilder.length(), "");
+                            if (gwEndpoint.contains("http:") && apiTransports.contains("http")) {
+                                apiDefaultVersionURLsDTO.setHttp(endpointBuilder.toString());
+                            } else if (gwEndpoint.contains("https:") && apiTransports.contains("https")) {
+                                apiDefaultVersionURLsDTO.setHttps(endpointBuilder.toString());
+                            } else if (gwEndpoint.contains("ws:")) {
+                                apiDefaultVersionURLsDTO.setWs(endpointBuilder.toString());
+                            } else if (gwEndpoint.contains("wss:")) {
+                                apiDefaultVersionURLsDTO.setWss(endpointBuilder.toString());
+                            }
                         }
                     }
+
+                    APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
+                    apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
+                    apiEndpointURLsDTO.setUrLs(apiURLsDTO);
+
+                    apiEndpointURLsDTO.setEnvironmentName(environment.getName());
+                    apiEndpointURLsDTO.setEnvironmentType(environment.getType());
+
+                    apiEndpointsList.add(apiEndpointURLsDTO);
                 }
-
-                APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
-                apiEndpointURLsDTO.setDefaultVersionURLs(apiDefaultVersionURLsDTO);
-                apiEndpointURLsDTO.setUrLs(apiURLsDTO);
-
-                apiEndpointURLsDTO.setEnvironmentName(environment.getName());
-                apiEndpointURLsDTO.setEnvironmentType(environment.getType());
-
-                apiEndpointsList.add(apiEndpointURLsDTO);
             }
-        }
+        } else {
+            api.setSwaggerDefinition(apiConsumer.getOpenAPIDefinition(api.getId()));
 
+            JsonElement configElement = new JsonParser().parse(api.getSwaggerDefinition());
+            JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
+            JsonArray servers = configObject.getAsJsonArray("servers");
+            JsonObject server = servers.get(0).getAsJsonObject();
+            String url = server.get("url").getAsString();
+            JsonObject variables = server.getAsJsonObject("variables");
+            JsonObject basePath = variables.getAsJsonObject("basePath");
+            String stageName = basePath.get("default").getAsString();
+            String hostUrl = url.replace("/{basePath}", stageName);
+            if (hostUrl == null) {
+                hostUrl = " ";
+            }
+            apiURLsDTO.setHttps(hostUrl);
+        }
+        APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
+        apiEndpointURLsDTO.setUrLs(apiURLsDTO);
+        apiEndpointsList.add(apiEndpointURLsDTO);
         return apiEndpointsList;
     }
 

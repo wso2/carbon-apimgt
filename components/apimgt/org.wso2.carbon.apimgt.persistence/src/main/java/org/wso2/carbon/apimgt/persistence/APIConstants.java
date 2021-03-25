@@ -85,6 +85,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
     public static final String API_OVERVIEW_RESPONSE_CACHING = "overview_responseCaching";
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
+    public static final String API_OVERVIEW_AWSAPI = "overview_AWSAPI";
 
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
     public static final String API_OVERVIEW_REDIRECT_URL = "overview_redirectURL";

@@ -144,6 +144,7 @@ public class API implements Serializable {
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
+    private boolean isAWSAPI;
     private boolean isPublishedDefaultVersion = false;
     private List<String> keyManagers = new ArrayList<>();
     private JSONObject serviceInfo = new JSONObject();
@@ -946,6 +947,14 @@ public class API implements Serializable {
 
     public boolean isPublishedDefaultVersion() {
         return isPublishedDefaultVersion;
+    }
+
+    public void setAWSAPI(boolean isAWSAPI) {
+        this.isAWSAPI = isAWSAPI;
+    }
+
+    public boolean isAWSAPI() {
+        return isAWSAPI;
     }
 
     public CORSConfiguration getCorsConfiguration() {

@@ -301,6 +301,7 @@ public class RegistryPersistenceUtil {
             Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
             String json = new Gson().toJson(deploymentEnvironments);
             artifact.setAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS, json);
+            artifact.setAttribute(APIConstants.API_OVERVIEW_AWSAPI, Boolean.toString(api.isAWSAPI()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -333,7 +334,7 @@ public class RegistryPersistenceUtil {
     /**
      * This method used to set environment values to governance artifact of API .
      *
-     * @param environment set
+     * @param apiEnvironments set
      */
     public static String writeEnvironmentsToArtifact(Set<String> apiEnvironments) {
 
@@ -400,7 +401,7 @@ public class RegistryPersistenceUtil {
     /**
      * Utility method to get API provider path
      *
-     * @param api provider
+     * @param provider provider
      * @return API provider path
      */
     public static String getAPIProviderPath(String provider) {
@@ -781,7 +782,7 @@ public class RegistryPersistenceUtil {
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
-
+            api.setAWSAPI(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_AWSAPI)));
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -817,7 +818,7 @@ public class RegistryPersistenceUtil {
      * To set the resource properties to the API.
      *
      * @param api          API that need to set the resource properties.
-     * @param registry     Registry to get the resource from.
+     * @param apiResource     Registry to get the resource from.
      * @param artifactPath Path of the API artifact.
      * @return Updated API.
      * @throws RegistryException Registry Exception.

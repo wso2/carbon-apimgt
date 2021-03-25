@@ -349,17 +349,7 @@ class InfoBar extends React.Component {
      */
     render() {
         const { api } = this.context;
-//
-       // console.log(api);
-       // console.log(api.tags);
-        let awsApi = false;
-        for (let i=0; i<api.tags.length; i++) {
-            if (api.tags[i]==="aws") {
-                awsApi = true;
-            }
-        }
-        console.log(awsApi);
-//
+
         const { classes, theme, intl } = this.props;
         const {
             notFound, avgRating, total, count, descriptionHidden,

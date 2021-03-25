@@ -1,4 +1,7 @@
 {
+  "8+ZR29": {
+    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
+  },
   "APis.Details.tryout.help.main": {
     "defaultMessage": "Test APIs while in the Development stage."
   },
@@ -1675,9 +1678,6 @@
   "Apis.Details.Environments.Environments.api.gateways.name": {
     "defaultMessage": "Name"
   },
-  "Apis.Details.Environments.Environments.api.gateways.type": {
-    "defaultMessage": "Type"
-  },
   "Apis.Details.Environments.Environments.create.cancel": {
     "defaultMessage": "Cancel"
   },
@@ -1708,14 +1708,14 @@
   "Apis.Details.Environments.Environments.display.in.devportal": {
     "defaultMessage": "Display in Developer Portal"
   },
+  "Apis.Details.Environments.Environments.gateway.accessUrl": {
+    "defaultMessage": "Gateway Access URL"
+  },
   "Apis.Details.Environments.Environments.gateway.action": {
     "defaultMessage": "Action"
   },
   "Apis.Details.Environments.Environments.gateway.deployed.revision": {
     "defaultMessage": "Deployed Revision"
-  },
-  "Apis.Details.Environments.Environments.gateway.endpoints": {
-    "defaultMessage": "Endpoints"
   },
   "Apis.Details.Environments.Environments.gateway.labels.heading": {
     "defaultMessage": "Gateway Labels"
@@ -1786,6 +1786,9 @@
   "Apis.Details.Environments.Environments.select.table": {
     "defaultMessage": "Select Revision"
   },
+  "Apis.Details.Environments.Environments.select.vhost": {
+    "defaultMessage": "Select Access URL"
+  },
   "Apis.Details.Environments.Environments.undeploy.btn": {
     "defaultMessage": "Undeploy"
   },
@@ -1821,6 +1824,9 @@
   },
   "Apis.Details.Environments.MicroGateway.undeploy.btn": {
     "defaultMessage": "Undeploy"
+  },
+  "Apis.Details.Environments.create.vhost": {
+    "defaultMessage": "VHost"
   },
   "Apis.Details.ExternalStores.ExternalStores.cancel": {
     "defaultMessage": "Cancel"
@@ -3846,9 +3852,6 @@
   },
   "n8vnpP": {
     "defaultMessage": "Topic Name"
-  },
-  "qLKC50": {
-    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = { } | < > , ' \" \\\\ / ) ."
   },
   "sIDiOO": {
     "defaultMessage": "Yes. Delete"

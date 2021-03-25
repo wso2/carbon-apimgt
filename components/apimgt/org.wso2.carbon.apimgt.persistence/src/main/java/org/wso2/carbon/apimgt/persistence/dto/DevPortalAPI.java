@@ -59,6 +59,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
+    private boolean isAWSAPI;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -299,6 +300,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setSwaggerDefinition(String swaggerDefinition) {
         this.swaggerDefinition = swaggerDefinition;
+    }
+
+    public boolean isAWSAPI() {
+        return isAWSAPI;
+    }
+
+    public void setAWSAPI(boolean AWSAPI) {
+        isAWSAPI = AWSAPI;
     }
 
 
