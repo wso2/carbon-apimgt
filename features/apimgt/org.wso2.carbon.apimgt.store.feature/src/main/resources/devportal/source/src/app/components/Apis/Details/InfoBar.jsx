@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -39,14 +40,9 @@ import Environments from './Environments';
 import Breadcrumb from './Breadcrumb';
 
 const propertyDisplaySuffix = Settings.app.propertyDisplaySuffix || '__display';
-/**
- *
- *
- * @param {*} theme
- */
+
 const styles = (theme) => {
     const mainBack = theme.custom.infoBar.background || '#ffffff';
-    const infoBarHeight = theme.custom.infoBar.height || 170;
     const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(mainBack);
 
     return {
@@ -169,7 +165,7 @@ const styles = (theme) => {
             alignItems: 'center',
             '& p': {
                 lineHeight: '15px',
-            }
+            },
         },
         avatarRoot: {
             width: 30,
@@ -189,26 +185,18 @@ const styles = (theme) => {
 };
 
 /**
- *
- *
  * @class InfoBar
  * @extends {React.Component}
  */
 class InfoBar extends React.Component {
+    /**
+     * @param {JSON} props props passed from the parent
+     */
     constructor(props) {
         super(props);
         this.state = {
-            api: null,
-            applications: null,
-            policies: null,
-            dropDownApplications: null,
-            dropDownPolicies: null,
             notFound: false,
-            tabValue: 'Social Sites',
-            comment: '',
-            commentList: null,
             showOverview: true,
-            checked: false,
             avgRating: 0,
             total: 0,
             count: 0,
@@ -220,39 +208,21 @@ class InfoBar extends React.Component {
         this.collapseAllDescription = this.collapseAllDescription.bind(this);
     }
 
-    ditectCurrentMenu = (location) => {
-        const routeToCheck = 'overview';
-        const { pathname } = location;
-        const test1 = new RegExp('/' + routeToCheck + '$', 'g');
-        const test2 = new RegExp('/' + routeToCheck + '/', 'g');
-        if (pathname.match(test1) || pathname.match(test2)) {
-            this.setState({ showOverview: true });
-        } else {
-            this.setState({ showOverview: false });
-        }
-    };
-
+    /**
+     * component did mount
+     */
     componentDidMount() {
         const { history } = this.props;
-        this.ditectCurrentMenu(history.location);
+        this.detectCurrentMenu(history.location);
         history.listen((location) => {
-            this.ditectCurrentMenu(location);
+            this.detectCurrentMenu(location);
         });
     }
 
     /**
-     *
-     *
-     * @memberof InfoBar
+     * @returns {string} provider
+     * @param {JSON} api api object
      */
-    toggleOverview = (todo) => {
-        if (typeof todo === 'boolean') {
-            this.setState({ showOverview: todo });
-        } else {
-            this.setState((state) => ({ showOverview: !state.showOverview }));
-        }
-    };
-
     getProvider(api) {
         let { provider } = api;
         if (
@@ -265,6 +235,10 @@ class InfoBar extends React.Component {
         return provider;
     }
 
+    /**
+     * @returns {string} formatted mail
+     * @param {JSON} api api object
+     */
     getProviderMail(api) {
         let mail;
         if (
@@ -277,6 +251,10 @@ class InfoBar extends React.Component {
         return mail;
     }
 
+    /**
+     * @return {string} owner
+     * @param {JSON} api api object
+     */
     getTechnical(api) {
         let owner;
         if (
@@ -289,6 +267,10 @@ class InfoBar extends React.Component {
         return owner;
     }
 
+    /**
+     * @returns {string} formatted email address.
+     * @param {JSON} api api object.
+     */
     getTechnicalMail(api) {
         let mail;
         if (
@@ -301,12 +283,16 @@ class InfoBar extends React.Component {
         return mail;
     }
 
+    /**
+     * @param {JSON} api api object
+     * @returns {JSON} key managers
+     */
     getKeyManagers(api) {
         let keyManagers;
         let response;
         if (api.keyManagers) {
             keyManagers = api.keyManagers;
-            keyManagers.map(name => {
+            keyManagers.forEach((name) => {
                 if (name === 'all') {
                     response = 'All Applicable';
                 } else {
@@ -317,6 +303,9 @@ class InfoBar extends React.Component {
         return response;
     }
 
+    /**
+     * Get the scheme
+     */
     getSchema() {
         const newAPI = new API();
         const { api } = this.context;
@@ -333,6 +322,9 @@ class InfoBar extends React.Component {
         });
     }
 
+    /**
+     * @param {number} ratings rating value
+     */
     setRatingUpdate(ratings) {
         if (ratings) {
             const { avgRating, total, count } = ratings;
@@ -340,10 +332,40 @@ class InfoBar extends React.Component {
         }
     }
 
+    /**
+     * @param {boolean} todo toggle option
+     */
+     toggleOverview = (todo) => {
+         if (typeof todo === 'boolean') {
+             this.setState({ showOverview: todo });
+         } else {
+             this.setState((state) => ({ showOverview: !state.showOverview }));
+         }
+     };
+
+    /**
+     * @param {event} e click event
+     */
+    detectCurrentMenu = (location) => {
+        const routeToCheck = 'overview';
+        const { pathname } = location;
+        const test1 = new RegExp('/' + routeToCheck + '$', 'g');
+        const test2 = new RegExp('/' + routeToCheck + '/', 'g');
+        if (pathname.match(test1) || pathname.match(test2)) {
+            this.setState({ showOverview: true });
+        } else {
+            this.setState({ showOverview: false });
+        }
+    };
+
+    /**
+     * @param {event} e click event
+     */
     collapseAllDescription(e) {
         e.preventDefault();
-        this.setState({ descriptionHidden: !this.state.descriptionHidden });
+        this.setState((prevState) => ({ descriptionHidden: !prevState.descriptionHidden }));
     }
+
     /**
      *
      *
@@ -360,7 +382,7 @@ class InfoBar extends React.Component {
         const {
             custom: {
                 leftMenu: { position },
-                infoBar: { showThumbnail, height },
+                infoBar: { showThumbnail },
                 tagWise: { key, active },
                 social: { showRating },
             },
@@ -373,7 +395,7 @@ class InfoBar extends React.Component {
         }
         if (active && api.tags && api.tags.length > 0) {
             for (let i = 0; i < api.tags.length; i++) {
-                if (api.tags[i].search(key) != -1 && api.tags[i].split(key).length > 0) {
+                if (api.tags[i].search(key) !== -1 && api.tags[i].split(key).length > 0) {
                     apisTagsWithoutGroups.push(api.tags[i].split(key)[0]);
                 } else {
                     apisTagsWithoutGroups.push(api.tags[i]);
@@ -381,38 +403,38 @@ class InfoBar extends React.Component {
             }
         }
         const { additionalProperties, securityScheme } = api;
-        let additionalProperties__display = null;
+        let additionalPropertiesDisplay = null;
         if (additionalProperties && Object.keys(additionalProperties).length > 0 && additionalProperties.constructor === Object) {
-            additionalProperties__display = Object.keys(additionalProperties).filter(aProp => aProp.indexOf(propertyDisplaySuffix) !== -1);
+            additionalPropertiesDisplay = Object.keys(additionalProperties).filter((aProp) => aProp.indexOf(propertyDisplaySuffix) !== -1);
         }
 
-        let securityScheme_display = null;
+        let securitySchemeDisplay = null;
         if (securityScheme) {
-            securityScheme_display = [];
+            securitySchemeDisplay = [];
             securityScheme.forEach((scm) => {
                 if (scm === 'basic_auth') {
-                    securityScheme_display.push(
+                    securitySchemeDisplay.push(
                         intl.formatMessage({
                             defaultMessage: 'Basic',
                             id: 'Apis.Details.InfoBar.security.basic',
-                        })
+                        }),
                     );
                 } else if (scm === 'api_key') {
-                    securityScheme_display.push(
+                    securitySchemeDisplay.push(
                         intl.formatMessage({
                             defaultMessage: 'Api Key',
                             id: 'Apis.Details.InfoBar.security.api_key',
-                        })
+                        }),
                     );
                 } else if (scm === 'oauth2') {
-                    securityScheme_display.push(
+                    securitySchemeDisplay.push(
                         intl.formatMessage({
                             defaultMessage: 'OAuth2',
                             id: 'Apis.Details.InfoBar.security.oauth2',
-                        })
+                        }),
                     );
                 }
-            })
+            });
         }
         // Truncating the description
         let descriptionIsBig = false;
@@ -420,7 +442,7 @@ class InfoBar extends React.Component {
         if (api.description) {
             const limit = 40;
             if (api.description.split(' ').length > limit) {
-                let newContent = api.description.split(' ').slice(0, limit);
+                const newContent = api.description.split(' ').slice(0, limit);
                 smallDescription = newContent.join(' ') + '...';
                 descriptionIsBig = true;
             }
@@ -565,26 +587,33 @@ class InfoBar extends React.Component {
                                         <Typography variant='body2' className={classes.endpointLabel}>
                                             {apisTagsWithoutGroups.map((tag, index) => (
                                                 <Link to={`/apis?offset=0&query=tag:${tag}`} style={{ lineHeight: 0 }}>
-                                                    {tag} {(index + 1) !== apisTagsWithoutGroups.length && ', '}
+                                                    {tag}
+                                                    {(index + 1) !== apisTagsWithoutGroups.length && ', '}
                                                 </Link>
                                             ))}
-                                            {apisTagsWithoutGroups.length === 0 && (<FormattedMessage
-                                                id='Apis.Details.InfoBar.list.tags.not'
-                                                defaultMessage='Not Tagged'
-                                            />)}
+                                            {apisTagsWithoutGroups.length === 0 && (
+                                                <FormattedMessage
+                                                    id='Apis.Details.InfoBar.list.tags.not'
+                                                    defaultMessage='Not Tagged'
+                                                />
+                                            )}
                                         </Typography>
 
                                     </Box>
                                 </Grid>
 
-                                {api.description && (<Grid item xs={12} className={classes.infoWrapper}>
-                                    <Typography variant='body2' gutterBottom align='left'>
-                                        {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
-                                        {descriptionIsBig && (<a onClick={this.collapseAllDescription} href='#'>
-                                            {descriptionHidden ? 'more' : 'less'}
-                                        </a>)}
-                                    </Typography>
-                                </Grid>)}
+                                {api.description && (
+                                    <Grid item xs={12} className={classes.infoWrapper}>
+                                        <Typography variant='body2' gutterBottom align='left'>
+                                            {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
+                                            {descriptionIsBig && (
+                                                <a onClick={this.collapseAllDescription} href='#'>
+                                                    {descriptionHidden ? 'more' : 'less'}
+                                                </a>
+                                            )}
+                                        </Typography>
+                                    </Grid>
+                                )}
                             </Grid>
                         </Box>
                     </Box>
@@ -610,7 +639,7 @@ InfoBar.defaultProps = {
 };
 InfoBar.propTypes = {
     classes: PropTypes.shape({}),
-    theme: PropTypes.object.isRequired,
+    theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,

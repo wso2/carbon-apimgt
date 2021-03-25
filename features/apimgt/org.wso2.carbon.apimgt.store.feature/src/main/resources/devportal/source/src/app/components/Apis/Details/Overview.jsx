@@ -42,9 +42,7 @@ import OverviewDocuments from './OverviewDocuments';
 import Environments from './Environments';
 
 /**
- *
- *
- * @param {*} theme
+ * @param {JSON} theme
  */
 const styles = (theme) => ({
     root: {
@@ -90,7 +88,7 @@ const styles = (theme) => ({
         textDecoration: 'none',
         '& button': {
             textTransform: 'capitalize !important',
-        }
+        },
     },
     verticalSpace: {
         marginLeft: theme.spacing(60),
@@ -143,7 +141,7 @@ const styles = (theme) => ({
         padding: theme.spacing(2),
         '& span': {
             color: theme.palette.getContrastText(theme.custom.overview.noContentBackground),
-        }
+        },
     },
     paper: {
         margin: theme.spacing(2),
@@ -174,7 +172,7 @@ const styles = (theme) => ({
     },
     overviewContainerBoxAction: {
         minHeight: 172,
-    }
+    },
 });
 const ExpansionPanelSummary = withStyles({
     root: {
@@ -196,9 +194,14 @@ const ExpansionPanelSummary = withStyles({
 
 ExpansionPanelSummary.muiName = 'ExpansionPanelSummary';
 
+const isAsyncApi = (apiType) => {
+    return (apiType && (apiType === 'WS' || apiType === 'WEBSUB' || apiType === 'SSE'));
+};
+
 /**
  * Handles the Overview page for APIs and API Products.
- * @param {*} props properties passed by parent element
+ * @param {JSON} props properties passed by parent element
+ * @returns {JSX} rendered overview
  * @memberof Overview
  */
 function Overview(props) {
@@ -212,12 +215,11 @@ function Overview(props) {
     } = theme;
     const { api, subscribedApplications } = useContext(ApiContext);
     const [totalComments, setCount] = useState(0);
-    const [totalDocuments, setDocsCount] = useState(0);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
-    const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
-        !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
-    const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2') &&
-        !api.securityScheme.includes('api_key');
+    const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2')
+        && !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
+    const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2')
+        && !api.securityScheme.includes('api_key');
     useEffect(() => {
         const restApi = new API();
         const promisedApi = restApi.getDocumentsByAPIId(api.id);
@@ -241,30 +243,26 @@ function Overview(props) {
     }, []);
     const getResourcesForAPIs = (apiType, apiObject) => {
         if (isAsyncApi(apiType)) {
-            return <Topics api={apiObject}/>
+            return <Topics api={apiObject} />;
         } else {
             switch (apiType) {
                 case 'GRAPHQL':
-                    return <Operations api={apiObject}/>;
+                    return <Operations api={apiObject} />;
                 default:
-                    return <Resources api={apiObject}/>;
+                    return <Resources api={apiObject} />;
             }
         }
     };
 
-    const isAsyncApi = (apiType) => {
-        return (apiType && (apiType === 'WS' || apiType === 'WEBSUB' || apiType === 'SSE'));
-    };
-
     const getTitleForAPIOperationType = (apiType) => {
         if (isAsyncApi(apiType)) {
-            return <FormattedMessage id='Apis.Details.Overview.topics.title' defaultMessage='Topics'/>;
+            return <FormattedMessage id='Apis.Details.Overview.topics.title' defaultMessage='Topics' />;
         } else {
             switch (apiType) {
                 case 'GRAPHQL':
-                    return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations'/>;
+                    return <FormattedMessage id='Apis.Details.Overview.operations.title' defaultMessage='Operations' />;
                 default:
-                    return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources'/>;
+                    return <FormattedMessage id='Apis.Details.Overview.resources.title' defaultMessage='Resources' />;
             }
         }
     };
@@ -325,7 +323,7 @@ function Overview(props) {
                                             </Button>
                                         </Link>
                                     </>
-                                ):(
+                                ) : (
                                     <>
                                         <Divider />
                                         <Link to={'/apis/' + api.id + '/definition'} className={classes.button}>
@@ -345,84 +343,91 @@ function Overview(props) {
                                 )}
                             </Box>
                         </Paper>
-                    </Grid>)}
-                {(!api.advertiseInfo.advertised && showComments) && (<Grid item lg={4} md={6} xs={12}>
-                    <Paper elevation={0} className={classes.overviewPaper}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Overview.comments.title'
-                                defaultMessage='Comments'
-                            />
-                        </Typography>
-                        <Divider />
-                        <Box p={2} className={classes.overviewContainerBox}>
-                            {api && (
-                                <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
-                            )}
-                            {totalComments === 0 && (
-                                <div className={classes.emptyBox}>
-                                    <Typography variant='body2'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Overview.comments.no.content'
-                                            defaultMessage='No Comments Yet'
-                                        />
-                                    </Typography>
-                                </div>
-                            )}
-                        </Box>
-                    </Paper>
-                </Grid>)}
+                    </Grid>
+                )}
+                {(!api.advertiseInfo.advertised && showComments) && (
+                    <Grid item lg={4} md={6} xs={12}>
+                        <Paper elevation={0} className={classes.overviewPaper}>
+                            <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.comments.title'
+                                    defaultMessage='Comments'
+                                />
+                            </Typography>
+                            <Divider />
+                            <Box p={2} className={classes.overviewContainerBox}>
+                                {api && (
+                                    <Comments apiId={api.id} showLatest isOverview setCount={setCount} />
+                                )}
+                                {totalComments === 0 && (
+                                    <div className={classes.emptyBox}>
+                                        <Typography variant='body2'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.comments.no.content'
+                                                defaultMessage='No Comments Yet'
+                                            />
+                                        </Typography>
+                                    </div>
+                                )}
+                            </Box>
+                        </Paper>
+                    </Grid>
+                )}
 
-                {showDocuments && (<Grid item lg={4} md={6} xs={12}>
-                    <Paper elevation={0} className={classes.overviewPaper}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Overview.documents.title'
-                                defaultMessage='Documents'
-                            />
-                        </Typography>
-                        <Divider />
-                        <Box p={2} className={classes.overviewContainerBoxAction}>
-                            <OverviewDocuments apiId={api.id} setDocsCount={setDocsCount} />
-                        </Box>
-                        <Box>
+                {showDocuments && (
+                    <Grid item lg={4} md={6} xs={12}>
+                        <Paper elevation={0} className={classes.overviewPaper}>
+                            <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.documents.title'
+                                    defaultMessage='Documents'
+                                />
+                            </Typography>
                             <Divider />
-                            <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
-                                <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.comments.show.more'
-                                        defaultMessage='Show All Documents'
-                                    />
-                                </Button>
-                            </Link>
-                        </Box>
-                    </Paper>
-                </Grid>)}
-                {!isAsyncApi(api.type) && showSdks && (<Grid item lg={4} md={6} xs={12}>
-                    <Paper elevation={0} className={classes.overviewPaper}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
-                            <FormattedMessage
-                                id='Apis.Details.Overview.sdk.generation.title'
-                                defaultMessage='Software Development Kits'
-                            />
-                        </Typography>
-                        <Divider />
-                        <Box p={2} className={classes.overviewContainerBoxAction} display='flex'>
-                            {api && <Sdk apiId={api.id} onlyIcons />}
-                        </Box>
-                        <Box>
+                            <Box p={2} className={classes.overviewContainerBoxAction}>
+                                <OverviewDocuments apiId={api.id} />
+                            </Box>
+                            <Box>
+                                <Divider />
+                                <Link to={'/apis/' + api.id + '/documents'} className={classes.button}>
+                                    <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.comments.show.more'
+                                            defaultMessage='Show All Documents'
+                                        />
+                                    </Button>
+                                </Link>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                )}
+                {!isAsyncApi(api.type) && showSdks && (
+                    <Grid item lg={4} md={6} xs={12}>
+                        <Paper elevation={0} className={classes.overviewPaper}>
+                            <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <FormattedMessage
+                                    id='Apis.Details.Overview.sdk.generation.title'
+                                    defaultMessage='Software Development Kits'
+                                />
+                            </Typography>
                             <Divider />
-                            <Link to={'/apis/' + api.id + '/sdk'} className={classes.button}>
-                                <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.sdk.generation.show.more'
-                                        defaultMessage='Show All SDKs'
-                                    />
-                                </Button>
-                            </Link>
-                        </Box>
-                    </Paper>
-                </Grid>)}
+                            <Box p={2} className={classes.overviewContainerBoxAction} display='flex'>
+                                {api && <Sdk apiId={api.id} onlyIcons />}
+                            </Box>
+                            <Box>
+                                <Divider />
+                                <Link to={'/apis/' + api.id + '/sdk'} className={classes.button}>
+                                    <Button id='DMore' size='small' color='primary' aria-labelledby='DMore Documents'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.sdk.generation.show.more'
+                                            defaultMessage='Show All SDKs'
+                                        />
+                                    </Button>
+                                </Link>
+                            </Box>
+                        </Paper>
+                    </Grid>
+                )}
                 {!api.advertiseInfo.advertised && showCredentials && (
                     <Grid item lg={4} md={6} xs={12}>
                         <Paper elevation={0} className={classes.overviewPaper}>
@@ -445,112 +450,119 @@ function Overview(props) {
                                     </Typography>
 
                                 ) : (
-                                        <Box display='flex' flexDirection='column'>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.subscribe.info'
-                                                    defaultMessage={
-                                                        'Subscription enables you to receive access'
+                                    <Box display='flex' flexDirection='column'>
+                                        <Typography variant='body2'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.subscribe.info'
+                                                defaultMessage={
+                                                    'Subscription enables you to receive access'
                                                         + ' tokens and be authenticated to invoke this API.'
-                                                    }
-                                                />
-                                            </Typography>
-                                            <Typography variant='body2'>
-                                                <FormattedMessage
-                                                    id={'Apis.Details.Overview' +
-                                                        '.subscribe.available'}
-                                                    defaultMessage='Business plans available '
-                                                />
-                                                {api.tiers.map((tier, index) => (<>
-                                                    {tier.tierName}{index !== (api.tiers.length - 1)
-                                                        ? (', ') : ' '
-                                                    }
-                                                </>))}
-                                            </Typography>
-                                            <Box display='block' mt={2}>
-                                                <Grid item xs={12}>
-                                                    {user ? (
-                                                        <Box display='flex' flexDirection='column' mr={2}>
-                                                            <Link
-                                                                to={'/apis/' + api.id + '/credentials'}
-                                                                style={
-                                                                    !api.isSubscriptionAvailable ?
-                                                                        { pointerEvents: 'none' } : null
-                                                                }
+                                                }
+                                            />
+                                        </Typography>
+                                        <Typography variant='body2'>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Overview'
+                                                        + '.subscribe.available'}
+                                                defaultMessage='Business plans available '
+                                            />
+                                            {api.tiers.map((tier, index) => (
+                                                <>
+                                                    {tier.tierName}
+                                                    {index !== (api.tiers.length - 1)
+                                                        ? (', ') : ' '}
+                                                </>
+                                            ))}
+                                        </Typography>
+                                        <Box display='block' mt={2}>
+                                            <Grid item xs={12}>
+                                                {user ? (
+                                                    <Box display='flex' flexDirection='column' mr={2}>
+                                                        <Link
+                                                            to={'/apis/' + api.id + '/credentials'}
+                                                            style={
+                                                                !api.isSubscriptionAvailable
+                                                                    ? { pointerEvents: 'none' } : null
+                                                            }
+                                                        >
+                                                            <Button
+                                                                variant='contained'
+                                                                color='primary'
+                                                                size='large'
+                                                                disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
+                                                                        || isOnlyBasicAuth}
                                                             >
-                                                                <Button
-                                                                    variant='contained'
-                                                                    color='primary'
-                                                                    size='large'
-                                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL ||
-                                                                        isOnlyBasicAuth}
-                                                                >
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.Overview.subscribe'
+                                                                            + 'btn.link'}
+                                                                    defaultMessage='Subscribe'
+                                                                />
+                                                            </Button>
+                                                        </Link>
+                                                        {subscribedApplications && (
+                                                            <Typography variant='caption' component='div'>
+                                                                {subscribedApplications.length === 0 ? (
                                                                     <FormattedMessage
-                                                                        id={'Apis.Details.Overview.subscribe' +
-                                                                            'btn.link'}
-                                                                        defaultMessage='Subscribe'
+                                                                        id='Apis.Details.Overview.subscribe.count.zero'
+                                                                        defaultMessage='No application subscriptions.'
                                                                     />
-                                                                </Button>
-                                                            </Link>
-                                                            {subscribedApplications && (<Typography variant='caption' component='div'>
-                                                                {subscribedApplications.length === 0 ? (<FormattedMessage
-                                                                    id='Apis.Details.Overview.subscribe.count.zero'
-                                                                    defaultMessage={
-                                                                        'No application subscriptions.'
-                                                                    }
-                                                                />) : (
-                                                                        subscribedApplications.length
-                                                                    )}
+                                                                ) : (
+                                                                    subscribedApplications.length
+                                                                )}
                                                                 {(isOnlyMutualSSL || isOnlyBasicAuth) && (
                                                                     <Grid className={classes.mutualsslMessage}>
                                                                         <Typography variant='body2'>
                                                                             <FormattedMessage
                                                                                 id='Apis.Details.Overview.mutualssl.basicauth'
-                                                                                defaultMessage={'Subscription is not required for Mutual SSL APIs' +
-                                                                                    ' or APIs with only Basic Authentication.'}
+                                                                                defaultMessage={'Subscription is not required'
+                                                                                    + ' for Mutual SSL APIs or APIs'
+                                                                                    + ' with only Basic Authentication.'}
                                                                             />
                                                                         </Typography>
                                                                     </Grid>
                                                                 )}
                                                                 {' '}
-                                                                {subscribedApplications.length === 1 && (<>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.Overview.subscribe.count.singular'
-                                                                        defaultMessage={
-                                                                            'Application subscribed.'
-                                                                        }
-                                                                    /></>)}
-                                                                {subscribedApplications.length > 1 && (<>
-                                                                    <FormattedMessage
-                                                                        id='Apis.Details.Overview.subscribe.count.plural'
-                                                                        defaultMessage={
-                                                                            'Applications subscribed.'
-                                                                        }
-                                                                    /></>)}
-                                                            </Typography>)}
-                                                        </Box>
-                                                    ) : (
-                                                            <Box display='inline' mr={2}>
-                                                                <a href={app.context + '/services/configs'}>
-                                                                    <Button
-                                                                        variant='contained'
-                                                                        color='primary'
-                                                                        size='large'
-                                                                        disabled={!api.isSubscriptionAvailable}
-                                                                    >
+                                                                {subscribedApplications.length === 1 && (
+                                                                    <>
                                                                         <FormattedMessage
-                                                                            id={'Apis.Details.Overview.signin' +
-                                                                                '.subscribe.btn.link'}
-                                                                            defaultMessage='Sign in to Subscribe'
+                                                                            id='Apis.Details.Overview.subscribe.count.singular'
+                                                                            defaultMessage='Application subscribed.'
                                                                         />
-                                                                    </Button>
-                                                                </a>
-                                                            </Box>
+                                                                    </>
+                                                                )}
+                                                                {subscribedApplications.length > 1 && (
+                                                                    <>
+                                                                        <FormattedMessage
+                                                                            id='Apis.Details.Overview.subscribe.count.plural'
+                                                                            defaultMessage='Applications subscribed.'
+                                                                        />
+                                                                    </>
+                                                                )}
+                                                            </Typography>
                                                         )}
-                                                </Grid>
-                                            </Box>
+                                                    </Box>
+                                                ) : (
+                                                    <Box display='inline' mr={2}>
+                                                        <a href={app.context + '/services/configs'}>
+                                                            <Button
+                                                                variant='contained'
+                                                                color='primary'
+                                                                size='large'
+                                                                disabled={!api.isSubscriptionAvailable}
+                                                            >
+                                                                <FormattedMessage
+                                                                    id={'Apis.Details.Overview.signin'
+                                                                                + '.subscribe.btn.link'}
+                                                                    defaultMessage='Sign in to Subscribe'
+                                                                />
+                                                            </Button>
+                                                        </a>
+                                                    </Box>
+                                                )}
+                                            </Grid>
                                         </Box>
-                                    )}
+                                    </Box>
+                                )}
                             </Box>
                             <Box>
                                 <Divider />
@@ -564,12 +576,13 @@ function Overview(props) {
                                 </Link>
                             </Box>
                         </Paper>
-                    </Grid>)}
+                    </Grid>
+                )}
 
 
             </Grid>
         </Box>
-    )
+    );
 }
 
 Overview.propTypes = {

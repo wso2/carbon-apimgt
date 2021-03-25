@@ -30,6 +30,7 @@ import Icon from '@material-ui/core/Icon';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
 
 /**
  * Add two numbers.
@@ -102,7 +103,7 @@ const styles = (theme) => ({
  */
 function OverviewDocuments(props) {
     const [docs, setDocs] = useState([]);
-    const { apiId, setDocsCount } = props;
+    const { apiId } = props;
     const history = useHistory();
     const truncateString = (n, str) => {
         return (str.length > n) ? str.substr(0, n - 1) + '...' : str;
@@ -115,7 +116,6 @@ function OverviewDocuments(props) {
                 if (response.obj.list.length > 0) {
                     // Rearanging the response to group them by the sourceType property.
                     setDocs(response.obj.list);
-                    setDocsCount(response.obj.count);
                 }
             })
             .catch((error) => {
