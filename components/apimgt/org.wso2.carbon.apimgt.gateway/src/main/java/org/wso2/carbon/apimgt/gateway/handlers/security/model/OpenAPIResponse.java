@@ -58,9 +58,9 @@ public class OpenAPIResponse implements Response {
                 messageContext).getAxis2MessageContext();
         OpenAPIResponse openAPIResponse = new OpenAPIResponse();
 
-        Object statusCodeObject = messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
+        Object statusCodeObject = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
 
-        int statusCode = HttpStatus.SC_OK;
+        int statusCode = 0;
 
         if (statusCodeObject instanceof String) {
             statusCode = Integer.parseInt(String.valueOf(statusCodeObject));
