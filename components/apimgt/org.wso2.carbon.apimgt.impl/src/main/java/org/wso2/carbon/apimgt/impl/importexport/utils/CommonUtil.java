@@ -36,7 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -96,7 +95,7 @@ public class CommonUtil {
             createdDirectories = File.separator + identifier.toString() + File.separator;
         } else {
             createdDirectories =
-                    File.separator + RandomStringUtils.randomAlphanumeric(APIImportExportConstants.TEMP_FILENAME_LENGTH)
+                    File.separator + RandomStringUtils.randomAlphanumeric(ImportExportConstants.TEMP_FILENAME_LENGTH)
                             + File.separator;
         }
         File tempDirectory = new File(currentDirectory + createdDirectories);
@@ -177,8 +176,8 @@ public class CommonUtil {
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             // Get relative path from archive directory to the specific file
             String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1);
-            if (File.separatorChar != APIImportExportConstants.ZIP_FILE_SEPARATOR) {
-                zipFilePath = zipFilePath.replace(File.separatorChar, APIImportExportConstants.ZIP_FILE_SEPARATOR);
+            if (File.separatorChar != ImportExportConstants.ZIP_FILE_SEPARATOR) {
+                zipFilePath = zipFilePath.replace(File.separatorChar, ImportExportConstants.ZIP_FILE_SEPARATOR);
             }
             ZipEntry zipEntry = new ZipEntry(zipFilePath);
             zipOutputStream.putNextEntry(zipEntry);
@@ -305,7 +304,7 @@ public class CommonUtil {
                 //This index variable is used to get the extracted folder name; that is root directory
                 if (index == 0) {
                     archiveName = currentEntry
-                            .substring(0, currentEntry.indexOf(APIImportExportConstants.ZIP_FILE_SEPARATOR));
+                            .substring(0, currentEntry.indexOf(ImportExportConstants.ZIP_FILE_SEPARATOR));
                     --index;
                 }
 

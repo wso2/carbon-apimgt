@@ -66,7 +66,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
@@ -1368,7 +1367,7 @@ public class ImportUtils {
         String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
         // Getting registry API base path out of apiResourcePath
         apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-        String sequencesDirectoryPath = pathToArchive + File.separator + APIImportExportConstants.SEQUENCES_RESOURCE;
+        String sequencesDirectoryPath = pathToArchive + File.separator + ImportExportConstants.SEQUENCES_RESOURCE;
 
         // Add multiple custom sequences to registry for each type in/out/fault
         addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
