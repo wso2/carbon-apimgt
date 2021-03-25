@@ -86,7 +86,6 @@ class ServiceCatalog {
             'serviceMetadata.json', { type: 'application/json', lastModified: new Date().getTime() });
         const requestBody = {
             serviceMetadata: serviceMetadataFile,
-            // inlineContent: JSON.stringify(inlineContent),
             definitionFile,
         };
         const promisedCatalogSampleService = serviceCatalog.then((client) => {
