@@ -9,14 +9,13 @@ import Typography from '@material-ui/core/Typography';
 import Configurations from 'Config';
 import { FormattedMessage } from 'react-intl';
 import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
 import { Link as RouterLink } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
-import DeleteIcon from '@material-ui/icons/Delete';
 import Tooltip from '@material-ui/core/Tooltip';
 import Chip from '@material-ui/core/Chip';
 
-import CreateAPIButton from '../../CreateApi';
+import CreateAPIButton from 'AppComponents/ServiceCatalog/CreateApi';
+import DeleteServiceButton from 'AppComponents/ServiceCatalog/Listing/Delete';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -53,12 +52,6 @@ export default function ServiceCard(props) {
     const classes = useStyles();
     const theme = useTheme();
     const [raised, setRaised] = React.useState(false);
-    const handelDelete = (event) => {
-        const { id } = event.currentTarget;
-        event.preventDefault();
-        event.stopPropagation();
-        onDelete(id);
-    };
     /**
      * enum:
           - OAS2
@@ -203,15 +196,12 @@ export default function ServiceCard(props) {
                                 serviceVersion={service.serviceVersion}
                                 serviceUrl={service.serviceUrl}
                             />
-                            <IconButton
-                                disableRipple
-                                disableFocusRipple
-                                id={service.id}
-                                onClick={handelDelete}
-                                aria-label='add to favorites'
-                            >
-                                <DeleteIcon />
-                            </IconButton>
+                            <DeleteServiceButton
+                                serviceDisplayName={service.name}
+                                serviceId={service.id}
+                                onDelete={onDelete}
+                                isIconButton
+                            />
                         </Grid>
                     </Grid>
                 </Box>

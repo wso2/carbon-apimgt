@@ -33,7 +33,7 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
  * @returns {any} ServiceCatalogTopMenu Page for Services
  */
 function ServiceCatalogTopMenu(props) {
-    const { isGridView, setIsGridView } = props;
+    const { isGridView, setIsGridView, showServiceToggle } = props;
     return (
         <Box
             borderBottom={1}
@@ -59,14 +59,16 @@ function ServiceCatalogTopMenu(props) {
                     </Typography>
                 </Grid>
                 <Grid item>
-                    <ButtonGroup color='primary' aria-label='outlined primary button group'>
-                        <IconButton onClick={() => setIsGridView(true)} aria-label='delete'>
-                            <GridOn color={isGridView ? 'primary' : 'disabled'} />
-                        </IconButton>
-                        <IconButton onClick={() => setIsGridView(false)} aria-label='delete'>
-                            <List color={!isGridView ? 'primary' : 'disabled'} />
-                        </IconButton>
-                    </ButtonGroup>
+                    {showServiceToggle && (
+                        <ButtonGroup color='primary' aria-label='outlined primary button group'>
+                            <IconButton onClick={() => setIsGridView(true)} aria-label='delete'>
+                                <GridOn color={isGridView ? 'primary' : 'disabled'} />
+                            </IconButton>
+                            <IconButton onClick={() => setIsGridView(false)} aria-label='delete'>
+                                <List color={!isGridView ? 'primary' : 'disabled'} />
+                            </IconButton>
+                        </ButtonGroup>
+                    )}
                 </Grid>
             </Grid>
         </Box>

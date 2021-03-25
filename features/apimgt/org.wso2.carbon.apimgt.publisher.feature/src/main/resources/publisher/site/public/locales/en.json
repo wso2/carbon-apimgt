@@ -204,7 +204,7 @@
   "Apis.Create.Default.APICreateDefault.api.sub.heading": [
     {
       "type": 0,
-      "value": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+      "value": "Create an API by providing a Name, a Version, a Context and Backend Endpoint (optional)"
     }
   ],
   "Apis.Create.Default.APICreateDefault.apiProduct.heading": [
@@ -270,7 +270,7 @@
   "Apis.Create.Default.APICreateDefault.webSocket.sub.heading": [
     {
       "type": 0,
-      "value": "Create a WebSocket API by providing a Name, a Context, and Business Plans (optional)."
+      "value": "Create a WebSocket API by providing a Name, and a Context."
     }
   ],
   "Apis.Create.GraphQL.ApiCreateGraphQL.back": [
@@ -6248,7 +6248,7 @@
   "Apis.Details.index.Tryout.menu.name": [
     {
       "type": 0,
-      "value": "Try Out"
+      "value": "TryOut"
     }
   ],
   "Apis.Details.index.api.definition2": [
@@ -7867,42 +7867,6 @@
       "value": "Service deleted successfully!"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.description": [
-    {
-      "type": 0,
-      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.description2": [
-    {
-      "type": 0,
-      "value": "Create and Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.subHeading": [
-    {
-      "type": 0,
-      "value": "Integration Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading2.subHeading": [
-    {
-      "type": 0,
-      "value": "Integration Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.add.sample": [
-    {
-      "type": 0,
-      "value": "Add a sample"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.add.sample.service": [
-    {
-      "type": 0,
-      "value": "Add Sample Service"
-    }
-  ],
   "ServiceCatalog.Listing.Onboarding.add.sample.success": [
     {
       "type": 0,
@@ -7915,16 +7879,52 @@
       "value": "Error while creating Sample Service"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.get.started": [
+  "ServiceCatalog.Listing.Onboarding.learn.heading": [
+    {
+      "type": 0,
+      "value": "Learn to write your first"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.heading.sub": [
+    {
+      "type": 0,
+      "value": "Integration Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
+    {
+      "type": 0,
+      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.link": [
     {
       "type": 0,
       "value": "Get Started"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.write.first.intg": [
+  "ServiceCatalog.Listing.Onboarding.sample.add": [
     {
       "type": 0,
-      "value": "Write your first"
+      "value": "Add Sample Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading": [
+    {
+      "type": 0,
+      "value": "Add a sample"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading.sub": [
+    {
+      "type": 0,
+      "value": "Integration Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading.text": [
+    {
+      "type": 0,
+      "value": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
     }
   ],
   "ServiceCatalog.Listing.Overview.back.btn": [
@@ -8135,18 +8135,6 @@
     {
       "type": 0,
       "value": "Version"
-    }
-  ],
-  "ServiceCatalog.Listing.onboarding.create.new": [
-    {
-      "type": 0,
-      "value": "Service Catalog"
-    }
-  ],
-  "ServiceCatalog.Listing.onboarding.description": [
-    {
-      "type": 0,
-      "value": "Enabling API-first Integration"
     }
   ],
   "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": [
