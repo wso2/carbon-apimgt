@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
