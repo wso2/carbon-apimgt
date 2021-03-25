@@ -276,7 +276,7 @@ const useStyles = makeStyles((theme) => ({
         marginTop: theme.spacing(3),
     },
     textCount: {
-        marginTop: '-20px',
+        marginTop: theme.spacing(-2.5),
     },
 }));
 
