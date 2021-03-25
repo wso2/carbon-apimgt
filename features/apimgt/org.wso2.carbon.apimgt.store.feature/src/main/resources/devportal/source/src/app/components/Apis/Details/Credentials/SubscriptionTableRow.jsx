@@ -63,7 +63,7 @@ const styles = (theme) => ({
 const subscriptionTableRow = (props) => {
     const {
         classes, loadInfo, handleSubscriptionDelete,
-        theme, selectedAppId, updateSubscriptionData, selectedKeyType, app, index, applicationOwner, hashEnabled,
+        theme, selectedAppId, updateSubscriptionData, selectedKeyType, app, applicationOwner, hashEnabled,
     } = props;
     return (
         <>
@@ -205,6 +205,5 @@ subscriptionTableRow.propTypes = {
         value: PropTypes.string,
         subscriptionId: PropTypes.string,
     }).isRequired,
-    index: PropTypes.number.isRequired,
 };
 export default withStyles(styles, { withTheme: true })(subscriptionTableRow);

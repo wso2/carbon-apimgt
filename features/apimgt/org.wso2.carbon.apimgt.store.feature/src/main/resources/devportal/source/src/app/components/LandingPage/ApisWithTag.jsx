@@ -18,38 +18,35 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import { injectIntl } from 'react-intl';
+import { makeStyles } from '@material-ui/core/styles';
+import { useIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
 import Settings from 'AppComponents/Shared/SettingsContext';
 import ResourceNotFound from '../Base/Errors/ResourceNotFound';
 import API from '../../data/api';
 import ApiThumb from '../Apis/Listing/ApiThumb';
 
-/**
- *
- *
- * @param {*} theme
- */
-const styles = theme => ({
+const useStyles = makeStyles(() => ({
     tagedApisWrapper: {
         display: 'flex',
         flexDirection: 'row',
         flexWrap: 'wrap',
     },
-});
+}));
 
 /**
- *
- *
- * @param {*} props
- * @returns
+ * Renders Apis With Tag section.
+ * @param {JSON} props Parent pros.
+ * @returns {JSX} rendered Apis With Tag view.
  */
 function ApisWithTag(props) {
+    const classes = useStyles();
+    const intl = useIntl();
+
     const [apis, setApis] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const {
-        tag, classes, maxCount, intl,
+        tag, maxCount,
     } = props;
     const settingsContext = useContext(Settings);
     useEffect(() => {
@@ -74,20 +71,13 @@ function ApisWithTag(props) {
                 }
             });
     }, []);
-
-    /**
-     *
-     *
-     * @returns
-     * @memberof Listing
-     */
     if (notFound) {
         return <ResourceNotFound />;
     } else {
         return (
             apis && (
                 <div className={classes.tagedApisWrapper}>
-                    {apis.list.map(api => (
+                    {apis.list.map((api) => (
                         <ApiThumb api={api} key={api.id} />
                     ))}
                 </div>
@@ -97,8 +87,7 @@ function ApisWithTag(props) {
 }
 
 ApisWithTag.propTypes = {
-    classes: PropTypes.object.isRequired,
-    tag: PropTypes.object.isRequired,
-    maxCount: PropTypes.object.isRequired,
+    tag: PropTypes.shape({}).isRequired,
+    maxCount: PropTypes.shape({}).isRequired,
 };
-export default injectIntl(withStyles(styles)(ApisWithTag));
+export default ApisWithTag;

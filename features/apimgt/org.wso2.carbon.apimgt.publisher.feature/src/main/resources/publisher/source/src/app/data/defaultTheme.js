@@ -72,7 +72,7 @@ export default {
     palette: {
         primary: {
             // light: will be calculated from palette.primary.main,
-            main: '#15b8cf',
+            main: '#006E9C',
             // dark: will be calculated from palette.primary.main,
             // contrastText: will be calculated to contrast with palette.primary.main
         },
@@ -125,7 +125,7 @@ export default {
                                                 To disable one option for an example if you want to disable grid
                                                 completely and get rid of the toggle buttons use ['list']. */
         leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-        leftMenuIconSize: 24,
+        leftMenuIconSize: 20,
         leftMenuIconMainSize: 52,
         leftMenuTextStyle: 'capitalize',
         resourceChipColors: { // https://github.com/swagger-api/swagger-ui/blob/master/src/style/_variables.scss#L45-L52
@@ -193,7 +193,6 @@ export default {
                 restApiIcon: '/site/public/images/landing-icons/restapi.svg',
                 soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
                 streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
-                websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
             },
             menu: {
                 primary: '#34679D',
@@ -207,6 +206,12 @@ export default {
             onboarding: {
                 buttonText: '#FF7300',
                 buttonBorder: '#FCA574',
+            },
+            icons: {
+                graphql: '/site/public/images/service_catalog/icons/graphql.svg',
+                asyncapi: '/site/public/images/service_catalog/icons/async.svg',
+                oas3: '/site/public/images/service_catalog/icons/oas3.png',
+                swagger: '/site/public/images/service_catalog/icons/swagger.svg',
             },
         },
     },

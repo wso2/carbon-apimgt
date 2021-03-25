@@ -35,103 +35,102 @@ import java.util.Map;
  * Utility class singleton to connect to Redis Server, and perform general operations
  */
 public class RedisCacheUtils {
-    private static final Log log = LogFactory.getLog(RedisCacheUtils.class);
 
-    private static final RedisCacheUtils instance = new RedisCacheUtils();
+    private static final Log log = LogFactory.getLog(RedisCacheUtils.class);
 
     private static JedisPool jedisPool;
 
     /**
-     * Private constructor
-     */
-    private RedisCacheUtils(){
-    }
-
-    /**
      * RedisCacheUtils constructor to create new JedisPool instance
      * with a Redis Server
+     *
      * @param host Host name of the Redis Server
      * @param port Port used by the Redis Server
      */
     public RedisCacheUtils(String host, int port) {
+
         jedisPool = new JedisPool(new JedisPoolConfig(), host, port);
     }
 
     /**
      * RedisCacheUtils constructor to create new JedisPool instance
      * with a Redis Server requiring authorization
-     * @param host Host name of the Redis Server
-     * @param port Port used by the Redis Server
-     * @param timeout Timeout of the Redis Server connection
+     *
+     * @param host     Host name of the Redis Server
+     * @param port     Port used by the Redis Server
+     * @param timeout  Timeout of the Redis Server connection
      * @param username Username of the user of the Redis Server
      * @param password Password of the user of the Redis Server
      * @param database Database ID in the Redis Server
-     * @param ssl Boolean value to check if ssl is enabled or not
+     * @param ssl      Boolean value to check if ssl is enabled or not
      */
     public RedisCacheUtils(String host, int port, int timeout, String username, char[] password,
-            int database, boolean ssl) {
+                           int database, boolean ssl) {
+
         jedisPool = new JedisPool(new JedisPoolConfig(), host, port,
                 timeout, username, String.valueOf(password), database, ssl);
     }
 
     /**
-     * Get RedisCacheUtils Instance
-     * @return RedisCacheUtils Instance
-     */
-    public static RedisCacheUtils getInstance() {
-        return instance;
-    }
-
-    /**
-     * Save a string key-value pair in Redis
-     * @param key Key of the value to be saved
+     * Save a string key-value pair in Redis.
+     *
+     * @param key   Key of the value to be saved
      * @param value Value to be saved
      */
     public void setValue(String key, String value) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.set(key, value);
         }
     }
 
     /**
-     * Retrieve a string key-value pair in Redis
+     * Retrieve a string key-value pair in Redis.
+     *
      * @param key Key of the value to be retrieved
      * @return String value retrieved
      */
     public String getValue(String key) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.get(key);
         }
     }
 
     /**
-     * Check whether key exists in Redis
+     * Check whether key exists in Redis.
+     *
      * @param key Key to be searched
      * @return boolean value whether key exists or not
      */
     public boolean exists(String key) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.exists(key);
         }
     }
 
     /**
-     * Delete key from Redis if it exists
+     * Delete key from Redis if it exists.
+     *
      * @param key Key to be deleted
      * @return Returns 1 if deleted, 0 if not
      */
     public Long deleteKey(String key) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.del(key);
         }
     }
 
     /**
-     * Rename key in Redis if exists
+     * Rename key in Redis if exists.
+     *
      * @param oldKey Existing key value
      * @param newKey New key value
      */
     public void renameKey(String oldKey, String newKey) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.rename(oldKey, newKey);
         }
@@ -139,12 +138,14 @@ public class RedisCacheUtils {
 
     /**
      * Set timeout for a key so that after the timeout has
-     * expired, the key will automatically be deleted
-     * @param key Key to be set a timeout value
+     * expired, the key will automatically be deleted.
+     *
+     * @param key     Key to be set a timeout value
      * @param seconds Timeout value in seconds
      * @return Return 1 if timeout was set successfully, 0 if not
      */
     public Long expireKeyIn(String key, int seconds) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.expire(key, seconds);
         }
@@ -152,6 +153,7 @@ public class RedisCacheUtils {
 
     /**
      * Get the time to live for a specific key
+     *
      * @param key Key to check the time to live
      * @return Returns 2 if the key does not exist,
      * 1 if it does exist but has not expire set,
@@ -159,6 +161,7 @@ public class RedisCacheUtils {
      * in seconds
      */
     public Long getTimeToLive(String key) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.ttl(key);
         }
@@ -166,11 +169,13 @@ public class RedisCacheUtils {
 
     /**
      * Add a field with a value for a specific key
-     * @param key Key to be updated with the field
+     *
+     * @param key   Key to be updated with the field
      * @param field Field to be updated with a value
      * @param value Value of the specified field
      */
     public void addFieldValue(String key, String field, String value) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.hset(key, field, value);
         }
@@ -178,11 +183,13 @@ public class RedisCacheUtils {
 
     /**
      * Get the value associated with a field stored at the key
-     * @param key Key at which the field-value pair is stored
+     *
+     * @param key   Key at which the field-value pair is stored
      * @param field Field which contains the value to be retrieved
      * @return Value associated with the field
      */
     public String getFieldValue(String key, String field) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             return jedis.hget(key, field);
         }
@@ -190,10 +197,12 @@ public class RedisCacheUtils {
 
     /**
      * Add a map into Redis
+     *
      * @param key Key at which the map should be saved
      * @param map Map to be saved
      */
     public void addMap(String key, Map<String, String> map) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.hset(key, map);
         }
@@ -201,10 +210,12 @@ public class RedisCacheUtils {
 
     /**
      * Get map associated with a key
+     *
      * @param key Key at which the map is saved
      * @return Map associated with the key
      */
     public Map<String, String> getMap(String key) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             Map<String, String> map = jedis.hgetAll(key);
             if (map.size() != 0) {
@@ -217,10 +228,12 @@ public class RedisCacheUtils {
 
     /**
      * Add object into Redis
-     * @param key Key at which the object should be associated with
+     *
+     * @param key    Key at which the object should be associated with
      * @param object object to be saved
      */
     public void addObject(String key, Object object) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             byte[] data = new ObjectMapper().writeValueAsBytes(object);
             jedis.set(key.getBytes(), data);
@@ -231,10 +244,12 @@ public class RedisCacheUtils {
 
     /**
      * Get object from Redis
+     *
      * @param key Key at which the object is saved
      * @return object associated with the key
      */
     public Object getObject(String key, Class objectType) {
+
         try (Jedis jedis = jedisPool.getResource()) {
             byte[] objectBytes = jedis.get(key.getBytes());
             if (objectBytes != null) {
@@ -256,6 +271,7 @@ public class RedisCacheUtils {
      * Drop the Redis Server connection
      */
     public void stopRedisCacheSession() {
+
         jedisPool.destroy();
     }
 }

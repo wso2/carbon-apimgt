@@ -25,29 +25,27 @@ import { withStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import MaterialIcons from 'MaterialIcons';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
+import classNames from 'classnames';
 import ImageGenerator from './APICards/ImageGenerator';
 import Api from '../../../data/api';
 import { ApiContext } from '../Details/ApiContext';
-import classNames from 'classnames';
 
 /**
  *
  *
  * @param {*} theme
  */
-const styles = theme => ({
+const styles = (theme) => ({
     card: {
         margin: theme.spacing.unit * (3 / 2),
         maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
     },
     apiDetails: {
-        padding: theme.spacing.unit,
         background: theme.custom.thumbnail.contentBackgroundColor,
-        padding: theme.spacing.unit,
+        padding: theme.spacing(),
         color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
         '& a': {
             color: theme.palette.getContrastText(theme.custom.thumbnail.contentBackgroundColor),
@@ -240,9 +238,8 @@ class RecommendedApiThumb extends React.Component {
             api, classes, theme, customWidth, customHeight, showInfo,
         } = this.props;
         const { thumbnail } = theme.custom;
-        const { name, version, context } = api;
+        const { name } = api;
 
-        let { provider } = api;
         // if (
         //     api.businessInformation &&
         //     api.businessInformation.businessOwner &&
@@ -364,6 +361,5 @@ RecommendedApiThumb.propTypes = {
 };
 
 RecommendedApiThumb.contextType = ApiContext;
- 
+
 export default withStyles(styles, { withTheme: true })(RecommendedApiThumb);
- 

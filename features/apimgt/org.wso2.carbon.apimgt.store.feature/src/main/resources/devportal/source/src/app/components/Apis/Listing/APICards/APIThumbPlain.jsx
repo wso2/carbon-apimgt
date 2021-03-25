@@ -15,8 +15,7 @@ import Api from 'AppData/api';
 import classNames from 'classnames';
 
 
-
-import { getIcon } from './ImageUtils';
+import getIcon from './ImageUtils';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -61,12 +60,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 const windowURL = window.URL || window.webkitURL;
 
+/**
+ * @param {JSON} props props passed from parent
+ * @returns {JSX} plain api thumbnail
+ */
 function APIThumbPlain(props) {
     const theme = useTheme();
     const classes = useStyles();
     const { api, showInfo } = props;
     const { custom: { thumbnail, social: { showRating } } } = theme;
-    const { name, version, context, provider } = api;
+    const {
+        name, version, context, provider,
+    } = api;
 
     const [imageConf, setImageConf] = useState({
         selectedIcon: '',
@@ -76,7 +81,6 @@ function APIThumbPlain(props) {
     const [imageObj, setIMageObj] = useState(null);
     const [imageLoaded, setImageLoaded] = useState(false);
 
-    const bull = <span className={classes.bullet}>•</span>;
     useEffect(() => {
         const restApi = new Api();
 
@@ -97,14 +101,16 @@ function APIThumbPlain(props) {
             }
         }).finally(() => {
             setImageLoaded(true);
-        })
+        });
     }, []);
     let ImageView;
     if (!imageLoaded) {
-        ImageView = (<div class="image-load-frame">
-            <div class="image-load-animation1"></div>
-            <div class="image-load-animation2"></div>
-        </div>)
+        ImageView = (
+            <div className='image-load-frame'>
+                <div className='image-load-animation1' />
+                <div className='image-load-animation2' />
+            </div>
+        );
     } else if (imageObj) {
         ImageView = (
             <img
@@ -132,10 +138,10 @@ function APIThumbPlain(props) {
                 </Box>
 
             </Link>
-        )
+        );
     }
     return (
-        <Card className={classes.root} variant="outlined">
+        <Card className={classes.root} variant='outlined'>
             <CardContent>
                 <Box>
                     <Link to={'/apis/' + api.id} aria-hidden='true'>
@@ -149,15 +155,22 @@ function APIThumbPlain(props) {
                                 gutterBottom
                                 title={name}
                                 className={classes.thumbHeader}
-                            >{name}</Typography>
+                            >
+                                {name}
+                            </Typography>
                         </Box>
 
                     </Link>
                 </Box>
-                {provider && (<><Typography variant='caption' gutterBottom align='left' className={classes.caption} component='span'>
-                    <FormattedMessage defaultMessage='By' id='Apis.Listing.ApiThumb.by' />
-                    <FormattedMessage defaultMessage=' : ' id='Apis.Listing.ApiThumb.by.colon' />
-                </Typography><Typography variant='body2' component='span'>{provider}</Typography></>)}
+                {provider && (
+                    <>
+                        <Typography variant='caption' gutterBottom align='left' className={classes.caption} component='span'>
+                            <FormattedMessage defaultMessage='By' id='Apis.Listing.ApiThumb.by' />
+                            <FormattedMessage defaultMessage=' : ' id='Apis.Listing.ApiThumb.by.colon' />
+                        </Typography>
+                        <Typography variant='body2' component='span'>{provider}</Typography>
+                    </>
+                )}
                 <Box display='flex' mt={2}>
                     <Box flex={1}>
                         <Typography variant='subtitle1'>{version}</Typography>
@@ -182,21 +195,23 @@ function APIThumbPlain(props) {
                 </Box>
 
                 <Box display='flex' mt={2}>
-                    {showRating && <Box flex={1}>
-                        <Typography
-                            variant='subtitle1'
-                            gutterBottom
-                            align='left'
-                            className={classNames('api-thumb-rating', classes.ratingWrapper)}
-                        >
-                            <StarRatingBar
-                                apiRating={api.avgRating}
-                                apiId={api.id}
-                                isEditable={false}
-                                showSummary={false}
-                            />
-                        </Typography>
-                    </Box>}
+                    {showRating && (
+                        <Box flex={1}>
+                            <Typography
+                                variant='subtitle1'
+                                gutterBottom
+                                align='left'
+                                className={classNames('api-thumb-rating', classes.ratingWrapper)}
+                            >
+                                <StarRatingBar
+                                    apiRating={api.avgRating}
+                                    apiId={api.id}
+                                    isEditable={false}
+                                    showSummary={false}
+                                />
+                            </Typography>
+                        </Box>
+                    )}
                     <Box>
                         <Typography
                             variant='subtitle1'
@@ -226,13 +241,9 @@ function APIThumbPlain(props) {
 
 
 APIThumbPlain.defaultProps = {
-    customWidth: null,
-    customHeight: null,
     showInfo: true,
 };
 APIThumbPlain.propTypes = {
-    customWidth: PropTypes.number,
-    customHeight: PropTypes.number,
     showInfo: PropTypes.bool,
 };
 

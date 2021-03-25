@@ -26,7 +26,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import Icon from '@material-ui/core/Icon';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     root: {
         padding: theme.spacing(1, 3),
     },
@@ -52,6 +52,11 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+/**
+ * Render no api breadcrumb section.
+ * @param {JSON} props properties passed down from the parent.
+ * @returns {JSX} Api breadcrumb section.
+ */
 export default function ApiBreadcrumbs(props) {
     const classes = useStyles();
     const theme = useTheme();
@@ -69,10 +74,12 @@ export default function ApiBreadcrumbs(props) {
                     </Link>
                 </RouterLink>
 
-                {selectedTag && <Link color='inherit' className={classes.linkNotActive}>
-                    <CustomIcon width={16} height={16} icon='api' />
-                    <span className={classes.selectedTagText}>{selectedTag}</span>
-                </Link>}
+                {selectedTag && (
+                    <Link color='inherit' className={classes.linkNotActive}>
+                        <CustomIcon width={16} height={16} icon='api' />
+                        <span className={classes.selectedTagText}>{selectedTag}</span>
+                    </Link>
+                )}
             </Breadcrumbs>
         </Paper>
     );

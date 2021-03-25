@@ -35,6 +35,8 @@ import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
 import CommentAdd from './CommentAdd';
 
+dayjs.extend(relativeTime);
+
 const styles = (theme) => ({
     link: {
         color: theme.palette.getContrastText(theme.palette.background.default),
@@ -294,7 +296,6 @@ class Comment extends React.Component {
                                             </Typography>
                                             <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
                                                 <Typography noWrap className={classes.commentText} variant='caption'>
-                                                    {dayjs.extend(relativeTime)}
                                                     {dayjs(comment.createdTime).fromNow()}
                                                 </Typography>
                                             </Tooltip>

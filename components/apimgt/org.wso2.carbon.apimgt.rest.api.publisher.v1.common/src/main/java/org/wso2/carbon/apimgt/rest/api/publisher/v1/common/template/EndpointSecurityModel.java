@@ -28,6 +28,17 @@ public class EndpointSecurityModel extends EndpointSecurity implements Serializa
 
     private String alias;
     private String base64EncodedPassword;
+    private String clientSecretAlias;
+    private String passwordAlias;
+
+    public EndpointSecurityModel() {
+
+    }
+
+    public EndpointSecurityModel(EndpointSecurity endpointSecurity) {
+
+        super(endpointSecurity);
+    }
 
     public String getAlias() {
 
@@ -49,4 +60,23 @@ public class EndpointSecurityModel extends EndpointSecurity implements Serializa
         this.base64EncodedPassword = base64EncodedPassword;
     }
 
+    public String getClientSecretAlias() {
+
+        return clientSecretAlias;
+    }
+
+    public void setClientSecretAlias(String clientSecretAlias) {
+
+        this.clientSecretAlias = clientSecretAlias;
+    }
+
+    public String getPasswordAlias() {
+
+        return passwordAlias;
+    }
+
+    public void setPasswordAlias(String passwordAlias) {
+
+        this.passwordAlias = passwordAlias;
+    }
 }

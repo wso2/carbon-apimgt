@@ -70,7 +70,7 @@ const styles = (theme) => ({
     },
     infoButton: {
         margin: theme.spacing(1),
-        color: 'white',
+        color: theme.palette.background.paper,
     },
     InfoToolTip: {
         backgroundColor: '#f5f5f9',

@@ -14,7 +14,7 @@ const AppConfig = {
             // It is `localhost` in 99.99% case, If you want to change server host name change it in deployment.toml
         },
         feedback: { // If enabled, Feedback form option(an icon) will be available in the footer LHS bottom
-            enable: false,
+            enable: true,
             serviceURL: '', // Check `/source/src/app/components/Base/Footer/FeedbackForm.jsx` for details
         },
         singleLogout: {
@@ -22,6 +22,8 @@ const AppConfig = {
             timeout: 4000, // Defines the timeout for the above periodical session status check
         },
         propertyDisplaySuffix: '__display',
+        loadDefaultLocales: true, // If false, Default en.json file will not be used/loaded in app.
+        // loadDefaultLocales = false is good for performance but text overrides using the locale file will not work
     },
     serviceCatalogDefinitionTypes: {
         OAS2: 'Swagger',
@@ -42,5 +44,5 @@ const AppConfig = {
 };
 
 if (typeof module !== 'undefined') {
-    module.exports = AppConfig; // To be used in JS unit tests
+    module.exports = AppConfig; // For Jest unit tests
 }

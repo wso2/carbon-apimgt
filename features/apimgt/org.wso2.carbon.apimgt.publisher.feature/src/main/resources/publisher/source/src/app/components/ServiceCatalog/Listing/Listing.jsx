@@ -17,90 +17,19 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import MUIDataTable from 'mui-datatables';
-import moment from 'moment';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { Progress } from 'AppComponents/Shared';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Alert from 'AppComponents/Shared/Alert';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Onboarding from 'AppComponents/ServiceCatalog/Listing/Onboarding';
-import Delete from 'AppComponents/ServiceCatalog/Listing/Delete';
-import Usages from 'AppComponents/ServiceCatalog/Listing/Usages';
-import CreateApi from 'AppComponents/ServiceCatalog/CreateApi';
-import Grid from '@material-ui/core/Grid';
-import Help from '@material-ui/icons/Help';
-import Tooltip from '@material-ui/core/Tooltip';
-import Configurations from 'Config';
+import ServicesTableView from 'AppComponents/ServiceCatalog/Listing/components/ServicesTableView';
+import ServiceCatalogTopMenu from 'AppComponents/ServiceCatalog/Listing/components/ServiceCatalogTopMenu';
 
-const useStyles = makeStyles((theme) => ({
-    contentInside: {
-        padding: theme.spacing(3),
-        paddingTop: theme.spacing(2),
-        paddingLeft: theme.spacing(3),
-        paddingRight: theme.spacing(3),
-        '& > div[class^="MuiPaper-root-"]': {
-            boxShadow: 'none',
-            backgroundColor: 'transparent',
-        },
-    },
-    serviceNameLink: {
-        display: 'flex',
-        alignItems: 'center',
-        '& span': {
-            marginLeft: theme.spacing(),
-        },
-        '& span.material-icons': {
-            marginLeft: 0,
-            color: '#444',
-            marginRight: theme.spacing(),
-            fontSize: 18,
-        },
-    },
-    buttonStyle: {
-        marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1),
-        marginRight: theme.spacing(2),
-    },
-    content: {
-        display: 'flex',
-        flex: 1,
-        flexDirection: 'column',
-        paddingBottom: theme.spacing(3),
-    },
-    helpDiv: {
-        marginTop: theme.spacing(0.5),
-    },
-    helpIcon: {
-        fontSize: 20,
-    },
-    horizontalDivider: {
-        marginTop: theme.spacing(3),
-        borderTop: '0px',
-        width: '100%',
-    },
-    tableStyle: {
-        marginTop: theme.spacing(4),
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        '& > td[class^=MUIDataTableBodyCell-cellHide-]': {
-            display: 'none',
-        },
-        '& .MUIDataTableBodyCell-cellHide-793': {
-            display: 'none',
-        },
-        '& td': {
-            wordBreak: 'break-word',
-        },
-        '& th': {
-            minWidth: '150px',
-        },
-    },
-}));
+import ServicesCardView from 'AppComponents/ServiceCatalog/Listing/components/ServicesCardView';
+import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
+
 
 /**
  * Listing for service catalog entries
@@ -108,13 +37,12 @@ const useStyles = makeStyles((theme) => ({
  * @function Listing
  * @returns {any} Listing Page for Services
  */
-function Listing(props) {
+function Listing() {
     const [serviceList, setServiceList] = useState([]);
     const [notFound, setNotFound] = useState(true);
     const [loading, setLoading] = useState(true);
+    const [isGridView, setIsGridView] = useState(true);
     const intl = useIntl();
-    const classes = useStyles();
-    const { history } = props;
 
     // Get Services
     const getData = () => {
@@ -149,6 +77,7 @@ function Listing(props) {
             // Reload the services list
             getData();
         }).catch((errorResponse) => {
+            console.error(errorResponse);
             if (errorResponse.response.body.description !== null) {
                 Alert.error(errorResponse.response.body.description);
             } else {
@@ -160,219 +89,6 @@ function Listing(props) {
         });
     };
 
-    const getDefinitionTypeDisplayName = (definitionType) => {
-        return Configurations.serviceCatalogDefinitionTypes[definitionType] || definitionType;
-    };
-
-    const columns = [
-        {
-            name: 'id',
-            options: {
-                display: 'excluded',
-                filter: false,
-            },
-        },
-        {
-            name: 'name',
-            label: intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.name',
-                defaultMessage: 'Service',
-            }),
-            options: {
-                customBodyRender: (value, tableMeta) => {
-                    if (tableMeta.rowData) {
-                        const dataRow = serviceList[tableMeta.rowIndex];
-                        const serviceId = dataRow.id;
-                        if (dataRow) {
-                            return (
-                                <Link
-                                    className={classes.serviceNameLink}
-                                    to={'/service-catalog/' + serviceId + '/overview'}
-                                >
-                                    <span>{dataRow.name}</span>
-                                </Link>
-                            );
-                        }
-                    }
-                    return <span />;
-                },
-                sort: false,
-                filter: false,
-            },
-        },
-        {
-            name: 'serviceUrl',
-            label: intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.service.url',
-                defaultMessage: 'Service URL',
-            }),
-            options: {
-                customBodyRender: (value, tableMeta) => {
-                    if (tableMeta.rowData) {
-                        const dataRow = serviceList[tableMeta.rowIndex];
-                        const { serviceUrl } = dataRow;
-                        if (dataRow) {
-                            return (
-                                <Tooltip
-                                    placement='top-start'
-                                    title={serviceUrl}
-                                    aria-label='add'
-                                >
-                                    <span style={{
-                                        whiteSpace: 'nowrap',
-                                        textOverflow: 'ellipsis',
-                                        width: '300px',
-                                        display: 'block',
-                                        overflow: 'hidden',
-                                    }}
-                                    >
-                                        {serviceUrl}
-                                    </span>
-                                </Tooltip>
-                            );
-                        }
-                    }
-                    return <span />;
-                },
-                sort: false,
-                filter: false,
-            },
-        },
-        {
-            name: 'definitionType',
-            label: intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.schema.type',
-                defaultMessage: 'Schema Type',
-            }),
-            options: {
-                customBodyRender: (value, tableMeta) => {
-                    if (tableMeta.rowData) {
-                        const dataRow = serviceList[tableMeta.rowIndex];
-                        const { definitionType } = dataRow;
-                        if (dataRow) {
-                            return (
-                                <span>{getDefinitionTypeDisplayName(definitionType)}</span>
-                            );
-                        }
-                    }
-                    return <span />;
-                },
-                sort: false,
-                filter: false,
-            },
-        },
-        {
-            name: 'version',
-            label: intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.version',
-                defaultMessage: 'Version',
-            }),
-            options: {
-                sort: false,
-            },
-        },
-        {
-            name: 'createdTime',
-            label: intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.created.time',
-                defaultMessage: 'Created Time',
-            }),
-            options: {
-                customBodyRender: (value, tableMeta) => {
-                    if (tableMeta.rowData) {
-                        const dataRow = serviceList[tableMeta.rowIndex];
-                        const { createdTime } = dataRow;
-                        if (dataRow) {
-                            return (
-                                <Tooltip
-                                    placement='top-start'
-                                    title={moment(createdTime).format('lll')}
-                                    aria-label='add'
-                                >
-                                    <span>{moment(createdTime).fromNow()}</span>
-                                </Tooltip>
-                            );
-                        }
-                    }
-                    return <span />;
-                },
-                sort: false,
-                filter: false,
-            },
-        },
-        {
-            name: 'usage',
-            label: intl.formatMessage({
-                id: 'ServiceCatalog.Listing.Listing.usage',
-                defaultMessage: 'Number of Usages',
-            }),
-            options: {
-                customBodyRender: (value, tableMeta) => {
-                    if (tableMeta.rowData) {
-                        const dataRow = serviceList[tableMeta.rowIndex];
-                        const { usage, id, name } = dataRow;
-                        if (dataRow) {
-                            return (
-                                <Usages usageNumber={usage} serviceDisplayName={name} serviceId={id} />
-                            );
-                        }
-                    }
-                    return <span />;
-                },
-                sort: false,
-                filter: false,
-            },
-        },
-        {
-            options: {
-                customBodyRender: (value, tableMeta) => {
-                    if (tableMeta.rowData) {
-                        const dataRow = serviceList[tableMeta.rowIndex];
-                        const {
-                            id, serviceKey, name, definitionType, version, serviceUrl,
-                        } = dataRow;
-                        return (
-                            <>
-                                <Box display='flex' flexDirection='row'>
-                                    <CreateApi
-                                        history={history}
-                                        serviceId={id}
-                                        serviceKey={serviceKey}
-                                        definitionType={definitionType}
-                                        serviceDisplayName={name}
-                                        serviceVersion={version}
-                                        serviceUrl={serviceUrl}
-                                    />
-                                    <Delete
-                                        serviceDisplayName={name}
-                                        serviceId={id}
-                                        onDelete={onDelete}
-                                    />
-                                </Box>
-                            </>
-                        );
-                    }
-                    return false;
-                },
-                sort: false,
-                name: 'actions',
-                label: '',
-            },
-        },
-    ];
-
-    const options = {
-        filterType: 'dropdown',
-        selectableRows: 'none',
-        title: false,
-        filter: false,
-        sort: false,
-        print: false,
-        download: false,
-        viewColumns: false,
-        customToolbar: false,
-        rowsPerPageOptions: [5, 10, 25, 50, 100],
-    };
     if (loading || !serviceList) {
         return <Progress per={90} message='Loading Services ...' />;
     }
@@ -386,41 +102,26 @@ function Listing(props) {
     }
 
     return (
-        <>
-            <div className={classes.content}>
-                <div className={classes.contentInside}>
-                    <Grid container direction='row' spacing={10}>
-                        <Grid item md={11}>
-                            <Typography className={classes.heading} variant='h4'>
-                                <FormattedMessage
-                                    id='ServiceCatalog.Listing.Listing.heading'
-                                    defaultMessage='Service Catalog'
-                                />
-                            </Typography>
-                        </Grid>
-                        <Grid item md={1}>
-                            <Tooltip
-                                placement='right'
-                                title={(
-                                    <FormattedMessage
-                                        id='ServiceCatalog.Listing.Listing.help.tooltip'
-                                        defaultMessage='The Service Catalog enables API-first Integration'
-                                    />
-                                )}
-                            >
-                                <div className={classes.helpDiv}>
-                                    <Help className={classes.helpIcon} />
-                                </div>
-                            </Tooltip>
-                        </Grid>
+        <Box flexGrow={1}>
+            <Grid
+                container
+                direction='column'
+                justify='flex-start'
+                alignItems='stretch'
+            >
+                <Grid xs={12}>
+                    <ServiceCatalogTopMenu isGridView={isGridView} setIsGridView={setIsGridView} />
+                </Grid>
+                <Box px={8} pt={4}>
+                    <Grid xs={12}>
+                        {isGridView ? <ServicesCardView serviceList={serviceList} onDelete={onDelete} />
+                            : <ServicesTableView serviceList={serviceList} onDelete={onDelete} /> }
                     </Grid>
-                    <hr className={classes.horizontalDivider} />
-                    <div className={classes.tableStyle}>
-                        <MUIDataTable title='' data={serviceList} columns={columns} options={options} />
-                    </div>
-                </div>
-            </div>
-        </>
+                </Box>
+
+            </Grid>
+        </Box>
+
     );
 }
 

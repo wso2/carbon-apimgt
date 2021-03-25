@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-    useTheme,
-} from '@material-ui/core';
+import { useTheme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -32,7 +30,7 @@ const useStyles = makeStyles({
 
 const APILanding = () => {
     const theme = useTheme();
-    const matches = useMediaQuery(theme.breakpoints.down('xs'));
+    const isXsOrBelow = useMediaQuery(theme.breakpoints.down('xs'));
     const { dividerCls, root } = useStyles();
     const {
         graphqlIcon,
@@ -50,7 +48,7 @@ const APILanding = () => {
                 spacing={5}
             >
                 <Grid item xs={12}>
-                    <Box pt={matches ? 2 : 7} />
+                    <Box pt={isXsOrBelow ? 2 : 7} />
                 </Grid>
                 <Grid item md={12}>
                     <Typography display='block' gutterBottom align='center' variant='h4'>
@@ -71,7 +69,7 @@ const APILanding = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Box pt={matches ? 2 : 7} pb={5} mx={matches ? 12 : 3}>
+                    <Box pt={isXsOrBelow ? 2 : 7} pb={5} mx={isXsOrBelow ? 12 : 3}>
                         <Grid
                             container
                             direction='row'

@@ -1,6 +1,6 @@
 import MaterialIcons from 'MaterialIcons';
 
-export const getIcon = (key, category, theme, api) => {
+const getIcon = (key, category, theme, api) => {
     let IconElement;
     let count;
 
@@ -15,5 +15,6 @@ export const getIcon = (key, category, theme, api) => {
         IconElement = MaterialIcons.categories[8].icons[randomIconIndex].id;
     }
     return IconElement;
+};
 
-}
+export default getIcon;

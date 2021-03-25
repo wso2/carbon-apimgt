@@ -785,17 +785,6 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
-     * Returns the swagger definition of the API for the given container managed cluster name as a string
-     *
-     * @param api api
-     * @param clusterName name of the container managed cluster
-     * @return swagger string
-     * @throws APIManagementException if error occurred while obtaining the swagger definition
-     */
-    String getOpenAPIDefinitionForClusterName(API api, String clusterName)
-            throws APIManagementException;
-
-    /**
      * Revokes the oldAccessToken generating a new one.
      *
      * @param oldAccessToken          Token to be revoked
@@ -1020,17 +1009,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
      */
     String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName)
-            throws APIManagementException;
-
-    /**
-     * Returns the AsyncAPI definition of the API for the given container managed cluster name as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @param clusterName name of the container managed cluster
-     * @return AsyncAPI definition string
-     * @throws APIManagementException if error occurred while obtaining the AsyncAPI definition
-     */
-    String getAsyncAPIDefinitionForClusterName(Identifier apiId, String clusterName)
             throws APIManagementException;
 
     /**
