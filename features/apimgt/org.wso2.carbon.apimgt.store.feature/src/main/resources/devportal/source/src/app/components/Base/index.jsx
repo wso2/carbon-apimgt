@@ -535,17 +535,6 @@ class Layout extends React.Component {
                                                         <Paper>
                                                             <ClickAwayListener onClickAway={this.handleCloseUserMenu}>
                                                                 <MenuList>
-                                                                    <MenuItem className={classes.logoutLink}>
-                                                                        <Link
-                                                                            to='/settings/manage-alerts'
-                                                                            onClick={this.handleCloseUserMenu}
-                                                                        >
-                                                                            <FormattedMessage
-                                                                                id='Base.index.settingsMenu.alertConfiguration'
-                                                                                defaultMessage='Configure Alerts'
-                                                                            />
-                                                                        </Link>
-                                                                    </MenuItem>
                                                                     {this.getPasswordChangeEnabled()
                                                                         ? (
                                                                             <MenuItem className={classes.logoutLink}>
