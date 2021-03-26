@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
@@ -186,7 +187,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     public MetaInfo getMetaInfo() {
         MetaInfo metaInfo = new MetaInfo();
         Object correlationId  = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(Constants.CORRELATION_ID);
+                .getProperty(CorrelationConstants.CORRELATION_ID);
         if (correlationId instanceof String){
             metaInfo.setCorrelationId((String) correlationId);
         }
