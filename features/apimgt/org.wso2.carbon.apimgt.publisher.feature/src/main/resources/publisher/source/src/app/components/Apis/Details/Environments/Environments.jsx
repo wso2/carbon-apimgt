@@ -317,7 +317,6 @@ export default function Environments() {
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
     const [revisionToRestore, setRevisionToRestore] = useState([]);
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
-    const [lastRevisionCount, setLastRevisionCount] = useState(0);
     const [currentLength, setCurrentLength] = useState(0);
 
     // allEnvDeployments represents all deployments of the API with mapping
