@@ -73,9 +73,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private int retryCount = 10;
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTPS = "SecureWebhookServer";
-    private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
-    private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/tenants/";
-    private String synapseDeploymentPath = "synapse-configs/default";
+    private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository"
+            + File.separator + "resources" + File.separator + "apim-synapse-config" + File.separator;
+    private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator
+            + "tenants" + File.separator;
+    private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
 
     public GatewayStartupListener() {
 
