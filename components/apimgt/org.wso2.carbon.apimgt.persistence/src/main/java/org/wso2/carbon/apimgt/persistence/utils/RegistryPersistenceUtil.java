@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.persistence.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,9 +36,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.DeploymentEnvironments;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
@@ -257,16 +254,6 @@ public class RegistryPersistenceUtil {
                     RegistryPersistenceUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
 
             //attaching micro-gateway labels to the API
-            
-            //clear all the existing labels first
-            artifact.removeAttribute(APIConstants.API_LABELS_GATEWAY_LABELS);
-            //if there are labels attached to the API object, add them to the artifact
-            if (api.getGatewayLabels() != null) {
-                List<Label> labelList = api.getGatewayLabels();
-                for (Label label : labelList) {
-                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
-                }
-            }
 
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
@@ -295,12 +282,6 @@ public class RegistryPersistenceUtil {
                                             .contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
-
-            //          set deployments selected
-            Set<DeploymentEnvironments> deploymentEnvironments = api.getDeploymentEnvironments();
-            String json = new Gson().toJson(deploymentEnvironments);
-            artifact.setAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS, json);
-
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
@@ -746,17 +727,11 @@ public class RegistryPersistenceUtil {
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
             
-            Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> deploymentEnvironments = extractDeploymentsForAPI(deployments);
-            if (deploymentEnvironments != null && !deploymentEnvironments.isEmpty()) {
-                api.setDeploymentEnvironments(deploymentEnvironments);
-            }
-
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
                 api.setMonetizationProperties(jsonObj);
             }
-            api.setGatewayLabels(getLabelsFromAPIGovernanceArtifact(artifact, api.getId().getProviderName()));
             api.setApiCategories(getAPICategoriesFromAPIGovernanceArtifact(artifact, tenantId));
             //get endpoint config string from artifact, parse it as a json and set the environment list configured with
             //non empty URLs to API object
@@ -1179,41 +1154,6 @@ public class RegistryPersistenceUtil {
                 .fromJson(artifact.getAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION),
                 org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration.class);
         return websubSubscriptionConfiguration;
-    }
-    
-    /**
-     * This method used to set selected deployment environment values to governance artifact of API .
-     *
-     * @param deployments DeploymentEnvironments attributes value
-     */
-    public static Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> extractDeploymentsForAPI(
-            String deployments) {
-
-        HashSet<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> deploymentEnvironmentsSet = new HashSet<>();
-        if (deployments != null && !"null".equals(deployments)) {
-            Type deploymentEnvironmentsSetType = new TypeToken<HashSet<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments>>() {
-            }.getType();
-            deploymentEnvironmentsSet = new Gson().fromJson(deployments, deploymentEnvironmentsSetType);
-            return deploymentEnvironmentsSet;
-        }
-        return deploymentEnvironmentsSet;
-    }
-    
-    public static List<Label> getLabelsFromAPIGovernanceArtifact(GovernanceArtifact artifact, String apiProviderName)
-            throws GovernanceException, APIManagementException {
-
-        String[] labelArray = artifact.getAttributes(APIConstants.API_LABELS_GATEWAY_LABELS);
-        List<Label> gatewayLabelListForAPI = new ArrayList<>();
-
-        if (labelArray != null && labelArray.length > 0) {
-            for (String labelName : labelArray) {
-                Label label = new Label();
-                //set the name
-                label.setName(labelName);
-                gatewayLabelListForAPI.add(label);
-            }
-        }
-        return gatewayLabelListForAPI;
     }
     
     /**
@@ -1727,6 +1667,26 @@ public class RegistryPersistenceUtil {
             throw new APIManagementException(msg, e);
         }
         return apiProduct;
+    }
+
+    public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+            String adminUserName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getRealmConfiguration().getAdminUserName();
+            if (!tenantDomain.contentEquals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                return adminUserName.concat("@").concat(tenantDomain);
+            }
+            return adminUserName;
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error in getting tenant admin username", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
 }

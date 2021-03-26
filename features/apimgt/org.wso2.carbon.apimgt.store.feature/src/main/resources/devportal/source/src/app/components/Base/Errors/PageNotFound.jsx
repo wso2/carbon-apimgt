@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import React from 'react';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -31,7 +30,7 @@ const PageNotFound = (props) => {
     return (
         <Container maxWidth='md'>
             <Box padding={4}>
-                <Paper elevation={0} >
+                <Paper elevation={0}>
                     <Box padding={4}>
                         <Grid container alignItems='center' justify='center' style={{ height: '100%' }}>
                             <Grid item xs={12} md={6}>

@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
 
 /**
- * Latency attribute in analytics event
+ * Latency attribute in analytics event.
  */
 public class Latencies {
     private long responseLatency;

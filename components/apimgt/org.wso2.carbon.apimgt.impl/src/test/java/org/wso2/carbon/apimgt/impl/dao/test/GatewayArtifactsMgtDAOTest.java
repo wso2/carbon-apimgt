@@ -53,7 +53,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
@@ -134,7 +136,10 @@ public class GatewayArtifactsMgtDAOTest {
                 APIConstants.HTTP_PROTOCOL, file);
         String gatewayAPIId = gatewayArtifactsMgtDAO.getGatewayAPIId(name, version, "carbon.super");
         Assert.assertEquals(gatewayAPIId, uuid);
-        gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"));
+        Map<String, String> gatewayVhosts = new HashMap<>();
+        gatewayVhosts.put("label1", "dev.wso2.com");
+        gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label1"),
+                gatewayVhosts);
         List<APIRuntimeArtifactDto> artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid,
                 new String[]{"label1"}, "carbon.super");
         Assert.assertEquals(artifacts.size(), 1);
@@ -143,8 +148,10 @@ public class GatewayArtifactsMgtDAOTest {
         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
         apiRevisionDeployment.setRevisionUUID(revision);
         apiRevisionDeployment.setDeployment("label1");
+        gatewayVhosts = new HashMap<>();
+        gatewayVhosts.put("label2", "prod.wso2.com");
         gatewayArtifactsMgtDAO.addAndRemovePublishedGatewayLabels(uuid, revision, Collections.asSet("label2"),
-                Collections.asSet(apiRevisionDeployment));
+                gatewayVhosts, Collections.asSet(apiRevisionDeployment));
         artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label1"}, "carbon.super");
         Assert.assertEquals(artifacts.size(), 0);
         artifacts = gatewayArtifactsMgtDAO.retrieveGatewayArtifactsByAPIIDAndLabel(uuid, new String[]{"label2"},

@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.impl.Analytics
 import java.util.Map;
 
 /**
- * Configuration holder
+ * Configuration holder.
  */
 public class AnalyticsServiceReferenceHolder {
     private static final Log log = LogFactory.getLog(AnalyticsServiceReferenceHolder.class);

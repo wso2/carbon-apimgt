@@ -331,13 +331,6 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
-    public static final String API_OVERVIEW_ENDPOINT_OAUTH = "overview_endpointOAuth";
-    public static final String API_OVERVIEW_ENDPOINT_GRANT_TYPE = "overview_grantType";
-    public static final String API_OVERVIEW_ENDPOINT_HTTP_METHOD = "overview_httpMethod";
-    public static final String API_OVERVIEW_ENDPOINT_TOKEN_URL = "overview_endpointTokenUrl";
-    public static final String API_OVERVIEW_ENDPOINT_CLIENT_ID = "overview_clientId";
-    public static final String API_OVERVIEW_ENDPOINT_CLIENT_SECRET = "overview_clientSecret";
-    public static final String API_OVERVIEW_ENDPOINT_CUSTOM_PARAMETERS = "overview_customParameters";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
     public static final String API_OVERVIEW_INSEQUENCE = "overview_inSequence";
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
@@ -353,7 +346,6 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
-    public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
     public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
@@ -587,8 +579,6 @@ public final class APIConstants {
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
 
-    public static final String DEFAULT_RESERVED_USERNAME = "apim_reserved_user";
-
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
@@ -606,6 +596,7 @@ public final class APIConstants {
     public static final String API_TYPE_WS = "WS";
     public static final String GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME = "gatewayInternalKeyDataCache";
     public static final String GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME = "gatewayInvalidInternalKeyCache";
+    public static final String GRANT_TYPE_PASSWORD = "password";
 
     public static class TokenStatus {
 
@@ -779,6 +770,8 @@ public final class APIConstants {
     public static final String API_STORE_DISPLAY_ALL_APIS = API_STORE + "DisplayAllAPIs";
     public static final String API_STORE_DISPLAY_MULTIPLE_VERSIONS = API_STORE + "DisplayMultipleVersions";
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
+    public static final int REPLYLIMIT = 3;
+    public static final int REPLYOFFSET = 0;
     public static final String API_STORE_DISPLAY_RATINGS = API_STORE + "DisplayRatings";
     public static final String STORE_TOKEN_DISPLAY_URL = API_STORE + "StoreTokenDisplayURL";
     public static final String API_STORE_FORCE_CI_COMPARISIONS = API_STORE + "CompareCaseInsensitively";
@@ -795,6 +788,8 @@ public final class APIConstants {
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
             "EnableCrossTenantSubscription";
+    public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
+            "DefaultReservedUsername";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -1209,6 +1204,7 @@ public final class APIConstants {
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
         public static final String KEY_MAPPING_ID = "keyMappingId";
+        public static final String MODE = "mode";
     }
 
     public static class AccessTokenConstants {
@@ -1380,6 +1376,12 @@ public final class APIConstants {
 
     public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
     public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
+
+    public static final String PROXY_ENABLE = "ProxyConfig.Enable";
+    public static final String PROXY_HOST = "ProxyConfig.Host";
+    public static final String PROXY_PORT = "ProxyConfig.Port";
+    public static final String PROXY_USERNAME = "ProxyConfig.Username";
+    public static final String PROXY_PASSWORD = "ProxyConfig.Password";
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -2538,14 +2540,6 @@ public final class APIConstants {
 
     }
 
-    public static class ContainerMgtAttributes {
-
-        public static final String DEPLOYMENTS = "Deployments";
-        public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
-        public static final String CONTAINER_MANAGEMENT_INFO = "ContainerMgtInfo";
-
-    }
-
     public static class AsyncApi {
         public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
         public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "init-request:";
@@ -2711,5 +2705,10 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+    }
+
+    public static class GatewayArtifactConstants {
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
 }

@@ -283,8 +283,14 @@ public class InMemoryAPIDeployer {
                                         .addStringToList(gatewayEvent.getUuid().concat(
                                                 "_graphQL"), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                     }
-                    GatewayUtils.setEndpointsToBeRemoved(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion(),
-                            gatewayAPIDTO);
+                    if (APIConstants.APITransportType.WS.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
+                        org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.setWebsocketEndpointsToBeRemoved(
+                                gatewayAPIDTO, gatewayEvent.getTenantDomain());
+                    } else {
+                        GatewayUtils.setEndpointsToBeRemoved(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion(),
+                                gatewayAPIDTO);
+                    }
+
                     GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
                 }
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
@@ -299,6 +305,7 @@ public class InMemoryAPIDeployer {
             MessageContext.destroyCurrentMessageContext();
         }
     }
+
 
     public void cleanDeployment(String artifactRepositoryPath) {
 

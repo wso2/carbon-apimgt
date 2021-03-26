@@ -96,8 +96,9 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     handleClickCancel() {
-        const { toggleShowReply } = this.props;
-        toggleShowReply();
+        this.setState({ content: '' });
+        const { handleShowReply } = this.props;
+        handleShowReply();
     }
 
     /**
@@ -115,7 +116,7 @@ class CommentAdd extends React.Component {
      * * */
     handleClickAddComment() {
         const {
-            apiId, replyTo, allComments, commentsUpdate,
+            apiId, replyTo, allComments, commentsUpdate, handleShowReply,
         } = this.props;
         const { content } = this.state;
         const comment = {
@@ -148,6 +149,7 @@ class CommentAdd extends React.Component {
             Alert.error('You cannot enter a blank comment');
         }
         this.setState({ currentLength: 0 });
+        handleShowReply();
     }
 
     /**
@@ -223,7 +225,7 @@ class CommentAdd extends React.Component {
 
 CommentAdd.defaultProps = {
     replyTo: null,
-    toggleShowReply: null,
+    handleShowReply: null,
     commentsUpdate: null,
 };
 
@@ -232,7 +234,7 @@ CommentAdd.propTypes = {
     cancelButton: PropTypes.bool.isRequired,
     apiId: PropTypes.string.isRequired,
     replyTo: PropTypes.string,
-    toggleShowReply: PropTypes.func,
+    handleShowReply: PropTypes.func,
     commentsUpdate: PropTypes.func,
     allComments: PropTypes.instanceOf(Array).isRequired,
     theme: PropTypes.shape({}).isRequired,

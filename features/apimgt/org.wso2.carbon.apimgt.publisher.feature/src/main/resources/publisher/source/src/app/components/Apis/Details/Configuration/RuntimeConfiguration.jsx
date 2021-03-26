@@ -52,7 +52,6 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
-import Subscription from './components/Subscription';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -145,7 +144,7 @@ function copyAPIConfig(api) {
         wsdlUrl: api.wsdlUrl,
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
-        keyManagers: [...api.keyManagers || []],
+        keyManagers: [...(api.keyManagers || [])],
         corsConfiguration: {
             corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
             accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
@@ -153,14 +152,11 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        websubSubscriptionConfiguration: {
-            secret: api.websubSubscriptionConfiguration.secret,
-            signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
-            signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
-        },
     };
     return apiConfigJson;
 }
+
+
 /**
  * This component handles the basic configurations UI in the API details page
  *
@@ -286,11 +282,6 @@ export default function RuntimeConfiguration() {
                     nextState.keyManagers = keyManagersConfigured;
                 }
                 return nextState;
-            case 'secret':
-            case 'signingAlgorithm':
-            case 'signatureHeader':
-                nextState.websubSubscriptionConfiguration[action] = value;
-                return nextState;
             default:
                 return state;
         }
@@ -298,12 +289,6 @@ export default function RuntimeConfiguration() {
     const { api, updateAPI } = useContext(APIContext);
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
     const isWebSub = api.type === 'WEBSUB';
-    api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
-        secret: '',
-        signingAlgorithm: '',
-        signatureHeader: '',
-    };
-
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
@@ -475,9 +460,6 @@ export default function RuntimeConfiguration() {
                                                 isRestricted={isRestricted(['apim:api_create'], api)}
                                             />
                                         </Box>
-                                    )}
-                                    {api.type === 'WEBSUB' && (
-                                        <Subscription api={apiConfig} configDispatcher={configDispatcher} />
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />

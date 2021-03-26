@@ -16,6 +16,7 @@
  * under the License.
  */
 import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Radio from '@material-ui/core/Radio';
 import Button from '@material-ui/core/Button';
@@ -41,6 +42,13 @@ const RateLimitingLevels = {
     RESOURCE: 'resource',
 };
 
+const useStyles = makeStyles((theme) => ({
+    focusLabel: {
+        boxShadow: '1px 1px 1px 1px #efefef',
+        paddingRight: theme.spacing(1),
+    },
+}));
+
 /**
  *
  * Handles the resource level and API level throttling UI switch
@@ -51,7 +59,9 @@ const RateLimitingLevels = {
 function APIRateLimiting(props) {
     const {
         updateAPI, operationRateLimits, onChange, value: currentApiThrottlingPolicy, isAPIProduct,
+        setFocusOperationLevel, focusOperationLevel,
     } = props;
+    const classes = useStyles();
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(currentApiThrottlingPolicy);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -85,6 +95,9 @@ function APIRateLimiting(props) {
             onChange(userSelection);
         } else {
             setApiThrottlingPolicy(userSelection);
+        }
+        if (event.target.value === RateLimitingLevels.RESOURCE) {
+            setFocusOperationLevel(false);
         }
     }
     /**
@@ -172,6 +185,7 @@ function APIRateLimiting(props) {
                                         disabled={isRestricted(['apim:api_create'], apiFromContext)}
                                     />
                                 )}
+                                className={focusOperationLevel && classes.focusLabel}
                                 label='Operation Level'
                                 labelPlacement='end'
                             />

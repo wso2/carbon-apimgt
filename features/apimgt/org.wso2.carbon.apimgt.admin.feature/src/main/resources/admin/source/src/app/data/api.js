@@ -499,68 +499,6 @@ class API extends Resource {
     }
 
     /**
-     * Get a list of available Microgateway labels
-     */
-    getMicrogatewayLabelList() {
-        return this.client.then((client) => {
-            return client.apis['Label Collection'].get_labels(
-                this._requestMetaData(),
-            );
-        });
-    }
-
-     /**
-     * Delete a Microgateway Label
-     */
-    deleteMicrogatewayLabel(id) {
-        return this.client.then((client) => {
-            return client.apis['Label'].delete_labels__labelId_(
-                { labelId: id },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-     /**
-     * Add a Microgateway Label
-     */
-    addMicrogatewayLabel(name, description, hosts,  callback = null) {
-        return this.client.then((client) => {
-            const data = {
-                name: name,
-                description: description,
-                accessUrls: hosts,
-            };
-            const payload = {
-                'Content-Type': 'application/json',
-            };
-            return client.apis['Label'].post_labels(
-                payload,
-                { requestBody: data },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-     /**
-     * Update a Microgateway Label
-     */
-    updateMicrogatewayLabel(id, name, description, hosts,  callback = null) {
-        return this.client.then((client) => {
-            const data = {
-                name: name,
-                description: description,
-                accessUrls: hosts,
-            };
-            return client.apis['Label'].put_labels__labelId_(
-                { labelId: id },
-                { requestBody: data },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
      * Get Blacklist Policies
      */
     blacklistPoliciesGet() {

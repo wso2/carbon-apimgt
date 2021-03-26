@@ -56,6 +56,7 @@ public interface ApiProductsApiService {
       public Response restoreAPIProductRevision(String apiProductId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response undeployAPIProductRevision(String apiProductId, String revisionId, String revisionNumber, Boolean allEnvironments, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIProduct(String apiProductId, APIProductDTO apIProductDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPIProductDeployment(String apiProductId, String deploymentId, APIRevisionDeploymentDTO apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIProductDocument(String apiProductId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIProductThumbnail(String apiProductId, InputStream fileInputStream, Attachment fileDetail, String ifMatch, MessageContext messageContext) throws APIManagementException;
 }

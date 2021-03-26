@@ -57,7 +57,6 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -114,7 +113,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -404,14 +402,7 @@ public class ImportUtils {
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
-            Set<String> keySet =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                            .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet();
-            Set<String> gatewayEnvironmentsSet = new HashSet<>(keySet);
-            List<Label> labels = apiProvider.getAllLabels(tenantDomain);
-            for (Label label : labels) {
-                gatewayEnvironmentsSet.add(label.getName());
-            }
+            Set<String> gatewayEnvironmentsSet = APIUtil.getEnvironments().keySet();
 
             for (int i = 0; i < deploymentInfoArray.size(); i++) {
                 JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
@@ -586,11 +577,11 @@ public class ImportUtils {
      * @param pathToArchive            Path to the extracted folder
      * @param isDefaultProviderAllowed Preserve provider flag value
      * @param currentUser              Username of the current user
-     * @throws APIMgtAuthorizationFailedException If an error occurs while authorizing the provider
+     * @throws APIManagementException If an error occurs while authorizing the provider or retrieving the definition
      */
     private static JsonElement retrieveValidatedDTOObject(String pathToArchive, Boolean isDefaultProviderAllowed,
                                                           String currentUser, String type)
-            throws IOException, APIMgtAuthorizationFailedException {
+            throws IOException, APIManagementException {
 
         JsonObject configObject = (StringUtils.equals(type, ImportExportConstants.TYPE_API)) ?
                 retrievedAPIDtoJson(pathToArchive) :
@@ -600,23 +591,26 @@ public class ImportUtils {
     }
 
     @NotNull
-    private static JsonObject retrievedAPIDtoJson(String pathToArchive) throws IOException {
+    private static JsonObject retrievedAPIDtoJson(String pathToArchive) throws IOException, APIManagementException {
         // Get API Definition as JSON
         String jsonContent =
                 getFileContentAsJson(pathToArchive + ImportExportConstants.API_FILE_LOCATION);
         if (jsonContent == null) {
-            throw new IOException("Cannot find API definition. api.yaml or api.json should present");
+            throw new APIManagementException("Cannot find API definition. api.yaml or api.json should present",
+                    ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
         }
         return processRetrievedDefinition(jsonContent);
     }
 
     @NotNull
-    private static JsonObject retrievedAPIProductDtoJson(String pathToArchive) throws IOException {
+    private static JsonObject retrievedAPIProductDtoJson(String pathToArchive)
+            throws IOException, APIManagementException {
         // Get API Product Definition as JSON
         String jsonContent = getFileContentAsJson(pathToArchive + ImportExportConstants.API_PRODUCT_FILE_LOCATION);
         if (jsonContent == null) {
-            throw new IOException(
-                    "Cannot find API Product definition. api_product.yaml or api_product.json should present");
+            throw new APIManagementException(
+                    "Cannot find API Product definition. api_product.yaml or api_product.json should present",
+                    ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
         }
         return processRetrievedDefinition(jsonContent);
     }
@@ -662,13 +656,13 @@ public class ImportUtils {
         return configObject;
     }
 
-    public static APIDTO retrievedAPIDto(String pathToArchive) throws IOException {
+    public static APIDTO retrievedAPIDto(String pathToArchive) throws IOException, APIManagementException {
 
         JsonObject jsonObject = retrievedAPIDtoJson(pathToArchive);
         return new Gson().fromJson(jsonObject, APIDTO.class);
     }
 
-    public static APIProductDTO retrieveAPIProductDto(String pathToArchive) throws IOException {
+    public static APIProductDTO retrieveAPIProductDto(String pathToArchive) throws IOException, APIManagementException {
 
         JsonObject jsonObject = retrievedAPIProductDtoJson(pathToArchive);
 
@@ -1919,18 +1913,19 @@ public class ImportUtils {
             if (Boolean.TRUE.equals(overwriteAPIProduct) && targetApiProduct != null) {
                 log.info("Existing API Product found, attempting to update it...");
                 importedApiProduct = PublisherCommonUtils.updateApiProduct(targetApiProduct, importedApiProductDTO,
-                        RestApiCommonUtil.getLoggedInUserProvider(), userName);
+                        RestApiCommonUtil.getLoggedInUserProvider(), userName, currentTenantDomain);
             } else {
                 if (targetApiProduct == null && Boolean.TRUE.equals(overwriteAPIProduct)) {
                     log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
                 }
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
-                                importedApiProductDTO.getProvider(), importedApiProductDTO.getProvider());
+                                importedApiProductDTO.getProvider());
             }
 
             // Add/update swagger of API Product
-            importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct, apiProvider);
+            importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct.getUuid(),
+                    importedApiProduct, apiProvider, currentTenantDomain);
 
             // Since Image, documents and client certificates are optional, exceptions are logged and ignored in
             // implementation
@@ -2313,8 +2308,8 @@ public class ImportUtils {
      * @throws FaultGatewaysException If an error occurs when updating the API to overwrite
      * @throws IOException            If an error occurs when loading the swagger file
      */
-    private static APIProduct updateApiProductSwagger(String pathToArchive, APIProduct importedApiProduct,
-                                                      APIProvider apiProvider)
+    private static APIProduct updateApiProductSwagger(String pathToArchive, String apiProductId, APIProduct
+            importedApiProduct, APIProvider apiProvider, String orgId)
             throws APIManagementException, FaultGatewaysException, IOException {
 
         String swaggerContent = loadSwaggerFile(pathToArchive);
@@ -2327,7 +2322,7 @@ public class ImportUtils {
         // This is required to make scopes get effected
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .updateAPIProduct(importedApiProduct);
-        apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, importedApiProduct);
+        apiProvider.updateAPIProductSwagger(apiProductId, apiToProductResourceMapping, importedApiProduct, orgId);
         return importedApiProduct;
     }
 }

@@ -45,8 +45,8 @@ public interface APIProvider extends APIManager {
      * This method is to add a comment.
      *
      * @param identifier Api identifier
-     * @param comment comment object
-     * @param user Username of the comment author
+     * @param comment    comment object
+     * @param user       Username of the comment author
      * @throws APIManagementException if failed to add comment for API
      */
     String addComment(Identifier identifier, Comment comment, String user) throws APIManagementException;
@@ -55,7 +55,7 @@ public interface APIProvider extends APIManager {
      * This method is to get a comment of an API.
      *
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @param replyLimit
      * @param replyOffset
      * @return Comment
@@ -65,7 +65,7 @@ public interface APIProvider extends APIManager {
             APIManagementException;
 
     /**
-     * @param apiTypeWrapper Api type wrapper
+     * @param apiTypeWrapper  Api type wrapper
      * @param parentCommentID
      * @param replyLimit
      * @param replyOffset
@@ -76,8 +76,8 @@ public interface APIProvider extends APIManager {
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
-     * @param commentId comment ID
-     * @param comment Comment object
+     * @param commentId      comment ID
+     * @param comment        Comment object
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
@@ -87,7 +87,7 @@ public interface APIProvider extends APIManager {
      * This method is to delete a comment.
      *
      * @param apiTypeWrapper API Type Wrapper
-     * @param commentId Comment ID
+     * @param commentId      Comment ID
      * @return boolean
      * @throws APIManagementException if failed to delete comment for identifier
      */
@@ -863,8 +863,8 @@ public interface APIProvider extends APIManager {
      * @param apiProduct   API Product
      * @throws APIManagementException
      */
-    void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException;
+    void addAPIProductSwagger(String apiProductId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+            APIProduct apiProduct, String orgId) throws APIManagementException;
 
     /**
      * This method updates the swagger definition of an API Product in registry
@@ -873,8 +873,8 @@ public interface APIProvider extends APIManager {
      * @param apiProduct   API Product
      * @throws APIManagementException
      */
-    void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException, FaultGatewaysException;
+    void updateAPIProductSwagger(String apiProductId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+            APIProduct apiProduct, String orgId) throws APIManagementException, FaultGatewaysException;
 
     /**
      * This method validates the existence of all the resource level throttling tiers in URI templates of API
@@ -1471,14 +1471,6 @@ public interface APIProvider extends APIManager {
     void saveGraphqlSchemaDefinition(API api, String schemaDefinition) throws APIManagementException;
 
     /**
-     * Returns labels of a given tenant
-     *
-     * @param tenantDomain    tenant domain
-     * @return A List of labels related to the given tenant
-     */
-    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
-
-    /**
      * Remove pending lifecycle state change task for the given api.
      *
      * @param apiIdentifier api identifier
@@ -1600,24 +1592,6 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If failed to validate
      */
     SharedScopeUsage getSharedScopeUsage(String uuid, int tenantId) throws APIManagementException;
-
-    /**
-     * This method is used to publish the api in private jet mode
-     *
-     * @param api           API Object
-     * @param apiIdentifier api identifier
-     * @throws APIManagementException if failed to add the schema as a resource to registry
-     */
-    void publishInPrivateJet(API api, APIIdentifier apiIdentifier) throws APIManagementException;
-
-    /**
-     * Retrieve the status information of the deployments of APIs cloud clusters
-     * that are currently reused by API Products.
-     *
-     * @param apiId API Identifier
-     * @return a list of Deploymentstatus objects in different cloud environments
-     */
-    List <DeploymentStatus> getDeploymentStatus(APIIdentifier apiId) throws APIManagementException ;
 
     /**
      * Retrieve list of resources of the provided api that are used in other API products
@@ -1800,13 +1774,34 @@ public interface APIProvider extends APIManager {
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
 
     /**
-     * Get an API Revisions Deployment mapping details by providing deployment name
+     * Update the displayOnDevportal field in an existing deployments of an API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployment APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void updateAPIDisplayOnDevportal(String apiId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment) throws APIManagementException;
+
+    /**
+     * Update the displayOnDevportal field in an existing deployments of an API Product
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployment APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void updateAPIProductDisplayOnDevportal(String apiProductId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment) throws APIManagementException;
+
+    /**
+     * Get an API Revisions Deployment mapping details by providing deployment name and revision id
      *
      * @param name Deployment Name
+     * @param revisionId Revision UUID
      * @return APIRevisionDeployment Object
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
-    APIRevisionDeployment getAPIRevisionDeployment(String name) throws APIManagementException;
+    APIRevisionDeployment getAPIRevisionDeployment(String name, String revisionId) throws APIManagementException;
 
     /**
      * Get an API Revisions Deployment mapping details by providing revision uuid

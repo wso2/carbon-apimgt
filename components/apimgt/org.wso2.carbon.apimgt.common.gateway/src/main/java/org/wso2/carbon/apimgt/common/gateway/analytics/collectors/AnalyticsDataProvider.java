@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.Even
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
 
 /**
- * Data provider interface to extract request data
+ * Data provider interface to extract request data.
  */
 public interface AnalyticsDataProvider {
 

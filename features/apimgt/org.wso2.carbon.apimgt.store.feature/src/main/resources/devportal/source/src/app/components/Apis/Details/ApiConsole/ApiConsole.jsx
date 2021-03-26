@@ -127,8 +127,6 @@ class ApiConsole extends React.Component {
         const user = AuthManager.getUser();
         let apiData;
         let environments;
-        let containerMngEnvironments;
-        let labels;
         let selectedEnvironment;
         let swagger;
         let productionAccessToken;
@@ -145,10 +143,6 @@ class ApiConsole extends React.Component {
                         return { name: endpoint.environmentName, displayName: endpoint.environmentDisplayName };
                     });
                 }
-                containerMngEnvironments = apiData.ingressURLs;
-                if (apiData.labels) {
-                    labels = apiData.labels.map((label) => { return label.name; });
-                }
                 if (apiData.scopes) {
                     const scopeList = apiData.scopes.map((scope) => { return scope.key; });
                     this.setState({ scopes: scopeList });
@@ -156,15 +150,6 @@ class ApiConsole extends React.Component {
                 if (environments && environments.length > 0) {
                     selectedEnvironment = environments[0].name;
                     return this.apiClient.getSwaggerByAPIIdAndEnvironment(apiID, selectedEnvironment);
-                } else if (containerMngEnvironments
-                    && containerMngEnvironments.some((env) => env.clusterDetails.length > 0)) {
-                    const { clusterDetails: [{ clusterName }] } = containerMngEnvironments
-                        .find((env) => env.clusterDetails.length > 0);
-                    selectedEnvironment = clusterName;
-                    return this.apiClient.getSwaggerByAPIIdAndClusterName(apiID, clusterName);
-                } else if (labels && labels.length > 0) {
-                    [selectedEnvironment] = labels;
-                    return this.apiClient.getSwaggerByAPIIdAndLabel(apiID, selectedEnvironment);
                 } else {
                     return this.apiClient.getSwaggerByAPIId(apiID);
                 }
@@ -181,8 +166,6 @@ class ApiConsole extends React.Component {
                     api: apiData,
                     swagger,
                     environments,
-                    containerMngEnvironments,
-                    labels,
                     productionAccessToken,
                     sandboxAccessToken,
                     selectedEnvironment,
@@ -393,19 +376,12 @@ class ApiConsole extends React.Component {
      */
     updateSwagger(environment) {
         const {
-            api, environments, containerMngEnvironments,
+            api, environments,
         } = this.state;
         let promiseSwagger;
 
-        if (environment) {
-            if (environments.find((e) => e.name === environment)) {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, environment);
-            } else if (containerMngEnvironments.some((env) => env.clusterDetails.length > 0
-                && env.clusterDetails.some((cluster) => cluster.clusterName === environment))) {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndClusterName(api.id, environment);
-            } else {
-                promiseSwagger = this.apiClient.getSwaggerByAPIIdAndLabel(api.id, environment);
-            }
+        if (environment && environments.find((e) => e.name === environment)) {
+            promiseSwagger = this.apiClient.getSwaggerByAPIIdAndEnvironment(api.id, environment);
         } else {
             promiseSwagger = this.apiClient.getSwaggerByAPIId(api.id);
         }
@@ -421,9 +397,9 @@ class ApiConsole extends React.Component {
     render() {
         const { classes } = this.props;
         const {
-            api, notFound, swagger, securitySchemeType, selectedEnvironment, labels, environments, scopes,
+            api, notFound, swagger, securitySchemeType, selectedEnvironment, environments, scopes,
             username, password, productionAccessToken, sandboxAccessToken, selectedKeyType,
-            sandboxApiKey, productionApiKey, selectedKeyManager, containerMngEnvironments,
+            sandboxApiKey, productionApiKey, selectedKeyManager,
         } = this.state;
         const user = AuthManager.getUser();
         const downloadSwagger = JSON.stringify({ ...swagger });
@@ -483,8 +459,6 @@ class ApiConsole extends React.Component {
                         sandboxAccessToken={sandboxAccessToken}
                         setSandboxAccessToken={this.setSandboxAccessToken}
                         swagger={swagger}
-                        labels={labels}
-                        containerMngEnvironments={containerMngEnvironments}
                         environments={environments}
                         scopes={scopes}
                         setUsername={this.setUsername}

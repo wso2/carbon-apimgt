@@ -16,7 +16,8 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
 const ScopeNotFound = (props) => {
     return (
@@ -24,7 +25,10 @@ const ScopeNotFound = (props) => {
             <div className='message message-danger'>
                 <h4>
                     <i className='icon fw fw-error' />
-                    <FormattedMessage id='Base.Errors.ScopeNotFound.title' defaultMessage='Un-authorized Access' />
+                    <FormattedMessage
+                        id='Base.Errors.ScopeNotFound.title'
+                        defaultMessage='Un-authorized Access'
+                    />
                 </h4>
                 <p>
                     <FormattedMessage
@@ -36,7 +40,8 @@ const ScopeNotFound = (props) => {
                     </span>
                     <FormattedMessage
                         id='Base.Errors.ScopeNotFound.message.second'
-                        defaultMessage=' is not allowed under logged in user role scopes. Please login with different user with relevant permission to access this resource.'
+                        defaultMessage={'is not allowed under logged in user role scopes. '
+                        + 'Please login with different user with relevant permission to access this resource.'}
                     />
                 </p>
             </div>

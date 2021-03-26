@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import Background from '../Background';
-import { getIcon } from './ImageUtils';
+import getIcon from './ImageUtils';
 
 const styles = {
     icon: {},
@@ -57,14 +57,14 @@ class ImageGenerator extends PureComponent {
             category, key, color, backgroundIndex,
         } = fixedIcon;
 
-        let apiName = api.name;
+        const apiName = api.name;
         let colorPair;
         let randomBackgroundIndex;
-        let IconElement = getIcon(key, category, theme, api);
+        const IconElement = getIcon(key, category, theme, api);
         const colorPairs = theme.custom.thumbnail.backgrounds;
 
         // Creating the icon
-       
+
 
         // Obtain or generate background color pair
         if (api.type === 'DOC') {

@@ -288,6 +288,7 @@ public class ExtensionListenerUtil {
                     JsonUtil.removeJsonPayload(axis2MC);
                     JsonUtil.getNewJsonPayload(axis2MC, payload, true, true);
                     axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    axis2MC.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                 } else {
                     // by default treat payload in well formed xml format
                     OMElement omElement = AXIOMUtil.stringToOM(payload);
