@@ -37,7 +37,7 @@ import CONSTANTS from 'AppData/Constants';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { ResourceNotFound } from '../../Base/Errors/index';
-import InfoBar from './InfoBar';
+import Breadcrumb from './Breadcrumb';
 import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 import Wizard from './Credentials/Wizard/Wizard';
@@ -546,7 +546,7 @@ class Details extends React.Component {
                         { [classes.contentExpandView]: !open },
                     )}
                 >
-                    <InfoBar apiId={apiUuid} intl={intl} {...this.props} />
+                    <Breadcrumb />
                     <div
                         className={classNames(
                             { [classes.contentLoader]: position === 'horizontal' },
