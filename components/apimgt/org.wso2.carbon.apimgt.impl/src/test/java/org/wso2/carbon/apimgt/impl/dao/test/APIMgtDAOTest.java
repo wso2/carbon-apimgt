@@ -404,7 +404,7 @@ public class APIMgtDAOTest {
         apiMgtDAO.addSubscriber(subscriber, null);
 
         Application application = new Application("SUB_FORWARD_APP", subscriber);
-        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName());
+        int applicationId = apiMgtDAO.addApplication(application, subscriber.getName(), "org1");
 
         // Add the first version of the API
         APIIdentifier apiId1 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V1.0.0");
