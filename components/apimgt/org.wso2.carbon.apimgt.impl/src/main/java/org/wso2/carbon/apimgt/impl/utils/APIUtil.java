@@ -11648,6 +11648,15 @@ public final class APIUtil {
         return false;
     }
 
+    public static String retrieveDefaultReservedUsername() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String defaultReservedUsername =
+                apiManagerConfiguration.getFirstProperty(APIConstants.API_DEVPORTAL_DEFAULT_RESERVED_USERNAME);
+        return defaultReservedUsername;
+    }
+
 
     /**
      * Get UUID by the API Identifier.
