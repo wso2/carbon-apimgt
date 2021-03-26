@@ -1913,18 +1913,19 @@ public class ImportUtils {
             if (Boolean.TRUE.equals(overwriteAPIProduct) && targetApiProduct != null) {
                 log.info("Existing API Product found, attempting to update it...");
                 importedApiProduct = PublisherCommonUtils.updateApiProduct(targetApiProduct, importedApiProductDTO,
-                        RestApiCommonUtil.getLoggedInUserProvider(), userName);
+                        RestApiCommonUtil.getLoggedInUserProvider(), userName, currentTenantDomain);
             } else {
                 if (targetApiProduct == null && Boolean.TRUE.equals(overwriteAPIProduct)) {
                     log.info("Cannot find : " + importedApiProductDTO.getName() + ". Creating it.");
                 }
                 importedApiProduct = PublisherCommonUtils
                         .addAPIProductWithGeneratedSwaggerDefinition(importedApiProductDTO,
-                                importedApiProductDTO.getProvider(), importedApiProductDTO.getProvider());
+                                importedApiProductDTO.getProvider());
             }
 
             // Add/update swagger of API Product
-            importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct, apiProvider);
+            importedApiProduct = updateApiProductSwagger(extractedFolderPath, importedApiProduct.getUuid(),
+                    importedApiProduct, apiProvider, currentTenantDomain);
 
             // Since Image, documents and client certificates are optional, exceptions are logged and ignored in
             // implementation
@@ -2307,8 +2308,8 @@ public class ImportUtils {
      * @throws FaultGatewaysException If an error occurs when updating the API to overwrite
      * @throws IOException            If an error occurs when loading the swagger file
      */
-    private static APIProduct updateApiProductSwagger(String pathToArchive, APIProduct importedApiProduct,
-                                                      APIProvider apiProvider)
+    private static APIProduct updateApiProductSwagger(String pathToArchive, String apiProductId, APIProduct
+            importedApiProduct, APIProvider apiProvider, String orgId)
             throws APIManagementException, FaultGatewaysException, IOException {
 
         String swaggerContent = loadSwaggerFile(pathToArchive);
@@ -2321,7 +2322,7 @@ public class ImportUtils {
         // This is required to make scopes get effected
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .updateAPIProduct(importedApiProduct);
-        apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, importedApiProduct);
+        apiProvider.updateAPIProductSwagger(apiProductId, apiToProductResourceMapping, importedApiProduct, orgId);
         return importedApiProduct;
     }
 }

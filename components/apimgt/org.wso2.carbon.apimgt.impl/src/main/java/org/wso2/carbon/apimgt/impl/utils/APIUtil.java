@@ -9812,7 +9812,9 @@ public final class APIUtil {
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
                     productVersion);
+            apiProductIdentifier.setUUID(artifact.getId());
             apiProduct = new APIProduct(apiProductIdentifier);
+            apiProduct.setUuid(artifact.getId());
             apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
