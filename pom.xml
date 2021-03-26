@@ -425,6 +425,18 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.andes.wso2</groupId>
+                <artifactId>andes-client</artifactId>
+                <version>${carbon.broker.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-transport-base</artifactId>
+                <version>${axis2.wso2.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.wso2.carbon.analytics-common</groupId>
                 <artifactId>org.wso2.carbon.databridge.agent</artifactId>
                 <version>${carbon.analytics.common.version}</version>
@@ -548,6 +560,12 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
@@ -1798,6 +1816,11 @@
                 <artifactId>swagger-request-validator-core</artifactId>
                 <version>${org.wso2.orbit.atlassian.oai.version}</version>
             </dependency>
+            <dependency>
+                <groupId>javax.jms</groupId>
+                <artifactId>javax.jms-api</artifactId>
+                <version>${javax.jms.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2066,5 +2089,6 @@
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <skip.aspectj>false</skip.aspectj>
+        <javax.jms.version>2.0.1</javax.jms.version>
     </properties>
 </project>
