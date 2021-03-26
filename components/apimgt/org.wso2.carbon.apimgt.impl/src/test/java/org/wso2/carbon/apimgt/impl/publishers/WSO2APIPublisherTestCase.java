@@ -154,7 +154,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(new File(apiArtifactDir)).when(importExportAPI)
                 .exportAPI(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
                         Matchers.anyString(), Matchers.anyBoolean(), Matchers.any(ExportFormat.class),
-                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean());
+                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString());
         //Test Unauthenticated scenario for publishing API
         Mockito.doReturn(HttpStatus.SC_UNAUTHORIZED).when(statusLine).getStatusCode();
         String unauthenticatedResponse = "{\"code\":401,\"message\":\"\",\"description\":\"Unauthenticated request\"," +
@@ -191,13 +191,25 @@ public class WSO2APIPublisherTestCase {
         PowerMockito.doThrow(new APIImportExportException("Error while exporting API")).when(importExportAPI)
                 .exportAPI(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
                         Matchers.anyString(), Matchers.anyBoolean(), Matchers.any(ExportFormat.class),
-                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean());
+                        Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyBoolean(), Matchers.anyString());
         try {
             wso2APIPublisher.publishToStore(api, store);
             Assert.fail("APIManagement exception not thrown for error scenario");
         } catch (APIManagementException e) {
             String errorMsg = "Error while exporting API: " + api.getId().getApiName() + " version: "
                     + api.getId().getVersion();
+            Assert.assertEquals(errorMsg, e.getMessage());
+        }
+
+        PowerMockito.doThrow(
+                new UserStoreException("Error in getting the tenant id with tenant domain: " + tenantDomain + "."))
+                .when(tenantManager).getTenantId(tenantDomain);
+        try {
+            wso2APIPublisher.publishToStore(api, store);
+            Assert.fail("APIManagement exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            String errorMsg = "Error while getting tenantId for tenant domain: " + tenantDomain
+                    + " when exporting API:" + api.getId().getApiName() + " version: " + api.getId().getVersion();
             Assert.assertEquals(errorMsg, e.getMessage());
         }
     }

@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -112,6 +113,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -178,9 +180,12 @@ public class ImportUtils {
             if (paramsConfigObject != null) {
                 importedApiDTO = APIControllerUtil.injectEnvParamsToAPI(importedApiDTO, paramsConfigObject,
                         extractedFolderPath);
-                JsonElement deploymentsParam = paramsConfigObject.get(ImportExportConstants.DEPLOYMENT_ENVIRONMENTS);
-                if (deploymentsParam != null && !deploymentsParam.isJsonNull()) {
-                    deploymentInfoArray = deploymentsParam.getAsJsonArray();
+                if (!isAdvertiseOnlyAPI(importedApiDTO)) {
+                    JsonElement deploymentsParam = paramsConfigObject
+                            .get(ImportExportConstants.DEPLOYMENT_ENVIRONMENTS);
+                    if (deploymentsParam != null && !deploymentsParam.isJsonNull()) {
+                        deploymentInfoArray = deploymentsParam.getAsJsonArray();
+                    }
                 }
             }
 
@@ -215,6 +220,10 @@ public class ImportUtils {
 
             API targetApi = retrieveApiToOverwrite(importedApiDTO.getName(), importedApiDTO.getVersion(),
                     currentTenantDomain, apiProvider, Boolean.TRUE);
+
+            if (isAdvertiseOnlyAPI(importedApiDTO)) {
+                processAdvertiseOnlyPropertiesInDTO(importedApiDTO, tokenScopes);
+            }
 
             // If the overwrite is set to true (which means an update), retrieve the existing API
             if (Boolean.TRUE.equals(overwrite) && targetApi != null) {
@@ -276,17 +285,20 @@ public class ImportUtils {
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
-            addAPISequences(extractedFolderPath, importedApi, registry);
-            addAPISpecificSequences(extractedFolderPath, registry, importedApi.getId());
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider, registry);
-            addEndpointCertificates(extractedFolderPath, importedApi, apiProvider, tenantId);
             addSOAPToREST(extractedFolderPath, importedApi, registry);
 
-            if (log.isDebugEnabled()) {
-                log.debug("Mutual SSL enabled. Importing client certificates.");
+            if (!isAdvertiseOnlyAPI(importedApiDTO)) {
+                addAPISequences(extractedFolderPath, importedApi, registry);
+                addAPISpecificSequences(extractedFolderPath, registry, importedApi.getId());
+                addEndpointCertificates(extractedFolderPath, importedApi, apiProvider, tenantId);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Mutual SSL enabled. Importing client certificates.");
+                }
+                addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
+                        importedApi.getId().getProviderName());
             }
-            addClientCertificates(extractedFolderPath, apiProvider, preserveProvider,
-                    importedApi.getId().getProviderName());
 
             // Change API lifecycle if state transition is required
             if (StringUtils.isNotEmpty(lifecycleAction)) {
@@ -300,7 +312,7 @@ public class ImportUtils {
             }
             importedApi.setStatus(targetStatus);
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            if (deploymentInfoArray == null) {
+            if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
                 //If the params have not overwritten the deployment environments, yaml file will be read
                 deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
             }
@@ -384,7 +396,32 @@ public class ImportUtils {
     }
 
     /**
-     * This method is used to validate the Gateway environments from the deplotment enviornments file. Gateway
+     * Check whether an advertise only API
+     *
+     * @param importedApiDTO API DTO to import
+     */
+    public static boolean isAdvertiseOnlyAPI(APIDTO importedApiDTO) {
+        return importedApiDTO.getAdvertiseInfo() != null && importedApiDTO.getAdvertiseInfo().isAdvertised();
+    }
+    
+    /**
+     * Process the properties specific to advertise only APIs
+     *
+     * @param importedApiDTO               API DTO to import
+     * @param tokenScopes Scopes of the token
+     */
+    private static void processAdvertiseOnlyPropertiesInDTO(APIDTO importedApiDTO, String[] tokenScopes) {
+        if (!Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE)) {
+            log.error("Since the user does not have the required scope: " + RestApiConstants.ADMIN_SCOPE
+                    + ". Original DevPortal URL (redirect URL):" + importedApiDTO.getAdvertiseInfo()
+                    .getOriginalDevPortalUrl() + " of " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
+                    + " will be removed.");
+            importedApiDTO.getAdvertiseInfo().setOriginalDevPortalUrl(null);
+        }
+    }
+
+    /**
+     * This method is used to validate the Gateway environments from the deployment environments file. Gateway
      * environments will be validated with a set of all the labels and environments of the tenant domain. If
      * environment is not found in this set, it will be skipped with an error message in the console. This method is
      * common to both APIs and API Products

@@ -59,6 +59,8 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -128,19 +130,33 @@ public class WSO2APIPublisher implements APIPublisher {
     private File exportAPIArchive(API api) throws APIManagementException {
 
         File apiArchive;
+        String tenantDomain = null;
+        int tenantId;
 
         try {
+            // Get tenant domain and ID to generate the original DevPortal URL (redirect URL) for the original Store
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
+                    api.getId().getProviderName()));
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+
             //Export API as an archive file and set it as a multipart entity in the request
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
             apiArchive = importExportAPI.exportAPI(api.getUuid(), api.getId().getName(), api.getId().getVersion(),
                     String.valueOf(api.getRevisionId()), api.getId().getProviderName(), Boolean.TRUE, ExportFormat.JSON,
-                    Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE);
+                    Boolean.TRUE, Boolean.TRUE, Boolean.FALSE,
+                    getExternalStoreRedirectURLForAPI(tenantId, api.getUuid()));
             if (log.isDebugEnabled()) {
                 log.debug("API successfully exported to file: " + apiArchive.getName());
             }
         } catch (APIImportExportException e) {
             String errorMessage = "Error while exporting API: " + api.getId().getApiName() + " version: "
                     + api.getId().getVersion();
+            throw new APIManagementException(errorMessage, e);
+        } catch (UserStoreException e) {
+            String errorMessage =
+                    "Error while getting tenantId for tenant domain: " + tenantDomain + " when exporting API:" + api.getId().getApiName() + " version: " + api.getId().getVersion();
+            log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, e);
         }
         return apiArchive;

@@ -43,14 +43,15 @@ public interface ImportExportAPI {
      * @param format               Format of output documents. Can be YAML or JSON
      * @param preserveDocs         Preserve documentation on Export.
      * @param exportLatestRevision Export the latest revision.
-     * @param isAdvertiseOnly      Whether an advertise only API.
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
      * @return API artifact.
      * @throws APIManagementException
      * @throws APIImportExportException
      */
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
             boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-            boolean exportLatestRevision, boolean isAdvertiseOnly)
+            boolean exportLatestRevision, String originalDevPortalUrl)
             throws APIManagementException, APIImportExportException;
 
 

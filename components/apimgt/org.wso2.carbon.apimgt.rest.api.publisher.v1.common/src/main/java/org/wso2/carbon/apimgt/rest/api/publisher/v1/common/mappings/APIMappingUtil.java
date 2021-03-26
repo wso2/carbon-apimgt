@@ -86,6 +86,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentLis
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -204,8 +205,11 @@ public class APIMappingUtil {
         if (dto.isEnableStore() != null) {
             model.setEnableStore(dto.isEnableStore());
         }
-        if (dto.isAdvertiseOnly() != null) {
-            model.setAdvertiseOnly(dto.isAdvertiseOnly());
+        if (dto.getAdvertiseInfo() != null) {
+            AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
+            model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
+            model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
+            model.setApiOwner(advertiseInfoDTO.getApiOwner());
         }
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
@@ -862,8 +866,14 @@ public class APIMappingUtil {
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableStore(model.isEnableStore());
-        dto.setAdvertiseOnly(model.isAdvertiseOnly());
         dto.setTestKey(model.getTestKey());
+        if (model.isAdvertiseOnly()) {
+            AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+            advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
+            advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
+            advertiseInfoDTO.setApiOwner(model.getApiOwner());
+            dto.setAdvertiseInfo(advertiseInfoDTO);
+        }
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {
             dto.setResponseCachingEnabled(Boolean.TRUE);
         } else {
