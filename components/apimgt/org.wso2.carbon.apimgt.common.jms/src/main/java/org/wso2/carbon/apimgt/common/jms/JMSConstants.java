@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.common.jms;
 
 import org.apache.axis2.client.Options;
 
+/**
+ * JMS related constants.
+ */
 public class JMSConstants {
 
     /**

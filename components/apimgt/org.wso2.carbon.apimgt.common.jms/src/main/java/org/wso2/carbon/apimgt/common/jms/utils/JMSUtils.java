@@ -23,6 +23,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.JMSConstants;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -43,15 +49,9 @@ import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.naming.Reference;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 
 /**
- * Miscellaneous methods used for the JMS transport
+ * Miscellaneous methods used for the JMS transport.
  */
 public class JMSUtils extends BaseUtils {
 
@@ -105,9 +105,9 @@ public class JMSUtils extends BaseUtils {
             try {
                 assert replyDestination != null;
                 log.debug("Expecting a response to JMS Destination : " +
-                          (replyDestination instanceof Queue ?
-                           ((Queue) replyDestination).getQueueName() :
-                           ((Topic) replyDestination).getTopicName()));
+                        (replyDestination instanceof Queue ?
+                                ((Queue) replyDestination).getQueueName() :
+                                ((Topic) replyDestination).getTopicName()));
             } catch (JMSException ignore) {
             }
         }
@@ -133,7 +133,7 @@ public class JMSUtils extends BaseUtils {
         for (String name : messageConfiguration.keySet()) {
 
             if (name.startsWith(JMSConstants.JMSX_PREFIX) &&
-                !(name.equals(JMSConstants.JMSX_GROUP_ID) || name.equals(JMSConstants.JMSX_GROUP_SEQ))) {
+                    !(name.equals(JMSConstants.JMSX_GROUP_ID) || name.equals(JMSConstants.JMSX_GROUP_SEQ))) {
                 continue;
             }
 
@@ -212,7 +212,7 @@ public class JMSUtils extends BaseUtils {
                 Destination dest = message.getJMSDestination();
                 map.put(JMSConstants.JMS_DESTINATION,
                         dest instanceof Queue ?
-                        ((Queue) dest).getQueueName() : ((Topic) dest).getTopicName());
+                                ((Queue) dest).getQueueName() : ((Topic) dest).getTopicName());
             }
         } catch (JMSException ignore) {
         }
@@ -249,7 +249,7 @@ public class JMSUtils extends BaseUtils {
                 Destination dest = message.getJMSReplyTo();
                 map.put(JMSConstants.JMS_REPLY_TO,
                         dest instanceof Queue ?
-                        ((Queue) dest).getQueueName() : ((Topic) dest).getTopicName());
+                                ((Queue) dest).getQueueName() : ((Topic) dest).getTopicName());
             }
         } catch (JMSException ignore) {
         }
@@ -364,12 +364,12 @@ public class JMSUtils extends BaseUtils {
             if (object instanceof Reference) {
                 Reference ref = (Reference) object;
                 BaseUtils.handleException("JNDI failed to de-reference Reference with name " +
-                                          name + "; is the factory " + ref.getFactoryClassName() +
-                                          " in your classpath?");
+                        name + "; is the factory " + ref.getFactoryClassName() +
+                        " in your classpath?");
                 return null;
             } else {
                 BaseUtils.handleException("JNDI lookup of name " + name + " returned a " +
-                                          object.getClass().getName() + " while a " + clazz + " was expected");
+                        object.getClass().getName() + " while a " + clazz + " was expected");
                 return null;
             }
         }
@@ -398,7 +398,7 @@ public class JMSUtils extends BaseUtils {
         Connection connection = null;
         if (log.isDebugEnabled()) {
             log.debug("Creating a " + (isQueue ? "Queue" : "Topic") +
-                      "Connection using credentials : (" + user + "/" + pass + ")");
+                    "Connection using credentials : (" + user + "/" + pass + ")");
         }
 
         if (jmsSpec11 || isQueue == null) {
@@ -572,8 +572,8 @@ public class JMSUtils extends BaseUtils {
         } catch (NameNotFoundException e) {
             try {
                 return JMSUtils.lookup(context, Destination.class,
-                                       (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(destinationType) ?
-                                        "dynamicTopics/" : "dynamicQueues/") + destinationName);
+                        (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(destinationType) ?
+                                "dynamicTopics/" : "dynamicQueues/") + destinationName);
             } catch (NamingException x) {
                 log.warn("Cannot locate destination : " + destinationName);
                 throw x;
@@ -583,77 +583,78 @@ public class JMSUtils extends BaseUtils {
             throw e;
         }
     }
-    
+
     /**
      * Masks the sensitive parameters in axis2.xml configs for JMS for error logging. Do not use for info logs.
+     *
      * @param sensitiveParamsTable Hash table with axis2 configs
      * @return the hash table with masked values.
      */
-	public static Hashtable<String, String> maskAxis2ConfigSensitiveParameters(
-			Hashtable<String, String> sensitiveParamsTable) {
+    public static Hashtable<String, String> maskAxis2ConfigSensitiveParameters(
+            Hashtable<String, String> sensitiveParamsTable) {
 
-		Hashtable<String, String> maskedParamsTable = new Hashtable<String, String>(sensitiveParamsTable);
-		if (maskedParamsTable.get(JMSConstants.PARAM_JMS_PASSWORD) != null) {
-			maskedParamsTable.put(JMSConstants.PARAM_JMS_PASSWORD, MASKING_STRING);
-		}
-		if (sensitiveParamsTable.get(JMSConstants.PARAM_NAMING_SECURITY_CREDENTIALS) != null) {
-			maskedParamsTable.put(JMSConstants.PARAM_NAMING_SECURITY_CREDENTIALS, MASKING_STRING);
-		}
-		if (sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_QUEUE) != null) {
-			maskedParamsTable.put(JMSConstants.CONNECTION_STRING_QUEUE, getMaskedConnectionString(
-					sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_QUEUE), MASKING_STRING));
-		}
-		if (sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_TOPIC) != null) {			
-			maskedParamsTable.put(JMSConstants.CONNECTION_STRING_TOPIC, getMaskedConnectionString(
-					sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_TOPIC), MASKING_STRING));
-		}
+        Hashtable<String, String> maskedParamsTable = new Hashtable<String, String>(sensitiveParamsTable);
+        if (maskedParamsTable.get(JMSConstants.PARAM_JMS_PASSWORD) != null) {
+            maskedParamsTable.put(JMSConstants.PARAM_JMS_PASSWORD, MASKING_STRING);
+        }
+        if (sensitiveParamsTable.get(JMSConstants.PARAM_NAMING_SECURITY_CREDENTIALS) != null) {
+            maskedParamsTable.put(JMSConstants.PARAM_NAMING_SECURITY_CREDENTIALS, MASKING_STRING);
+        }
+        if (sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_QUEUE) != null) {
+            maskedParamsTable.put(JMSConstants.CONNECTION_STRING_QUEUE, getMaskedConnectionString(
+                    sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_QUEUE), MASKING_STRING));
+        }
+        if (sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_TOPIC) != null) {
+            maskedParamsTable.put(JMSConstants.CONNECTION_STRING_TOPIC, getMaskedConnectionString(
+                    sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_TOPIC), MASKING_STRING));
+        }
 
-		return maskedParamsTable;
-	}
-	
-	private static String getMaskedConnectionString(String connectionString, String maskString) {
-		String maskedConnectionString;
-		try {
-			URI url = new URI(connectionString);
-			String userInfo = url.getUserInfo();
-			if (userInfo == null) {
-				// Fix for Java 1.5 which doesn't parse UserInfo for non http
-				// URIs
-				userInfo = url.getAuthority();
+        return maskedParamsTable;
+    }
 
-				if (userInfo != null) {
-					int atIndex = userInfo.indexOf('@');
+    private static String getMaskedConnectionString(String connectionString, String maskString) {
+        String maskedConnectionString;
+        try {
+            URI url = new URI(connectionString);
+            String userInfo = url.getUserInfo();
+            if (userInfo == null) {
+                // Fix for Java 1.5 which doesn't parse UserInfo for non http
+                // URIs
+                userInfo = url.getAuthority();
 
-					if (atIndex != -1) {
-						userInfo = userInfo.substring(0, atIndex);
-					} else {
-						userInfo = null;
-					}
-				}
-			}
+                if (userInfo != null) {
+                    int atIndex = userInfo.indexOf('@');
 
-			if (userInfo == null) {
-				// url does not contain any user related information. return the
-				// url as it is
-				return connectionString;
-			} else {
-				// user info = user:pass
-				int colonIndex = userInfo.indexOf(':');
-				if (colonIndex == -1) {
-					// password is not in the url. 
-					return connectionString.replace(userInfo, maskString);
-				} else {				
-					return connectionString.replace(userInfo, maskString + ":" + maskString);
-				}
-			}
-		} catch (URISyntaxException ignore) {
-			// If the provided url cannot be parsed, then a custom message will
-			// be printed instead of the invalid url. 
-			log.error("Error while parsing the JMS connection url");
-			maskedConnectionString = "Invalid connection url";
-		}
+                    if (atIndex != -1) {
+                        userInfo = userInfo.substring(0, atIndex);
+                    } else {
+                        userInfo = null;
+                    }
+                }
+            }
 
-		return maskedConnectionString;
-	}
+            if (userInfo == null) {
+                // url does not contain any user related information. return the
+                // url as it is
+                return connectionString;
+            } else {
+                // user info = user:pass
+                int colonIndex = userInfo.indexOf(':');
+                if (colonIndex == -1) {
+                    // password is not in the url.
+                    return connectionString.replace(userInfo, maskString);
+                } else {
+                    return connectionString.replace(userInfo, maskString + ":" + maskString);
+                }
+            }
+        } catch (URISyntaxException ignore) {
+            // If the provided url cannot be parsed, then a custom message will
+            // be printed instead of the invalid url.
+            log.error("Error while parsing the JMS connection url");
+            maskedConnectionString = "Invalid connection url";
+        }
+
+        return maskedConnectionString;
+    }
 
 }

@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.common.jms.JMSConstants;
 import org.wso2.carbon.apimgt.common.jms.JmsRunTimeException;
 import org.wso2.carbon.apimgt.common.jms.utils.JMSUtils;
 
+import java.util.Hashtable;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -33,7 +34,6 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.util.Hashtable;
 
 /**
  * Encapsulate a JMS Connection factory definition within an Axis2.xml  *

@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.factory.JMSConnectionFactory;
 import org.wso2.carbon.apimgt.common.jms.factory.JMSTaskManagerFactory;
 
-import javax.jms.MessageListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,7 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import javax.jms.MessageListener;
 
+/**
+ * Handler for JMS transport initialization and subscription.
+ */
 public class JMSTransportHandler {
 
     private static final Log log = LogFactory.getLog(JMSTransportHandler.class);

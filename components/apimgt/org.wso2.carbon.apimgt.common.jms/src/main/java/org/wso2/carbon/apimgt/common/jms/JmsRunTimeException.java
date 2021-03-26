@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.common.jms;
 
+/**
+ * Runtime exception definition for jms related exceptions.
+ */
 public class JmsRunTimeException extends RuntimeException {
     public JmsRunTimeException(String s, Exception e) {
     }

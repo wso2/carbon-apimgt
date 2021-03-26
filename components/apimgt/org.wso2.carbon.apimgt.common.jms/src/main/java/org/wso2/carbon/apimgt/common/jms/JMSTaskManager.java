@@ -24,6 +24,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.jms.utils.JMSUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -41,12 +47,6 @@ import javax.transaction.NotSupportedException;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * JMSTaskManager instance that will create, manage and also destroy
@@ -219,7 +219,7 @@ public class JMSTaskManager {
     /**
      * State of this Task Manager
      */
-    private volatile int JMSTaskManagerState = STATE_STOPPED;
+    private volatile int jmsTaskManagerState = STATE_STOPPED;
     /**
      * Number of invoker tasks active
      */
@@ -254,7 +254,7 @@ public class JMSTaskManager {
      */
     public synchronized void start() {
 
-        if (JMSTaskManagerState == STATE_PAUSED) {
+        if (jmsTaskManagerState == STATE_PAUSED) {
             log.info("Attempt to re-start paused TaskManager is ignored. Please use resume instead");
             return;
         }
@@ -267,28 +267,28 @@ public class JMSTaskManager {
         if (cacheLevel == JMSConstants.CACHE_AUTO) {
             cacheLevel =
                     transactionality == BaseConstants.TRANSACTION_NONE ?
-                    JMSConstants.CACHE_CONSUMER : JMSConstants.CACHE_NONE;
+                            JMSConstants.CACHE_CONSUMER : JMSConstants.CACHE_NONE;
         }
         switch (cacheLevel) {
             case JMSConstants.CACHE_NONE:
                 log.debug("No JMS resources will be cached/shared between poller " +
-                          "worker tasks of " + jmsConsumerName);
+                        "worker tasks of " + jmsConsumerName);
                 break;
             case JMSConstants.CACHE_CONNECTION:
                 log.debug("Only the JMS Connection will be cached and shared between *all* " +
-                          "poller task invocations");
+                        "poller task invocations");
                 break;
             case JMSConstants.CACHE_SESSION:
                 log.debug("The JMS Connection and Session will be cached and shared between " +
-                          "successive poller task invocations");
+                        "successive poller task invocations");
                 break;
             case JMSConstants.CACHE_CONSUMER:
                 log.debug("The JMS Connection, Session and MessageConsumer will be cached and " +
-                          "shared between successive poller task invocations");
+                        "shared between successive poller task invocations");
                 break;
             default: {
                 handleException("Invalid cache level : " + cacheLevel +
-                                " for  " + jmsConsumerName);
+                        " for  " + jmsConsumerName);
             }
         }
 
@@ -296,7 +296,7 @@ public class JMSTaskManager {
             workerPool.execute(new MessageListenerTask());
         }
 
-        JMSTaskManagerState = STATE_STARTED;
+        jmsTaskManagerState = STATE_STARTED;
         log.info("Task manager for " + jmsConsumerName + " [re-]initialized");
     }
 
@@ -309,8 +309,8 @@ public class JMSTaskManager {
             log.debug("Stopping JMSTaskManager for " + jmsConsumerName);
         }
 
-        if (JMSTaskManagerState != STATE_FAILURE) {
-            JMSTaskManagerState = STATE_SHUTTING_DOWN;
+        if (jmsTaskManagerState != STATE_FAILURE) {
+            jmsTaskManagerState = STATE_SHUTTING_DOWN;
         }
 
         synchronized (pollingTasks) {
@@ -344,8 +344,8 @@ public class JMSTaskManager {
             log.warn("Unable to shutdown all polling tasks of " + jmsConsumerName);
         }
 
-        if (JMSTaskManagerState != STATE_FAILURE) {
-            JMSTaskManagerState = STATE_STOPPED;
+        if (jmsTaskManagerState != STATE_FAILURE) {
+            jmsTaskManagerState = STATE_STOPPED;
         }
         log.info("Task manager for jms consumer " + receiveTimeout + " shutdown");
     }
@@ -388,8 +388,8 @@ public class JMSTaskManager {
      * e do not have any idle tasks - i.e. scale up listening
      */
     private void scheduleNewTaskIfAppropriate() {
-        if (JMSTaskManagerState == STATE_STARTED &&
-            pollingTasks.size() < getMaxConcurrentConsumers() && getIdleTaskCount() == 0) {
+        if (jmsTaskManagerState == STATE_STARTED &&
+                pollingTasks.size() < getMaxConcurrentConsumers() && getIdleTaskCount() == 0) {
             workerPool.execute(new MessageListenerTask());
         }
     }
@@ -511,8 +511,8 @@ public class JMSTaskManager {
 
             try {
                 while (isActive() &&
-                       (getMaxMessagesPerTask() < 0 || messageCount < getMaxMessagesPerTask()) &&
-                       (getConcurrentConsumers() == 1 || idleExecutionCount < getIdleTaskExecutionLimit())) {
+                        (getMaxMessagesPerTask() < 0 || messageCount < getMaxMessagesPerTask()) &&
+                        (getConcurrentConsumers() == 1 || idleExecutionCount < getIdleTaskExecutionLimit())) {
 
                     UserTransaction ut = null;
                     try {
@@ -536,13 +536,13 @@ public class JMSTaskManager {
                         if (message != null) {
                             try {
                                 log.trace("<<<<<<< READ message with Message ID : " +
-                                          message.getJMSMessageID() + " from : " + destination +
-                                          " by Thread ID : " + Thread.currentThread().getId());
+                                        message.getJMSMessageID() + " from : " + destination +
+                                        " by Thread ID : " + Thread.currentThread().getId());
                             } catch (JMSException ignore) {
                             }
                         } else {
                             log.trace("No message received by Thread ID : " +
-                                      Thread.currentThread().getId() + " for destination : " + destination);
+                                    Thread.currentThread().getId() + " for destination : " + destination);
                         }
                     }
 
@@ -564,14 +564,14 @@ public class JMSTaskManager {
 
                 if (log.isTraceEnabled()) {
                     log.trace("Listener task with Thread ID : " + Thread.currentThread().getId() +
-                              " is stopping after processing : " + messageCount + " messages :: " +
-                              " isActive : " + isActive() + " maxMessagesPerTask : " +
-                              getMaxMessagesPerTask() + " concurrentConsumers : " + getConcurrentConsumers() +
-                              " idleExecutionCount : " + idleExecutionCount + " idleTaskExecutionLimit : " +
-                              getIdleTaskExecutionLimit());
+                            " is stopping after processing : " + messageCount + " messages :: " +
+                            " isActive : " + isActive() + " maxMessagesPerTask : " +
+                            getMaxMessagesPerTask() + " concurrentConsumers : " + getConcurrentConsumers() +
+                            " idleExecutionCount : " + idleExecutionCount + " idleTaskExecutionLimit : " +
+                            getIdleTaskExecutionLimit());
                 } else if (log.isDebugEnabled()) {
                     log.debug("Listener task with Thread ID : " + Thread.currentThread().getId() +
-                              " is stopping after processing : " + messageCount + " messages");
+                            " is stopping after processing : " + messageCount + " messages");
                 }
 
                 // Close the consumer and session before decrementing activeTaskCount.
@@ -617,7 +617,7 @@ public class JMSTaskManager {
 
             if (log.isDebugEnabled()) {
                 log.debug("Waiting for a message for " + jmsConsumerName + " - duration : "
-                          + (getReceiveTimeout() < 0 ? "unlimited" : (getReceiveTimeout() + "ms")));
+                        + (getReceiveTimeout() < 0 ? "unlimited" : (getReceiveTimeout() + "ms")));
             }
 
             try {
@@ -686,7 +686,7 @@ public class JMSTaskManager {
                     }
                 } catch (JMSException e) {
                     logError("Error " + (commitOrAck ? "committing" : "rolling back") +
-                             " local session txn for message : " + messageId, e);
+                            " local session txn for message : " + messageId, e);
                 }
 
                 // if a JTA transaction was being used, commit it or rollback
@@ -706,7 +706,7 @@ public class JMSTaskManager {
                     }
                 } catch (Exception e) {
                     logError("Error " + (commitOrAck ? "committing" : "rolling back") +
-                             " JTA txn for message : " + messageId + " from the session", e);
+                            " JTA txn for message : " + messageId + " from the session", e);
                 }
 
                 // close the consumer
@@ -740,7 +740,7 @@ public class JMSTaskManager {
             }
 
             // if we failed while active, update state to show failure
-            setJMSTaskManagerState(STATE_FAILURE);
+            setJmsTaskManagerState(STATE_FAILURE);
             log.error("JMS Connection failed : " + j.getMessage() + " - shutting down worker tasks");
 
             int r = 1;
@@ -769,7 +769,7 @@ public class JMSTaskManager {
                 if (!connected) {
                     retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
                     log.error("Reconnection attempt : " + (r++) + " for " + jmsConsumerName +
-                              " failed. Next retry in " + (retryDuration / 1000) + " seconds");
+                            " failed. Next retry in " + (retryDuration / 1000) + " seconds");
                     if (retryDuration > maxReconnectDuration) {
                         retryDuration = maxReconnectDuration;
                     }
@@ -781,7 +781,7 @@ public class JMSTaskManager {
                 } else {
                     isOnExceptionError = false;
                     log.info("Reconnection attempt: " + r + " for " + jmsConsumerName +
-                             " was successful!");
+                            " was successful!");
                 }
 
 
@@ -872,7 +872,7 @@ public class JMSTaskManager {
          */
         private void closeConnection() {
             if (connection != null &&
-                cacheLevel < JMSConstants.CACHE_CONNECTION) {
+                    cacheLevel < JMSConstants.CACHE_CONNECTION) {
                 try {
                     if (log.isDebugEnabled()) {
                         log.debug("Closing non-shared JMS connection for " + jmsConsumerName);
@@ -893,7 +893,7 @@ public class JMSTaskManager {
          */
         private void closeSession(boolean forced) {
             if (session != null &&
-                (cacheLevel < JMSConstants.CACHE_SESSION || forced)) {
+                    (cacheLevel < JMSConstants.CACHE_SESSION || forced)) {
                 try {
                     if (log.isDebugEnabled()) {
                         log.debug("Closing non-shared JMS session");
@@ -914,7 +914,7 @@ public class JMSTaskManager {
          */
         private void closeConsumer(boolean forced) {
             if (consumer != null &&
-                (cacheLevel < JMSConstants.CACHE_CONSUMER || forced)) {
+                    (cacheLevel < JMSConstants.CACHE_CONSUMER || forced)) {
                 try {
                     if (log.isDebugEnabled()) {
                         log.debug("Closing non-shared JMS consumer");
@@ -941,8 +941,8 @@ public class JMSTaskManager {
                         getInitialContext(), ConnectionFactory.class, getConnFactoryJNDIName());
                 log.debug("Connected to the JMS connection factory : " + getConnFactoryJNDIName());
             } catch (NamingException e) {
-				handleException("Error looking up connection factory : " + getConnFactoryJNDIName()
-						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
+                handleException("Error looking up connection factory : " + getConnFactoryJNDIName()
+                        + " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
 
             Connection connection = null;
@@ -966,8 +966,8 @@ public class JMSTaskManager {
                         log.error("Error when cleaning up connection:" + ex.getMessage(), e);
                     }
                 }
-				handleException("Error acquiring a JMS connection to : " + getConnFactoryJNDIName()
-						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
+                handleException("Error acquiring a JMS connection to : " + getConnFactoryJNDIName()
+                        + " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
             return connection;
         }
@@ -1010,7 +1010,7 @@ public class JMSTaskManager {
                 MessageConsumer consumer = JMSUtils.createConsumer(
                         session, getDestination(session), isQueue(),
                         (isSubscriptionDurable() && getDurableSubscriberName() != null ?
-                         getDurableSubscriberName() : jmsConsumerName),
+                                getDurableSubscriberName() : jmsConsumerName),
                         getMessageSelector(), isPubSubNoLocal(), isSubscriptionDurable(), isJmsSpec11());
                 consumerCount.incrementAndGet();
                 return consumer;
@@ -1048,10 +1048,10 @@ public class JMSTaskManager {
             try {
                 context = getInitialContext();
                 destination = JMSUtils.lookupDestination(context, getDestinationJNDIName(),
-                                                         JMSUtils.getDestinationTypeAsString(destinationType));
+                        JMSUtils.getDestinationTypeAsString(destinationType));
                 if (log.isDebugEnabled()) {
                     log.debug("JMS Destination with JNDI name : " + getDestinationJNDIName() +
-                              " found " + jmsConsumerName);
+                            " found " + jmsConsumerName);
                 }
             } catch (NamingException e) {
                 try {
@@ -1065,15 +1065,15 @@ public class JMSTaskManager {
                             break;
                         }
                         default: {
-						handleException("Error looking up JMS destination : " + getDestinationJNDIName()
-								+ " using JNDI properties : "
-								+ JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
+                            handleException("Error looking up JMS destination : " + getDestinationJNDIName()
+                                    + " using JNDI properties : "
+                                    + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
                         }
                     }
                 } catch (JMSException j) {
-					handleException("Error looking up JMS destination and auto " + "creating JMS destination : "
-							+ getDestinationJNDIName() + " using JNDI properties : "
-							+ JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
+                    handleException("Error looking up JMS destination and auto " + "creating JMS destination : "
+                            + getDestinationJNDIName() + " using JNDI properties : "
+                            + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
                 }
             }
         }
@@ -1096,8 +1096,8 @@ public class JMSTaskManager {
                 return
                         JMSUtils.lookup(context, UserTransaction.class, getUserTransactionJNDIName());
             } catch (NamingException e) {
-				handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName()
-						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
+                handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName()
+                        + " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
         }
 
@@ -1110,8 +1110,8 @@ public class JMSTaskManager {
                     log.debug("Acquired shared UserTransaction for " + jmsConsumerName);
                 }
             } catch (NamingException e) {
-				handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName()
-						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
+                handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName()
+                        + " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
         }
         return sharedUserTransaction;
@@ -1119,7 +1119,7 @@ public class JMSTaskManager {
 
     // -------------------- trivial methods ---------------------
     private boolean isSTMActive() {
-        return JMSTaskManagerState == STATE_STARTED;
+        return jmsTaskManagerState == STATE_STARTED;
     }
 
     /**
@@ -1401,7 +1401,7 @@ public class JMSTaskManager {
         return consumerCount.get();
     }
 
-    public void setJMSTaskManagerState(int JMSTaskManagerState) {
-        this.JMSTaskManagerState = JMSTaskManagerState;
+    public void setJmsTaskManagerState(int jmsTaskManagerState) {
+        this.jmsTaskManagerState = jmsTaskManagerState;
     }
 }
