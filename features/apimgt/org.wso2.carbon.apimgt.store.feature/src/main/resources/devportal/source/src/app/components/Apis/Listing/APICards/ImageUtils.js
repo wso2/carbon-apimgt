@@ -1,8 +1,5 @@
-import MaterialIcons from 'MaterialIcons';
-
 const getIcon = (key, category, theme, api) => {
     let IconElement;
-    let count;
 
     // Creating the icon
     if (key && category) {
