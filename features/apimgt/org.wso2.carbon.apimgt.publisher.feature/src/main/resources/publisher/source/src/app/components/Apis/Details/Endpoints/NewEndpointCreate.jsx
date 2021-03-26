@@ -40,7 +40,7 @@ const styles = (theme) => ({
     },
     endpointTypeCard: {
         margin: theme.spacing(1),
-        maxWidth: theme.spacing(32),
+        maxWidth: theme.spacing(30),
         transition: 'box-shadow 0.3s ease-in-out',
         height: theme.spacing(40),
         display: 'flex',

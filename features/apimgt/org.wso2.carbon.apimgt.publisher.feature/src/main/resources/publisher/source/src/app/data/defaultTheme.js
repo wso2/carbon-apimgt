@@ -72,7 +72,7 @@ export default {
     palette: {
         primary: {
             // light: will be calculated from palette.primary.main,
-            main: '#15b8cf',
+            main: '#006E9C',
             // dark: will be calculated from palette.primary.main,
             // contrastText: will be calculated to contrast with palette.primary.main
         },
@@ -125,7 +125,7 @@ export default {
                                                 To disable one option for an example if you want to disable grid
                                                 completely and get rid of the toggle buttons use ['list']. */
         leftMenu: 'icon left', //  other values ('icon top', 'icon left', 'no icon', 'no text')
-        leftMenuIconSize: 24,
+        leftMenuIconSize: 20,
         leftMenuIconMainSize: 52,
         leftMenuTextStyle: 'capitalize',
         resourceChipColors: { // https://github.com/swagger-api/swagger-ui/blob/master/src/style/_variables.scss#L45-L52
@@ -138,8 +138,8 @@ export default {
             head: '#9012fe',
             trace: '#785446',
             disabled: '#ebebeb',
-            subscribe: '#61affe',
-            publish: '#49cc90',
+            sub: '#38a169',
+            pub: '#4299e1',
         },
         operationChipColor: {
             query: '#b3e6fe',
@@ -162,12 +162,12 @@ export default {
             width: 240,
             height: 140,
             backgrounds: [ // These backgrounds are use to generate the thumbnails.
-                { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
-                { prime: 0xf47f16ff, sub: 0xcddc39ff },
-                { prime: 0xf44236ff, sub: 0xfec107ff },
                 { prime: 0x2196f3ff, sub: 0xaeea00ff },
-                { prime: 0xff9700ff, sub: 0xffeb3cff },
-                { prime: 0xff9700ff, sub: 0xfe5722ff },
+                // { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
+                // { prime: 0xf47f16ff, sub: 0xcddc39ff },
+                // { prime: 0xf44236ff, sub: 0xfec107ff },
+                // { prime: 0xff9700ff, sub: 0xffeb3cff },
+                // { prime: 0xff9700ff, sub: 0xfe5722ff },
             ],
             document: {
                 icon: 'library_books',
@@ -179,7 +179,7 @@ export default {
         },
         // lifeCycleImage: '/site/public/images/logo.svg',
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
-        adminRole: 'admin',
+        adminRole: 'admin@carbon.super',
         commentsLimit: 5,
         maxCommentLength: 256,
         productSampleProgess: {
@@ -193,7 +193,6 @@ export default {
                 restApiIcon: '/site/public/images/landing-icons/restapi.svg',
                 soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
                 streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
-                websocketApiIcon: '/site/public/images/landing-icons/websocketapi.svg',
             },
             menu: {
                 primary: '#34679D',
@@ -207,6 +206,12 @@ export default {
             onboarding: {
                 buttonText: '#FF7300',
                 buttonBorder: '#FCA574',
+            },
+            icons: {
+                graphql: '/site/public/images/service_catalog/icons/graphql.svg',
+                asyncapi: '/site/public/images/service_catalog/icons/async.svg',
+                oas3: '/site/public/images/service_catalog/icons/oas3.png',
+                swagger: '/site/public/images/service_catalog/icons/swagger.svg',
             },
         },
     },

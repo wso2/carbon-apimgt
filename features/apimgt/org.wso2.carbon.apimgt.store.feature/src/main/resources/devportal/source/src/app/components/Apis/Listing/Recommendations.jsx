@@ -33,7 +33,7 @@ import ImageGenerator from './APICards/ImageGenerator';
 import RecommendedApiThumb from './RecommendedApiThumb';
 import { ApiContext } from '../Details/ApiContext';
 
-const styles = theme => ({
+const styles = (theme) => ({
     rowImageOverride: {
         '& .material-icons': {
             marginTop: 5,
@@ -68,6 +68,27 @@ class Recommendations extends React.Component {
             data: null,
             loading: true,
         };
+    }
+
+    /**
+     * @memberof Recommendations
+    */
+    componentDidMount() {
+        this.getData();
+    }
+
+    /**
+     * @memberof Recommendations
+     * @param {JSON} prevProps previous props
+    */
+    componentDidUpdate(prevProps) {
+        const { query, selectedTag } = this.props;
+        if (
+            query !== prevProps.query
+            || prevProps.selectedTag !== selectedTag
+        ) {
+            this.getData();
+        }
     }
 
     getMuiTheme = () => {
@@ -152,19 +173,6 @@ class Recommendations extends React.Component {
         return createMuiTheme(muiTheme);
     };
 
-    componentDidMount() {
-        this.getData();
-    }
-
-    componentDidUpdate(prevProps) {
-        const { query, selectedTag } = this.props;
-        if (
-            query !== prevProps.query ||
-            prevProps.selectedTag !== selectedTag
-        ) {
-            this.getData();
-        }
-    }
 
     // get data
     getData = () => {
@@ -225,6 +233,7 @@ class Recommendations extends React.Component {
                             const artifact = tableViewObj.state.data[tableMeta.rowIndex];
                             return <ImageGenerator api={artifact} width={30} height={30} />;
                         }
+                        return <span />;
                     },
                     sort: false,
                     filter: false,
@@ -249,7 +258,6 @@ class Recommendations extends React.Component {
                                 return (
                                     <Link
                                         to={'/apis/' + apiId + '/overview'}
-                                        className={classes.rowImageOverride}
                                         className={classes.apiNameLink}
                                     >
                                         <CustomIcon width={16} height={16} icon='api' strokeColor='#444444' />
@@ -259,6 +267,7 @@ class Recommendations extends React.Component {
                                 );
                             }
                         }
+                        return <span />;
                     },
                     sort: false,
                     filter: false,
@@ -286,8 +295,14 @@ class Recommendations extends React.Component {
                                             showSummary={false}
                                         />
                                     );
+                                } else {
+                                    return (<span />);
                                 }
+                            } else {
+                                return (<span />);
                             }
+                        } else {
+                            return (<span />);
                         }
                     },
                     sort: false,
@@ -309,6 +324,7 @@ class Recommendations extends React.Component {
             search: false,
         };
         if (gridView) {
+            // eslint-disable-next-line no-shadow
             options.customRowRender = (data, dataIndex, rowIndex, tableViewObj = this) => {
                 const artifact = tableViewObj.state.data[dataIndex];
                 if (artifact) {
@@ -344,4 +360,3 @@ class Recommendations extends React.Component {
 Recommendations.contextType = ApiContext;
 
 export default withSettings(injectIntl(withTheme(withStyles(styles)(Recommendations))));
-

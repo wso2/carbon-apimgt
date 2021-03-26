@@ -297,7 +297,7 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
     }
 
     @GET
-    @Path("/{apiProductId}/deployed-revision")
+    @Path("/{apiProductId}/deployments")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "List Deployments", notes = "List available deployed revision deployment details of an API Product ", response = APIRevisionDeploymentListDTO.class, authorizations = {
@@ -474,6 +474,23 @@ ApiProductsApiService delegate = new ApiProductsApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response updateAPIProduct(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "API object that needs to be added" ,required=true) APIProductDTO apIProductDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.updateAPIProduct(apiProductId, apIProductDTO, ifMatch, securityContext);
+    }
+
+    @PUT
+    @Path("/{apiProductId}/deployments/{deploymentId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update Deployment", notes = "Update deployment devportal visibility ", response = APIRevisionDeploymentDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Product Revisions",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Created. Successful response with the newly updated APIRevisionDeployment List object as the entity in the body. ", response = APIRevisionDeploymentDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response updateAPIProductDeployment(@ApiParam(value = "**API Product ID** consisting of the **UUID** of the API Product. Using the **UUID** in the API call is recommended. ",required=true) @PathParam("apiProductId") String apiProductId, @ApiParam(value = "Base64 URL encoded value of the name of an environment ",required=true) @PathParam("deploymentId") String deploymentId, @ApiParam(value = "Deployment object that needs to be updated" ) APIRevisionDeploymentDTO apIRevisionDeploymentDTO) throws APIManagementException{
+        return delegate.updateAPIProductDeployment(apiProductId, deploymentId, apIRevisionDeploymentDTO, securityContext);
     }
 
     @PUT

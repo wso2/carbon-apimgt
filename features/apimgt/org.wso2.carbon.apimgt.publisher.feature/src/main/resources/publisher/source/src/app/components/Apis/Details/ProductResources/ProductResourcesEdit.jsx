@@ -99,7 +99,7 @@ function ProductResourcesEdit() {
                     api={api}
                 />
                 <div className={classes.buttonWrapper}>
-                    <Grid container direction='row' alignItems='flex-start' spacing={4}>
+                    <Grid container direction='row' alignItems='flex-start' spacing={1}>
                         <Grid item>
                             <div>
                                 <Button variant='contained' color='primary' onClick={save} disabled={updating}>

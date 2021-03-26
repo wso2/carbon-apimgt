@@ -601,7 +601,7 @@ class APIDefinition extends React.Component {
                                 />
                             </Button>
                         ) : (
-                            !(graphQL || api.type === 'APIProduct') && (
+                            !(graphQL || api.type === API.CONSTS.APIProduct) && (
                                 <Button
                                     size='small'
                                     className={classes.button}
@@ -616,7 +616,7 @@ class APIDefinition extends React.Component {
                                 </Button>
                             )
                         )}
-                        {api.type !== 'APIProduct' && (
+                        {api.type !== API.CONSTS.APIProduct && (
                             <ImportDefinition setSchemaDefinition={this.setSchemaDefinition} />
                         )}
                         {api.serviceInfo && api.serviceInfo.outdated && (

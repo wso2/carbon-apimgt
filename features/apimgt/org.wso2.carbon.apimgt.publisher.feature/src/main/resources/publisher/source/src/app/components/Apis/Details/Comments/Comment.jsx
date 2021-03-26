@@ -30,10 +30,12 @@ import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
-import API from 'AppData/api';
+import CommentsAPI from 'AppData/Comments';
 import CommentEdit from './CommentEdit';
 import CommentOptions from './CommentOptions';
 import CommentAdd from './CommentAdd';
+
+dayjs.extend(relativeTime);
 
 const styles = (theme) => ({
     link: {
@@ -136,7 +138,7 @@ class Comment extends React.Component {
      */
     filterCommentToDelete(commentToFilter) {
         const { deleteComment } = this.state;
-        return commentToFilter.id === deleteComment.replyTo;
+        return commentToFilter.id === deleteComment.parentCommentId;
     }
 
     /**
@@ -216,28 +218,29 @@ class Comment extends React.Component {
      * @memberof Comment
      */
     handleClickDeleteComment() {
-        const apiClient = new API();
+        const apiClient = new CommentsAPI();
 
         const { deleteComment } = this.state;
         const {
             apiId, allComments, commentsUpdate, intl,
         } = this.props;
         const commentIdOfCommentToDelete = deleteComment.id;
-        const parentCommentIdOfCommentToDelete = deleteComment.replyTo;
+        const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
         this.handleClose();
 
         apiClient
             .deleteComment(apiId, commentIdOfCommentToDelete)
             .then(() => {
-                if (parentCommentIdOfCommentToDelete === undefined) {
+                if (parentCommentIdOfCommentToDelete === null) {
                     const remainingComments = allComments.filter(this.filterRemainingComments);
                     commentsUpdate(remainingComments);
-                    Alert.message('Comment' + commentIdOfCommentToDelete + 'has been successfully deleted');
+                    Alert.message('Comment has been successfully deleted');
                 } else {
                     const index = allComments.findIndex(this.filterCommentToDelete);
-                    const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
-                    allComments[index].replies = remainingReplies;
+                    const remainingReplies = allComments[index].replies.list.filter(this.filterRemainingComments);
+                    allComments[index].replies.list = remainingReplies;
                     commentsUpdate(allComments);
+                    Alert.info('Reply comment has been successfully deleted');
                 }
             })
             .catch((error) => {
@@ -294,7 +297,6 @@ class Comment extends React.Component {
                                             </Typography>
                                             <Tooltip title={comment.createdTime} aria-label={comment.createdTime}>
                                                 <Typography noWrap className={classes.commentText} variant='caption'>
-                                                    {dayjs.extend(relativeTime)}
                                                     {dayjs(comment.createdTime).fromNow()}
                                                 </Typography>
                                             </Tooltip>

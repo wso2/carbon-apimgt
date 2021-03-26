@@ -60,22 +60,25 @@ export default function APIProductOperations() {
         updateAPI({ apiThrottlingPolicy }).finally(() => setIsSaving(false));
     }
     return (
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
             <Grid item md={12}>
                 <Typography variant='h4' gutterBottom>
                     Product Resources
-                    <Box component='div' display='inline'>
-                        <Link to={'/api-products/' + api.id + '/resources/edit'}>
-                            <Button size='small'>
-                                <EditIcon />
-                                <FormattedMessage
-                                    id='Apis.Details.Resources.Resources.edit.resources.button'
-                                    defaultMessage='Edit Resources'
-                                />
-                            </Button>
-                        </Link>
-                    </Box>
                 </Typography>
+                <Box component='div' display='inline'>
+                    <Link to={'/api-products/' + api.id + '/resources/edit'}>
+                        <Button
+                            variant='contained'
+                            color='primary'
+                        >
+                            <EditIcon />
+                            <FormattedMessage
+                                id='Apis.Details.Resources.Resources.edit.resources.button'
+                                defaultMessage='Edit Resources'
+                            />
+                        </Button>
+                    </Link>
+                </Box>
             </Grid>
             <Grid item md={12}>
                 <APIRateLimiting

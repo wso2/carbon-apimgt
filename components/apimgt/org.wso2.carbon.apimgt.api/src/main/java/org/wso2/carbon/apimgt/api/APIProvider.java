@@ -863,8 +863,8 @@ public interface APIProvider extends APIManager {
      * @param apiProduct   API Product
      * @throws APIManagementException
      */
-    void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException;
+    void addAPIProductSwagger(String apiProductId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+            APIProduct apiProduct, String orgId) throws APIManagementException;
 
     /**
      * This method updates the swagger definition of an API Product in registry
@@ -873,8 +873,8 @@ public interface APIProvider extends APIManager {
      * @param apiProduct   API Product
      * @throws APIManagementException
      */
-    void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException, FaultGatewaysException;
+    void updateAPIProductSwagger(String apiProductId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+            APIProduct apiProduct, String orgId) throws APIManagementException, FaultGatewaysException;
 
     /**
      * This method validates the existence of all the resource level throttling tiers in URI templates of API
@@ -1774,13 +1774,34 @@ public interface APIProvider extends APIManager {
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments) throws APIManagementException;
 
     /**
-     * Get an API Revisions Deployment mapping details by providing deployment name
+     * Update the displayOnDevportal field in an existing deployments of an API
+     *
+     * @param apiId API UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployment APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void updateAPIDisplayOnDevportal(String apiId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment) throws APIManagementException;
+
+    /**
+     * Update the displayOnDevportal field in an existing deployments of an API Product
+     *
+     * @param apiProductId API Product UUID
+     * @param apiRevisionId API Revision UUID
+     * @param apiRevisionDeployment APIRevisionDeployment objects
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void updateAPIProductDisplayOnDevportal(String apiProductId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment) throws APIManagementException;
+
+    /**
+     * Get an API Revisions Deployment mapping details by providing deployment name and revision id
      *
      * @param name Deployment Name
+     * @param revisionId Revision UUID
      * @return APIRevisionDeployment Object
      * @throws APIManagementException if failed to get the related API revision Deployment Mapping details
      */
-    APIRevisionDeployment getAPIRevisionDeployment(String name) throws APIManagementException;
+    APIRevisionDeployment getAPIRevisionDeployment(String name, String revisionId) throws APIManagementException;
 
     /**
      * Get an API Revisions Deployment mapping details by providing revision uuid

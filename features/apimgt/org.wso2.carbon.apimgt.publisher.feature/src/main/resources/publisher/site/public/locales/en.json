@@ -204,7 +204,7 @@
   "Apis.Create.Default.APICreateDefault.api.sub.heading": [
     {
       "type": 0,
-      "value": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+      "value": "Create an API by providing a Name, a Version, a Context and Backend Endpoint (optional)"
     }
   ],
   "Apis.Create.Default.APICreateDefault.apiProduct.heading": [
@@ -270,7 +270,7 @@
   "Apis.Create.Default.APICreateDefault.webSocket.sub.heading": [
     {
       "type": 0,
-      "value": "Create a WebSocket API by providing a Name, a Context, and Business Plans (optional)."
+      "value": "Create a WebSocket API by providing a Name, and a Context."
     }
   ],
   "Apis.Create.GraphQL.ApiCreateGraphQL.back": [
@@ -1155,12 +1155,6 @@
       "value": "Enter valid role and press enter"
     }
   ],
-  "Apis.Details.ApiCOnsole.generate.test.key": [
-    {
-      "type": 0,
-      "value": "GET TEST KEY"
-    }
-  ],
   "Apis.Details.ApiConsole.ApiConsole.title": [
     {
       "type": 0,
@@ -1173,10 +1167,34 @@
       "value": "Please select an environment"
     }
   ],
+  "Apis.Details.ApiConsole.deployments.api.gateways": [
+    {
+      "type": 0,
+      "value": "API Gateways"
+    }
+  ],
+  "Apis.Details.ApiConsole.deployments.isAPIRetired": [
+    {
+      "type": 0,
+      "value": "Can not Try Out retired APIs!"
+    }
+  ],
+  "Apis.Details.ApiConsole.deployments.no": [
+    {
+      "type": 0,
+      "value": "API is not deployed yet! Please deploy the API before trying out"
+    }
+  ],
   "Apis.Details.ApiConsole.environment": [
     {
       "type": 0,
       "value": "Environment"
+    }
+  ],
+  "Apis.Details.ApiConsole.generate.test.key": [
+    {
+      "type": 0,
+      "value": "Generate Key"
     }
   ],
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": [
@@ -1368,7 +1386,7 @@
   "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Configure basic API Product meta informations"
+      "value": "Configure basic API Product meta information"
     }
   ],
   "Apis.Details.Configuration.Configuration.Design.sub.heading": [
@@ -3629,12 +3647,6 @@
       "value": "Revisions"
     }
   ],
-  "Apis.Details.Environments.Environments.Kubernetes": [
-    {
-      "type": 0,
-      "value": "Kubernetes"
-    }
-  ],
   "Apis.Details.Environments.Environments.api.gateways.heading": [
     {
       "type": 0,
@@ -3723,12 +3735,6 @@
     {
       "type": 0,
       "value": "Deployed Revision"
-    }
-  ],
-  "Apis.Details.Environments.Environments.gateway.labels.heading": [
-    {
-      "type": 0,
-      "value": "Gateway Labels"
     }
   ],
   "Apis.Details.Environments.Environments.new.revision.name.heading1": [
@@ -3898,72 +3904,6 @@
     }
   ],
   "Apis.Details.Environments.Environments.undeploy.btn": [
-    {
-      "type": 0,
-      "value": "Undeploy"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.GatewayLabels": [
-    {
-      "type": 0,
-      "value": "Gateway Labels"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.access.url": [
-    {
-      "type": 0,
-      "value": "Access URL"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.deploy.button": [
-    {
-      "type": 0,
-      "value": "Deploy"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.deployed.revision": [
-    {
-      "type": 0,
-      "value": "Deployed Revision"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.description": [
-    {
-      "type": 0,
-      "value": "Description"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.devportal.display": [
-    {
-      "type": 0,
-      "value": "Display in devportal"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.label": [
-    {
-      "type": 0,
-      "value": "Label"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.labels.emptym1": [
-    {
-      "type": 0,
-      "value": "Gateway labels are not available."
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.labels.emptym2": [
-    {
-      "type": 0,
-      "value": "You can request the administrator to add labels."
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.select.table": [
-    {
-      "type": 0,
-      "value": "Select Revision"
-    }
-  ],
-  "Apis.Details.Environments.MicroGateway.undeploy.btn": [
     {
       "type": 0,
       "value": "Undeploy"
@@ -4837,10 +4777,40 @@
       "value": "Operation"
     }
   ],
+  "Apis.Details.Overview.CustomizedStepper.Deploy": [
+    {
+      "type": 0,
+      "value": "Deploy"
+    }
+  ],
   "Apis.Details.Overview.CustomizedStepper.Deployments": [
     {
       "type": 0,
       "value": "Deployments"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Develop": [
+    {
+      "type": 0,
+      "value": "Develop"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Test": [
+    {
+      "type": 0,
+      "value": "Test"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.Tier": [
+    {
+      "type": 0,
+      "value": "Business Plan"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.blocked": [
@@ -4883,6 +4853,12 @@
     {
       "type": 0,
       "value": "Prototyped"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.publish": [
+    {
+      "type": 0,
+      "value": "Published (Current API)"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.published": [
@@ -6147,6 +6123,12 @@
       "value": "Error while retrieving the subscriptions"
     }
   ],
+  "Apis.Details.TryOutConsole.token.label": [
+    {
+      "type": 0,
+      "value": "Internal API Key"
+    }
+  ],
   "Apis.Details.components.APIDetailsTopMenu.created.by": [
     {
       "type": 0,
@@ -6263,16 +6245,10 @@
       "value": "type"
     }
   ],
-  "Apis.Details.index.Tryout": [
+  "Apis.Details.index.Tryout.menu.name": [
     {
       "type": 0,
-      "value": "Try out"
-    }
-  ],
-  "Apis.Details.index.api.Config": [
-    {
-      "type": 0,
-      "value": "API configurations"
+      "value": "TryOut"
     }
   ],
   "Apis.Details.index.api.definition2": [
@@ -6377,12 +6353,6 @@
     {
       "type": 0,
       "value": "overview"
-    }
-  ],
-  "Apis.Details.index.portal.configuration": [
-    {
-      "type": 0,
-      "value": "Portal Configurations"
     }
   ],
   "Apis.Details.index.properties": [
@@ -6511,12 +6481,6 @@
       "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPI.created": [
-    {
-      "type": 0,
-      "value": "Sample PizzaShackAPI API created successfully"
-    }
-  ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
     {
       "type": 0,
@@ -6533,12 +6497,6 @@
     {
       "type": 0,
       "value": "Import GraphQL SDL"
-    }
-  ],
-  "Apis.Listing.SampleAPI.SampleAPI.published": [
-    {
-      "type": 0,
-      "value": "Sample PizzaShackAPI API published successfully"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": [
@@ -6667,6 +6625,78 @@
       "value": "Create New API Product"
     }
   ],
+  "Apis.Listing.SampleAPI.continue.on.close": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "Apis.Listing.SampleAPI.continue.on.error": [
+    {
+      "type": 0,
+      "value": "Continue"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.create.complete": [
+    {
+      "type": 0,
+      "value": "API created successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.create.inprogress": [
+    {
+      "type": 0,
+      "value": "Creating sample API ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.deploy.complete": [
+    {
+      "type": 0,
+      "value": "API deployed successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.deploy.inprogress": [
+    {
+      "type": 0,
+      "value": "Deploying sample API ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.publish.complete": [
+    {
+      "type": 0,
+      "value": "API published successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.publish.inprogress": [
+    {
+      "type": 0,
+      "value": "Publishing sample API to developer portal ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.revision.complete": [
+    {
+      "type": 0,
+      "value": "API revision created successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.revision.inprogress": [
+    {
+      "type": 0,
+      "value": "Creating a revision of sample API ..."
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.update.complete": [
+    {
+      "type": 0,
+      "value": "API updated successfully!"
+    }
+  ],
+  "Apis.Listing.SampleAPI.popup.update.inprogress": [
+    {
+      "type": 0,
+      "value": "Updating sample API ..."
+    }
+  ],
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
@@ -6689,6 +6719,12 @@
     {
       "type": 0,
       "value": "Error While Loading APIs"
+    }
+  ],
+  "Apis.Listing.TaskState.generic.error.prefix": [
+    {
+      "type": 0,
+      "value": "Error while"
     }
   ],
   "Apis.Listing.components.ImageGenerator.DocThumb.apiName": [
@@ -7807,12 +7843,6 @@
       "value": "Yes"
     }
   ],
-  "ServiceCatalog.Listing.Listing.created.time": [
-    {
-      "type": 0,
-      "value": "Created Time"
-    }
-  ],
   "ServiceCatalog.Listing.Listing.error.delete": [
     {
       "type": 0,
@@ -7831,82 +7861,10 @@
       "value": "Service Catalog"
     }
   ],
-  "ServiceCatalog.Listing.Listing.help.tooltip": [
-    {
-      "type": 0,
-      "value": "The Service Catalog enables API-first Integration"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.name": [
-    {
-      "type": 0,
-      "value": "Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.schema.type": [
-    {
-      "type": 0,
-      "value": "Schema Type"
-    }
-  ],
   "ServiceCatalog.Listing.Listing.service.deleted.successfully": [
     {
       "type": 0,
       "value": "Service deleted successfully!"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.service.url": [
-    {
-      "type": 0,
-      "value": "Service URL"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.usage": [
-    {
-      "type": 0,
-      "value": "Number of Usages"
-    }
-  ],
-  "ServiceCatalog.Listing.Listing.version": [
-    {
-      "type": 0,
-      "value": "Version"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.description": [
-    {
-      "type": 0,
-      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.description2": [
-    {
-      "type": 0,
-      "value": "Create and Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.subHeading": [
-    {
-      "type": 0,
-      "value": "Integration Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading2.subHeading": [
-    {
-      "type": 0,
-      "value": "Integration Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.add.sample": [
-    {
-      "type": 0,
-      "value": "Add a sample"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.add.sample.service": [
-    {
-      "type": 0,
-      "value": "Add Sample Service"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.add.sample.success": [
@@ -7921,16 +7879,52 @@
       "value": "Error while creating Sample Service"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.get.started": [
+  "ServiceCatalog.Listing.Onboarding.learn.heading": [
+    {
+      "type": 0,
+      "value": "Learn to write your first"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.heading.sub": [
+    {
+      "type": 0,
+      "value": "Integration Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
+    {
+      "type": 0,
+      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.link": [
     {
       "type": 0,
       "value": "Get Started"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.write.first.intg": [
+  "ServiceCatalog.Listing.Onboarding.sample.add": [
     {
       "type": 0,
-      "value": "Write your first"
+      "value": "Add Sample Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading": [
+    {
+      "type": 0,
+      "value": "Add a sample"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading.sub": [
+    {
+      "type": 0,
+      "value": "Integration Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading.text": [
+    {
+      "type": 0,
+      "value": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
     }
   ],
   "ServiceCatalog.Listing.Overview.back.btn": [
@@ -8125,16 +8119,58 @@
       "value": "serviceName"
     }
   ],
-  "ServiceCatalog.Listing.onboarding.create.new": [
+  "ServiceCatalog.Listing.components.ServiceCard.create.api": [
     {
       "type": 0,
-      "value": "Service Catalog"
+      "value": "Create API"
     }
   ],
-  "ServiceCatalog.Listing.onboarding.description": [
+  "ServiceCatalog.Listing.components.ServiceCard.type": [
     {
       "type": 0,
-      "value": "Enabling API-first Integration"
+      "value": "Type"
+    }
+  ],
+  "ServiceCatalog.Listing.components.ServiceCard.version": [
+    {
+      "type": 0,
+      "value": "Version"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": [
+    {
+      "type": 0,
+      "value": "Created Time"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.name": [
+    {
+      "type": 0,
+      "value": "Service"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.schema.type": [
+    {
+      "type": 0,
+      "value": "Schema Type"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.service.url": [
+    {
+      "type": 0,
+      "value": "Service URL"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.usage": [
+    {
+      "type": 0,
+      "value": "Number of Usages"
+    }
+  ],
+  "ServiceCatalog.ServicesTableView.ServicesTableView.version": [
+    {
+      "type": 0,
+      "value": "Version"
     }
   ],
   "Settings.Alerts.Alerts.configure.alert": [
@@ -8161,28 +8197,10 @@
       "value": "Internal Server Error"
     }
   ],
-  "api.console.gateway.heading": [
-    {
-      "type": 0,
-      "value": "Gateway"
-    }
-  ],
   "api.console.security.heading": [
     {
       "type": 0,
       "value": "Security"
-    }
-  ],
-  "api.console.security.type.heading": [
-    {
-      "type": 0,
-      "value": "Internal key"
-    }
-  ],
-  "api.gateways": [
-    {
-      "type": 0,
-      "value": "API Gateways"
     }
   ],
   "app.components.Shared.Banner.back": [
@@ -8273,12 +8291,6 @@
     {
       "type": 0,
       "value": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-    }
-  ],
-  "internal.token": [
-    {
-      "type": 0,
-      "value": "Internal Token"
     }
   ],
   "save": [

@@ -28,6 +28,8 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -68,8 +70,10 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -487,7 +491,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            APIProduct updatedProduct = PublisherCommonUtils.updateApiProduct(retrievedProduct, body, apiProvider, username);
+            APIProduct updatedProduct = PublisherCommonUtils.updateApiProduct(retrievedProduct, body, apiProvider, username, tenantDomain);
             APIProductDTO updatedProductDTO = getAPIProductByID(apiProductId, apiProvider);
             return Response.ok().entity(updatedProductDTO).build();
         } catch (APIManagementException | FaultGatewaysException e) {
@@ -744,9 +748,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override public Response createAPIProduct(APIProductDTO body, MessageContext messageContext) {
-        String provider = null;
+        String provider = body.getProvider();
         try {
-            APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body, provider,
+            APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body,
                     RestApiCommonUtil.getLoggedInUsername());
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(
@@ -963,5 +967,38 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             }
         }
         return null;
+    }
+
+    @Override
+    public Response updateAPIProductDeployment(String apiProductId, String deploymentId, APIRevisionDeploymentDTO
+            apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String revisionId = apIRevisionDeploymentDTO.getRevisionUuid();
+        String decodedDeploymentName;
+        if (deploymentId != null) {
+            try {
+                decodedDeploymentName = new String(Base64.getUrlDecoder().decode(deploymentId),
+                        StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                throw new APIMgtResourceNotFoundException("deployment with " + deploymentId +
+                        " not found", ExceptionCodes.from(ExceptionCodes.EXISTING_DEPLOYMENT_NOT_FOUND,
+                        deploymentId));
+            }
+        } else {
+            throw new APIMgtResourceNotFoundException("deployment id not found",
+                    ExceptionCodes.from(ExceptionCodes.DEPLOYMENT_ID_NOT_FOUND));
+        }
+        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+        apiRevisionDeployment.setRevisionUUID(revisionId);
+        apiRevisionDeployment.setDeployment(decodedDeploymentName);
+        apiRevisionDeployment.setVhost(apIRevisionDeploymentDTO.getVhost());
+        apiRevisionDeployment.setDisplayOnDevportal(apIRevisionDeploymentDTO.isDisplayOnDevportal());
+        apiProvider.updateAPIProductDisplayOnDevportal(apiProductId, revisionId, apiRevisionDeployment);
+        APIRevisionDeployment apiRevisionDeploymentsResponse = apiProvider.
+                getAPIRevisionDeployment(decodedDeploymentName, revisionId);
+        APIRevisionDeploymentDTO apiRevisionDeploymentDTO = APIMappingUtil.
+                fromAPIRevisionDeploymenttoDTO(apiRevisionDeploymentsResponse);
+        Response.Status status = Response.Status.OK;
+        return Response.status(status).entity(apiRevisionDeploymentDTO).build();
     }
 }

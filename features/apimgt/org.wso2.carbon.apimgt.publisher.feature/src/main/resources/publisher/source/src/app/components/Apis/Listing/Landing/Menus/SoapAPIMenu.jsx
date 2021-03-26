@@ -3,12 +3,16 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
 import LandingMenu from 'AppComponents/Apis/Listing/Landing/components/LandingMenu';
+import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreateMenuSection';
 
 const SoapAPIMenu = (props) => {
-    const { icon, openList } = props;
+    const { icon, isCreateMenu } = props;
+
+    const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
+    const dense = isCreateMenu;
     return (
-        <LandingMenu
-            openList={openList}
+        <Component
+            openList={dense}
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.soap.api'
@@ -18,7 +22,7 @@ const SoapAPIMenu = (props) => {
             icon={icon}
         >
             <LandingMenuItem
-                dense={openList}
+                dense={dense}
                 id='itest-id-create-soap-api'
                 linkTo='/apis/create/wsdl'
                 helperText={(
@@ -33,9 +37,7 @@ const SoapAPIMenu = (props) => {
                     defaultMessage='Import WSDL'
                 />
             </LandingMenuItem>
-
-
-        </LandingMenu>
+        </Component>
     );
 };
 

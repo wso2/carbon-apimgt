@@ -205,7 +205,6 @@ public final class ImportExportConstants {
     public static final String 
             INTERMEDIATE_PARAMS_FILE_LOCATION = File.separator + "intermediate_params";
     //Env param fields
-    public static final String ENV_NAME_FIELD = "name";
     public static final String ENDPOINT_TYPE_FIELD = "endpointType";
     public static final String GATEWAY_ENVIRONMENTS_FIELD = "gatewayEnvironments";
     public static final String MUTUAL_SSL_CERTIFICATES_FIELD = "mutualSslCerts";
@@ -219,12 +218,7 @@ public final class ImportExportConstants {
     public static final String DEPENDENT_APIS_FIELD = "dependentAPIs";
 
     //Security config related constants
-    public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
-    public static final String ENDPOINT_UT_USERNAME = "username";
-    public static final String ENDPOINT_UT_PASSWORD = "password";
-    public static final String ENDPOINT_SECURITY_TYPE = "type";
-    public static final String ENDPOINT_DIGEST_SECURITY_TYPE = "digest";
-    public static final String ENDPOINT_BASIC_SECURITY_TYPE = "basic";
+    public static final String ENDPOINT_NONE_SECURITY_TYPE = "NONE";
 
     //Default values for Endpoints
     public static final String ENDPOINT_URL = "url";
@@ -247,12 +241,8 @@ public final class ImportExportConstants {
 
     // AWS endpoint related constants
     public static final String AWS_LAMBDA_ENDPOINT_JSON_PROPERTY = "awsLambdaEndpoints";
-    public static final String AWS_LAMBDA_ENDPOINT_PROPERTY = "AWSLambdaEndpoints";
     public static final String AWS_ACCESS_METHOD_JSON_PROPERTY = "accessMethod";
     public static final String AWS_ACCESS_METHOD_PROPERTY = "access_method";
-    public static final String AWS_AMZN_REGION_PROPERTY = "amznRegion";
-    public static final String AWS_AMZN_ACCESS_KEY_PROPERTY = "amznAccessKey";
-    public static final String AWS_AMZN_SECRET_KEY_PROPERTY = "amznSecretKey";
     public static final String AWS_STORED_ACCESS_METHOD = "stored";
     public static final String AWS_ROLE_SUPPLIED_ACCESS_METHOD = "role-supplied";
 
@@ -274,15 +264,9 @@ public final class ImportExportConstants {
 
     //Certificate related constants
     public static final String MUTUAL_SSL_ENABLED = "mutualssl";
-    public static final String CERTIFICATE_API_IDENTIFIER_PROPERTY = "apiIdentifier";
     public static final String CERTIFICATE_PATH_PROPERTY = "path";
-    public static final String CERTIFICATE_CERTIFICATE_CONTENT_PROPERTY = "file";
     public static final String CERTIFICATE_HOST_NAME_PROPERTY = "hostName";
     public static final String CERTIFICATE_TIER_NAME_PROPERTY = "tierName";
-    public static final String DATA_PROPERTY = "data";
-
-
-    public static final String CERTIFICATE_FILE_EXTENSION = ".crt";
     public static final String CERTIFICATE_DIRECTORY = File.separator + "certificates";
     public static final String ENDPOINT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Endpoint-certificates";
     public static final String CLIENT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Client-certificates";

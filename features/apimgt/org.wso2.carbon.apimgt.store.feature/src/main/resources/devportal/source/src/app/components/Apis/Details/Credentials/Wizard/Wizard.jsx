@@ -45,11 +45,11 @@ const styles = (theme) => ({
         '& h5, & label, & td, & li, & div, & input, & p.MuiFormHelperText-root': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
         },
-        '& .MuiButton-containedPrimary span.MuiButton-label' : {
+        '& .MuiButton-containedPrimary span.MuiButton-label': {
             color: theme.palette.getContrastText(theme.palette.primary.main),
-        }
-    }
-    
+        },
+    },
+
 });
 
 const stepComponents = [CreateAppStep, SubscribeToAppStep, GenerateKeysStep,
@@ -179,7 +179,7 @@ class Wizard extends Component {
                     />
                 </Typography>
                 <Paper elevation={0} className={classes.paper}>
-                    <Box py={1} mx='auto' display='flex' >
+                    <Box py={1} mx='auto' display='flex'>
                         <Grid item xs={12} md={12}>
                             <Stepper activeStep={currentStep}>
                                 {this.steps.map((label) => {
@@ -210,9 +210,9 @@ class Wizard extends Component {
                             </>
                         )}
                     </Box>
-                    <Box py={1} mb={1} mx='auto' display='flex' >
+                    <Box py={1} mb={1} mx='auto' display='flex'>
                         {stepStatus === this.stepStatuses.BLOCKED && (
-                            <Box pt={2} px={3} display='flex' >
+                            <Box pt={2} px={3} display='flex'>
                                 <Typography variant='h5'>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Wizard.Wizard.approval.request.'

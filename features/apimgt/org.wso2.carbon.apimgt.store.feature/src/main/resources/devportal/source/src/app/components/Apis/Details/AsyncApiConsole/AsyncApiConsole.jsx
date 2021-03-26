@@ -87,18 +87,24 @@ export default function AsyncApiConsole() {
                         return endpoint.environmentName;
                     });
                     setEnvironments(environment);
+                } else {
+                    setEnvironments([]);
                 }
                 if (apiData.labels) {
                     const Label = apiData.labels.map((label) => {
                         return label.name;
                     });
                     setLabels(Label);
+                } else {
+                    setLabels([]);
                 }
                 if (apiData.scopes) {
                     const scopeList = apiData.scopes.map((scope) => {
                         return scope.name;
                     });
                     setScopes(scopeList);
+                } else {
+                    setScopes([]);
                 }
             })
             .catch((error) => {
@@ -167,7 +173,7 @@ export default function AsyncApiConsole() {
         return <Progress />;
     }
     if (notFound) {
-        return <FormattedMessage id='Apis.Details.WebhooksConsole.WebhooksConsole.Api.Unavailable' defaultMessage='API Not Found !' />;
+        return <FormattedMessage id='Apis.Details.AsyncApiConsole.AsyncApiConsole.Api.Unavailable' defaultMessage='API Not Found !' />;
     }
 
     let isApiKeyEnabled = false;
@@ -185,7 +191,7 @@ export default function AsyncApiConsole() {
     return (
         <>
             <Typography variant='h4' className={classes.titleSub}>
-                <FormattedMessage id='Apis.Details.WebhooksConsole.WebhooksConsole.title' defaultMessage='Webhooks' />
+                <FormattedMessage id='Apis.Details.AsyncApiConsole.AsyncApiConsole.title' defaultMessage='Try Out' />
             </Typography>
             <Paper className={classes.paper}>
                 <Grid container className={classes.grid}>

@@ -107,6 +107,7 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
@@ -210,6 +211,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -2037,7 +2039,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private LifecycleStateDTO getLifecycleState(String apiId) {
         return getLifecycleState(null, apiId);
     }
-        
+
     private LifecycleStateDTO getLifecycleState(APIIdentifier identifier, String apiId) {
         try {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -2909,7 +2911,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
                 // Validate and retrieve the OpenAPI definition
-                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail,
+                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, null,
                         true, false);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap .get(RestApiConstants.RETURN_MODEL);
@@ -3184,17 +3186,19 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileInputStream InputStream for the provided file
      * @param fileDetail File meta-data
      * @param returnContent Whether to return the definition content
+     * @param inlineApiDefinition Swagger API definition String
      * @param messageContext CXF message context
      * @return API Definition validation response
      */
     @Override
     public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream,
-                                              Attachment fileDetail, MessageContext messageContext) {
+                                              Attachment fileDetail, String inlineApiDefinition,
+                                              MessageContext messageContext) {
 
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, returnContent, false);
+            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, inlineApiDefinition, returnContent, false);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
@@ -3211,12 +3215,14 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @param fileDetail File meta-data
      * @param url URL of the OpenAPI definition
      * @param additionalProperties API object (json) including additional properties like name, version, context
+     * @param inlineApiDefinition Swagger API definition String
      * @param messageContext CXF message context
      * @return API Import using OpenAPI definition response
      */
     @Override
     public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
-                                            String additionalProperties, MessageContext messageContext) {
+                                            String additionalProperties, String inlineApiDefinition,
+                                            MessageContext messageContext) {
 
         // validate 'additionalProperties' json
         if (StringUtils.isBlank(additionalProperties)) {
@@ -3234,7 +3240,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Import the API and Definition
         try {
-            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, apiDTOFromProperties, fileDetail, null);
+            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
+                    apiDTOFromProperties, fileDetail, null);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3279,6 +3286,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException if error occurred during validation of the WSDL
      */
     private Map validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail) throws APIManagementException {
+        handleInvalidParams(fileInputStream, fileDetail, url, null, false);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
 
@@ -3699,7 +3707,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                    newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, apidto,
+                    newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, null, apidto,
                             null, service);
                 } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                     newVersionedApi = importAsyncAPISpecification(service.getEndpointDef(), null, apidto,
@@ -3980,15 +3988,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param url OpenAPI definition url
      * @param fileInputStream file as input stream
+     * @param apiDefinition Swagger API definition String
      * @param returnContent whether to return the content of the definition in the response DTO
      * @return Map with the validation response information. A value with key 'dto' will have the response DTO
      *  of type OpenAPIDefinitionValidationResponseDTO for the REST API. A value with key 'model' will have the
      *  validation response of type APIDefinitionValidationResponse coming from the impl level.
      */
     private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-           Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
+                                          String apiDefinition, Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url, isServiceAPI);
+        handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
 
         OpenAPIDefinitionValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
@@ -4012,6 +4021,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }  catch (IOException e) {
                 RestApiUtil.handleInternalServerError("Error while reading file content", e, log);
             }
+        } else if (apiDefinition != null) {
+            validationResponse = OASParserUtil.validateAPIDefinition(apiDefinition, returnContent);
         }
         responseDTO = APIMappingUtil.getOpenAPIDefinitionValidationResponseFromModel(validationResponse,
                 returnContent);
@@ -4027,20 +4038,23 @@ public class ApisApiServiceImpl implements ApisApiService {
      *
      * @param fileInputStream file content stream
      * @param url             URL of the definition
+     * @param apiDefinition   Swagger API definition String
      */
     private void handleInvalidParams(InputStream fileInputStream, Attachment fileDetail, String url,
-                                     Boolean isServiceAPI) {
+                                     String apiDefinition, Boolean isServiceAPI) {
 
         String msg = "";
         boolean isFileSpecified = (fileInputStream != null && fileDetail != null &&
                 fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null)
                 || (fileInputStream != null && isServiceAPI);
-        if (url == null && !isFileSpecified) {
-            msg = "Either 'file' or 'url' should be specified";
+        if (url == null && !isFileSpecified && apiDefinition == null) {
+            msg = "One out of 'file' or 'url' or 'inline definition' should be specified";
         }
 
-        if (isFileSpecified && url != null) {
-            msg = "Only one of 'file' and 'url' should be specified";
+        boolean isMultipleSpecificationGiven = (isFileSpecified && url != null) | (isFileSpecified &&
+                apiDefinition != null) | (apiDefinition != null && url != null);
+        if (isMultipleSpecificationGiven) {
+            msg = "Only one of 'file', 'url', and 'inline definition' should be specified";
         }
 
         if (StringUtils.isNotBlank(msg)) {
@@ -4450,7 +4464,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private Map validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail,
                                           Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url, isServiceAPI);
+        handleInvalidParams(fileInputStream, fileDetail, url, null, isServiceAPI);
 
         AsyncAPISpecificationValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
@@ -4651,7 +4665,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIDTO createdApiDTO = null;
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, apiDto, null, service);
+                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, null, apiDto, null, service);
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 createdApiDTO = importAsyncAPISpecification(service.getEndpointDef(), null, apiDto, null, service);
             }
@@ -4700,7 +4714,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             Map validationResponseMap = new HashMap();
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null,
+                validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, null,
                         true, true);
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 validationResponseMap = validateAsyncAPISpecification(null, service.getEndpointDef(),
@@ -4736,8 +4750,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,
-                                           Attachment fileDetail, ServiceEntry service) {
+    private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
+                                           APIDTO apiDTOFromProperties, Attachment fileDetail, ServiceEntry service) {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         boolean isServiceAPI = false;
@@ -4745,8 +4759,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (service != null) {
                 isServiceAPI = true;
             }
-            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, true,
-                    isServiceAPI);
+            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
+                    true, isServiceAPI);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
         }
@@ -4880,5 +4894,38 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response updateAPIDeployment(String apiId, String deploymentId, APIRevisionDeploymentDTO
+            apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String revisionId = apIRevisionDeploymentDTO.getRevisionUuid();
+        String decodedDeploymentName;
+        if (deploymentId != null) {
+            try {
+                decodedDeploymentName = new String(Base64.getUrlDecoder().decode(deploymentId),
+                        StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                throw new APIMgtResourceNotFoundException("deployment with " + deploymentId +
+                        " not found", ExceptionCodes.from(ExceptionCodes.EXISTING_DEPLOYMENT_NOT_FOUND,
+                        deploymentId));
+            }
+        } else {
+            throw new APIMgtResourceNotFoundException("deployment id not found",
+                    ExceptionCodes.from(ExceptionCodes.DEPLOYMENT_ID_NOT_FOUND));
+        }
+        APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
+        apiRevisionDeployment.setRevisionUUID(revisionId);
+        apiRevisionDeployment.setDeployment(decodedDeploymentName);
+        apiRevisionDeployment.setVhost(apIRevisionDeploymentDTO.getVhost());
+        apiRevisionDeployment.setDisplayOnDevportal(apIRevisionDeploymentDTO.isDisplayOnDevportal());
+        apiProvider.updateAPIDisplayOnDevportal(apiId, revisionId, apiRevisionDeployment);
+        APIRevisionDeployment apiRevisionDeploymentsResponse = apiProvider.
+                getAPIRevisionDeployment(decodedDeploymentName, revisionId);
+        APIRevisionDeploymentDTO apiRevisionDeploymentDTO = APIMappingUtil.
+                fromAPIRevisionDeploymenttoDTO(apiRevisionDeploymentsResponse);
+        Response.Status status = Response.Status.OK;
+        return Response.status(status).entity(apiRevisionDeploymentDTO).build();
     }
 }

@@ -331,6 +331,9 @@ public class APIManagerConfiguration {
                     String value = propertyElem.getText();
                     analyticsProps.put(name, value);
                 }
+                OMElement authTokenElement = element.getFirstChildWithName(new QName("AuthToken"));
+                String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
+                analyticsProps.put("auth.api.token", resolvedAuthToken);
                 analyticsProperties = analyticsProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));
