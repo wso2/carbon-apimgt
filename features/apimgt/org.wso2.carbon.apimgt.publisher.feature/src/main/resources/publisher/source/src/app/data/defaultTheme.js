@@ -162,12 +162,12 @@ export default {
             width: 240,
             height: 140,
             backgrounds: [ // These backgrounds are use to generate the thumbnails.
-                { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
-                { prime: 0xf47f16ff, sub: 0xcddc39ff },
-                { prime: 0xf44236ff, sub: 0xfec107ff },
                 { prime: 0x2196f3ff, sub: 0xaeea00ff },
-                { prime: 0xff9700ff, sub: 0xffeb3cff },
-                { prime: 0xff9700ff, sub: 0xfe5722ff },
+                // { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
+                // { prime: 0xf47f16ff, sub: 0xcddc39ff },
+                // { prime: 0xf44236ff, sub: 0xfec107ff },
+                // { prime: 0xff9700ff, sub: 0xffeb3cff },
+                // { prime: 0xff9700ff, sub: 0xfe5722ff },
             ],
             document: {
                 icon: 'library_books',
