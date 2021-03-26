@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.localentry.LocalEntryAdminException;
 
 import java.io.IOException;
@@ -76,6 +77,8 @@ public class GoogleAnalyticsConfigDeployer {
         if (closeableHttpResponse.getStatusLine().getStatusCode() == 200) {
             try (InputStream content = closeableHttpResponse.getEntity().getContent()) {
                 MessageContext.setCurrentMessageContext(GatewayUtils.createAxis2MessageContext());
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 String resourceContent = IOUtils.toString(content);
                 if (localEntryServiceProxy.localEntryExists(APIConstants.GA_CONF_KEY)) {
                     localEntryServiceProxy.deleteEntry(APIConstants.GA_CONF_KEY);
@@ -86,6 +89,7 @@ public class GoogleAnalyticsConfigDeployer {
                 log.error("Error while deploying LocalEntry ga-config", e);
             } finally {
                 MessageContext.destroyCurrentMessageContext();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         } else {
             throw new ArtifactSynchronizerException("Error while deploying localEntry status code : " +
