@@ -105,8 +105,7 @@ public class JMSListener implements Runnable {
                          " of type " + JMSUtils.getDestinationTypeAsString(stm.getDestinationType()) +
                          " for listener " + listenerName + " have not yet started after 3 seconds ..");
             } else {
-                log.error("Unable to continue server startup as it seems the JMS Provider " +
-                          "is not yet started. Please start the JMS provider now.");
+                log.error("JMS Provider is not yet started. Please start the JMS provider now.");
                 retryDuration = (long) (retryDuration * reconnectionProgressionFactor);
                 log.error("Connection attempt : " + (r++) + " for JMS Provider failed. Next retry in "
                           + (retryDuration / 1000) + " seconds");
