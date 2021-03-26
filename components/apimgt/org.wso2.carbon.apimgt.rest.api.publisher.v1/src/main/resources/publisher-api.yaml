@@ -4607,13 +4607,11 @@ paths:
     get:
       tags:
         - Throttling Policies
-      summary: Get subscription throttling policies based on quota type
+      summary: Get streaming throttling policies
       description: |
-        This operation can be used to list the available subscription policies for a given tenent ID based on the given quota type.
-        Quota Type should be provide as a query parameters and supported Quota types are "requestCount" ,"bandwidthVolume" and "eventCount"
+        This operation can be used to list the available streaming subscription policies
       operationId: getSubscriptionThrottlingPolicies
       parameters:
-        - $ref: '#/components/parameters/tierQuotaType'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -4634,7 +4632,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
                 $ref: '#/components/schemas/SubscriptionPolicy'
         304:
           description: |
@@ -9462,6 +9459,23 @@ components:
             type: string
           description: Properties of a tier plan which are related to monetization
           example: {}
+
+    SubscriptionPolicyList:
+      title: Subscription policy list
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Tiers returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionPolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
     SubscriptionList:
       title: Subscription List
       type: object
