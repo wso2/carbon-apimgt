@@ -24,7 +24,7 @@ import Overview from 'AppComponents/ServiceCatalog/Listing/Overview';
 /**
  * Have used key={Date.now()} for `Route` element in `/service-catalog`
  */
-const ServiceCatalogComponent = () => {
+const ServiceCatalogRouting = () => {
     return (
         <Switch>
             <Route
@@ -43,4 +43,4 @@ const ServiceCatalogComponent = () => {
     );
 };
 
-export default ServiceCatalogComponent;
+export default ServiceCatalogRouting;

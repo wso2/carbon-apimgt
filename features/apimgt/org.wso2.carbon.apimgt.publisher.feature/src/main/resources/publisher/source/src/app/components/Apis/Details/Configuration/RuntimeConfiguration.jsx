@@ -52,7 +52,6 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
-import Subscription from './components/Subscription';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -154,13 +153,6 @@ function copyAPIConfig(api) {
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
     };
-    if (!api.isAPIProduct()) {
-        apiConfigJson.apiwebsubSubscriptionConfiguration = {
-            secret: api.websubSubscriptionConfiguration.secret,
-            signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
-            signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
-        };
-    }
     return apiConfigJson;
 }
 
@@ -289,11 +281,6 @@ export default function RuntimeConfiguration() {
                 } else {
                     nextState.keyManagers = keyManagersConfigured;
                 }
-                return nextState;
-            case 'secret':
-            case 'signingAlgorithm':
-            case 'signatureHeader':
-                nextState.websubSubscriptionConfiguration[action] = value;
                 return nextState;
             default:
                 return state;
@@ -473,9 +460,6 @@ export default function RuntimeConfiguration() {
                                                 isRestricted={isRestricted(['apim:api_create'], api)}
                                             />
                                         </Box>
-                                    )}
-                                    {api.type === 'WEBSUB' && (
-                                        <Subscription api={apiConfig} configDispatcher={configDispatcher} />
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />

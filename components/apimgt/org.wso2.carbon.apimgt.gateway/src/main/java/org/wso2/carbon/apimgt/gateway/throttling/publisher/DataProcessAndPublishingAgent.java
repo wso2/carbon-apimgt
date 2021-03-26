@@ -183,16 +183,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
     }
 
     public void run() {
-
         JSONObject jsonObMap = new JSONObject();
-
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
-        //Set transport headers of the message
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
-                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-
         String remoteIP = GatewayUtils.getIp(axis2MessageContext);
         if (log.isDebugEnabled()) {
             log.debug("Remote IP address : " + remoteIP);

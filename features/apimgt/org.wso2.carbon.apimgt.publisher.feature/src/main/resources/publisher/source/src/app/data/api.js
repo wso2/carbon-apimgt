@@ -482,24 +482,6 @@ class API extends Resource {
     }
 
     /**
-     * Get the swagger of an API
-     * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwagger(id = this.id, callback = null) {
-        const promise_get = this.client.then(client => {
-            return client.apis['APIs'].getAPISwagger(
-                {
-                    apiId: id,
-                },
-                this._requestMetaData(),
-            );
-        });
-        return promise_get;
-    }
-
-    /**
      * Mock sample responses for Inline Prototyping
      * of a swagger OAS defintion
      *
@@ -767,7 +749,6 @@ class API extends Resource {
      * @deprecated
      */
     updateSwagger(id, swagger) {
-        alert('update swagger() invoked!');
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
@@ -1861,8 +1842,8 @@ class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSwagger(environmentName = '') {
-        const payload = { apiId: this.id };
+    getSwagger(id = this.id, environmentName = '') {
+        const payload = { apiId: id };
         if(environmentName) {
             payload[environmentName] = environmentName;
         }
@@ -2151,7 +2132,7 @@ class API extends Resource {
                 {
                     serviceKey: serviceKey,
                 },
-                { requestBody: apiMetaData },
+                { requestBody: apiMetaData},
                 this._requestMetaData()
             );
         });

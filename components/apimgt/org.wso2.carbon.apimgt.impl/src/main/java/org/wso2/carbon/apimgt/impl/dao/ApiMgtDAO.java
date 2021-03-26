@@ -52,15 +52,14 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Pagination;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Pagination;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
@@ -70,9 +69,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
-import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
-import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
-import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -80,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
@@ -91,6 +88,8 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
@@ -112,6 +111,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -277,6 +277,7 @@ public class ApiMgtDAO {
             ps.setString(3, dto.getStatus().toString());
             ps.setString(4, dto.getKeyManager());
             ps.setString(5, UUID.randomUUID().toString());
+            ps.setString(6, APIConstants.OAuthAppMode.CREATED.name());
             ps.execute();
 
             conn.commit();
@@ -8860,6 +8861,11 @@ public class ApiMgtDAO {
                     apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
                     apiKey.setType(resultSet.getString("KEY_TYPE"));
                     apiKey.setState(resultSet.getString("STATE"));
+                    String createMode = resultSet.getString("CREATE_MODE");
+                    if (StringUtils.isEmpty(createMode)) {
+                        createMode = APIConstants.OAuthAppMode.CREATED.name();
+                    }
+                    apiKey.setCreateMode(createMode);
                     try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
                         if (appInfo != null) {
                             apiKey.setAppMetaData(IOUtils.toString(appInfo));
@@ -8879,8 +8885,8 @@ public class ApiMgtDAO {
     public APIKey getKeyMappingFromApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException {
 
-        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE FROM AM_APPLICATION_KEY_MAPPING " +
-                "WHERE APPLICATION_ID=? AND UUID = ?";
+        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE,CREATE_MODE FROM " +
+                "AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID=? AND UUID = ?";
         Set<APIKey> apiKeyList = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -8894,6 +8900,11 @@ public class ApiMgtDAO {
                     apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
                     apiKey.setType(resultSet.getString("KEY_TYPE"));
                     apiKey.setState(resultSet.getString("STATE"));
+                    String createMode = resultSet.getString("CREATE_MODE");
+                    if (StringUtils.isEmpty(createMode)) {
+                        createMode = APIConstants.OAuthAppMode.CREATED.name();
+                    }
+                    apiKey.setCreateMode(createMode);
                     return apiKey;
                 }
             }
@@ -13328,8 +13339,9 @@ public class ApiMgtDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
+            String dbProductName = conn.getMetaData().getDatabaseProductName();
             try (PreparedStatement prepStmt = conn.prepareStatement(SQLConstants.INSERT_ENVIRONMENT_SQL,
-                    new String[]{"ID"})) {
+                    new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "ID")})) {
                 prepStmt.setString(1, uuid);
                 prepStmt.setString(2, environment.getName());
                 prepStmt.setString(3, tenantDomain);
@@ -13845,19 +13857,24 @@ public class ApiMgtDAO {
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
                     while (rs.next()) {
                         URITemplate uriTemplate = new URITemplate();
-                        uriTemplate.setHTTPVerb(rs.getString(1));
-                        uriTemplate.setAuthType(rs.getString(2));
-                        uriTemplate.setUriTemplate(rs.getString(3));
-                        uriTemplate.setThrottlingTier(rs.getString(4));
-                        uriTemplate.setMediationScript(rs.getString(5));
-                        if (!StringUtils.isEmpty(rs.getString(6))) {
+                        uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                        uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                        uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                        uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                        String script = null;
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        }
+                        uriTemplate.setMediationScript(script);
+                        if (!StringUtils.isEmpty(rs.getString("SCOPE_NAME"))) {
                             Scope scope = new Scope();
-                            scope.setKey(rs.getString(6));
+                            scope.setKey(rs.getString("SCOPE_NAME"));
                             uriTemplate.setScope(scope);
                         }
-                        if (rs.getInt(7) != 0) {
+                        if (rs.getInt("API_ID") != 0) {
                             // Adding api id to uri template id just to store value
-                            uriTemplate.setId(rs.getInt(7));
+                            uriTemplate.setId(rs.getInt("API_ID"));
                         }
                         urlMappingList.add(uriTemplate);
                     }
@@ -14986,13 +15003,10 @@ public class ApiMgtDAO {
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    Blob metadataBlob = rs.getBlob("WF_METADATA");
-                    Blob propertiesBlob = rs.getBlob("WF_PROPERTIES");
+                    InputStream targetStream = rs.getBinaryStream("WF_METADATA");
+                    InputStream propertiesTargetStream = rs.getBinaryStream("WF_PROPERTIES");
 
-                    byte[] metadataByte;
-                    if (metadataBlob != null) {
-                        metadataByte = metadataBlob.getBytes(1L, (int) metadataBlob.length());
-                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
+                    if (targetStream != null) {
                         String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
                         Gson metadataGson = new Gson();
                         JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
@@ -15002,10 +15016,7 @@ public class ApiMgtDAO {
                         workflow.setMetadata(metadataJson);
                     }
 
-                    byte[] propertiesByte;
-                    if (propertiesBlob != null) {
-                        propertiesByte = propertiesBlob.getBytes(1L, (int) propertiesBlob.length());
-                        InputStream propertiesTargetStream = new ByteArrayInputStream(propertiesByte);
+                    if (propertiesTargetStream != null) {
                         String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
                         Gson propertiesGson = new Gson();
                         JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
@@ -15839,7 +15850,7 @@ public class ApiMgtDAO {
                     if (!StringUtils.isEmpty(environmentName)) {
                         apiRevisionDeployment.setDeployment(environmentName);
                         String vhost = rs.getString("VHOST");
-                        apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                        apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                         //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
                         apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                         apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -15890,7 +15901,6 @@ public class ApiMgtDAO {
      */
     public void addAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
-        Map<String, org.wso2.carbon.apimgt.impl.dto.Environment> readOnlyEnvs = APIUtil.getReadOnlyEnvironments();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -15901,13 +15911,8 @@ public class ApiMgtDAO {
                     String envName = apiRevisionDeployment.getDeployment();
                     String vhost = apiRevisionDeployment.getVhost();
                     // set VHost as null, if it is the default vhost of the read only environment
-                    if (readOnlyEnvs.get(envName) != null
-                            && StringUtils.equalsIgnoreCase(vhost,
-                            APIUtil.getDefaultVhostOfReadOnlyEnvironment(envName).getHost())) {
-                        vhost = null;
-                    }
                     statement.setString(1, apiRevisionDeployment.getDeployment());
-                    statement.setString(2, vhost);
+                    statement.setString(2, VHostUtils.resolveIfDefaultVhostToNull(envName, vhost));
                     statement.setString(3, apiRevisionId);
                     statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
                     statement.addBatch();
@@ -15944,7 +15949,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -15975,7 +15980,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16008,7 +16013,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16064,7 +16069,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16929,19 +16934,5 @@ public class ApiMgtDAO {
             statement.setInt(3, apiId);
             statement.executeUpdate();
         }
-    }
-
-    /**
-     *
-     * @param environmentName Environment name
-     * @param vhost Host of the vhost
-     * @return Resolved vhost
-     * @throws APIManagementException if failed to find the read only environment
-     */
-    private String getResolvedVhost(String environmentName, String vhost) throws APIManagementException {
-        if (StringUtils.isEmpty(vhost)) {
-            return APIUtil.getDefaultVhostOfReadOnlyEnvironment(environmentName).getHost();
-        }
-        return vhost;
     }
 }

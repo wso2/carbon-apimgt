@@ -1206,6 +1206,7 @@ public final class APIConstants {
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
         public static final String KEY_MAPPING_ID = "keyMappingId";
+        public static final String MODE = "mode";
     }
 
     public static class AccessTokenConstants {
@@ -2706,5 +2707,10 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+    }
+
+    public static class GatewayArtifactConstants {
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
 }
