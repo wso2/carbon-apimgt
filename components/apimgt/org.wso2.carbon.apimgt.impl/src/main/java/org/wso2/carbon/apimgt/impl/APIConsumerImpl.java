@@ -3349,7 +3349,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 api = wrapper.getApi();
                 context = api.getContext();
             } else if (apiProdIdentifier != null) {
-                wrapper = getAPIorAPIProductByUUID(apiIdentifier.getUUID(), providerTenantDomain);
+                wrapper = getAPIorAPIProductByUUID(apiProdIdentifier.getUUID(), providerTenantDomain);
                 product = wrapper.getApiProduct();
                 context = product.getContext();
             }
