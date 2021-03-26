@@ -1,8 +1,10 @@
 name: Test Coverage Uploader
 
+# Added a workaround to stop running this
 on:
-  schedule:
-    - cron:  '0 20 * * *'
+  push:
+    paths:
+      - '**.never.ever.run'
 
 jobs:
   build:

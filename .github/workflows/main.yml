@@ -1,15 +1,10 @@
 name: API Manager Build with Test
 
-on:
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:
-    branches:
-      - master
-
+on
+  push:
+    paths:
+      - '**.never.ever.run'
 jobs:
-
   build-carbon:
     runs-on: ubuntu-latest
     steps:
