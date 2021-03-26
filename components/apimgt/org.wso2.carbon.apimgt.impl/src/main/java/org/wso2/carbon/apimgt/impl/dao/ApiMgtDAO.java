@@ -9071,7 +9071,7 @@ public class ApiMgtDAO {
                         api.setUuid(resultSet.getString("API_UUID"));
                         api.setContext(resultSet.getString("CONTEXT"));
                         api.setType(resultSet.getString("API_TYPE"));
-                        api.setStatus(resultSet.getNString("STATUS"));
+                        api.setStatus(resultSet.getString("STATUS"));
                         return api;
                     }
                 }
