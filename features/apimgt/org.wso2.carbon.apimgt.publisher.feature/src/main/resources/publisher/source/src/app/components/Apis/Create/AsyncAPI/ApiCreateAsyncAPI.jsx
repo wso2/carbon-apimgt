@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -99,22 +99,25 @@ export default function ApiCreateAsyncAPI(props) {
 
     const protocols = [
         {
-            name: 'WEBSUB',
-            displayName: 'WebSub',
-        },
-        {
-            name: 'WEBSOCKET',
+            name: 'ws',
             displayName: 'WebSocket',
+            description: 'WebSocket API',
         },
         {
-            name: 'SSE',
-            displayName: 'Server Sent Events (SSE)',
+            name: 'websub',
+            displayName: 'WebSub',
+            description: 'WebHook API based on WebSub specification',
+        },
+        {
+            name: 'sse',
+            displayName: 'SSE',
+            description: 'Server-Sent Events',
         },
     ];
 
     const protocolKeys = {
         WebSocket: 'WS',
-        'Server Sent Events (SSE)': 'SSE',
+        SSE: 'SSE',
         WebSub: 'WEBSUB',
     };
 

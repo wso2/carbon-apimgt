@@ -477,7 +477,7 @@ class Details extends Component {
                         <LeftMenuItem
                             text={intl.formatMessage({
                                 id: 'Apis.Details.index.topics',
-                                defaultMessage: 'Topics',
+                                defaultMessage: 'topics',
                             })}
                             to={pathPrefix + 'topics'}
                             Icon={<ResourcesIcon />}
@@ -518,6 +518,7 @@ class Details extends Component {
         if (api.apiType === API.CONSTS.APIProduct) {
             isAPIProduct = true;
         }
+
         const updatedProperties = _updatedProperties instanceof API ? _updatedProperties.toJson() : _updatedProperties;
         let promisedUpdate;
         // TODO: Ideally, The state should hold the corresponding API object

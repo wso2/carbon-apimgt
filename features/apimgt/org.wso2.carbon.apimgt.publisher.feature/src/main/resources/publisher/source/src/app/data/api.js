@@ -749,7 +749,6 @@ class API extends Resource {
      * @deprecated
      */
     updateSwagger(id, swagger) {
-        alert('update swagger() invoked!');
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
@@ -2133,7 +2132,7 @@ class API extends Resource {
                 {
                     serviceKey: serviceKey,
                 },
-                { requestBody: apiMetaData },
+                { requestBody: apiMetaData},
                 this._requestMetaData()
             );
         });
