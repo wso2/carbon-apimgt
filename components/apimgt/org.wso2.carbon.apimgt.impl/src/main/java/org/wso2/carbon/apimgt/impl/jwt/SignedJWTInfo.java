@@ -23,6 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.nimbusds.jose.util.X509CertUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.clients.Util;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 
 import java.io.Serializable;
@@ -111,29 +113,18 @@ public class SignedJWTInfo implements Serializable {
 
         this.x509ClientCertificate = x509ClientCertificate;
         if (x509ClientCertificate != null) {
-            byte[] encoded = new byte[0];
-            try {
-                encoded = org.apache.commons.codec.binary.Base64.encodeBase64(x509ClientCertificate.getEncoded());
-            } catch (CertificateEncodingException e) {
-                log.error("Error while encoding client certificate. ");
-            }
-            x509ClientCertificateHash = GatewayUtils.hashString(encoded);
+            CertificateMgtUtils.convert(x509ClientCertificate).ifPresent(x509Certificate ->
+                    x509ClientCertificateHash = X509CertUtils.computeSHA256Thumbprint(x509Certificate).toString());
         }
     }
 
 
     public String getCertificateThumbprint() {
 
-        String thumbprint = null;
         if (null != jwtClaimsSet) {
-            try {
-                thumbprint = jwtClaimsSet.getStringClaim(APIConstants.CNF);
-                JSONObject thumbprintJson = new JSONObject(thumbprint);
-                return thumbprintJson.getString(APIConstants.DIGEST);
-
-            } catch (ParseException e) {
-                log.error("Error while paring JWT claims. ");
-            }
+            Object thumbprint = jwtClaimsSet.getClaim(APIConstants.CNF);
+            net.minidev.json.JSONObject thumbprintJson = (net.minidev.json.JSONObject) thumbprint;
+            return thumbprintJson.getAsString(APIConstants.DIGEST);
         }
         return null;
     }
