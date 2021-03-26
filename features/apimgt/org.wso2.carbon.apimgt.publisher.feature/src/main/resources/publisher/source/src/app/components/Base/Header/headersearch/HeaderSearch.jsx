@@ -70,7 +70,7 @@ const styles = (theme) => ({
     },
     infoButton: {
         margin: theme.spacing(1),
-        color: 'white',
+        color: theme.palette.background.paper,
     },
     InfoToolTip: {
         backgroundColor: '#f5f5f9',
@@ -327,12 +327,6 @@ class HeaderSearch extends React.Component {
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option12'
                                         defaultMessage='Api Category [ Syntax - api-category:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option7'
-                                        defaultMessage='Sub-Context [ Syntax - subcontext:xxxx ]'
                                     />
                                 </li>
                                 <li style={{ marginTop: '5px' }}>

@@ -1,13 +1,13 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax2106="http://api.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax2108="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://service.impl.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.impl.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax233="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:ax231="http://api.apimgt.carbon.wso2.org/xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://service.impl.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://service.impl.apimgt.carbon.wso2.org">
     <wsdl:documentation>APIKeyMgtRemoteUserStoreMgtService</wsdl:documentation>
     <wsdl:types>
-        <xs:schema xmlns:ax2107="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax2109="http://dto.impl.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+        <xs:schema xmlns:ax234="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax232="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
             <xs:import namespace="http://api.apimgt.carbon.wso2.org/xsd"/>
             <xs:import namespace="http://dto.impl.apimgt.carbon.wso2.org/xsd"/>
             <xs:element name="APIKeyMgtRemoteUserStoreMgtServiceAPIManagementException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax2106:APIManagementException"/>
+                        <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax232:APIManagementException"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -36,7 +36,7 @@
             <xs:element name="getUserAuthenticationInfoResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ax2108:BasicAuthValidationInfoDTO"/>
+                        <xs:element minOccurs="0" name="return" nillable="true" type="ax234:BasicAuthValidationInfoDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -60,6 +60,7 @@
             <xs:complexType name="BasicAuthValidationInfoDTO">
                 <xs:sequence>
                     <xs:element minOccurs="0" name="authenticated" type="xs:boolean"/>
+                    <xs:element minOccurs="0" name="cached" type="xs:boolean"/>
                     <xs:element minOccurs="0" name="domainQualifiedUsername" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="hashedPassword" nillable="true" type="xs:string"/>
                     <xs:element maxOccurs="unbounded" minOccurs="0" name="userRoleList" nillable="true" type="xs:string"/>
@@ -69,7 +70,7 @@
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://api.apimgt.carbon.wso2.org/xsd">
             <xs:complexType name="APIManagementException">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="errorHandler" nillable="true" type="ax2106:ErrorHandler"/>
+                    <xs:element minOccurs="0" name="errorHandler" nillable="true" type="ax231:ErrorHandler"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType abstract="true" name="ErrorHandler">

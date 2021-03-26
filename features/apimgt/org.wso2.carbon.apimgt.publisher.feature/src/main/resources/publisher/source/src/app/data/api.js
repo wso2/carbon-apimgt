@@ -206,13 +206,13 @@ class API extends Resource {
      * export an API Directory as A Zpi file
      * @returns {promise} Promise Containing the ZPI file of the selected API
      */
-    exportApi(apiId) {
+    export() {
         const apiZip = this.client.then((client) => {
             return client.apis['Import Export'].exportAPI({
-                apiId: apiId
-            },  this._requestMetaData({
-                    'accept': 'application/zip'
-                })
+                apiId: this.id
+            }, this._requestMetaData({
+                'accept': 'application/zip'
+            })
             );
         });
         return apiZip;
@@ -505,7 +505,7 @@ class API extends Resource {
      *
      * @param id {String} The api id.
      */
-    generateMockScripts(id=this.id) {
+    generateMockScripts(id = this.id) {
         const promise_get = this.client.then(client => {
             return client.apis['APIs'].generateMockScripts(
                 {
@@ -523,7 +523,7 @@ class API extends Resource {
      *
      * @param {String} id
      */
-    getGeneratedMockScriptsOfAPI(id=this.id) {
+    getGeneratedMockScriptsOfAPI(id = this.id) {
         const promise_get = this.client.then(client => {
             return client.apis['APIs'].getGeneratedMockScriptsOfAPI(
                 {
@@ -569,7 +569,7 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopes(
-                { limit, offset},
+                { limit, offset },
                 this._requestMetaData(),
             );
         });
@@ -659,11 +659,6 @@ class API extends Resource {
         return promised_status;
     }
 
-    getDeployments() {
-        return this.client.then(client => {
-            return client.apis['Deployments'].deploymentsGet();
-        });
-    }
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
@@ -1604,228 +1599,6 @@ class API extends Resource {
     }
 
     /**
-     * Add new comment to an existing API
-     * @param apiId apiId of the api to which the comment is added
-     * @param commentInfo comment text
-     * * TODO: remove
-     */
-    addComment(apiId, comment, replyTo, callback = null) {
-        // let promise = this.client
-        //     .then(client => {
-        //         return client.apis['Comment (Individual)'].post_apis__apiId__comments(
-        //             { apiId: apiId, body: commentInfo },
-        //             this._requestMetaData(),
-        //         );
-        //     })
-        //     .catch(error => {
-        //         console.error(error);
-        //     });
-        // if (callback) {
-        //     return promise.then(callback);
-        // } else {
-        //     return promise;
-        // }
-        const response = {
-            id: '01234567-0123-0123-0123-012345678901',
-            commenterInfo: {
-                firstName: "John",
-                lastName: "David",
-                fullName: "John David"
-            },
-            content: comment.content,
-            createdBy: 'admin',
-            createdTime: '2020-02-20T13:57:16.229Z',
-            replyTo: replyTo,
-            replies: {
-                count: 1,
-                list: [
-                ],
-                pagination: {
-                    offset: 0,
-                    limit: 1,
-                    total: 10,
-                    next: "string",
-                    previous: "string"
-                }
-            }
-        };
-        return Promise.resolve({ body: response });
-    }
-
-    /**
-     * Get all comments for a particular API
-     * @param apiId api id of the api to which the comment is added
-     * * TODO: remove
-     */
-    getAllComments(apiId, callback = null) {
-        // let promise_get = this.client
-        //     .then(client => {
-        //         return client.apis['Comment (Collection)'].get_apis__apiId__comments(
-        //             { apiId: apiId },
-        //             this._requestMetaData(),
-        //         );
-        //     })
-        //     .catch(error => {
-        //         console.error(error);
-        //     });
-        // if (callback) {
-        //     return promise_get.then(callback);
-        // } else {
-        //     return promise_get;
-        // }
-        return new Promise((resolve, reject) => {
-            resolve({
-                body: {
-                    count: 18,
-                    list: [
-                        {
-                            id: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
-                            content: "Information and user interface components must be presentable to users in ways they can perceive. This principle addresses the fundamentals of information and content presentation, such as compositional sequence, colors, contrasts, contextual relationships and display of text",
-                            createdTime: "2021-02-02 16:33:43.236",
-                            createdBy: "admin",
-                            category: "general",
-                            replyTo: null,
-                            entryPoint: "publisher",
-                            commenterInfo: {
-                                firstName: "John",
-                                lastName: "David",
-                                fullName: "John David"
-                            },
-                            replies: {
-                                count: 1,
-                                list: [
-                                    {
-                                        id: "953d3002-000c-42d3-a1b9-d6559f8a4d49",
-                                        content: "This is a child comment",
-                                        createdTime: "2021-02-04 16:33:43.236",
-                                        createdBy: "user1",
-                                        category: "general",
-                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a4d49",
-                                        entryPoint: "devportal",
-                                        commenterInfo: {
-                                            firstName: "Jane",
-                                            lastName: "David",
-                                            fullName: "Jane David"
-                                        }
-                                    }
-                                ],
-                                pagination: {
-                                    offset: 0,
-                                    limit: 1,
-                                    total: 10,
-                                    next: "string",
-                                    previous: "string"
-                                }
-                            }
-                        },
-                        {
-                            id: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
-                            content: "This is a Parent comment",
-                            createdTime: "2021-02-02 16:33:43.236",
-                            createdBy: "admin",
-                            category: "general",
-                            replyTo: null,
-                            entryPoint: "publisher",
-                            commenterInfo: {
-                                firstName: "",
-                                lastName: "",
-                                fullName: ""
-                            },
-                            replies: {
-                                count: 1,
-                                list: [
-                                    {
-                                        id: "953d3002-000c-42d3-a1b9-d6559f8a5d50",
-                                        content: "This is a child comment",
-                                        createdTime: "2021-02-03 16:33:43.236",
-                                        createdBy: "user1",
-                                        category: "general",
-                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d50",
-                                        entryPoint: "devportal",
-                                        commenterInfo: {
-                                            firstName: "John",
-                                            lastName: "David",
-                                            fullName: "John David"
-                                        }
-                                    }
-                                ],
-                                pagination: {
-                                    offset: 0,
-                                    limit: 1,
-                                    total: 10,
-                                    next: "string",
-                                    previous: "string"
-                                }
-                            }
-                        },
-                        {
-                            id: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
-                            content: "This is a Parent comment",
-                            createdTime: "2021-02-02 16:33:43.236",
-                            createdBy: "admin",
-                            category: "general",
-                            replyTo: null,
-                            entryPoint: "publisher",
-                            commenterInfo: {
-                                firstName: "John",
-                                lastName: "David",
-                                fullName: "John David"
-                            },
-                            replies: {
-                                count: 2,
-                                list: [
-                                    {
-                                        id: "953d3002-000c-42d3-a1b9-d6559f8a5d60",
-                                        content: "This is a child comment",
-                                        createdTime: "2021-02-03 16:33:43.236",
-                                        createdBy: "user1",
-                                        category: "general",
-                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
-                                        entryPoint: "devportal",
-                                        commenterInfo: {
-                                            firstName: "Jane",
-                                            lastName: "David",
-                                            fullName: "Jane David"
-                                        }
-                                    },
-                                    {
-                                        id: "953d3002-000c-42d3-a1b9-d6559f8a5d61",
-                                        content: "This is a child comment",
-                                        createdTime: "2021-02-04 16:33:43.236",
-                                        createdBy: "admin",
-                                        category: "general",
-                                        replyTo: "943d3002-000c-42d3-a1b9-d6559f8a5d60",
-                                        entryPoint: "devportal",
-                                        commenterInfo: {
-                                            firstName: "John",
-                                            lastName: "David",
-                                            fullName: "John David"
-                                        }
-                                    }
-                                ],
-                                pagination: {
-                                    offset: 0,
-                                    limit: 1,
-                                    total: 10,
-                                    next: "string",
-                                    previous: "string"
-                                }
-                            }
-                        },
-
-                    ],
-                    pagination: {
-                        offset: 0,
-                        limit: 1,
-                        total: 10,
-                        next: "string",
-                        previous: "string"
-                    }
-                }});
-        });
-    }
-
-    /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to
      * @param commentId comment id of the comment which has to be deleted
@@ -1899,15 +1672,6 @@ class API extends Resource {
     getTenantsByState(state) {
         return this.client.then(client => {
             return client.apis['Tenants'].getTenantsByState({ state });
-        });
-    }
-
-    /**
-     * Get list of microgateway labels
-     */
-    microgatewayLabelsGet() {
-        return this.client.then(client => {
-            return client.apis['Label Collection'].getLabels();
         });
     }
 
@@ -2014,42 +1778,39 @@ class API extends Resource {
         });
     }
 
-     /**
-     * Get details of a given API
-     * @param id {string} UUID of the api.
-     * @param callback {function} A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
+    /**
+    * Get details of a given API
+    * @param id {string} UUID of the api.
+    * @param callback {function} A callback function to invoke after receiving successful response.
+    * @returns {promise} With given callback attached to the success chain else API invoke promise.
+    */
     static getAPIById(id, callback = null) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.getAPI({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
-            console.log('original object from API1');
             return promiseGet.then(callback);
         } else {
-            console.log('original object from API2' + promiseGet.obj);
             return promiseGet;
         }
     }
 
     /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param environmentName {String} API environment name
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * Generate Internal Key
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+    static generateInternalKey(id, callback = null) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        const promiseGet = apiClient.then((client) => {
-            return client.apis.APIs.getAPISwagger({ apiId, environmentName }, this._requestMetaData());
+        const promiseKey = apiClient.then((client) => {
+            return client.apis.APIs.generateInternalAPIKey({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
-            return promiseGet.then(callback);
+            return promiseKey.then(callback);
         } else {
-            return promiseGet;
+            return promiseKey;
         }
     }
 
@@ -2097,38 +1858,17 @@ class API extends Resource {
     /**
      * Get the swagger of an API
      * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param environmentName {String} API environment name
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        const promiseGet = apiClient.then((client) => {
-            return client.apis.APIs.getAPISwagger({ apiId, environmentName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
+    getSwagger(environmentName = '') {
+        const payload = { apiId: this.id };
+        if(environmentName) {
+            payload[environmentName] = environmentName;
         }
-    }
-
-    /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    static getSwaggerByAPIId(apiId, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        const promiseGet = apiClient.then((client) => {
-            return client.apis.APIs.getAPISwagger({ apiId }, this._requestMetaData());
+        return this.client.then((client) => {
+            return client.apis.APIs.getAPISwagger(payload, this._requestMetaData());
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
     }
 
     /**
@@ -2237,10 +1977,10 @@ class API extends Resource {
      * */
     getRevisions(apiId) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-                return apiClient.then(client => {
-                   return client.apis['API Revisions'].getAPIRevisions( {
-                    apiId: apiId,
-                },
+        return apiClient.then(client => {
+            return client.apis['API Revisions'].getAPIRevisions({
+                apiId: apiId,
+            },
             );
         });
     }
@@ -2252,22 +1992,25 @@ class API extends Resource {
      * */
     getRevisionsWithEnv(apiId) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-                return apiClient.then(client => {
-                   return client.apis['API Revisions'].getAPIRevisions(
-                    {
-                        apiId: apiId,
-                        query: 'deployed:true',
-                    },
+        return apiClient.then(client => {
+            return client.apis['API Revisions'].getAPIRevisions(
+                {
+                    apiId: apiId,
+                    query: 'deployed:true',
+                },
             );
         });
     }
 
-    getRevisionsEnv(apiId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-                return apiClient.then(client => {
-                   return client.apis['API Revisions'].getAPIRevisionDeployments( {
-                    apiId: apiId,
-                },
+    /**
+     * Return the deployed revisions of this API 
+     * @returns 
+     */
+    getDeployedRevisions() {
+        return this.client.then(client => {
+            return client.apis['API Revisions'].getAPIRevisionDeployments({
+                apiId: this.id,
+            },
             );
         });
     }
@@ -2283,8 +2026,8 @@ class API extends Resource {
         return apiClient.then(
             client => {
                 return client.apis['API Revisions'].createAPIRevision(
-                    {apiId: apiId},
-                    { requestBody: body},
+                    { apiId: apiId },
+                    { requestBody: body },
                     this._requestMetaData(),
                 );
             });
@@ -2325,18 +2068,18 @@ class API extends Resource {
                         apiId: apiId,
                         revisionId: revisionId
                     },
-                    { requestBody: body},
+                    { requestBody: body },
                     this._requestMetaData(),
                 );
             });
     }
 
-     /**
-     * Undeploy revision.
-     *
-     * @param {string} apiId Id of the API.
-     * @param {Object} body Revision Object.
-     * */
+    /**
+    * Undeploy revision.
+    *
+    * @param {string} apiId Id of the API.
+    * @param {Object} body Revision Object.
+    * */
     deployRevision(apiId, revisionId, body) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
@@ -2346,7 +2089,7 @@ class API extends Resource {
                         apiId: apiId,
                         revisionId: revisionId
                     },
-                    { requestBody: body},
+                    { requestBody: body },
                     this._requestMetaData(),
                 );
             });
@@ -2373,39 +2116,64 @@ class API extends Resource {
     }
 
     /**
+     * Change displayInDevportal.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {string} deploymentId Id of the deployment.
+     * @param {Object} body Revision Object.
+     * */
+    displayInDevportalAPI(apiId, deploymentId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].updateAPIDeployment(
+                    {
+                        apiId: apiId,
+                        deploymentId: deploymentId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
      * Create API from service
      * @returns {promise} Add response.
      */
-    static createApiFromService(serviceKey, apiMetaData) {
+    static createApiFromService(serviceKey, apiMetaData, type) {
+        if (type != '') {
+            apiMetaData['type'] = type;
+        }
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promisedServiceResponse = apiClient.then(client => {
             return client.apis['APIs'].importServiceFromCatalog(
                 {
                     serviceKey: serviceKey,
                 },
-                { requestBody: apiMetaData},
-                this._requestMetaData() 
+                { requestBody: apiMetaData },
+                this._requestMetaData()
             );
         });
         return promisedServiceResponse.then(response => response.body);
     }
 
-     /**
-     * Reimport service.
-     *
-     * @param {string} apiId Id of the API.
-     * */
+    /**
+    * Reimport service.
+    *
+    * @param {string} apiId Id of the API.
+    * */
     static reimportService(apiId) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(
             client => {
                 return client.apis['APIs'].reimportServiceFromCatalog(
-                    {   
+                    {
                         apiId: apiId,
                     },
                     this._requestMetaData(),
                 );
-            });    
+            });
     }
 
     /**
@@ -2418,14 +2186,14 @@ class API extends Resource {
         return apiClient.then(
             client => {
                 return client.apis['APIs'].reimportServiceFromCatalog(
-                    {   
+                    {
                         apiId: apiId,
                     },
                     this._requestMetaData(),
                 );
-            });    
+            });
     }
-    
+
 
     /**
      * Get details of a given API
@@ -2543,10 +2311,14 @@ class API extends Resource {
     /**
      * Get all the endpoint certificates.
      * */
-    static getEndpointCertificates() {
+    static getEndpointCertificates(params) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            if (params) {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates(params);
+            } else {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            }
         });
     }
 
@@ -3064,7 +2836,7 @@ class API extends Resource {
         });
     }
 
-    static validateAsyncAPIByFile(asyncAPIData){
+    static validateAsyncAPIByFile(asyncAPIData) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         let payload, promisedValidate;
         payload = {
@@ -3088,7 +2860,7 @@ class API extends Resource {
         return promisedValidate;
     }
 
-    static validateAsyncAPIByUrl(url, params = {returnContent: false}) {
+    static validateAsyncAPIByUrl(url, params = { returnContent: false }) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const payload = {
             'Content-Type': 'multipart/form-data',
@@ -3189,7 +2961,7 @@ class API extends Resource {
             };
             const requestBody = {
                 requestBody: {
-                    apiDefinition :JSON.stringify(asyncAPI)
+                    apiDefinition: JSON.stringify(asyncAPI)
                 }
             };
             return client.apis['APIs'].put_apis__apiId__asyncapi(

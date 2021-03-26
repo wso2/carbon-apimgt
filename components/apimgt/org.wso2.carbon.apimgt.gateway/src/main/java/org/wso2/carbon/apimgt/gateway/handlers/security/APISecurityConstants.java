@@ -18,6 +18,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 public class APISecurityConstants {
     public static final String API_AUTH_FAILURE_HANDLER = "_auth_failure_handler_";
+    public static final String BACKEND_AUTH_FAILURE_HANDLER = "_backend_failure_handler_";
+
     public static final int API_AUTH_GENERAL_ERROR       = 900900;
     public static final String API_AUTH_GENERAL_ERROR_MESSAGE = "Unclassified Authentication Failure";
 
@@ -158,4 +160,5 @@ public class APISecurityConstants {
     
     public static final int DEFAULT_MAX_VALID_KEYS = 250;
     public static final int DEFAULT_MAX_INVALID_KEYS = 100;
+    public static final String API_BLOCKED_SEQUENCE = "_api_blocked_sequence_";
 }

@@ -16,8 +16,8 @@
  * under the License.
  */
 
-import ResourceNotFound from './ResourceNotFound'
-import ScopeNotFound from './ScopeNotFound'
-import PageNotFound from './PageNotFound'
+import ResourceNotFound from './ResourceNotFound';
+import ScopeNotFound from './ScopeNotFound';
+import PageNotFound from './PageNotFound';
 
-export { ResourceNotFound, ScopeNotFound, PageNotFound }
+export { ResourceNotFound, ScopeNotFound, PageNotFound };

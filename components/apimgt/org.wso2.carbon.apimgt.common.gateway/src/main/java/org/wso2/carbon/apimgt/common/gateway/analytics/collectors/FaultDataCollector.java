@@ -21,7 +21,7 @@ import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsExcep
 import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Event;
 
 /**
- * Interface to faulty handlers
+ * Interface to faulty handlers.
  */
 public interface FaultDataCollector {
     void collectFaultData(Event faultyEvent) throws AnalyticsException;

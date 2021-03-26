@@ -32,15 +32,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This class used to map Environment DTO to model.
+ */
 public class EnvironmentMappingUtil {
 
     /**
-     * Converts an Environment object into EnvironmentDTO
+     * Converts an Environment object into EnvironmentDTO.
      *
      * @param environment Environment object
      * @return EnvironmentDTO object corresponding to the given Environment object
      */
     public static EnvironmentDTO fromEnvironmentToDTO(Environment environment) {
+
         EnvironmentDTO environmentDTO = new EnvironmentDTO();
         environmentDTO.setName(environment.getName());
         environmentDTO.setDisplayName(environment.getDisplayName());
@@ -71,12 +75,13 @@ public class EnvironmentMappingUtil {
     }
 
     /**
-     * Converts a List object of SubscribedAPIs into a DTO
+     * Converts a List object of SubscribedAPIs into a DTO.
      *
      * @param environmentCollection a collection of Environment objects
      * @return EnvironmentListDTO object containing EnvironmentDTOs
      */
     public static EnvironmentListDTO fromEnvironmentCollectionToDTO(Collection<Environment> environmentCollection) {
+
         EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
         List<EnvironmentDTO> environmentDTOs = environmentListDTO.getList();
         if (environmentDTOs == null) {
@@ -92,12 +97,13 @@ public class EnvironmentMappingUtil {
     }
 
     /**
-     * Converts VHost into a VHostDTO
+     * Converts VHost into a VHostDTO.
      *
      * @param vHost VHost object
      * @return VHostDTO
      */
-    public static VHostDTO fromVHostToVHostDTO(VHost vHost){
+    public static VHostDTO fromVHostToVHostDTO(VHost vHost) {
+
         VHostDTO vHostDTO = new VHostDTO();
         vHostDTO.setHost(vHost.getHost());
         vHostDTO.setHttpContext(vHost.getHttpContext());
@@ -109,42 +115,46 @@ public class EnvironmentMappingUtil {
     }
 
     /**
-     * Check whether given url is a HTTP url
+     * Check whether given url is a HTTP url.
      *
      * @param url url to check
      * @return true if the given url is HTTP, false otherwise
      */
     private static boolean isHttpURL(String url) {
+
         return url.matches("^http://.*");
     }
 
     /**
-     * Check whether given url is a HTTPS url
+     * Check whether given url is a HTTPS url.
      *
      * @param url url to check
      * @return true if the given url is HTTPS, false otherwise
      */
     private static boolean isHttpsURL(String url) {
+
         return url.matches("^https://.*");
     }
 
     /**
-     * Check whether given url is a WS url
+     * Check whether given url is a WS url.
      *
      * @param url url to check
      * @return true if the given url is WS, false otherwise
      */
     private static boolean isWebSocketURL(String url) {
+
         return url.matches("^ws://.*");
     }
 
     /**
-     * Check whether given url is a WSS url
+     * Check whether given url is a WSS url.
      *
      * @param url url to check
      * @return true if the given url is WSS, false otherwise
      */
     private static boolean isSecureWebsocketURL(String url) {
+
         return url.matches("^wss://.*");
     }
 

@@ -49,7 +49,7 @@ Listing.propTypes = {
         contentInside: PropTypes.string,
     }).isRequired,
     theme: PropTypes.shape({
-        custom: PropTypes.string,
+        custom: PropTypes.shape({}),
     }).isRequired,
     isAPIProduct: PropTypes.bool.isRequired,
     location: PropTypes.shape({

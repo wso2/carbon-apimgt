@@ -36,39 +36,6 @@ import java.util.Map;
  */
 public interface APIAdmin  {
     /**
-     * Returns labels of a given tenant
-     *
-     * @param tenantDomain    tenant domain
-     * @return A List of labels related to the given tenant
-     */
-    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
-
-    /**
-     * Creates a new label for the tenant
-     *
-     * @param tenantDomain    tenant domain
-     * @param label           content to add
-     * @throws APIManagementException if failed add Label
-     */
-    Label addLabel(String tenantDomain, Label label) throws APIManagementException;
-
-    /**
-     * Delete existing label
-     *
-     * @param labelID  Label identifier
-     * @throws APIManagementException If failed to delete label
-     */
-    void deleteLabel(String user, String labelID) throws APIManagementException;
-
-    /**
-     * Updates the details of the given Label.
-     * @param tenantDomain    tenant domain
-     * @param label             content to update
-     * @throws APIManagementException if failed to update label
-     */
-    Label updateLabel(String tenantDomain, Label label) throws APIManagementException;
-
-    /**
      * Returns environments of a given tenant
      *
      * @param tenantDomain tenant domain

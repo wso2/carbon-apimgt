@@ -966,6 +966,11 @@
           "example" : "APIProduct",
           "description" : "Type of the API."
         },
+        "status" : {
+          "type" : "string",
+          "example" : "APIProduct",
+          "description" : "Type of the API."
+        },
         "isDefaultVersion" : {
           "type" : "boolean",
           "example" : false,
@@ -1263,10 +1268,12 @@
         },
         "tenantId" : {
           "type" : "integer",
+          "example" : -1234,
           "description" : "The tenant id."
         },
         "appID" : {
           "type" : "string",
+          "example" : "1",
           "description" : "The application ID of the subscription."
         },
         "callbackURL" : {
@@ -1288,18 +1295,22 @@
         },
         "tier" : {
           "type" : "string",
+          "example" : "Bronze",
           "description" : "the subscription tier."
         },
         "applicationTier" : {
           "type" : "string",
+          "example" : "Unlimited",
           "description" : "the application tier."
         },
         "apiTier" : {
           "type" : "string",
+          "example" : "Bronze",
           "description" : "the API tier."
         },
         "subscriberName" : {
           "type" : "string",
+          "example" : "admin",
           "description" : "the subscriber name."
         }
       }

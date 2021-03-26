@@ -47,7 +47,6 @@ public class APISecurityUtilsTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         APIManagerConfiguration apiMgtConfig = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiMgtConfig);
-        Mockito.when(apiMgtConfig.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CLIENT_TYPE)).thenReturn("WSClient");
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         AuthenticationContext authenticationContext = Mockito.mock(AuthenticationContext.class);
         Mockito.when(authenticationContext.getKeyType()).thenReturn("keyType");

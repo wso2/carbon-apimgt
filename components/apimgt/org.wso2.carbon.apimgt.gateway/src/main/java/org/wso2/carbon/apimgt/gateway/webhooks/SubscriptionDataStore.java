@@ -131,10 +131,11 @@ public class SubscriptionDataStore {
      * @param subscriber        the subscriber.
      */
     public void removeSubscriber(String key, WebhooksDTO subscriber) {
-        List<WebhooksDTO> subscriberList = getSubscribers(key);
-        if (subscriberList != null) {
-            subscriberList.removeIf(existingSubscriber -> existingSubscriber.getCallbackURL().equals(
+        Map<String, WebhooksDTO> existingSubscribers = subscribersMap.get(key);
+        if (existingSubscribers != null) {
+            existingSubscribers.values().removeIf(existingSubscriber -> existingSubscriber.getCallbackURL().equals(
                     subscriber.getCallbackURL()));
+            subscribersMap.replace(key, existingSubscribers);
         }
     }
 
@@ -206,11 +207,12 @@ public class SubscriptionDataStore {
     public List<WebhooksDTO> getSubscribers(String api) {
         Map<String, WebhooksDTO> subscribers = subscribersMap.get(api);
         if (subscribers != null) {
-            List<WebhooksDTO> subscriberList = new ArrayList<WebhooksDTO>(subscribersMap.get(api).values());
+            Map<String, WebhooksDTO> existingSubscribers = subscribersMap.get(api);
             long now = Instant.now().toEpochMilli();
-            subscriberList.removeIf(existingSubscriber -> existingSubscriber.getExpiryTime() != 0 &&
+            existingSubscribers.values().removeIf(existingSubscriber -> existingSubscriber.getExpiryTime() != 0 &&
                     existingSubscriber.getExpiryTime() < now);
-            return subscriberList;
+            subscribersMap.replace(api, existingSubscribers);
+            return new ArrayList<WebhooksDTO>(existingSubscribers.values());
         }
         return null;
     }

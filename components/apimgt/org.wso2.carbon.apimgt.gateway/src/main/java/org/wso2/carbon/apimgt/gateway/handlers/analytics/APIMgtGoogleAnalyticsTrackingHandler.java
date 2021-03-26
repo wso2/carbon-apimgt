@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
 import org.wso2.carbon.apimgt.tracing.TracingTracer;
 import org.wso2.carbon.apimgt.tracing.Util;
@@ -70,7 +71,10 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
     @MethodStats
     @Override
-	public boolean handleRequest(MessageContext msgCtx) {
+    public boolean handleRequest(MessageContext msgCtx) {
+        if (GatewayUtils.isAPIStatusPrototype(msgCtx)) {
+            return true;
+        }
         TracingSpan span = null;
         TracingTracer tracer = null;
         Map<String, String> tracerSpecificCarrier = new HashMap<>();
@@ -123,7 +127,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 if (Util.tracingEnabled()) {
                     Util.inject(span, tracer, tracerSpecificCarrier);
                     if (org.apache.axis2.context.MessageContext.getCurrentMessageContext() != null) {
-                        Map headers = (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
+                        Map headers =
+                                (Map) org.apache.axis2.context.MessageContext.getCurrentMessageContext().getProperty(
                                 org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                         headers.putAll(tracerSpecificCarrier);
                         org.apache.axis2.context.MessageContext.getCurrentMessageContext()

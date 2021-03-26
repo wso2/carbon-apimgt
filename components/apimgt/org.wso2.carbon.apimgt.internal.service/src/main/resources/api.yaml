@@ -776,6 +776,10 @@ definitions:
         type: string
         description: Type of the API.
         example: APIProduct
+      status:
+        type: string
+        description: Type of the API.
+        example: APIProduct
       isDefaultVersion:
         type: boolean
         description: Whether this is the default version of the API.
@@ -1030,9 +1034,11 @@ definitions:
       tenantId:
         type: integer
         description: The tenant id.
+        example: -1234
       appID:
         type: string
         description: The application ID of the subscription.
+        example: 1
       callbackURL:
         type: string
         description: The callback URL
@@ -1049,15 +1055,19 @@ definitions:
       tier:
         type: string
         description: the subscription tier.
+        example: Bronze
       applicationTier:
         type: string
         description: the application tier.
+        example: Unlimited
       apiTier:
         type: string
         description: the API tier.
+        example: Bronze
       subscriberName:
         type: string
         description: the subscriber name.
+        example: admin
 
 
   #---------------------  --------------------------------

@@ -44,7 +44,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String authorizationHeader;
     private List<String> securityScheme = new ArrayList<>();
     private Set<String> environments;
-    private Set<String> gatewayLabels;
     private Set<String> apiCategories;
     private boolean isMonetizationEnabled; //(monetizationStatus)
     private List<String> keyManagers = new ArrayList<>();
@@ -212,14 +211,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.environments = environments;
     }
 
-    public Set<String> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(Set<String> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
-    }
-
     public Set<String> getApiCategories() {
         return apiCategories;
     }
@@ -312,7 +303,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + apiOwner + ", advertiseOnly=" + advertiseOnly + ", subscriptionAvailability="
                 + subscriptionAvailability + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs
                 + ", authorizationHeader=" + authorizationHeader + ", securityScheme=" + securityScheme
-                + ", environments=" + environments + ", gatewayLabels=" + gatewayLabels + ", apiCategories="
+                + ", environments=" + environments + ", apiCategories="
                 + apiCategories + ", isMonetizationEnabled=" + isMonetizationEnabled + ", keyManagers=" + keyManagers
                 + ", deploymentEnvironments=" + deploymentEnvironments + ", tags=" + tags + ", additionalProperties="
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="

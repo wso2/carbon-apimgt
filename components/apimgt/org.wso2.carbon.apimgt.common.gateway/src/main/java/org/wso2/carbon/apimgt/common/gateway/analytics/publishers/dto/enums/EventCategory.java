@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums;
 
 /**
- * enum for event categories
+ * enum for event categories.
  */
 public enum EventCategory {
     SUCCESS, FAULT, INVALID

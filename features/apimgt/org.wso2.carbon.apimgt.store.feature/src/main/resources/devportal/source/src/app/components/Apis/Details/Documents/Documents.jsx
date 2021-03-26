@@ -42,11 +42,6 @@ const styles = (theme) => ({
         minHeight: 400 + theme.spacing(4),
         height: '100%',
     },
-    contentWrapper: {
-        paddingLeft: theme.spacing(3),
-        paddingRight: theme.spacing(3),
-        paddingTop: theme.spacing(3),
-    },
     docContent: {
         paddingTop: theme.spacing(1),
     },
@@ -71,6 +66,7 @@ const styles = (theme) => ({
         paddingBottom: 0,
     },
     contentWrapper: {
+        paddingRight: theme.spacing(3),
         maxWidth: theme.custom.contentAreaWidth,
         paddingLeft: theme.spacing(3),
         paddingTop: theme.spacing(3),
@@ -212,7 +208,6 @@ function Documents(props) {
                 }
             }
         }
-
     }, [documentId]);
     if (!documentList) {
         return (

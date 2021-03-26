@@ -127,7 +127,7 @@ class Topics extends React.Component {
                 <div className={parentClasses.titleWrapper}>
                     <Typography variant='h5' component='h3' className={parentClasses.title}>
                         <FormattedMessage
-                            id='Apis.Details.NewOverview.Resources.resources'
+                            id='Apis.Details.NewOverview.async.api.topics'
                             defaultMessage='Topics'
                         />
                     </Typography>

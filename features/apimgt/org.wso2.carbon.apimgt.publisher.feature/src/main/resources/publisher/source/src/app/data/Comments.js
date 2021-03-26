@@ -78,11 +78,11 @@ class Comments extends Resource {
      * @param apiId api id of the api to which the comment is added
      * * TODO: remove
      */
-    static all(apiId) {
+     static all(apiId, limit, offset) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(),
             Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis.Comments.getAllCommentsOfAPI({ apiId });
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId , limit, offset });
         })
     }
 

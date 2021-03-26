@@ -32,7 +32,8 @@ const styles = (theme) => ({
         textAlign: 'left',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
-        fontWeight: 450,
+        fontSize: theme.typography.body1.fontSize,
+        fontWeight: 250,
         whiteSpace: 'nowrap',
     },
     leftLInkTextHead: {
@@ -60,9 +61,20 @@ const styles = (theme) => ({
     },
     leftLInk: {
         paddingTop: theme.spacing(1),
+        paddingLeft: theme.spacing(2),
+        paddingRight: theme.spacing(1),
         paddingBottom: theme.spacing(1),
+        height: '18px',
+        fontSize: theme.typography.caption.fontSize,
+        cursor: 'pointer',
+        textDecoration: 'none',
+    },
+    leftLInkOverview: {
+        paddingTop: theme.spacing(1),
         paddingLeft: theme.spacing(1),
         paddingRight: theme.spacing(1),
+        paddingBottom: theme.spacing(1),
+        height: '18px',
         fontSize: theme.typography.caption.fontSize,
         cursor: 'pointer',
         textDecoration: 'none',
@@ -121,7 +133,8 @@ function LeftMenuItem(props) {
     return (
         <Link
             className={classNames(
-                classes.leftLInk,
+                head !== 'valueOnly' ? (
+                    classes.leftLInk) : (classes.leftLInkOverview),
                 {
                     [classes.leftLink_IconLeft]: leftMenu === 'icon left',
                 },
