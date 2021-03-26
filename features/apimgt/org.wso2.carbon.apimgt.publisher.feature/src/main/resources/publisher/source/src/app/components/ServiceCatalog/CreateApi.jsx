@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -119,6 +119,21 @@ function reducer(state, { field, value }) {
     }
 }
 
+const protocols = [
+    {
+        displayName: 'WebSocket',
+        value: 'WS',
+    },
+    {
+        displayName: 'WebSub',
+        value: 'WEBSUB',
+    },
+    {
+        displayName: 'SSE',
+        value: 'SSE',
+    },
+];
+
 /**
  * Create API Component for the Service Catalog
  * @param {any} props prop values
@@ -140,22 +155,25 @@ function CreateApi(props) {
     const [open, setOpen] = useState(false);
     const [pageError, setPageError] = useState(null);
     const [type, setType] = useState('');
-    const protocols = [
-        {
-            displayName: 'WebSocket',
-            value: 'WS',
-        },
-        {
-            displayName: 'WebSub',
-            value: 'WEBSUB',
-        },
-        {
-            displayName: 'SSE',
-            value: 'SSE',
-        },
-    ];
     const [isFormValid, setIsFormValid] = useState(false);
 
+    const [policies, setPolicies] = useState([]);
+
+    useEffect(() => {
+        API.policies('subscription').then((response) => {
+            const allPolicies = response.body.list;
+            if (allPolicies.length === 0) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Create.Default.APICreateDefault.error.policies.not.available',
+                    defaultMessage: 'Throttling policies not available. Contact your administrator',
+                }));
+            } else if (allPolicies.filter((p) => p.name === 'Unlimited').length > 0) {
+                setPolicies(['Unlimited']);
+            } else {
+                setPolicies([allPolicies[0].name]);
+            }
+        });
+    }, []);
     /**
      * This method gets the context for the API from the service url
      *
@@ -166,7 +184,11 @@ function CreateApi(props) {
         if (url && url !== '') {
             const urlObject = url.split('://').length > 1 ? new URL(url) : null;
             if (urlObject) {
-                return urlObject.pathname;
+                let path = urlObject.pathname;
+                if (path.endsWith('/')) {
+                    path = path.slice(0, -1); // Remove leading `/` because of context validation failure
+                }
+                return path;
             }
         }
         return url;
@@ -177,7 +199,6 @@ function CreateApi(props) {
         context: getContextFromServiceUrl(serviceUrl),
         version: serviceVersion,
     };
-
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const toggleOpen = (event) => {
@@ -292,7 +313,7 @@ function CreateApi(props) {
     }
 
     const runAction = () => {
-        const promisedCreateApi = API.createApiFromService(serviceKey, state, type);
+        const promisedCreateApi = API.createApiFromService(serviceKey, { ...state, policies }, type);
         promisedCreateApi.then((data) => {
             const apiInfo = data;
             Alert.info(intl.formatMessage({
@@ -333,7 +354,7 @@ function CreateApi(props) {
                         disableFocusRipple
                         color='primary'
                         onClick={toggleOpen}
-                        aria-label='add to favorites'
+                        aria-label={`Create api from ${serviceDisplayName} service`}
                     >
                         <AddCircleIcon />
                     </IconButton>

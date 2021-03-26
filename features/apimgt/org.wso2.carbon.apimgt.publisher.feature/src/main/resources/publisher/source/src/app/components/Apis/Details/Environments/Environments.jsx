@@ -311,7 +311,6 @@ export default function Environments() {
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
     const [revisionToRestore, setRevisionToRestore] = useState([]);
     const [openDeployPopup, setOpenDeployPopup] = useState(false);
-    const [lastRevisionCount, setLastRevisionCount] = useState(0);
 
     // allEnvDeployments represents all deployments of the API with mapping
     // environment -> {revision deployed to env, vhost deployed to env with revisino}
@@ -326,24 +325,10 @@ export default function Environments() {
         allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
 
-    const extractLastRevisionNumber = (list, lastRev) => {
-        if (lastRev !== null) {
-            setLastRevisionCount(lastRev);
-        } else if (list[list.length - 1]) {
-            const lastRevisionName = list[list.length - 1].displayName;
-            const splitList = lastRevisionName.split(' ');
-            setLastRevisionCount(splitList[1]);
-        } else {
-            setLastRevisionCount(0);
-        }
-    };
-
     useEffect(() => {
         if (api && api.apiType !== API.CONSTS.APIProduct) {
             restApi.getRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
-                setLastRevisionCount(result.body.count);
-                extractLastRevisionNumber(result.body.list, null);
             });
             restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
                 setEnvRevision(result.body.list);
@@ -351,8 +336,6 @@ export default function Environments() {
         } else {
             restProductApi.getProductRevisions(api.id).then((result) => {
                 setRevisions(result.body.list);
-                setLastRevisionCount(result.body.count);
-                extractLastRevisionNumber(result.body.list, null);
             });
             restProductApi.getProductRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
                 setEnvRevision(result.body.list);
@@ -415,25 +398,6 @@ export default function Environments() {
         setExtraRevisionToDelete(null);
     };
 
-    /**
-     * Handles creating and deploying a new revision
-     * @param {Object} list the environment list
-     * @param {Object} revisionName the name of the revision
-     * @returns {Object} the revision number
-     */
-    function checkIfDeletingLastRevision(list, revisionName) {
-        const splitList = revisionName.split(' ');
-        let splitList1;
-        if (list[list.length - 1]) {
-            const lastRevInList = list[list.length - 1].displayName;
-            splitList1 = lastRevInList.split(' ');
-        }
-        if (parseInt(splitList[1], 10) === parseInt(splitList1[1], 10)) {
-            return splitList[1];
-        }
-        return null;
-    }
-
     const handleChange = (event) => {
         if (event.target.checked) {
             setSelectedEnvironment([...SelectedEnvironment, event.target.value]);
@@ -452,8 +416,7 @@ export default function Environments() {
      * @param {Object} revisionId the revision Id
      * @returns {Object} promised delete
      */
-    function deleteRevision(revisionId, revisionName) {
-        const lastRev = checkIfDeletingLastRevision(allRevisions, revisionName);
+    function deleteRevision(revisionId) {
         let promiseDelete;
         if (api.apiType === API.CONSTS.APIProduct) {
             promiseDelete = restProductApi.deleteProductRevision(api.id, revisionId)
@@ -475,7 +438,6 @@ export default function Environments() {
                 }).finally(() => {
                     restProductApi.getProductRevisions(api.id).then((result) => {
                         setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, lastRev);
                     });
                 });
         } else {
@@ -498,7 +460,6 @@ export default function Environments() {
                 }).finally(() => {
                     restApi.getRevisions(api.id).then((result) => {
                         setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, lastRev);
                     });
                 });
         }
@@ -526,7 +487,6 @@ export default function Environments() {
                 }).finally(() => {
                     restProductApi.getProductRevisions(api.id).then((result) => {
                         setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, null);
                     });
                 });
         } else {
@@ -544,7 +504,6 @@ export default function Environments() {
                 }).finally(() => {
                     restApi.getRevisions(api.id).then((result) => {
                         setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, null);
                     });
                 });
         }
@@ -559,7 +518,7 @@ export default function Environments() {
             description,
         };
         if (extraRevisionToDelete) {
-            deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
+            deleteRevision(extraRevisionToDelete[0])
                 .then(() => {
                     createRevision(body);
                 }).finally(() => setExtraRevisionToDelete(null));
@@ -571,9 +530,9 @@ export default function Environments() {
         setExtraRevisionToDelete(null);
     }
 
-    const runActionDelete = (confirm, revisionId, revisionName) => {
+    const runActionDelete = (confirm, revisionId) => {
         if (confirm) {
-            deleteRevision(revisionId, revisionName);
+            deleteRevision(revisionId);
         }
         setConfirmDeleteOpen(!confirmDeleteOpen);
         setRevisionToDelete([]);
@@ -802,7 +761,7 @@ export default function Environments() {
      */
     function handleCreateAndDeployRevision(envList, vhostList) {
         if (extraRevisionToDelete) {
-            deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
+            deleteRevision(extraRevisionToDelete[0])
                 .then(() => {
                     createDeployRevision(envList, vhostList);
                 }).finally(() => setExtraRevisionToDelete(null));
@@ -839,7 +798,7 @@ export default function Environments() {
                     defaultMessage='Yes'
                 />
             )}
-            callback={(e) => runActionDelete(e, revisionToDelete[1], revisionToDelete[0])}
+            callback={(e) => runActionDelete(e, revisionToDelete[1])}
             open={confirmDeleteOpen}
         />
     );
@@ -862,7 +821,7 @@ export default function Environments() {
             message={(
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.revision.restore.confirm.message'
-                    defaultMessage='Are you sure you want to restore {revision} ?'
+                    defaultMessage='Are you sure you want to restore {revision} (To Current API)?'
                     values={{ revision: revisionToRestore[0] }}
                 />
             )}
@@ -1341,18 +1300,6 @@ export default function Environments() {
                         />
                     </DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        <Typography variant='body1' className={classes.labelSpacingDown}>
-                            <b>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.new.revision.name.heading1'
-                                    defaultMessage='Revision Name:'
-                                />
-                            </b>
-                            <span className={classes.labelSpace}>
-                                {'Revision '}
-                                {parseInt(lastRevisionCount, 10) + 1}
-                            </span>
-                        </Typography>
                         { allRevisions && allRevisions.length === revisionCount && (
                             <Typography variant='body' align='left' className={classes.warningText}>
                                 <FormattedMessage
@@ -1665,22 +1612,10 @@ export default function Environments() {
                     <DialogTitle id='form-dialog-title' variant='h2'>
                         <FormattedMessage
                             id='Apis.Details.Environments.Environments.revision.create.heading'
-                            defaultMessage='Create Revision'
+                            defaultMessage='Create New Revision (From Current API)'
                         />
                     </DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        <Typography variant='body1' className={classes.labelSpacingDown}>
-                            <b>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.new.revision.name.heading2'
-                                    defaultMessage='Revision Name:'
-                                />
-                            </b>
-                            <span className={classes.labelSpace}>
-                                {'Revision '}
-                                {parseInt(lastRevisionCount, 10) + 1}
-                            </span>
-                        </Typography>
                         { allRevisions && allRevisions.length === revisionCount && (
                             <Typography variant='body' align='left' className={classes.warningText}>
                                 <FormattedMessage

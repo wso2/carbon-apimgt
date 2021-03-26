@@ -579,8 +579,6 @@ public final class APIConstants {
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
 
-    public static final String DEFAULT_RESERVED_USERNAME = "apim_reserved_user";
-
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
@@ -790,6 +788,8 @@ public final class APIConstants {
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
             "EnableCrossTenantSubscription";
+    public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
+            "DefaultReservedUsername";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -1204,6 +1204,7 @@ public final class APIConstants {
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
         public static final String KEY_MAPPING_ID = "keyMappingId";
+        public static final String MODE = "mode";
     }
 
     public static class AccessTokenConstants {
@@ -2704,5 +2705,10 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+    }
+
+    public static class GatewayArtifactConstants {
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
 }

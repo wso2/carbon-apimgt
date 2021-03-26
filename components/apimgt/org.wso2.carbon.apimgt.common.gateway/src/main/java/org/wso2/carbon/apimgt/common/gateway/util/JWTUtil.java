@@ -18,11 +18,20 @@
 
 package org.wso2.carbon.apimgt.common.gateway.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.JWTSignatureAlg;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,11 +40,14 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Helper class for util related to jwt generation.
  */
 public final class JWTUtil {
+    private static final Logger log = LoggerFactory.getLogger(JWTUtil.class);
     private static final String NONE = "NONE";
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
 
@@ -168,5 +180,32 @@ public final class JWTUtil {
             //do not log
             throw new JWTGeneratorException("Error while signing JWT", e);
         }
+    }
+
+    /**
+     * Parse a jwt assertion provided in string format and returns set of claims
+     * defined in the assertion.
+     *
+     * @param jwt jwt assertion
+     * @return claims as a {@link Map}. if jwt is not parse-able null will be returned.
+     */
+    public static Map<String, String> getJWTClaims(String jwt) {
+        if (StringUtils.isNotEmpty(jwt)) {
+            String[] jwtTokenArray = jwt.split(Pattern.quote("."));
+            // decoding JWT
+            try {
+                byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes(StandardCharsets.UTF_8));
+                String jwtAssertion = new String(jwtByteArray, StandardCharsets.UTF_8);
+                Type mapType = new TypeToken<Map<String, String>>() {
+                }.getType();
+                return new Gson().fromJson(jwtAssertion, mapType);
+            } catch (JsonParseException e) {
+                // gson throws runtime exceptions for parsing errors. We don't want to throw
+                // errors and break the flow from this util method. Therefore logging and
+                // returning null for error case
+                log.error("Error occurred while parsing jwt claims");
+            }
+        }
+        return null;
     }
 }

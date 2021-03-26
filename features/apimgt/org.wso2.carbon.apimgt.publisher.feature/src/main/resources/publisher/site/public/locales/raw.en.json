@@ -93,7 +93,7 @@
     "defaultMessage": "Create an API"
   },
   "Apis.Create.Default.APICreateDefault.api.sub.heading": {
-    "defaultMessage": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+    "defaultMessage": "Create an API by providing a Name, a Version, a Context and Backend Endpoint (optional)"
   },
   "Apis.Create.Default.APICreateDefault.apiProduct.heading": {
     "defaultMessage": "Create an API Product"
@@ -126,7 +126,7 @@
     "defaultMessage": "Create a WebSocket API"
   },
   "Apis.Create.Default.APICreateDefault.webSocket.sub.heading": {
-    "defaultMessage": "Create a WebSocket API by providing a Name, a Context, and Business Plans (optional)."
+    "defaultMessage": "Create a WebSocket API by providing a Name, and a Context."
   },
   "Apis.Create.GraphQL.ApiCreateGraphQL.back": {
     "defaultMessage": "Back"
@@ -2971,7 +2971,7 @@
     "defaultMessage": "Delete {type}"
   },
   "Apis.Details.index.Tryout.menu.name": {
-    "defaultMessage": "Try Out"
+    "defaultMessage": "TryOut"
   },
   "Apis.Details.index.api.definition2": {
     "defaultMessage": "API definition"
@@ -3759,35 +3759,35 @@
   "ServiceCatalog.Listing.Listing.service.deleted.successfully": {
     "defaultMessage": "Service deleted successfully!"
   },
-  "ServiceCatalog.Listing.Onboarding.Heading1.description": {
-    "defaultMessage": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
-  },
-  "ServiceCatalog.Listing.Onboarding.Heading1.description2": {
-    "defaultMessage": "Create and Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
-  },
-  "ServiceCatalog.Listing.Onboarding.Heading1.subHeading": {
-    "defaultMessage": "Integration Service"
-  },
-  "ServiceCatalog.Listing.Onboarding.Heading2.subHeading": {
-    "defaultMessage": "Integration Service"
-  },
-  "ServiceCatalog.Listing.Onboarding.add.sample": {
-    "defaultMessage": "Add a sample"
-  },
-  "ServiceCatalog.Listing.Onboarding.add.sample.service": {
-    "defaultMessage": "Add Sample Service"
-  },
   "ServiceCatalog.Listing.Onboarding.add.sample.success": {
     "defaultMessage": "Sample Service added successfully!"
   },
   "ServiceCatalog.Listing.Onboarding.error.creating.sample.service": {
     "defaultMessage": "Error while creating Sample Service"
   },
-  "ServiceCatalog.Listing.Onboarding.get.started": {
+  "ServiceCatalog.Listing.Onboarding.learn.heading": {
+    "defaultMessage": "Learn to write your first"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.heading.sub": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.heading.text": {
+    "defaultMessage": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.link": {
     "defaultMessage": "Get Started"
   },
-  "ServiceCatalog.Listing.Onboarding.write.first.intg": {
-    "defaultMessage": "Write your first"
+  "ServiceCatalog.Listing.Onboarding.sample.add": {
+    "defaultMessage": "Add Sample Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading": {
+    "defaultMessage": "Add a sample"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading.sub": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading.text": {
+    "defaultMessage": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
   },
   "ServiceCatalog.Listing.Overview.back.btn": {
     "defaultMessage": "Go Back"
@@ -3887,12 +3887,6 @@
   },
   "ServiceCatalog.Listing.components.ServiceCard.version": {
     "defaultMessage": "Version"
-  },
-  "ServiceCatalog.Listing.onboarding.create.new": {
-    "defaultMessage": "Service Catalog"
-  },
-  "ServiceCatalog.Listing.onboarding.description": {
-    "defaultMessage": "Enabling API-first Integration"
   },
   "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": {
     "defaultMessage": "Created Time"

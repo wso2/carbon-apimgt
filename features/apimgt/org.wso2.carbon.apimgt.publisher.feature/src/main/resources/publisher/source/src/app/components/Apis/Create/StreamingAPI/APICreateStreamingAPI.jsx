@@ -51,15 +51,15 @@ const APICreateStreamingAPI = (props) => {
     const protocols = [
         {
             displayName: 'WebSocket',
-            description: 'WebSocket',
+            description: 'WebSocket API',
         },
         {
             displayName: 'WebSub',
-            description: 'WebSub',
+            description: 'WebHook API based on WebSub specification',
         },
         {
             displayName: 'SSE',
-            description: 'Server Sent Events',
+            description: 'Server-Sent Events',
         },
     ];
     const protocolKeys = {

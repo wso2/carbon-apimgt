@@ -358,10 +358,10 @@ public class PublisherCommonUtils {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-            // TODO: update the asyncapi.yaml
+             String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
             AsyncApiParser asyncApiParser = new AsyncApiParser();
-            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(originalAPI);
-            apiProvider.saveAsyncApiDefinition(originalAPI, apiDefinition);
+            String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
+            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 
@@ -1237,8 +1237,8 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating an existing API Product
      */
     public static APIProduct updateApiProduct(APIProduct originalAPIProduct, APIProductDTO apiProductDtoToUpdate,
-                                              APIProvider apiProvider, String username) throws APIManagementException
-            , FaultGatewaysException {
+                                              APIProvider apiProvider, String username, String orgId)
+            throws APIManagementException, FaultGatewaysException {
 
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
@@ -1286,7 +1286,7 @@ public class PublisherCommonUtils {
         product.setUuid(originalAPIProduct.getUuid());
 
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
-        apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, product);
+        apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
 
         //preserve monetization status in the update flow
         apiProvider.configureMonetizationInAPIProductArtifact(product);
@@ -1297,20 +1297,19 @@ public class PublisherCommonUtils {
      * Add API Product with the generated swagger from the DTO.
      *
      * @param apiProductDTO API Product DTO
-     * @param provider      Provider name
      * @param username      Username
      * @return Created API Product object
      * @throws APIManagementException Error while creating the API Product
      * @throws FaultGatewaysException Error while adding the API Product to gateway
      */
-    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String provider,
-                                                                         String username)
+    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username)
             throws APIManagementException, FaultGatewaysException {
 
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         // if not add product
-        provider = apiProductDTO.getProvider();
+        String provider = apiProductDTO.getProvider();
         String context = apiProductDTO.getContext();
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
@@ -1370,14 +1369,14 @@ public class PublisherCommonUtils {
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
 
+        APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
-        apiProvider.addAPIProductSwagger(apiToProductResourceMapping, productToBeAdded);
-
-        APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
+        apiProvider.addAPIProductSwagger(createdProduct.getUuid(), apiToProductResourceMapping, createdProduct,
+                tenantDomain);
 
-        //apiProvider.saveToGateway(createdProduct);
+        createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
     }
 

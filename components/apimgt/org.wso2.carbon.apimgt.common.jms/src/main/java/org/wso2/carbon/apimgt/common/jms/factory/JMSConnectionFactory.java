@@ -1,32 +1,39 @@
 /*
-*  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-package org.wso2.carbon.apimgt.jms.listener.utils;
+package org.wso2.carbon.apimgt.common.jms.factory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.jms.listener.ThrottlingRunTimeException;
+import org.wso2.carbon.apimgt.common.jms.JMSConstants;
+import org.wso2.carbon.apimgt.common.jms.JmsRunTimeException;
+import org.wso2.carbon.apimgt.common.jms.utils.JMSUtils;
 
-import javax.jms.*;
+import java.util.Hashtable;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.util.Hashtable;
 
 /**
  * Encapsulate a JMS Connection factory definition within an Axis2.xml  *
@@ -92,7 +99,7 @@ public class JMSConnectionFactory {
             log.info("JMS ConnectionFactory : " + name + " initialized");
 
         } catch (NamingException e) {
-            throw new ThrottlingRunTimeException("Cannot acquire JNDI context, JMS Connection factory : "
+            throw new JmsRunTimeException("Cannot acquire JNDI context, JMS Connection factory : "
                                                  + parameters.get(JMSConstants.PARAM_CONFAC_JNDI_NAME)
                                                  + " or default destination : "
                                                  + parameters.get(JMSConstants.PARAM_DESTINATION) +
@@ -117,7 +124,7 @@ public class JMSConnectionFactory {
         } else if ("producer".equals(val)) {
             this.cacheLevel = JMSConstants.CACHE_PRODUCER;
         } else if (val != null) {
-            throw new ThrottlingRunTimeException("Invalid cache level : " + val + " for JMS CF : " + name);
+            throw new JmsRunTimeException("Invalid cache level : " + val + " for JMS CF : " + name);
         }
     }
 
@@ -227,7 +234,7 @@ public class JMSConnectionFactory {
 
     private void handleException(String msg, Exception e) {
         log.error(msg, e);
-        throw new ThrottlingRunTimeException(msg, e);
+        throw new JmsRunTimeException(msg, e);
     }
 
     /**
@@ -257,7 +264,7 @@ public class JMSConnectionFactory {
             } else if ("topic".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_CONFAC_TYPE))) {
                 return false;
             } else {
-                throw new ThrottlingRunTimeException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
+                throw new JmsRunTimeException("Invalid " + JMSConstants.PARAM_CONFAC_TYPE + " : " +
                                                      parameters.get(JMSConstants.PARAM_CONFAC_TYPE)
                                                      + " for JMS CF : " + name);
             }
@@ -267,7 +274,7 @@ public class JMSConnectionFactory {
             } else if ("topic".equalsIgnoreCase(parameters.get(JMSConstants.PARAM_DEST_TYPE))) {
                 return false;
             } else {
-                throw new ThrottlingRunTimeException("Invalid " + JMSConstants.PARAM_DEST_TYPE + " : " +
+                throw new JmsRunTimeException("Invalid " + JMSConstants.PARAM_DEST_TYPE + " : " +
                                                      parameters.get(JMSConstants.PARAM_DEST_TYPE)
                                                      + " for JMS CF : " + name);
             }
