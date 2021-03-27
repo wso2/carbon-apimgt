@@ -189,8 +189,6 @@ public final class ImportExportConstants {
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
-    public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
-
     public static final String GRAPHQL_COMPLEXITY = "graphql-complexity";
 
     public static final String UPLOAD_APPLICATION_FILE_NAME = "ApplicationArchive.zip";
