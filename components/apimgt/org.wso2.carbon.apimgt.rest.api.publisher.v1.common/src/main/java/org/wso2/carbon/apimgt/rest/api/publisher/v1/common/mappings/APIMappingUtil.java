@@ -867,13 +867,13 @@ public class APIMappingUtil {
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableStore(model.isEnableStore());
         dto.setTestKey(model.getTestKey());
-        if (model.isAdvertiseOnly()) {
-            AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
-            advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
-            advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
-            advertiseInfoDTO.setApiOwner(model.getApiOwner());
-            dto.setAdvertiseInfo(advertiseInfoDTO);
-        }
+
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
+        advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
+        advertiseInfoDTO.setApiOwner(model.getApiOwner());
+        dto.setAdvertiseInfo(advertiseInfoDTO);
+
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {
             dto.setResponseCachingEnabled(Boolean.TRUE);
         } else {

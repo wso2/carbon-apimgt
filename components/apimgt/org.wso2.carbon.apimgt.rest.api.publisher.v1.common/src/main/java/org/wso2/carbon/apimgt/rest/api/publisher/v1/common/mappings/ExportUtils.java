@@ -194,7 +194,7 @@ public class ExportUtils {
 
             addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
-            if (ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
+            if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
                 addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
                 addSequencesToArchive(archivePath, api);
                 // Export mTLS authentication related certificates
