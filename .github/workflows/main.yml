@@ -39,7 +39,6 @@ jobs:
         run: mvn clean install --file pom.xml -Dskip.aspectj=true
 
   build-product:
-    if: ${{ github.event.label.name != 'Type/React-UI' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
