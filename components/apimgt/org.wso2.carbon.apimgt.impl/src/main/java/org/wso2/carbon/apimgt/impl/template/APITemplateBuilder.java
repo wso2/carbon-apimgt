@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.template;
 
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 
 public interface APITemplateBuilder {
 
