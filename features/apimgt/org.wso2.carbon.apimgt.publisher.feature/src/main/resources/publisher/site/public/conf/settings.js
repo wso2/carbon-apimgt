@@ -14,7 +14,7 @@ const AppConfig = {
             // It is `localhost` in 99.99% case, If you want to change server host name change it in deployment.toml
         },
         feedback: { // If enabled, Feedback form option(an icon) will be available in the footer LHS bottom
-            enable: true,
+            enable: false,
             serviceURL: '', // Check `/source/src/app/components/Base/Footer/FeedbackForm.jsx` for details
         },
         singleLogout: {

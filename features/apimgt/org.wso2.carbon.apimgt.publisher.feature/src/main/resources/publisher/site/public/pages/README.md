@@ -1,13 +1,13 @@
-/*
+<!--
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
+ * 
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -15,7 +15,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+-->
 
-## `site.json` has been removed!
+# index.jag vs index.jag.hbs
 
-Please refer `<APIM_PUBLISHER>/site/public/conf/settings.js` file to , get all the configurations related to Publisher SPA
+`index.jag` is generated using `index.jag.hbs` in the build time of the React app, So do not make any changes to index.jag file directly, If you want to modify the index.jag behavior use it's templated file `index.jag.hbs`.
