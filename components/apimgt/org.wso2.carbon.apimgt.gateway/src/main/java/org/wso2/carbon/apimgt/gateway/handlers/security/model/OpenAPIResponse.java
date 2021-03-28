@@ -58,9 +58,9 @@ public class OpenAPIResponse implements Response {
                 messageContext).getAxis2MessageContext();
         OpenAPIResponse openAPIResponse = new OpenAPIResponse();
 
-        Object statusCodeObject = messageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
+        Object statusCodeObject = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
 
-        int statusCode = HttpStatus.SC_OK;
+        int statusCode = 0;
 
         if (statusCodeObject instanceof String) {
             statusCode = Integer.parseInt(String.valueOf(statusCodeObject));
@@ -71,7 +71,8 @@ public class OpenAPIResponse implements Response {
         openAPIResponse.status = statusCode;
         openAPIResponse.method = Request.Method.valueOf((String)
                 messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
-        openAPIResponse.path = (String) messageContext.getProperty(REST_SUB_REQUEST_PATH);
+        openAPIResponse.path = SchemaValidationUtils.getRestSubRequestPath(
+                messageContext.getProperty(REST_SUB_REQUEST_PATH).toString());
         Map<String, String> transportHeaders = (Map<String, String>)
                 (axis2MessageContext.getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS));
 
