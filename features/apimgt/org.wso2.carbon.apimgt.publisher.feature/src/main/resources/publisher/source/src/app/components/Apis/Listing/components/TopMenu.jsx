@@ -113,7 +113,6 @@ function TopMenu(props) {
         classes, data, setListType, theme, count, isAPIProduct, listType, showToggle,
     } = props;
     const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
-
     if (count > 0) {
         return (
             <div className={classes.root}>

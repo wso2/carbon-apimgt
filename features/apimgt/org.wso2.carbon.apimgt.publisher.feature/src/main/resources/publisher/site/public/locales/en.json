@@ -3737,22 +3737,10 @@
       "value": "Deployed Revision"
     }
   ],
-  "Apis.Details.Environments.Environments.new.revision.name.heading1": [
-    {
-      "type": 0,
-      "value": "Revision Name:"
-    }
-  ],
-  "Apis.Details.Environments.Environments.new.revision.name.heading2": [
-    {
-      "type": 0,
-      "value": "Revision Name:"
-    }
-  ],
   "Apis.Details.Environments.Environments.revision.create.heading": [
     {
       "type": 0,
-      "value": "Create Revision"
+      "value": "Create New Revision (From Current API)"
     }
   ],
   "Apis.Details.Environments.Environments.revision.delete": [
@@ -3840,7 +3828,7 @@
     },
     {
       "type": 0,
-      "value": " ?"
+      "value": " (To Current API)?"
     }
   ],
   "Apis.Details.Environments.Environments.revision.restore.confirm.ok": [
@@ -4783,12 +4771,6 @@
       "value": "Deploy"
     }
   ],
-  "Apis.Details.Overview.CustomizedStepper.Deployments": [
-    {
-      "type": 0,
-      "value": "Deployments"
-    }
-  ],
   "Apis.Details.Overview.CustomizedStepper.Develop": [
     {
       "type": 0,
@@ -4819,24 +4801,6 @@
       "value": "Blocked"
     }
   ],
-  "Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans": [
-    {
-      "type": 0,
-      "value": "Business plans"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.business.plan.endpoint": [
-    {
-      "type": 0,
-      "value": "Endpoint"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.create": [
-    {
-      "type": 0,
-      "value": "Created"
-    }
-  ],
   "Apis.Details.Overview.CustomizedStepper.deprecated": [
     {
       "type": 0,
@@ -4861,16 +4825,16 @@
       "value": "Published (Current API)"
     }
   ],
-  "Apis.Details.Overview.CustomizedStepper.published": [
-    {
-      "type": 0,
-      "value": "Published"
-    }
-  ],
   "Apis.Details.Overview.CustomizedStepper.retired": [
     {
       "type": 0,
       "value": "Retired"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.view.devportal": [
+    {
+      "type": 0,
+      "value": "View in devportal"
     }
   ],
   "Apis.Details.Overview.Overview.topic.createtopics": [
@@ -6248,7 +6212,7 @@
   "Apis.Details.index.Tryout.menu.name": [
     {
       "type": 0,
-      "value": "TryOut"
+      "value": "Try Out"
     }
   ],
   "Apis.Details.index.api.definition2": [
