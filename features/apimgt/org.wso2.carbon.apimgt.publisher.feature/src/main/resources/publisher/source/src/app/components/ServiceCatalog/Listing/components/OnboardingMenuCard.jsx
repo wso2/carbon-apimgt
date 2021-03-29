@@ -79,6 +79,7 @@ function OnboardingMenuCard(props) {
                     </Grid>
                     <Grid item xs={12}>
                         <Box
+                            mx={1}
                             textAlign='center'
                             color='text.secondary'
                             fontSize='body1.fontSize'
