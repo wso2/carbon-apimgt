@@ -684,23 +684,23 @@ public class ImportUtils {
                 if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
                     JsonObject endpointSecuritySandbox = endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX)
                             .getAsJsonObject();
-                    if (endpointSecuritySandbox.has(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS)) {
+                    if (endpointSecuritySandbox.has(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)) {
                         String customParameters = endpointSecuritySandbox
-                                .get(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS).toString();
-                        endpointSecuritySandbox.remove(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS);
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS).toString();
+                        endpointSecuritySandbox.remove(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         endpointSecuritySandbox
-                                .addProperty(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS, customParameters);
+                                .addProperty(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
                     }
                 }
                 if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
                     JsonObject endpointSecuritySandbox = endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION)
                             .getAsJsonObject();
-                    if (endpointSecuritySandbox.has(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS)) {
+                    if (endpointSecuritySandbox.has(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)) {
                         String customParameters = endpointSecuritySandbox
-                                .get(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS).toString();
-                        endpointSecuritySandbox.remove(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS);
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS).toString();
+                        endpointSecuritySandbox.remove(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         endpointSecuritySandbox
-                                .addProperty(ImportExportConstants.ENDPOINT_CUSTOM_PARAMETERS, customParameters);
+                                .addProperty(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
                     }
                 }
             }

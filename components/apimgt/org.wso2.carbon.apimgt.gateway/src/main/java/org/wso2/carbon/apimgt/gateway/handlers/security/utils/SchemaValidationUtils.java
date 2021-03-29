@@ -88,7 +88,7 @@ public class SchemaValidationUtils {
 
         Map<String, String> queryParams = new HashMap<>();
         if (!apiResource.equals(path) && apiResource.contains("?")) {
-            String queryString = apiResource.replace(path + "?", "");
+            String queryString = apiResource.split("\\?")[1];
             String[] query = queryString.split("&");
             for (String keyValue : query) {
                 int idx = keyValue.indexOf("=");

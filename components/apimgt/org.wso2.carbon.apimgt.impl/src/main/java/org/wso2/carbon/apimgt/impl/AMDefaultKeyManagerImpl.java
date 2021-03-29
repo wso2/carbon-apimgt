@@ -195,7 +195,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // Use a generated user as the app owner for cross tenant subscription scenarios, to avoid the tenant admin
         // being exposed in the JWT token.
-        if (APIUtil.isCrossTenantSubscriptionsEnabled()) {
+        if (APIUtil.isCrossTenantSubscriptionsEnabled()
+                && !tenantDomain.equals(MultitenantUtils.getTenantDomain(applicationOwner))) {
             clientInfo.setApplication_owner(APIUtil.retrieveDefaultReservedUsername());
         } else {
             clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));

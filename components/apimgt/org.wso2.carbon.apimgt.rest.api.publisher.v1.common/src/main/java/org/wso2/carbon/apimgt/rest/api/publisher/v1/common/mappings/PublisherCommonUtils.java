@@ -167,20 +167,25 @@ public class PublisherCommonUtils {
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
         // OAuth 2.0 backend protection: Api Key and Api Secret encryption while updating the API
+        String customParametersString = "{}";
         if (endpointConfig != null) {
             if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
-                LinkedHashMap endpointSecurity = (LinkedHashMap) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
                 if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                    LinkedHashMap endpointSecurityProduction = (LinkedHashMap) endpointSecurity
+                    Map endpointSecurityProduction = (Map) endpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap =
-                            (LinkedHashMap<String, String>) endpointSecurityProduction
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    if (!(endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                        LinkedHashMap<String, String> customParametersHashMap =
+                                (LinkedHashMap<String, String>) endpointSecurityProduction
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    }
+
                     endpointSecurityProduction
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
@@ -203,16 +208,18 @@ public class PublisherCommonUtils {
                     apiDtoToUpdate.setEndpointConfig(endpointConfig);
                 }
                 if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                    LinkedHashMap endpointSecuritySandbox = (LinkedHashMap) endpointSecurity
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap =
-                            (LinkedHashMap<String, String>) endpointSecuritySandbox
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    if (!(endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                        Map<String, String> customParametersHashMap = (Map<String, String>) endpointSecuritySandbox
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    }
                     endpointSecuritySandbox
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
