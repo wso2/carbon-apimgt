@@ -5796,13 +5796,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organizationId, int start, int end)
             throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organizationId);
         String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
@@ -5824,7 +5824,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 apiSet.addAll(apiList);
                 result.put("apis", apiSet);
-                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("length", list.size());
                 result.put("isMore", true);
             } else {
                 result.put("apis", apiSet);

@@ -537,8 +537,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         int skip = start;
         int limit = offset;
-        //published prototyped only
-        searchQuery = "";
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
         MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getDevportalSearchAggregate(searchQuery, skip, limit))
