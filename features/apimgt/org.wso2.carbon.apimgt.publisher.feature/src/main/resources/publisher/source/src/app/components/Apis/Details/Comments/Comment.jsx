@@ -234,7 +234,7 @@ class Comment extends React.Component {
                 if (parentCommentIdOfCommentToDelete === null) {
                     const remainingComments = allComments.filter(this.filterRemainingComments);
                     commentsUpdate(remainingComments);
-                    Alert.message('Comment has been successfully deleted');
+                    Alert.info('Comment has been successfully deleted');
                 } else {
                     const index = allComments.findIndex(this.filterCommentToDelete);
                     const remainingReplies = allComments[index].replies.list.filter(this.filterRemainingComments);
