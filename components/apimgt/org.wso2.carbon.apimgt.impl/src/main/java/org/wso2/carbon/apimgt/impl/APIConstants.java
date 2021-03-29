@@ -2611,6 +2611,8 @@ public final class APIConstants {
         public static final String SUBSCRIBER_TOPIC_PROPERTY = "SUBSCRIBER_TOPIC";
         public static final String SUBSCRIBER_APPLICATION_ID_PROPERTY = "SUBSCRIBER_APPLICATION_ID";
         public static final String PAYLOAD_PROPERTY = "ORIGINAL_PAYLOAD";
+        public static final String SKIP_DELIVERY_STATUS_UPDATE_PROPERTY = "SKIP_DELIVERY_STATUS_UPDATE";
+        public static final String FAULT_SEQUENCE = "webhooksFaultSequence";
     }
 
     public enum PolicyType {
