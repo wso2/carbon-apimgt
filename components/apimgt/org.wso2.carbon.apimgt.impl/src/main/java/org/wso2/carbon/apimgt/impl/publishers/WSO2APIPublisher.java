@@ -155,8 +155,8 @@ public class WSO2APIPublisher implements APIPublisher {
             throw new APIManagementException(errorMessage, e);
         } catch (UserStoreException e) {
             String errorMessage =
-                    "Error while getting tenantId for tenant domain: " + tenantDomain + " when exporting API:" + api.getId().getApiName() + " version: " + api.getId().getVersion();
-            log.error(errorMessage, e);
+                    "Error while getting tenantId for tenant domain: " + tenantDomain + " when exporting API:" + api
+                            .getId().getApiName() + " version: " + api.getId().getVersion();
             throw new APIManagementException(errorMessage, e);
         }
         return apiArchive;
