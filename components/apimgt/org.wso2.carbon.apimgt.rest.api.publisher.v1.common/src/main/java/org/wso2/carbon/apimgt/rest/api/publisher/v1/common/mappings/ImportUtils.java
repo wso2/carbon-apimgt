@@ -410,12 +410,19 @@ public class ImportUtils {
                 if (deploymentNameElement != null) {
                     String deploymentName = deploymentNameElement.getAsString();
                     if (gatewayEnvironmentsSet.contains(deploymentName)) {
+                        JsonElement deploymentVhostElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_VHOST);
+                        if (deploymentVhostElement == null) {
+                            throw new APIManagementException(
+                                    String.format("Required field \"%s\" is not defined in the deployment",
+                                            ImportExportConstants.DEPLOYMENT_VHOST));
+                        }
                         JsonElement displayOnDevportalElement =
                                 deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
                         boolean displayOnDevportal =
                                 displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
                         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                         apiRevisionDeployment.setDeployment(deploymentName);
+                        apiRevisionDeployment.setVhost(deploymentVhostElement.getAsString());
                         apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
                         apiRevisionDeployments.add(apiRevisionDeployment);
                     } else {

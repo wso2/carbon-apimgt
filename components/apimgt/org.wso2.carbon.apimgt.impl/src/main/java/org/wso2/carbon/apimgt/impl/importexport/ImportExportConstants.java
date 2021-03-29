@@ -282,6 +282,7 @@ public final class ImportExportConstants {
     public static final String DEPLOYMENT_INFO_LOCATION = File.separator + "deployment_environments";
     public static final String DEPLOYMENT_ENVIRONMENTS = "deploymentEnvironments";
     public static final String DEPLOYMENT_NAME = "deploymentEnvironment";
+    public static final String DEPLOYMENT_VHOST = "deploymentVhost";
     public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
 
 }

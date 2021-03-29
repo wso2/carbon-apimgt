@@ -676,6 +676,7 @@ public class ExportUtils {
             for (APIRevisionDeployment deployment : deploymentsList) {
                 JsonObject deploymentObject = new JsonObject();
                 deploymentObject.addProperty(ImportExportConstants.DEPLOYMENT_NAME, deployment.getDeployment());
+                deploymentObject.addProperty(ImportExportConstants.DEPLOYMENT_VHOST, deployment.getVhost());
                 deploymentObject.addProperty(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION,
                         deployment.isDisplayOnDevportal());
                 deploymentsArray.add(deploymentObject);
