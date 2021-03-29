@@ -414,7 +414,7 @@ public class ImportUtils {
         // Only the users who has admin privileges (apim:admin scope) are allowed to set the original devportal URL.
         // Otherwise, someone can set a malicious URL here.
         if (!Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE)) {
-            log.info("Since the user does not have the required scope: " + RestApiConstants.ADMIN_SCOPE
+            log.debug("Since the user does not have the required scope: " + RestApiConstants.ADMIN_SCOPE
                     + ". Original DevPortal URL (redirect URL):" + importedApiDTO.getAdvertiseInfo()
                     .getOriginalDevPortalUrl() + " of " + importedApiDTO.getName() + "-" + importedApiDTO.getVersion()
                     + " will be removed.");
