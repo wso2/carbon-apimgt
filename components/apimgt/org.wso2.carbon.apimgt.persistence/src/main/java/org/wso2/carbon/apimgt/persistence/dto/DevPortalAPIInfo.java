@@ -50,6 +50,7 @@ public class DevPortalAPIInfo {
     public String getId() {
         return id;
     }
+    private Set<String> apiCategories;
     public void setId(String id) {
         this.id = id;
     }
@@ -120,5 +121,14 @@ public class DevPortalAPIInfo {
     public void setTags(List<String> tags) {
         this.tags = tags;
     }
+
+    public Set<String> getApiCategories() {
+        return apiCategories;
+    }
+
+    public void setApiCategories(Set<String> apiCategories) {
+        this.apiCategories = apiCategories;
+    }
+
 
 }

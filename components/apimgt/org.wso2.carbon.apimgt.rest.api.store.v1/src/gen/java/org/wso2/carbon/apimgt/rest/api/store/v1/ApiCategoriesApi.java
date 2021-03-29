@@ -46,7 +46,7 @@ ApiCategoriesApiService delegate = new ApiCategoriesApiServiceImpl();
     }, tags={ "API Category (Collection)" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Categories returned ", response = APICategoryListDTO.class) })
-    public Response apiCategoriesGet( @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.apiCategoriesGet(xWSO2Tenant, securityContext);
+    public Response apiCategoriesGet( @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId) throws APIManagementException{
+        return delegate.apiCategoriesGet(organizationId, securityContext);
     }
 }

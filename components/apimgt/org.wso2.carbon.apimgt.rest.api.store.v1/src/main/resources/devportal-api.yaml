@@ -3526,7 +3526,7 @@ paths:
       description: |
         Get all API categories
       parameters:
-        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |
