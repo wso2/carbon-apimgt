@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
@@ -402,19 +403,26 @@ public class ImportUtils {
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
-            Set<String> gatewayEnvironmentsSet = APIUtil.getEnvironments().keySet();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments();
 
             for (int i = 0; i < deploymentInfoArray.size(); i++) {
                 JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
                 JsonElement deploymentNameElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_NAME);
                 if (deploymentNameElement != null) {
                     String deploymentName = deploymentNameElement.getAsString();
-                    if (gatewayEnvironmentsSet.contains(deploymentName)) {
+                    Environment gatewayEnvironment = gatewayEnvironments.get(deploymentName);
+                    if (gatewayEnvironment != null) {
                         JsonElement deploymentVhostElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_VHOST);
-                        if (deploymentVhostElement == null) {
-                            throw new APIManagementException(
-                                    String.format("Required field \"%s\" is not defined in the deployment",
-                                            ImportExportConstants.DEPLOYMENT_VHOST));
+                        String deploymentVhost;
+                        if (deploymentVhostElement != null) {
+                            deploymentVhost = deploymentVhostElement.getAsString();
+                        } else {
+                            // set the default vhost of the given environment
+                            if (gatewayEnvironment.getVhosts().isEmpty()) {
+                                throw new APIManagementException("No VHosts defined for the environment: "
+                                        + deploymentName);
+                            }
+                            deploymentVhost = gatewayEnvironment.getVhosts().get(0).getHost();
                         }
                         JsonElement displayOnDevportalElement =
                                 deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
@@ -422,7 +430,7 @@ public class ImportUtils {
                                 displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
                         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                         apiRevisionDeployment.setDeployment(deploymentName);
-                        apiRevisionDeployment.setVhost(deploymentVhostElement.getAsString());
+                        apiRevisionDeployment.setVhost(deploymentVhost);
                         apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
                         apiRevisionDeployments.add(apiRevisionDeployment);
                     } else {
