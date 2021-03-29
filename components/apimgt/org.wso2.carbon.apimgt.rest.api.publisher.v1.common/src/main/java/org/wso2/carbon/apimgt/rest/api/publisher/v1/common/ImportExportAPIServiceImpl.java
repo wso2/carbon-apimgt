@@ -82,7 +82,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         if (exportLatestRevision) {
             //if a latest revision flag used, latest revision's api object is used
             exportAPIUUID = apiProvider.getLatestRevisionUUID(apiId);
-        } else if (revisionNum != null) {
+        } else if (StringUtils.isNotBlank(revisionNum)) {
             //if a revision number provided, revision api object is used
             exportAPIUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
         } else {
