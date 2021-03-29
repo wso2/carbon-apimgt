@@ -28,6 +28,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
@@ -63,7 +64,6 @@ public class SubscribersPersistMediator extends AbstractMediator {
             Map<String, String> queryParams = populateQueryParamData(messageContext);
             if (queryParams.isEmpty()) {
                 populateException("Query params must present in the request", messageContext);
-                return false;
             }
             String callback = queryParams.get(APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM);
             String topicName = queryParams.get(APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM);
@@ -76,15 +76,12 @@ public class SubscribersPersistMediator extends AbstractMediator {
             axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
             if (StringUtils.isEmpty(callback)) {
                 populateException("Callback URL cannot be empty", messageContext);
-                return false;
             }
             if (StringUtils.isEmpty(mode)) {
                 populateException("Mode cannot be empty", messageContext);
-                return false;
             } else if (!(APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()) || APIConstants.Webhooks.
                     UNSUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()))) {
                 populateException("Invalid Entry for hub.mode", messageContext);
-                return false;
             }
             AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
             String tenantDomain = (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY);
@@ -161,12 +158,7 @@ public class SubscribersPersistMediator extends AbstractMediator {
         messageContext.setProperty(SynapseConstants.ERROR_CODE, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMsg);
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorMsg);
-        messageContext.setProperty(APIConstants.Webhooks.SKIP_DELIVERY_STATUS_UPDATE_PROPERTY, true);
-        Mediator sequence = messageContext.getSequence(APIConstants.Webhooks.FAULT_SEQUENCE);
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            return;
-        }
-        Utils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        throw new SynapseException(errorMsg);
     }
 
     /**
