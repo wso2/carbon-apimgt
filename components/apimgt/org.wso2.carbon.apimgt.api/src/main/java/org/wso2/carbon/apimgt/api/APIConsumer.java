@@ -138,7 +138,7 @@ public interface APIConsumer extends APIManager {
      * @return a list of all Tags applied to all APIs published.
      * @throws APIManagementException if failed to get All the tags
      */
-    Set<Tag> getAllTags(String tenantDomain) throws APIManagementException;
+    Set<Tag> getAllTags(String organizationId) throws APIManagementException;
 
     /**
      * Returns all tags with their descriptions.

@@ -15,6 +15,8 @@
  */
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -34,6 +36,7 @@ public class DevPortalAPIInfo {
     private String status;
     private Set<String> availableTierNames;
     private String createdTime;
+    private List<String> tags = new ArrayList<>();
 
     public String getCreatedTime() {
         return createdTime;
@@ -109,6 +112,13 @@ public class DevPortalAPIInfo {
     }
     public void setAvailableTierNames(Set<String> availableTierNames) {
         this.availableTierNames = availableTierNames;
+    }
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
 }

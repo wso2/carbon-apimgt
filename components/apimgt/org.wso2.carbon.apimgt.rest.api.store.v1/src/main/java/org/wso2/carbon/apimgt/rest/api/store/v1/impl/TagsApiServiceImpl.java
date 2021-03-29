@@ -44,7 +44,7 @@ public class TagsApiServiceImpl implements TagsApiService {
     private static final Log log = LogFactory.getLog(TagsApiService.class);
 
     @Override
-    public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch,
+    public Response tagsGet(String organizationId, Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch,
             MessageContext messageContext) {
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -61,7 +61,7 @@ public class TagsApiServiceImpl implements TagsApiService {
 
             String username = RestApiCommonUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-            tagSet = apiConsumer.getAllTags(requestedTenantDomain);
+            tagSet = apiConsumer.getAllTags(organizationId);
             if (tagSet != null) {
                 tagList.addAll(tagSet);
             }
