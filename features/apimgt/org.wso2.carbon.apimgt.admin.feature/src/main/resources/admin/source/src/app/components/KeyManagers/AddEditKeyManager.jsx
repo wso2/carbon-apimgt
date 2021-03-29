@@ -327,7 +327,7 @@ function AddEditKeyManager(props) {
             if (e.target.name === 'enableSelfValidationJWT') {
                 dispatch({ field: e.target.name, value: e.target.value === 'selfValidate' });
             } else {
-                dispatch({ field: e.target.name, value: e.target.value });
+                dispatch({ field: e.target.name, value: e.target.value.trim() });
             }
         }
     };
