@@ -641,7 +641,11 @@
                 <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher</artifactId>
