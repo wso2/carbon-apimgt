@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.simple.JSONObject;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.RoleAliasListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ScopeDTO;
@@ -76,6 +77,10 @@ public class SystemScopesMappingUtil {
         }
 
         for (Map.Entry<String, List<String>> mapping : portalScopeList.entrySet()) {
+            // openid scope doesn't need a role mapping
+            if (APIConstants.OPEN_ID_SCOPE_NAME.equals(mapping.getKey())) {
+                continue;
+            }
             if (scopeRoleMapping.containsKey(mapping.getKey())) {
                 ScopeDTO roleScopeDTO = new ScopeDTO();
                 roleScopeDTO.setName(mapping.getKey());
