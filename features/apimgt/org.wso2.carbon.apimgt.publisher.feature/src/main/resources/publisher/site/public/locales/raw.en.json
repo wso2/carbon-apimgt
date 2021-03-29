@@ -68,17 +68,8 @@
   "Apis.Create.Components.DefaultAPIForm.api.product.context": {
     "defaultMessage": "Context"
   },
-  "Apis.Create.Components.DefaultAPIForm.callbackUrl": {
-    "defaultMessage": "Callback URL"
-  },
-  "Apis.Create.Components.DefaultAPIForm.description": {
-    "defaultMessage": "Description"
-  },
   "Apis.Create.Components.DefaultAPIForm.name": {
     "defaultMessage": "Name"
-  },
-  "Apis.Create.Components.DefaultAPIForm.urlmapping": {
-    "defaultMessage": "URL Mapping"
   },
   "Apis.Create.Components.DefaultAPIForm.version": {
     "defaultMessage": "Version"
@@ -884,9 +875,6 @@
   },
   "Apis.Details.Configuration.components.Subscription.signingAlgorithm": {
     "defaultMessage": "Signing Algortithm"
-  },
-  "Apis.Details.Configuration.components.Subscription.subscription": {
-    "defaultMessage": "Subscription"
   },
   "Apis.Details.Configuration.components.Tags.helper": {
     "defaultMessage": "Press `Enter` after typing the tag name to add a new tag"
@@ -2301,17 +2289,11 @@
   "Apis.Details.Overview.CustomizedStepper.view.devportal": {
     "defaultMessage": "View in devportal"
   },
-  "Apis.Details.Overview.Overview.topic.createtopics": {
-    "defaultMessage": "Create Topics"
-  },
   "Apis.Details.Overview.Overview.topic.header": {
     "defaultMessage": "Overview"
   },
   "Apis.Details.Overview.ProductResources.resources": {
     "defaultMessage": "Resources"
-  },
-  "Apis.Details.Overview.async.topic.header": {
-    "defaultMessage": "Topics"
   },
   "Apis.Details.ProductResources.ProductResourcesEdit.api.resources": {
     "defaultMessage": "Select API Resources"
@@ -2553,6 +2535,15 @@
   "Apis.Details.Resources.components.operationComponents.EditParameter.use.done.button.to.persist.changes": {
     "defaultMessage": "Use DONE button in the page to persist changes"
   },
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.close": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.done": {
+    "defaultMessage": "Done"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.title": {
+    "defaultMessage": "Edit"
+  },
   "Apis.Details.Resources.components.operationComponents.ListParameter.actions": {
     "defaultMessage": "Actions"
   },
@@ -2585,6 +2576,12 @@
   },
   "Apis.Details.Resources.components.operationComponents.ListParameter.yes": {
     "defaultMessage": "Yes"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProperties.edit": {
+    "defaultMessage": "Edit"
+  },
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProps.delete": {
+    "defaultMessage": "Delete"
   },
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.Security.tooltip": {
     "defaultMessage": "This will enable/disable Application Level securities defined in the Runtime Configurations page."
@@ -2910,6 +2907,54 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": {
     "defaultMessage": "Error while retrieving the subscriptions"
   },
+  "Apis.Details.Topics.components.AddOperation.op.type": {
+    "defaultMessage": "Type"
+  },
+  "Apis.Details.Topics.components.AddOperation.operation.topic.or.type.cannot.be.empty.warning": {
+    "defaultMessage": "Topic name or topic type(s) can't be empty"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditParameter.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditParameter.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditParameter.select.data.type": {
+    "defaultMessage": "Select the Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.select.data.type": {
+    "defaultMessage": "Select the Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.datatype": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.name": {
+    "defaultMessage": "Name"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.actions": {
+    "defaultMessage": "Actions"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.data.type": {
+    "defaultMessage": "Data Type"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.description": {
+    "defaultMessage": "Description"
+  },
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.name": {
+    "defaultMessage": "Name"
+  },
   "Apis.Details.TryOutConsole.token.label": {
     "defaultMessage": "Internal API Key"
   },
@@ -3019,7 +3064,7 @@
     "defaultMessage": "subscriptions"
   },
   "Apis.Details.index.topics": {
-    "defaultMessage": "Topics"
+    "defaultMessage": "topics"
   },
   "Apis.Details.index.wsdl.definition": {
     "defaultMessage": "WSDL Definition"
@@ -3404,15 +3449,6 @@
   },
   "Apis.Shared.RedirectToLogin.you.will.be.redirected.to": {
     "defaultMessage": "You will be redirected to {page}"
-  },
-  "Apis.Topic.Edit.Description": {
-    "defaultMessage": "Description"
-  },
-  "Apis.Topic.Edit.Type": {
-    "defaultMessage": "Type"
-  },
-  "Apis.Topic.Edit.name": {
-    "defaultMessage": "Name"
   },
   "Applications.Details.Invoice.view.btn": {
     "defaultMessage": "View Invoice"

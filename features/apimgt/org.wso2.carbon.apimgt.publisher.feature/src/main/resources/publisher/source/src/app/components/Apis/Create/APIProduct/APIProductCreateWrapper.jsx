@@ -338,7 +338,7 @@ export default function ApiProductCreateWrapper(props) {
                                         </Button>
                                     )}
                                 {wizardStep === 0 && (
-                                    <Link to='/apis/'>
+                                    <Link to='/api-products/'>
                                         <Button>
                                             <FormattedMessage
                                                 id='Apis.Create.APIProduct.APIProductCreateWrapper.cancel'
