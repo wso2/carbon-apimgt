@@ -979,7 +979,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
             String userNameLocal;
-            if (APIConstants.WSO2_ANONYMOUS_USER.equals(holder.getUserName())) {
+            if (holder.isAnonymousMode()) {
                 userNameLocal = APIConstants.WSO2_ANONYMOUS_USER;
             } else {
                 userNameLocal = getTenantAwareUsername(ctx.getUserame());
@@ -2918,14 +2918,14 @@ public class RegistryPersistenceImpl implements APIPersistence {
         private Registry registry;
         private boolean isTenantFlowStarted;
         private int tenantId;
-        private String userName;
+        private boolean isAnonymousMode;
 
-        public String getUserName() {
-            return userName;
+        public boolean isAnonymousMode() {
+            return isAnonymousMode;
         }
 
-        public void setUserName(String userName) {
-            this.userName = userName;
+        public void setAnonymousMode(boolean anonymousMode) {
+            isAnonymousMode = anonymousMode;
         }
 
         public Registry getRegistry() {
@@ -3027,7 +3027,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, id);
                     holder.setTenantId(id);
                 } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant
-                    holder.setUserName(APIConstants.WSO2_ANONYMOUS_USER);
+                    holder.setAnonymousMode(true);
                     log.debug("Cross tenant user from tenant " + userTenantDomain + " accessing "
                             + requestedTenantDomain + " registry");
                     loadTenantRegistry(id);
