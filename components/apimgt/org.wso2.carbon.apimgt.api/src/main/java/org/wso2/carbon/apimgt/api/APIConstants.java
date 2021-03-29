@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.api;
 
+/**
+ * This class contains common constants for APIs.
+ */
 public class APIConstants {
     public static final String GATEWAY_ENV_TYPE_HYBRID = "hybrid";
     public static final String GATEWAY_ENV_TYPE_PRODUCTION = "production";

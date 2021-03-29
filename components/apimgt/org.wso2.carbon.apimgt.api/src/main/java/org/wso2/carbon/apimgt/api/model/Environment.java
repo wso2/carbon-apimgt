@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represent an Environment
+ * This class represent an Environment.
  */
 public class Environment implements Serializable {
 
