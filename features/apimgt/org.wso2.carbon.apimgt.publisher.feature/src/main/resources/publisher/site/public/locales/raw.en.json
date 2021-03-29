@@ -3180,8 +3180,8 @@
   "Apis.Listing.SampleAPI.SampleAPI.streaming.websub.title": {
     "defaultMessage": "Webhook API"
   },
-  "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": {
-    "defaultMessage": "Create New API Product"
+  "Apis.Listing.SampleAPI.SampleAPIProduct.title": {
+    "defaultMessage": "Let’s get started !"
   },
   "Apis.Listing.SampleAPI.continue.on.close": {
     "defaultMessage": "Close"
@@ -3219,11 +3219,11 @@
   "Apis.Listing.SampleAPI.popup.update.inprogress": {
     "defaultMessage": "Updating sample API ..."
   },
+  "Apis.Listing.SampleAPIProduct.creator.error": {
+    "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
+  },
   "Apis.Listing.SampleAPIProduct.description": {
     "defaultMessage": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
-  },
-  "Apis.Listing.SampleAPIProduct.manager": {
-    "defaultMessage": "Welcome to WSO2 API Manager"
   },
   "Apis.Listing.TableView.TableView.doc.flag": {
     "defaultMessage": "[Doc]"
@@ -3645,9 +3645,6 @@
   "Scopes.EditScope.update.scope": {
     "defaultMessage": "Update Scope"
   },
-  "Scopes.Listing.Listing.create.scopes.button": {
-    "defaultMessage": "Create a new scope"
-  },
   "Scopes.Listing.Listing.heading.scope.add_new": {
     "defaultMessage": "Add New Scope"
   },
@@ -3680,9 +3677,6 @@
   },
   "Scopes.Listing.Listing.update.not.allowed": {
     "defaultMessage": "*You are not authorized to update scopes of the API due to insufficient permissions"
-  },
-  "Scopes.Listing.sample.scope.manager": {
-    "defaultMessage": "Welcome to WSO2 API Manager"
   },
   "Scopes.Usage.Usage.api.context": {
     "defaultMessage": "Context:"

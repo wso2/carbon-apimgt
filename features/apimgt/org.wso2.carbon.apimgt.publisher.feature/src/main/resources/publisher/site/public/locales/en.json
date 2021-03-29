@@ -6673,10 +6673,10 @@
       "value": "Webhook API"
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": [
+  "Apis.Listing.SampleAPI.SampleAPIProduct.title": [
     {
       "type": 0,
-      "value": "Create New API Product"
+      "value": "Let’s get started !"
     }
   ],
   "Apis.Listing.SampleAPI.continue.on.close": [
@@ -6751,16 +6751,16 @@
       "value": "Updating sample API ..."
     }
   ],
+  "Apis.Listing.SampleAPIProduct.creator.error": [
+    {
+      "type": 0,
+      "value": "API is not deployed yet! Please deploy the API before trying out"
+    }
+  ],
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
       "value": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
-    }
-  ],
-  "Apis.Listing.SampleAPIProduct.manager": [
-    {
-      "type": 0,
-      "value": "Welcome to WSO2 API Manager"
     }
   ],
   "Apis.Listing.TableView.TableView.doc.flag": [
@@ -7627,12 +7627,6 @@
       "value": "Update Scope"
     }
   ],
-  "Scopes.Listing.Listing.create.scopes.button": [
-    {
-      "type": 0,
-      "value": "Create a new scope"
-    }
-  ],
   "Scopes.Listing.Listing.heading.scope.add_new": [
     {
       "type": 0,
@@ -7697,12 +7691,6 @@
     {
       "type": 0,
       "value": "*You are not authorized to update scopes of the API due to insufficient permissions"
-    }
-  ],
-  "Scopes.Listing.sample.scope.manager": [
-    {
-      "type": 0,
-      "value": "Welcome to WSO2 API Manager"
     }
   ],
   "Scopes.Usage.Usage.api.context": [
