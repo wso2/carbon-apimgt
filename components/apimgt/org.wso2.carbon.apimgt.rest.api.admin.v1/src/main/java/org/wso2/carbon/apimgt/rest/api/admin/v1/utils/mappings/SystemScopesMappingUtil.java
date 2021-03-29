@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SystemScopesMappingUtil {
 
@@ -172,10 +173,15 @@ public class SystemScopesMappingUtil {
         Map<String, List<String>> map = new HashMap<>();
         for (Object role : roleMapping.keySet()) {
             String key = (String) role;
-            String aliaseString = (String) roleMapping.get(key);
-            String[] aliases = aliaseString.split(",");
+            String aliasString = (String) roleMapping.get(key);
+            String[] aliases = aliasString.split(",");
             List<String> result = Arrays.asList(aliases);
-            map.put(key, result);
+            // process alias list to trip the spaces and remove the current role from the alias list.
+            List<String> filteredResult = result.stream()
+                    .map(String::trim)
+                    .filter(alias -> !alias.equals(role))
+                    .collect(Collectors.toList());
+            map.put(key, filteredResult);
         }
         return map;
     }
