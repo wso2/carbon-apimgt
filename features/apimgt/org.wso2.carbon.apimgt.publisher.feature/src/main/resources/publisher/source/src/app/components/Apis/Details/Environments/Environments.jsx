@@ -21,6 +21,7 @@ import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -285,6 +286,7 @@ export default function Environments() {
     const classes = useStyles();
     const intl = useIntl();
     const { api, updateAPI } = useContext(APIContext);
+    const history = useHistory();
     const { settings } = useAppContext();
     let revisionCount;
     if (Configurations.app.revisionCount) {
@@ -310,7 +312,7 @@ export default function Environments() {
     const [revisionToDelete, setRevisionToDelete] = useState([]);
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
     const [revisionToRestore, setRevisionToRestore] = useState([]);
-    const [openDeployPopup, setOpenDeployPopup] = useState(false);
+    const [openDeployPopup, setOpenDeployPopup] = useState(history.location.state === 'deploy');
 
     // allEnvDeployments represents all deployments of the API with mapping
     // environment -> {revision deployed to env, vhost deployed to env with revisino}
@@ -712,6 +714,7 @@ export default function Environments() {
                 })
                 .finally(() => {
                     updateAPI();
+                    history.replace();
                 });
             setOpenDeployPopup(false);
         } else {

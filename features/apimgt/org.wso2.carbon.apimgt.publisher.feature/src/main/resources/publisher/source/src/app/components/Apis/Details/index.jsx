@@ -682,6 +682,14 @@ class Details extends Component {
                                         />
                                         <LeftMenuItem
                                             text={intl.formatMessage({
+                                                id: 'Apis.Details.index.subscriptions',
+                                                defaultMessage: 'subscriptions',
+                                            })}
+                                            to={pathPrefix + 'subscriptions'}
+                                            Icon={<SubscriptionsIcon />}
+                                        />
+                                        <LeftMenuItem
+                                            text={intl.formatMessage({
                                                 id: 'Apis.Details.index.documents',
                                                 defaultMessage: 'documents',
                                             })}
@@ -750,15 +758,6 @@ class Details extends Component {
                                                 Icon={<EndpointIcon />}
                                             />
                                         )}
-                                        <LeftMenuItem
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.subscriptions',
-                                                defaultMessage: 'subscriptions',
-                                            })}
-                                            to={pathPrefix + 'subscriptions'}
-                                            Icon={<SubscriptionsIcon />}
-                                        />
-
                                         {!api.isWebSocket() && !isAPIProduct && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
