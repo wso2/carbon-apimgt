@@ -7,12 +7,20 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Icon from '@material-ui/core/Icon';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import {FormattedMessage, injectIntl, useIntl} from 'react-intl';
 import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import API from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Application from 'AppData/Application';
+import axios from 'axios';
+import InputAdornment from "@material-ui/core/InputAdornment";
+import Tooltip from "@material-ui/core/Tooltip";
+import CopyToClipboard from "react-copy-to-clipboard";
+import IconButton from "@material-ui/core/IconButton";
+import TextField from "@material-ui/core/TextField";
+import Grid from "@material-ui/core/Grid";
+import Chip from "@material-ui/core/Chip";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -74,6 +82,10 @@ const useStyles = makeStyles((theme) => ({
     actionPanel: {
         justifyContent: 'flex-start',
     },
+    solaceDiv: {
+        padding: theme.spacing(3, 2),
+    },
+
 }));
 
 /**
@@ -87,6 +99,11 @@ function Overview(props) {
     const [tierDescription, setTierDescription] = useState(null);
     const [notFound, setNotFound] = useState(false);
     const { match: { params: { applicationId } } } = props;
+    const [deployedToSolace, setDeployedToSolace] = useState(true);
+    const [solaceAppDetails, setSolaceAppDetails] = useState(null);
+    const [contentCopied, setContentCopied] = useState(false);
+    const [copiedContent, setCopiedContent] = useState(null);
+    const intl = useIntl();
     useEffect(() => {
         const client = new API();
         // Get application
@@ -110,12 +127,32 @@ function Overview(props) {
                     setNotFound(false);
                 }
             });
+        /*console.log(application);
+        const url = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1/WSO2/apps/ElevatorApp";
+        const userName = "wso2";
+        const password = "hzxVWwFQs2EEK5kK";
+        const base64 = require('base-64');
+        const headers = new Headers();
+        headers.set('Authorization', 'Basic' + base64.encode(userName + ":" + password));
+        fetch(url, {method:'GET', headers: headers}).
+            then(response => console.log(response));*/
+        /*axios.get(url, {headers: headers})
+            .then(r => console.log(r))*/
     }, []);
     if (notFound) {
         return <ResourceNotFound />;
     }
     if (!application) {
         return <Loading />;
+    }
+    const onCopy = (copiedContent) => {
+        setContentCopied(true);
+        setCopiedContent(copiedContent);
+
+        const caller = function () {
+            setContentCopied(false);
+        };
+        setTimeout(caller, 2000);
     }
     const pathPrefix = '/applications/' + applicationId;
     return (
@@ -234,6 +271,258 @@ function Overview(props) {
 
                     </TableBody>
                 </Table>
+                {deployedToSolace && (
+                    <div className={classes.solaceDiv}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                                <Typography variant='h5' className={classes.keyTitle}>
+                                    <FormattedMessage
+                                        id='solace.application.keys'
+                                        defaultMessage='Solace Application Details'
+                                    />
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={5}>
+                                <Typography>
+                                    <FormattedMessage
+                                        id='solace.application.keys'
+                                        defaultMessage='Access credentials'
+                                    />
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={7}>
+                                <Typography>
+                                    <FormattedMessage
+                                        id='solace.application.keys'
+                                        defaultMessage='Available endpoints'
+                                    />
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={5}>
+                                <TextField
+                                    disabled
+                                    id='consumer-key'
+                                    value='key'
+                                    margin='dense'
+                                    label={(
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.key'
+                                            defaultMessage='Consumer Key'
+                                        />
+                                    )}
+                                    fullWidth
+                                    variant='outlined'
+                                    /*InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <Tooltip
+                                                    title={
+                                                        keyCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Shared.AppsAndKeys.ViewKeys.copy.to',
+                                                            })
+                                                    }
+                                                    placement='right'
+                                                >
+                                                    <CopyToClipboard
+                                                        text='key'
+                                                        onCopy={() => this.onCopy('keyCopied')}
+                                                        classes={{ root: classes.iconButton }}
+                                                    >
+                                                        <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
+                                                            <Icon color='secondary'>
+                                                                file_copy
+                                                            </Icon>
+                                                        </IconButton>
+                                                    </CopyToClipboard>
+                                                </Tooltip>
+                                            </InputAdornment>
+                                        ),
+                                    }}*/
+                                />
+                                <TextField
+                                    disabled
+                                    id='consumer-secret'
+                                    value='secret'
+                                    margin='dense'
+                                    label={(
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.secret'
+                                            defaultMessage='Consumer secret'
+                                        />
+                                    )}
+                                    fullWidth
+                                    variant='outlined'
+                                    /*InputProps={{
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <InputAdornment position='end'>
+                                                <Tooltip
+                                                    title={
+                                                        keyCopied
+                                                            ? intl.formatMessage({
+                                                                defaultMessage: 'Copied',
+                                                                id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                                            })
+                                                            : intl.formatMessage({
+                                                                defaultMessage: 'Copy to clipboard',
+                                                                id: 'Shared.AppsAndKeys.ViewKeys.copy.to',
+                                                            })
+                                                    }
+                                                    placement='right'
+                                                >
+                                                    <CopyToClipboard
+                                                        text='key'
+                                                        onCopy={() => this.onCopy('keyCopied')}
+                                                        classes={{ root: classes.iconButton }}
+                                                    >
+                                                        <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
+                                                            <Icon color='secondary'>
+                                                                file_copy
+                                                            </Icon>
+                                                        </IconButton>
+                                                    </CopyToClipboard>
+                                                </Tooltip>
+                                            </InputAdornment>
+                                        ),
+                                    }}*/
+                                />
+                            </Grid>
+                            <Grid item xs={7}>
+                                <Grid container spacing={2} alignItems="center" justify="center">
+                                    <Grid item xs={1}>
+                                        <Chip label="MQTT" color="primary" size="medium" variant="outlined"/>
+                                    </Grid>
+                                    <Grid item xs={11}>
+                                        <FormattedMessage
+                                            id='Shared.AppsAndKeys.ViewKeys.consumer.key'
+                                            defaultMessage='Consumer Key'
+                                        />
+                                        {/*<Tooltip
+                                            title={
+                                                contentCopied
+                                                    ? intl.formatMessage({
+                                                        defaultMessage: 'Copied',
+                                                        id: 'Shared.AppsAndKeys.KeyConfiguration.copied',
+                                                    })
+                                                    : intl.formatMessage({
+                                                        defaultMessage: 'Copy to clipboard',
+                                                        id: 'Shared.AppsAndKeys.KeyConfiguration.copy.to.clipboard',
+                                                    })
+                                            }
+                                            placement='right'
+                                            className={classes.iconStyle}
+                                        >
+                                            <CopyToClipboard
+                                                text={copiedContent}
+                                                onCopy={onCopy}
+                                            >
+                                                <IconButton aria-label='Copy to clipboard'
+                                                            classes={{ root: classes.iconButton }}>
+                                                    <Icon color='secondary'>file_copy</Icon>
+                                                </IconButton>
+                                            </CopyToClipboard>
+                                        </Tooltip>*/}
+                                    </Grid>
+                                    <Grid item xs={1}>
+                                        <Chip label="HTTP" color="primary" size="medium" variant="outlined"/>
+                                    </Grid>
+                                    <Grid item xs={11}>
+                                        <TextField
+                                            id='consumer-secret'
+                                            value='secret'
+                                            margin='dense'
+                                            fullWidth
+                                            /*InputProps={{
+                                                readOnly: true,
+                                                endAdornment: (
+                                                    <InputAdornment position='end'>
+                                                        <Tooltip
+                                                            title={
+                                                                keyCopied
+                                                                    ? intl.formatMessage({
+                                                                        defaultMessage: 'Copied',
+                                                                        id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                                                    })
+                                                                    : intl.formatMessage({
+                                                                        defaultMessage: 'Copy to clipboard',
+                                                                        id: 'Shared.AppsAndKeys.ViewKeys.copy.to',
+                                                                    })
+                                                            }
+                                                            placement='right'
+                                                        >
+                                                            <CopyToClipboard
+                                                                text='key'
+                                                                onCopy={() => this.onCopy('keyCopied')}
+                                                                classes={{ root: classes.iconButton }}
+                                                            >
+                                                                <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
+                                                                    <Icon color='secondary'>
+                                                                        file_copy
+                                                                    </Icon>
+                                                                </IconButton>
+                                                            </CopyToClipboard>
+                                                        </Tooltip>
+                                                    </InputAdornment>
+                                                ),
+                                            }}*/
+                                        />
+                                    </Grid>
+                                    <Grid item xs={1}>
+                                        <Chip label="AMQP" color="primary" size="medium" variant="outlined"/>
+                                    </Grid>
+                                    <Grid item xs={11}>
+                                        <TextField
+                                            id='consumer-secret'
+                                            value='secret'
+                                            margin='dense'
+                                            fullWidth
+                                            /*InputProps={{
+                                                readOnly: true,
+                                                endAdornment: (
+                                                    <InputAdornment position='end'>
+                                                        <Tooltip
+                                                            title={
+                                                                keyCopied
+                                                                    ? intl.formatMessage({
+                                                                        defaultMessage: 'Copied',
+                                                                        id: 'Shared.AppsAndKeys.ViewKeys.copied',
+                                                                    })
+                                                                    : intl.formatMessage({
+                                                                        defaultMessage: 'Copy to clipboard',
+                                                                        id: 'Shared.AppsAndKeys.ViewKeys.copy.to',
+                                                                    })
+                                                            }
+                                                            placement='right'
+                                                        >
+                                                            <CopyToClipboard
+                                                                text='key'
+                                                                onCopy={() => this.onCopy('keyCopied')}
+                                                                classes={{ root: classes.iconButton }}
+                                                            >
+                                                                <IconButton aria-label='Copy to clipboard' classes={{ root: classes.iconButton }}>
+                                                                    <Icon color='secondary'>
+                                                                        file_copy
+                                                                    </Icon>
+                                                                </IconButton>
+                                                            </CopyToClipboard>
+                                                        </Tooltip>
+                                                    </InputAdornment>
+                                                ),
+                                            }}*/
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </div>
+                )}
             </div>
         </>
     );
