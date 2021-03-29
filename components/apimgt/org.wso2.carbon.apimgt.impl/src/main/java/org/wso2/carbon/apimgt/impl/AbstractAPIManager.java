@@ -3853,14 +3853,13 @@ public abstract class AbstractAPIManager implements APIManager {
             api.setWorkflowStatus(status.toString());
         }
         // TODO try to use a single query to get info from db
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         // Ratings
         int internalId = apiMgtDAO.getAPIID(apiId);
         api.setRating(APIUtil.getAverageRating(internalId));
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
         // api level tier
-        String apiLevelTier = ApiMgtDAO.getInstance().getAPILevelTier(internalId);
+        String apiLevelTier = apiMgtDAO.getAPILevelTier(internalId);
         api.setApiLevelPolicy(apiLevelTier);
 
         // available tier
@@ -3900,7 +3899,7 @@ public abstract class AbstractAPIManager implements APIManager {
             JSONObject resourceConfigsJSON = (JSONObject) jsonParser.parse(resourceConfigsString);
             paths = (JSONObject) resourceConfigsJSON.get(APIConstants.SWAGGER_PATHS);
         }
-        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(api.getId());
+        Set<URITemplate> uriTemplates = apiMgtDAO.getURITemplatesOfAPI(api.getId());
         for (URITemplate uriTemplate : uriTemplates) {
             String uTemplate = uriTemplate.getUriTemplate();
             String method = uriTemplate.getHTTPVerb();
