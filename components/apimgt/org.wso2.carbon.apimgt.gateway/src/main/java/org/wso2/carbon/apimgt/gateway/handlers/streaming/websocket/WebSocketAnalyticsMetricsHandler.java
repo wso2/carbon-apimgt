@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
