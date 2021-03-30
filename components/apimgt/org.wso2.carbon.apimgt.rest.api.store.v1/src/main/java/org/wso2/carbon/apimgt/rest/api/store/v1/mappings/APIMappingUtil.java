@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
@@ -434,7 +438,30 @@ public class APIMappingUtil {
         } else {
             apidto = fromAPItoDTO(model.getApi(), tenantDomain);
         }
-        apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
+
+        if (!apidto.isIsAWSAPI()) {
+            apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
+        } else {
+            JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
+            JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
+            JsonArray servers = configObject.getAsJsonArray("servers");
+            JsonObject server = servers.get(0).getAsJsonObject();
+            String url = server.get("url").getAsString();
+            JsonObject variables = server.getAsJsonObject("variables");
+            JsonObject basePath = variables.getAsJsonObject("basePath");
+            String stageName = basePath.get("default").getAsString();
+            String hostUrl = url.replace("/{basePath}", stageName);
+            if (hostUrl == null) {
+                hostUrl = " ";
+            }
+            APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
+            List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
+            APIURLsDTO apiurLsDTO = new APIURLsDTO();
+            apiurLsDTO.setHttps(hostUrl);
+            apiEndpointURLsDTO.setUrLs(apiurLsDTO);
+            endpointUrls.add(apiEndpointURLsDTO);
+            apidto.setEndpointURLs(endpointUrls);
+        }
         return apidto;
     }
 

@@ -777,15 +777,19 @@ class Details extends Component {
                                             Icon={<PropertiesIcon />}
                                         />
 
-                                        {!api.advertiseOnly && !api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.monetization',
-                                                    defaultMessage: 'monetization',
-                                                })}
-                                                to={pathPrefix + 'monetization'}
-                                                Icon={<MonetizationIcon />}
-                                            />
+                                        {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                                            <>
+                                                {!api.advertiseOnly && (
+                                                    <LeftMenuItem
+                                                        text={intl.formatMessage({
+                                                            id: 'Apis.Details.index.monetization',
+                                                            defaultMessage: 'monetization',
+                                                        })}
+                                                        to={pathPrefix + 'monetization'}
+                                                        Icon={<MonetizationIcon />}
+                                                    />
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 </AccordionDetails>

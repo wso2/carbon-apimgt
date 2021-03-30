@@ -3737,22 +3737,10 @@
       "value": "Deployed Revision"
     }
   ],
-  "Apis.Details.Environments.Environments.new.revision.name.heading1": [
-    {
-      "type": 0,
-      "value": "Revision Name:"
-    }
-  ],
-  "Apis.Details.Environments.Environments.new.revision.name.heading2": [
-    {
-      "type": 0,
-      "value": "Revision Name:"
-    }
-  ],
   "Apis.Details.Environments.Environments.revision.create.heading": [
     {
       "type": 0,
-      "value": "Create Revision"
+      "value": "Create New Revision (From Current API)"
     }
   ],
   "Apis.Details.Environments.Environments.revision.delete": [
@@ -3840,7 +3828,7 @@
     },
     {
       "type": 0,
-      "value": " ?"
+      "value": " (To Current API)?"
     }
   ],
   "Apis.Details.Environments.Environments.revision.restore.confirm.ok": [
@@ -6248,7 +6236,7 @@
   "Apis.Details.index.Tryout.menu.name": [
     {
       "type": 0,
-      "value": "Try Out"
+      "value": "TryOut"
     }
   ],
   "Apis.Details.index.api.definition2": [

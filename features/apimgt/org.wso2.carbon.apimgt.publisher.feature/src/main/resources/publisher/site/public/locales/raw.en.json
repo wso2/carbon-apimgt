@@ -1779,14 +1779,8 @@
   "Apis.Details.Environments.Environments.gateway.deployed.revision": {
     "defaultMessage": "Deployed Revision"
   },
-  "Apis.Details.Environments.Environments.new.revision.name.heading1": {
-    "defaultMessage": "Revision Name:"
-  },
-  "Apis.Details.Environments.Environments.new.revision.name.heading2": {
-    "defaultMessage": "Revision Name:"
-  },
   "Apis.Details.Environments.Environments.revision.create.heading": {
-    "defaultMessage": "Create Revision"
+    "defaultMessage": "Create New Revision (From Current API)"
   },
   "Apis.Details.Environments.Environments.revision.delete": {
     "defaultMessage": "Delete"
@@ -1822,7 +1816,7 @@
     "defaultMessage": "Cancel"
   },
   "Apis.Details.Environments.Environments.revision.restore.confirm.message": {
-    "defaultMessage": "Are you sure you want to restore {revision} ?"
+    "defaultMessage": "Are you sure you want to restore {revision} (To Current API)?"
   },
   "Apis.Details.Environments.Environments.revision.restore.confirm.ok": {
     "defaultMessage": "Yes"
@@ -2971,7 +2965,7 @@
     "defaultMessage": "Delete {type}"
   },
   "Apis.Details.index.Tryout.menu.name": {
-    "defaultMessage": "Try Out"
+    "defaultMessage": "TryOut"
   },
   "Apis.Details.index.api.definition2": {
     "defaultMessage": "API definition"

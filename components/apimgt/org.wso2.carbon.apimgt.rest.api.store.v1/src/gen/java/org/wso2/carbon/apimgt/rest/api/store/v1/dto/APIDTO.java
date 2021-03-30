@@ -255,7 +255,7 @@ public class APIDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("isAWSAPI")
   public Boolean isIsAWSAPI() {
