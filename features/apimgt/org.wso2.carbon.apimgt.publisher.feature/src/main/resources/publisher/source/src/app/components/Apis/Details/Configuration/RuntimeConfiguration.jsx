@@ -35,7 +35,7 @@ import cloneDeep from 'lodash.clonedeep';
 import Api from 'AppData/api';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
-import CustomizeSplitButton from 'AppComponents/Shared/CustomizeSplitButton';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import ResponseCaching from './components/ResponseCaching';
 import CORSConfiguration from './components/CORSConfiguration';
 import SchemaValidation from './components/SchemaValidation';
@@ -613,7 +613,7 @@ export default function RuntimeConfiguration() {
                                         />
                                     </Button>
                                 ) : (
-                                    <CustomizeSplitButton
+                                    <CustomSplitButton
                                         handleSave={handleSave}
                                         handleSaveAndDeploy={handleSaveAndDeploy}
                                         isUpdating={isUpdating}

@@ -24,7 +24,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import { Link, withRouter } from 'react-router-dom';
-import CustomizeSplitButton from 'AppComponents/Shared/CustomizeSplitButton';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import NewEndpointCreate from 'AppComponents/Apis/Details/Endpoints/NewEndpointCreate';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
@@ -458,7 +458,7 @@ function Endpoints(props) {
                                                 />
                                             </Button>
                                         ) : (
-                                            <CustomizeSplitButton
+                                            <CustomSplitButton
                                                 handleSave={handleSave}
                                                 handleSaveAndDeploy={handleSaveAndDeploy}
                                                 isUpdating={isUpdating}

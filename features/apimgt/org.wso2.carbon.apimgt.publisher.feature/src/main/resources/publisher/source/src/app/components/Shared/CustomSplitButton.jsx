@@ -14,7 +14,7 @@ import MenuList from '@material-ui/core/MenuList';
 
 const options = ['Save and deploy', 'Save'];
 
-export default function CustomizeSplitButton(props) {
+export default function CustomSplitButton(props) {
     const [open, setOpen] = React.useState(false);
     const { handleSave, handleSaveAndDeploy, isUpdating } = props;
     const anchorRef = React.useRef(null);
@@ -103,7 +103,7 @@ export default function CustomizeSplitButton(props) {
     );
 }
 
-CustomizeSplitButton.propTypes = {
+CustomSplitButton.propTypes = {
     handleSave: PropTypes.shape({}).isRequired,
     handleSaveAndDeploy: PropTypes.shape({}).isRequired,
 };

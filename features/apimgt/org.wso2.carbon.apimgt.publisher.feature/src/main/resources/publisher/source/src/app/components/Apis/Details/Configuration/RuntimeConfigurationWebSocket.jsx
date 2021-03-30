@@ -28,7 +28,7 @@ import { FormattedMessage } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
 import ArrowForwardIcon from '@material-ui/icons/SettingsEthernet';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
-import CustomizeSplitButton from 'AppComponents/Shared/CustomizeSplitButton';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import { isRestricted } from 'AppData/AuthManager';
 import API from 'AppData/api';
 import Endpoints from './components/Endpoints';
@@ -288,7 +288,7 @@ export default function RuntimeConfiguration() {
                                         />
                                     </Button>
                                 ) : (
-                                    <CustomizeSplitButton
+                                    <CustomSplitButton
                                         handleSave={handleSave}
                                         handleSaveAndDeploy={handleSaveAndDeploy}
                                         isUpdating={isUpdating}

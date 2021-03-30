@@ -36,7 +36,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import CustomizeSplitButton from 'AppComponents/Shared/CustomizeSplitButton';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Box from '@material-ui/core/Box';
@@ -720,7 +720,7 @@ function Properties(props) {
                                                     />
                                                 </Button>
                                             ) : (
-                                                <CustomizeSplitButton
+                                                <CustomSplitButton
                                                     handleSave={handleSave}
                                                     handleSaveAndDeploy={handleSaveAndDeploy}
                                                     isUpdating={isUpdating}

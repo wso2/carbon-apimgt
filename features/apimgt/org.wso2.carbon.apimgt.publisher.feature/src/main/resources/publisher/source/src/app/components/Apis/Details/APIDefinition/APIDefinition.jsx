@@ -25,7 +25,7 @@ import EditRounded from '@material-ui/icons/EditRounded';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import LockRounded from '@material-ui/icons/LockRounded';
 import SwapHorizontalCircle from '@material-ui/icons/SwapHorizontalCircle';
-import CustomizeSplitButton from 'AppComponents/Shared/CustomizeSplitButton';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import Dialog from '@material-ui/core/Dialog';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
@@ -920,7 +920,7 @@ class APIDefinition extends React.Component {
                                 </Button>
                             </Grid>
                             <Grid item>
-                                <CustomizeSplitButton
+                                <CustomSplitButton
                                     handleSave={this.handleSave}
                                     handleSaveAndDeploy={this.handleSaveAndDeploy}
                                     isUpdating={isUpdating}

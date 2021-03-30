@@ -27,7 +27,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import cloneDeep from 'lodash.clonedeep';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
-import CustomizeSplitButton from 'AppComponents/Shared/CustomizeSplitButton';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import ProductResourcesEditWorkspace from './ProductResourcesEditWorkspace';
 
@@ -126,7 +126,7 @@ function ProductResourcesEdit() {
                     <Grid container direction='row' alignItems='flex-start' spacing={1}>
                         <Grid item>
                             <div>
-                                <CustomizeSplitButton
+                                <CustomSplitButton
                                     handleSave={handleSave}
                                     handleSaveAndDeploy={handleSaveAndDeploy}
                                     isUpdating={isUpdating}
