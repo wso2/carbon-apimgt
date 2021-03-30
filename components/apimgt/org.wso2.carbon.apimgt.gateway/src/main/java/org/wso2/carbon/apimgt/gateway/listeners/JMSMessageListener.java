@@ -111,15 +111,17 @@ public class JMSMessageListener implements MessageListener {
             }
         } catch (JMSException e) {
             log.error("JMSException occurred when processing the received message ", e);
-        } catch (ParseException | JsonProcessingException e) {
+        } catch (ParseException e) {
             log.error("Error while processing evaluatedConditions", e);
+        } catch (JsonProcessingException e) {
+            log.error("Error while parsing JMS payload", e);
         }
     }
 
     private void handleThrottleUpdateMessage(JsonNode msg) throws ParseException {
-        String throttleKey = msg.get(APIConstants.AdvancedThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = msg.get(APIConstants.AdvancedThrottleConstants.IS_THROTTLED).toString();
-        Long timeStamp = Long.parseLong(msg.get(APIConstants.AdvancedThrottleConstants.EXPIRY_TIMESTAMP).toString());
+        String throttleKey = msg.get(APIConstants.AdvancedThrottleConstants.THROTTLE_KEY).asText();
+        String throttleState = msg.get(APIConstants.AdvancedThrottleConstants.IS_THROTTLED).asText();
+        Long timeStamp = Long.parseLong(msg.get(APIConstants.AdvancedThrottleConstants.EXPIRY_TIMESTAMP).asText());
         Object evaluatedConditionObject = msg.get(APIConstants.AdvancedThrottleConstants.EVALUATED_CONDITIONS);
 
         if (log.isDebugEnabled()) {
@@ -170,17 +172,17 @@ public class JMSMessageListener implements MessageListener {
     //as this will not happen more frequently
     private synchronized void handleBlockingMessage(JsonNode msg) {
         if (log.isDebugEnabled()) {
-            log.debug("Received Key -  blockingCondition : " + msg.get(APIConstants.BLOCKING_CONDITION_KEY).toString() +
+            log.debug("Received Key -  blockingCondition : " + msg.get(APIConstants.BLOCKING_CONDITION_KEY).asText() +
                     " , " +
-                    "conditionValue :" + msg.get(APIConstants.BLOCKING_CONDITION_VALUE).toString() + " , " +
-                    "tenantDomain : " + msg.get(APIConstants.BLOCKING_CONDITION_DOMAIN));
+                    "conditionValue :" + msg.get(APIConstants.BLOCKING_CONDITION_VALUE).asText() + " , " +
+                    "tenantDomain : " + msg.get(APIConstants.BLOCKING_CONDITION_DOMAIN).asText());
         }
 
-        String condition = msg.get(APIConstants.BLOCKING_CONDITION_KEY).toString();
-        String conditionValue = msg.get(APIConstants.BLOCKING_CONDITION_VALUE).toString();
-        String conditionState = msg.get(APIConstants.BLOCKING_CONDITION_STATE).toString();
+        String condition = msg.get(APIConstants.BLOCKING_CONDITION_KEY).asText();
+        String conditionValue = msg.get(APIConstants.BLOCKING_CONDITION_VALUE).asText();
+        String conditionState = msg.get(APIConstants.BLOCKING_CONDITION_STATE).asText();
         int conditionId = msg.get(APIConstants.BLOCKING_CONDITION_ID).asInt();
-        String tenantDomain = msg.get(APIConstants.BLOCKING_CONDITION_DOMAIN).toString();
+        String tenantDomain = msg.get(APIConstants.BLOCKING_CONDITION_DOMAIN).asText();
 
         if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
             if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
@@ -268,10 +270,10 @@ public class JMSMessageListener implements MessageListener {
 
     private synchronized void handleKeyTemplateMessage(JsonNode msg) {
         if (log.isDebugEnabled()) {
-            log.debug("Received Key -  KeyTemplate : " + msg.get(APIConstants.POLICY_TEMPLATE_KEY).toString());
+            log.debug("Received Key -  KeyTemplate : " + msg.get(APIConstants.POLICY_TEMPLATE_KEY).asText());
         }
-        String keyTemplateValue = msg.get(APIConstants.POLICY_TEMPLATE_KEY).toString();
-        String keyTemplateState = msg.get(APIConstants.TEMPLATE_KEY_STATE).toString();
+        String keyTemplateValue = msg.get(APIConstants.POLICY_TEMPLATE_KEY).asText();
+        String keyTemplateState = msg.get(APIConstants.TEMPLATE_KEY_STATE).asText();
         if (APIConstants.AdvancedThrottleConstants.ADD.equals(keyTemplateState)) {
             ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .addKeyTemplate(keyTemplateValue, keyTemplateValue);
