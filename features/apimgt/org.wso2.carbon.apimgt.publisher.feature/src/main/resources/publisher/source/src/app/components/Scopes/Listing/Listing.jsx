@@ -26,7 +26,6 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import Button from '@material-ui/core/Button';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
-import Create from '@material-ui/icons/Create';
 import IconButton from '@material-ui/core/IconButton';
 import FirstPageIcon from '@material-ui/icons/FirstPage';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
@@ -35,12 +34,13 @@ import LastPageIcon from '@material-ui/icons/LastPage';
 import AddCircle from '@material-ui/icons/AddCircle';
 import MUIDataTable from 'mui-datatables';
 import Icon from '@material-ui/core/Icon';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import Grid from '@material-ui/core/Grid';
 import { isRestricted } from 'AppData/AuthManager';
 import { withAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import Alert from 'AppComponents/Shared/Alert';
 import Box from '@material-ui/core/Box';
+import OnboardingMenuCard from 'AppComponents/Shared/Onboarding/OnboardingMenuCard';
+import Onboarding from 'AppComponents/Shared/Onboarding/Onboarding';
 import Delete from '../Delete/Delete';
 import Usage from '../Usage/Usage';
 
@@ -394,43 +394,25 @@ class Listing extends React.Component {
 
         if (scopes.length === 0) {
             return (
-                <div className={classes.contentInside}>
-                    <InlineMessage type='info' height={140}>
-                        <div className={classes.contentWrapper}>
-                            <Typography variant='h5' component='h3' className={classes.head}>
-                                <FormattedMessage
-                                    id='Scopes.Listing.sample.scope.manager'
-                                    defaultMessage='Welcome to WSO2 API Manager'
-                                />
-                            </Typography>
-                            <Typography component='p' className={classes.content}>
-                                <FormattedMessage
-                                    id='Scopes.Listing.Listing.scopes.enable.fine.gained.access.control'
-                                    defaultMessage={
-                                        'Scopes enable fine-grained access control to API resources'
-                                        + ' based on user roles.'
-                                    }
-                                />
-                            </Typography>
-                            <div className={classes.actions}>
-                                <Link to={url}>
-                                    <Button
-                                        size='small'
-                                        variant='contained'
-                                        color='primary'
-                                        className={classes.button}
-                                    >
-                                        <Create />
-                                        <FormattedMessage
-                                            id='Scopes.Listing.Listing.create.scopes.button'
-                                            defaultMessage='Create a new scope'
-                                        />
-                                    </Button>
-                                </Link>
-                            </div>
-                        </div>
-                    </InlineMessage>
-                </div>
+                <Onboarding
+                    title={(
+                        <FormattedMessage
+                            id='Apis.Listing.SampleAPI.SampleAPI.create.new'
+                            defaultMessage='Let’s get started !'
+                        />
+                    )}
+                    subTitle={(
+                        <FormattedMessage
+                            id='Scopes.Listing.Listing.scopes.enable.fine.gained.access.control'
+                            defaultMessage={
+                                'Scopes enable fine-grained access control to API resources'
+                        + ' based on user roles.'
+                            }
+                        />
+                    )}
+                >
+                    <OnboardingMenuCard to='/scopes/create' name='Scopes' />
+                </Onboarding>
             );
         }
 

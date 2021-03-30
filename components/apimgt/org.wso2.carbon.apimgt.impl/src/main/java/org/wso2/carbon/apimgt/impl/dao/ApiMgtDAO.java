@@ -1128,12 +1128,14 @@ public class ApiMgtDAO {
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
+                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
                     APIIdentifier apiIdentifier = new APIIdentifier(
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiIdentifier.setId(resultSet.getInt("API_ID"));
+                    apiIdentifier.setUuid(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
 
@@ -9071,7 +9073,7 @@ public class ApiMgtDAO {
                         api.setUuid(resultSet.getString("API_UUID"));
                         api.setContext(resultSet.getString("CONTEXT"));
                         api.setType(resultSet.getString("API_TYPE"));
-                        api.setStatus(resultSet.getNString("STATUS"));
+                        api.setStatus(resultSet.getString("STATUS"));
                         return api;
                     }
                 }

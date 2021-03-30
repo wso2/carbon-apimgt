@@ -339,6 +339,7 @@ public class SQLConstants {
             "   SUBS.UUID AS UUID, " +
             "   SUBS.CREATED_TIME AS CREATED_TIME, " +
             "   SUBS.UPDATED_TIME AS UPDATED_TIME, " +
+            "   API.API_UUID AS API_UUID, " +
             "   API.API_ID AS API_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +

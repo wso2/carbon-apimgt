@@ -49,11 +49,10 @@ import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
@@ -776,30 +775,6 @@ public class TemplateBuilderUtil {
     }
 
     /**
-     * Store the secured endpoint username password to registry.
-     *
-     * @param api
-     * @param tenantDomain
-     * @throws APIManagementException
-     */
-    private static void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain)
-            throws APIManagementException {
-
-        boolean isSecureVaultEnabled =
-                Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
-        if (api.isEndpointSecured() && isSecureVaultEnabled) {
-            try {
-                securityAdminClient.setSecureVaultProperty(api, tenantDomain);
-            } catch (Exception e) {
-                String msg = "Error in setting secured password.";
-                log.error(msg + ' ' + e.getLocalizedMessage(), e);
-                throw new APIManagementException(msg);
-            }
-        }
-    }
-
-    /**
      * To deploy client certificate in given API environment.
      *
      * @param tenantDomain              Tenant domain.
@@ -1123,7 +1098,7 @@ public class TemplateBuilderUtil {
     private static Map<String, APIDTO> retrieveAssociatedApis(String extractedPath) throws APIManagementException {
 
         Map<String, APIDTO> apidtoMap = new HashMap();
-        String apisDirectoryPath = extractedPath + File.separator + APIImportExportConstants.APIS_DIRECTORY;
+        String apisDirectoryPath = extractedPath + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);
         File[] apisDirectoryListing = apisDirectory.listFiles();
         if (apisDirectoryListing != null) {

@@ -24,7 +24,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.jms.listener.APICondition;
+import org.wso2.carbon.apimgt.gateway.dto.APICondition;
 
 import java.util.Date;
 import java.util.Enumeration;

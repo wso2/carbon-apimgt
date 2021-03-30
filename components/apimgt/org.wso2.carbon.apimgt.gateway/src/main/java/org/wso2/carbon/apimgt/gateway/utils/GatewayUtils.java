@@ -51,6 +51,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -207,26 +208,6 @@ public class GatewayUtils {
             }
 
             return queryParamsMap;
-        }
-        return null;
-    }
-
-    public static Map getJWTClaims(AuthenticationContext authContext) {
-
-        String assertion = authContext.getCallerToken();
-        if (StringUtils.isNotEmpty(assertion)) {
-            String[] jwtTokenArray = authContext.getCallerToken().split(Pattern.quote("."));
-            // decoding JWT
-            try {
-                byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
-                String jwtAssertion = new String(jwtByteArray, "UTF-8");
-                JSONParser parser = new JSONParser();
-                return (Map) parser.parse(jwtAssertion);
-            } catch (UnsupportedEncodingException e) {
-                log.error("Error while decoding jwt header", e);
-            } catch (ParseException e) {
-                log.error("Error while parsing jwt header", e);
-            }
         }
         return null;
     }
@@ -1311,6 +1292,24 @@ public class GatewayUtils {
         }
         if (requestDestination != null) {
             messageContext.setProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS, requestDestination);
+        }
+    }
+
+    public static void setWebsocketEndpointsToBeRemoved(GatewayAPIDTO gatewayAPIDTO, String tenantDomain)
+            throws AxisFault {
+        String apiName = gatewayAPIDTO.getName();
+        String apiVersion = gatewayAPIDTO.getVersion();
+        if (apiName != null && apiVersion != null) {
+            String prefix = apiName.concat("--v").concat(apiVersion).concat("_API");
+            EndpointAdminServiceProxy endpointAdminServiceProxy = new EndpointAdminServiceProxy(tenantDomain);
+            String[] endpoints = endpointAdminServiceProxy.getEndpoints();
+            for (String endpoint : endpoints) {
+                if (endpoint.startsWith(prefix)) {
+                    gatewayAPIDTO.setEndpointEntriesToBeRemove(
+                            org.wso2.carbon.apimgt.impl.utils.GatewayUtils.addStringToList(endpoint,
+                                    gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+                }
+            }
         }
     }
 }

@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -53,9 +54,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
 
     @Override
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
-                          boolean preserveStatus,
-                          ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
-                          boolean exportLatestRevision)
+            boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
+            boolean exportLatestRevision, String originalDevPortalUrl)
             throws APIManagementException, APIImportExportException {
 
         APIIdentifier apiIdentifier;
@@ -82,7 +82,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         if (exportLatestRevision) {
             //if a latest revision flag used, latest revision's api object is used
             exportAPIUUID = apiProvider.getLatestRevisionUUID(apiId);
-        } else if (revisionNum != null) {
+        } else if (StringUtils.isNotBlank(revisionNum)) {
             //if a revision number provided, revision api object is used
             exportAPIUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
         } else {
@@ -95,7 +95,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs);
+                preserveDocs, originalDevPortalUrl);
     }
 
     @Override
@@ -111,7 +111,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         api.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs);
+                preserveDocs, StringUtils.EMPTY);
 
     }
 

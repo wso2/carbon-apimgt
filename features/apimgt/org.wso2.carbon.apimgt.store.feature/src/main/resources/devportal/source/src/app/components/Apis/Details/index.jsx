@@ -482,7 +482,7 @@ class Details extends React.Component {
 
                                     </>
                                 )}
-                                {!isAsyncApi && showTryout && (
+                                {showTryout && (
                                     <LeftMenuItem
                                         text={<FormattedMessage id='Apis.Details.index.try.out'
                                             defaultMessage='Try out' />}
@@ -531,7 +531,7 @@ class Details extends React.Component {
                             />
 
                         )}
-                        {!api.advertiseInfo.advertised && api.type !== 'WS' && showSdks && (
+                        {!api.advertiseInfo.advertised && !isAsyncApi && showSdks && (
 
                             <LeftMenuItem
                                 text={<FormattedMessage id='Apis.Details.index.sdk' defaultMessage='SDKs' />}

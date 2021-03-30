@@ -694,6 +694,7 @@ class Details extends Component {
                                                     id: 'Apis.Details.index.comments',
                                                     defaultMessage: 'Comments',
                                                 })}
+                                                route='comments'
                                                 to={pathPrefix + 'comments'}
                                                 Icon={<CommentIcon />}
                                             />
@@ -764,6 +765,7 @@ class Details extends Component {
                                                     id: 'Apis.Details.index.left.menu.scope',
                                                     defaultMessage: 'Local Scopes',
                                                 })}
+                                                route='scopes'
                                                 to={pathPrefix + 'scopes'}
                                                 Icon={<ScopesIcon />}
                                             />
@@ -804,11 +806,12 @@ class Details extends Component {
                             Icon={<PersonPinCircleOutlinedIcon />}
                         />
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'RETIRED' && (
+                            && api.lifeCycleStatus !== 'RETIRED' && (
                             <div>
                                 <Divider />
                                 <Typography className={classes.headingText}>Test</Typography>
                                 <LeftMenuItem
+                                    route='test-console'
                                     text={intl.formatMessage({
                                         id: 'Apis.Details.index.Tryout.menu.name',
                                         defaultMessage: 'Try Out',

@@ -21,21 +21,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -49,7 +50,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.UUID;
 
 
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
@@ -186,7 +186,11 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     @Override
     public MetaInfo getMetaInfo() {
         MetaInfo metaInfo = new MetaInfo();
-        metaInfo.setCorrelationId(UUID.randomUUID().toString());
+        Object correlationId  = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(CorrelationConstants.CORRELATION_ID);
+        if (correlationId instanceof String){
+            metaInfo.setCorrelationId((String) correlationId);
+        }
         metaInfo.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
         Map<String, String> configMap = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
                 .getAPIAnalyticsConfiguration().getReporterProperties();

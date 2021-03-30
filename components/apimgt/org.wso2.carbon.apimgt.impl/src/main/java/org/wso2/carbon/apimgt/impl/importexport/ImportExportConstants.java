@@ -27,6 +27,12 @@ import java.util.Map;
  */
 public final class ImportExportConstants {
 
+    // System independent file separator for zip files
+    public static final char ZIP_FILE_SEPARATOR = '/';
+
+    //length of the name of the temporary directory
+    public static final int TEMP_FILENAME_LENGTH = 5;
+
     // Location of the API definition file
     public static final String API_FILE_LOCATION = File.separator + "api";
 
@@ -188,8 +194,6 @@ public final class ImportExportConstants {
     public static final String APIM_VERSION = "v4.0.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
-
-    public static final String ENDPOINT_CUSTOM_PARAMETERS = "customParameters";
 
     public static final String GRAPHQL_COMPLEXITY = "graphql-complexity";
 
