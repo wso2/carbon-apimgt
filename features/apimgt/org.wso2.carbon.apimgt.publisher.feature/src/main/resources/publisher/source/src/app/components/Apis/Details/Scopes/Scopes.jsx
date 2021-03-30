@@ -227,6 +227,7 @@ class Scopes extends React.Component {
             viewColumns: false,
             customToolbar: false,
         };
+
         const scopesList = api.scopes.filter((apiScope) => {
             return !apiScope.shared;
         }).map((apiScope) => {

@@ -60,7 +60,18 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ErrorItem;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.MonetizationException;
+import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -125,7 +136,14 @@ import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
+import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
+import org.wso2.carbon.apimgt.impl.dto.ThirdPartyEnvironment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -148,6 +166,9 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.solace.SolaceAdminApis;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
+import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
@@ -233,7 +254,24 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -268,6 +306,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected  ArtifactSaver artifactSaver;
     protected ImportExportAPI importExportAPI;
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
+    private RecommendationEnvironment recommendationEnvironment;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -276,6 +315,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         this.artifactSaver = ServiceReferenceHolder.getInstance().getArtifactSaver();
         this.importExportAPI = ServiceReferenceHolder.getInstance().getImportExportService();
         this.gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
+        this.recommendationEnvironment = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getApiRecommendationEnvironment();
     }
 
     protected String getUserNameWithoutChange() {
@@ -1533,6 +1574,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()),
                 api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher
+                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
     }
 
     private void sendUpdateEventToPreviousDefaultVersion(APIIdentifier apiIdentifier) throws APIManagementException {
@@ -1651,6 +1700,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+
+        // Extracting API details for the recommendation system
+        if (recommendationEnvironment != null) {
+            RecommenderEventPublisher
+                    extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+            Thread recommendationThread = new Thread(extractor);
+            recommendationThread.start();
+        }
+
         return api;
     }
 
@@ -4015,6 +4073,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.getStatus());
             APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
+            // Extracting API details for the recommendation system
+            if (recommendationEnvironment != null) {
+                RecommenderEventPublisher
+                        extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.DELETE_API);
+                Thread recommendationThread = new Thread(extractor);
+                recommendationThread.start();
+            }
+
         } catch (WorkflowException e) {
             handleException("Failed to execute workflow cleanup task ", e);
         } catch (APIPersistenceException e) {
@@ -5253,10 +5319,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void saveSwaggerDefinition(String apiId, String jsonText,String orgId) throws APIManagementException {
+    public void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException {
         try {
             apiPersistenceInstance.saveOASDefinition(new Organization(orgId), apiId, jsonText);
-
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while persisting OAS definition ", e);
         }
@@ -5331,26 +5396,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException {
+    public void addAPIProductSwagger(String productId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+                APIProduct apiProduct, String orgId) throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
         apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
-        saveSwagger20Definition(apiProduct.getId(), apiProductSwagger);
+        saveSwaggerDefinition(productId, apiProductSwagger, orgId);
         apiProduct.setDefinition(apiProductSwagger);
     }
 
     @Override
-    public void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException, FaultGatewaysException {
+    public void updateAPIProductSwagger(String productId, Map<API,
+            List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct, String orgId)
+            throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData updatedData = new SwaggerData(apiProduct);
         String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                 updatedProductSwagger);
-        saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
+        saveSwaggerDefinition(productId, updatedProductSwagger, orgId);
         apiProduct.setDefinition(updatedProductSwagger);
     }
 
@@ -5593,6 +5659,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             uuid,apiVersion, apiType, apiContext, APIUtil.replaceEmailDomainBack(providerName), targetStatus);
                     APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
+                    // Extracting API details for the recommendation system
+                    if (recommendationEnvironment != null) {
+                        RecommenderEventPublisher
+                                extractor = new RecommenderDetailsExtractor(api, tenantDomain, APIConstants.ADD_API);
+                        Thread recommendationThread = new Thread(extractor);
+                        recommendationThread.start();
+                    }
                     return response;
                 }
             }
@@ -7463,17 +7536,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
+            Registry sysRegistry = getRegistryService().getGovernanceSystemRegistry();
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            if (!registry.resourceExists(resourcePath)) {
+            if (!sysRegistry.resourceExists(resourcePath)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Resource does not exist in the path : " + resourcePath + " this can happen if this is in the "
                             + "middle of the new " + identifierType + " creation, hence not checking the access control");
                 }
                 return;
             }
-            Resource resource = registry.get(resourcePath);
+            Resource resource = sysRegistry.get(resourcePath);
             if (resource == null) {
                 return;
             }
@@ -8726,8 +8800,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<APIResource> getUsedProductResources(APIIdentifier apiId) throws APIManagementException {
         List<APIResource> usedProductResources = new ArrayList<>();
-        Set<URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPI(apiId);
-        for (URITemplate uriTemplate : uriTemplates) {
+        Map<Integer, URITemplate> uriTemplates = ApiMgtDAO.getInstance().getURITemplatesOfAPIWithProductMapping(apiId);
+        for (URITemplate uriTemplate : uriTemplates.values()) {
             // If existing URITemplate is used by any API Products
             if (!uriTemplate.retrieveUsedByProducts().isEmpty()) {
                 APIResource apiResource = new APIResource(uriTemplate.getHTTPVerb(), uriTemplate.getUriTemplate());
@@ -9280,6 +9354,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         API api = getAPIbyUUID(apiId, apiRevision);
         Set<String> environmentsToAdd = new HashSet<>();
+        Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
@@ -9289,6 +9364,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
+            gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
@@ -9333,7 +9409,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAddOtherThanThirdParty.size() > 0) {
             GatewayArtifactsMgtDAO.getInstance()
-                    .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAddOtherThanThirdParty, environmentsToRemove);
+                    .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAddOtherThanThirdParty, gatewayVhosts,
+                                    environmentsToRemove);
             gatewayManager.deployToGateway(api, tenantDomain, environmentsToAddOtherThanThirdParty);
         }
 
@@ -9370,6 +9447,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public void updateAPIDisplayOnDevportal(String apiId, String apiRevisionId, APIRevisionDeployment apiRevisionDeployment)
+            throws APIManagementException {
+
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
+                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
+        Set<APIRevisionDeployment> environmentsToUpdate = new HashSet<>();
+        for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
+            if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                    apiRevisionDeployment.getDeployment())) {
+                environmentsToUpdate.add(apiRevisionDeployment);
+            }
+        }
+        // if the provided deployment doesn't exist we are not adding to update list
+        if (environmentsToUpdate.size() > 0) {
+            apiMgtDAO.updateAPIRevisionDeployment(apiId, environmentsToUpdate);
+        } else {
+            throw new APIMgtResourceNotFoundException("deployment with " + apiRevisionDeployment.getDeployment() +
+                    " not found", ExceptionCodes.from(ExceptionCodes.EXISTING_DEPLOYMENT_NOT_FOUND,
+                    apiRevisionDeployment.getDeployment()));
+        }
+    }
+
     private API getAPIbyUUID(String apiId, APIRevision apiRevision)
             throws APIManagementException {
 
@@ -9382,8 +9492,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public APIRevisionDeployment getAPIRevisionDeployment(String name) throws APIManagementException {
-         return apiMgtDAO.getAPIRevisionDeploymentByName(name);
+    public APIRevisionDeployment getAPIRevisionDeployment(String name, String revisionId) throws APIManagementException {
+         return apiMgtDAO.getAPIRevisionDeploymentByNameAndRevsionID(name,revisionId);
     }
 
     @Override
@@ -9627,6 +9737,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Set<String> environmentsToAdd = new HashSet<>();
+        Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
@@ -9636,18 +9747,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
+            gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeAPIRevisionDeployment(apiProductId,environmentsToRemove);
             removeFromGateway(product, tenantDomain, environmentsToRemove, environmentsToAdd);
         }
         GatewayArtifactsMgtDAO.getInstance()
-                .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, environmentsToRemove);
+                .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, gatewayVhosts,
+                        environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
             gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
         }
 
+    }
+
+    @Override
+    public void updateAPIProductDisplayOnDevportal(String apiProductId, String apiRevisionId,
+                                                   APIRevisionDeployment apiRevisionDeployment) throws APIManagementException {
+
+        APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiProductId);
+        if (apiProductIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Product with ID: "
+                    + apiProductId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiProductId));
+        }
+        APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionId);
+        if (apiRevision == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
+                    + apiRevisionId, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionId));
+        }
+        List<APIRevisionDeployment> currentApiRevisionDeploymentList =
+                apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
+        Set<APIRevisionDeployment> environmentsToUpdate = new HashSet<>();
+        for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
+            if (StringUtils.equalsIgnoreCase(currentapiRevisionDeployment.getDeployment(),
+                    apiRevisionDeployment.getDeployment())) {
+                environmentsToUpdate.add(apiRevisionDeployment);
+            }
+        }
+        // if the provided deployment doesn't exist we are not adding to update list
+
+        if (environmentsToUpdate.size() > 0) {
+            apiMgtDAO.updateAPIRevisionDeployment(apiProductId, environmentsToUpdate);
+        } else {
+            throw new APIMgtResourceNotFoundException("deployment with " + apiRevisionDeployment.getDeployment() +
+                    " not found", ExceptionCodes.from(ExceptionCodes.EXISTING_DEPLOYMENT_NOT_FOUND,
+                    apiRevisionDeployment.getDeployment()));
+        }
     }
 
     @Override

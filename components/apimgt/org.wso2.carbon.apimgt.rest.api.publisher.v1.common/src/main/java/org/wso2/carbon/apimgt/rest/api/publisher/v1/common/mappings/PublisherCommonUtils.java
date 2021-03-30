@@ -167,20 +167,25 @@ public class PublisherCommonUtils {
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
         // OAuth 2.0 backend protection: Api Key and Api Secret encryption while updating the API
+        String customParametersString = "{}";
         if (endpointConfig != null) {
             if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
-                LinkedHashMap endpointSecurity = (LinkedHashMap) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
                 if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                    LinkedHashMap endpointSecurityProduction = (LinkedHashMap) endpointSecurity
+                    Map endpointSecurityProduction = (Map) endpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap =
-                            (LinkedHashMap<String, String>) endpointSecurityProduction
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    if (!(endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                        LinkedHashMap<String, String> customParametersHashMap =
+                                (LinkedHashMap<String, String>) endpointSecurityProduction
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    }
+
                     endpointSecurityProduction
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
@@ -203,16 +208,18 @@ public class PublisherCommonUtils {
                     apiDtoToUpdate.setEndpointConfig(endpointConfig);
                 }
                 if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                    LinkedHashMap endpointSecuritySandbox = (LinkedHashMap) endpointSecurity
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap =
-                            (LinkedHashMap<String, String>) endpointSecuritySandbox
-                                    .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    if (!(endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                        Map<String, String> customParametersHashMap = (Map<String, String>) endpointSecuritySandbox
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    }
                     endpointSecuritySandbox
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
@@ -358,10 +365,10 @@ public class PublisherCommonUtils {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-            // TODO: update the asyncapi.yaml
+             String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
             AsyncApiParser asyncApiParser = new AsyncApiParser();
-            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(originalAPI);
-            apiProvider.saveAsyncApiDefinition(originalAPI, apiDefinition);
+            String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
+            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 
@@ -1238,8 +1245,8 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating an existing API Product
      */
     public static APIProduct updateApiProduct(APIProduct originalAPIProduct, APIProductDTO apiProductDtoToUpdate,
-                                              APIProvider apiProvider, String username) throws APIManagementException
-            , FaultGatewaysException {
+                                              APIProvider apiProvider, String username, String orgId)
+            throws APIManagementException, FaultGatewaysException {
 
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
@@ -1287,7 +1294,7 @@ public class PublisherCommonUtils {
         product.setUuid(originalAPIProduct.getUuid());
 
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
-        apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, product);
+        apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
 
         //preserve monetization status in the update flow
         apiProvider.configureMonetizationInAPIProductArtifact(product);
@@ -1298,20 +1305,19 @@ public class PublisherCommonUtils {
      * Add API Product with the generated swagger from the DTO.
      *
      * @param apiProductDTO API Product DTO
-     * @param provider      Provider name
      * @param username      Username
      * @return Created API Product object
      * @throws APIManagementException Error while creating the API Product
      * @throws FaultGatewaysException Error while adding the API Product to gateway
      */
-    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String provider,
-                                                                         String username)
+    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username)
             throws APIManagementException, FaultGatewaysException {
 
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         // if not add product
-        provider = apiProductDTO.getProvider();
+        String provider = apiProductDTO.getProvider();
         String context = apiProductDTO.getContext();
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
@@ -1371,14 +1377,14 @@ public class PublisherCommonUtils {
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
 
+        APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
-        apiProvider.addAPIProductSwagger(apiToProductResourceMapping, productToBeAdded);
-
-        APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
+        apiProvider.addAPIProductSwagger(createdProduct.getUuid(), apiToProductResourceMapping, createdProduct,
+                tenantDomain);
 
-        //apiProvider.saveToGateway(createdProduct);
+        createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
     }
 

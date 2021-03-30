@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThirdPartyEnvironmentListDTO;
@@ -54,24 +53,6 @@ public class EnvironmentMappingUtil {
         environmentDTO.setType(environment.getType());
         environmentDTO.setServerUrl(environment.getServerURL());
         environmentDTO.setShowInApiConsole(environment.isShowInConsole());
-        String[] gatewayEndpoints = environment.getApiGatewayEndpoint().split(",");
-        String[] webSocketGatewayEndpoints = environment.getWebsocketGatewayEndpoint().split(",");
-        EnvironmentEndpointsDTO environmentEndpointsDTO = new EnvironmentEndpointsDTO();
-        for (String gatewayEndpoint : gatewayEndpoints) {
-            if (isHttpURL(gatewayEndpoint)) {
-                environmentEndpointsDTO.setHttp(gatewayEndpoint);
-            } else if (isHttpsURL(gatewayEndpoint)) {
-                environmentEndpointsDTO.setHttps(gatewayEndpoint);
-            }
-        }
-        for (String websocketGatewayEndpoint : webSocketGatewayEndpoints) {
-            if (isWebSocketURL(websocketGatewayEndpoint)) {
-                environmentEndpointsDTO.setWs(websocketGatewayEndpoint);
-            } else if (isSecureWebsocketURL(websocketGatewayEndpoint)) {
-                environmentEndpointsDTO.setWss(websocketGatewayEndpoint);
-            }
-        }
-        environmentDTO.setEndpoints(environmentEndpointsDTO);
         environmentDTO.setVhosts(environment.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostToVHostDTO)
                 .collect(Collectors.toList()));
         return environmentDTO;

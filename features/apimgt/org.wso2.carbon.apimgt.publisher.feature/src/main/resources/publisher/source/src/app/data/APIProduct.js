@@ -702,6 +702,28 @@ class APIProduct extends Resource {
     }
 
     /**
+    * Change displayInDevportal.
+    *
+    * @param {string} apiProductId Id of the API.
+    * @param {string} deploymentId Id of the API.
+    * @param {Object} body Revision Object.
+    * */
+    displayInDevportalProduct(apiProductId, deploymentId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Product Revisions'].updateAPIProductDeployment(
+                    {
+                        apiProductId: apiProductId,
+                        deploymentId: deploymentId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
      * Update an api swagger via PUT HTTP method
      * @param {*} swagger
      */

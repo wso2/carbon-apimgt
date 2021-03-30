@@ -371,7 +371,7 @@ export default function DesignConfigurations() {
                                     <Typography variant='caption'>
                                         <FormattedMessage
                                             id='Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading'
-                                            defaultMessage='Configure basic API Product meta informations'
+                                            defaultMessage='Configure basic API Product meta information'
                                         />
                                     </Typography>
                                 )

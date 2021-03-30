@@ -138,6 +138,25 @@ function extractPathParameters(target, spec) {
 }
 
 /**
+ * Extract AsyncAPI path parameters from the channel name.
+ * @param {*} target
+ */
+function extractAsyncAPIPathParameters(target) {
+    const regEx = /[^{}]+(?=})/g;
+    const params = target.match(regEx) || [];
+    const parameters = { };
+    params.forEach((param) => {
+        parameters[param] = {
+            description: '',
+            schema: {
+                type: 'string',
+            },
+        };
+    });
+    return parameters;
+}
+
+/**
  *
  * Return the WSO2 specific scopes array (currently only use the first element of the array)
  * @param {*} operation
@@ -159,6 +178,22 @@ function getOperationScopes(operation, spec) {
         } else if (operation['x-scope']) {
             scopes = [operation['x-scope']];
         }
+    }
+    return scopes;
+}
+
+/**
+ * Return AsyncAPI operation scopes array.
+ * @param {*} operation
+ * @param {*} spec
+ */
+function getAsyncAPIOperationScopes(operation) {
+    const scopes = [];
+    if (operation['x-scopes']) {
+        // eslint-disable-next-line no-unused-vars
+        Object.entries(operation['x-scopes']).forEach(([k, v]) => {
+            scopes.push(v);
+        });
     }
     return scopes;
 }
@@ -227,7 +262,9 @@ export {
     getTaggedOperations,
     getAPIProductTaggedOperations,
     extractPathParameters,
+    extractAsyncAPIPathParameters,
     getOperationScopes,
+    getAsyncAPIOperationScopes,
     isSelectAll,
     getVersion,
     VERSIONS,

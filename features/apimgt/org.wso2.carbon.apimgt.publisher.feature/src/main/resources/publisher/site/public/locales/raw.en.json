@@ -93,7 +93,7 @@
     "defaultMessage": "Create an API"
   },
   "Apis.Create.Default.APICreateDefault.api.sub.heading": {
-    "defaultMessage": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+    "defaultMessage": "Create an API by providing a Name, a Version, a Context and Backend Endpoint (optional)"
   },
   "Apis.Create.Default.APICreateDefault.apiProduct.heading": {
     "defaultMessage": "Create an API Product"
@@ -126,7 +126,7 @@
     "defaultMessage": "Create a WebSocket API"
   },
   "Apis.Create.Default.APICreateDefault.webSocket.sub.heading": {
-    "defaultMessage": "Create a WebSocket API by providing a Name, a Context, and Business Plans (optional)."
+    "defaultMessage": "Create a WebSocket API by providing a Name, and a Context."
   },
   "Apis.Create.GraphQL.ApiCreateGraphQL.back": {
     "defaultMessage": "Back"
@@ -492,17 +492,26 @@
   "Apis.Details.AccessControl.roles.help": {
     "defaultMessage": "Enter valid role and press enter"
   },
-  "Apis.Details.ApiCOnsole.generate.test.key": {
-    "defaultMessage": "GET TEST KEY"
-  },
   "Apis.Details.ApiConsole.ApiConsole.title": {
     "defaultMessage": "Try Out"
   },
   "Apis.Details.ApiConsole.SelectAppPanel.environment": {
     "defaultMessage": "Please select an environment"
   },
+  "Apis.Details.ApiConsole.deployments.api.gateways": {
+    "defaultMessage": "API Gateways"
+  },
+  "Apis.Details.ApiConsole.deployments.isAPIRetired": {
+    "defaultMessage": "Can not Try Out retired APIs!"
+  },
+  "Apis.Details.ApiConsole.deployments.no": {
+    "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
+  },
   "Apis.Details.ApiConsole.environment": {
     "defaultMessage": "Environment"
+  },
+  "Apis.Details.ApiConsole.generate.test.key": {
+    "defaultMessage": "Generate Key"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": {
     "defaultMessage": "Business Information of the API"
@@ -598,7 +607,7 @@
     "defaultMessage": "The header name that is used to send the authorization information. \"Authorization\" is the default header."
   },
   "Apis.Details.Configuration.Configuration.Design.APIProduct.sub.heading": {
-    "defaultMessage": "Configure basic API Product meta informations"
+    "defaultMessage": "Configure basic API Product meta information"
   },
   "Apis.Details.Configuration.Configuration.Design.sub.heading": {
     "defaultMessage": "Configure basic API meta information"
@@ -1725,9 +1734,6 @@
   "Apis.Details.Environments.Environments.Deployments": {
     "defaultMessage": "Revisions"
   },
-  "Apis.Details.Environments.Environments.Kubernetes": {
-    "defaultMessage": "Kubernetes"
-  },
   "Apis.Details.Environments.Environments.api.gateways.heading": {
     "defaultMessage": "API Gateways"
   },
@@ -1773,17 +1779,8 @@
   "Apis.Details.Environments.Environments.gateway.deployed.revision": {
     "defaultMessage": "Deployed Revision"
   },
-  "Apis.Details.Environments.Environments.gateway.labels.heading": {
-    "defaultMessage": "Gateway Labels"
-  },
-  "Apis.Details.Environments.Environments.new.revision.name.heading1": {
-    "defaultMessage": "Revision Name:"
-  },
-  "Apis.Details.Environments.Environments.new.revision.name.heading2": {
-    "defaultMessage": "Revision Name:"
-  },
   "Apis.Details.Environments.Environments.revision.create.heading": {
-    "defaultMessage": "Create Revision"
+    "defaultMessage": "Create New Revision (From Current API)"
   },
   "Apis.Details.Environments.Environments.revision.delete": {
     "defaultMessage": "Delete"
@@ -1819,7 +1816,7 @@
     "defaultMessage": "Cancel"
   },
   "Apis.Details.Environments.Environments.revision.restore.confirm.message": {
-    "defaultMessage": "Are you sure you want to restore {revision} ?"
+    "defaultMessage": "Are you sure you want to restore {revision} (To Current API)?"
   },
   "Apis.Details.Environments.Environments.revision.restore.confirm.ok": {
     "defaultMessage": "Yes"
@@ -1846,39 +1843,6 @@
     "defaultMessage": "Select Access URL"
   },
   "Apis.Details.Environments.Environments.undeploy.btn": {
-    "defaultMessage": "Undeploy"
-  },
-  "Apis.Details.Environments.MicroGateway.GatewayLabels": {
-    "defaultMessage": "Gateway Labels"
-  },
-  "Apis.Details.Environments.MicroGateway.access.url": {
-    "defaultMessage": "Access URL"
-  },
-  "Apis.Details.Environments.MicroGateway.deploy.button": {
-    "defaultMessage": "Deploy"
-  },
-  "Apis.Details.Environments.MicroGateway.deployed.revision": {
-    "defaultMessage": "Deployed Revision"
-  },
-  "Apis.Details.Environments.MicroGateway.description": {
-    "defaultMessage": "Description"
-  },
-  "Apis.Details.Environments.MicroGateway.devportal.display": {
-    "defaultMessage": "Display in devportal"
-  },
-  "Apis.Details.Environments.MicroGateway.label": {
-    "defaultMessage": "Label"
-  },
-  "Apis.Details.Environments.MicroGateway.labels.emptym1": {
-    "defaultMessage": "Gateway labels are not available."
-  },
-  "Apis.Details.Environments.MicroGateway.labels.emptym2": {
-    "defaultMessage": "You can request the administrator to add labels."
-  },
-  "Apis.Details.Environments.MicroGateway.select.table": {
-    "defaultMessage": "Select Revision"
-  },
-  "Apis.Details.Environments.MicroGateway.undeploy.btn": {
     "defaultMessage": "Undeploy"
   },
   "Apis.Details.Environments.deploy.vhost": {
@@ -2301,20 +2265,23 @@
   "Apis.Details.Operations.operation.operationName": {
     "defaultMessage": "Operation"
   },
-  "Apis.Details.Overview.CustomizedStepper.Deployments": {
-    "defaultMessage": "Deployments"
+  "Apis.Details.Overview.CustomizedStepper.Deploy": {
+    "defaultMessage": "Deploy"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Develop": {
+    "defaultMessage": "Develop"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Endpoint": {
+    "defaultMessage": "Endpoint"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Test": {
+    "defaultMessage": "Test"
+  },
+  "Apis.Details.Overview.CustomizedStepper.Tier": {
+    "defaultMessage": "Business Plan"
   },
   "Apis.Details.Overview.CustomizedStepper.blocked": {
     "defaultMessage": "Blocked"
-  },
-  "Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans": {
-    "defaultMessage": "Business plans"
-  },
-  "Apis.Details.Overview.CustomizedStepper.business.plan.endpoint": {
-    "defaultMessage": "Endpoint"
-  },
-  "Apis.Details.Overview.CustomizedStepper.create": {
-    "defaultMessage": "Created"
   },
   "Apis.Details.Overview.CustomizedStepper.deprecated": {
     "defaultMessage": "Deprecated"
@@ -2325,11 +2292,14 @@
   "Apis.Details.Overview.CustomizedStepper.prototyped": {
     "defaultMessage": "Prototyped"
   },
-  "Apis.Details.Overview.CustomizedStepper.published": {
-    "defaultMessage": "Published"
+  "Apis.Details.Overview.CustomizedStepper.publish": {
+    "defaultMessage": "Published (Current API)"
   },
   "Apis.Details.Overview.CustomizedStepper.retired": {
     "defaultMessage": "Retired"
+  },
+  "Apis.Details.Overview.CustomizedStepper.view.devportal": {
+    "defaultMessage": "View in devportal"
   },
   "Apis.Details.Overview.Overview.topic.createtopics": {
     "defaultMessage": "Create Topics"
@@ -2940,6 +2910,9 @@
   "Apis.Details.Subscriptions.SubscriptionsTable.subscriptions.error": {
     "defaultMessage": "Error while retrieving the subscriptions"
   },
+  "Apis.Details.TryOutConsole.token.label": {
+    "defaultMessage": "Internal API Key"
+  },
   "Apis.Details.components.APIDetailsTopMenu.created.by": {
     "defaultMessage": "Created by:"
   },
@@ -2979,11 +2952,8 @@
   "Apis.Details.components.DeleteApiButton.title": {
     "defaultMessage": "Delete {type}"
   },
-  "Apis.Details.index.Tryout": {
-    "defaultMessage": "Try out"
-  },
-  "Apis.Details.index.api.Config": {
-    "defaultMessage": "API configurations"
+  "Apis.Details.index.Tryout.menu.name": {
+    "defaultMessage": "Try Out"
   },
   "Apis.Details.index.api.definition2": {
     "defaultMessage": "API definition"
@@ -3032,9 +3002,6 @@
   },
   "Apis.Details.index.overview": {
     "defaultMessage": "overview"
-  },
-  "Apis.Details.index.portal.configuration": {
-    "defaultMessage": "Portal Configurations"
   },
   "Apis.Details.index.properties": {
     "defaultMessage": "properties"
@@ -3099,9 +3066,6 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": {
     "defaultMessage": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
   },
-  "Apis.Listing.SampleAPI.SampleAPI.created": {
-    "defaultMessage": "Sample PizzaShackAPI API created successfully"
-  },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": {
     "defaultMessage": "GraphQL"
   },
@@ -3110,9 +3074,6 @@
   },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.import.sdl.title": {
     "defaultMessage": "Import GraphQL SDL"
-  },
-  "Apis.Listing.SampleAPI.SampleAPI.published": {
-    "defaultMessage": "Sample PizzaShackAPI API published successfully"
   },
   "Apis.Listing.SampleAPI.SampleAPI.rest.api": {
     "defaultMessage": "REST API"
@@ -3177,6 +3138,42 @@
   "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": {
     "defaultMessage": "Create New API Product"
   },
+  "Apis.Listing.SampleAPI.continue.on.close": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Listing.SampleAPI.continue.on.error": {
+    "defaultMessage": "Continue"
+  },
+  "Apis.Listing.SampleAPI.popup.create.complete": {
+    "defaultMessage": "API created successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.create.inprogress": {
+    "defaultMessage": "Creating sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.deploy.complete": {
+    "defaultMessage": "API deployed successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.deploy.inprogress": {
+    "defaultMessage": "Deploying sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.publish.complete": {
+    "defaultMessage": "API published successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.publish.inprogress": {
+    "defaultMessage": "Publishing sample API to developer portal ..."
+  },
+  "Apis.Listing.SampleAPI.popup.revision.complete": {
+    "defaultMessage": "API revision created successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.revision.inprogress": {
+    "defaultMessage": "Creating a revision of sample API ..."
+  },
+  "Apis.Listing.SampleAPI.popup.update.complete": {
+    "defaultMessage": "API updated successfully!"
+  },
+  "Apis.Listing.SampleAPI.popup.update.inprogress": {
+    "defaultMessage": "Updating sample API ..."
+  },
   "Apis.Listing.SampleAPIProduct.description": {
     "defaultMessage": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
   },
@@ -3188,6 +3185,9 @@
   },
   "Apis.Listing.TableView.TableView.error.loading": {
     "defaultMessage": "Error While Loading APIs"
+  },
+  "Apis.Listing.TaskState.generic.error.prefix": {
+    "defaultMessage": "Error while"
   },
   "Apis.Listing.components.ImageGenerator.DocThumb.apiName": {
     "defaultMessage": "API Name"
@@ -3729,9 +3729,6 @@
   "ServiceCatalog.Listing.Delete.ok.yes": {
     "defaultMessage": "Yes"
   },
-  "ServiceCatalog.Listing.Listing.created.time": {
-    "defaultMessage": "Created Time"
-  },
   "ServiceCatalog.Listing.Listing.error.delete": {
     "defaultMessage": "Error while deleting service"
   },
@@ -3741,44 +3738,8 @@
   "ServiceCatalog.Listing.Listing.heading": {
     "defaultMessage": "Service Catalog"
   },
-  "ServiceCatalog.Listing.Listing.help.tooltip": {
-    "defaultMessage": "The Service Catalog enables API-first Integration"
-  },
-  "ServiceCatalog.Listing.Listing.name": {
-    "defaultMessage": "Service"
-  },
-  "ServiceCatalog.Listing.Listing.schema.type": {
-    "defaultMessage": "Schema Type"
-  },
   "ServiceCatalog.Listing.Listing.service.deleted.successfully": {
     "defaultMessage": "Service deleted successfully!"
-  },
-  "ServiceCatalog.Listing.Listing.service.url": {
-    "defaultMessage": "Service URL"
-  },
-  "ServiceCatalog.Listing.Listing.usage": {
-    "defaultMessage": "Number of Usages"
-  },
-  "ServiceCatalog.Listing.Listing.version": {
-    "defaultMessage": "Version"
-  },
-  "ServiceCatalog.Listing.Onboarding.Heading1.description": {
-    "defaultMessage": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
-  },
-  "ServiceCatalog.Listing.Onboarding.Heading1.description2": {
-    "defaultMessage": "Create and Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
-  },
-  "ServiceCatalog.Listing.Onboarding.Heading1.subHeading": {
-    "defaultMessage": "Integration Service"
-  },
-  "ServiceCatalog.Listing.Onboarding.Heading2.subHeading": {
-    "defaultMessage": "Integration Service"
-  },
-  "ServiceCatalog.Listing.Onboarding.add.sample": {
-    "defaultMessage": "Add a sample"
-  },
-  "ServiceCatalog.Listing.Onboarding.add.sample.service": {
-    "defaultMessage": "Add Sample Service"
   },
   "ServiceCatalog.Listing.Onboarding.add.sample.success": {
     "defaultMessage": "Sample Service added successfully!"
@@ -3786,11 +3747,29 @@
   "ServiceCatalog.Listing.Onboarding.error.creating.sample.service": {
     "defaultMessage": "Error while creating Sample Service"
   },
-  "ServiceCatalog.Listing.Onboarding.get.started": {
+  "ServiceCatalog.Listing.Onboarding.learn.heading": {
+    "defaultMessage": "Learn to write your first"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.heading.sub": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.heading.text": {
+    "defaultMessage": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.link": {
     "defaultMessage": "Get Started"
   },
-  "ServiceCatalog.Listing.Onboarding.write.first.intg": {
-    "defaultMessage": "Write your first"
+  "ServiceCatalog.Listing.Onboarding.sample.add": {
+    "defaultMessage": "Add Sample Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading": {
+    "defaultMessage": "Add a sample"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading.sub": {
+    "defaultMessage": "Integration Service"
+  },
+  "ServiceCatalog.Listing.Onboarding.sample.heading.text": {
+    "defaultMessage": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
   },
   "ServiceCatalog.Listing.Overview.back.btn": {
     "defaultMessage": "Go Back"
@@ -3882,11 +3861,32 @@
   "ServiceCatalog.Listing.Usages.usage": {
     "defaultMessage": "Usages of {serviceName}"
   },
-  "ServiceCatalog.Listing.onboarding.create.new": {
-    "defaultMessage": "Service Catalog"
+  "ServiceCatalog.Listing.components.ServiceCard.create.api": {
+    "defaultMessage": "Create API"
   },
-  "ServiceCatalog.Listing.onboarding.description": {
-    "defaultMessage": "Enabling API-first Integration"
+  "ServiceCatalog.Listing.components.ServiceCard.type": {
+    "defaultMessage": "Type"
+  },
+  "ServiceCatalog.Listing.components.ServiceCard.version": {
+    "defaultMessage": "Version"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": {
+    "defaultMessage": "Created Time"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.name": {
+    "defaultMessage": "Service"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.schema.type": {
+    "defaultMessage": "Schema Type"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.service.url": {
+    "defaultMessage": "Service URL"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.usage": {
+    "defaultMessage": "Number of Usages"
+  },
+  "ServiceCatalog.ServicesTableView.ServicesTableView.version": {
+    "defaultMessage": "Version"
   },
   "Settings.Alerts.Alerts.configure.alert": {
     "defaultMessage": "Configurations"
@@ -3900,17 +3900,8 @@
   "UnexpectedError.title": {
     "defaultMessage": "Internal Server Error"
   },
-  "api.console.gateway.heading": {
-    "defaultMessage": "Gateway"
-  },
   "api.console.security.heading": {
     "defaultMessage": "Security"
-  },
-  "api.console.security.type.heading": {
-    "defaultMessage": "Internal key"
-  },
-  "api.gateways": {
-    "defaultMessage": "API Gateways"
   },
   "app.components.Shared.Banner.back": {
     "defaultMessage": "Back"
@@ -3956,9 +3947,6 @@
   },
   "error.list.500.description": {
     "defaultMessage": "The server encountered an internal error or misconfiguration and was unable to complete your request."
-  },
-  "internal.token": {
-    "defaultMessage": "Internal Token"
   },
   "save": {
     "defaultMessage": "Save"

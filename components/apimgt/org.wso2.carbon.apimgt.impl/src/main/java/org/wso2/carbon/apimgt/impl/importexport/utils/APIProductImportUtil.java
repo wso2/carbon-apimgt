@@ -213,11 +213,11 @@ public class APIProductImportUtil {
 
             if (Boolean.FALSE.equals(overwriteAPIProduct)) {
                 // Add API Product in PUBLISHED state
-                Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.addAPIProductWithoutPublishingToGateway(importedApiProduct);
-                apiProvider.addAPIProductSwagger(apiToProductResourceMapping, importedApiProduct);
-                APIProductIdentifier createdAPIProductIdentifier = importedApiProduct.getId();
-                APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
-                //apiProvider.saveToGateway(createdProduct);
+                Map<API, List<APIProductResource>> apiToProductResourceMapping =
+                        apiProvider.addAPIProductWithoutPublishingToGateway(importedApiProduct);
+                APIProduct createdAPIProduct = apiProvider.getAPIProduct(importedApiProduct.getId());
+                apiProvider.addAPIProductSwagger(createdAPIProduct.getUuid(), apiToProductResourceMapping,
+                        importedApiProduct, currentTenantDomain);
             }
 
             String swaggerContent = APIAndAPIProductCommonUtil.loadSwaggerFile(pathToArchive);
@@ -230,7 +230,9 @@ public class APIProductImportUtil {
 
             // This is required to make scopes get effected
             Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(importedApiProduct);
-            apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, importedApiProduct);
+            APIProduct updatedAPIProduct = apiProvider.getAPIProduct(importedApiProduct.getId());
+            apiProvider.updateAPIProductSwagger(updatedAPIProduct.getUuid(), apiToProductResourceMapping,
+                    importedApiProduct, currentTenantDomain);
 
             // Since Image, documents and client certificates are optional, exceptions are logged and ignored in implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApiProduct = new ApiTypeWrapper(importedApiProduct);
@@ -239,10 +241,10 @@ public class APIProductImportUtil {
             APIAndAPIProductCommonUtil.addAPIOrAPIProductDocuments(pathToArchive, apiTypeWrapperWithUpdatedApiProduct,
                     apiProvider, currentTenantDomain);
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Importing client certificates.");
-                }
-                APIAndAPIProductCommonUtil.addClientCertificates(pathToArchive, apiProvider);
+            if (log.isDebugEnabled()) {
+                log.debug("Mutual SSL enabled. Importing client certificates.");
+            }
+            APIAndAPIProductCommonUtil.addClientCertificates(pathToArchive, apiProvider);
         } catch (IOException e) {
             // Error is logged and APIImportExportException is thrown because adding API Product and swagger are mandatory steps
             String errorMessage = "Error while reading API Product meta information from path: " + pathToArchive;

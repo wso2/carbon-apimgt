@@ -51,9 +51,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -67,7 +71,10 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.apache.solr.common.SolrDocument;
@@ -7091,6 +7098,12 @@ public final class APIUtil {
         String defaultMaxPerRoute = configuration
                 .getFirstProperty(APIConstants.HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE);
 
+        String proxyEnabled = configuration.getFirstProperty(APIConstants.PROXY_ENABLE);
+        String proxyHost = configuration.getFirstProperty(APIConstants.PROXY_HOST);
+        String proxyPort = configuration.getFirstProperty(APIConstants.PROXY_PORT);
+        String proxyUsername = configuration.getFirstProperty(APIConstants.PROXY_USERNAME);
+        String proxyPassword = configuration.getFirstProperty(APIConstants.PROXY_PASSWORD);
+
         PoolingHttpClientConnectionManager pool = null;
         try {
             pool = getPoolingHttpClientConnectionManager(protocol);
@@ -7101,7 +7114,21 @@ public final class APIUtil {
         pool.setDefaultMaxPerRoute(Integer.parseInt(defaultMaxPerRoute));
 
         RequestConfig params = RequestConfig.custom().build();
-        return HttpClients.custom().setConnectionManager(pool).setDefaultRequestConfig(params).build();
+        HttpClientBuilder clientBuilder = HttpClients.custom().setConnectionManager(pool)
+                .setDefaultRequestConfig(params);
+
+        if (Boolean.parseBoolean(proxyEnabled)) {
+            HttpHost host = new HttpHost(proxyHost, Integer.parseInt(proxyPort), protocol);
+            DefaultProxyRoutePlanner routePlanner = new DefaultProxyRoutePlanner(host);
+            clientBuilder = clientBuilder.setRoutePlanner(routePlanner);
+            if (!StringUtils.isBlank(proxyUsername) && !StringUtils.isBlank(proxyPassword)) {
+                CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+                        new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+                clientBuilder = clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            }
+        }
+        return clientBuilder.build();
     }
 
 
@@ -9794,7 +9821,9 @@ public final class APIUtil {
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
                     productVersion);
+            apiProductIdentifier.setUUID(artifact.getId());
             apiProduct = new APIProduct(apiProductIdentifier);
+            apiProduct.setUuid(artifact.getId());
             apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
@@ -11626,6 +11655,15 @@ public final class APIUtil {
             return Boolean.parseBoolean(crossTenantSubscriptionProperty);
         }
         return false;
+    }
+
+    public static String retrieveDefaultReservedUsername() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String defaultReservedUsername =
+                apiManagerConfiguration.getFirstProperty(APIConstants.API_DEVPORTAL_DEFAULT_RESERVED_USERNAME);
+        return defaultReservedUsername;
     }
 
 

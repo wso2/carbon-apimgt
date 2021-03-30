@@ -126,7 +126,7 @@ public interface ApisApiService {
       public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
       public Response importAsyncAPISpecification(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response importGraphQLSchema(String ifMatch, String type, InputStream fileInputStream, Attachment fileDetail, String additionalProperties, MessageContext messageContext) throws APIManagementException;
-      public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
+      public Response importOpenAPIDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String inlineAPIDefinition, MessageContext messageContext) throws APIManagementException;
       public Response importServiceFromCatalog(String serviceKey, APIDTO APIDTO, MessageContext messageContext) throws APIManagementException;
       public Response importWSDLDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String implementationType, MessageContext messageContext) throws APIManagementException;
       public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
@@ -135,6 +135,7 @@ public interface ApisApiService {
       public Response undeployAPIRevision(String apiId, String revisionId, String revisionNumber, Boolean allEnvironments, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPI(String apiId, APIDTO APIDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIClientCertificateByAlias(String alias, String apiId, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPIDeployment(String apiId, String deploymentId, APIRevisionDeploymentDTO apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIDocument(String apiId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIGraphQLSchema(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIMediationPolicyContentByPolicyId(String apiId, String mediationPolicyId, String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
@@ -149,6 +150,6 @@ public interface ApisApiService {
       public Response validateDocument(String apiId, String name, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response validateEndpoint(String endpointUrl, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response validateGraphQLSchema(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
-      public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
+      public Response validateOpenAPIDefinition(Boolean returnContent, String url, InputStream fileInputStream, Attachment fileDetail, String inlineAPIDefinition, MessageContext messageContext) throws APIManagementException;
       public Response validateWSDLDefinition(String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
 }

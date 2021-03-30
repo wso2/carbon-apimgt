@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
@@ -163,9 +164,6 @@ import org.wso2.carbon.user.mgt.common.UserAdminException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Cache;
-import javax.cache.Caching;
-import javax.wsdl.Definition;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -195,6 +193,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.cache.Cache;
+import javax.cache.Caching;
+import javax.wsdl.Definition;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -2615,7 +2616,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public Map<String, Object> mapExistingOAuthClient(String jsonString, String userName, String clientId,
                                                       String applicationName, String keyType, String tokenType,
-                                                      String keyManagerName,String tenantDomain) throws APIManagementException {
+                                                      String keyManagerName, String tenantDomain) throws APIManagementException {
 
         String callBackURL = null;
         if (StringUtils.isEmpty(tenantDomain)) {
@@ -2639,11 +2640,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyManagerConfiguration = apiMgtDAO.getKeyManagerConfigurationByName(tenantDomain, keyManagerName);
             keyManagerId = keyManagerConfiguration.getUuid();
         }
-            if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
-                throw new APIManagementException(
-                        "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
-                        ExceptionCodes.KEY_MANAGER_NOT_FOUND);
-            }
+        if (keyManagerConfiguration == null || !keyManagerConfiguration.isEnabled()) {
+            throw new APIManagementException(
+                    "Key Manager " + keyManagerName + " doesn't exist in Tenant " + tenantDomain,
+                    ExceptionCodes.KEY_MANAGER_NOT_FOUND);
+        }
         OAuthAppRequest oauthAppRequest = ApplicationUtils
                 .createOauthAppRequest(applicationName, clientId, callBackURL, "default", jsonString, tokenType,
                         tenantDomain, keyManagerName);
@@ -2663,18 +2664,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         log.debug("Client ID not mapped previously with another application.");
 
         //createApplication on oAuthorization server.
-        OAuthApplicationInfo oAuthApplication;
-        String oauthAppValidation = getAPIManagerConfiguration()
-                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_PROVISION_APP_VALIDATION);
-        if (StringUtils.isNotEmpty(oauthAppValidation)) {
-            if (Boolean.parseBoolean(oauthAppValidation)) {
-                oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
-            } else {
-                oAuthApplication = oauthAppRequest.getOAuthApplicationInfo();
-            }
-        } else {
-            oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
-        }
+        OAuthApplicationInfo oAuthApplication = isOauthAppValidation() ?
+                keyManager.mapOAuthApplication(oauthAppRequest) : oauthAppRequest.getOAuthApplicationInfo();
 
         //Do application mapping with consumerKey.
         String keyMappingId = UUID.randomUUID().toString();
@@ -2706,11 +2697,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             keyDetails.put("tokenDetails", tokenInfo.getJSONString());
         }
 
-        keyDetails.put("consumerKey", oAuthApplication.getClientId());
-        keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
-        keyDetails.put("appDetails", oAuthApplication.getJsonString());
+        keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, oAuthApplication.getClientId());
+        keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, oAuthApplication.getParameter(
+                "client_secret"));
+        keyDetails.put(APIConstants.FrontEndParameterNames.CLIENT_DETAILS, oAuthApplication.getJsonString());
         keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
-
+        keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.MAPPED.name());
         return keyDetails;
     }
 
@@ -3177,6 +3169,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
             int id = apiMgtDAO.getAPIID(identifier);
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             if (wfDTO != null) {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
@@ -3465,11 +3460,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             API api = null;
             APIProduct product = null;
             String context = null;
+            ApiTypeWrapper wrapper;
             if (apiIdentifier != null) {
-                api = getAPI(apiIdentifier);
+                wrapper = getAPIorAPIProductByUUID(apiIdentifier.getUUID(), providerTenantDomain);
+                api = wrapper.getApi();
                 context = api.getContext();
             } else if (apiProdIdentifier != null) {
-                product = getAPIProduct(apiProdIdentifier);
+                wrapper = getAPIorAPIProductByUUID(apiProdIdentifier.getUUID(), providerTenantDomain);
+                product = wrapper.getApiProduct();
                 context = product.getContext();
             }
             workflowDTO.setApiContext(context);
@@ -3637,6 +3635,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // get the workflow state once the executor is executed.
             WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
                     WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            int tenantId = APIUtil.getTenantId(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             // only send the notification if approved
             // wfDTO is null when simple wf executor is used because wf state is not stored in the db and is always approved.
             if (wfDTO != null) {
@@ -4446,15 +4447,16 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appRegistrationWorkflow.execute(appRegWFDto);
 
             Map<String, Object> keyDetails = new HashMap<String, Object>();
-            keyDetails.put("keyState", appRegWFDto.getStatus().toString());
+            keyDetails.put(APIConstants.FrontEndParameterNames.KEY_STATE, appRegWFDto.getStatus().toString());
             OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
             String keyMappingId = apiMgtDAO.getKeyMappingIdFromApplicationIdKeyTypeAndKeyManager(application.getId(),
-                    tokenType,keyManagerId);
+                    tokenType, keyManagerId);
             if (applicationInfo != null) {
-                keyDetails.put("consumerKey", applicationInfo.getClientId());
-                keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
-                keyDetails.put("appDetails", applicationInfo.getJsonString());
-                keyDetails.put("keyMappingId",keyMappingId);
+                keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_KEY, applicationInfo.getClientId());
+                keyDetails.put(APIConstants.FrontEndParameterNames.CONSUMER_SECRET, applicationInfo.getClientSecret());
+                keyDetails.put(ApplicationConstants.OAUTH_APP_DETAILS, applicationInfo.getJsonString());
+                keyDetails.put(APIConstants.FrontEndParameterNames.KEY_MAPPING_ID, keyMappingId);
+                keyDetails.put(APIConstants.FrontEndParameterNames.MODE, APIConstants.OAuthAppMode.CREATED.name());
             }
 
             // There can be instances where generating the Application Token is
@@ -5707,6 +5709,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         properties.put(APIConstants.NotificationEvent.TOKEN_TYPE, APIConstants.API_KEY_AUTH_TYPE);
         properties.put(APIConstants.NotificationEvent.TENANT_ID, tenantId);
         properties.put(APIConstants.NotificationEvent.TENANT_DOMAIN, tenantDomain);
+        ApiMgtDAO.getInstance().addRevokedJWTSignature(eventID,
+                apiKey, APIConstants.API_KEY_AUTH_TYPE,
+                expiryTime, tenantId);
         revocationRequestPublisher.publishRevocationEvents(apiKey, expiryTime, properties);
     }
 
