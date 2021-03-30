@@ -285,7 +285,7 @@ const useStyles = makeStyles((theme) => ({
 export default function Environments() {
     const classes = useStyles();
     const intl = useIntl();
-    const { api, updateAPI } = useContext(APIContext);
+    const { api } = useContext(APIContext);
     const history = useHistory();
     const { settings } = useAppContext();
     let revisionCount;
@@ -558,7 +558,12 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    restApi.getRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                    });
+                    restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
+                        setEnvRevision(result.body.list);
+                    });
                 });
         } else {
             restProductApi.restoreProductRevision(api.id, revisionId)
@@ -573,7 +578,13 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    restProductApi.getProductRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                    });
+                    restProductApi.getProductRevisionsWithEnv(api.isRevision
+                        ? api.revisionedApiId : api.id).then((result) => {
+                        setEnvRevision(result.body.list);
+                    });
                 });
         }
     }
@@ -608,7 +619,12 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    restApi.getRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                    });
+                    restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
+                        setEnvRevision(result.body.list);
+                    });
                 });
         } else {
             restProductApi.undeployProductRevision(api.id, revisionId, body)
@@ -623,7 +639,13 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    restProductApi.getProductRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                    });
+                    restProductApi.getProductRevisionsWithEnv(api.isRevision
+                        ? api.revisionedApiId : api.id).then((result) => {
+                        setEnvRevision(result.body.list);
+                    });
                 });
         }
     }
@@ -651,7 +673,12 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    restApi.getRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                    });
+                    restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
+                        setEnvRevision(result.body.list);
+                    });
                 });
         } else {
             restProductApi.deployProductRevision(api.id, revisionId, body)
@@ -666,7 +693,13 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    restProductApi.getProductRevisions(api.id).then((result) => {
+                        setRevisions(result.body.list);
+                    });
+                    restProductApi.getProductRevisionsWithEnv(api.isRevision
+                        ? api.revisionedApiId : api.id).then((result) => {
+                        setEnvRevision(result.body.list);
+                    });
                 });
         }
     }
@@ -713,7 +746,6 @@ export default function Environments() {
                     console.error(error);
                 })
                 .finally(() => {
-                    updateAPI();
                     history.replace();
                 });
             setOpenDeployPopup(false);
@@ -750,7 +782,7 @@ export default function Environments() {
                     console.error(error);
                 })
                 .finally(() => {
-                    updateAPI();
+                    history.replace();
                 });
             setOpenDeployPopup(false);
         }
