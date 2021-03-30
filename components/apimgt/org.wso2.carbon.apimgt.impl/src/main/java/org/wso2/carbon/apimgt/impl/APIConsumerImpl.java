@@ -1828,7 +1828,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, "",
-                    0, 25, userCtx);
+                    0, 35, userCtx);
             SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
             if (searchAPIs != null) {
                 List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
@@ -1862,7 +1862,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         List<APICategory> categoriesList = new ArrayList<>();
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, "",
-                    0, 25, userCtx);
+                    0, 35, userCtx);
             SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
             if (searchAPIs != null) {
                 List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
