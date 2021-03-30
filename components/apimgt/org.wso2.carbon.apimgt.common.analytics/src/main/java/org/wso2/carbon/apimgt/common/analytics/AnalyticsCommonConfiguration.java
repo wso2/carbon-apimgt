@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.common.gateway.analytics;
+package org.wso2.carbon.apimgt.common.analytics;
 
 import java.util.Map;
 

@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.wso2.carbon.apimgt.common.gateway.analytics.AnalyticsCommonConfiguration;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;

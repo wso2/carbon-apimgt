@@ -15,7 +15,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto;
+package org.wso2.carbon.apimgt.common.analytics.publishers.dto;
 
 /**
  * Extended API Object with organization ID
