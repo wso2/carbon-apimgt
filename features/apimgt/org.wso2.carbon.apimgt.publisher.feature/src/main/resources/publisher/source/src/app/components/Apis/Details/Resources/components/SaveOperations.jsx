@@ -36,7 +36,9 @@ import DialogTitle from '@material-ui/core/DialogTitle';
  * @returns
  */
 export default function SaveOperations(props) {
-    const { updateOpenAPI, operationsDispatcher, api } = props;
+    const {
+        updateOpenAPI, updateAsyncAPI, operationsDispatcher, api,
+    } = props;
     const [isSaving, setIsSaving] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     /**
@@ -45,7 +47,11 @@ export default function SaveOperations(props) {
      */
     function saveChanges() {
         setIsSaving(true);
-        updateOpenAPI('save').finally(() => setIsSaving(false));
+        if (updateAsyncAPI) {
+            updateAsyncAPI('save').finally(() => setIsSaving(false));
+        } else {
+            updateOpenAPI('save').finally(() => setIsSaving(false));
+        }
     }
     return (
         <>
@@ -94,6 +100,12 @@ export default function SaveOperations(props) {
     );
 }
 SaveOperations.propTypes = {
-    updateOpenAPI: PropTypes.func.isRequired,
+    updateOpenAPI: PropTypes.func,
+    updateAsyncAPI: PropTypes.func,
     operationsDispatcher: PropTypes.func.isRequired,
+};
+
+SaveOperations.defaultProps = {
+    updateOpenAPI: undefined,
+    updateAsyncAPI: undefined,
 };

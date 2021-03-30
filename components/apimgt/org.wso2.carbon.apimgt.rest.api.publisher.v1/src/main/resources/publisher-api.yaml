@@ -4344,6 +4344,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_import_export
+            - apim:admin
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8212,9 +8213,6 @@ components:
         isAWSAPI:
           type: boolean
           example: false
-        advertiseOnly:
-          type: boolean
-          example: false
         isRevision:
           type: boolean
           example: false
@@ -8570,6 +8568,8 @@ components:
             outdated:
               type: boolean
               example: false
+        advertiseInfo:
+          $ref: '#/components/schemas/AdvertiseInfo'
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -10792,6 +10792,19 @@ components:
             $ref: '#/components/schemas/Tenant'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    AdvertiseInfo:
+      title: API Advertise info object with advertise details
+      type: object
+      properties:
+        advertised:
+          type: boolean
+          example: true
+        originalDevPortalUrl:
+          type: string
+          example: https://localhost:9443/devportal
+        apiOwner:
+          type: string
+          example: admin
     AlertTypesList:
       title: Alert Types List
       type: object
@@ -11548,7 +11561,6 @@ components:
             apim:api_publish: Publish API
             apim:subscription_view: View Subscription
             apim:subscription_block: Block Subscription
-            apim:external_services_discover: Discover External Services
             apim:threat_protection_policy_create: Create threat protection policies
             apim:threat_protection_policy_manage: Update and delete threat protection policies
             apim:document_create: Create API documents
@@ -11569,3 +11581,4 @@ components:
             apim:api_import_export: Import and export APIs related operations
             apim:api_product_import_export: Import and export API Products related operations
             apim:api_generate_key: Generate Internal Key
+            apim:admin: Manage all admin operations

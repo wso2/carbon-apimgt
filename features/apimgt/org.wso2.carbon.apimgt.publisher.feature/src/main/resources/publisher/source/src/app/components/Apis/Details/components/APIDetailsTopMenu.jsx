@@ -26,7 +26,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import { withStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
@@ -116,6 +116,9 @@ const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct, imageUpdate, intl,
     } = props;
+    const history = useHistory();
+    const prevLocation = history.location.pathname;
+    const lastIndex = prevLocation.split('/')[3];
     const [revision, setRevision] = useState(null);
     const [revisionId, setRevisionId] = useState(api.id);
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
@@ -250,7 +253,7 @@ const APIDetailsTopMenu = (props) => {
                 >
                     {!isAPIProduct ? (
                         <MenuItem value={api.isRevision ? api.revisionedApiId : api.id}>
-                            <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/overview'}>
+                            <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/' + lastIndex}>
                                 <FormattedMessage
                                     id='Apis.Details.components.APIDetailsTopMenu.current.api'
                                     defaultMessage='Current API'
@@ -260,7 +263,7 @@ const APIDetailsTopMenu = (props) => {
                     ) : (
                         <MenuItem value={api.isRevision ? api.revisionedApiProductId : api.id}>
                             <Link to={'/api-products/' + (api.isRevision
-                                ? api.revisionedApiProductId : api.id) + '/overview'}
+                                ? api.revisionedApiProductId : api.id) + '/' + lastIndex}
                             >
                                 <FormattedMessage
                                     id='Apis.Details.components.APIDetailsTopMenu.current.api'
@@ -272,11 +275,11 @@ const APIDetailsTopMenu = (props) => {
                     {revision && revision.map((item) => (
                         <MenuItem value={item.id}>
                             {!isAPIProduct ? (
-                                <Link to={'/apis/' + item.id + '/overview'}>
+                                <Link to={'/apis/' + item.id + '/' + lastIndex}>
                                     {item.displayName}
                                 </Link>
                             ) : (
-                                <Link to={'/api-products/' + item.id + '/overview'}>
+                                <Link to={'/api-products/' + item.id + '/' + lastIndex}>
                                     {item.displayName}
                                 </Link>
                             )}
@@ -316,7 +319,7 @@ const APIDetailsTopMenu = (props) => {
                 {(isDownloadable) && (
                     <a
                         onClick={exportAPI}
-                        onKeyDown='null'
+                        onKeyDown={null}
                         className={classes.downloadApiFlex}
                     >
                         <div>

@@ -95,12 +95,7 @@ function Listing() {
     if (notFound) {
         return <ResourceNotFound />;
     }
-    if (serviceList.length === 0) {
-        return (
-            <Onboarding />
-        );
-    }
-
+    const haveServices = serviceList.length !== 0;
     return (
         <Box flexGrow={1}>
             <Grid
@@ -110,18 +105,22 @@ function Listing() {
                 alignItems='stretch'
             >
                 <Grid xs={12}>
-                    <ServiceCatalogTopMenu isGridView={isGridView} setIsGridView={setIsGridView} />
+                    <ServiceCatalogTopMenu
+                        showServiceToggle={haveServices}
+                        isGridView={isGridView}
+                        setIsGridView={setIsGridView}
+                    />
                 </Grid>
                 <Box px={8} pt={4}>
                     <Grid xs={12}>
-                        {isGridView ? <ServicesCardView serviceList={serviceList} onDelete={onDelete} />
-                            : <ServicesTableView serviceList={serviceList} onDelete={onDelete} /> }
+                        {!haveServices && <Onboarding />}
+                        {haveServices && (isGridView
+                            ? <ServicesCardView serviceList={serviceList} onDelete={onDelete} />
+                            : <ServicesTableView serviceList={serviceList} onDelete={onDelete} />)}
                     </Grid>
                 </Box>
-
             </Grid>
         </Box>
-
     );
 }
 

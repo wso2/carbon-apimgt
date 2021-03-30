@@ -18,6 +18,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.apicurio.datamodels.Library;
+import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
+import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,6 +86,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentLis
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -200,6 +204,12 @@ public class APIMappingUtil {
         }
         if (dto.isEnableStore() != null) {
             model.setEnableStore(dto.isEnableStore());
+        }
+        if (dto.getAdvertiseInfo() != null) {
+            AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
+            model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
+            model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
+            model.setApiOwner(advertiseInfoDTO.getApiOwner());
         }
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
@@ -823,7 +833,7 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO    fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
@@ -862,6 +872,13 @@ public class APIMappingUtil {
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableStore(model.isEnableStore());
         dto.setTestKey(model.getTestKey());
+
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
+        advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
+        advertiseInfoDTO.setApiOwner(model.getApiOwner());
+        dto.setAdvertiseInfo(advertiseInfoDTO);
+
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {
             dto.setResponseCachingEnabled(Boolean.TRUE);
         } else {
@@ -1051,7 +1068,15 @@ public class APIMappingUtil {
             // Get from asyncapi definition
             List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
-            // TODO: get scopes
+
+            String asyncAPIDefinition;
+            if (model.getAsyncApiDefinition() != null) {
+                asyncAPIDefinition = model.getAsyncApiDefinition();
+            } else {
+                asyncAPIDefinition = apiProvider.getAsyncAPIDefinition(model.getId().getUUID(), tenantDomain);
+            }
+            List<ScopeDTO> scopeDTOS = getScopesFromAsyncAPI(asyncAPIDefinition);
+            dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
         }
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList<>();
@@ -1185,6 +1210,44 @@ public class APIMappingUtil {
         dto.setKeyManagers(model.getKeyManagers());
 
         return dto;
+    }
+
+    private static List<ScopeDTO> getScopesFromAsyncAPI(String asyncAPIDefinition) {
+        Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(asyncAPIDefinition);
+        List<ScopeDTO> scopeDTOS = new ArrayList<>();
+
+        if (document.components == null
+                || document.components.securitySchemes == null
+                || document.components.securitySchemes.get("oauth2") == null) {
+            return scopeDTOS;
+        }
+        AaiSecurityScheme securityScheme = document.components.securitySchemes.get("oauth2");
+
+        if (securityScheme.flows == null
+                || securityScheme.flows.implicit == null
+                || securityScheme.flows.implicit.scopes == null) {
+            return scopeDTOS;
+        }
+        Map<String, String> scopes = securityScheme.flows.implicit.scopes;
+        Map<String, String> xScopeBindings =
+                (Map<String, String>) securityScheme.flows.implicit.getExtension("x-scopes-bindings").value;
+
+
+        for (Map.Entry<String, String> aScope : scopes.entrySet()) {
+            ScopeDTO scopeDTO = new ScopeDTO();
+            scopeDTO.setName(aScope.getKey());
+            scopeDTO.setDisplayName(aScope.getKey());
+            scopeDTO.setDescription(aScope.getValue());
+
+            String roles = xScopeBindings.get(aScope.getKey());
+            if (roles == null || roles.isEmpty()) {
+                scopeDTO.setBindings(Collections.emptyList());
+            } else {
+                scopeDTO.setBindings(Arrays.asList((roles).split(",")));
+            }
+            scopeDTOS.add(scopeDTO);
+        }
+        return scopeDTOS;
     }
 
     /**
@@ -1849,21 +1912,23 @@ public class APIMappingUtil {
      * @return a set of operations from a given swagger definition
      */
     private static List<APIOperationsDTO> getOperationsFromAPI(API api) {
-
         Set<URITemplate> uriTemplates = api.getUriTemplates();
-
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
             APIOperationsDTO operationsDTO = getOperationFromURITemplate(uriTemplate);
 
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
-                String uriMapping = api.getWsUriMapping().get(
-                        operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
-                operationsDTO.setUriMapping(uriMapping);
+                Map<String, String> wsUriMappings = api.getWsUriMapping();
+                if (wsUriMappings != null) {
+                    String wsUriMapping = wsUriMappings
+                            .get(operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
+                    if (wsUriMapping != null) {
+                        operationsDTO.setUriMapping(wsUriMapping);
+                    }
+                }
             }
             operationsDTOList.add(operationsDTO);
         }
-
         return operationsDTOList;
     }
 

@@ -5298,10 +5298,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void saveSwaggerDefinition(String apiId, String jsonText,String orgId) throws APIManagementException {
+    public void saveSwaggerDefinition(String apiId, String jsonText, String orgId) throws APIManagementException {
         try {
             apiPersistenceInstance.saveOASDefinition(new Organization(orgId), apiId, jsonText);
-
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while persisting OAS definition ", e);
         }
@@ -5376,26 +5375,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException {
+    public void addAPIProductSwagger(String productId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+                APIProduct apiProduct, String orgId) throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
         apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
-        saveSwagger20Definition(apiProduct.getId(), apiProductSwagger);
+        saveSwaggerDefinition(productId, apiProductSwagger, orgId);
         apiProduct.setDefinition(apiProductSwagger);
     }
 
     @Override
-    public void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException, FaultGatewaysException {
+    public void updateAPIProductSwagger(String productId, Map<API,
+            List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct, String orgId)
+            throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData updatedData = new SwaggerData(apiProduct);
         String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                 updatedProductSwagger);
-        saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
+        saveSwaggerDefinition(productId, updatedProductSwagger, orgId);
         apiProduct.setDefinition(updatedProductSwagger);
     }
 
@@ -7515,17 +7515,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
+            Registry sysRegistry = getRegistryService().getGovernanceSystemRegistry();
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            if (!registry.resourceExists(resourcePath)) {
+            if (!sysRegistry.resourceExists(resourcePath)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Resource does not exist in the path : " + resourcePath + " this can happen if this is in the "
                             + "middle of the new " + identifierType + " creation, hence not checking the access control");
                 }
                 return;
             }
-            Resource resource = registry.get(resourcePath);
+            Resource resource = sysRegistry.get(resourcePath);
             if (resource == null) {
                 return;
             }

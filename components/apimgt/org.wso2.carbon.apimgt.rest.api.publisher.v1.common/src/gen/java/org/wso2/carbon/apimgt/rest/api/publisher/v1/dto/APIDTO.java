@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
@@ -55,7 +56,6 @@ public class APIDTO   {
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
     private Boolean isAWSAPI = null;
-    private Boolean advertiseOnly = null;
     private Boolean isRevision = null;
     private String revisionedApiId = null;
     private Integer revisionId = null;
@@ -268,6 +268,7 @@ return null;
     private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
+    private AdvertiseInfoDTO advertiseInfo = null;
 
   /**
    * UUID of the api registry artifact 
@@ -537,7 +538,7 @@ return null;
     return this;
   }
 
-  
+
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("isAWSAPI")
   public Boolean isIsAWSAPI() {
@@ -545,23 +546,6 @@ return null;
   }
   public void setIsAWSAPI(Boolean isAWSAPI) {
     this.isAWSAPI = isAWSAPI;
-  }
-
-  /**
-   **/
-  public APIDTO advertiseOnly(Boolean advertiseOnly) {
-    this.advertiseOnly = advertiseOnly;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "false", value = "")
-  @JsonProperty("advertiseOnly")
-  public Boolean isAdvertiseOnly() {
-    return advertiseOnly;
-  }
-  public void setAdvertiseOnly(Boolean advertiseOnly) {
-    this.advertiseOnly = advertiseOnly;
   }
 
   /**
@@ -1256,6 +1240,24 @@ return null;
     this.serviceInfo = serviceInfo;
   }
 
+  /**
+   **/
+  public APIDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+    return this;
+  }
+
+
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("advertiseInfo")
+  public AdvertiseInfoDTO getAdvertiseInfo() {
+    return advertiseInfo;
+  }
+  public void setAdvertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1282,7 +1284,6 @@ return null;
         Objects.equals(hasThumbnail, API.hasThumbnail) &&
         Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(isAWSAPI, API.isAWSAPI) &&
-        Objects.equals(advertiseOnly, API.advertiseOnly) &&
         Objects.equals(isRevision, API.isRevision) &&
         Objects.equals(revisionedApiId, API.revisionedApiId) &&
         Objects.equals(revisionId, API.revisionId) &&
@@ -1321,12 +1322,13 @@ return null;
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
-        Objects.equals(serviceInfo, API.serviceInfo);
+        Objects.equals(serviceInfo, API.serviceInfo) &&
+        Objects.equals(advertiseInfo, API.advertiseInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isAWSAPI, advertiseOnly, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isAWSAPI, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
   }
 
   @Override
@@ -1350,7 +1352,6 @@ return null;
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isAWSAPI: ").append(toIndentedString(isAWSAPI)).append("\n");
-    sb.append("    advertiseOnly: ").append(toIndentedString(advertiseOnly)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
@@ -1390,6 +1391,7 @@ return null;
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
+    sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }
