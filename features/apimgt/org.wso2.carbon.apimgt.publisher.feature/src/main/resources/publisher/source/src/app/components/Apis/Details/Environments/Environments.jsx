@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
@@ -61,6 +61,7 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
+import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
 import DisplayDevportal from './DisplayDevportal';
 
 const useStyles = makeStyles((theme) => ({
@@ -288,6 +289,9 @@ export default function Environments() {
     const { api } = useContext(APIContext);
     const history = useHistory();
     const { settings } = useAppContext();
+    const {
+        allRevisions, getRevision, allEnvRevision, getDeployedEnv,
+    } = useRevisionContext();
     let revisionCount;
     if (Configurations.app.revisionCount) {
         revisionCount = Configurations.app.revisionCount;
@@ -296,8 +300,6 @@ export default function Environments() {
     }
     const restApi = new API();
     const restProductApi = new APIProduct();
-    const [allRevisions, setRevisions] = useState(null);
-    const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState([]);
     const defaultVhosts = settings.environment.map(
         (e) => (e.vhosts && e.vhosts.length > 0 ? { env: e.name, vhost: e.vhosts[0].host } : undefined),
@@ -326,24 +328,6 @@ export default function Environments() {
         const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
         allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
-
-    useEffect(() => {
-        if (api && api.apiType !== API.CONSTS.APIProduct) {
-            restApi.getRevisions(api.id).then((result) => {
-                setRevisions(result.body.list);
-            });
-            restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                setEnvRevision(result.body.list);
-            });
-        } else {
-            restProductApi.getProductRevisions(api.id).then((result) => {
-                setRevisions(result.body.list);
-            });
-            restProductApi.getProductRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                setEnvRevision(result.body.list);
-            });
-        }
-    }, []);
 
     const toggleOpenConfirmDelete = (revisionName, revisionId) => {
         setRevisionToDelete([revisionName, revisionId]);
@@ -438,9 +422,7 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    getRevision();
                 });
         } else {
             promiseDelete = restApi.deleteRevision(api.id, revisionId)
@@ -460,9 +442,7 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    getRevision();
                 });
         }
         return promiseDelete;
@@ -487,9 +467,7 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    getRevision();
                 });
         } else {
             api.createRevision(api.id, body)
@@ -504,9 +482,7 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    getRevision();
                 });
         }
     }
@@ -558,12 +534,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
-                    restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                        setEnvRevision(result.body.list);
-                    });
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.restoreProductRevision(api.id, revisionId)
@@ -578,13 +550,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
-                    restProductApi.getProductRevisionsWithEnv(api.isRevision
-                        ? api.revisionedApiId : api.id).then((result) => {
-                        setEnvRevision(result.body.list);
-                    });
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -619,12 +586,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
-                    restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                        setEnvRevision(result.body.list);
-                    });
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.undeployProductRevision(api.id, revisionId, body)
@@ -639,13 +602,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
-                    restProductApi.getProductRevisionsWithEnv(api.isRevision
-                        ? api.revisionedApiId : api.id).then((result) => {
-                        setEnvRevision(result.body.list);
-                    });
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -673,12 +631,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
-                    restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                        setEnvRevision(result.body.list);
-                    });
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.deployProductRevision(api.id, revisionId, body)
@@ -693,13 +647,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
-                    restProductApi.getProductRevisionsWithEnv(api.isRevision
-                        ? api.revisionedApiId : api.id).then((result) => {
-                        setEnvRevision(result.body.list);
-                    });
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -747,6 +696,8 @@ export default function Environments() {
                 })
                 .finally(() => {
                     history.replace();
+                    getRevision();
+                    getDeployedEnv();
                 });
             setOpenDeployPopup(false);
         } else {
@@ -783,6 +734,8 @@ export default function Environments() {
                 })
                 .finally(() => {
                     history.replace();
+                    getRevision();
+                    getDeployedEnv();
                 });
             setOpenDeployPopup(false);
         }
