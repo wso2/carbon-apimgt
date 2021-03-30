@@ -4438,26 +4438,17 @@ public final class APIUtil {
             sequences = inSequenceDir.listFiles();
 
             if (sequences != null) {
-                //Tracks whether new sequences are there to deploy
-                boolean availableNewSequences = false;
-                //Tracks whether json_fault.xml is in the registry
-                boolean jsonFaultSeqInRegistry = false;
-
                 for (File sequenceFile : sequences) {
                     String sequenceFileName = sequenceFile.getName();
                     String regResourcePath =
                             APIConstants.API_CUSTOM_SEQUENCE_LOCATION + '/' +
                                     customSequenceType + '/' + sequenceFileName;
                     if (registry.resourceExists(regResourcePath)) {
-                        if (APIConstants.API_CUSTOM_SEQ_JSON_FAULT.equals(sequenceFileName)) {
-                            jsonFaultSeqInRegistry = true;
-                        }
                         if (log.isDebugEnabled()) {
                             log.debug("The sequence file with the name " + sequenceFileName
                                     + " already exists in the registry path " + regResourcePath);
                         }
                     } else {
-                        availableNewSequences = true;
                         if (log.isDebugEnabled()) {
                             log.debug(
                                     "Adding sequence file with the name " + sequenceFileName + " to the registry path "
@@ -4471,26 +4462,6 @@ public final class APIUtil {
 
                         registry.put(regResourcePath, inSeqResource);
                     }
-
-                }
-                //On the fly migration of json_fault.xml for 2.0.0 to 2.1.0
-                if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(customSequenceType) &&
-                        availableNewSequences && jsonFaultSeqInRegistry) {
-                    String oldFaultStatHandler = "org.wso2.carbon.apimgt.usage.publisher.APIMgtFaultHandler";
-                    String newFaultStatHandler = "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtFaultHandler";
-                    String regResourcePath =
-                            APIConstants.API_CUSTOM_SEQUENCE_LOCATION + '/' +
-                                    customSequenceType + '/' + APIConstants.API_CUSTOM_SEQ_JSON_FAULT;
-                    Resource jsonFaultSeqResource = registry.get(regResourcePath);
-                    String oldJsonFaultSeqContent = new String((byte[]) jsonFaultSeqResource.getContent(),
-                            Charset.defaultCharset());
-                    if (oldJsonFaultSeqContent != null && oldJsonFaultSeqContent.contains(oldFaultStatHandler)) {
-                        String newJsonFaultContent =
-                                oldJsonFaultSeqContent.replace(oldFaultStatHandler, newFaultStatHandler);
-                        jsonFaultSeqResource.setContent(newJsonFaultContent);
-                        registry.put(regResourcePath, jsonFaultSeqResource);
-                    }
-
                 }
             } else {
                 log.error(
