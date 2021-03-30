@@ -48,7 +48,7 @@ const useStyles = makeStyles(() => {
  * @param {object} props.help -  Page help component
  * @param {string} props.backgroundColor -  Page background color in #xxxxxx format
  * @param {object} props.paperProps -  Page background color in #xxxxxx format
- * @param {object} props.pageStyle - @deprecated Page style one of 'half' 'full' or 'small'
+ * @param {object} props.pageStyle - Page style one of 'half' 'full' or 'small'
  * @returns {JSX} Header AppBar components.
  */
 function ContentBase(props) {

@@ -9,7 +9,7 @@ const path = require('path');
 const agent = new https.Agent({
     rejectUnauthorized: false,
 });
-const callbackUrl = 'https://localhost:8081/publisher/services/auth/callback/login';
+const callbackUrl = 'https://localhost:8081/admin/services/auth/callback/login';
 
 /**
  *
@@ -28,7 +28,7 @@ function oauthAppCache(data) {
  *
  */
 async function getSettings() {
-    const res = await fetch('https://localhost:9443/api/am/publisher/v2/settings', { agent });
+    const res = await fetch('https://localhost:9443/api/am/admin/v2/settings', { agent });
     const data = await res.json();
     return data;
 }
@@ -66,7 +66,7 @@ async function generateToken(code, keys) {
 async function doDCR() {
     const dcrRequestData = {
         callbackUrl,
-        clientName: 'publisher_webpack_dev',
+        clientName: 'admin_webpack_dev',
         owner: 'admin',
         grantType: 'authorization_code refresh_token',
         saasApp: true,
@@ -87,11 +87,11 @@ async function doDCR() {
 }
 
 const clientRoutingBypass = (req, res, proxyOptions) => {
-    if (req.path.startsWith('/publisher/site/public/images/')) {
-        return req.path.split('/publisher')[1];
+    if (req.path.startsWith('/admin/site/public/images/')) {
+        return req.path.split('/admin')[1];
     } else if (req.headers.accept.indexOf('html') !== -1) {
         console.log('Skipping proxy for browser request.');
-        return '/publisher/index.html';
+        return '/admin/index.html';
     }
     return null;
 };
@@ -103,7 +103,7 @@ const clientRoutingBypass = (req, res, proxyOptions) => {
  * @param {*} compiler
  */
 function devServerBefore(app, server, compiler) {
-    app.get('/publisher/services/auth/login', async (req, res, next) => {
+    app.get('/admin/services/auth/login', async (req, res, next) => {
         const dcrData = await doDCR();
         const { clientId } = dcrData;
         const settingsData = await getSettings();
@@ -117,7 +117,7 @@ function devServerBefore(app, server, compiler) {
 
         res.redirect(location);
     });
-    app.get('/publisher/services/auth/callback/login', async (req, res, next) => {
+    app.get('/admin/services/auth/callback/login', async (req, res, next) => {
         const { code, session_state } = req.query;
         const keys = oauthAppCache();
         const tokens = await generateToken(code, keys);
@@ -139,14 +139,14 @@ function devServerBefore(app, server, compiler) {
         const refreshTokenPart2 = refreshToken.substring(tokenLength / 2, tokenLength);
         const maxAge = tokens.expires_in * 1000;
         res.cookie('AM_ACC_TOKEN_DEFAULT_P2', accessTokenPart2, {
-            path: '/publisher',
+            path: '/admin',
             httpOnly: true,
             secure: true,
             maxAge,
         });
 
         res.cookie('AM_ACC_TOKEN_DEFAULT_P2', accessTokenPart2, {
-            path: '/api/am/publisher/',
+            path: '/api/am/admin/',
             httpOnly: true,
             secure: true,
             maxAge,
@@ -160,43 +160,43 @@ function devServerBefore(app, server, compiler) {
         });
 
         res.cookie('AM_REF_TOKEN_DEFAULT_P2', refreshTokenPart2, {
-            path: '/publisher',
+            path: '/admin',
             httpOnly: true,
             secure: true,
             maxAge: 86400,
         });
 
         res.cookie('WSO2_AM_TOKEN_1_Default', accessTokenPart1, {
-            path: '/publisher',
+            path: '/admin',
             secure: true,
             maxAge,
         });
 
         res.cookie('WSO2_AM_REFRESH_TOKEN_1_Default', refreshTokenPart1, {
-            path: '/publisher',
+            path: '/admin',
             secure: true,
             maxAge: 86400,
         });
 
         res.cookie('AM_ID_TOKEN_DEFAULT_P2', idTokenPart2, {
-            path: '/publisher/services/logout',
+            path: '/admin/services/logout',
             secure: true,
             maxAge,
         });
 
         res.cookie('AM_ID_TOKEN_DEFAULT_P1', idTokenPart1, {
-            path: '/publisher/services/logout',
+            path: '/admin/services/logout',
             secure: true,
             maxAge,
         });
 
-        res.cookie('publisher_session_state', session_state, {
-            path: '/publisher',
+        res.cookie('admin_session_state', session_state, {
+            path: '/admin',
             secure: true,
             maxAge: 14400000,
         });
 
-        res.redirect('/publisher/');
+        res.redirect('/admin/');
     });
 }
 module.exports.clientRoutingBypass = clientRoutingBypass;
