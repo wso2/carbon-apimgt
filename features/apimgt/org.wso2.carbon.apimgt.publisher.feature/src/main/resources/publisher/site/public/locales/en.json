@@ -3419,10 +3419,28 @@
       "value": "*You are not authorized to view certificates due to insufficient permissions"
     }
   ],
+  "Apis.Details.Endpoints.GenericEndpoint.check.endpoint": [
+    {
+      "type": 0,
+      "value": "Check endpoint status"
+    }
+  ],
+  "Apis.Details.Endpoints.GenericEndpoint.config.endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint configurations"
+    }
+  ],
   "Apis.Details.Endpoints.GenericEndpoint.no.ep.error": [
     {
       "type": 0,
       "value": "Endpoint URL should not be empty"
+    }
+  ],
+  "Apis.Details.Endpoints.GenericEndpoint.security.endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint security"
     }
   ],
   "Apis.Details.Endpoints.GenericEndpoint.service.url.input": [

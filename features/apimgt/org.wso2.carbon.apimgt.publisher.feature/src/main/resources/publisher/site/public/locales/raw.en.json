@@ -1620,8 +1620,17 @@
   "Apis.Details.Endpoints.GeneralConfiguration.not.allowed": {
     "defaultMessage": "*You are not authorized to view certificates due to insufficient permissions"
   },
+  "Apis.Details.Endpoints.GenericEndpoint.check.endpoint": {
+    "defaultMessage": "Check endpoint status"
+  },
+  "Apis.Details.Endpoints.GenericEndpoint.config.endpoint": {
+    "defaultMessage": "Endpoint configurations"
+  },
   "Apis.Details.Endpoints.GenericEndpoint.no.ep.error": {
     "defaultMessage": "Endpoint URL should not be empty"
+  },
+  "Apis.Details.Endpoints.GenericEndpoint.security.endpoint": {
+    "defaultMessage": "Endpoint security"
   },
   "Apis.Details.Endpoints.GenericEndpoint.service.url.input": {
     "defaultMessage": "Service URL"

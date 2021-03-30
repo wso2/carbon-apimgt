@@ -6,9 +6,9 @@
     "scripts": {
         "test": "jest",
         "test:coverage": "jest --coverage",
-        "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
-        "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
-        "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
+        "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production --stats=errors-only",
+        "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack --mode development --watch ",
+        "analysis": "NODE_ENV=analysis NODE_OPTIONS=--max_old_space_size=8172 webpack --mode production --progress",
         "lint": "eslint source",
         "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'",
         "check-unused": "webpack --mode production --env.unused true --display errors-only",
