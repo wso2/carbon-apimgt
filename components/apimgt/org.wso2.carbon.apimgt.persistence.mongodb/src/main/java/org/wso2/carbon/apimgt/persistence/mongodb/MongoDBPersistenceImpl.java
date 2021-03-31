@@ -1042,10 +1042,10 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                 Filters.eq("status", "PUBLISHED"),
                 Filters.eq("status", "PROTOTYPED")
         );
-//        Bson revisionFilter = Filters.eq("revision", true);
+        Bson revisionFilter = Filters.exists("revision", false);
 
-        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(match(statusFilter),
-                project(include("_id", "tags")))).cursor();
+        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(match(Filters.and(statusFilter,
+                revisionFilter)), project(include("_id", "tags")))).cursor();
 
         Map<String, Integer> tagMap= new HashMap<>();
         while (cursor.hasNext()) {
@@ -1095,8 +1095,9 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                 Filters.eq("status", "PUBLISHED"),
                 Filters.eq("status", "PROTOTYPED")
         );
-        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(Aggregates.match(statusFilter),
-                project(include("_id", "apiCategories")))).cursor();
+        Bson revisionFilter = Filters.exists("revision", false);
+        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(Aggregates.match(Filters.and(
+                statusFilter, revisionFilter)), project(include("_id", "apiCategories")))).cursor();
         while (cursor.hasNext()) {
             MongoDBDevPortalAPI mongoDBAPIDocument = cursor.next();
             DevPortalAPI api = MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
