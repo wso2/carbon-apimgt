@@ -88,9 +88,6 @@ import java.util.Set;
 public class ExportUtils {
 
     private static final Log log = LogFactory.getLog(ExportUtils.class);
-    private static final String IN = "in";
-    private static final String OUT = "out";
-    private static final String SOAPTOREST = "SoapToRest";
 
     /**
      * Validate name, version and provider before exporting an API/API Product.
