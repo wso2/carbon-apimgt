@@ -451,7 +451,16 @@ class TestConsole extends React.Component {
                     httpsUrls = httpsUrls.concat({ url: settings[i].endpoints.https });
                 }
             }
-            servers = httpUrls.concat(httpsUrls);
+            const httpMissingValue = httpUrls.some((httpUrl) => httpUrl.url.includes('null'));
+            const httpsMissingValue = httpsUrls.some((httpUrl) => httpUrl.url.includes('null'));
+            if (api.transport.includes('http') && api.transport.includes('https')
+                && !httpMissingValue && !httpsMissingValue) {
+                servers = httpUrls.concat(httpsUrls);
+            } else if (api.transport.includes('https') && !httpsMissingValue) {
+                servers = httpsUrls;
+            } else if (api.transport.includes('http') && !httpMissingValue) {
+                servers = httpUrls;
+            }
             swagger.servers = servers;
         }
         const isProtoTyped = api.lifeCycleStatus.toLowerCase() === 'prototyped';
