@@ -9441,7 +9441,6 @@ components:
             type: string
           description: Properties of a tier plan which are related to monetization
           example: {}
-
     SubscriptionPolicyList:
       title: Subscription policy list
       type: object
@@ -9459,7 +9458,6 @@ components:
             $ref: '#/components/schemas/SubscriptionPolicy'
         pagination:
           $ref: '#/components/schemas/Pagination'
-
     SubscriptionList:
       title: Subscription List
       type: object
