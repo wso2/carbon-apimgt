@@ -28,6 +28,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -57,8 +58,6 @@ import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
-import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -74,8 +73,11 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.VHost;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
+import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -138,7 +140,6 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.common.TermData;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Registry;
@@ -1802,13 +1803,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Set<Tag> getAllTags(String requestedTenantDomain) throws APIManagementException {
-
-        this.isTenantModeStoreView = (requestedTenantDomain != null);
-
-        if(requestedTenantDomain != null){
-            this.requestedTenant = requestedTenantDomain;
-        }
+    public Set<Tag> getAllTags(String organizationId) throws APIManagementException {
 
         /* We keep track of the lastUpdatedTime of the TagCache to determine its freshness.
          */
@@ -1819,102 +1814,31 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return tagSet;
             }
         }
-
-        TreeSet<Tag> tempTagSet = new TreeSet<Tag>(new Comparator<Tag>() {
-            @Override
-            public int compare(Tag o1, Tag o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-        Registry userRegistry = null;
-        boolean isTenantFlowStarted = false;
-        String tagsQueryPath = null;
+        Organization org = new Organization(organizationId);
         try {
-        	tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
-            Map<String, String> params = new HashMap<String, String>();
-            params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
-            //as a tenant, I'm browsing my own Store or I'm browsing a Store of another tenant..
-            if ((this.isTenantModeStoreView && this.tenantDomain==null) || (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant based store anonymous mode
-                int tenantId = getTenantId(this.requestedTenant);
-                userRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-            } else {
-                userRegistry = registry;
-            }
-
-            Map<String, Tag> tagsData = new HashMap<String, Tag>();
-            try {
-            	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
-                if (requestedTenant != null ) {
-                    isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenant);
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
-                }
-
-                Map <String, List<String>> criteriaPublished = new HashMap<String, List<String>>();
-                criteriaPublished.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {{
-                    add(APIConstants.PUBLISHED);
-                }});
-                //rxt api media type
-                List<TermData> termsPublished = GovernanceUtils
-                        .getTermDataList(criteriaPublished, APIConstants.API_OVERVIEW_TAG,
-                                         APIConstants.API_RXT_MEDIA_TYPE, true);
-
-                if(termsPublished != null){
-                    for(TermData data : termsPublished){
-                        tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
-                    }
-                }
-
-                Map<String, List<String>> criteriaPrototyped = new HashMap<String, List<String>>();
-                criteriaPrototyped.put(APIConstants.LCSTATE_SEARCH_KEY, new ArrayList<String>() {{
-                    add(APIConstants.PROTOTYPED);
-                }});
-                //rxt api media type
-                List<TermData> termsPrototyped = GovernanceUtils
-                        .getTermDataList(criteriaPrototyped, APIConstants.API_OVERVIEW_TAG,
-                                         APIConstants.API_RXT_MEDIA_TYPE, true);
-
-                if(termsPrototyped != null){
-                    for(TermData data : termsPrototyped){
-                        tempTagSet.add(new Tag(data.getTerm(), (int)data.getFrequency()));
-                    }
-                }
-
-
-            } finally {
-                if (isTenantFlowStarted) {
-                    endTenantFlow();
-                }
-            }
-
+            Set<Tag> tempTagSet = apiPersistenceInstance.getAllTags(org);
             synchronized (tagCacheMutex) {
                 lastUpdatedTime = System.currentTimeMillis();
                 this.tagSet = tempTagSet;
             }
-
-        } catch (RegistryException e) {
-        	try {
-        		//Before a tenant login to the store or publisher at least one time,
-        		//a registry exception is thrown when the tenant store is accessed in anonymous mode.
-        		//This fix checks whether query resource available in the registry. If not
-        		// give a warn.
-				if (userRegistry != null && !userRegistry.resourceExists(tagsQueryPath)) {
-					log.warn("Failed to retrieve tags query resource at " + tagsQueryPath);
-					return tagSet == null ? Collections.EMPTY_SET : tagSet;
-				}
-			} catch (RegistryException e1) {
-                // Even if we should ignore this exception, we are logging this as a warn log.
-                // The reason is that, this error happens when we try to add some additional logs in an error
-                // scenario and it does not affect the execution path.
-                log.warn("Unable to execute the resource exist method for tags query resource path : " + tagsQueryPath,
-                         e1);
-            }
-            handleException("Failed to get all the tags", e);
-        } catch (UserStoreException e) {
-            handleException("Failed to get all the tags", e);
+        } catch (Exception e) {
+            String msg = "Failed to get API tags";
+            throw new APIManagementException(msg, e);
         }
-
         return tagSet;
+    }
+
+    @Override
+    public List<APICategory> getAllCategories(String organizationId) throws APIManagementException {
+        Organization org = new Organization(organizationId);
+        List<APICategory> categoriesList;
+        try {
+            categoriesList = apiPersistenceInstance.getAllCategories(org);
+        } catch (APIPersistenceException e) {
+            String msg = "Failed to get API categories";
+            throw new APIManagementException(msg, e);
+        }
+        return  categoriesList;
     }
 
     @Override
@@ -5796,13 +5720,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String tenantDomain, int start, int end)
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organizationId, int start, int end)
             throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
         }
-        Organization org = new Organization(tenantDomain);
+        Organization org = new Organization(organizationId);
         String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
@@ -5824,7 +5748,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 apiSet.addAll(apiList);
                 result.put("apis", apiSet);
-                result.put("length", searchAPIs.getTotalAPIsCount());
+                result.put("length", list.size());
                 result.put("isMore", true);
             } else {
                 result.put("apis", apiSet);

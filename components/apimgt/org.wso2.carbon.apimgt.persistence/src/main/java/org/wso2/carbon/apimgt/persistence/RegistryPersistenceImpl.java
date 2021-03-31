@@ -47,13 +47,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.Label;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
@@ -3482,6 +3476,17 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
     
     }
+
+    @Override
+    public Set<Tag> getAllTags(Organization org) {
+        return null;
+    }
+
+    @Override
+    public List<APICategory> getAllCategories(Organization org) throws APIPersistenceException {
+        return null;
+    }
+
     protected GenericArtifact getAPIArtifact(String apiId, Registry registry)
             throws APIPersistenceException, GovernanceException {
         GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,

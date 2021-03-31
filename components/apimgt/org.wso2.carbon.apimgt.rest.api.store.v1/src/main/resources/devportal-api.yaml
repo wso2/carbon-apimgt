@@ -2918,6 +2918,7 @@ paths:
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's tags, you need to provide Authorization header.
       parameters:
+        - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/requestedTenant'
@@ -3525,7 +3526,7 @@ paths:
       description: |
         Get all API categories
       parameters:
-        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/organizationId'
       responses:
         200:
           description: |

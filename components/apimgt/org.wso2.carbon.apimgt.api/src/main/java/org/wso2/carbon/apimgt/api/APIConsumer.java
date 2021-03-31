@@ -21,11 +21,6 @@ package org.wso2.carbon.apimgt.api;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -43,6 +38,12 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 
 import java.util.List;
 import java.util.Map;
@@ -138,7 +139,16 @@ public interface APIConsumer extends APIManager {
      * @return a list of all Tags applied to all APIs published.
      * @throws APIManagementException if failed to get All the tags
      */
-    Set<Tag> getAllTags(String tenantDomain) throws APIManagementException;
+    Set<Tag> getAllTags(String organizationId) throws APIManagementException;
+
+
+    /**
+     * Get all categories of published APIs
+     *
+     * @return a list of all categories applied to all APIs published.
+     * @throws APIManagementException if failed to get All the categories
+     */
+    List<APICategory> getAllCategories(String organizationId) throws APIManagementException;
 
     /**
      * Returns all tags with their descriptions.

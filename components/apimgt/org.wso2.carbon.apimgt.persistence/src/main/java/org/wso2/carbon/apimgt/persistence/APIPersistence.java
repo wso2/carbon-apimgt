@@ -16,7 +16,9 @@
 
 package org.wso2.carbon.apimgt.persistence;
 
+import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalContentSearchResult;
@@ -44,6 +46,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.ThumbnailPersistenceExcepti
 import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This Interface defines the interface methods related to API operations and functionalities which incorporate with
@@ -72,8 +75,8 @@ public interface APIPersistence {
     /**
      * Add API Revision to the persistence layer
      *
-     * @param org          Organization the API is owned by
-     * @param apiUUID API UUID
+     * @param org        Organization the API is owned by
+     * @param apiUUID    API UUID
      * @param revisionId API Revision ID
      * @return ID of Added API
      * @throws APIPersistenceException
@@ -83,8 +86,8 @@ public interface APIPersistence {
     /**
      * Add API Revision to the persistence layer
      *
-     * @param org          Organization the API is owned by
-     * @param apiUUID API UUID
+     * @param org        Organization the API is owned by
+     * @param apiUUID    API UUID
      * @param revisionId API Revision ID
      * @throws APIPersistenceException
      */
@@ -94,8 +97,8 @@ public interface APIPersistence {
     /**
      * Add API Revision to the persistence layer
      *
-     * @param org          Organization the API is owned by
-     * @param apiUUID API UUID
+     * @param org        Organization the API is owned by
+     * @param apiUUID    API UUID
      * @param revisionId API Revision ID
      * @throws APIPersistenceException
      */
@@ -150,7 +153,7 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset,
-                                    UserContext ctx) throws APIPersistenceException;
+                                                    UserContext ctx) throws APIPersistenceException;
 
     /**
      * Search APIs to be displayed on Dev Portal API listing
@@ -163,8 +166,8 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset,
-                                    UserContext ctx) throws APIPersistenceException;
-    
+                                                    UserContext ctx) throws APIPersistenceException;
+
     /**
      * Search based on content to display on publisher
      *
@@ -176,7 +179,7 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start, int offset,
-                                    UserContext ctx) throws APIPersistenceException;
+                                                           UserContext ctx) throws APIPersistenceException;
 
     /**
      * Search based on content to display on dev portal
@@ -189,7 +192,7 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start, int offset,
-                                    UserContext ctx) throws APIPersistenceException;
+                                                           UserContext ctx) throws APIPersistenceException;
 
     /**
      * Change API Life Cycle
@@ -237,6 +240,7 @@ public interface APIPersistence {
      * @throws OASPersistenceException
      */
     void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException;
+
     /**
      * Get OAS Schema definition of the API
      *
@@ -272,7 +276,7 @@ public interface APIPersistence {
      * @throws GraphQLPersistenceException
      */
     void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition)
-                                    throws GraphQLPersistenceException;
+            throws GraphQLPersistenceException;
 
     /**
      * Get GraphQL schema definition
@@ -297,7 +301,7 @@ public interface APIPersistence {
      * @throws DocumentationPersistenceException
      */
     Documentation addDocumentation(Organization org, String apiId, Documentation documentation)
-                                    throws DocumentationPersistenceException;
+            throws DocumentationPersistenceException;
 
     /**
      * Update API documentation
@@ -308,7 +312,7 @@ public interface APIPersistence {
      * @throws DocumentationPersistenceException
      */
     Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
-                                    throws DocumentationPersistenceException;
+            throws DocumentationPersistenceException;
 
     /**
      * Get API Documentation
@@ -331,15 +335,14 @@ public interface APIPersistence {
      * @throws DocumentationPersistenceException
      */
     DocumentContent getDocumentationContent(Organization org, String apiId, String docId)
-                                    throws DocumentationPersistenceException;
+            throws DocumentationPersistenceException;
 
     /**
      * Add the content (Inline text/Markdown content text/ Resource file) of API documentation
      *
-     * @param org   Organization the documentation is owned by
-     * @param apiId API ID
-     * @param docId Documentation ID
-     * @param Documentation Content
+     * @param org           Organization the documentation is owned by
+     * @param apiId         API ID
+     * @param docId         Documentation ID
      * @return Documentation Content
      * @throws DocumentationPersistenceException
      */
@@ -355,7 +358,8 @@ public interface APIPersistence {
      * @throws DocumentationPersistenceException
      */
     DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset, String searchQuery,
-                                    UserContext ctx) throws DocumentationPersistenceException;
+                                             UserContext ctx) throws DocumentationPersistenceException;
+
     /**
      * Delete API documentation
      *
@@ -379,7 +383,7 @@ public interface APIPersistence {
      * @throws MediationPolicyPersistenceException
      */
     Mediation addMediationPolicy(Organization org, String apiId, Mediation mediation) throws
-                                    MediationPolicyPersistenceException;
+            MediationPolicyPersistenceException;
 
     /**
      * Update mediation policy of the API
@@ -401,7 +405,7 @@ public interface APIPersistence {
      * @throws MediationPolicyPersistenceException
      */
     Mediation getMediationPolicy(Organization org, String apiId, String mediationPolicyId)
-                                    throws MediationPolicyPersistenceException;
+            throws MediationPolicyPersistenceException;
     /**
      * Get a list of all the mediation policies of the API
      *
@@ -452,41 +456,37 @@ public interface APIPersistence {
      * @throws ThumbnailPersistenceException
      */
     void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
-    
-    
     /**
      * Add API product to the persistence layer
      *
-     * @param org          Organization the API is owned by
+     * @param org                 Organization the API is owned by
      * @param publisherAPIProduct API product to add
      * @return ID of Added API Product
      * @throws APIPersistenceException
      */
     PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException;
-    
+
 
     /**
      * Update API product to the persistence layer
      *
-     * @param org          Organization the API is owned by
+     * @param org                 Organization the API is owned by
      * @param publisherAPIProduct API product to add
      * @return ID of Added API Product
      * @throws APIPersistenceException
      */
     PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException;
-    
     /**
      * Get the API product information stored in persistence layer, that is used for publisher operations
      *
-     * @param org   Organization the API is owned by
+     * @param org          Organization the API is owned by
      * @param apiProductId API product ID
      * @return API information
      * @throws APIPersistenceException
      */
     PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId) throws APIPersistenceException;
-    
     /**
      * Search API Products to be displayed on Publisher API product listing
      *
@@ -498,8 +498,8 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery, int start,
-            int offset, UserContext ctx) throws APIPersistenceException;
-    
+                                                                  int offset, UserContext ctx) throws APIPersistenceException;
+
     /**
      * Delete API Product
      *
@@ -509,4 +509,19 @@ public interface APIPersistence {
      */
     void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException;
 
+    /**
+     * Get a list of all the tagscategories of an organization
+     *
+     * @param org   Organization the tags are owned by
+     * @return list of all the tags of an organization
+     */
+    Set<Tag> getAllTags(Organization org) throws APIPersistenceException;
+
+    /**
+     * Get a list of all the categories of an organization
+     *
+     * @param org   Organization the categories are owned by
+     * @return list of all the API categories of an organization
+     */
+    List<APICategory>getAllCategories(Organization org) throws APIPersistenceException;
 }

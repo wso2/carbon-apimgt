@@ -24,19 +24,26 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
-import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.result.InsertOneResult;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBThumbnail;
@@ -86,6 +93,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -487,6 +496,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             fieldList.add("documentationList.textContent");
             return fieldList;
         }
+
         return fieldList;
     }
 
@@ -537,8 +547,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                                                            int offset, UserContext ctx) throws APIPersistenceException {
         int skip = start;
         int limit = offset;
-        //published prototyped only
-        searchQuery = "";
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
         MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getDevportalSearchAggregate(searchQuery, skip, limit))
@@ -1027,6 +1035,42 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
+    @Override
+    public Set<Tag> getAllTags(Organization org) {
+        Set<Tag> tagSet = new HashSet<>();
+        MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(org.getName());
+        Bson statusFilter = Filters.or(
+                Filters.eq("status", "PUBLISHED"),
+                Filters.eq("status", "PROTOTYPED")
+        );
+        Bson revisionFilter = Filters.exists("revision", false);
+
+        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(match(Filters.and(statusFilter,
+                revisionFilter)), project(include("_id", "tags")))).cursor();
+
+        Map<String, Integer> tagMap = new HashMap<>();
+        while (cursor.hasNext()) {
+            MongoDBDevPortalAPI mongoDBAPIDocument = cursor.next();
+            List<String> mongoDBAPIDocumentTags = mongoDBAPIDocument.getTags();
+            for (String mongoDBAPIDocumentTag : mongoDBAPIDocumentTags) {
+                if (tagMap.containsKey(mongoDBAPIDocumentTag)) {
+                    int count = tagMap.get(mongoDBAPIDocumentTag);
+                    tagMap.put(mongoDBAPIDocumentTag, count + 1);
+                } else {
+                    tagMap.put(mongoDBAPIDocumentTag, 1);
+                }
+            }
+        }
+        if (!tagMap.isEmpty()) {
+            for (Map.Entry<String, Integer> entry : tagMap.entrySet()) {
+                Tag tag = new Tag(entry.getKey());
+                tag.setNoOfOccurrences(entry.getValue());
+                tagSet.add(tag);
+            }
+        }
+        return tagSet;
+    }
+
     private MongoDBPublisherAPI getMongoDBPublisherAPIFromId(Organization org, String apiId, Boolean excludeSwagger)
             throws APIPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(org.getName());
@@ -1042,5 +1086,26 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException(msg);
         }
         return mongoDBAPIDocument;
+    }
+
+    @Override
+    public List<APICategory> getAllCategories(Organization org) {
+        List<APICategory> categoriesList = new ArrayList<>();
+        MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(org.getName());
+        Bson statusFilter = Filters.or(
+                Filters.eq("status", "PUBLISHED"),
+                Filters.eq("status", "PROTOTYPED")
+        );
+        Bson revisionFilter = Filters.exists("revision", false);
+        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(Aggregates.match(Filters.and(
+                statusFilter, revisionFilter)), project(include("_id", "apiCategories")))).cursor();
+        while (cursor.hasNext()) {
+            MongoDBDevPortalAPI mongoDBAPIDocument = cursor.next();
+            DevPortalAPI api = MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
+            API mappedAPI = APIMapper.INSTANCE.toApi(api);
+            List<APICategory> mappedAPIApiCategories = mappedAPI.getApiCategories();
+            categoriesList.addAll(mappedAPIApiCategories);
+        }
+        return categoriesList;
     }
 }
