@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
@@ -51,11 +52,13 @@ import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
+import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -368,6 +371,38 @@ public class APIMappingUtil {
             model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
+        }
+
+        APIServiceInfoDTO serviceInfoDTO = dto.getServiceInfo();
+        if (serviceInfoDTO != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            JSONParser parser = new JSONParser();
+            JSONObject serviceInfoJson;
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            try {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                                                getTenantId(tenantDomain);
+                serviceInfoJson = (JSONObject) parser.parse(mapper.writeValueAsString(serviceInfoDTO));
+
+                ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
+                ServiceEntry service = serviceCatalog.getServiceByKey(dto.getServiceInfo().getKey(), tenantId);
+                // Set the md5 of the service which is already available in the system to the API model
+                if (service == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("A service with key" + dto.getServiceInfo().getKey() + " referenced in the API "
+                                                        + "information is not available in the service catalog");
+                    }
+                } else {
+                    serviceInfoJson.put("md5", service.getMd5());
+                }
+                model.setServiceInfo(serviceInfoJson);
+            } catch (JsonProcessingException | ParseException e) {
+                String msg = "Error while getting json representation of APIServiceInfo";
+                handleException(msg, e);
+            } catch (UserStoreException e) {
+                String msg = "Error while getting tenantId from the given tenant domain " + tenantDomain;
+                handleException(msg, e);
+            }
         }
 
         return model;
