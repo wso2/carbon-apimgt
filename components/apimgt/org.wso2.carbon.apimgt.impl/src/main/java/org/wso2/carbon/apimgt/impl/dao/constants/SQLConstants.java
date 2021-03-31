@@ -1104,7 +1104,8 @@ public class SQLConstants {
             " FROM" +
             "   AM_APPLICATION " +
             " WHERE " +
-            "   CREATED_BY = ? ";
+            "   CREATED_BY = ?" +
+            "   LIMIT ?, ? ";
 
     public static final String UPDATE_APPLICATION_OWNER =
             "UPDATE AM_APPLICATION " +

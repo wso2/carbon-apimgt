@@ -215,11 +215,11 @@ public class APIAdminImpl implements APIAdmin {
      * @param sortOrder            content to sort in a order
      * @throws APIManagementException if failed to get application
      */
-    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start, int offset
+    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start, int offset, int limit
             , String searchOwner, String searchApplication, String sortColumn, String sortOrder)
             throws APIManagementException {
 
-        return apiMgtDAO.getApplicationsByTenantIdWithPagination(tenantId, start, offset,
+        return apiMgtDAO.getApplicationsByTenantIdWithPagination(tenantId, start, offset, limit,
                 searchOwner, searchApplication, sortColumn, sortOrder);
     }
 

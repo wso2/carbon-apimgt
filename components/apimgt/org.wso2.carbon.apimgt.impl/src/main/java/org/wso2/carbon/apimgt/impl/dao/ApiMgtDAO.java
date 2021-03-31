@@ -4180,7 +4180,7 @@ public class ApiMgtDAO {
      * @return
      * @throws APIManagementException
      */
-    public Application[] getApplicationsByOwner(String userId) throws APIManagementException {
+    public Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -4193,6 +4193,8 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, userId);
+            prepStmt.setInt(2, offset);
+            prepStmt.setInt(3, limit);
             rs = prepStmt.executeQuery();
 
             ArrayList<Application> applicationsList = new ArrayList<Application>();
@@ -4527,6 +4529,7 @@ public class ApiMgtDAO {
      * @param tenantId          The tenantId.
      * @param start             The start index.
      * @param offset            The offset.
+     * @param limit             The limit
      * @param searchOwner       The search string.
      * @param searchApplication The search string.
      * @param sortOrder         The sort order.
@@ -4534,7 +4537,7 @@ public class ApiMgtDAO {
      * @return Application[] The array of applications.
      * @throws APIManagementException
      */
-    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start, int offset,
+    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start, int offset, int limit,
                                                                      String searchOwner, String searchApplication,
                                                                      String sortColumn, String sortOrder)
             throws APIManagementException {
@@ -4555,8 +4558,8 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, tenantId);
             prepStmt.setString(2, "%" + searchOwner + "%");
             prepStmt.setString(3, "%" + searchApplication + "%");
-            prepStmt.setInt(4, start);
-            prepStmt.setInt(5, offset);
+            prepStmt.setInt(4, offset);
+            prepStmt.setInt(5, limit);
             rs = prepStmt.executeQuery();
             Application application;
             while (rs.next()) {

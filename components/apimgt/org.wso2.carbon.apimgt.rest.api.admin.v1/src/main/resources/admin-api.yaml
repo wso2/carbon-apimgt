@@ -3724,22 +3724,12 @@ components:
           description: |
             Number of applications returned.
           example: 1
-        next:
-          type: string
-          description: |
-            Link to the next subset of resources qualified.
-            Empty if no more resources are to be returned.
-          example: /applications?limit=1&offset=2&user=
-        previous:
-          type: string
-          description: |
-            Link to the previous subset of resources qualified.
-            Empty if current subset is the first subset returned.
-          example: /applications?limit=1&offset=0&user=
         list:
           type: array
           items:
             $ref: '#/components/schemas/ApplicationInfo'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     ApplicationInfo:
       title: Application info object with basic application details
       type: object
@@ -4550,6 +4540,31 @@ components:
           - Internal/subscriber
           items:
             type: string
+    Pagination:
+      title: Pagination
+      type: object
+      properties:
+        offset:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          example: 10
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+            example: ""
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
+            example: ""
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

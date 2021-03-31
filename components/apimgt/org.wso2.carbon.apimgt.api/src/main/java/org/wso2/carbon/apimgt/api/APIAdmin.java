@@ -96,9 +96,9 @@ public interface APIAdmin  {
      * @param sortOrder            content to sort in a order
      * @throws APIManagementException if failed to get applications
      */
-    List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start , int offset, String searchOwner,
-                                                              String searchApplication, String sortColumn,
-                                                              String sortOrder)
+    List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start , int offset, int limit,
+                                                              String searchOwner, String searchApplication,
+                                                              String sortColumn, String sortOrder)
             throws APIManagementException;
 
     /**
