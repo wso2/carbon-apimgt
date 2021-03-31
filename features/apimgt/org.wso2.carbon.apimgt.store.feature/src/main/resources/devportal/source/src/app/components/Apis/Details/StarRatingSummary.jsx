@@ -27,6 +27,7 @@ const styles = (theme) => {
     const starColor = theme.custom.infoBar.starColor || theme.palette.getContrastText(theme.custom.infoBar.background);
     return {
         starRate: {
+            marginRight: theme.spacing(),
             color: starColor,
             '&.material-icons': {
                 fontSize: 30,
@@ -53,7 +54,7 @@ function StarRatingSummary(props) {
         <>
             {returnCount > 0 ? (
                 <>
-                    <Icon className={classes.starRate}>star_border</Icon>
+                    <Icon className={classes.starRate}>star</Icon>
                     <div className={classes.ratingSummary}>
                         <div className={classes.userRating}>
                             <Typography variant='body1'>{avgRating}</Typography>

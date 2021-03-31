@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 /* eslint-disable react/jsx-props-no-spreading */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -149,11 +150,11 @@ const styles = (theme) => {
             cursor: 'pointer',
             background: theme.custom.leftMenu.rootBackground,
             color: theme.palette.getContrastText(theme.custom.leftMenu.rootBackground),
-            textDecoration: 'none',
             alignItems: 'center',
             justifyContent: 'center',
             display: 'flex',
             height: theme.custom.infoBar.height,
+            textDecoration: 'none',
         },
         leftLInkMainText: {
             fontSize: 18,
@@ -220,7 +221,10 @@ class Details extends React.Component {
          *
          * @memberof Details
          */
-        this.updateSubscriptionData = () => {
+        this.updateSubscriptionData = (callback) => {
+            let existingSubscriptions = null;
+            let promisedApplications = null;
+
             const restApi = new Api();
 
             // const subscriptionClient = new Subscription();
@@ -254,12 +258,66 @@ class Details extends React.Component {
             }
             if (user != null) {
                 this.setState({ open: user.isSideBarOpen });
+                existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
+                const subscriptionLimit = app.subscribeApplicationLimit || 5000;
+                existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null, subscriptionLimit);
+                promisedApplications = restApi.getAllApplications(null, subscriptionLimit);
+
+                Promise.all([existingSubscriptions, promisedApplications])
+                    .then((response) => {
+                        const [subscriptions, applications] = response.map((data) => data.obj);
+
+                        // get the application IDs of existing subscriptions
+                        const subscribedApplications = subscriptions.list.map((element) => {
+                            return {
+                                value: element.applicationId,
+                                policy: element.throttlingPolicy,
+                                status: element.status,
+                                subscriptionId: element.subscriptionId,
+                                label: element.applicationInfo.name,
+                            };
+                        });
+
+                        // Removing subscribed applications from all the applications and get
+                        // the available applications to subscribe
+                        const subscribedAppIds = subscribedApplications.map((sub) => sub.value);
+                        const applicationsAvailable = applications.list
+                            .filter((appInner) => !subscribedAppIds.includes(appInner.applicationId) && appInner.status === 'APPROVED')
+                            .map((filteredApp) => {
+                                return {
+                                    value: filteredApp.applicationId,
+                                    label: filteredApp.name,
+                                };
+                            });
+                        this.setState({ subscribedApplications, applicationsAvailable }, () => {
+                            if (callback) {
+                                callback();
+                            }
+                        });
+                    })
+                    .catch((error) => {
+                        if (process.env.NODE_ENV !== 'production') {
+                            console.log(error);
+                        }
+                        const { status } = error;
+                        if (status === 404) {
+                            this.setState({ notFound: true });
+                        }
+                    });
             }
         };
 
 
         this.state = {
+            active: 'overview',
+            overviewHiden: false,
+            updateSubscriptionData: this.updateSubscriptionData,
             api: null,
+            applications: null,
+            subscribedApplications: [],
+            applicationsAvailable: [],
+            item: 1,
+            xo: null,
         };
         this.setDetailsAPI = this.setDetailsAPI.bind(this);
         this.api_uuid = this.props.match.params.apiUuid;
@@ -275,8 +333,8 @@ class Details extends React.Component {
     }
 
     /**
-     * @param {JSON} prevProps previous instance props
-     * @memberof Details
+     * handle component did update
+     * @param {JSON} prevProps previous props
      */
     componentDidUpdate(prevProps) {
         const { match: { params: { apiUuid: prevApiUuid } } } = prevProps;
@@ -309,7 +367,7 @@ class Details extends React.Component {
     }
 
     /**
-     * @memberof Details
+     * handle left side drawer open
      */
     handleDrawerOpen() {
         this.setState({ open: true });
@@ -321,9 +379,9 @@ class Details extends React.Component {
     }
 
     /**
+     * handle lef side drawer open
      * @param {JSON} api api object
-     * @memberof Details
-     * @returns {Boolean} is api async or not
+     * @returns {boolean} is the api async api
      */
     isAsyncAPI(api) {
         return (api
@@ -333,15 +391,14 @@ class Details extends React.Component {
     }
 
     /**
-     * @returns {JSX} return detailed output
+     * @returns {JSX} rendered outpu
      * @memberof Details
      */
     render() {
         const {
-            classes, theme, intl, match,
+            classes, theme, intl,
         } = this.props;
         const user = AuthManager.getUser();
-        const { apiUuid } = match.params;
         const { api, notFound, open } = this.state;
         const {
             custom: {
@@ -512,11 +569,7 @@ class Details extends React.Component {
                                 onClick={this.handleDrawerClose}
                                 onKeyDown={this.handleDrawerClose}
                                 style={{
-                                    width: 100,
-                                    paddingLeft: '15px',
-                                    position: 'absolute',
-                                    bottom: 0,
-                                    cursor: 'pointer',
+                                    width: 100, paddingLeft: '15px', position: 'absolute', bottom: 0, cursor: 'pointer',
                                 }}
                             >
                                 <ArrowBackIosIcon fontSize='medium' style={{ color: 'white' }} />
@@ -526,10 +579,7 @@ class Details extends React.Component {
                                 onClick={this.handleDrawerOpen}
                                 onKeyDown={this.handleDrawerOpen}
                                 style={{
-                                    paddingLeft: '15px',
-                                    position: 'absolute',
-                                    bottom: 0,
-                                    cursor: 'pointer',
+                                    paddingLeft: '15px', position: 'absolute', bottom: 0, cursor: 'pointer',
                                 }}
                             >
                                 <ArrowForwardIosIcon fontSize='medium' style={{ color: 'white' }} />
