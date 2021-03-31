@@ -26,6 +26,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -175,12 +176,7 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
      */
     private void handleFailure(MessageContext messageContext, String errorDescription) {
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
-        Mediator sequence =
-                messageContext.getSequence(APIConstants.WebHookProperties.WEB_HOOK_SUBSCRIPTION_FAILURE_HANDLER);
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            return;
-        }
-        Utils.sendFault(messageContext, HttpStatus.SC_UNPROCESSABLE_ENTITY);
+        throw new SynapseException(errorDescription);
     }
 
     public void setEventReceiverResourcePath(String eventReceiverResourcePath) {
