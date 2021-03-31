@@ -836,6 +836,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             //validation for tiers
             List<String> tiersFromDTO = body.getPolicies();
+            //check whether there are subscriptions of the removed policies
+            List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+            for (SubscribedAPI subscription : apiUsages) {
+                String tierName = subscription.getTier().getName();
+                if (!tiersFromDTO.contains(tierName)) {
+                    RestApiUtil.handleBadRequest("Subscriptions are available under " + tierName + " tier. " +
+                            "Please unsubscribe before removing the tier.", log);
+                }
+            }
             String originalStatus = originalAPI.getStatus();
             if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) ||
                     apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
