@@ -1665,7 +1665,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //notify key manager with API update
         registerOrUpdateResourceInKeyManager(api, tenantDomain);
 
-        int apiId = apiMgtDAO.getAPIID(api.getId());
         if (publishedDefaultVersion != null) {
             if (api.isPublishedDefaultVersion() && !api.getId().getVersion().equals(publishedDefaultVersion)) {
                 APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
@@ -1673,12 +1672,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier);
             }
         }
-
-        APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
-                APIConstants.EventType.API_UPDATE.name(), tenantId, tenantDomain, api.getId().getApiName(), apiId,
-                api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
-                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus());
-        APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
