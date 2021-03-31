@@ -111,6 +111,7 @@ function AddPayloadProperty(props) {
                 target, verb, value: property,
             },
         });
+        clearInputs();
     }
 
     return (

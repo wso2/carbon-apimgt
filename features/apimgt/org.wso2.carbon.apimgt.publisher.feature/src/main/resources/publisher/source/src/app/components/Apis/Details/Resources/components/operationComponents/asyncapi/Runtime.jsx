@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
@@ -24,22 +24,36 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
 /**
- *
  * Renders the callback URL for WebSub and URI mapping for WebSocket.
- * @export
+ *
  * @param {*} props
- * @returns
  */
 export default function Runtime(props) {
     const {
         operation, operationsDispatcher, target, verb, api,
     } = props;
-    operation.runtime = operation.runtime || { };
 
     const buildCallbackURL = () => {
         return `http://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
             + `webhooks_events_receiver_resource?topic=${target.toLowerCase()}`;
     };
+
+    const getUriMappingHelperText = (value) => {
+        let fqPath;
+        if (api.endpointConfig
+            && api.endpointConfig.production_endpoints
+            && api.endpointConfig.production_endpoints.url
+            && api.endpointConfig.production_endpoints.url.length > 0
+            && value
+            && value.length > 0) {
+            // TODO: remove trailing '/' if available
+            fqPath = api.endpointConfig.production_endpoints.url + value;
+        }
+        return fqPath ? 'Production URL will be ' + fqPath : '';
+    };
+    const [uriMappingHelperText, setUriMappingHelperText] = useState(
+        getUriMappingHelperText(operation[verb]['x-uri-mapping']),
+    );
 
     return (
         <>
@@ -57,13 +71,17 @@ export default function Runtime(props) {
                             margin='dense'
                             fullWidth
                             label='URL Mapping'
-                            value={operation.runtime.uriMapping}
+                            value={operation[verb]['x-uri-mapping']}
                             variant='outlined'
-                            onChange={
-                                ({ target: { value } }) => operationsDispatcher(
-                                    { action: 'uriMapping', data: { target, verb, value } },
-                                )
-                            }
+                            helperText={uriMappingHelperText}
+                            onChange={(e) => {
+                                let { value } = e.target;
+                                if (value.length > 0 && value.substr(0, 1) !== '/') {
+                                    value = '/' + value;
+                                }
+                                setUriMappingHelperText(getUriMappingHelperText(value));
+                                operationsDispatcher({ action: 'uriMapping', data: { target, verb, value } });
+                            }}
                         />
                     </Grid>
                     <Grid item md={6} />
@@ -94,7 +112,6 @@ Runtime.propTypes = {
         target: PropTypes.string.isRequired,
         verb: PropTypes.string.isRequired,
         spec: PropTypes.shape({}).isRequired,
-        runtime: PropTypes.shape({}).isRequired,
     }).isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
     target: PropTypes.string.isRequired,

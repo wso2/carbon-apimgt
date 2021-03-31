@@ -4597,7 +4597,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String updatedAsyncAPIDefinition;
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //Handle URL and file based definition imports
-            if (url != null || fileInputStream != null){
+            if (url != null || fileInputStream != null) {
                 //Validate and retrieve the AsyncAPI definition
                 Map validationResponseMap = validateAsyncAPISpecification(url, fileInputStream,
                         fileDetail, true, false);

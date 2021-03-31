@@ -20,6 +20,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
@@ -53,7 +54,10 @@ function AsyncOperation(props) {
         operationsDispatcher,
         highlight,
         api,
+        disableDelete,
         disableUpdate,
+        onMarkAsDelete,
+        markAsDelete,
         spec,
         target,
         verb,
@@ -106,6 +110,7 @@ function AsyncOperation(props) {
         event.stopPropagation();
         event.preventDefault();
         setIsExpanded(false);
+        onMarkAsDelete({ verb, target }, !markAsDelete);
     }
 
     /**
@@ -120,9 +125,22 @@ function AsyncOperation(props) {
     const classes = useStyles();
     return (
         <>
+            {markAsDelete && (
+                <Box className={classes.overlayUnmarkDelete}>
+                    <Tooltip title='Marked for delete' aria-label='Marked for delete'>
+                        <Button onClick={toggleDelete} variant='outlined' style={{ marginTop: '10px' }}>
+                            <FormattedMessage
+                                id='Apis.Details.Resources.components.Operation.undo.delete'
+                                defaultMessage='Undo Delete'
+                            />
+                        </Button>
+                    </Tooltip>
+                </Box>
+            )}
             <ExpansionPanel
                 expanded={isExpanded}
                 onChange={handleExpansion}
+                disabled={markAsDelete}
                 className={classes.paperStyles}
             >
                 <ExpansionPanelSummary
@@ -150,58 +168,49 @@ function AsyncOperation(props) {
                                 {target}
                             </Typography>
                         </Grid>
-                        <Grid item md={1} justify='flex-end' container>
-                            <Tooltip
-                                title={
-                                    isUsedInAPIProduct
-                                        ? (
-                                            <FormattedMessage
-                                                id={'Apis.Details.Resources.components.Operation.cannot.delete'
-                                                + '.when.used.in.api.products'}
-                                                defaultMessage='Cannot delete operation when used in an API product'
-                                            />
-                                        )
-                                        : (
-                                            <FormattedMessage
-                                                id='Apis.Details.Resources.components.Operation.Delete'
-                                                defaultMessage='Delete'
-                                            />
-                                        )
-                                }
-                                aria-label={(
-                                    <FormattedMessage
-                                        id='Apis.Details.Resources.components.Operation.delete.operation'
-                                        defaultMessage='Delete operation'
-                                    />
-                                )}
-                            >
-                                <div>
-                                    <IconButton
-                                        disabled={Boolean(isUsedInAPIProduct) || disableUpdate}
-                                        onClick={toggleDelete}
-                                        aria-label='delete'
-                                    >
-                                        <DeleteIcon fontSize='small' />
-                                    </IconButton>
-                                </div>
-                            </Tooltip>
-                        </Grid>
-                        {/* )} */}
+                        {!(disableDelete || markAsDelete) && (
+                            <Grid item md={1} justify='flex-end' container>
+                                <Tooltip
+                                    title={
+                                        isUsedInAPIProduct
+                                            ? (
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Resources.components.Operation.cannot.delete'
+                                                    + '.when.used.in.api.products'}
+                                                    defaultMessage='Cannot delete operation when used in an API product'
+                                                />
+                                            )
+                                            : (
+                                                <FormattedMessage
+                                                    id='Apis.Details.Resources.components.Operation.Delete'
+                                                    defaultMessage='Delete'
+                                                />
+                                            )
+                                    }
+                                    aria-label={(
+                                        <FormattedMessage
+                                            id='Apis.Details.Resources.components.Operation.delete.operation'
+                                            defaultMessage='Delete operation'
+                                        />
+                                    )}
+                                >
+                                    <div>
+                                        <IconButton
+                                            disabled={Boolean(isUsedInAPIProduct) || disableUpdate}
+                                            onClick={toggleDelete}
+                                            aria-label='delete'
+                                        >
+                                            <DeleteIcon fontSize='small' />
+                                        </IconButton>
+                                    </div>
+                                </Tooltip>
+                            </Grid>
+                        )}
                     </Grid>
                 </ExpansionPanelSummary>
                 <Divider light className={classes.customDivider} />
                 <ExpansionPanelDetails>
                     <Grid spacing={2} container direction='row' justify='flex-start' alignItems='flex-start'>
-                        {(api.type === 'WS' || api.type === 'WEBSUB') && (
-                            <Runtime
-                                operation={operation}
-                                operationsDispatcher={operationsDispatcher}
-                                disableUpdate={disableUpdate}
-                                target={target}
-                                verb={verb}
-                                api={api}
-                            />
-                        )}
                         <DescriptionAndSummary
                             operation={operation}
                             operationsDispatcher={operationsDispatcher}
@@ -237,6 +246,16 @@ function AsyncOperation(props) {
                             verb={verb}
                             sharedScopes={sharedScopes}
                         />
+                        {(api.type === 'WS' || api.type === 'WEBSUB') && (
+                            <Runtime
+                                operation={operation}
+                                operationsDispatcher={operationsDispatcher}
+                                disableUpdate={disableUpdate}
+                                target={target}
+                                verb={verb}
+                                api={api}
+                            />
+                        )}
                     </Grid>
                 </ExpansionPanelDetails>
             </ExpansionPanel>
@@ -246,12 +265,18 @@ function AsyncOperation(props) {
 AsyncOperation.defaultProps = {
     highlight: false,
     disableUpdate: false,
+    disableDelete: false,
+    onMarkAsDelete: () => {},
+    markAsDelete: false,
 };
 AsyncOperation.propTypes = {
     api: PropTypes.shape({ scopes: PropTypes.arrayOf(PropTypes.shape({})), resourcePolicies: PropTypes.shape({}) })
         .isRequired,
     operationsDispatcher: PropTypes.func.isRequired,
+    onMarkAsDelete: PropTypes.func,
     resourcePolicy: PropTypes.shape({}).isRequired,
+    markAsDelete: PropTypes.bool,
+    disableDelete: PropTypes.bool,
     operation: PropTypes.shape({
         'x-wso2-new': PropTypes.bool,
         summary: PropTypes.string,

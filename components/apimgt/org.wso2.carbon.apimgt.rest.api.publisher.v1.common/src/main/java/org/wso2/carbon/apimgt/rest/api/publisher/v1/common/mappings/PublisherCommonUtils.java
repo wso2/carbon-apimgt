@@ -980,6 +980,18 @@ public class PublisherCommonUtils {
         //this will fall if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         String apiDefinition = response.getJsonContent();
+
+        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        // Set uri templates
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition);
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
+            throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
+        }
+        existingAPI.setUriTemplates(uriTemplates);
+
+        // Update ws uri mapping
+        existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
+
         //updating APi with the new AsyncAPI definition
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
