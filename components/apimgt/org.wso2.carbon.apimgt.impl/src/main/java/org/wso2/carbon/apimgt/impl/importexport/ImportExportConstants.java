@@ -27,6 +27,12 @@ import java.util.Map;
  */
 public final class ImportExportConstants {
 
+    // System independent file separator for zip files
+    public static final char ZIP_FILE_SEPARATOR = '/';
+
+    //length of the name of the temporary directory
+    public static final int TEMP_FILENAME_LENGTH = 5;
+
     // Location of the API definition file
     public static final String API_FILE_LOCATION = File.separator + "api";
 

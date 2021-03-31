@@ -722,6 +722,7 @@ export default function Environments() {
                     for (let i = 0; i < envList.length; i++) {
                         body1.push({
                             name: envList[i],
+                            vhost: vhostList.find((v) => v.env === envList[i]).vhost,
                             displayOnDevportal: true,
                         });
                     }

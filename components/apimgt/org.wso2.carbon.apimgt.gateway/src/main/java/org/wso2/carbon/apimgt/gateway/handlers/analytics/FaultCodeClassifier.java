@@ -22,9 +22,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategories;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategories;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 

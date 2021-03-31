@@ -119,7 +119,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
+/**
+ *
+ * @returns
+ */
 export default function NewCustomizedStepper() {
     const classes = useStyles();
     const [api, updateAPI] = useAPI();
@@ -473,7 +476,7 @@ export default function NewCustomizedStepper() {
                                         <Grid item>
                                             {(((api.type !== 'WEBSUB' && !isEndpointAvailable))
                                             || !isTierAvailable
-                                            || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED')
+                                            || api.workflowStatus === 'CREATED')
                                                 ? (
                                                     <Box ml={1}>
                                                         <LaunchIcon

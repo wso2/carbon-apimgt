@@ -1176,7 +1176,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 

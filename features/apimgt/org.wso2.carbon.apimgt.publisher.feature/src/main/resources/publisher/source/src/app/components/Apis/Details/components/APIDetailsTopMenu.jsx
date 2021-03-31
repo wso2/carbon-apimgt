@@ -319,7 +319,7 @@ const APIDetailsTopMenu = (props) => {
                 {(isDownloadable) && (
                     <a
                         onClick={exportAPI}
-                        onKeyDown='null'
+                        onKeyDown={null}
                         className={classes.downloadApiFlex}
                     >
                         <div>

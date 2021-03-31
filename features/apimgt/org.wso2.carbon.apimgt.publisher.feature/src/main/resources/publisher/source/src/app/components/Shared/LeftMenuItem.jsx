@@ -16,15 +16,16 @@
  * under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/styles';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 
-const styles = (theme) => ({
+const useStyles = makeStyles((theme) => ({
     leftLInkText: {
         color: theme.palette.getContrastText(theme.palette.background.leftMenu),
         textTransform: theme.custom.leftMenuTextStyle,
@@ -93,43 +94,34 @@ const styles = (theme) => ({
     leftLInkText_NoText: {
         diplay: 'none',
     },
+    selectedMenu: {
+        backgroundColor: theme.palette.background.appBarSelected,
+        width: '100%',
+        paddingRight: theme.spacing(5),
+    },
 
-});
+}));
 
 /**
- *
+ * NOTE: Incase displaying menu text is not equal to associated path segment should use `route` prop
  *
  * @param {*} props
  * @returns
  */
 function LeftMenuItem(props) {
-    const [selected, setSelected] = useState(false);
-
     const {
-        classes, theme, Icon, to, history, text, route, head,
+        Icon, to, text, route, head,
     } = props;
-    const routeToCheck = route || text;
+    const classes = useStyles();
+    const theme = useTheme();
     const { leftMenu } = theme.custom;
     const strokeColor = theme.palette.getContrastText(theme.palette.background.leftMenu);
     const iconSize = theme.custom.leftMenuIconSize;
-    const ditectCurrentMenu = (location) => {
-        const { pathname } = location;
-        const test1 = new RegExp('/' + routeToCheck + '$', 'g');
-        const test2 = new RegExp('/' + routeToCheck + '/', 'g');
-        if (pathname.match(test1) || pathname.match(test2)) {
-            setSelected(true);
-        } else {
-            setSelected(false);
-        }
-    };
-    useEffect(() => {
-        const { location } = history;
-        ditectCurrentMenu(location);
-    }, []);
-    history.listen((location) => {
-        ditectCurrentMenu(location);
-    });
-
+    const { pathname } = useLocation();
+    // Incase displaying menu text is not equal to associated path segment should use `route` prop
+    const routeToCheck = route || text;
+    const menuPathPattern = new RegExp('/' + routeToCheck + '($|/)', 'g');
+    const isSelected = pathname.match(menuPathPattern);
     return (
         <Link
             className={classNames(
@@ -139,11 +131,11 @@ function LeftMenuItem(props) {
                     [classes.leftLink_IconLeft]: leftMenu === 'icon left',
                 },
                 'leftLInk',
+                isSelected && classes.selectedMenu,
             )}
             to={to}
-            style={{ backgroundColor: selected ? theme.palette.background.appBarSelected : '' }}
         >
-            {// If the icon pro ( which is comming from the React Material library )
+            {// If the icon pro ( which is coming from the React Material library )
                 // is coming we add css class and render.
                 // If leftMenu='no icon' at the theme object we hide the icon. Also we add static classes to
                 // allow customers theme
@@ -242,4 +234,4 @@ LeftMenuItem.propTypes = {
     }).isRequired,
     iconText: PropTypes.string,
 };
-export default withRouter(withStyles(styles, { withTheme: true })(LeftMenuItem));
+export default LeftMenuItem;
