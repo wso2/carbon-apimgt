@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.persistence.mongodb;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -24,19 +25,21 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
-import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.*;
 import com.mongodb.client.result.InsertOneResult;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherSearchContent;
 import org.wso2.carbon.apimgt.persistence.dto.SearchContent;
 import org.wso2.carbon.apimgt.persistence.exceptions.AsyncSpecPersistenceException;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBDevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBPublisherAPI;
 import org.wso2.carbon.apimgt.persistence.mongodb.dto.MongoDBThumbnail;
@@ -79,13 +82,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -1025,6 +1022,42 @@ public class MongoDBPersistenceImpl implements APIPersistence {
 
     }
 
+    @Override
+    public Set<Tag> getAllTags(Organization org) {
+        Set<Tag> tagSet = new HashSet<>();
+        MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(org.getName());
+        Bson statusFilter = Filters.or(
+                Filters.eq("status", "PUBLISHED"),
+                Filters.eq("status", "PROTOTYPED")
+        );
+//        Bson revisionFilter = Filters.eq("revision", true);
+
+        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(match(statusFilter),
+                project(include("_id", "tags")))).cursor();
+
+        Map<String, Integer> tagMap= new HashMap<>();
+        while (cursor.hasNext()) {
+            MongoDBDevPortalAPI mongoDBAPIDocument = cursor.next();
+            List<String> mongoDBAPIDocumentTags = mongoDBAPIDocument.getTags();
+            for (String mongoDBAPIDocumentTag: mongoDBAPIDocumentTags) {
+                if (tagMap.containsKey(mongoDBAPIDocumentTag)) {
+                    int count = tagMap.get(mongoDBAPIDocumentTag);
+                    tagMap.put(mongoDBAPIDocumentTag, count + 1);
+                } else {
+                    tagMap.put(mongoDBAPIDocumentTag, 1);
+                }
+            }
+        }
+        if (!tagMap.isEmpty()) {
+            for (Map.Entry<String, Integer> entry : tagMap.entrySet()) {
+                Tag tag = new Tag(entry.getKey());
+                tag.setNoOfOccurrences(entry.getValue());
+                tagSet.add(tag);
+            }
+        }
+        return tagSet;
+    }
+
     private MongoDBPublisherAPI getMongoDBPublisherAPIFromId(Organization org, String apiId, Boolean excludeSwagger)
             throws APIPersistenceException {
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(org.getName());
@@ -1040,5 +1073,27 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             throw new APIPersistenceException(msg);
         }
         return mongoDBAPIDocument;
+    }
+
+    @Override
+    public List<APICategory> getAllCategories(Organization org) {
+        List<APICategory> categoriesList = new ArrayList<>();
+        MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(org.getName());
+        Bson statusFilter = Filters.or(
+                Filters.eq("status", "PUBLISHED"),
+                Filters.eq("status", "PROTOTYPED")
+        );
+        MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(Aggregates.match(statusFilter),
+                project(include("_id", "apiCategories")))).cursor();
+        while (cursor.hasNext()) {
+            MongoDBDevPortalAPI mongoDBAPIDocument = cursor.next();
+            DevPortalAPI api = MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
+            API mappedAPI = APIMapper.INSTANCE.toApi(api);
+            List<APICategory> mappedAPIApiCategories = mappedAPI.getApiCategories();
+            for (APICategory apiCategory: mappedAPIApiCategories) {
+                categoriesList.add(apiCategory);
+            }
+        }
+        return  categoriesList;
     }
 }

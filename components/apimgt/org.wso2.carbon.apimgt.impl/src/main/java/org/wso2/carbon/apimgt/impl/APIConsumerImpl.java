@@ -1814,38 +1814,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 return tagSet;
             }
         }
-
-        TreeSet<Tag> tempTagSet = new TreeSet<Tag>(new Comparator<Tag>() {
-            @Override
-            public int compare(Tag o1, Tag o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
         Organization org = new Organization(organizationId);
-        String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
-        String[] roles = APIUtil.getListOfRoles(userName);
-        Map<String, Object> properties = APIUtil.getUserProperties(userName);
-        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
         try {
-            DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, "",
-                    0, 35, userCtx);
-            SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
-            if (searchAPIs != null) {
-                List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
-                List<Object> apiList = new ArrayList<>();
-                for (DevPortalAPIInfo devPortalAPIInfo : list) {
-                    API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                    Set<String> mappedAPITags = mappedAPI.getTags();
-                    for (String tag: mappedAPITags) {
-                        tempTagSet.add(new Tag(tag));
-                    }
-                }
-            }
+            Set<Tag> tempTagSet = apiPersistenceInstance.getAllTags(org);
             synchronized (tagCacheMutex) {
                 lastUpdatedTime = System.currentTimeMillis();
                 this.tagSet = tempTagSet;
             }
-        } catch (APIPersistenceException e) {
+        } catch (Exception e) {
             String msg = "Failed to get API tags";
             throw new APIManagementException(msg, e);
         }
@@ -1855,31 +1831,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public List<APICategory> getAllCategories(String organizationId) throws APIManagementException {
         Organization org = new Organization(organizationId);
-        String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
-        String[] roles = APIUtil.getListOfRoles(userName);
-        Map<String, Object> properties = APIUtil.getUserProperties(userName);
-        UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
-        List<APICategory> categoriesList = new ArrayList<>();
+        List<APICategory> categoriesList;
         try {
-            DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, "",
-                    0, 35, userCtx);
-            SortedSet<Object> apiSet = new TreeSet<>(new APIAPIProductNameComparator());
-            if (searchAPIs != null) {
-                List<DevPortalAPIInfo> list = searchAPIs.getDevPortalAPIInfoList();
-                List<Object> apiList = new ArrayList<>();
-                for (DevPortalAPIInfo devPortalAPIInfo : list) {
-                    API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
-                    List<APICategory> mappedAPIApiCategories = mappedAPI.getApiCategories();
-                    for (APICategory apiCategory: mappedAPIApiCategories) {
-                        categoriesList.add(apiCategory);
-                    }
-                }
-            }
-            return  categoriesList;
+            categoriesList = apiPersistenceInstance.getAllCategories(org);
         } catch (APIPersistenceException e) {
-            String msg = "Failed to get API tags";
+            String msg = "Failed to get API categories";
             throw new APIManagementException(msg, e);
         }
+        return  categoriesList;
     }
 
     @Override
