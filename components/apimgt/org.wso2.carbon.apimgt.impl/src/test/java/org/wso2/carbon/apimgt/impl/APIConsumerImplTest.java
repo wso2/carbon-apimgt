@@ -532,29 +532,6 @@ public class APIConsumerImplTest {
     }
 
     @Test
-    public void testGetTagsWithAttributes() throws Exception {
-        Registry userRegistry = Mockito.mock(Registry.class);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
-        System.setProperty(CARBON_HOME, "");
-        PowerMockito.mockStatic(GovernanceUtils.class);
-        UserRegistry userRegistry1 = Mockito.mock(UserRegistry.class);
-        Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt())).
-                thenReturn(userRegistry1);
-        Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry1);
-        List<TermData> list = new ArrayList<TermData>();
-        TermData termData = new TermData("testTerm", 10);
-        list.add(termData);
-        Mockito.when(GovernanceUtils.getTermDataList(Mockito.anyMap(), Mockito.anyString(), Mockito.anyString(),
-                Mockito.anyBoolean())).thenReturn(list);
-        ResourceDO resourceDO = Mockito.mock(ResourceDO.class);
-        Resource resource = new ResourceImpl("dw", resourceDO);
-        resource.setContent("testContent");
-        Mockito.when(userRegistry1.resourceExists(Mockito.anyString())).thenReturn(true);
-        Mockito.when(userRegistry1.get(Mockito.anyString())).thenReturn(resource);
-        assertNotNull(apiConsumer.getTagsWithAttributes("testDomain"));
-    }
-
-    @Test
     public void testGetTopRatedAPIs() throws APIManagementException, RegistryException {
         Registry userRegistry = Mockito.mock(Registry.class);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
