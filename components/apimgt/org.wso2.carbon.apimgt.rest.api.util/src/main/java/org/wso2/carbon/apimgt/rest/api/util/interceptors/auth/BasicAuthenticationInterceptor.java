@@ -18,10 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 
-import org.apache.axis2.client.Options;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ServiceContext;
-import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,29 +26,23 @@ import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.wso2.carbon.CarbonException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.RealmUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.util.AnonymousSessionUtil;
-import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -119,42 +109,29 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @return true if user is successfully authenticated and authorized. false otherwise.
      */
     private boolean authenticate(Message inMessage, String username, String password) {
+
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
-        RegistryService registryService =
-                (RegistryService) carbonContext.getOSGiService(RegistryService.class, null);
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
-        int tenantId;
         UserRealm userRealm;
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         try {
-            tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-            userRealm = AnonymousSessionUtil.getRealmByTenantDomain(registryService, realmService, tenantDomain);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+            userRealm = RealmUtil.getTenantUserRealm(tenantId);
+
             if (userRealm == null) {
                 log.error("Authentication failed: invalid domain or unactivated tenant login");
                 return false;
             }
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            String url = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
-            AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url +
-                    RestApiConstants.AUTHENTICATION_ADMIN_SERVICE_ENDPOINT);
-            ServiceClient client = authAdminStub._getServiceClient();
-            Options options = client.getOptions();
-            options.setManageSession(true);
-            String host = new URL(url).getHost();
-            //if authenticated
-            if (authAdminStub.login(username, password, host)) {
-                //set the correct tenant info for downstream code.
-                ServiceContext serviceContext = authAdminStub._getServiceClient().getLastOperationContext()
-                        .getServiceContext();
-                String sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-                String domainAwareUserName = APIUtil.getLoggedInUserInfo(sessionCookie, url).getUserName();
-                domainAwareUserName = APIUtil.setDomainNameToUppercase(domainAwareUserName);
-                if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    domainAwareUserName = domainAwareUserName + "@" + tenantDomain;
-                }
+            UserStoreManager userStoreManager = userRealm.getUserStoreManager();
+            boolean isAuthenticated = userStoreManager.authenticate(MultitenantUtils.
+                    getTenantAwareUsername(username), password);
+            if (isAuthenticated) {
+                String domain = UserCoreUtil.getDomainFromThreadLocal();
+                String domainAwareUserName = UserCoreUtil.addDomainToName(username, domain);
                 RestApiCommonUtil
-                        .setThreadLocalRequestedTenant(MultitenantUtils.getTenantAwareUsername(domainAwareUserName));
+                        .setThreadLocalRequestedTenant(MultitenantUtils.getTenantAwareUsername(username));
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(domainAwareUserName);
@@ -162,13 +139,11 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                 }
                 return validateRoles(inMessage, userRealm, tenantDomain, username);
-            } else {
-                log.error("Authentication failed: Invalid credentials");
             }
-        } catch (UserStoreException | CarbonException e) {
+        } catch (UserStoreException e) {
             log.error("Error occurred while authenticating user: " + username, e);
-        } catch (Exception e) {
-            log.error("Error occurred while authenticating user: " + username, e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
         return false;
     }
@@ -184,6 +159,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @return true if user is authorized, false otherwise.
      */
     private boolean validateRoles(Message inMessage, UserRealm userRealm, String tenantDomain, String username) {
+
         String basePath = (String) inMessage.get(Message.BASE_PATH);
         String path = (String) inMessage.get(Message.REQUEST_URI);
         String verb = (String) inMessage.get(Message.HTTP_REQUEST_METHOD);

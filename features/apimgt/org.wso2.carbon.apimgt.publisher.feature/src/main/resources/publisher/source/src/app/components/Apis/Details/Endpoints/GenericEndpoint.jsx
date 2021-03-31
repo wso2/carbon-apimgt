@@ -26,11 +26,13 @@ import {
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import green from '@material-ui/core/colors/green';
+import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Chip from '@material-ui/core/Chip';
 import { isRestricted } from 'AppData/AuthManager';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
+
 
 const styles = (theme) => ({
     endpointInputWrapper: {
@@ -175,9 +177,21 @@ function GenericEndpoint(props) {
                                     {isUpdating
                                         ? <CircularProgress size={20} />
                                         : (
-                                            <Icon>
-                                                check_circle
-                                            </Icon>
+                                            <Tooltip
+                                                placement='top-start'
+                                                interactive
+                                                title={(
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Endpoints.GenericEndpoint.check.endpoint'
+                                                        defaultMessage='Check endpoint status'
+                                                    />
+                                                )}
+                                            >
+                                                <Icon>
+                                                    check_circle
+                                                </Icon>
+                                            </Tooltip>
+
                                         )}
                                 </IconButton>
                             )}
@@ -191,9 +205,20 @@ function GenericEndpoint(props) {
                                             onClick={() => setAdvancedConfigOpen(index, type, category)}
                                             disabled={(isRestricted(['apim:api_create'], api))}
                                         >
-                                            <Icon>
-                                                settings
-                                            </Icon>
+                                            <Tooltip
+                                                placement='top-start'
+                                                interactive
+                                                title={(
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Endpoints.GenericEndpoint.config.endpoint'
+                                                        defaultMessage='Endpoint configurations'
+                                                    />
+                                                )}
+                                            >
+                                                <Icon>
+                                                    settings
+                                                </Icon>
+                                            </Tooltip>
                                         </IconButton>
                                         <IconButton
                                             className={classes.iconButton}
@@ -201,9 +226,20 @@ function GenericEndpoint(props) {
                                             onClick={() => setESConfigOpen(type, esCategory)}
                                             disabled={(isRestricted(['apim:api_create'], api))}
                                         >
-                                            <Icon>
-                                                security
-                                            </Icon>
+                                            <Tooltip
+                                                placement='top-start'
+                                                interactive
+                                                title={(
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Endpoints.GenericEndpoint.security.endpoint'
+                                                        defaultMessage='Endpoint security'
+                                                    />
+                                                )}
+                                            >
+                                                <Icon>
+                                                    security
+                                                </Icon>
+                                            </Tooltip>
                                         </IconButton>
                                     </>
                                 )}

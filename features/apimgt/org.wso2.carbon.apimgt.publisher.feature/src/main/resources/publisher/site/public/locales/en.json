@@ -153,28 +153,10 @@
       "value": "Context"
     }
   ],
-  "Apis.Create.Components.DefaultAPIForm.callbackUrl": [
-    {
-      "type": 0,
-      "value": "Callback URL"
-    }
-  ],
-  "Apis.Create.Components.DefaultAPIForm.description": [
-    {
-      "type": 0,
-      "value": "Description"
-    }
-  ],
   "Apis.Create.Components.DefaultAPIForm.name": [
     {
       "type": 0,
       "value": "Name"
-    }
-  ],
-  "Apis.Create.Components.DefaultAPIForm.urlmapping": [
-    {
-      "type": 0,
-      "value": "URL Mapping"
     }
   ],
   "Apis.Create.Components.DefaultAPIForm.version": [
@@ -1941,12 +1923,6 @@
       "value": "Signing Algortithm"
     }
   ],
-  "Apis.Details.Configuration.components.Subscription.subscription": [
-    {
-      "type": 0,
-      "value": "Subscription"
-    }
-  ],
   "Apis.Details.Configuration.components.Tags.helper": [
     {
       "type": 0,
@@ -3443,10 +3419,28 @@
       "value": "*You are not authorized to view certificates due to insufficient permissions"
     }
   ],
+  "Apis.Details.Endpoints.GenericEndpoint.check.endpoint": [
+    {
+      "type": 0,
+      "value": "Check endpoint status"
+    }
+  ],
+  "Apis.Details.Endpoints.GenericEndpoint.config.endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint configurations"
+    }
+  ],
   "Apis.Details.Endpoints.GenericEndpoint.no.ep.error": [
     {
       "type": 0,
       "value": "Endpoint URL should not be empty"
+    }
+  ],
+  "Apis.Details.Endpoints.GenericEndpoint.security.endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint security"
     }
   ],
   "Apis.Details.Endpoints.GenericEndpoint.service.url.input": [
@@ -4837,12 +4831,6 @@
       "value": "View in devportal"
     }
   ],
-  "Apis.Details.Overview.Overview.topic.createtopics": [
-    {
-      "type": 0,
-      "value": "Create Topics"
-    }
-  ],
   "Apis.Details.Overview.Overview.topic.header": [
     {
       "type": 0,
@@ -4853,12 +4841,6 @@
     {
       "type": 0,
       "value": "Resources"
-    }
-  ],
-  "Apis.Details.Overview.async.topic.header": [
-    {
-      "type": 0,
-      "value": "Topics"
     }
   ],
   "Apis.Details.ProductResources.ProductResourcesEdit.api.resources": [
@@ -5349,6 +5331,24 @@
       "value": "Use DONE button in the page to persist changes"
     }
   ],
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.close": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.done": [
+    {
+      "type": 0,
+      "value": "Done"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.title": [
+    {
+      "type": 0,
+      "value": "Edit"
+    }
+  ],
   "Apis.Details.Resources.components.operationComponents.ListParameter.actions": [
     {
       "type": 0,
@@ -5413,6 +5413,18 @@
     {
       "type": 0,
       "value": "Yes"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProperties.edit": [
+    {
+      "type": 0,
+      "value": "Edit"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProps.delete": [
+    {
+      "type": 0,
+      "value": "Delete"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.Security.tooltip": [
@@ -6087,6 +6099,102 @@
       "value": "Error while retrieving the subscriptions"
     }
   ],
+  "Apis.Details.Topics.components.AddOperation.op.type": [
+    {
+      "type": 0,
+      "value": "Type"
+    }
+  ],
+  "Apis.Details.Topics.components.AddOperation.operation.topic.or.type.cannot.be.empty.warning": [
+    {
+      "type": 0,
+      "value": "Topic name or topic type(s) can't be empty"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditParameter.data.type": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditParameter.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditParameter.select.data.type": [
+    {
+      "type": 0,
+      "value": "Select the Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.data.type": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.select.data.type": [
+    {
+      "type": 0,
+      "value": "Select the Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.actions": [
+    {
+      "type": 0,
+      "value": "Actions"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.datatype": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.name": [
+    {
+      "type": 0,
+      "value": "Name"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.actions": [
+    {
+      "type": 0,
+      "value": "Actions"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.data.type": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.name": [
+    {
+      "type": 0,
+      "value": "Name"
+    }
+  ],
   "Apis.Details.TryOutConsole.token.label": [
     {
       "type": 0,
@@ -6352,7 +6460,7 @@
   "Apis.Details.index.topics": [
     {
       "type": 0,
-      "value": "Topics"
+      "value": "topics"
     }
   ],
   "Apis.Details.index.wsdl.definition": [
@@ -6583,10 +6691,10 @@
       "value": "Webhook API"
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": [
+  "Apis.Listing.SampleAPI.SampleAPIProduct.title": [
     {
       "type": 0,
-      "value": "Create New API Product"
+      "value": "Let’s get started !"
     }
   ],
   "Apis.Listing.SampleAPI.continue.on.close": [
@@ -6661,16 +6769,16 @@
       "value": "Updating sample API ..."
     }
   ],
+  "Apis.Listing.SampleAPIProduct.creator.error": [
+    {
+      "type": 0,
+      "value": "API is not deployed yet! Please deploy the API before trying out"
+    }
+  ],
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
       "value": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
-    }
-  ],
-  "Apis.Listing.SampleAPIProduct.manager": [
-    {
-      "type": 0,
-      "value": "Welcome to WSO2 API Manager"
     }
   ],
   "Apis.Listing.TableView.TableView.doc.flag": [
@@ -7139,24 +7247,6 @@
       "value": "page"
     }
   ],
-  "Apis.Topic.Edit.Description": [
-    {
-      "type": 0,
-      "value": "Description"
-    }
-  ],
-  "Apis.Topic.Edit.Type": [
-    {
-      "type": 0,
-      "value": "Type"
-    }
-  ],
-  "Apis.Topic.Edit.name": [
-    {
-      "type": 0,
-      "value": "Name"
-    }
-  ],
   "Applications.Details.Invoice.view.btn": [
     {
       "type": 0,
@@ -7555,12 +7645,6 @@
       "value": "Update Scope"
     }
   ],
-  "Scopes.Listing.Listing.create.scopes.button": [
-    {
-      "type": 0,
-      "value": "Create a new scope"
-    }
-  ],
   "Scopes.Listing.Listing.heading.scope.add_new": [
     {
       "type": 0,
@@ -7625,12 +7709,6 @@
     {
       "type": 0,
       "value": "*You are not authorized to update scopes of the API due to insufficient permissions"
-    }
-  ],
-  "Scopes.Listing.sample.scope.manager": [
-    {
-      "type": 0,
-      "value": "Welcome to WSO2 API Manager"
     }
   ],
   "Scopes.Usage.Usage.api.context": [
