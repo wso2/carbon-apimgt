@@ -74,8 +74,7 @@ public class SchemaValidator extends AbstractHandler {
             return true;
         }
         OpenApiInteractionValidator validator = getOpenAPIValidator(swagger);
-        OpenAPIRequest request;
-        request = new OpenAPIRequest(messageContext);
+        OpenAPIRequest request = new OpenAPIRequest(messageContext);
 
         ValidationReport validationReport = validator.validateRequest(request);
         if (validationReport.hasErrors()) {
@@ -95,8 +94,7 @@ public class SchemaValidator extends AbstractHandler {
 
         String swagger = messageContext.getProperty("OPEN_API_STRING").toString();
         OpenApiInteractionValidator validator = getOpenAPIValidator(swagger);
-        OpenAPIResponse response;
-        response = new OpenAPIResponse(messageContext);
+        OpenAPIResponse response = new OpenAPIResponse(messageContext);
 
         ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
                 response);
