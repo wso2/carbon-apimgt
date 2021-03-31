@@ -47,46 +47,42 @@ public class OpenAPIRequest implements Request {
     private Multimap<String, String> headers = ArrayListMultimap.create();
     private Map<String, Collection<String>> queryParams;
     private Optional<String> requestBody;
-
     /**
      * Build OAI Request from Message Context.
      *
      * @param messageContext Synapse message context.
      * @return OAI Request.
      */
-    public static OpenAPIRequest from(MessageContext messageContext) {
+    public OpenAPIRequest(MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
-        OpenAPIRequest openAPIRequest = new OpenAPIRequest();
         //set HTTP Method
-        openAPIRequest.method = Request.Method.valueOf((String)
+        method = Request.Method.valueOf((String)
                 messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
         //Set Request path
-        openAPIRequest.path = SchemaValidationUtils.getRestSubRequestPath(
+        path = SchemaValidationUtils.getRestSubRequestPath(
                 messageContext.getProperty(REST_SUB_REQUEST_PATH).toString());
         //extract transport headers
         Map<String, String> transportHeaders = (Map<String, String>)
                 (axis2MessageContext.getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS));
         //Set Request body
-        openAPIRequest.requestBody = SchemaValidationUtils.getMessageContent(messageContext);
+        requestBody = SchemaValidationUtils.getMessageContent(messageContext);
         Map<String, Collection<String>> headerMap = transportHeaders.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));
         //Set transport headers
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
-            openAPIRequest.headers.put(header.getKey(), header.getValue().iterator().next());
+            headers.put(header.getKey(), header.getValue().iterator().next());
         }
         String apiResource = messageContext.getProperty(APIMgtGatewayConstants.RESOURCE).toString();
         //Extracting query params
         try {
-            openAPIRequest.queryParams = SchemaValidationUtils.getQueryParams(apiResource, (String)
+            queryParams = SchemaValidationUtils.getQueryParams(apiResource, (String)
                     messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE));
         } catch (UnsupportedEncodingException e) {
             logger.error("Failed to decode query string");
         }
-        return openAPIRequest;
-
     }
 
     @Nonnull
