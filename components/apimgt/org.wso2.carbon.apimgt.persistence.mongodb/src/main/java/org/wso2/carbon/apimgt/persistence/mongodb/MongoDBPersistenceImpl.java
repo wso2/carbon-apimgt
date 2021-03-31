@@ -1048,11 +1048,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoCursor<MongoDBDevPortalAPI> cursor = collection.aggregate(Arrays.asList(match(Filters.and(statusFilter,
                 revisionFilter)), project(include("_id", "tags")))).cursor();
 
-        Map<String, Integer> tagMap= new HashMap<>();
+        Map<String, Integer> tagMap = new HashMap<>();
         while (cursor.hasNext()) {
             MongoDBDevPortalAPI mongoDBAPIDocument = cursor.next();
             List<String> mongoDBAPIDocumentTags = mongoDBAPIDocument.getTags();
-            for (String mongoDBAPIDocumentTag: mongoDBAPIDocumentTags) {
+            for (String mongoDBAPIDocumentTag : mongoDBAPIDocumentTags) {
                 if (tagMap.containsKey(mongoDBAPIDocumentTag)) {
                     int count = tagMap.get(mongoDBAPIDocumentTag);
                     tagMap.put(mongoDBAPIDocumentTag, count + 1);
@@ -1106,6 +1106,6 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             List<APICategory> mappedAPIApiCategories = mappedAPI.getApiCategories();
             categoriesList.addAll(mappedAPIApiCategories);
         }
-        return  categoriesList;
+        return categoriesList;
     }
 }
