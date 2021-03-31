@@ -166,7 +166,8 @@ public class ThrottlingPolicyMappingUtil {
         }
     }
 
-    public static SubscriptionPolicyDTO fromSubscriptionToDTO(SubscriptionPolicy subscriptionPolicy) {
+    public static SubscriptionPolicyDTO fromSubscriptionToDTO(SubscriptionPolicy subscriptionPolicy,
+                                                              int position) {
         SubscriptionPolicyDTO dto = new SubscriptionPolicyDTO();
         dto.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
         dto.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
@@ -180,13 +181,18 @@ public class ThrottlingPolicyMappingUtil {
         eventCountLimitDTO.setTimeUnit(eventCountLimit.getTimeUnit());
         eventCountLimitDTO.setUnitTime(eventCountLimit.getUnitTime());
         limitDTO.setEventCount(eventCountLimitDTO);
-        dto.setGraphQLMaxDepth(subscriptionPolicy.getGraphQLMaxDepth());
-        dto.setGraphQLMaxComplexity(subscriptionPolicy.getGraphQLMaxComplexity());
+        dto.setDefaultLimit(limitDTO);
         dto.setSubscriberCount(subscriptionPolicy.getSubscriberCount());
         dto.setDisplayName(subscriptionPolicy.getDisplayName());
         dto.setDescription(subscriptionPolicy.getDescription());
         dto.setIsDeployed(subscriptionPolicy.isDeployed());
-        dto.setType(subscriptionPolicy.getTierQuotaType());
+        dto.setPolicyName(subscriptionPolicy.getPolicyName());
+        dto.setBillingPlan(subscriptionPolicy.getBillingPlan());
+        dto.setPolicyId(position);
+        dto.setUuid(subscriptionPolicy.getUUID());
+        dto.setIsDeployed(subscriptionPolicy.isDeployed());
+        dto.setTenantDomain(subscriptionPolicy.getTenantDomain());
+        dto.setTenantId(subscriptionPolicy.getTenantId());
         return dto;
     }
 }

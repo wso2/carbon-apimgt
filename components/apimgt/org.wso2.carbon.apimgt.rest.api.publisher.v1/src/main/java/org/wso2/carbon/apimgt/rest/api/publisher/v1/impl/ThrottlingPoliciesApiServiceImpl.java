@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
+
 /**
  * This is the service implementation class for Publisher throttling policies related operations
  */
@@ -76,24 +78,42 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         return Response.ok().entity(policyListDTO).build();
     }
 
-    @Override
-    public Response getSubscriptionThrottlingPolicies(String ifNoneMatch,
-                                                      MessageContext messageContext) throws APIManagementException {
+    /**
+     * Retrieves all the Tiers
+     *
+     * @param limit       max number of objects returns
+     * @param offset      starting index
+     * @param ifNoneMatch If-None-Match header value
+     * @return Response object containing resulted tiers
+     */
 
+    @Override
+    public Response getSubscriptionThrottlingPolicies(Integer limit, Integer offset, String ifNoneMatch,
+                                                      MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        SubscriptionPolicy[] subscriptionPolicies = (SubscriptionPolicy[]) apiProvider.getPolicies(userName,
+                PolicyConstants.POLICY_LEVEL_SUB);
+        List<SubscriptionPolicy> streamingPolicies = new ArrayList<>();
+        for (SubscriptionPolicy subscriptionPolicy:subscriptionPolicies) {
+            if (subscriptionPolicy.getDefaultQuotaPolicy().getType().equals(EVENT_COUNT_TYPE))
+            streamingPolicies.add(subscriptionPolicy);
+        }
         SubscriptionPolicyListDTO subscriptionPolicyListDTO = new SubscriptionPolicyListDTO();
         List<SubscriptionPolicyDTO> subscriptionPolicyDTOs = subscriptionPolicyListDTO.getList();
         if (subscriptionPolicyDTOs == null) {
             subscriptionPolicyDTOs = new ArrayList<>();
             subscriptionPolicyListDTO.setList(subscriptionPolicyDTOs);
         }
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        String userName = RestApiCommonUtil.getLoggedInUsername();
-        SubscriptionPolicy[] subscriptionPolicies = (SubscriptionPolicy[]) apiProvider.getPolicies(userName,
-                PolicyConstants.POLICY_LEVEL_SUB);
-        for (SubscriptionPolicy policy : subscriptionPolicies) {
-            subscriptionPolicyDTOs.add(ThrottlingPolicyMappingUtil.fromSubscriptionToDTO(policy));
-        }
+        int size = streamingPolicies.size();
+        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = Math.min(offset + limit - 1, size - 1);
 
+        for (int i = start; i <= end; i++) {
+            subscriptionPolicyDTOs.add(ThrottlingPolicyMappingUtil.fromSubscriptionToDTO(streamingPolicies.get(i), i));
+        }
+        subscriptionPolicyListDTO.setCount(subscriptionPolicyDTOs.size());
         return Response.ok().entity(subscriptionPolicyListDTO).build();
     }
 

@@ -4612,6 +4612,8 @@ paths:
         This operation can be used to list the available streaming subscription policies
       operationId: getSubscriptionThrottlingPolicies
       parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -4632,7 +4634,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SubscriptionPolicy'
+                $ref: '#/components/schemas/SubscriptionPolicyList'
         304:
           description: |
             Not Modified.
@@ -9471,6 +9473,8 @@ components:
           example: 1
         list:
           type: array
+          description: |
+            Array of SubscriptionPolicies
           items:
             $ref: '#/components/schemas/SubscriptionPolicy'
         pagination:
@@ -9672,16 +9676,48 @@ components:
     SubscriptionPolicy:
       title: Subscription Throttling Policy
       allOf:
-        - $ref: '#/components/schemas/ThrottlePolicy'
-        - $ref: '#/components/schemas/GraphQLQuery'
         - required:
             - defaultLimit
           type: object
           properties:
+            policyId:
+              type: int
+              description: Id of policy
+              example: 1
+            uuid:
+              type: string
+              description: policy uuid
+              example: 0c6439fd-9b16-3c2e-be6e-1086e0b9aa93
+            policyName:
+              maxLength: 60
+              minLength: 1
+              type: string
+              description: Name of policy
+              example: 30PerMin
+            displayName:
+              type: string
+              description: Display name of the policy
+              example: 30PerMin
+              maxLength: 512
+            description:
+              maxLength: 1024
+              type: string
+              description: Description of the policy
+              example: Allows 30 request per minute
+            isDeployed:
+              type: boolean
+              description: Indicates whether the policy is deployed successfully or not.
+              default: false
+            tenantId:
+              type: int
+              description: Throttling policy tenant domain id
+              example: -1234
+            tenantDomain:
+              type: string
+              description: Throttling policy tenant domain
+              example: carbon.super
             defaultLimit:
               $ref: '#/components/schemas/ThrottleLimit'
-            monetization:
-              $ref: '#/components/schemas/MonetizationInfo'
             rateLimitCount:
               type: integer
               description: Burst control request count
