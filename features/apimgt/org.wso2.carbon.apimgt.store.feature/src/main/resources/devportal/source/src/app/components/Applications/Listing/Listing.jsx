@@ -546,15 +546,19 @@ class Listing extends Component {
                                                 defaultMessage='No Applications Available'
                                             />
                                         </Typography>
-                                        
-                                        <Typography variant="body2" gutterBottom>
-                                            <a onClick={this.handleClickOpen} className={classes.clearSearchLink}>
-                                                <FormattedMessage
-                                                    id='Applications.Listing.Listing.noapps.display.link.text'
-                                                    defaultMessage='Add New Application'
-                                                />
-                                            </a>
-                                        </Typography>
+                                        <ScopeValidation
+                                            resourcePath={resourcePaths.APPLICATIONS}
+                                            resourceMethod={resourceMethods.POST}
+                                        >
+                                            <Typography variant="body2" gutterBottom>
+                                                <a onClick={this.handleClickOpen} className={classes.clearSearchLink}>
+                                                    <FormattedMessage
+                                                        id='Applications.Listing.Listing.noapps.display.link.text'
+                                                        defaultMessage='Add New Application'
+                                                    />
+                                                </a>
+                                            </Typography>
+                                        </ScopeValidation>
                                     </div>
                                 ) :
                                     (<div className={classes.noDataMessage}>
