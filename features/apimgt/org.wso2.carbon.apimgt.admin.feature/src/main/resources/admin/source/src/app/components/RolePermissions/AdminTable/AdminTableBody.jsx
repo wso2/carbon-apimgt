@@ -112,18 +112,17 @@ function AdminTableBody(props) {
         <TableBody>
             {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => {
-                    const key = row[0].key || row[0];
+                .map((row, index) => {
                     const isItemSelected = isSelected(row.name);
-                    const labelId = `enhanced-table-checkbox-${key}`;
+                    const labelId = `enhanced-table-checkbox-${index}`;
                     return (
                         <TableRow
                             hover
-                            onClick={(event) => handleClick(event, key)}
+                            onClick={(event) => handleClick(event, index)}
                             role='checkbox'
                             aria-checked={isItemSelected}
                             tabIndex={-1}
-                            key={key}
+                            key={index}
                             selected={isItemSelected}
 
                         >
