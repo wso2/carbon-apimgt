@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.persistence.mongodb;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -25,7 +24,12 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.GridFSDownloadStream;
 import com.mongodb.client.gridfs.model.GridFSUploadOptions;
-import com.mongodb.client.model.*;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.result.InsertOneResult;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
@@ -82,7 +86,15 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
