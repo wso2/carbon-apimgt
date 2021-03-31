@@ -25,13 +25,9 @@ import com.google.gson.JsonParser;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.AbstractAPIManager;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
@@ -65,10 +61,11 @@ public class APIUtils {
 
         Set<String> apiTransports = new HashSet<>(Arrays.asList(api.getTransports().split(",")));
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-        APIURLsDTO apiURLsDTO = new APIURLsDTO();
+
         for (String environmentName : environmentsPublishedByAPI) {
             Environment environment = environments.get(environmentName);
             if (environment != null) {
+                APIURLsDTO apiURLsDTO = new APIURLsDTO();
                 APIDefaultVersionURLsDTO apiDefaultVersionURLsDTO = new APIDefaultVersionURLsDTO();
                 String[] gwEndpoints = null;
                 if ("WS".equalsIgnoreCase(api.getType())) {
@@ -134,9 +131,6 @@ public class APIUtils {
             }
         }
 
-        APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
-        apiEndpointURLsDTO.setUrLs(apiURLsDTO);
-        apiEndpointsList.add(apiEndpointURLsDTO);
         return apiEndpointsList;
     }
 
