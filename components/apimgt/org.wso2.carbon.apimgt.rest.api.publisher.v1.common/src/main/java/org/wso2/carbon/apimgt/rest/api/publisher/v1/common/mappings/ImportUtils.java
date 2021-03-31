@@ -102,8 +102,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryIteratorException;
@@ -284,7 +282,7 @@ public class ImportUtils {
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
-            addAPIWsdl(extractedFolderPath, importedApi, apiProvider, registry);
+            addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
             addSOAPToREST(extractedFolderPath, importedApi, registry);
 
             if (!isAdvertiseOnlyAPI(importedApiDTO)) {
@@ -1471,32 +1469,27 @@ public class ImportUtils {
      * @param pathToArchive Location of the extracted folder of the API
      * @param importedApi   The imported API object
      * @param apiProvider   API Provider
-     * @param registry      Registry
      */
-    private static void addAPIWsdl(String pathToArchive, API importedApi, APIProvider apiProvider, Registry registry) {
+    private static void addAPIWsdl(String pathToArchive, API importedApi, APIProvider apiProvider)
+            throws APIManagementException {
 
         String wsdlFileName = importedApi.getId().getApiName() + "-" + importedApi.getId().getVersion()
                 + APIConstants.WSDL_FILE_EXTENSION;
         String wsdlPath = pathToArchive + ImportExportConstants.WSDL_LOCATION + wsdlFileName;
 
         if (CommonUtil.checkFileExistence(wsdlPath)) {
-            try {
-                URL wsdlFileUrl = new File(wsdlPath).toURI().toURL();
-                importedApi.setWsdlUrl(wsdlFileUrl.toString());
-                APIUtil.createWSDL(registry, importedApi);
-                apiProvider.updateAPI(importedApi);
-            } catch (MalformedURLException e) {
-                // this exception is logged and ignored since WSDL is optional for an API
-                log.error("Error in getting WSDL URL. ", e);
-            } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
-                // this exception is logged and ignored since WSDL is optional for an API
-                log.error("Error in putting the WSDL resource to registry. ", e);
-            } catch (APIManagementException e) {
-                // this exception is logged and ignored since WSDL is optional for an API
-                log.error("Error in creating the WSDL resource in the registry. ", e);
-            } catch (FaultGatewaysException e) {
-                // This is logged and process is continued because WSDL is optional for an API
-                log.error("Failed to update API after adding WSDL. ", e);
+            try (FileInputStream inputStream = new FileInputStream(wsdlPath)) {
+                String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+                String fileExtension = FilenameUtils.getExtension(wsdlPath);
+                PublisherCommonUtils.addWsdl(fileExtension, inputStream, importedApi, apiProvider, tenantDomain);
+            } catch (FileNotFoundException e) {
+                throw new APIManagementException(
+                        "WSDL file of the API: " + importedApi.getId().getName() + " is not found.", e,
+                        ExceptionCodes.NO_WSDL_FOUND_IN_WSDL_ARCHIVE);
+            } catch (IOException e) {
+                throw new APIManagementException(
+                        "Error reading the WSDL file of the API: " + importedApi.getId().getName(), e,
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
             }
         }
     }

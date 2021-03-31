@@ -1456,4 +1456,27 @@ public class PublisherCommonUtils {
         return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
                 APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
     }
+
+    /**
+     * Add WSDL file of an API.
+     *
+     * @param fileContentType Content type of the file
+     * @param fileInputStream Input Stream
+     * @param api             API to which the WSDL belongs to
+     * @param apiProvider     API Provider
+     * @param tenantDomain    Tenant domain of the API
+     * @throws APIManagementException If an error occurs while adding the WSDL resource
+     */
+    public static void addWsdl(String fileContentType, InputStream fileInputStream, API api, APIProvider apiProvider,
+            String tenantDomain) throws APIManagementException {
+        ResourceFile wsdlResource;
+        if (APIConstants.APPLICATION_ZIP.equals(fileContentType) || APIConstants.APPLICATION_X_ZIP_COMPRESSED
+                .equals(fileContentType)) {
+            wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+        } else {
+            wsdlResource = new ResourceFile(fileInputStream, fileContentType);
+        }
+        api.setWsdlResource(wsdlResource);
+        apiProvider.addWSDLResource(api.getUuid(), wsdlResource, null, tenantDomain);
+    }
 }
