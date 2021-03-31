@@ -57,7 +57,6 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -1117,9 +1116,10 @@ public class ImportUtils {
      *
      * @param pathToArchive  Location of the extracted folder of the API or API Product
      * @param apiTypeWrapper The imported API object
+     * @throws APIManagementException If an error occurs when uploading the thumbnail of the API/API Product
      */
     private static void addThumbnailImage(String pathToArchive, ApiTypeWrapper apiTypeWrapper,
-                                          APIProvider apiProvider) {
+                                          APIProvider apiProvider) throws APIManagementException {
 
         //Adding image icon to the API if there is any
         File imageFolder = new File(pathToArchive + ImportExportConstants.IMAGE_FILE_LOCATION);
@@ -1142,12 +1142,15 @@ public class ImportUtils {
      * @param imageFile      Image file
      * @param apiTypeWrapper API or API Product to update
      * @param apiProvider    API Provider
+     * @throws APIManagementException If an error occurs when uploading the thumbnail of the API/API Product
      */
-    private static void updateWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider) {
+    private static void updateWithThumbnail(File imageFile, ApiTypeWrapper apiTypeWrapper, APIProvider apiProvider)
+            throws APIManagementException {
 
         Identifier identifier = apiTypeWrapper.getId();
         String fileName = imageFile.getName();
         String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (StringUtils.isBlank(mimeType)) {
             try {
                 // Check whether the icon is in .json format (UI icons are stored as .json)
@@ -1163,25 +1166,19 @@ public class ImportUtils {
             }
         }
         try (FileInputStream inputStream = new FileInputStream(imageFile.getAbsolutePath())) {
-            ResourceFile apiImage = new ResourceFile(inputStream, mimeType);
-            String thumbPath = APIUtil.getIconPath(identifier);
-            String thumbnailUrl = apiProvider.addResourceFile(identifier, thumbPath, apiImage);
-            apiTypeWrapper.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, identifier.getProviderName()));
-            APIUtil.setResourcePermissions(identifier.getProviderName(), null, null, thumbPath);
-            if (apiTypeWrapper.isAPIProduct()) {
-                apiProvider.updateAPIProduct(apiTypeWrapper.getApiProduct());
-            } else {
-                apiProvider.updateAPI(apiTypeWrapper.getApi());
-            }
-        } catch (FaultGatewaysException e) {
-            //This is logged and process is continued because icon is optional for an API
-            log.error("Failed to update API/API Product after adding icon. ", e);
-        } catch (APIManagementException e) {
-            log.error("Failed to add icon to the API/API Product: " + identifier.getName(), e);
+            String apiOrApiProductId = (!apiTypeWrapper.isAPIProduct()) ?
+                    apiTypeWrapper.getApi().getUuid() :
+                    apiTypeWrapper.getApiProduct().getUuid();
+            PublisherCommonUtils.updateThumbnail(inputStream, mimeType, apiProvider, apiOrApiProductId, tenantDomain);
         } catch (FileNotFoundException e) {
-            log.error("Icon for API/API Product: " + identifier.getName() + " is not found.", e);
+            throw new APIManagementException("Icon for API/API Product: " + identifier.getName() + " is not found.", e,
+                    ExceptionCodes.from(ExceptionCodes.ERROR_UPLOADING_THUMBNAIL, identifier.getName(),
+                            identifier.getVersion()));
         } catch (IOException e) {
-            log.error("Failed to import icon for API/API Product:" + identifier.getName());
+            throw new APIManagementException(
+                    "Failed to read the image file of API/API Product: " + identifier.getName() + " from the archive.",
+                    e, ExceptionCodes
+                    .from(ExceptionCodes.ERROR_UPLOADING_THUMBNAIL, identifier.getName(), identifier.getVersion()));
         }
     }
 
@@ -1253,17 +1250,15 @@ public class ImportUtils {
                             Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(docSourceType)
                                     || Documentation.DocumentSourceType.MARKDOWN.toString()
                                     .equalsIgnoreCase(docSourceType);
+                    String apiOrApiProductId = (!apiTypeWrapper.isAPIProduct()) ?
+                            apiTypeWrapper.getApi().getUuid() :
+                            apiTypeWrapper.getApiProduct().getUuid();
                     if (docContentExists) {
                         try (FileInputStream inputStream = new FileInputStream(
                                 individualDocumentFilePath + File.separator + folderName)) {
                             String inlineContent = IOUtils.toString(inputStream, ImportExportConstants.CHARSET);
-                            if (!apiTypeWrapper.isAPIProduct()) {
-                                apiProvider.addDocumentationContent(apiTypeWrapper.getApi(), documentation.getName(),
-                                        inlineContent);
-                            } else {
-                                apiProvider.addProductDocumentationContent(apiTypeWrapper.getApiProduct(),
-                                        documentation.getName(), inlineContent);
-                            }
+                            PublisherCommonUtils.addDocumentationContent(documentation, apiProvider, apiOrApiProductId,
+                                    documentation.getId(), tenantDomain, inlineContent);
                         }
                     } else if (ImportExportConstants.FILE_DOC_TYPE.equalsIgnoreCase(docSourceType)) {
                         String filePath = documentation.getFilePath();
@@ -1272,24 +1267,9 @@ public class ImportUtils {
                             String docExtension = FilenameUtils.getExtension(
                                     pathToArchive + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY
                                             + File.separator + filePath);
-                            ResourceFile apiDocument = new ResourceFile(inputStream, docExtension);
-                            String visibleRolesList = apiTypeWrapper.getVisibleRoles();
-                            String[] visibleRoles = new String[0];
-                            if (visibleRolesList != null) {
-                                visibleRoles = visibleRolesList.split(",");
-                            }
-                            String filePathDoc = APIUtil.getDocumentationFilePath(identifier, filePath);
-                            APIUtil.setResourcePermissions(apiTypeWrapper.getId().getProviderName(),
-                                    apiTypeWrapper.getVisibility(), visibleRoles, filePathDoc);
-                            documentation.setFilePath(
-                                    apiProvider.addResourceFile(apiTypeWrapper.getId(), filePathDoc, apiDocument));
-                            if (!apiTypeWrapper.isAPIProduct()) {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApi().getUuid(), documentation,
-                                        tenantDomain);
-                            } else {
-                                apiProvider.updateDocumentation(apiTypeWrapper.getApiProduct().getUuid(), documentation,
-                                        tenantDomain);
-                            }
+                            PublisherCommonUtils.addDocumentationContentForFile(inputStream, docExtension,
+                                    documentation.getFilePath(), apiProvider, apiOrApiProductId, documentation.getId(),
+                                    tenantDomain);
                         } catch (FileNotFoundException e) {
                             //this error is logged and ignored because documents are optional in an API
                             log.error("Failed to locate the document files of the API/API Product: " + apiTypeWrapper

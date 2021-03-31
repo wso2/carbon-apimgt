@@ -205,10 +205,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     RestApiUtil.handleBadRequest(
                             "Source type of product document " + documentId + " is not INLINE " + "or MARKDOWN", log);
                 }
-                DocumentationContent content = new DocumentationContent();
-                content.setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
-                content.setTextContent(inlineContent);
-                apiProvider.addDocumentationContent(apiProductId, documentId, tenantDomain, content);
+                PublisherCommonUtils
+                        .addDocumentationContent(documentation, apiProvider, apiProductId, documentId, tenantDomain,
+                                inlineContent);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }

@@ -49,6 +49,8 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -77,6 +79,7 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1170,6 +1173,22 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * Update thumbnail of an API/API Product
+     *
+     * @param fileInputStream Input stream
+     * @param fileContentType The content type of the image
+     * @param apiProvider     API Provider
+     * @param apiId           API/API Product UUID
+     * @param tenantDomain    Tenant domain of the API
+     * @throws APIManagementException If an error occurs while updating the thumbnail
+     */
+    public static void updateThumbnail(InputStream fileInputStream, String fileContentType, APIProvider apiProvider,
+            String apiId, String tenantDomain) throws APIManagementException {
+        ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
+        apiProvider.setThumbnailToAPI(apiId, apiImage, tenantDomain);
+    }
+
+    /**
      * Add document DTO.
      *
      * @param documentDto Document DTO
@@ -1209,6 +1228,48 @@ public class PublisherCommonUtils {
         documentation = apiProvider.addDocumentation(apiId, documentation, tenantDomain);
 
         return documentation;
+    }
+
+    /**
+     * Add documentation content of inline and markdown documents.
+     *
+     * @param documentation Documentation
+     * @param apiProvider   API Provider
+     * @param apiId         API/API Product UUID
+     * @param documentId    Document ID
+     * @param tenantDomain  Tenant domain of the API/API Product
+     * @param inlineContent Inline content string
+     * @throws APIManagementException If an error occurs while adding the documentation content
+     */
+    public static void addDocumentationContent(Documentation documentation, APIProvider apiProvider, String apiId,
+            String documentId, String tenantDomain, String inlineContent) throws APIManagementException {
+        DocumentationContent content = new DocumentationContent();
+        content.setSourceType(DocumentationContent.ContentSourceType.valueOf(documentation.getSourceType().toString()));
+        content.setTextContent(inlineContent);
+        apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
+    }
+
+    /**
+     * Add documentation content of files.
+     *
+     * @param inputStream  Input Stream
+     * @param mediaType    Media type of the document
+     * @param filename     File name
+     * @param apiProvider  API Provider
+     * @param apiId        API/API Product UUID
+     * @param documentId   Document ID
+     * @param tenantDomain Tenant domain of the API/API Product
+     * @throws APIManagementException If an error occurs while adding the documentation file
+     */
+    public static void addDocumentationContentForFile(InputStream inputStream, String mediaType, String filename,
+            APIProvider apiProvider, String apiId, String documentId, String tenantDomain)
+            throws APIManagementException {
+        DocumentationContent content = new DocumentationContent();
+        ResourceFile resourceFile = new ResourceFile(inputStream, mediaType);
+        resourceFile.setName(filename);
+        content.setResourceFile(resourceFile);
+        content.setSourceType(DocumentationContent.ContentSourceType.FILE);
+        apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
     }
 
     /**
