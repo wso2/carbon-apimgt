@@ -200,9 +200,8 @@ public class ImportUtils {
             if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                 graphQLSchema = retrieveValidatedGraphqlSchemaFromArchive(extractedFolderPath);
             }
-            // Validate the WSDL of SOAP/SOAPTOREST APIs
-            if (APIConstants.API_TYPE_SOAP.equalsIgnoreCase(apiType) || APIConstants.API_TYPE_SOAPTOREST
-                    .equalsIgnoreCase(apiType)) {
+            // Validate the WSDL of SOAP APIs
+            if (APIConstants.API_TYPE_SOAP.equalsIgnoreCase(apiType)) {
                 validateWSDLFromArchive(extractedFolderPath, importedApiDTO);
             }
             // Validate the AsyncAPI definition of streaming APIs
@@ -283,7 +282,7 @@ public class ImportUtils {
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
-            addSOAPToREST(extractedFolderPath, importedApi, registry);
+            addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
 
             if (!isAdvertiseOnlyAPI(importedApiDTO)) {
                 addAPISequences(extractedFolderPath, importedApi, registry);
@@ -1469,6 +1468,7 @@ public class ImportUtils {
      * @param pathToArchive Location of the extracted folder of the API
      * @param importedApi   The imported API object
      * @param apiProvider   API Provider
+     * @throws APIManagementException If an error occurs while adding WSDL
      */
     private static void addAPIWsdl(String pathToArchive, API importedApi, APIProvider apiProvider)
             throws APIManagementException {
@@ -1697,34 +1697,19 @@ public class ImportUtils {
     /**
      * This method adds API sequences to the imported API. If the sequence is a newly defined one, it is added.
      *
-     * @param pathToArchive Location of the extracted folder of the API
-     * @param importedApi   API
-     * @param registry      Registry
-     * @throws APIImportExportException If an error occurs while importing mediation logic
+     * @param importedApi    API
+     * @param swaggerContent Swagger Content
+     * @param apiProvider    API Provider
+     * @throws APIManagementException If an error occurs while updating the API or generating the sequences
+     * @throws FaultGatewaysException If an error occurs while updating the API
      */
-    private static void addSOAPToREST(String pathToArchive, API importedApi, Registry registry)
-            throws APIManagementException {
-
-        List<SoapToRestMediationDto> soapToRestInMediationDtoList = retrieveSoapToRestFlowMediations(pathToArchive, IN);
-        List<SoapToRestMediationDto> soapToRestOUTMediationDtoList = retrieveSoapToRestFlowMediations(pathToArchive,
-                OUT);
-        APIIdentifier apiId = importedApi.getId();
-        String soapToRestLocationIn =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiId.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + apiId.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + apiId.getVersion() + RegistryConstants.PATH_SEPARATOR
-                        + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE;
-        String soapToRestLocationOut =
-                APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiId.getProviderName()
-                        + RegistryConstants.PATH_SEPARATOR + apiId.getApiName() + RegistryConstants.PATH_SEPARATOR
-                        + apiId.getVersion() + RegistryConstants.PATH_SEPARATOR
-                        + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
-
-        for (SoapToRestMediationDto soapToRestMediationDto : soapToRestInMediationDtoList) {
-            importMediationLogic(soapToRestMediationDto, registry, soapToRestLocationIn);
-        }
-        for (SoapToRestMediationDto soapToRestMediationDto : soapToRestOUTMediationDtoList) {
-            importMediationLogic(soapToRestMediationDto, registry, soapToRestLocationOut);
+    private static void addSOAPToREST(API importedApi, String swaggerContent, APIProvider apiProvider)
+            throws APIManagementException, FaultGatewaysException {
+        if (StringUtils.equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
+            String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+            PublisherCommonUtils
+                    .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider,
+                            tenantDomain);
         }
     }
 

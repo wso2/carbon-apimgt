@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -64,6 +65,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
@@ -1478,5 +1480,24 @@ public class PublisherCommonUtils {
         }
         api.setWsdlResource(wsdlResource);
         apiProvider.addWSDLResource(api.getUuid(), wsdlResource, null, tenantDomain);
+    }
+
+    /**
+     * Set the generated SOAP to REST sequences from the swagger file to the API and update it.
+     *
+     * @param swaggerContent Swagger content
+     * @param api            API to update
+     * @param apiProvider    API Provider
+     * @param tenantDomain   Tenant domain of the API
+     * @return Updated API Object
+     * @throws APIManagementException If an error occurs while generating the sequences or updating the API
+     * @throws FaultGatewaysException If an error occurs while updating the API
+     */
+    public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
+            APIProvider apiProvider, String tenantDomain) throws APIManagementException, FaultGatewaysException {
+        List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent, api.getId());
+        API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
+        updatedAPI.setSoapToRestSequences(list);
+        return apiProvider.updateAPI(updatedAPI, api);
     }
 }
