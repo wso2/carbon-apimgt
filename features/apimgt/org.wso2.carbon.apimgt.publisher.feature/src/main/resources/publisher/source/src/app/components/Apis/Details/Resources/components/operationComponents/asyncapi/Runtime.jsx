@@ -34,8 +34,13 @@ export default function Runtime(props) {
     } = props;
 
     const buildCallbackURL = () => {
-        return `http://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
-            + `webhooks_events_receiver_resource?topic=${target.toLowerCase()}`;
+        const context = api.context.substr(0, 1) !== '/' ? '/' + api.context : api.context;
+        let url = 'http://{GATEWAY_HOST}:9021';
+        url += context;
+        url += '/' + api.version;
+        url += '/webhooks_events_receiver_resource?topic=';
+        url += target.toLowerCase();
+        return url;
     };
 
     const getUriMappingHelperText = (value) => {
@@ -46,8 +51,9 @@ export default function Runtime(props) {
             && api.endpointConfig.production_endpoints.url.length > 0
             && value
             && value.length > 0) {
-            // TODO: remove trailing '/' if available
-            fqPath = api.endpointConfig.production_endpoints.url + value;
+            const { url } = api.endpointConfig.production_endpoints;
+            const seperator = url.substr(url.length - 1, 1) !== '/' ? '/' : '';
+            fqPath = url + seperator + value;
         }
         return fqPath ? 'Production URL will be ' + fqPath : '';
     };
