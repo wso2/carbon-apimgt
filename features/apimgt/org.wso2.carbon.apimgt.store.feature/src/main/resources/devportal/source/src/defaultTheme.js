@@ -242,7 +242,7 @@ const DefaultConfigurations = {
         social: {
             showRating: true,
             showSharing: {
-                active: true,
+                active: false,
                 showFacebook: true,
                 showReddit: true,
                 showTwitter: true,
@@ -343,7 +343,7 @@ const DefaultConfigurations = {
         AsyncTryOut: {
             backgroundColor: '#89b7d1',
         },
-        showSwaggerDescriptionOnOverview: true,
+        showSwaggerDescriptionOnOverview: false,
         overrides: {
             MuiOutlinedInput: {
                 root: {

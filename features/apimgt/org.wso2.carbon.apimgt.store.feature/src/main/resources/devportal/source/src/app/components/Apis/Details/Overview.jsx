@@ -35,6 +35,8 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import CardContent from '@material-ui/core/CardContent';
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
 import ApiThumb from 'AppComponents/Apis/Listing/ApiThumb';
 import StarRatingBar from 'AppComponents/Apis/Listing/StarRatingBar';
@@ -59,33 +61,34 @@ const useStyles = makeStyles((theme) => ({
         paddingTop: theme.spacing(2),
     },
     linkTitle: {
-        color: '#424242',
+        color: theme.palette.grey[800],
     },
     description: {
-        color: '#707070',
+        color: theme.palette.grey[700],
     },
     textLabel: {
         fontWeight: 500,
-        color: '#42424299',
+        color: theme.palette.grey[800],
     },
     apiThumb: {
         padding: theme.spacing(),
         border: 'solid 1px',
-        borderColor: '#42424299',
+        borderColor: theme.palette.grey[800],
     },
     chipRoot: {
         cursor: 'pointer',
         marginRight: theme.spacing(),
     },
     subtitle: {
-        color: '#424242',
+        color: theme.palette.grey[800],
     },
     cardRoot: {
         width: 150,
         height: 150,
+        marginRight: theme.spacing(),
     },
     sectionTitle: {
-        color: '#424242',
+        color: theme.palette.grey[800],
         fontSize: '0.95rem',
         fontWeight: 400,
     },
@@ -113,6 +116,7 @@ function Overview() {
             },
             infoBar: { showThumbnail },
             social: { showRating },
+            showSwaggerDescriptionOnOverview,
         },
     } = theme;
     const intl = useIntl();
@@ -121,6 +125,7 @@ function Overview() {
     const [notFound, setNotFound] = useState(false);
     const [allDocuments, setAllDocuments] = useState(null);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
+    const [swaggerDescription, setSwaggerDescription] = useState(null);
     const [rating, setRating] = useState({
         avgRating: 0,
         total: 0,
@@ -147,30 +152,46 @@ function Overview() {
 
     useEffect(() => {
         const restApi = new API();
-        const promisedApi = restApi.getDocumentsByAPIId(api.id);
-        promisedApi
-            .then((response) => {
-                const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
-                if (overviewDoc.length > 0) {
-                    // We can override the UI with this content
-                    setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
-                }
-                setAllDocuments(response.body.list);
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
+
+        if (showSwaggerDescriptionOnOverview) {
+            restApi.getSwaggerByAPIIdAndEnvironment(api.id, selectedEndpoint.environmentName)
+                .then((swaggerResponse) => {
+                    const swagger = swaggerResponse.obj;
+                    if (swagger && swagger.info) {
+                        setSwaggerDescription(swagger.info.description);
+                    } else {
+                        setSwaggerDescription('');
+                    }
+                })
+                .catch((error) => {
                     console.log(error);
-                }
-                const { status } = error;
-                if (status === 404) {
-                    Alert.error(intl.formatMessage({
-                        id: 'Apis.Details.Overview.error.occurred',
-                        defaultMessage: 'Error occurred',
-                    }));
-                    setNotFound(true);
-                }
-                setAllDocuments([]);
-            });
+                    setSwaggerDescription('');
+                });
+        } else {
+            restApi.getDocumentsByAPIId(api.id)
+                .then((response) => {
+                    const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
+                    if (overviewDoc.length > 0) {
+                        // We can override the UI with this content
+                        setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
+                    }
+                    setAllDocuments(response.body.list);
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        Alert.error(intl.formatMessage({
+                            id: 'Apis.Details.Overview.error.occurred',
+                            defaultMessage: 'Error occurred',
+                        }));
+                        setNotFound(true);
+                    }
+                    setAllDocuments([]);
+                });
+        }
     }, []);
 
     /**
@@ -237,6 +258,19 @@ function Overview() {
     };
 
     const user = AuthManager.getUser();
+    if (showSwaggerDescriptionOnOverview) {
+        if (!swaggerDescription) {
+            return (<Progress />);
+        } else {
+            return (
+                <Box p={3}>
+                    <ReactMarkdown plugins={[gfm]} escapeHtml>
+                        {swaggerDescription}
+                    </ReactMarkdown>
+                </Box>
+            );
+        }
+    }
     if (!allDocuments) {
         return (<Progress />);
     }

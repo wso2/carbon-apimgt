@@ -17,6 +17,7 @@
  * under the License.
  */
 import React, { useContext, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
@@ -233,7 +234,14 @@ function Environments(props) {
                         </Paper>
                     </>
                 )}
-                <Button variant='outlined' color='primary' size='small' classes={{ label: classes.tryoutLabel }}>
+                <Button
+                    component={Link}
+                    to={'/apis/' + api.id + '/test'}
+                    variant='outlined'
+                    color='primary'
+                    size='small'
+                    classes={{ label: classes.tryoutLabel }}
+                >
                     <FormattedMessage
                         id='Apis.Details.Environments.btn.tryout'
                         defaultMessage='Try Out'
