@@ -422,6 +422,7 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
+                    history.replace();
                     getRevision();
                 });
         } else {
@@ -442,6 +443,7 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
+                    history.replace();
                     getRevision();
                 });
         }
@@ -684,6 +686,10 @@ export default function Environments() {
                                 Alert.error('Something went wrong while deploying the revision');
                             }
                             console.error(error);
+                        }).finally(() => {
+                            history.replace();
+                            getRevision();
+                            getDeployedEnv();
                         });
                 })
                 .catch((error) => {
@@ -693,11 +699,6 @@ export default function Environments() {
                         Alert.error('Something went wrong while creating the revision');
                     }
                     console.error(error);
-                })
-                .finally(() => {
-                    history.replace();
-                    getRevision();
-                    getDeployedEnv();
                 });
             setOpenDeployPopup(false);
         } else {
@@ -722,6 +723,10 @@ export default function Environments() {
                                 Alert.error('Something went wrong while deploying the revision');
                             }
                             console.error(error);
+                        }).finally(() => {
+                            history.replace();
+                            getRevision();
+                            getDeployedEnv();
                         });
                 })
                 .catch((error) => {
@@ -731,11 +736,6 @@ export default function Environments() {
                         Alert.error('Something went wrong while creating the revision');
                     }
                     console.error(error);
-                })
-                .finally(() => {
-                    history.replace();
-                    getRevision();
-                    getDeployedEnv();
                 });
             setOpenDeployPopup(false);
         }
@@ -752,7 +752,9 @@ export default function Environments() {
             deleteRevision(extraRevisionToDelete[0])
                 .then(() => {
                     createDeployRevision(envList, vhostList);
-                }).finally(() => setExtraRevisionToDelete(null));
+                }).finally(() => {
+                    setExtraRevisionToDelete(null);
+                });
         } else {
             createDeployRevision(envList, vhostList);
         }
