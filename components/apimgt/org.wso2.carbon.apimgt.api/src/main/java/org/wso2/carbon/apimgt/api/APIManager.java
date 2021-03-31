@@ -927,6 +927,4 @@ public interface APIManager {
      * @throws APIManagementException
      */
     String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException;
-
-    String getOpenAPIDefinition(Identifier apiId) throws APIManagementException;
 }

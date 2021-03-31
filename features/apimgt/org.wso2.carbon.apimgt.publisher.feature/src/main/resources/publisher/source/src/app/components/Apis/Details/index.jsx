@@ -716,7 +716,7 @@ class Details extends Component {
                                 </AccordianSummary>
                                 <AccordionDetails>
                                     <div>
-                                        {!api.advertiseOnly && !api.isWebSocket() && (
+                                        {!api.advertiseInfo.advertised && !api.isWebSocket() && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.runtime.configs',
@@ -727,7 +727,7 @@ class Details extends Component {
                                                 Icon={<RuntimeConfigurationIcon />}
                                             />
                                         )}
-                                        {!api.advertiseOnly && api.isWebSocket() && (
+                                        {!api.advertiseInfo.advertised && api.isWebSocket() && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.runtime.configs',
@@ -738,9 +738,10 @@ class Details extends Component {
                                                 Icon={<RuntimeConfigurationIcon />}
                                             />
                                         )}
-                                        {!api.advertiseOnly && this.getLeftMenuItemForResourcesByType(api.type)}
+                                        {!api.advertiseInfo.advertised
+                                        && this.getLeftMenuItemForResourcesByType(api.type)}
                                         {this.getLeftMenuItemForDefinitionByType(api.type)}
-                                        {!api.advertiseOnly && !isAPIProduct && api.type !== 'WEBSUB' && (
+                                        {!api.advertiseInfo.advertised && !isAPIProduct && api.type !== 'WEBSUB' && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.endpoints',
@@ -750,7 +751,7 @@ class Details extends Component {
                                                 Icon={<EndpointIcon />}
                                             />
                                         )}
-                                        {!api.advertiseOnly && (
+                                        {!api.advertiseInfo.advertised && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.subscriptions',
@@ -761,7 +762,7 @@ class Details extends Component {
                                             />
                                         )}
 
-                                        {!api.isWebSocket() && !isAPIProduct && (
+                                        {!api.advertiseInfo.advertised && !api.isWebSocket() && !isAPIProduct && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.left.menu.scope',
@@ -784,7 +785,7 @@ class Details extends Component {
 
                                         {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                                             <>
-                                                {!api.advertiseOnly && (
+                                                {!api.advertiseInfo.advertised && (
                                                     <LeftMenuItem
                                                         text={intl.formatMessage({
                                                             id: 'Apis.Details.index.monetization',
@@ -801,20 +802,22 @@ class Details extends Component {
                             </Accordion>
                         </div>
                         <Divider />
-                        <Typography className={classes.headingText}>Deploy</Typography>
-                        {!api.advertiseOnly && (
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.environments',
-                                    defaultMessage: 'Deployments',
-                                })}
-                                route='deployments'
-                                to={pathPrefix + 'deployments'}
-                                Icon={<PersonPinCircleOutlinedIcon />}
-                            />
-                         )}
-                        {!api.advertiseOnly && !api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && api.lifeCycleStatus !== 'RETIRED' && (
+                        {!api.advertiseInfo.advertised && (
+                            <>
+                                <Typography className={classes.headingText}>Deploy</Typography>
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.environments',
+                                        defaultMessage: 'Deployments',
+                                    })}
+                                    route='deployments'
+                                    to={pathPrefix + 'deployments'}
+                                    Icon={<PersonPinCircleOutlinedIcon />}
+                                />
+                            </>
+                        )}
+                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
+                            && !api.advertiseInfo.advertised && api.lifeCycleStatus !== 'RETIRED' && (
                             <div>
                                 <Divider />
                                 <Typography className={classes.headingText}>Test</Typography>

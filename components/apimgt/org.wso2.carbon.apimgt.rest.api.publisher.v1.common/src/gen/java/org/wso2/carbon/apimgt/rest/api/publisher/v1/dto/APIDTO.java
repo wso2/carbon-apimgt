@@ -538,7 +538,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "false", value = "")
   @JsonProperty("isAWSAPI")
   public Boolean isIsAWSAPI() {
@@ -1247,7 +1247,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("advertiseInfo")

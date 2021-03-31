@@ -864,7 +864,6 @@ public class APIMappingUtil {
         }
         dto.setDescription(model.getDescription());
         dto.setIsAWSAPI(model.isAWSAPI());
-        dto.setAdvertiseOnly(model.isAdvertiseOnly());
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setIsRevision(model.isRevision());
         dto.setRevisionedApiId(model.getRevisionedApiId());
