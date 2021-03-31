@@ -18,10 +18,13 @@
 
 import React, { useState } from 'react';
 import { isRestricted } from 'AppData/AuthManager';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import { useHistory } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -39,13 +42,33 @@ export default function SaveOperations(props) {
     const {
         updateOpenAPI, updateAsyncAPI, operationsDispatcher, api,
     } = props;
-    const [isSaving, setIsSaving] = useState(false);
+    const [isUpdating, setIsSaving] = useState(false);
+    const history = useHistory();
     const [isOpen, setIsOpen] = useState(false);
+    function handleSaveAndDeploy() {
+        setIsSaving(true);
+        if (updateAsyncAPI) {
+            updateAsyncAPI('save')
+                .finally(() => history.push({
+                    pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                        : `/apis/${api.id}/deployments`,
+                    state: 'deploy',
+                }));
+        } else {
+            updateOpenAPI('save')
+                .finally(() => history.push({
+                    pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                        : `/apis/${api.id}/deployments`,
+                    state: 'deploy',
+                }));
+        }
+    }
+
     /**
      * Handle the Save button event,
      *
      */
-    function saveChanges() {
+    function handleSave() {
         setIsSaving(true);
         if (updateAsyncAPI) {
             updateAsyncAPI('save').finally(() => setIsSaving(false));
@@ -53,22 +76,36 @@ export default function SaveOperations(props) {
             updateOpenAPI('save').finally(() => setIsSaving(false));
         }
     }
+
     return (
         <>
-            <Box>
-                <Button
-                    disabled={isSaving || isRestricted(['apim:api_create'], api) || api.isRevision}
-                    onClick={saveChanges}
-                    variant='contained'
-                    color='primary'
-                >
-                    Save
-                    {isSaving && <CircularProgress size={24} />}
-                </Button>
-                <Box display='inline' ml={1}>
+            <Grid container direction='row' spacing={1} style={{ marginTop: 20 }}>
+                <Grid item>
+                    {api.isRevision
+                        || isRestricted(['apim:api_create'], api) ? (
+                            <Button
+                                disabled
+                                type='submit'
+                                variant='contained'
+                                color='primary'
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.Configuration.Resources.save'
+                                    defaultMessage='Save'
+                                />
+                            </Button>
+                        ) : (
+                            <CustomSplitButton
+                                handleSave={handleSave}
+                                handleSaveAndDeploy={handleSaveAndDeploy}
+                                isUpdating={isUpdating}
+                            />
+                        )}
+                </Grid>
+                <Grid item>
                     <Button onClick={() => setIsOpen(true)}>Reset</Button>
-                </Box>
-            </Box>
+                </Grid>
+            </Grid>
             <Dialog
                 open={isOpen}
                 aria-labelledby='bulk-delete-dialog-title'

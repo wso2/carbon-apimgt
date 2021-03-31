@@ -29,13 +29,13 @@ import { withStyles } from '@material-ui/core/styles';
 import { Link, useHistory } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
+import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import API from 'AppData/api';
-import APIProduct from 'AppData/APIProduct';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
@@ -119,7 +119,7 @@ const APIDetailsTopMenu = (props) => {
     const history = useHistory();
     const prevLocation = history.location.pathname;
     const lastIndex = prevLocation.split('/')[3];
-    const [revision, setRevision] = useState(null);
+    // const [revision, setRevision] = useState(null);
     const [revisionId, setRevisionId] = useState(api.id);
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     /**
@@ -146,30 +146,30 @@ const APIDetailsTopMenu = (props) => {
         });
     }
 
-    React.useEffect(() => {
-        const restApi = new API();
-        const restApiProduct = new APIProduct();
-        let apiId = null;
-        if (!isAPIProduct) {
-            apiId = api.isRevision ? api.revisionedApiId : api.id;
-            restApi.getRevisions(apiId).then((response) => {
-                setRevision(response.body.list);
-            })
-                .catch((errorMessage) => {
-                    console.error(errorMessage);
-                    Alert.error(JSON.stringify(errorMessage));
-                });
-        } else {
-            apiId = api.isRevision ? api.revisionedApiProductId : api.id;
-            restApiProduct.getProductRevisions(apiId).then((response) => {
-                setRevision(response.body.list);
-            })
-                .catch((errorMessage) => {
-                    console.error(errorMessage);
-                    Alert.error(JSON.stringify(errorMessage));
-                });
-        }
-    }, []);
+    // React.useEffect(() => {
+    //     const restApi = new API();
+    //     const restApiProduct = new APIProduct();
+    //     let apiId = null;
+    //     if (!isAPIProduct) {
+    //         apiId = api.isRevision ? api.revisionedApiId : api.id;
+    //         restApi.getRevisions(apiId).then((response) => {
+    //             setRevision(response.body.list);
+    //         })
+    //             .catch((errorMessage) => {
+    //                 console.error(errorMessage);
+    //                 Alert.error(JSON.stringify(errorMessage));
+    //             });
+    //     } else {
+    //         apiId = api.isRevision ? api.revisionedApiProductId : api.id;
+    //         restApiProduct.getProductRevisions(apiId).then((response) => {
+    //             setRevision(response.body.list);
+    //         })
+    //             .catch((errorMessage) => {
+    //                 console.error(errorMessage);
+    //                 Alert.error(JSON.stringify(errorMessage));
+    //             });
+    //     }
+    // }, []);
 
     const handleChange = (event) => {
         setRevisionId(event.target.value);
@@ -177,6 +177,7 @@ const APIDetailsTopMenu = (props) => {
 
     const isDownloadable = [API.CONSTS.API, API.CONSTS.APIProduct].includes(api.apiType);
     const { settings, user } = useAppContext();
+    const { allRevisions } = useRevisionContext();
     const { tenantList } = useContext(ApiContext);
     const userNameSplit = user.name.split('@');
     const tenantDomain = userNameSplit[userNameSplit.length - 1];
@@ -272,7 +273,7 @@ const APIDetailsTopMenu = (props) => {
                             </Link>
                         </MenuItem>
                     )}
-                    {revision && revision.map((item) => (
+                    {allRevisions && allRevisions.map((item) => (
                         <MenuItem value={item.id}>
                             {!isAPIProduct ? (
                                 <Link to={'/apis/' + item.id + '/' + lastIndex}>
@@ -319,7 +320,7 @@ const APIDetailsTopMenu = (props) => {
                 {(isDownloadable) && (
                     <a
                         onClick={exportAPI}
-                        onKeyDown='null'
+                        onKeyDown={null}
                         className={classes.downloadApiFlex}
                     >
                         <div>

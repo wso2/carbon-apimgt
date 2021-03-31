@@ -25,7 +25,9 @@ import EditRounded from '@material-ui/icons/EditRounded';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import LockRounded from '@material-ui/icons/LockRounded';
 import SwapHorizontalCircle from '@material-ui/icons/SwapHorizontalCircle';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import Dialog from '@material-ui/core/Dialog';
+import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
@@ -127,7 +129,8 @@ class APIDefinition extends React.Component {
             isAsyncAPIValid: true,
         };
         this.handleNo = this.handleNo.bind(this);
-        this.handleOk = this.handleOk.bind(this);
+        this.handleSave = this.handleSave.bind(this);
+        this.handleSaveAndDeploy = this.handleSaveAndDeploy.bind(this);
         this.openEditor = this.openEditor.bind(this);
         this.transition = this.transition.bind(this);
         this.closeEditor = this.closeEditor.bind(this);
@@ -137,6 +140,8 @@ class APIDefinition extends React.Component {
         this.onChangeFormatClick = this.onChangeFormatClick.bind(this);
         this.openUpdateConfirmation = this.openUpdateConfirmation.bind(this);
         this.updateSwaggerDefinition = this.updateSwaggerDefinition.bind(this);
+        this.updateAsyncAPIDefinitionAndDeploy = this.updateAsyncAPIDefinitionAndDeploy.bind(this);
+        this.updateSwaggerDefinitionAndDeploy = this.updateSwaggerDefinitionAndDeploy.bind(this);
         this.onChangeSwaggerContent = this.onChangeSwaggerContent.bind(this);
         this.updateAsyncAPIDefinition = this.updateAsyncAPIDefinition.bind(this);
         this.onChangeAsyncAPIContent = this.onChangeAsyncAPIContent.bind(this);
@@ -326,12 +331,32 @@ class APIDefinition extends React.Component {
     /**
      * Handles the yes button action of the save api definition confirmation dialog box.
      */
-    handleOk() {
+    handleSave() {
         const { swaggerModified, asyncAPIModified } = this.state;
         if (asyncAPIModified !== null) {
             this.setState({ openDialog: false }, () => this.updateAsyncAPIDefinition(asyncAPIModified, '', ''));
         } else {
             this.setState({ openDialog: false }, () => this.updateSwaggerDefinition(swaggerModified, '', ''));
+        }
+    }
+
+    handleSaveAndDeploy() {
+        const { swaggerModified, asyncAPIModified } = this.state;
+        const { api, history } = this.props;
+        if (asyncAPIModified !== null) {
+            this.updateAsyncAPIDefinitionAndDeploy(asyncAPIModified, '', '');
+            history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            });
+        } else {
+            this.updateSwaggerDefinitionAndDeploy(swaggerModified, '', '');
+            history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            });
         }
     }
 
@@ -458,6 +483,122 @@ class APIDefinition extends React.Component {
     }
 
     /**
+     * Updates swagger definition of the api.
+     * @param {string} swaggerContent The swagger file that needs to be updated.
+     * @param {string} specFormat The current format of the definition
+     * @param {string} toFormat The format it can be converted to.
+     * */
+    updateSwaggerDefinitionAndDeploy(swaggerContent, specFormat, toFormat) {
+        const { api, intl } = this.props;
+        this.setState({ isUpdating: true });
+        let parsedContent = {};
+        if (this.hasJsonStructure(swaggerContent)) {
+            parsedContent = JSON.parse(swaggerContent);
+        } else {
+            try {
+                parsedContent = YAML.load(swaggerContent);
+            } catch (err) {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.parsing.api.definition',
+                    defaultMessage: 'Error occurred while updating the API Definition',
+                }));
+                return;
+            }
+        }
+        const promise = api.updateSwagger(parsedContent);
+        promise
+            .then((response) => {
+                const { endpointImplementationType } = api;
+                if (endpointImplementationType === 'INLINE') {
+                    api.generateMockScripts(api.id);
+                }
+                if (response) {
+                    Alert.success(intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.api.definition.updated.successfully',
+                        defaultMessage: 'API Definition updated successfully',
+                    }));
+                    if (specFormat && toFormat) {
+                        this.setState({ swagger: swaggerContent, format: specFormat, convertTo: toFormat });
+                    } else {
+                        this.setState({ swagger: swaggerContent });
+                    }
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                const { response: { body: { description, message } } } = err;
+                if (description && message) {
+                    Alert.error(`${message} ${description}`);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.api.definition',
+                        defaultMessage: 'Error occurred while updating the API Definition',
+                    }));
+                }
+            });
+    }
+
+
+    /**
+     * Updates asyncAPI definition of the API
+     * @param {string} asyncAPIContent The AsyncAPi file that needs to be updated.
+     * @param {string} specFormat The current format of the definition
+     * @param {string} toFormat The format it can be converted to.
+     */
+    updateAsyncAPIDefinitionAndDeploy(asyncAPIContent, specFormat, toFormat) {
+        const { api, intl } = this.props;
+        this.setState({ isUpdating: true });
+        let parsedContent = {};
+        if (this.hasJsonStructure(asyncAPIContent)) {
+            parsedContent = JSON.parse(asyncAPIContent);
+        } else {
+            try {
+                parsedContent = YAML.load(asyncAPIContent);
+            } catch (err) {
+                console.log(err);
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.async.api.definition',
+                    defaultMessage: 'Error occurred while updating the API Definition',
+                }));
+                return;
+            }
+        }
+        const promise = api.updateAsyncAPIDefinition(parsedContent);
+        promise
+            .then((response) => {
+                /* const { endpointImplementationType } = api; */
+                /* if (endpointImplementationType === 'INLINE') {
+                    api.generateMockScripts(api.id);
+                } */
+                if (response) {
+                    Alert.success(intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.async.api.definition.updated.successfully',
+                        defaultMessage: 'API Definition updated successfully',
+                    }));
+                    if (specFormat && toFormat) {
+                        this.setState({ asyncAPI: asyncAPIContent, format: specFormat, convertTo: toFormat });
+                    } else {
+                        this.setState({ asyncAPI: asyncAPIContent });
+                    }
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+                const { response: { body: { description, message } } } = err;
+                if (description && message) {
+                    Alert.error(`${message} ${description}`);
+                } else {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.APIDefinition.APIDefinition.error.while.updating.async.api.definition',
+                        defaultMessage: 'Error occurred while updating the API Definition',
+                    }));
+                }
+                this.setState({ isUpdating: false });
+            });
+    }
+
+    /**
      * Updates asyncAPI definition of the API
      * @param {string} asyncAPIContent The AsyncAPi file that needs to be updated.
      * @param {string} specFormat The current format of the definition
@@ -520,6 +661,7 @@ class APIDefinition extends React.Component {
                 this.setState({ isUpdating: false });
             });
     }
+
 
     /**
      * @inheritdoc
@@ -763,18 +905,28 @@ class APIDefinition extends React.Component {
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleNo} color='primary'>
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.btn.no'
-                                defaultMessage='CANCEL'
-                            />
-                        </Button>
-                        <Button onClick={this.handleOk} color='primary' autoFocus variant='contained'>
-                            <FormattedMessage
-                                id='Apis.Details.APIDefinition.APIDefinition.btn.yes'
-                                defaultMessage='SAVE'
-                            />
-                        </Button>
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='flex-start'
+                            spacing={1}
+                        >
+                            <Grid item>
+                                <Button onClick={this.handleNo} color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.APIDefinition.APIDefinition.btn.no'
+                                        defaultMessage='CANCEL'
+                                    />
+                                </Button>
+                            </Grid>
+                            <Grid item>
+                                <CustomSplitButton
+                                    handleSave={this.handleSave}
+                                    handleSaveAndDeploy={this.handleSaveAndDeploy}
+                                    isUpdating={isUpdating}
+                                />
+                            </Grid>
+                        </Grid>
                     </DialogActions>
                 </Dialog>
             </>

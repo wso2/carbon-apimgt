@@ -19,7 +19,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.0.82-SNAPSHOT</version>
+        <version>9.0.97-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -67,7 +67,6 @@
                             org.apache.commons.*,
                             org.osgi.service.*;version="${imp.package.version.osgi.service}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.jms.listener.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.context.*;version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.core.*;version="${carbon.kernel.package.import.version.range}",
                             org.wso2.carbon.event.output.adapter.core.*,

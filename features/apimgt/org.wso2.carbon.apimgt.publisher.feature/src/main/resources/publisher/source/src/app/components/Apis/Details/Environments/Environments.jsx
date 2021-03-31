@@ -16,11 +16,12 @@
  * under the License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -61,6 +62,7 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
+import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
 import DisplayDevportal from './DisplayDevportal';
 
 const useStyles = makeStyles((theme) => ({
@@ -290,8 +292,12 @@ export default function Environments() {
     const theme = useTheme();
     const { maxCommentLength } = theme.custom;
     const intl = useIntl();
-    const { api, updateAPI } = useContext(APIContext);
+    const { api } = useContext(APIContext);
+    const history = useHistory();
     const { settings } = useAppContext();
+    const {
+        allRevisions, getRevision, allEnvRevision, getDeployedEnv,
+    } = useRevisionContext();
     let revisionCount;
     if (Configurations.app.revisionCount) {
         revisionCount = Configurations.app.revisionCount;
@@ -300,8 +306,6 @@ export default function Environments() {
     }
     const restApi = new API();
     const restProductApi = new APIProduct();
-    const [allRevisions, setRevisions] = useState(null);
-    const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState([]);
     const defaultVhosts = settings.environment.map(
         (e) => (e.vhosts && e.vhosts.length > 0 ? { env: e.name, vhost: e.vhosts[0].host } : undefined),
@@ -316,8 +320,8 @@ export default function Environments() {
     const [revisionToDelete, setRevisionToDelete] = useState([]);
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
     const [revisionToRestore, setRevisionToRestore] = useState([]);
-    const [openDeployPopup, setOpenDeployPopup] = useState(false);
     const [currentLength, setCurrentLength] = useState(0);
+    const [openDeployPopup, setOpenDeployPopup] = useState(history.location.state === 'deploy');
 
     // allEnvDeployments represents all deployments of the API with mapping
     // environment -> {revision deployed to env, vhost deployed to env with revisino}
@@ -331,24 +335,6 @@ export default function Environments() {
         const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
         allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
-
-    useEffect(() => {
-        if (api && api.apiType !== API.CONSTS.APIProduct) {
-            restApi.getRevisions(api.id).then((result) => {
-                setRevisions(result.body.list);
-            });
-            restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                setEnvRevision(result.body.list);
-            });
-        } else {
-            restProductApi.getProductRevisions(api.id).then((result) => {
-                setRevisions(result.body.list);
-            });
-            restProductApi.getProductRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                setEnvRevision(result.body.list);
-            });
-        }
-    }, []);
 
     const toggleOpenConfirmDelete = (revisionName, revisionId) => {
         setRevisionToDelete([revisionName, revisionId]);
@@ -444,9 +430,8 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    history.replace();
+                    getRevision();
                 });
         } else {
             promiseDelete = restApi.deleteRevision(api.id, revisionId)
@@ -466,9 +451,8 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    history.replace();
+                    getRevision();
                 });
         }
         return promiseDelete;
@@ -493,9 +477,7 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    getRevision();
                 });
         } else {
             api.createRevision(api.id, body)
@@ -510,9 +492,7 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                    });
+                    getRevision();
                 });
         }
     }
@@ -564,7 +544,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.restoreProductRevision(api.id, revisionId)
@@ -579,7 +560,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -614,7 +596,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.undeployProductRevision(api.id, revisionId, body)
@@ -629,7 +612,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -657,7 +641,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.deployProductRevision(api.id, revisionId, body)
@@ -672,7 +657,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -708,6 +694,10 @@ export default function Environments() {
                                 Alert.error('Something went wrong while deploying the revision');
                             }
                             console.error(error);
+                        }).finally(() => {
+                            history.replace();
+                            getRevision();
+                            getDeployedEnv();
                         });
                 })
                 .catch((error) => {
@@ -717,9 +707,6 @@ export default function Environments() {
                         Alert.error('Something went wrong while creating the revision');
                     }
                     console.error(error);
-                })
-                .finally(() => {
-                    updateAPI();
                 });
             setOpenDeployPopup(false);
         } else {
@@ -730,6 +717,7 @@ export default function Environments() {
                     for (let i = 0; i < envList.length; i++) {
                         body1.push({
                             name: envList[i],
+                            vhost: vhostList.find((v) => v.env === envList[i]).vhost,
                             displayOnDevportal: true,
                         });
                     }
@@ -744,6 +732,10 @@ export default function Environments() {
                                 Alert.error('Something went wrong while deploying the revision');
                             }
                             console.error(error);
+                        }).finally(() => {
+                            history.replace();
+                            getRevision();
+                            getDeployedEnv();
                         });
                 })
                 .catch((error) => {
@@ -753,9 +745,6 @@ export default function Environments() {
                         Alert.error('Something went wrong while creating the revision');
                     }
                     console.error(error);
-                })
-                .finally(() => {
-                    updateAPI();
                 });
             setOpenDeployPopup(false);
         }
@@ -772,7 +761,9 @@ export default function Environments() {
             deleteRevision(extraRevisionToDelete[0])
                 .then(() => {
                     createDeployRevision(envList, vhostList);
-                }).finally(() => setExtraRevisionToDelete(null));
+                }).finally(() => {
+                    setExtraRevisionToDelete(null);
+                });
         } else {
             createDeployRevision(envList, vhostList);
         }

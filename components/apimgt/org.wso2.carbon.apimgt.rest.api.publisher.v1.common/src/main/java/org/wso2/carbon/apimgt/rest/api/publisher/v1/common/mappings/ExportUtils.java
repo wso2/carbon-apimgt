@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.registry.api.Collection;
@@ -137,21 +138,29 @@ public class ExportUtils {
      * Exports an API from API Manager for a given API. Meta information, API icon, documentation,
      * WSDL and sequences are exported.
      *
-     * @param apiProvider    API Provider
-     * @param apiIdentifier  API Identifier
-     * @param apiDtoToReturn API DTO
-     * @param userName       Username
-     * @param exportFormat   Format of output documents. Can be YAML or JSON
-     * @param preserveStatus Preserve API status on export
+     * @param apiProvider          API Provider
+     * @param apiIdentifier        API Identifier
+     * @param apiDtoToReturn       API DTO
+     * @param userName             Username
+     * @param exportFormat         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus       Preserve API status on export
+     * @param preserveDocs         Preserve documentation on Export.
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
     public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
                                  String userName, ExportFormat exportFormat, boolean preserveStatus,
-                                 boolean preserveDocs)
+                                 boolean preserveDocs, String originalDevPortalUrl)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
+        // If explicitly advertise only property has been specified as true, make it true and update the API DTO.
+        if (StringUtils.isNotBlank(originalDevPortalUrl)) {
+            setAdvertiseOnlySpecificPropertiesToDTO(apiDtoToReturn, originalDevPortalUrl);
+        }
+
         try {
             // Create temp location for storing API data
             File exportFolder = CommonUtil.createTempDirectory(apiIdentifier);
@@ -178,28 +187,46 @@ public class ExportUtils {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
             }
 
-            addSequencesToArchive(archivePath, api);
-
             // Set API status to created if the status is not preserved
             if (!preserveStatus) {
                 apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
             }
 
             addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
-            addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
-            addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
 
-            // Export mTLS authentication related certificates
-            if (log.isDebugEnabled()) {
-                log.debug("Mutual SSL enabled. Exporting client certificates.");
+            if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
+                addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
+                addSequencesToArchive(archivePath, api);
+                // Export mTLS authentication related certificates
+                if (log.isDebugEnabled()) {
+                    log.debug("Mutual SSL enabled. Exporting client certificates.");
+                }
+                addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
             }
-            addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
+            addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
             CommonUtil.archiveDirectory(exportAPIBasePath);
             FileUtils.deleteQuietly(new File(exportAPIBasePath));
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         }
+    }
+
+    /**
+     * Set the properties specific to advertise only APIs
+     *
+     * @param apiDto               API DTO to export
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
+     */
+    private static void setAdvertiseOnlySpecificPropertiesToDTO(APIDTO apiDto, String originalDevPortalUrl) {
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(Boolean.TRUE);
+        // Change owner to original provider as the provider will be overriding after importing
+        advertiseInfoDTO.setApiOwner(apiDto.getProvider());
+        advertiseInfoDTO.setOriginalDevPortalUrl(originalDevPortalUrl);
+        apiDto.setAdvertiseInfo(advertiseInfoDTO);
+        apiDto.setMediationPolicies(null);
     }
 
     /**
@@ -997,7 +1024,7 @@ public class ExportUtils {
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
             File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
-                    isStatusPreserved, preserveDocs);
+                    isStatusPreserved, preserveDocs, StringUtils.EMPTY);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }
