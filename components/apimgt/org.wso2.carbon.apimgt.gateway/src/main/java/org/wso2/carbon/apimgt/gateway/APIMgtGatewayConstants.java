@@ -51,7 +51,6 @@ public class APIMgtGatewayConstants {
     public static final String SYNAPSE_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
     public static final String DUMMY_ENDPOINT_ADDRESS = "dummy_endpoint_address";
     public static final String CUSTOM_PROPERTY = "customProperty";
-
     public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
@@ -221,5 +220,6 @@ public class APIMgtGatewayConstants {
     public static final String LOGIN_CONTEXT = "/logincontext";
     public static final String OAUTH2_CONTEXT = "/oauth2";
     public static final String API_OBJECT = "API";
+    public static final String OAUTH_ENDPOINT_INSTANCE = "oauth.instance";
 }
 

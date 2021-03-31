@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -60,9 +61,11 @@ public class ImportUtils {
      * Retrieve Application Definition as JSON.
      *
      * @param pathToArchive Path Application archive
-     * @throws IOException If an error occurs while reading the file
+     * @throws IOException            If an error occurs while reading the file
+     * @throws APIManagementException If an error occurs while fetching the application definition
      */
-    public static String getApplicationDefinitionAsJson(String pathToArchive) throws IOException {
+    public static String getApplicationDefinitionAsJson(String pathToArchive) throws IOException,
+            APIManagementException {
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_APPLICATION_FILE_LOCATION;
         String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_APPLICATION_FILE_LOCATION;
@@ -80,6 +83,10 @@ public class ImportUtils {
                 log.debug("Found application definition file " + pathToJsonFile);
             }
             jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+        } else {
+            throw new APIManagementException(
+                    "Cannot find Application definition. application.yaml or application.json should present",
+                    ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
         }
         return jsonContent;
     }

@@ -262,10 +262,6 @@ public class APIExecutor implements Execution {
                     }
                 }
             }
-            //Deploy API in selected cloud clusters
-            if (api.getDeploymentEnvironments() != null && !api.getDeploymentEnvironments().isEmpty()) {
-                apiProvider.publishInPrivateJet(api, api.getId());
-            }
         }
 
         return executed;

@@ -70,13 +70,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Retrieves all Advanced level policies
      *
      * @param accept          Accept header value
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return All matched Advanced Throttle policies to the given request
      */
     @Override
-    public Response throttlingPoliciesAdvancedGet(String accept, String ifNoneMatch, String ifModifiedSince,
-                                                  MessageContext messageContext) {
+    public Response throttlingPoliciesAdvancedGet(String accept, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -145,13 +142,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Get a specific Advanced Level Policy
      *
      * @param policyId        uuid of the policy
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return Required policy specified by name
      */
     @Override
-    public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId, String ifNoneMatch, String ifModifiedSince
-            , MessageContext messageContext) {
+    public Response throttlingPoliciesAdvancedPolicyIdGet(String policyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -180,13 +174,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param policyId          uuid of the policy
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return Updated policy
      */
     @Override
     public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, String contentType,
-              AdvancedThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
+              AdvancedThrottlePolicyDTO body, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -225,13 +217,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Delete an Advanced level policy specified by uuid
      *
      * @param policyId          uuid of the policy
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, String ifMatch,
-                                                             String ifUnmodifiedSince, MessageContext messageContext) {
+    public Response throttlingPoliciesAdvancedPolicyIdDelete(String policyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -264,13 +253,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Retrieves all Application Throttle Policies
      *
      * @param accept          Accept header value
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return Retrieves all Application Throttle Policies
      */
     @Override
-    public Response throttlingPoliciesApplicationGet(String accept, String ifNoneMatch, String ifModifiedSince,
-                                                     MessageContext messageContext) {
+    public Response throttlingPoliciesApplicationGet(String accept, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -341,13 +327,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Get a specific Application Policy by its uuid
      *
      * @param policyId        uuid of the policy
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return Matched Application Throttle Policy by the given name
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyIdGet(String policyId, String ifNoneMatch,
-                                                             String ifModifiedSince, MessageContext messageContext) {
+    public Response throttlingPoliciesApplicationPolicyIdGet(String policyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -377,13 +360,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param policyId          uuid of the policy
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return Updated policy
      */
     @Override
     public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, String contentType,
-         ApplicationThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
+         ApplicationThrottlePolicyDTO body, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -422,14 +403,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Delete an Application level policy specified by uuid
      *
      * @param policyId          uuid of the policy
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesApplicationPolicyIdDelete(String policyId, String ifMatch,
-                                                                String ifUnmodifiedSince,
-                                                                MessageContext messageContext) {
+    public Response throttlingPoliciesApplicationPolicyIdDelete(String policyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -462,13 +439,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Retrieves all Subscription level policies
      *
      * @param accept          Accept header value
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return All matched Subscription Throttle policies to the given request
      */
     @Override
-    public Response throttlingPoliciesSubscriptionGet(String accept, String ifNoneMatch, String ifModifiedSince,
-                                                      MessageContext messageContext) {
+    public Response throttlingPoliciesSubscriptionGet(String accept, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -605,13 +579,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Get a specific Subscription Policy by its uuid
      *
      * @param policyId        uuid of the policy
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return Matched Subscription Throttle Policy by the given name
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId, String ifNoneMatch,
-                                                              String ifModifiedSince, MessageContext messageContext) {
+    public Response throttlingPoliciesSubscriptionPolicyIdGet(String policyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -645,14 +616,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param policyId          u
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return Updated policy
      */
     @Override
     public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, String contentType,
-                      SubscriptionThrottlePolicyDTO body, String ifMatch, String ifUnmodifiedSince,
-                      MessageContext messageContext) throws APIManagementException{
+                      SubscriptionThrottlePolicyDTO body, MessageContext messageContext) throws APIManagementException{
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -702,14 +670,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Delete a Subscription level policy specified by uuid
      *
      * @param policyId          uuid of the policyu
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesSubscriptionPolicyIdDelete(String policyId, String ifMatch,
-                                                                 String ifUnmodifiedSince,
-                                                                 MessageContext messageContext) {
+    public Response throttlingPoliciesSubscriptionPolicyIdDelete(String policyId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -743,13 +707,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Retrieves all Global level policies
      *
      * @param accept          Accept header value
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return All matched Global Throttle policies to the given request
      */
     @Override
-    public Response throttlingPoliciesCustomGet(String accept, String ifNoneMatch, String ifModifiedSince,
-                                                MessageContext messageContext) {
+    public Response throttlingPoliciesCustomGet(String accept, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String userName = RestApiCommonUtil.getLoggedInUsername();
@@ -825,13 +786,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Get a specific custom rule by its name
      *
      * @param ruleId          uuid of the policy
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return Matched Global Throttle Policy by the given name
      */
     @Override
-    public Response throttlingPoliciesCustomRuleIdGet(String ruleId, String ifNoneMatch, String ifModifiedSince,
-                                                      MessageContext messageContext) {
+    public Response throttlingPoliciesCustomRuleIdGet(String ruleId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -863,14 +821,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param ruleId            uuid of the policy
      * @param body              DTO of policy to be updated
      * @param contentType       Content-Type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return Updated policy
      */
     @Override
     public Response throttlingPoliciesCustomRuleIdPut(String ruleId, String contentType, CustomRuleDTO body,
-                    String ifMatch, String ifUnmodifiedSince, MessageContext messageContext)
-                    throws APIManagementException {
+                                                      MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils
                 .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
@@ -915,13 +870,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Delete a Global level policy/custom rule specified by uuid
      *
      * @param ruleId            uuid of the policy
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesCustomRuleIdDelete(String ruleId, String ifMatch, String ifUnmodifiedSince,
-                                                         MessageContext messageContext) {
+    public Response throttlingPoliciesCustomRuleIdDelete(String ruleId,  MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -952,13 +904,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Retrieves all Block Conditions
      *
      * @param accept          Accept header value
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return All matched block conditions to the given request
      */
     @Override
-    public Response throttlingDenyPoliciesGet(String accept, String ifNoneMatch, String ifModifiedSince,
-                                           MessageContext messageContext) {
+    public Response throttlingDenyPoliciesGet(String accept, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
@@ -1036,13 +985,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Get a specific Block condition by its id
      *
      * @param conditionId     Id of the block condition
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header value
      * @return Matched block condition for the given Id
      */
     @Override
-    public Response throttlingDenyPolicyConditionIdGet(String conditionId, String ifNoneMatch, String ifModifiedSince,
-                                                      MessageContext messageContext) {
+    public Response throttlingDenyPolicyConditionIdGet(String conditionId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -1072,13 +1018,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Delete a block condition specified by the condition Id
      *
      * @param conditionId       Id of the block condition
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 OK response if successfully deleted the block condition
      */
     @Override
-    public Response throttlingDenyPolicyConditionIdDelete(String conditionId, String ifMatch, String ifUnmodifiedSince
-            , MessageContext messageContext) {
+    public Response throttlingDenyPolicyConditionIdDelete(String conditionId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -1107,13 +1050,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @param conditionId       Id of the block condition
      * @param body              content to update
      * @param contentType       Content-Type header
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return 200 response if successful
      */
     @Override
     public Response throttlingDenyPolicyConditionIdPatch(String conditionId, String contentType,
-            BlockingConditionStatusDTO body, String ifMatch, String ifUnmodifiedSince, MessageContext messageContext) {
+            BlockingConditionStatusDTO body, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();

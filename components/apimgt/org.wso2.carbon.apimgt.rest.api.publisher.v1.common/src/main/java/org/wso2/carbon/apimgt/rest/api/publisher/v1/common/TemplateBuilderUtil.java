@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
 import org.apache.axiom.om.OMAttribute;
@@ -19,25 +37,22 @@ import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
-import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
@@ -49,7 +64,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -63,28 +77,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+/**
+ * This class used to utility for Template.
+ */
 public class TemplateBuilderUtil {
 
     private static final String ENDPOINT_PRODUCTION = "_PRODUCTION_";
     private static final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
-    private static final String PRODUCT_VERSION = "1.0.0";
-
     private static final Log log = LogFactory.getLog(TemplateBuilderUtil.class);
 
     public static APITemplateBuilderImpl getAPITemplateBuilder(API api, String tenantDomain,
                                                                List<ClientCertificateDTO> clientCertificateDTOS,
-                                                               List<SoapToRestMediationDto> soapToRestInMediationDtoList,
-                                                               List<SoapToRestMediationDto> soapToRestOutMediationDtoList)
+                                                               List<SoapToRestMediationDto> soapToRestInMediationDtos,
+                                                               List<SoapToRestMediationDto> soapToRestMediationDtos)
             throws APIManagementException {
 
         int tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
         APITemplateBuilderImpl vtb =
-                new APITemplateBuilderImpl(api, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
+                new APITemplateBuilderImpl(api, soapToRestInMediationDtos, soapToRestMediationDtos);
         Map<String, String> latencyStatsProperties = new HashMap<String, String>();
         latencyStatsProperties.put(APIConstants.API_UUID, api.getUUID());
         if (!APIUtil.isStreamingApi(api)) {
@@ -154,8 +168,8 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler"
                         , corsProperties);
             }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
         }
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.common.APIStatusHandler", Collections.emptyMap());
         Map<String, String> clientCertificateObject = null;
         CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
         if (clientCertificateDTOS != null) {
@@ -213,7 +227,7 @@ public class TemplateBuilderUtil {
 
         if (APIConstants.GRAPHQL_API.equals(api.getType())) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler",
-                    Collections.<String, String>emptyMap());
+                    Collections.emptyMap());
         }
 
         if (!APIUtil.isStreamingApi(api)) {
@@ -230,8 +244,6 @@ public class TemplateBuilderUtil {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler"
                     , properties);
 
-
-
             properties = new HashMap<String, String>();
             properties.put("configKey", APIConstants.GA_CONF_KEY);
             vtb.addHandler(
@@ -239,13 +251,13 @@ public class TemplateBuilderUtil {
                     , properties);
 
             String extensionHandlerPosition = getExtensionHandlerPosition(tenantDomain);
-            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+            if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap(), 0);
+                        Collections.emptyMap(), 0);
             } else {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap());
+                        Collections.emptyMap());
             }
         }
 
@@ -387,10 +399,10 @@ public class TemplateBuilderUtil {
             if ("top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority(
                         "org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap(), 0);
+                        Collections.emptyMap(), 0);
             } else {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                        Collections.<String, String>emptyMap());
+                        Collections.emptyMap());
             }
         }
 
@@ -398,7 +410,7 @@ public class TemplateBuilderUtil {
     }
 
     /**
-     * Retrieves Extension Handler Position from the tenant-config.json
+     * Retrieves Extension Handler Position from the tenant-config.json.
      *
      * @return ExtensionHandlerPosition
      * @throws APIManagementException
@@ -444,7 +456,7 @@ public class TemplateBuilderUtil {
         APITemplateBuilder apiTemplateBuilder = TemplateBuilderUtil.getAPITemplateBuilder(api, tenantDomain,
                 clientCertificatesDTOList, soapToRestInMediationDtoList, soapToRestOutMediationDtoList);
         return createAPIGatewayDTOtoPublishAPI(environment, api, apiTemplateBuilder, tenantDomain,
-                extractedFolderPath, apidto,clientCertificatesDTOList);
+                extractedFolderPath, apidto, clientCertificatesDTOList);
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -478,13 +490,13 @@ public class TemplateBuilderUtil {
                                                                      String tenantDomain, APIDTO apidto,
                                                                      String extractedFolderPath)
             throws APIManagementException, XMLStreamException, APITemplateException, CertificateManagementException {
+
         return retrieveGatewayAPIDto(api, environment, tenantDomain, apidto, extractedFolderPath);
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(APIProduct apiProduct, Environment environment,
-                                                      String tenantDomain, String extractedFolderPath,
-                                                      APIDefinitionValidationResponse apiDefinitionValidationResponse)
-            throws APIManagementException, XMLStreamException, APITemplateException, CertificateManagementException {
+                                                      String tenantDomain, String extractedFolderPath)
+            throws APIManagementException, XMLStreamException, APITemplateException {
 
         List<ClientCertificateDTO> clientCertificatesDTOList =
                 ImportUtils.retrieveClientCertificates(extractedFolderPath);
@@ -498,17 +510,22 @@ public class TemplateBuilderUtil {
                 productResource.setApiIdentifier(api.getId());
                 productResource.setEndpointConfig(api.getEndpointConfig());
                 if (StringUtils.isNotEmpty(api.getInSequence())) {
-                    String sequenceName = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                    String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
+                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
                     productResource.setInSequenceName(sequenceName);
                 }
                 if (StringUtils.isNotEmpty(api.getOutSequence())) {
-                    String sequenceName = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                    String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
+                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
                     productResource.setOutSequenceName(sequenceName);
                 }
                 if (StringUtils.isNotEmpty(api.getFaultSequence())) {
-                    String sequenceName = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                    String sequenceName = APIUtil.getSequenceExtensionName(apiProduct.getId().getName(),
+                            apiProduct.getId().getVersion()) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
                     productResource.setFaultSequenceName(sequenceName);
                 }
+                productResource.setProductIdentifier(apiProduct.getId());
+                productResource.setEndpointSecurityMap(APIUtil.setEndpointSecurityForAPIProduct(api));
             }
         }
         APITemplateBuilder
@@ -516,7 +533,7 @@ public class TemplateBuilderUtil {
                 TemplateBuilderUtil.getAPITemplateBuilder(apiProduct, tenantDomain, clientCertificatesDTOList,
                         convertAPIIdToDto(associatedAPIsMap.values()));
         return createAPIGatewayDTOtoPublishAPI(environment, apiProduct, apiTemplateBuilder, tenantDomain,
-                apidtoMap,clientCertificatesDTOList);
+                apidtoMap, clientCertificatesDTOList);
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, APIProduct apiProduct,
@@ -524,7 +541,7 @@ public class TemplateBuilderUtil {
                                                                  String tenantDomain,
                                                                  Map<String, APIDTO> associatedAPIsMap,
                                                                  List<ClientCertificateDTO> clientCertificatesDTOList)
-            throws CertificateManagementException, APITemplateException, XMLStreamException, APIManagementException {
+            throws APITemplateException, XMLStreamException, APIManagementException {
 
         APIProductIdentifier id = apiProduct.getId();
         GatewayAPIDTO productAPIDto = new GatewayAPIDTO();
@@ -533,7 +550,6 @@ public class TemplateBuilderUtil {
         productAPIDto.setName(id.getName());
         productAPIDto.setVersion(id.getVersion());
         productAPIDto.setTenantDomain(tenantDomain);
-        productAPIDto.setOverride(false);
         String definition = apiProduct.getDefinition();
         productAPIDto.setLocalEntriesToBeRemove(GatewayUtils.addStringToList(apiProduct.getUuid(),
                 productAPIDto.getLocalEntriesToBeRemove()));
@@ -545,21 +561,40 @@ public class TemplateBuilderUtil {
                 + "</localEntry>");
         productAPIDto.setLocalEntriesToBeAdd(addGatewayContentToList(productLocalEntry,
                 productAPIDto.getLocalEntriesToBeAdd()));
-        APIIdentifier apiId = new APIIdentifier(id.getProviderName(), id.getName(), PRODUCT_VERSION);
-        setClientCertificatesToBeAdded(tenantDomain, productAPIDto,clientCertificatesDTOList);
+        setClientCertificatesToBeAdded(tenantDomain, productAPIDto, clientCertificatesDTOList);
         productAPIDto.setApiDefinition(builder.getConfigStringForTemplate(environment));
         for (Map.Entry<String, APIDTO> apidtoEntry : associatedAPIsMap.entrySet()) {
             String apiExtractedPath = apidtoEntry.getKey();
             APIDTO apidto = apidtoEntry.getValue();
             API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
-            GatewayUtils.setCustomSequencesToBeRemoved(api, productAPIDto);
-            APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api);
+            api.setUuid(apidto.getId());
+            GatewayUtils.setCustomSequencesToBeRemoved(apiProduct.getId(), api.getUuid(), productAPIDto);
+            APITemplateBuilder apiTemplateBuilder = new APITemplateBuilderImpl(api, apiProduct);
             addEndpoints(api, apiTemplateBuilder, productAPIDto);
-            setCustomSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
+            setCustomSequencesToBeAdded(apiProduct, api, productAPIDto, apiExtractedPath, apidto);
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
+            String prefix = id.getName() + "--v" + id.getVersion();
+            setSecureVaultPropertyToBeAdded(prefix, api, productAPIDto);
         }
 
         return productAPIDto;
+    }
+
+    private static void setCustomSequencesToBeAdded(APIProduct apiProduct, API api, GatewayAPIDTO gatewayAPIDTO,
+                                                    String extractedPath, APIDTO apidto) throws APIManagementException {
+
+        GatewayContentDTO gatewayInContentDTO = retrieveSequence(apiProduct, extractedPath,
+                apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, api);
+        if (gatewayInContentDTO != null) {
+            gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayInContentDTO,
+                    gatewayAPIDTO.getSequenceToBeAdd()));
+        }
+        GatewayContentDTO gatewayOutContentDTO = retrieveSequence(apiProduct, extractedPath,
+                apidto.getMediationPolicies(), APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT, api);
+        if (gatewayOutContentDTO != null) {
+            gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(gatewayOutContentDTO,
+                    gatewayAPIDTO.getSequenceToBeAdd()));
+        }
     }
 
     private static GatewayAPIDTO createAPIGatewayDTOtoPublishAPI(Environment environment, API api,
@@ -575,7 +610,6 @@ public class TemplateBuilderUtil {
         gatewayAPIDTO.setProvider(api.getId().getProviderName());
         gatewayAPIDTO.setApiId(api.getUUID());
         gatewayAPIDTO.setTenantDomain(tenantDomain);
-        gatewayAPIDTO.setOverride(true);
 
         String definition;
 
@@ -668,16 +702,12 @@ public class TemplateBuilderUtil {
                 }
             }
         }
-
-        if (api.isDefaultVersion()) {
-            String defaultAPIConfig = builder.getConfigStringForDefaultAPITemplate(api.getId().getVersion());
-            gatewayAPIDTO.setDefaultAPIDefinition(defaultAPIConfig);
-        }
-        setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
+        setSecureVaultPropertyToBeAdded(null, api, gatewayAPIDTO);
         return gatewayAPIDTO;
     }
 
     private static void addWebsocketTopicMappings(API api, APIDTO apidto) {
+
         org.json.JSONObject endpointConfiguration = new org.json.JSONObject(api.getEndpointConfig());
         String sandboxEndpointUrl = !endpointConfiguration.isNull(APIConstants.API_DATA_SANDBOX_ENDPOINTS) ?
                 endpointConfiguration.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url") : null;
@@ -691,7 +721,7 @@ public class TemplateBuilderUtil {
                     Paths.get("/", operation.getUriMapping()).toString();
             Map<String, String> endpoints = new HashMap<>();
             if (sandboxEndpointUrl != null) {
-                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX,  sandboxEndpointUrl + mapping);
+                endpoints.put(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxEndpointUrl + mapping);
             }
             if (productionEndpointUrl != null) {
                 endpoints.put(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, productionEndpointUrl + mapping);
@@ -745,33 +775,9 @@ public class TemplateBuilderUtil {
     }
 
     /**
-     * Store the secured endpoint username password to registry
-     *
-     * @param api
-     * @param tenantDomain
-     * @throws APIManagementException
-     */
-    private static void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain)
-            throws APIManagementException {
-
-        boolean isSecureVaultEnabled =
-                Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
-        if (api.isEndpointSecured() && isSecureVaultEnabled) {
-            try {
-                securityAdminClient.setSecureVaultProperty(api, tenantDomain);
-            } catch (Exception e) {
-                String msg = "Error in setting secured password.";
-                log.error(msg + ' ' + e.getLocalizedMessage(), e);
-                throw new APIManagementException(msg);
-            }
-        }
-    }
-
-    /**
      * To deploy client certificate in given API environment.
      *
-     * @param tenantDomain Tenant domain.
+     * @param tenantDomain              Tenant domain.
      * @param clientCertificatesDTOList
      */
     private static void setClientCertificatesToBeAdded(String tenantDomain, GatewayAPIDTO gatewayAPIDTO,
@@ -818,6 +824,7 @@ public class TemplateBuilderUtil {
     }
 
     private static void addWebsocketTopicResourceKeys(API api) {
+
         WebSocketTopicMappingConfiguration mappingsConfig = api.getWebSocketTopicMappingConfiguration();
         for (String topic : mappingsConfig.getMappings().keySet()) {
             mappingsConfig.setResourceKey(topic, getWebsocketResourceKey(topic));
@@ -825,6 +832,7 @@ public class TemplateBuilderUtil {
     }
 
     private static String getWebsocketResourceKey(String topic) {
+
         String resourceKey;
         if (topic.contains("{") || (topic.contains("*") && !topic.endsWith("/*"))) {
             resourceKey = "template_" + topic;
@@ -839,6 +847,7 @@ public class TemplateBuilderUtil {
 
     private static void addWebSocketResourceEndpoints(API api, APITemplateBuilder builder, GatewayAPIDTO gatewayAPIDTO)
             throws APITemplateException, XMLStreamException {
+
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         Map<String, Map<String, String>> topicMappings = api.getWebSocketTopicMappingConfiguration().getMappings();
         List<GatewayContentDTO> endpointsToAdd = new ArrayList<>();
@@ -866,7 +875,7 @@ public class TemplateBuilderUtil {
     }
 
     /**
-     * Returns the defined endpoint types of the in the publisher
+     * Returns the defined endpoint types of the in the publisher.
      *
      * @param api API that the endpoint/s belong
      * @return ArrayList containing defined endpoint types
@@ -899,7 +908,7 @@ public class TemplateBuilderUtil {
 
     }
 
-    private static void setSecureVaultPropertyToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO) {
+    private static void setSecureVaultPropertyToBeAdded(String prefix, API api, GatewayAPIDTO gatewayAPIDTO) {
 
         boolean isSecureVaultEnabled =
                 Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
@@ -909,46 +918,76 @@ public class TemplateBuilderUtil {
             org.json.JSONObject endpointConfig = new org.json.JSONObject(api.getEndpointConfig());
 
             if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
-                org.json.JSONObject endpoints = (org.json.JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                org.json.JSONObject endpoints =
+                        (org.json.JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
                 org.json.JSONObject productionEndpointSecurity = (org.json.JSONObject)
                         endpoints.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                org.json.JSONObject sandboxEndpointSecurity = (org.json.JSONObject) endpoints.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                org.json.JSONObject sandboxEndpointSecurity =
+                        (org.json.JSONObject) endpoints.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
 
                 boolean isProductionEndpointSecured = (boolean)
                         productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
                 boolean isSandboxEndpointSecured = (boolean)
                         sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-                String secureVaultAlias = api.getId().getProviderName() + "--" + api.getId().getApiName() +
-                        api.getId().getVersion();
                 //for production endpoints
                 if (isProductionEndpointSecured) {
-                    CredentialDto credentialDto = new CredentialDto();
-                    credentialDto.setAlias(secureVaultAlias.concat("--").concat(APIConstants.
-                            ENDPOINT_SECURITY_PRODUCTION));
-                    credentialDto.setPassword((String)
-                            productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
-                    gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
-                            gatewayAPIDTO.getCredentialsToBeAdd()));
-                    if (log.isDebugEnabled()) {
-                        log.debug("SecureVault alias " +  secureVaultAlias + "--production" + " is created for " +
-                                api.getId().getApiName());
-                    }
+                    addCredentialsToList(prefix, api, gatewayAPIDTO, productionEndpointSecurity,
+                            APIConstants.ENDPOINT_SECURITY_PRODUCTION);
                 }
-                // for sandbox endpoints
                 if (isSandboxEndpointSecured) {
-                    CredentialDto credentialDto = new CredentialDto();
-                    credentialDto.setAlias(secureVaultAlias.concat("--").concat(APIConstants.
-                            ENDPOINT_SECURITY_SANDBOX));
-                    credentialDto.setPassword((String)
-                            sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
-                    gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
-                            gatewayAPIDTO.getCredentialsToBeAdd()));
-                    if (log.isDebugEnabled()) {
-                        log.debug("SecureVault alias " +  secureVaultAlias + "--sandbox" + " is created for " +
-                                api.getId().getApiName());
-                    }
+                    addCredentialsToList(prefix, api, gatewayAPIDTO, sandboxEndpointSecurity,
+                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+
                 }
             }
+        }
+    }
+
+    private static void addCredentialsToList(String prefix, API api, GatewayAPIDTO gatewayAPIDTO,
+                                             org.json.JSONObject endpointSecurity, String type) {
+
+        if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) endpointSecurity
+                .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+            CredentialDto clientSecretDto = new CredentialDto();
+            if (StringUtils.isNotEmpty(prefix)) {
+                clientSecretDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                        .retrieveOauthClientSecretAlias(api.getId().getApiName(), api.getId().getVersion(), type)));
+            } else {
+                clientSecretDto.setAlias(GatewayUtils.retrieveOauthClientSecretAlias(api.getId().getApiName()
+                        , api.getId().getVersion(), type));
+            }
+            clientSecretDto.setPassword((String) endpointSecurity
+                    .get(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET));
+            gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(clientSecretDto,
+                    gatewayAPIDTO.getCredentialsToBeAdd()));
+            if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_PASSWORD)) {
+                CredentialDto passwordDto = new CredentialDto();
+                if (StringUtils.isNotEmpty(prefix)) {
+                    passwordDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                            .retrieveOAuthPasswordAlias(api.getId().getApiName(), api.getId().getVersion(), type)));
+                } else {
+                    passwordDto.setAlias(GatewayUtils.retrieveOAuthPasswordAlias(api.getId().getApiName()
+                            , api.getId().getVersion(), type));
+                }
+                passwordDto.setPassword((String) endpointSecurity
+                        .get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
+                gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(passwordDto,
+                        gatewayAPIDTO.getCredentialsToBeAdd()));
+            }
+        } else if (APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase((String)
+                endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+            CredentialDto credentialDto = new CredentialDto();
+            if (StringUtils.isNotEmpty(prefix)) {
+                credentialDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                        .retrieveBasicAuthAlias(api.getId().getApiName(), api.getId().getVersion(), type)));
+            } else {
+                credentialDto.setAlias(GatewayUtils.retrieveBasicAuthAlias(api.getId().getApiName()
+                        , api.getId().getVersion(), type));
+            }
+            credentialDto.setPassword((String)
+                    endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
+            gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
+                    gatewayAPIDTO.getCredentialsToBeAdd()));
         }
     }
 
@@ -962,6 +1001,53 @@ public class TemplateBuilderUtil {
             credentialList.add(credential);
             return credentialList.toArray(new CredentialDto[credentialList.size()]);
         }
+    }
+
+    private static GatewayContentDTO retrieveSequence(APIProduct apiProduct, String pathToAchieve,
+                                                      List<MediationPolicyDTO> mediationPolicies,
+                                                      String type, API api) throws APIManagementException {
+
+        APIProductIdentifier apiProductIdentifier = apiProduct.getId();
+        MediationPolicyDTO mediationPolicyDTO = null;
+        for (MediationPolicyDTO mediationPolicy : mediationPolicies) {
+            if (type.equalsIgnoreCase(mediationPolicy.getType())) {
+                mediationPolicyDTO = mediationPolicy;
+                break;
+            }
+        }
+        if (mediationPolicyDTO != null) {
+            GatewayContentDTO sequenceContentDto = new GatewayContentDTO();
+
+            String sequenceContent = ImportUtils
+                    .retrieveSequenceContent(pathToAchieve, !mediationPolicyDTO.isShared(), type.toLowerCase(),
+                            mediationPolicyDTO.getName());
+            if (StringUtils.isNotEmpty(sequenceContent)) {
+                try {
+                    OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceContent.getBytes()));
+                    if (omElement != null) {
+                        String seqExt = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                                apiProductIdentifier.getVersion()).concat("--").concat(api.getUuid());
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equalsIgnoreCase(type)) {
+                            seqExt = seqExt + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(type)) {
+                            seqExt = seqExt + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(type)) {
+                            seqExt = seqExt + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                        }
+
+                        if (omElement.getAttribute(new QName("name")) != null) {
+                            omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
+                        }
+                        sequenceContentDto.setName(seqExt);
+                        sequenceContentDto.setContent(APIUtil.convertOMtoString(omElement));
+                        return sequenceContentDto;
+                    }
+                } catch (Exception e) {
+                    throw new APIManagementException(e);
+                }
+            }
+        }
+        return null;
     }
 
     private static GatewayContentDTO retrieveSequence(String pathToAchieve, List<MediationPolicyDTO> mediationPolicies,
@@ -984,14 +1070,15 @@ public class TemplateBuilderUtil {
                 try {
                     OMElement omElement = APIUtil.buildOMElement(new ByteArrayInputStream(sequenceContent.getBytes()));
                     if (omElement != null) {
-                        String seqExt = null;
+                        String seqExt = APIUtil.getSequenceExtensionName(api);
 
-                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equalsIgnoreCase(type))
-                            seqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
-                        else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(type))
-                            seqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
-                        else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(type))
-                            seqExt = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                        if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equalsIgnoreCase(type)) {
+                            seqExt = seqExt + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+                        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(type)) {
+                            seqExt = seqExt + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+                        } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(type)) {
+                            seqExt = seqExt + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+                        }
 
                         if (omElement.getAttribute(new QName("name")) != null) {
                             omElement.getAttribute(new QName("name")).setAttributeValue(seqExt);
@@ -1011,7 +1098,7 @@ public class TemplateBuilderUtil {
     private static Map<String, APIDTO> retrieveAssociatedApis(String extractedPath) throws APIManagementException {
 
         Map<String, APIDTO> apidtoMap = new HashMap();
-        String apisDirectoryPath = extractedPath + File.separator + APIImportExportConstants.APIS_DIRECTORY;
+        String apisDirectoryPath = extractedPath + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);
         File[] apisDirectoryListing = apisDirectory.listFiles();
         if (apisDirectoryListing != null) {
@@ -1036,119 +1123,8 @@ public class TemplateBuilderUtil {
         return apidtoMap;
     }
 
-    public static GatewayAPIDTO retrieveGatewayAPIDtoForWebSocket(API api) throws APIManagementException {
-
-        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
-        gatewayAPIDTO.setApiId(api.getUUID());
-        gatewayAPIDTO.setName(api.getId().getName());
-        gatewayAPIDTO.setVersion(api.getId().getVersion());
-        gatewayAPIDTO.setProvider(api.getId().getProviderName());
-        gatewayAPIDTO.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-        String production_endpoint = null;
-        String sandbox_endpoint = null;
-        org.json.JSONObject obj = new org.json.JSONObject(api.getEndpointConfig());
-        if (obj.has(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
-            production_endpoint = obj.getJSONObject(APIConstants.API_DATA_PRODUCTION_ENDPOINTS).getString("url");
-        }
-        if (obj.has(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
-            sandbox_endpoint = obj.getJSONObject(APIConstants.API_DATA_SANDBOX_ENDPOINTS).getString("url");
-        }
-        OMElement element;
-        try {
-            if (production_endpoint != null) {
-                String content = createSeqString(api, production_endpoint, ENDPOINT_PRODUCTION);
-                element = AXIOMUtil.stringToOM(content);
-                String fileName = element.getAttributeValue(new QName("name"));
-                gatewayAPIDTO.setSequencesToBeRemove(GatewayUtils.addStringToList(fileName,
-                        gatewayAPIDTO.getSequencesToBeRemove()));
-                GatewayContentDTO productionSequence = new GatewayContentDTO();
-                productionSequence.setContent(APIUtil.convertOMtoString(element));
-                productionSequence.setName(fileName);
-                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(productionSequence,
-                        gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-            if (sandbox_endpoint != null) {
-                String content = createSeqString(api, sandbox_endpoint, ENDPOINT_SANDBOX);
-                element = AXIOMUtil.stringToOM(content);
-                String fileName = element.getAttributeValue(new QName("name"));
-                gatewayAPIDTO.setSequencesToBeRemove(GatewayUtils.addStringToList(fileName,
-                        gatewayAPIDTO.getSequencesToBeRemove()));
-                GatewayContentDTO sandboxEndpointSequence = new GatewayContentDTO();
-                sandboxEndpointSequence.setContent(APIUtil.convertOMtoString(element));
-                sandboxEndpointSequence.setName(fileName);
-                gatewayAPIDTO.setSequenceToBeAdd(addGatewayContentToList(sandboxEndpointSequence,
-                        gatewayAPIDTO.getSequenceToBeAdd()));
-            }
-            return gatewayAPIDTO;
-        } catch (XMLStreamException e) {
-            String msg = "Error while parsing the Sequence";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
-        }
-    }
-
     /**
-     * create body of sequence
-     *
-     * @param api
-     * @param url
-     * @return
-     */
-    public static String createSeqString(API api, String url, String urltype) throws JSONException {
-
-        String context = api.getContext();
-        context = urltype + context;
-        String[] endpointConfig = websocketEndpointConfig(api, urltype);
-        String timeout = endpointConfig[0];
-        String suspendOnFailure = endpointConfig[1];
-        String markForSuspension = endpointConfig[2];
-        String endpointConf = "<default>\n" +
-                "\t<timeout>\n" +
-                timeout +
-                "\t</timeout>\n" +
-                "\t<suspendOnFailure>\n" +
-                suspendOnFailure + "\n" +
-                "\t</suspendOnFailure>\n" +
-                "\t<markForSuspension>\n" +
-                markForSuspension +
-                "\t</markForSuspension>\n" +
-                "</default>";
-        String seq = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"" +
-                context.replace('/', '-') + "\">\n" +
-                "   <property name=\"OUT_ONLY\" value=\"true\"/>\n" +
-                "   <script language=\"js\">var sub_path = mc.getProperty(\"websocket.subscriber.path\");\t    \n" +
-                "        \tvar queryParamString = sub_path.split(\"\\\\?\")[1];\n" +
-                "                if(queryParamString != undefined) {\t    \n" +
-                "\t\tmc.setProperty('queryparams', \"?\" + queryParamString);\n" +
-                "\t\t}\t\t\n" +
-                "   </script>\n" +
-                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
-                "             xmlns:ns=\"http://org.apache.synapse/xsd\"\n" +
-                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
-                "             name=\"queryparams\"\n" +
-                "             expression=\"$ctx:queryparams\"/>\n" +
-                "   <property name=\"urlVal\" value=\"" + url + "\"/>\n" +
-                "   <property xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
-                "             xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
-                "             name=\"fullUrl\"\n" +
-                "             expression=\"fn:concat(get-property('urlVal'), get-property('queryparams'))\"\n" +
-                "             type=\"STRING\"/>\n" +
-                "   <header xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"\n" +
-                "           xmlns:ns3=\"http://org.apache.synapse/xsd\"\n" +
-                "           name=\"To\"\n" +
-                "           expression=\"$ctx:fullUrl\"/>\n" +
-                "   <send>\n" +
-                "      <endpoint>\n" +
-                endpointConf + "\n" +
-                "      </endpoint>\n" +
-                "   </send>\n" +
-                "</sequence>";
-        return seq;
-    }
-
-    /**
-     * Construct the timeout, suspendOnFailure, markForSuspension to add suspend
+     * Construct the timeout, suspendOnFailure, markForSuspension to add suspend.
      * configuration to the websocket endpoint (Simply assign config values according to the endpoint-template)
      *
      * @param api
@@ -1218,7 +1194,7 @@ public class TemplateBuilderUtil {
     }
 
     /**
-     * Checks if a given key is available in the endpoint config and if it's value is a valid String
+     * Checks if a given key is available in the endpoint config and if it's value is a valid String.
      *
      * @param key         Key that needs to be validated
      * @param endpointObj Endpoint config JSON object
@@ -1231,7 +1207,7 @@ public class TemplateBuilderUtil {
     }
 
     /**
-     * Parse the error codes defined in the WebSocket endpoint config
+     * Parse the error codes defined in the WebSocket endpoint config.
      *
      * @param endpointObj   WebSocket endpoint config JSONObject
      * @param errorCodeType The error code type (retryErroCode/suspendErrorCode)

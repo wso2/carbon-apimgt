@@ -111,7 +111,6 @@ export default function GraphQLUI(props) {
             <>
                 <Box width='30%' m={1}>
                     <TextField
-
                         label={(
                             <FormattedMessage
                                 defaultMessage='Gateway URLs'

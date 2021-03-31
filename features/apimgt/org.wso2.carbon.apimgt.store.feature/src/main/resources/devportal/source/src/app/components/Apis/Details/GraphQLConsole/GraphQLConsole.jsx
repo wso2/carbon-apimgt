@@ -80,7 +80,6 @@ export default function GraphQLConsole() {
     const [sandboxApiKey, setSandboxApiKey] = useState('');
     const [productionApiKey, setProductionApiKey] = useState('');
     const [keys, setKeys] = useState([]);
-    const [labels, setLabels] = useState();
     const user = AuthManager.getUser();
 
     useEffect(() => {
@@ -94,10 +93,6 @@ export default function GraphQLConsole() {
                 if (apiData.endpointURLs) {
                     const environment = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
                     setEnvironments(environment);
-                }
-                if (apiData.labels) {
-                    const Label = apiData.labels.map((label) => { return label.name; });
-                    setLabels(Label);
                 }
                 if (apiData.scopes) {
                     const scopeList = apiData.scopes.map((scope) => { return scope.name; });
@@ -243,7 +238,6 @@ export default function GraphQLConsole() {
                     setSandboxAccessToken={setSandboxAccessToken}
                     environments={environments}
                     scopes={scopes}
-                    labels={labels}
                     setUsername={setUsername}
                     setPassword={setPassword}
                     username={username}

@@ -17,7 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DeploymentEnvironmentsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
@@ -148,9 +148,6 @@ return null;
     private APIEndpointSecurityDTO endpointSecurity = null;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> gatewayEnvironments = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    private List<DeploymentEnvironmentsDTO> deploymentEnvironments = new ArrayList<DeploymentEnvironmentsDTO>();
-    private List<String> labels = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
 
     @XmlType(name="SubscriptionAvailabilityEnum")
@@ -270,6 +267,7 @@ return null;
     private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
+    private AdvertiseInfoDTO advertiseInfo = null;
 
   /**
    * UUID of the api registry artifact 
@@ -850,43 +848,6 @@ return null;
   }
 
   /**
-   * List of selected deployment environments and clusters 
-   **/
-  public APIDTO deploymentEnvironments(List<DeploymentEnvironmentsDTO> deploymentEnvironments) {
-    this.deploymentEnvironments = deploymentEnvironments;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "List of selected deployment environments and clusters ")
-      @Valid
-  @JsonProperty("deploymentEnvironments")
-  public List<DeploymentEnvironmentsDTO> getDeploymentEnvironments() {
-    return deploymentEnvironments;
-  }
-  public void setDeploymentEnvironments(List<DeploymentEnvironmentsDTO> deploymentEnvironments) {
-    this.deploymentEnvironments = deploymentEnvironments;
-  }
-
-  /**
-   * Labels of micro-gateway environments attached to the API. 
-   **/
-  public APIDTO labels(List<String> labels) {
-    this.labels = labels;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[]", value = "Labels of micro-gateway environments attached to the API. ")
-  @JsonProperty("labels")
-  public List<String> getLabels() {
-    return labels;
-  }
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
-  }
-
-  /**
    **/
   public APIDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
     this.mediationPolicies = mediationPolicies;
@@ -1261,6 +1222,24 @@ return null;
     this.serviceInfo = serviceInfo;
   }
 
+  /**
+   **/
+  public APIDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("advertiseInfo")
+  public AdvertiseInfoDTO getAdvertiseInfo() {
+    return advertiseInfo;
+  }
+  public void setAdvertiseInfo(AdvertiseInfoDTO advertiseInfo) {
+    this.advertiseInfo = advertiseInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1304,8 +1283,6 @@ return null;
         Objects.equals(visibleTenants, API.visibleTenants) &&
         Objects.equals(endpointSecurity, API.endpointSecurity) &&
         Objects.equals(gatewayEnvironments, API.gatewayEnvironments) &&
-        Objects.equals(deploymentEnvironments, API.deploymentEnvironments) &&
-        Objects.equals(labels, API.labels) &&
         Objects.equals(mediationPolicies, API.mediationPolicies) &&
         Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
@@ -1326,12 +1303,13 @@ return null;
         Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
-        Objects.equals(serviceInfo, API.serviceInfo);
+        Objects.equals(serviceInfo, API.serviceInfo) &&
+        Objects.equals(advertiseInfo, API.advertiseInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, deploymentEnvironments, labels, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
   }
 
   @Override
@@ -1372,8 +1350,6 @@ return null;
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    endpointSecurity: ").append(toIndentedString(endpointSecurity)).append("\n");
     sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
-    sb.append("    deploymentEnvironments: ").append(toIndentedString(deploymentEnvironments)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
@@ -1395,6 +1371,7 @@ return null;
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
+    sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

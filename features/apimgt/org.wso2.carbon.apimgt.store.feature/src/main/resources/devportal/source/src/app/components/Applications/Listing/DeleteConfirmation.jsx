@@ -30,6 +30,7 @@ const DeleteConfirmation = (props) => {
                     />
                 </Button>
                 <Button
+                    id="itest-confirm-application-delete"
                     size='small'
                     variant='outlined'
                     color='primary'

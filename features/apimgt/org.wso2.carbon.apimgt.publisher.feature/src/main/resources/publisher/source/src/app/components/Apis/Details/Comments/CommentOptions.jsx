@@ -143,39 +143,39 @@ class CommentOptions extends React.Component {
      */
     render() {
         const {
-            classes, comment, editIndex, theme,
+            classes, comment, theme,
         } = this.props;
         const canDelete = (comment.createdBy === AuthManager.getUser().name)
             || (AuthManager.getUser().name === theme.custom.adminRole);
         const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
         return (
-            <Grid container spacing={2} className={classes.verticalSpace} key={comment.id}>
-                {comment.replyTo == null && [
-                    <Grid item key='key-reply'>
-                        <Button
-                            size='small'
-                            className={classes.link}
-                            onClick={() => this.showAddComment(comment.id)}
-                            color='primary'
-                        >
-                            <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
-                        </Button>
-                    </Grid>,
-                ]}
+            <Grid container spacing={1} className={classes.verticalSpace} key={comment.id}>
 
                 {/* only the comment owner or admin can delete a comment */}
                 {canDelete && [
                     <Grid item key='key-delete'>
                         <Button
                             size='small'
-                            className={editIndex === -1 ? classes.link : classes.disable}
                             onClick={() => this.handleClickOpen(comment)}
                             color='primary'
+                            aria-label={'Delete comment ' + comment.content}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Comments.CommentOptions.delete'
                                 defaultMessage='Delete'
                             />
+                        </Button>
+                    </Grid>,
+                ]}
+                {comment.parentCommentId === null && [
+                    <Grid item key='key-reply'>
+                        <Button
+                            size='small'
+                            onClick={() => this.showAddComment(comment.id)}
+                            color='primary'
+                            aria-label={'Reply to comment ' + comment.content}
+                        >
+                            <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
                         </Button>
                     </Grid>,
                 ]}

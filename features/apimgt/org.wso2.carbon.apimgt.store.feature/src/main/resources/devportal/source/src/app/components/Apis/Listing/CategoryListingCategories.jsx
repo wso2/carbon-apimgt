@@ -18,18 +18,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTheme, makeStyles } from '@material-ui/core/styles';
-import { Link, useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Icon from '@material-ui/core/Icon';
 import { FormattedMessage } from 'react-intl';
 import APICategoryThumb from './APICategoryThumb';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     mainTitle: {
         paddingTop: 10,
     },
@@ -68,11 +62,10 @@ const useStyles = makeStyles(theme => ({
 function CategoryListingCategories(props) {
     const classes = useStyles();
     const theme = useTheme();
-    const history = useHistory();
     const {
         custom: {
             tagWise: {
-                key, active, style, showAllApis,
+                style,
             },
         },
     } = theme;
@@ -90,7 +83,7 @@ function CategoryListingCategories(props) {
 
     return allCategories && allCategories.length > 0 ? (
         (
-            <React.Fragment>
+            <>
                 <Typography variant='h6' gutterBottom className={classes.filterTitle}>
                     <FormattedMessage defaultMessage='API Categories' id='Apis.Listing.CategoryListingCategories.title' />
                 </Typography>
@@ -99,7 +92,7 @@ function CategoryListingCategories(props) {
                         return <APICategoryThumb key={key} category={allCategories[key]} path={tagWiseURL} style={style} />;
                     })}
                 </List>
-            </React.Fragment>
+            </>
         )
     ) : (
         <div className={classes.mainTitle}>
@@ -117,6 +110,7 @@ CategoryListingCategories.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     theme: PropTypes.shape({}).isRequired,
     allTags: PropTypes.shape({}).isRequired,
+    allCategories: PropTypes.shape({}).isRequired,
 };
 
 export default CategoryListingCategories;

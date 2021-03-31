@@ -130,8 +130,7 @@ class Comment extends React.Component {
      */
     filterCommentToDelete(commentToFilter) {
         const { deleteComment } = this.state;
-        return commentToFilter.id === deleteComment.replyTo;
-        return commentToFilter.id;
+        return commentToFilter.id === deleteComment.parentCommentId;
     }
 
     /**
@@ -218,21 +217,22 @@ class Comment extends React.Component {
             apiId, allComments, commentsUpdate, intl,
         } = this.props;
         const commentIdOfCommentToDelete = deleteComment.id;
-        const parentCommentIdOfCommentToDelete = deleteComment.replyTo;
+        const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
         this.handleClose();
 
         apiClient
             .deleteComment(apiId, commentIdOfCommentToDelete)
             .then(() => {
-                if (parentCommentIdOfCommentToDelete === undefined) {
+                if (parentCommentIdOfCommentToDelete === null) {
                     const remainingComments = allComments.filter(this.filterRemainingComments);
                     commentsUpdate(remainingComments);
-                    Alert.info('Comment' + commentIdOfCommentToDelete + 'has been successfully deleted');
+                    Alert.info('Comment has been successfully deleted');
                 } else {
                     const index = allComments.findIndex(this.filterCommentToDelete);
-                    const remainingReplies = allComments[index].replies.filter(this.filterRemainingComments);
-                    allComments[index].replies = remainingReplies;
+                    const remainingReplies = allComments[index].replies.list.filter(this.filterRemainingComments);
+                    allComments[index].replies.list = remainingReplies;
                     commentsUpdate(allComments);
+                    Alert.info('Reply comment has been successfully deleted');
                 }
             })
             .catch((error) => {
@@ -270,7 +270,6 @@ class Comment extends React.Component {
                     {comments
                         && comments
                             .slice(0)
-                            .reverse()
                             .map((comment, index) => (
                                 <div
                                     // eslint-disable-next-line react/no-array-index-key

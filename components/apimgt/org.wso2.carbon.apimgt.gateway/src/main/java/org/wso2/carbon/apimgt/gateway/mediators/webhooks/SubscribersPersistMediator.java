@@ -25,8 +25,10 @@ import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.util.EntityUtils;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.SynapseException;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
@@ -34,8 +36,10 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.WebhooksUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -44,38 +48,40 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This mediator would persist webhooks subscription data.
  */
 public class SubscribersPersistMediator extends AbstractMediator {
     private static final int subscriptionDataPersisRetries = 15;
-    private String topicName;
-    private String callback;
-    private String secret;
-    private String mode;
-    private String leaseSeconds;
 
     @Override
     public boolean mediate(MessageContext messageContext) {
         try {
-            populateQueryParamData(messageContext);
+            Map<String, String> queryParams = populateQueryParamData(messageContext);
+            if (queryParams.isEmpty()) {
+                populateException("Query params must present in the request", messageContext);
+            }
+            String callback = queryParams.get(APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM);
+            String topicName = queryParams.get(APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM);
+            String mode = queryParams.get(APIConstants.Webhooks.HUB_MODE_QUERY_PARAM);
+            String secret = queryParams.get(APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM);
+            String leaseSeconds = queryParams.get(APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM);
             messageContext.setProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING, true);
             org.apache.axis2.context.MessageContext axisCtx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
             if (StringUtils.isEmpty(callback)) {
-                handleException("Callback URL cannot be empty", messageContext);
-            }
-            if (StringUtils.isEmpty(topicName)) {
-                handleException("Topic name cannot be empty", messageContext);
+                populateException("Callback URL cannot be empty", messageContext);
             }
             if (StringUtils.isEmpty(mode)) {
-                handleException("Mode cannot be empty", messageContext);
+                populateException("Mode cannot be empty", messageContext);
             } else if (!(APIConstants.Webhooks.SUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()) || APIConstants.Webhooks.
                     UNSUBSCRIBE_MODE.equalsIgnoreCase(mode.trim()))) {
-                handleException("Invalid Entry for hub.mode", messageContext);
+                populateException("Invalid Entry for hub.mode", messageContext);
             }
             AuthenticationContext authenticationContext = APISecurityUtils.getAuthenticationContext(messageContext);
             String tenantDomain = (String) messageContext.getProperty(APIConstants.TENANT_DOMAIN_INFO_PROPERTY);
@@ -89,15 +95,18 @@ public class SubscribersPersistMediator extends AbstractMediator {
                 WebhooksUtils.handleThrottleOutMessage(messageContext);
                 return false;
             }
-            String jsonString = generateRequestBody(apiKey, apiContext, apiVersion, applicationID, tenantDomain,
-                    tenantID, authenticationContext);
+            String jsonString = generateRequestBody(callback, topicName, mode, secret, leaseSeconds, apiKey, apiContext,
+                    apiVersion, applicationID, tenantDomain, tenantID, authenticationContext);
             HttpResponse httpResponse = WebhooksUtils.persistData(jsonString, subscriptionDataPersisRetries,
                     APIConstants.Webhooks.SUBSCRIPTION_EVENT_TYPE);
             handleResponse(httpResponse, messageContext);
         } catch (URISyntaxException | InterruptedException | IOException e) {
-            if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-                Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                        "Error while persisting request", "Check the request format"));
+            messageContext.setProperty(SynapseConstants.ERROR_CODE, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Error while persisting request");
+            messageContext.setProperty(SynapseConstants.ERROR_DETAIL, "Error while persisting request");
+            Mediator sequence = messageContext.getSequence(APISecurityConstants.BACKEND_AUTH_FAILURE_HANDLER);
+            if (sequence != null && !sequence.mediate(messageContext)) {
+                return true;
             }
             WebhooksUtils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
@@ -131,11 +140,25 @@ public class SubscribersPersistMediator extends AbstractMediator {
             if (response.contains("Throttle")) {
                 WebhooksUtils.handleThrottleOutMessage(messageContext);
             }
-            if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-                Utils.setFaultPayload(messageContext, WebhooksUtils.getFaultPayload(statusCode, response, response));
+            messageContext.setProperty(SynapseConstants.ERROR_CODE, statusCode);
+            messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, response);
+            messageContext.setProperty(SynapseConstants.ERROR_DETAIL, response);
+            Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
+            if (sequence != null && !sequence.mediate(messageContext)) {
+                // If needed user should be able to prevent the rest of the fault handling
+                // logic from getting executed
+                return;
             }
+
             WebhooksUtils.sendFault(messageContext, statusCode);
         }
+    }
+
+    private void populateException(String errorMsg, MessageContext messageContext) {
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMsg);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorMsg);
+        throw new SynapseException(errorMsg);
     }
 
     /**
@@ -143,7 +166,8 @@ public class SubscribersPersistMediator extends AbstractMediator {
      *
      * @param messageContext    the message context.
      */
-    private void populateQueryParamData(MessageContext messageContext) throws URISyntaxException {
+    private Map<String, String> populateQueryParamData(MessageContext messageContext) throws URISyntaxException {
+        Map<String, String> queryData = new HashMap<>();
         String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                 getProperty(APIConstants.TRANSPORT_URL_IN);
         if (StringUtils.isEmpty(urlQueryParams)) {
@@ -152,22 +176,9 @@ public class SubscribersPersistMediator extends AbstractMediator {
         List<NameValuePair> queryParameter = URLEncodedUtils.parse(new URI(urlQueryParams),
                 StandardCharsets.UTF_8.name());
         for (NameValuePair nvPair : queryParameter) {
-            if (APIConstants.Webhooks.HUB_TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
-                topicName = nvPair.getValue();
-            }
-            if (APIConstants.Webhooks.HUB_CALLBACK_QUERY_PARAM.equals(nvPair.getName())) {
-                callback = nvPair.getValue();
-            }
-            if (APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM.equals(nvPair.getName())) {
-                secret = nvPair.getValue();
-            }
-            if (APIConstants.Webhooks.HUB_MODE_QUERY_PARAM.equals(nvPair.getName())) {
-                mode = nvPair.getValue();
-            }
-            if (APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM.equals(nvPair.getName())) {
-                leaseSeconds = nvPair.getValue();
-            }
+            queryData.put(nvPair.getName(), nvPair.getValue());
         }
+        return queryData;
     }
 
     /**
@@ -182,7 +193,8 @@ public class SubscribersPersistMediator extends AbstractMediator {
      * @param authContext       the authentication context.
      * @return the generated body.
      */
-    private String generateRequestBody(String apiUUID, String apiContext, String apiVersion, String applicationID,
+    private String generateRequestBody(String callback, String topicName, String mode, String secret, String leaseSeconds,
+                                       String apiUUID, String apiContext, String apiVersion, String applicationID,
                                        String tenantDomain, int tenantID, AuthenticationContext authContext) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode node = mapper.createObjectNode();

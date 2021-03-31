@@ -123,7 +123,7 @@ class CommentAdd extends React.Component {
         const { content } = this.state;
         const Api = new API();
         const comment = {
-            content: content.trim(),
+            content: content.trim(), category: "general"
         };
 
         // to check whether a string does not contain only white spaces
@@ -186,10 +186,6 @@ class CommentAdd extends React.Component {
                             autoFocus
                             multiline
                             rows='4'
-                            label={intl.formatMessage({
-                                defaultMessage: 'Comment',
-                                id: 'Apis.Details.Comments.CommentAdd.comment',
-                            })}
                             className={classes.textField}
                             margin='normal'
                             placeholder={intl.formatMessage({

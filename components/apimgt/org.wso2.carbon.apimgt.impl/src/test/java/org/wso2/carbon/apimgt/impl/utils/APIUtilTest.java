@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -56,7 +55,7 @@ import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -88,8 +87,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.security.KeyStore;
-import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1114,8 +1111,6 @@ public class APIUtilTest {
             ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
             PowerMockito.mockStatic(ApiMgtDAO.class);
             Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-            Mockito.when(apiMgtDAO.getAllLabels(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME))
-                    .thenReturn(new ArrayList<Label>());
             APIUtil.createAPIArtifactContent(genericArtifact, api);
             Assert.assertTrue(true);
             APIUtil.createAPIArtifactContent(genericArtifact, api);
@@ -2489,7 +2484,7 @@ public class APIUtilTest {
     public void testConstructApisGetQuery4() {
 
         String searchQuery = "status:PUBLISHED doc:wso2";
-        String expectedError = "Invalid query. AND based search is not supported for doc and subcontext prefixes";
+        String expectedError = "Invalid query. AND based search is not supported for doc prefix";
         APIManagementException exception = null;
         try {
             APIUtil.constructApisGetQuery(searchQuery);

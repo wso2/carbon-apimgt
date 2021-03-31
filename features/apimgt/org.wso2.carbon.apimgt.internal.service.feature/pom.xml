@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.30-SNAPSHOT</version>
+        <version>9.0.96-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -87,6 +87,22 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.apicurio</groupId>
+            <artifactId>apicurio-data-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
         </dependency>
     </dependencies>
 
@@ -172,6 +188,15 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.common:${carbon.apimgt.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.publisher.v1.common:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
+                                <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-core</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-annotations</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.core:jackson-databind</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${fasterxml.jackson.version}</bundleDef>
+                                <bundleDef>com.fasterxml.jackson.datatype:jackson-datatype-guava:${fasterxml.jackson.version}</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
@@ -188,6 +213,15 @@
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.notification:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>javax.validation:validation-api</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector:${swagger.inflector.version}</bundleDef>
+                                <bundleDef>org.wso2.orbit.io.swagger:swagger-inflector-oas3:${swagger.inflector.oas3.version}</bundleDef>
+                                <bundleDef>io.swagger:swagger-core</bundleDef>
+                                <bundleDef>io.swagger:swagger-models</bundleDef>
+                                <bundleDef>commons-io.wso2:commons-io</bundleDef>
+                                <bundleDef>io.swagger:swagger-annotations</bundleDef>
+                                <bundleDef>io.apicurio:apicurio-data-models</bundleDef>
+                                <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:compatible:${carbon.kernel.feature.version}

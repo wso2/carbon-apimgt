@@ -51,7 +51,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObserver {
     private static final Log log = LogFactory.getLog(TenantServiceCreator.class);
     private String resourceMisMatchSequenceName = "_resource_mismatch_handler_";
-    private static final String blockingSequence = "_auth_failure_handler_";
+    private static final String blockingSequence = "_block_api_handler_";
     private String authFailureHandlerSequenceName = "_auth_failure_handler_";
     private String graphqlAuthFailureHandlerSequenceName = "_graphql_failure_handler_";
     private String sandboxKeyErrorSequenceName = "_sandbox_key_error_";
@@ -61,10 +61,14 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String mainSequenceName = "main";
     private String corsSequenceName = "_cors_request_handler_";
     private String threatFaultSequenceName = "_threat_fault_";
+    private String backendFailureSequenceName = "_backend_failure_handler_";
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTP = "WebhookServer";
+    private String webHookServerHTTPS = "SecureWebhookServer";
     private String webHookFaultSequenceName = "webhooksFaultSequence";
+    private String webSocketOutDispatchSeq = "outDispatchSeq";
+    private String webSocketDispatchSeq = "dispatchSeq";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
@@ -142,10 +146,20 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                     MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + blockingSequence + ".xml";
             File blockingSequenceXml = new File(blockingSequenceLocation);
             if (!blockingSequenceXml.exists()) {
-                FileUtils.copyFile(new File(synapseConfigRootPath + blockingSequenceLocation + ".xml"),
+                FileUtils.copyFile(new File(synapseConfigRootPath + blockingSequence + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator +
                                 MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
-                                blockingSequenceLocation + ".xml"));
+                                blockingSequence + ".xml"));
+            }
+            String backEndFailureSequence = synapseConfigsDir.getAbsolutePath() + File.separator +
+                    manger.getTracker().getCurrentConfigurationName() + File.separator +
+                    MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator + backendFailureSequenceName + ".xml";
+            File backendSequenceXml = new File(backEndFailureSequence);
+            if (!backendSequenceXml.exists()) {
+                FileUtils.copyFile(new File(synapseConfigRootPath + backendFailureSequenceName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator +
+                                MultiXMLConfigurationBuilder.SEQUENCES_DIR + File.separator +
+                                backEndFailureSequence + ".xml"));
             }
         } catch (RemoteException e) {
             log.error("Failed to create Tenant's synapse sequences.", e);
@@ -257,21 +271,30 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + webHookFaultSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + webHookFaultSequenceName + ".xml"));
-                FileUtils.copyFile(new File(synapseConfigRootPath + webSocketInboundEp + ".xml"), new File(
-                        synapseConfigDir.getAbsolutePath() + File.separator
-                                + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator
-                                + webSocketInboundEp + ".xml"));
-                FileUtils.copyFile(new File(synapseConfigRootPath + securedWebSocketInboundEp + ".xml"), new File(
-                        synapseConfigDir.getAbsolutePath() + File.separator
-                                + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator
-                                + securedWebSocketInboundEp + ".xml"));
-                FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTP + ".xml"), new File(
-                        synapseConfigDir.getAbsolutePath() + File.separator
-                                + MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR + File.separator + webHookServerHTTP
-                                + ".xml"));
+
+                copyArtifact(webSocketDispatchSeq, MultiXMLConfigurationBuilder.SEQUENCES_DIR);
+                copyArtifact(webSocketOutDispatchSeq, MultiXMLConfigurationBuilder.SEQUENCES_DIR);
+                copyArtifact(webSocketInboundEp, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
+                copyArtifact(securedWebSocketInboundEp, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
+                copyArtifact(webHookServerHTTP, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
+                copyArtifact(webHookServerHTTPS, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
             } catch (IOException e) {
                 log.error("Error while copying API manager specific synapse sequences" + e);
             }
         }
+
+        /**
+         * Copy artifacts when tenant created.
+         *
+         * @param artifactName name of artifact
+         * @param type         type. eg:- sequence inbound
+         * @throws IOException if error while copying
+         */
+        private void copyArtifact(String artifactName, String type) throws IOException {
+            FileUtils.copyFile(new File(synapseConfigRootPath + artifactName + ".xml"), new File(
+                    synapseConfigDir.getAbsolutePath() + File.separator + type + File.separator + artifactName
+                            + ".xml"));
+        }
+
     }
 }

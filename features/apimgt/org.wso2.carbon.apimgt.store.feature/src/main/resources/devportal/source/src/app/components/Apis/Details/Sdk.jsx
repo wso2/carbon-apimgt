@@ -286,6 +286,7 @@ class Sdk extends React.Component {
                                                         <Button
                                                             color='secondary'
                                                             onClick={event => this.handleClick(event, language)}
+                                                            aria-label={'Download ' + language + ' SDK'}
                                                         >
                                                             <Icon>arrow_downward</Icon>
                                                             {'Download'}

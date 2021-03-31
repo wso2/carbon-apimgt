@@ -32,6 +32,7 @@ import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 import { FormattedMessage } from 'react-intl';
 import { isRef } from 'AppComponents/Apis/Details/Resources/operationUtils';
 import RequestBody from 'AppComponents/Apis/Details/Resources/components/operationComponents/RequestBody';
+import Banner from 'AppComponents/Shared/Banner';
 import EditParameter from './EditParameter';
 
 const useStyles = makeStyles({
@@ -57,7 +58,21 @@ export default function ListParameters(props) {
     } = props;
     const classes = useStyles();
     const [editingParameter, setEditingParameter] = useState(null);
-
+    if (!resolvedSpec) {
+        return (
+            <Banner
+                disableActions
+                dense
+                type='error'
+                message={(
+                    <FormattedMessage
+                        id='Apis.Details.Resources.components.operationComponents.ListParameter.parameter.spec.error'
+                        defaultMessage='Error in resolving the definition!'
+                    />
+                )}
+            />
+        );
+    }
     return (
         <>
             {editingParameter !== null && (
@@ -126,14 +141,14 @@ export default function ListParameters(props) {
                                             ? (
                                                 <FormattedMessage
                                                     id={'Apis.Details.Resources.components.operationComponents'
-                                                + '.ListParameter.yes'}
+                                                        + '.ListParameter.yes'}
                                                     defaultMessage='Yes'
                                                 />
                                             )
                                             : (
                                                 <FormattedMessage
                                                     id={'Apis.Details.Resources.components.operationComponents'
-                                                + '.ListParameter.no'}
+                                                        + '.ListParameter.no'}
                                                     defaultMessage='No'
                                                 />
                                             )}
@@ -144,7 +159,7 @@ export default function ListParameters(props) {
                                                 <Tooltip title={(
                                                     <FormattedMessage
                                                         id={'Apis.Details.Resources.components.operationComponents.'
-                                                    + 'ListParameter.edit'}
+                                                            + 'ListParameter.edit'}
                                                         defaultMessage='Edit'
                                                     />
                                                 )}
@@ -160,7 +175,7 @@ export default function ListParameters(props) {
                                             <Tooltip title={(
                                                 <FormattedMessage
                                                     id={'Apis.Details.Resources.components.operationComponents'
-                                                + '.ListParameter.delete'}
+                                                        + '.ListParameter.delete'}
                                                     defaultMessage='Delete'
                                                 />
                                             )}

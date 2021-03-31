@@ -34,14 +34,11 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -74,15 +71,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
-import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.events.Event;
-import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -103,7 +96,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -392,13 +384,6 @@ public class APIMgtDAOTest {
     }
     @Test
     public void testKeyForwardCompatibility() throws Exception {
-        Set<APIIdentifier> apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
-        assertEquals(1, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertEquals("V1.0.0", apiId.getVersion());
-        }
 
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
@@ -408,29 +393,6 @@ public class APIMgtDAOTest {
         apiMgtDAO.addAPI(api, -1234);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0");
-        apiSet = apiMgtDAO.getAPIByConsumerKey("SSDCHEJJ-AWUIS-232");
-        assertEquals(2, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertTrue("V1.0.0".equals(apiId.getVersion()) || "V2.0.0".equals(apiId.getVersion()));
-        }
-
-        apiSet = apiMgtDAO.getAPIByConsumerKey("p1q2r3s4");
-        assertEquals(2, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("SUMEDHA", apiId.getProviderName());
-            assertEquals("API1", apiId.getApiName());
-            assertTrue("V1.0.0".equals(apiId.getVersion()) || "V2.0.0".equals(apiId.getVersion()));
-        }
-
-        apiSet = apiMgtDAO.getAPIByConsumerKey("a1b2c3d4");
-        assertEquals(1, apiSet.size());
-        for (APIIdentifier apiId : apiSet) {
-            assertEquals("PRABATH", apiId.getProviderName());
-            assertEquals("API2", apiId.getApiName());
-            assertEquals("V1.0.0", apiId.getVersion());
-        }
     }
 
     @Test
@@ -991,7 +953,7 @@ public class APIMgtDAOTest {
         assertTrue(apiPolicy.getPolicyName().equals(apiMgtDAO.getAPILevelTier(apiMgtDAO.getAPIID(apiId))));
         apiMgtDAO.recordAPILifeCycleEvent(apiId, "CREATED", "PUBLISHED", "testCreateApplicationRegistrationEntry",
                 -1234);
-        apiMgtDAO.updateDefaultAPIPublishedVersion(apiId, APIConstants.PUBLISHED, APIConstants.CREATED);
+        apiMgtDAO.updateDefaultAPIPublishedVersion(apiId);
         assertTrue(apiMgtDAO.getConsumerKeys(apiId).length > 0);
         apiMgtDAO.removeAllSubscriptions(apiId);
         assertTrue(apiMgtDAO.getAPINamesMatchingContext(api.getContext()).size() > 0);

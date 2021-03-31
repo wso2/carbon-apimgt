@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
 import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
@@ -70,7 +72,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         //setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        List<Tier> tierList = getThrottlingPolicyList(policyLevel);
+        List<Tier> tierList = getThrottlingPolicyList(policyLevel, false);
         ThrottlingPolicyListDTO policyListDTO = ThrottlingPolicyMappingUtil
                 .fromTierListToDTO(tierList, policyLevel, limit, offset);
         //todo: set total counts properly
@@ -176,7 +178,7 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
      * @param policyLevel
      * @return list of throttling policies
      */
-    public List<Tier> getThrottlingPolicyList(String policyLevel) {
+    public List<Tier> getThrottlingPolicyList(String policyLevel, boolean includeAsyncPolicies) {
         try {
             List<Tier> tierList = new ArrayList<>();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -188,15 +190,16 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
             //retrieves the tier based on the given tier-level
             if (ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString().equals(policyLevel)) {
                 Map<String, Tier> apiTiersMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
-                if (apiTiersMap != null) {
-                    tierList.addAll(apiTiersMap.values());
+                tierList.addAll(apiTiersMap.values());
+                // if includeAsyncPolicies is not set, remove the async API policies from the list.
+                if (!includeAsyncPolicies) {
+                    tierList = tierList.stream().filter(x -> !PolicyConstants.EVENT_COUNT_TYPE.equals(
+                            x.getQuotaPolicyType())).collect(Collectors.toList());
                 }
             } else if (ThrottlingPolicyDTO.PolicyLevelEnum.API.toString().equals(policyLevel)) {
                 Map<String, Tier> resourceTiersMap =
                         APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                if (resourceTiersMap != null) {
-                    tierList.addAll(resourceTiersMap.values());
-                }
+                tierList.addAll(resourceTiersMap.values());
             } else {
                 RestApiUtil.handleResourceNotFoundError(
                         "policyLevel should be one of " +

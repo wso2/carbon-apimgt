@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.dao.test.TestTenantManager;
 import org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -53,6 +54,11 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
 
     }
 
+    public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO, APIPersistence apiPersistenceInstance)
+            throws APIManagementException {
+        this.apiMgtDAO = apiMgtDAO;
+        this.apiPersistenceInstance = apiPersistenceInstance;
+    }
     /**
      * Returns API manager configurations.
      *

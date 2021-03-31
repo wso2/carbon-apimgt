@@ -244,6 +244,41 @@ function APICreateDefault(props) {
                         .then(() => {
                             Alert.info('API Revision Deployed Successfully');
                             setIsDeploying(false);
+                            // Publishing API after deploying
+                            setIsPublishing(true);
+                            api.publish()
+                                .then((response) => {
+                                    const { workflowStatus } = response.body;
+                                    if (workflowStatus === APICreateDefault.WORKFLOW_STATUS.CREATED) {
+                                        Alert.info(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
+                                            defaultMessage: 'Lifecycle state change request has been sent',
+                                        }));
+                                    } else {
+                                        Alert.info(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
+                                            defaultMessage: 'API updated successfully',
+                                        }));
+                                    }
+                                    history.push(`/apis/${api.id}/overview`);
+                                })
+                                .catch((error) => {
+                                    if (error.response) {
+                                        Alert.error(error.response.body.description);
+                                        setPageError(error.response.body);
+                                    } else {
+                                        Alert.error(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.publish',
+                                            defaultMessage: 'Something went wrong while publishing the API',
+                                        }));
+                                        setPageError('Something went wrong while publishing the API');
+                                    }
+                                    console.error(error);
+                                })
+                                .finally(() => {
+                                    setIsPublishing(false);
+                                    setIsPublishButtonClicked(false);
+                                });
                         })
                         .catch((error) => {
                             if (error.response) {
@@ -278,40 +313,6 @@ function APICreateDefault(props) {
                 .finally(() => {
                     setIsRevisioning(false);
                 });
-            setIsPublishing(true);
-            api.publish()
-                .then((response) => {
-                    const { workflowStatus } = response.body;
-                    if (workflowStatus === APICreateDefault.WORKFLOW_STATUS.CREATED) {
-                        Alert.info(intl.formatMessage({
-                            id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
-                            defaultMessage: 'Lifecycle state change request has been sent',
-                        }));
-                    } else {
-                        Alert.info(intl.formatMessage({
-                            id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
-                            defaultMessage: 'API updated successfully',
-                        }));
-                    }
-                    history.push(`/apis/${api.id}/overview`);
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        Alert.error(error.response.body.description);
-                        setPageError(error.response.body);
-                    } else {
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.publish',
-                            defaultMessage: 'Something went wrong while publishing the API',
-                        }));
-                        setPageError('Something went wrong while publishing the API');
-                    }
-                    console.error(error);
-                })
-                .finally(() => {
-                    setIsPublishing(false);
-                    setIsPublishButtonClicked(false);
-                });
         });
     }
 
@@ -336,8 +337,8 @@ function APICreateDefault(props) {
                 <FormattedMessage
                     id='Apis.Create.Default.APICreateDefault.api.sub.heading'
                     defaultMessage={
-                        'Create an API by providing a Name, a Version, a Context,'
-                        + ' Backend Endpoint(s) (optional), and Business Plans (optional).'
+                        'Create an API by providing a Name, a Version, a Context and'
+                        + ' Backend Endpoint (optional)'
                     }
                 />
             </Typography>
@@ -375,10 +376,7 @@ function APICreateDefault(props) {
                 <Typography variant='caption'>
                     <FormattedMessage
                         id='Apis.Create.Default.APICreateDefault.webSocket.sub.heading'
-                        defaultMessage={
-                            'Create a WebSocket API by providing a Name, a Context,'
-                            + ' and Business Plans (optional).'
-                        }
+                        defaultMessage='Create a WebSocket API by providing a Name, and a Context.'
                     />
                 </Typography>
             </>

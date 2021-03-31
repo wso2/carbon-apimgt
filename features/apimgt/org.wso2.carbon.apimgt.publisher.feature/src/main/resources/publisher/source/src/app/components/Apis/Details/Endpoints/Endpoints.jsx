@@ -74,6 +74,7 @@ function Endpoints(props) {
     const [swagger, setSwagger] = useState(defaultSwagger);
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
     const [isUpdating, setUpdating] = useState(false);
+    const [isEndpointUrlAvailable, setIsEndpointUrlAvailable] = useState(false);
 
     const apiReducer = (initState, configAction) => {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
@@ -397,6 +398,7 @@ function Endpoints(props) {
                                         onChangeAPI={apiDispatcher}
                                         endpointsDispatcher={apiDispatcher}
                                         saveAndRedirect={saveAndRedirect}
+                                        setIsEndpointUrlAvailable={setIsEndpointUrlAvailable}
                                     />
                                 </Grid>
                             </Grid>
@@ -421,7 +423,7 @@ function Endpoints(props) {
                                 <Grid item>
                                     <Button
                                         disabled={isUpdating || api.isRevision || !endpointValidity.isValid
-                                    || isRestricted(['apim:api_create'], api)}
+                                    || isRestricted(['apim:api_create'], api) || !isEndpointUrlAvailable}
                                         type='submit'
                                         variant='contained'
                                         color='primary'

@@ -48,7 +48,7 @@
       },
       {
         "Name": "apim:subscribe",
-        "Roles": "admin,Internal/subscriber"
+        "Roles": "admin,Internal/subscriber,Internal/devops"
       },
       {
         "Name": "apim:tier_view",
@@ -284,6 +284,14 @@
       },
       {
         "Name": "apim:role_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:environment_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:environment_read",
         "Roles": "admin"
       }
     ]

@@ -42,6 +42,7 @@ public final class RestApiConstants {
     public static final String USER_REST_API_SCOPES = "user_rest_api_scopes";
 
     public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
+    public static final String ADMIN_SCOPE = "apim:admin";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
@@ -95,7 +96,6 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String RESOURCE_PATH_THROTTLING = "/throttling";
-    public static final String RESOURCE_PATH_LABEL = "/labels";
     public static final String RESOURCE_PATH_ENVIRONMENT = "/environments";
     public static final String RESOURCE_PATH_SHARED_SCOPES =  "/scopes";
     public static final String RESOURCE_PATH_REVISIONS = "/revisions";
@@ -121,7 +121,7 @@ public final class RestApiConstants {
     public static final String SERVER_PASSWORD = "password";
 
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
-    public static final String RESOURCE_PATH_TIERS = "/tiers";
+    public static final String RESOURCE_PATH_TIERS = "/throttling-policies";
     public static final String RESOURCE_PATH_TIERS_API = RESOURCE_PATH_TIERS + "/api";
     public static final String RESOURCE_PATH_TIERS_APPLICATION = RESOURCE_PATH_TIERS + "/application";
     public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";

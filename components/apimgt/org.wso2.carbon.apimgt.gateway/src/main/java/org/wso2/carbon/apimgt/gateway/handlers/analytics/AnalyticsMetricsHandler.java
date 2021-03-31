@@ -23,9 +23,9 @@ import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.impl.GenericRequestDataCollector;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.AnalyticsException;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -49,12 +49,13 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
     @Override
     public boolean handleRequestInFlow(MessageContext messageContext) {
 
-        if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
-            return true;
-        }
+
         messageContext.setProperty(Constants.REQUEST_START_TIME_PROPERTY, System.currentTimeMillis());
         //Set user agent in request flow
         if (!messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
+            if (GatewayUtils.isAPIStatusPrototype(messageContext)) {
+                return true;
+            }
             String userAgent = getUserAgent(messageContext);
             String userIp = DataPublisherUtil.getEndUserIP(messageContext);
             messageContext.setProperty(Constants.USER_AGENT_PROPERTY, userAgent);

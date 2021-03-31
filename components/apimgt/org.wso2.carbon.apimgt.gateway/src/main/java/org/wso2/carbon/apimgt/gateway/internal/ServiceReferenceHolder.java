@@ -22,10 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
-import org.wso2.carbon.apimgt.gateway.webhooks.WebhooksDataHolder;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
@@ -84,6 +85,8 @@ public class ServiceReferenceHolder {
     private SubscriptionsDataService subscriptionsDataService;
 
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
+    private RedisCacheUtils redisCacheUtils;
+
     public void setThrottleDataHolder(ThrottleDataHolder throttleDataHolder) {
         this.throttleDataHolder = throttleDataHolder;
     }
@@ -358,5 +361,25 @@ public class ServiceReferenceHolder {
     public boolean isTenantLoaded(String tenantDomain) {
 
         return activeTenants.contains(tenantDomain);
+    }
+
+    public void setRedisCacheUtil(RedisCacheUtils redisCacheUtils) {
+
+        this.redisCacheUtils = redisCacheUtils;
+    }
+
+    public RedisCacheUtils getRedisCacheUtils() {
+
+        return redisCacheUtils;
+    }
+
+    public boolean isRedisEnabled() {
+
+        RedisConfig redisConfigProperties = getAPIManagerConfiguration().getRedisConfigProperties();
+        if (redisConfigProperties != null && redisConfigProperties.isRedisEnabled()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

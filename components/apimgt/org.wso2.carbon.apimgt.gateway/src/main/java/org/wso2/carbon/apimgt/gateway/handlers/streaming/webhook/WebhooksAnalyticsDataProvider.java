@@ -19,8 +19,8 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;

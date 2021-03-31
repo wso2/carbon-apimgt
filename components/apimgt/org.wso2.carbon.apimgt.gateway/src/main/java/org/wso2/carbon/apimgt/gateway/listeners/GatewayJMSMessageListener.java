@@ -136,7 +136,7 @@ public class GatewayJMSMessageListener implements MessageListener {
                                 tenantFlowStarted = true;
                                 inMemoryApiDeployer.deployAPI(gatewayEvent);
                             } catch (ArtifactSynchronizerException e) {
-                                log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
+                                    log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
                                         "in the Gateway");
                             } finally {
                                 if (tenantFlowStarted) {

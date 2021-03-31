@@ -18,9 +18,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 import java.util.Map;
 
@@ -82,25 +80,4 @@ public class APISecurityUtils {
         return (AuthenticationContext) synCtx.getProperty(API_AUTH_CONTEXT);
     }
 
-    public static String getKeyValidatorClientType() {
-        if (keyValidatorClientType == null) {
-            synchronized (APISecurityUtils.class) {
-                if (keyValidatorClientType == null) {
-                    getAPIKeyValidatorClientType();
-                    if (keyValidatorClientType == null) {
-                        //default to WSClient
-                        keyValidatorClientType = APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
-                    }
-                    return keyValidatorClientType;
-                }
-            }
-        }
-        return keyValidatorClientType;
-    }
-
-    protected static void getAPIKeyValidatorClientType() {
-        APIManagerConfiguration apiMgtConfig =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-        keyValidatorClientType = apiMgtConfig.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CLIENT_TYPE);
-    }
 }

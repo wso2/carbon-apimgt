@@ -21,9 +21,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class GatewayUtils {
+
     private static final Log log = LogFactory.getLog(GatewayUtils.class);
 
     public static void setCustomSequencesToBeRemoved(API api, GatewayAPIDTO gatewayAPIDTO) {
@@ -42,6 +43,7 @@ public class GatewayUtils {
         String faultSequence = APIUtil.getSequenceExtensionName(api) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
         gatewayAPIDTO.setSequencesToBeRemove(addStringToList(faultSequence, gatewayAPIDTO.getSequencesToBeRemove()));
     }
+
     public static String[] addStringToList(String key, String[] keys) {
 
         if (keys == null) {
@@ -53,6 +55,20 @@ public class GatewayUtils {
             return keyList.toArray(new String[keyList.size()]);
         }
     }
+
+    public static void setEndpointsToBeRemoved(APIProductIdentifier apiProductIdentifier, String apiUUID,
+                                               GatewayAPIDTO gatewayAPIDTO) {
+
+        String endpointName =
+                apiProductIdentifier.getName() + "--v" + apiProductIdentifier.getVersion().concat("--").concat(apiUUID);
+        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
+                endpointName + "_API" + APIConstants.API_DATA_SANDBOX_ENDPOINTS.replace("_endpoints", "") + "Endpoint",
+                gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
+                endpointName + "_API" + APIConstants.API_DATA_PRODUCTION_ENDPOINTS.replace("_endpoints", "") +
+                        "Endpoint", gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+    }
+
     public static void setEndpointsToBeRemoved(String apiName, String version, GatewayAPIDTO gatewayAPIDTO) {
 
         String endpointName = apiName + "--v" + version;
@@ -71,6 +87,7 @@ public class GatewayUtils {
      * @return hashed string
      */
     public static String hashString(byte[] str) {
+
         if (str == null) {
             return "";
         }
@@ -95,4 +112,41 @@ public class GatewayUtils {
         }
         return generatedHash;
     }
+
+    public static void setCustomSequencesToBeRemoved(APIProductIdentifier apiProductIdentifier, String apiUUID,
+                                                     GatewayAPIDTO gatewayAPIDTO) {
+
+        String inSequence = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                apiProductIdentifier.getVersion()).concat("--").concat(apiUUID) + APIConstants.API_CUSTOM_SEQ_IN_EXT;
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(inSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+        String outSequence = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                apiProductIdentifier.getVersion()).concat("--").concat(apiUUID) + APIConstants.API_CUSTOM_SEQ_OUT_EXT;
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(outSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+        String faultSequence = APIUtil.getSequenceExtensionName(apiProductIdentifier.getName(),
+                apiProductIdentifier.getVersion()).concat("--").concat(apiUUID) + APIConstants.API_CUSTOM_SEQ_FAULT_EXT;
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(faultSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+    }
+
+    public static String retrieveOauthClientSecretAlias(String name, String version, String type) {
+
+        return name.concat("--v").concat(version).concat("--")
+                .concat(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH).concat("--")
+                .concat(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET).concat("--").concat(type);
+    }
+    public static String retrieveOAuthPasswordAlias(String name, String version, String type) {
+
+        return name.concat("--v").concat(version).concat("--")
+                .concat(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH).concat("--")
+                .concat(APIConstants.ENDPOINT_SECURITY_PASSWORD).concat("--").concat(type);
+    }
+
+    public static String retrieveBasicAuthAlias(String name, String version, String type) {
+
+        return name.concat("--v").concat(version).concat("--").concat(type);
+    }
+    public static String retrieveUniqueIdentifier(String apiId, String type) {
+
+        return apiId.concat("--").concat(type);
+    }
+
 }

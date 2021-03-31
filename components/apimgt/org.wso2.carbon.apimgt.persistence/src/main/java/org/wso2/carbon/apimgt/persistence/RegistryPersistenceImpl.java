@@ -102,6 +102,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Collection;
@@ -195,13 +196,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (tagSet != null) {
                 for (String tag : tagSet) {
                     registry.applyTag(artifactPath, tag);
-                }
-            }
-            
-            List<Label> candidateLabelsList = api.getGatewayLabels();
-            if (candidateLabelsList != null) {
-                for (Label label : candidateLabelsList) {
-                    artifact.addAttribute(APIConstants.API_LABELS_GATEWAY_LABELS, label.getName());
                 }
             }
 
@@ -519,13 +513,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry.applyTag(artifactPath, tag);
                 }
             }
-            if (api.isDefaultVersion()) {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
-            } else {
-                updateApiArtifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
-            }
-
-
             artifactManager.updateGenericArtifact(updateApiArtifact);
 
             //write API Status to a separate property. This is done to support querying APIs using custom query (SQL)
@@ -714,7 +701,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
-            //String username = holder.getRegistryUser();
 
             GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact != null) {
@@ -875,8 +861,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherAPISearchResult result = null;
         try {
-            RegistryHolder holder = getRegistry(ctx.getUserame(), requestedTenantDomain);
-            Registry userRegistry = holder.getRegistry();
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry sysRegistry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
             int tenantIDLocal = holder.getTenantId();
             log.debug("Requested query for publisher search: " + searchQuery);
@@ -885,17 +871,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
             
             log.debug("Modified query for publisher search: " + modifiedQuery);
 
-            String userNameLocal = getTenantAwareUsername(ctx.getUserame());
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+            String tenantAdminUsername = getTenantAwareUsername(
+                    RegistryPersistenceUtil.getTenantAdminUserName(requestedTenantDomain));
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAdminUsername);
 
             if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                result = searchPaginatedPublisherAPIsByDoc(userRegistry, tenantIDLocal, searchQuery.split(":")[1],
-                        userNameLocal, start, offset);
-            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
-                result = searchPaginatedPublisherAPIsByURLPattern(userRegistry, tenantIDLocal,
-                        searchQuery.split(":")[1], userNameLocal, start, offset);
+                result = searchPaginatedPublisherAPIsByDoc(sysRegistry, tenantIDLocal, searchQuery.split(":")[1],
+                        tenantAdminUsername, start, offset);
             } else {
-                result = searchPaginatedPublisherAPIs(userRegistry, tenantIDLocal, modifiedQuery, start, offset);
+                result = searchPaginatedPublisherAPIs(sysRegistry, tenantIDLocal, modifiedQuery, start, offset);
             }
         } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while searching APIs " , e);
@@ -1001,9 +985,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 result = searchPaginatedDevPortalAPIsByDoc(userRegistry, tenantIDLocal, searchQuery.split(":")[1],
                         userNameLocal, start, offset);
-            } else if (searchQuery != null && searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
-                result = searchPaginatedDevPortalAPIsByURLPattern(userRegistry, tenantIDLocal,
-                        searchQuery.split(":")[1], userNameLocal, start, offset);
             } else {
                 result = searchPaginatedDevPortalAPIs(userRegistry, tenantIDLocal, modifiedQuery, start, offset);
             }
@@ -1206,102 +1187,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         return searchResults;
     }
-
-    @SuppressWarnings("serial")
-    private DevPortalAPISearchResult searchPaginatedDevPortalAPIsByURLPattern(Registry registry, int tenantID,
-            String searchQuery, String username, int start, int end) throws APIPersistenceException {
-        GenericArtifact[] genericArtifacts = new GenericArtifact[0];
-        GenericArtifactManager artifactManager = null;
-        int totalLength = 0;
-        String criteria;
-        DevPortalAPISearchResult searchResults = new DevPortalAPISearchResult();
-        final String searchValue = searchQuery.trim();
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        try {
-
-            artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Artifact manager is null when searching APIs by URL pattern " + searchQuery;
-                log.error(errorMessage);
-                throw new APIPersistenceException(errorMessage);
-            }
-            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-            if (artifactManager != null) {
-                for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
-                    // "url_template" entry stores in registry,unless we search in each API
-                    criteria = APIConstants.API_URI_PATTERN + i;
-                    listMap.put(criteria, new ArrayList<String>() {
-                        {
-                            add(searchValue);
-                        }
-                    });
-                    genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager
-                            .findGenericArtifacts(listMap));
-                }
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    return null;
-                }
-                totalLength = genericArtifacts.length;
-                StringBuilder apiNames = new StringBuilder();
-                List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<DevPortalAPIInfo>();
-                for (GenericArtifact artifact : genericArtifacts) {
-                    if (artifact == null) {
-                        log.error("Failed to retrieve an artifact when searching APIs by URL pattern : " + searchQuery +
-                                " , continuing with next artifact.");
-                        continue;
-                    }
-                    if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) { // Not found 
-                        
-                        String status = RegistryPersistenceUtil.getLcStateFromArtifact(artifact);
-                        DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
-                        if (isAllowDisplayAPIsWithMultipleStatus()) {
-                            if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)
-                                    || APIConstants.PROTOTYPED.equals(status)) {
-                                apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-                                apiInfo.setId(artifact.getId());
-                                apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
-                                apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-                                apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-                                apiInfo.setStatus(status);
-                                apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-                                apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
-                                apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-                                devPortalAPIInfoList.add(apiInfo);
-                                apiNames.append(apiInfo.getApiName());
-                            }
-                        } else {
-                            if (APIConstants.PUBLISHED.equals(status) || APIConstants.PROTOTYPED.equals(status)) {
-
-                                apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-                                apiInfo.setId(artifact.getId());
-                                apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
-                                apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-                                apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-                                apiInfo.setStatus(status);
-                                apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-                                apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
-                                apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-                                devPortalAPIInfoList.add(apiInfo);
-                                apiNames.append(apiInfo.getApiName());
-                            }
-                        }
-                    }
-                    totalLength = devPortalAPIInfoList.size();
-                }
-                if (totalLength <= ((start + end) - 1)) {
-                    end = totalLength;
-                }
-                searchResults.setDevPortalAPIInfoList(devPortalAPIInfoList);
-                searchResults.setTotalAPIsCount(devPortalAPIInfoList.size());
-                searchResults.setReturnedAPIsCount(devPortalAPIInfoList.size());
-            }
-        
-        } catch (GovernanceException e) {
-            throw new APIPersistenceException("Error while searching for subcontext ", e);
-        }
-        return searchResults;
-        
-    }
     
     private PublisherAPISearchResult searchPaginatedPublisherAPIsByDoc(Registry registry, int tenantID,
             String searchQuery, String username, int start, int offset) throws APIPersistenceException {
@@ -1309,7 +1194,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
         try {
 
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             if (artifactManager == null) {
@@ -1409,83 +1293,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         }
 
         return searchResults;
-    }
-
-    private PublisherAPISearchResult searchPaginatedPublisherAPIsByURLPattern(Registry registry, int tenantID,
-            String searchQuery, String username, int start, int end) throws APIPersistenceException {
-        GenericArtifact[] genericArtifacts = new GenericArtifact[0];
-        GenericArtifactManager artifactManager = null;
-        int totalLength = 0;
-        String criteria;
-        PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
-        final String searchValue = searchQuery.trim();
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        try {
-
-            artifactManager = RegistryPersistenceUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                String errorMessage = "Artifact manager is null when searching APIs by URL pattern " + searchQuery;
-                log.error(errorMessage);
-                throw new APIPersistenceException(errorMessage);
-            }
-            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-            if (artifactManager != null) {
-                for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
-                    // "url_template" entry stores in registry,unless we search in each API
-                    criteria = APIConstants.API_URI_PATTERN + i;
-                    listMap.put(criteria, new ArrayList<String>() {
-                        private static final long serialVersionUID = 1L;
-
-                        {
-                            add(searchValue);
-                        }
-                    });
-                    genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager
-                            .findGenericArtifacts(listMap));
-                }
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
-                    return null;
-                }
-                totalLength = genericArtifacts.length;
-                StringBuilder apiNames = new StringBuilder();
-                List<PublisherAPIInfo> apiInfoList = new ArrayList<PublisherAPIInfo>();
-                for (GenericArtifact artifact : genericArtifacts) {
-                    if (artifact == null) {
-                        log.error("Failed to retrieve an artifact when searching APIs by URL pattern : " + searchQuery +
-                                " , continuing with next artifact.");
-                        continue;
-                    }
-                    if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) { // Not found 
-                        
-                        String status = RegistryPersistenceUtil.getLcStateFromArtifact(artifact);
-                        PublisherAPIInfo apiInfo = new PublisherAPIInfo();
-                        apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
-                        apiInfo.setId(artifact.getId());
-                        apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
-                        apiInfo.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-                        apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
-                        apiInfo.setStatus(status);
-                        apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
-                        //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
-                        apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
-                        apiInfoList.add(apiInfo);
-                        apiNames.append(apiInfo.getApiName());
-                    }
-                    totalLength = apiInfoList.size();
-                }
-                if (totalLength <= ((start + end) - 1)) {
-                    end = totalLength;
-                }
-                searchResults.setPublisherAPIInfoList(apiInfoList);
-                searchResults.setTotalAPIsCount(apiInfoList.size());
-                searchResults.setReturnedAPIsCount(apiInfoList.size());
-            }
-        
-        } catch (GovernanceException e) {
-            throw new APIPersistenceException("Error while searching for subcontext ", e);
-        }
-        return searchResults;
-        
     }
 
     private boolean isAllowDisplayAPIsWithMultipleStatus() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -16,1008 +16,513 @@
  * under the License.
  */
 
-import React, { Component, lazy } from 'react';
-import PropTypes from 'prop-types';
-import green from '@material-ui/core/colors/green';
-import { withStyles, withTheme } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-import { FormattedMessage } from 'react-intl';
-import Paper from '@material-ui/core/Paper';
+import React, {
+    useReducer, useEffect, useState,
+} from 'react';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Chip from '@material-ui/core/Chip';
-import IconButton from '@material-ui/core/IconButton';
-import InfoIcon from '@material-ui/icons/Info';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
-import SaveIcon from '@material-ui/icons/Save';
-import CancelIcon from '@material-ui/icons/Cancel';
-import Divider from '@material-ui/core/Divider';
-import Box from '@material-ui/core/Box';
+import Paper from '@material-ui/core/Paper';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import cloneDeep from 'lodash.clonedeep';
+import isEmpty from 'lodash/isEmpty';
+import Alert from 'AppComponents/Shared/Alert';
+import Banner from 'AppComponents/Shared/Banner';
+import API from 'AppData/api';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import PropTypes from 'prop-types';
+import { isRestricted } from 'AppData/AuthManager';
+import AsyncOperation from '../Resources/components/AsyncOperation';
+import GroupOfOperations from '../Resources/components/operationComponents/asyncapi/GroupOfOperations';
+import AddOperation from '../Resources/components/AddOperation';
+import SubscriptionConfig from '../Resources/components/operationComponents/asyncapi/SubscriptionConfig';
+import { extractAsyncAPIPathParameters } from '../Resources/operationUtils';
+import SaveOperations from '../Resources/components/SaveOperations';
 
-import Accordion from '@material-ui/core/Accordion';
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import AccordionDetails from '@material-ui/core/AccordionDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import NewTopic from 'AppComponents/Apis/Details/Configuration/components/NewTopic';
-
-import $RefParser from '@apidevtools/json-schema-ref-parser';
-import { parse } from '@asyncapi/parser';
-
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-
-const MonacoEditor = lazy(() => import('react-monaco-editor' /* webpackChunkName: "APIDefMonacoEditor" */));
-
-function RenderMethodBase(props) {
-    // TODO:
-    const { methods } = props;
-    const chipColors = {
-        subscribe: '#61affe',
-        publish: '#49cc90',
-    };
-    return methods.map((method) => {
-        let chipColor = chipColors[method];
-        let chipTextColor = '#000000';
-        if (!chipColor) {
-            console.log('Check the theme settings. The resourceChipColors is not populated properly');
-            chipColor = '#cccccc';
-        } else {
-            chipTextColor = '#fff';
-        }
-        return (
-            <Chip
-                label={method.toUpperCase()}
-                style={{
-                    backgroundColor: chipColor, color: chipTextColor, height: 20, marginRight: 5,
-                }}
-            />
-        );
-    });
-}
-
-RenderMethodBase.propTypes = {
-    methods: PropTypes.arrayOf(PropTypes.string).isRequired,
-    theme: PropTypes.shape({}).isRequired,
-    classes: PropTypes.shape({}).isRequired,
+const verbMap = {
+    sub: 'subscribe',
+    pub: 'publish',
 };
-
-const RenderMethod = withTheme(RenderMethodBase);
-
-const styles = (theme) => ({
-    root: {
-        ...theme.mixins.gutters(),
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-    },
-    contentWrapper: {
-        marginTop: theme.spacing(2),
-    },
-    buttonSuccess: {
-        backgroundColor: green[500],
-        '&:hover': {
-            backgroundColor: green[700],
-        },
-    },
-    checkItem: {
-        textAlign: 'center',
-    },
-    divider: {
-        marginTop: 20,
-        marginBottom: 20,
-    },
-    chip: {
-        margin: theme.spacing(0.5),
-        padding: 0,
-        height: 'auto',
-        '& span': {
-            padding: '0 5px',
-        },
-    },
-    imageContainer: {
-        display: 'flex',
-    },
-    imageWrapper: {
-        marginRight: theme.spacing(3),
-    },
-    subtitle: {
-        marginTop: theme.spacing(0),
-    },
-    specialGap: {
-        marginTop: theme.spacing(3),
-    },
-    resourceTitle: {
-        marginBottom: theme.spacing(3),
-    },
-    ListRoot: {
-        padding: 0,
-        margin: 0,
-    },
-    titleWrapper: {
-        display: 'flex',
-    },
-    title: {
-        flex: 1,
-    },
-    helpButton: {
-        padding: 0,
-        minWidth: 20,
-    },
-    helpIcon: {
-        fontSize: 16,
-    },
-    htmlTooltip: {
-        backgroundColor: '#f5f5f9',
-        color: 'rgba(0, 0, 0, 0.87)',
-        maxWidth: 220,
-        fontSize: theme.typography.pxToRem(14),
-        border: '1px solid #dadde9',
-        '& b': {
-            fontWeight: theme.typography.fontWeightMedium,
-        },
-    },
-    lifecycleWrapper: {
-        display: 'flex',
-        alignItems: 'center',
-    },
-    lifecycleIcon: {
-        fontSize: 36,
-        color: 'green',
-        marginRight: theme.spacing(1),
-    },
-    leftSideWrapper: {
-        paddingRight: theme.spacing(2),
-    },
-    notConfigured: {
-        color: 'rgba(0, 0, 0, 0.40)',
-    },
-    url: {
-        maxWidth: '100%',
-        whiteSpace: 'nowrap',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-    },
-});
 
 /**
-  * API Topics page
-  */
-class Topics extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            tabValue: 0,
-            asyncAPI: null,
-            // eslint-disable-next-line react/no-unused-state
-            definition: this.getAsyncAPIDefinition(),
-            topics: this.loadTopics(this.getSortedOperations()),
-            showAddTopic: false,
-        };
+ * This component handles the Resource page in API details though it's written in a sharable way
+ * that anyone could use this to render resources in anywhere else if needed.
+ *
+ * @export
+ * @returns {React.Component} @inheritdoc
+ */
+export default function Topics(props) {
+    const {
+        disableUpdate,
+        disableAddOperation,
+    } = props;
 
-        this.updateOperations = this.updateOperations.bind(this);
-        this.handleCancelSave = this.handleCancelSave.bind(this);
-        this.handleAddTopic = this.handleAddTopic.bind(this);
-        this.handleDeleteTopic = this.handleDeleteTopic.bind(this);
+    const [api, updateAPI] = useAPI();
+    const [pageError, setPageError] = useState(false);
+    const [sharedScopes, setSharedScopes] = useState();
+    const [sharedScopesByName, setSharedScopesByName] = useState();
+    const [asyncAPISpec, setAsyncAPISpec] = useState({});
+    const [securityDefScopes, setSecurityDefScopes] = useState({});
+    const isAsyncAPI = api.type === 'WEBSUB' || api.type === 'WS' || api.type === 'SSE';
 
-        this.handleAddProperty = this.handleAddProperty.bind(this);
-        this.renderEditableProperty = this.renderEditableProperty.bind(this);
-        this.loadTopics = this.loadTopics.bind(this);
-        this.getSortedOperations = this.getSortedOperations.bind(this);
-        this.getAsyncAPIDefinition = this.getAsyncAPIDefinition.bind(this);
-        this.loadTopicMetaData = this.loadTopicMetaData.bind(this);
-        this.renderSchemaForTopic = this.renderSchemaForTopic.bind(this);
+    /**
+     *
+     * @param {*} spec
+     * @param {*} ref
+     */
+    function getRefTarget(spec, ref) {
+        const arr = ref.split('/');
+        const i = (arr[0] === '#') ? 1 : 0;
+        let target = spec;
+        for (let j = i; j < arr.length; j++) {
+            target = target[arr[j]];
+        }
+        return target;
     }
 
-    getAsyncAPIDefinition() {
-        const result = this.props.api.getAsyncAPIDefinition();
-        result.then(async (response) => {
-            $RefParser.dereference(response.body, (err) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    this.setState({
-                        // eslint-disable-next-line react/no-unused-state
-                        definition: response.body,
-                    });
-                }
-            });
-            const doc = await parse(response.body);
-            this.setState({ asyncAPI: doc }, this.loadTopicMetaData);
-        });
-    }
-
-    getSortedOperations() {
-        const operations = [...this.props.api.operations];
-        operations.sort((a, b) => ((a.target + a.verb > b.target + b.verb) ? 1 : -1));
-        return operations;
-    }
-
-    handleCancelSave() {
-        this.setState({ topics: this.loadTopics(this.getSortedOperations()) });
-    }
-
-    handleAddTopic(topic) {
-        // eslint-disable-next-line react/no-access-state-in-setstate
-        const topicsCopy = [...this.state.topics];
-        topicsCopy.push({
-            name: topic.name,
-            description: '',
-            scopes: [],
-            payload: {
-                type: 'object',
-                properties: [],
-            },
-        });
-        this.setState({ topics: topicsCopy, showAddTopic: false });
-    }
-
-    handleDeleteTopic(i) {
-        // eslint-disable-next-line react/no-access-state-in-setstate
-        const topicsCopy = [...this.state.topics];
-        topicsCopy.splice(i, 1);
-        this.setState({ topics: topicsCopy });
-    }
-
-    handleAddProperty(i) {
-        // eslint-disable-next-line react/no-access-state-in-setstate
-        const topicsCopy = [...this.state.topics];
-        topicsCopy[i].payload.properties.push({
-            name: '',
-            type: '',
-            advanced: '',
-            description: '',
-            editable: true,
-            new: true,
-        });
-        this.setState({ topics: topicsCopy });
-    }
-
-    loadTopics() {
-        const { operations } = this.props.api;
-        return operations.map((op) => {
-            return {
-                name: op.target,
-                description: '',
-                scopes: [],
-                uriMapping: op.uriMapping,
-                payload: {
-                    type: 'object',
-                    properties: this.extractProperties(op.payloadSchema),
-                },
-            };
-        });
-    }
-
-    loadTopicMetaData() {
-        const { asyncAPI, topics } = this.state;
-        topics.forEach((topic) => {
-            asyncAPI.channelNames().forEach((name) => {
-                const channel = asyncAPI.channel(name);
-                if (topic.name === name) {
-                    /* if (channel.hasPublish() && topic.mode === 'PUBLISH') {
-                        let pubMessage = null;
-                        if (!channel.publish().hasMultipleMessages()) {
-                            pubMessage = channel.publish().message();
-                            // eslint-disable-next-line no-param-reassign
-                            topic.description = pubMessage.uid();
-                            // eslint-disable-next-line guard-for-in
-                            for (const i in pubMessage.payload().properties()) {
-                                topic.payload.properties.push({
-                                    name: i,
-                                    type: pubMessage.payload().properties()[i].type(),
-                                    advanced: '',
-                                    description: '',
-                                    editable: false,
-                                    new: false,
-                                });
-                                if (pubMessage.payload().properties()[i].type() === 'object') {
-                                    // eslint-disable-next-line guard-for-in
-                                    for (const j in pubMessage.payload().properties()[i].properties()) {
-                                        topic.payload.properties.push({
-                                            name: i + ' / ' + j,
-                                            type: pubMessage.payload().properties()[i].properties()[j].type(),
-                                            advanced: '',
-                                            description: '',
-                                            editable: false,
-                                            new: false,
-                                        });
-                                    }
-                                }
-                            }
-                        } else {
-                            // eslint-disable-next-line prefer-destructuring
-                            pubMessage = channel.publish().messages()[0];
-                            // eslint-disable-next-line no-param-reassign
-                            topic.description = pubMessage.uid();
-                            // eslint-disable-next-line guard-for-in
-                            for (const i in pubMessage.payload().properties()) {
-                                topic.payload.properties.push({
-                                    name: i,
-                                    type: pubMessage.payload().properties()[i].type(),
-                                    advanced: '',
-                                    description: '',
-                                    editable: false,
-                                    new: false,
-                                });
-                                if (pubMessage.payload().properties()[i].type() === 'object') {
-                                    // eslint-disable-next-line guard-for-in
-                                    for (const j in pubMessage.payload().properties()[i].properties()) {
-                                        topic.payload.properties.push({
-                                            name: i + ' / ' + j,
-                                            type: pubMessage.payload().properties()[i].properties()[j].type(),
-                                            advanced: '',
-                                            description: '',
-                                            editable: false,
-                                            new: false,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    } */
-                    if (channel.hasSubscribe()) {
-                        let subMessage = null;
-                        if (!channel.subscribe().hasMultipleMessages()) {
-                            subMessage = channel.subscribe().message();
-                            // eslint-disable-next-line no-param-reassign
-                            topic.description = subMessage.uid();
-                            // eslint-disable-next-line guard-for-in
-                            for (const i in subMessage.payload().properties()) {
-                                topic.payload.properties.push({
-                                    name: i,
-                                    type: subMessage.payload().properties()[i].type(),
-                                    advanced: '',
-                                    description: '',
-                                    editable: false,
-                                    new: false,
-                                });
-                                if (subMessage.payload().properties()[i].type() === 'object') {
-                                    // eslint-disable-next-line guard-for-in
-                                    for (const j in subMessage.payload().properties()[i].properties()) {
-                                        topic.payload.properties.push({
-                                            name: i + ' / ' + j,
-                                            type: subMessage.payload().properties()[i].properties()[j].type(),
-                                            advanced: '',
-                                            description: '',
-                                            editable: false,
-                                            new: false,
-                                        });
-                                    }
-                                }
-                            }
-                        } else {
-                            // eslint-disable-next-line prefer-destructuring
-                            subMessage = channel.subscribe().messages()[0];
-                            // eslint-disable-next-line no-param-reassign
-                            topic.description = subMessage.uid();
-                            // eslint-disable-next-line guard-for-in
-                            for (const i in subMessage.payload().properties()) {
-                                topic.payload.properties.push({
-                                    name: i,
-                                    type: subMessage.payload().properties()[i].type(),
-                                    advanced: '',
-                                    description: '',
-                                    editable: false,
-                                    new: false,
-                                });
-                                if (subMessage.payload().properties()[i].type() === 'object') {
-                                    // eslint-disable-next-line guard-for-in
-                                    for (const j in subMessage.payload().properties()[i].properties()) {
-                                        topic.payload.properties.push({
-                                            name: i + ' / ' + j,
-                                            type: subMessage.payload().properties()[i].properties()[j].type(),
-                                            advanced: '',
-                                            description: '',
-                                            editable: false,
-                                            new: false,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    }
-
-    extractProperties(payloadSchema) {
-        const obj = JSON.parse(payloadSchema || JSON.stringify({ properties: [] }));
-        return obj.properties || [];
-    }
-
-    updateOperations() {
-        const operations = this.state.topics.map((topic) => {
-            return {
-                id: '',
-                target: topic.name,
-                verb: 'subscribe',
-                authType: 'Application & Application User',
-                throttlingPolicy: 'Unlimited',
-                amznResourceName: null,
-                amznResourceTimeout: null,
-                scopes: [],
-                usedProductIds: [],
-                payloadSchema: JSON.stringify({
-                    properties: topic.payload.properties,
-                }),
-                uriMapping: topic.uriMapping,
-            };
-        });
-        this.props.updateAPI({ operations });
-    }
-
-    buildCallbackURL(topic) {
-        const { api } = this.props;
-        return `https://{GATEWAY_HOST}:9021/${api.context.toLowerCase()}/${api.version}/`
-            + `webhooks_events_receiver_resource?topic=${topic.name.toLowerCase()}`;
-    }
-
-    renderProperty(property, i, pi) {
-        return (
-            <Grid
-                container
-                direction='row'
-                style={{ marginTop: 15, marginBottom: 15 }}
-            >
-                <Grid item xs={2}>
-                    <Typography>
-                        {property.name}
-                    </Typography>
-                </Grid>
-                <Grid item xs={2}>
-                    <Typography>
-                        {property.type}
-                    </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                    {/* <Typography>
-                        {property.advanced}
-                    </Typography> */}
-                </Grid>
-                <Grid item xs={2} align='right'>
-                    <IconButton
-                        color='primary'
-                        variant='contained'
-                        onClick={() => this.handleEditProperty(i, pi)}
-                    >
-                        <EditIcon />
-                    </IconButton>
-                    <IconButton
-                        color='primary'
-                        variant='contained'
-                        onClick={() => this.handleDeleteProperty(i, pi)}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography>
-                        {property.description}
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <Divider />
-                </Grid>
-            </Grid>
-        );
-    }
-
-    renderEditableProperty(property, i, pi) {
-        return (
-            <Grid
-                container
-                direction='row'
-                style={{ marginTop: 15, marginBottom: 15 }}
-                spacing={2}
-            >
-                <Grid item xs={2}>
-                    <TextField
-                        autoFocus
-                        fullWidth
-                        id='topic-description'
-                        label={(
-                            <>
-                                <FormattedMessage
-                                    id='Apis.Topic.Edit.name'
-                                    defaultMessage='Name'
-                                />
-                            </>
-                        )}
-                        value={property.name}
-                        helperText='Provide a name for the property'
-                        name='prop-description'
-                        margin='normal'
-                        variant='outlined'
-                        onChange={(e) => {
-                            // eslint-disable-next-line react/no-access-state-in-setstate
-                            const topics = [...this.state.topics];
-                            topics[i].payload.properties[pi].name = e.target.value;
-                            this.setState({ topics });
-                        }}
-                    />
-                </Grid>
-                <Grid item xs={2}>
-                    <TextField
-                        autoFocus
-                        fullWidth
-                        id='topic-description'
-                        label={(
-                            <>
-                                <FormattedMessage
-                                    id='Apis.Topic.Edit.Type'
-                                    defaultMessage='Type'
-                                />
-                            </>
-                        )}
-                        value={property.type}
-                        helperText='Provide a type for the property'
-                        name='prop-description'
-                        margin='normal'
-                        variant='outlined'
-                        onChange={(e) => {
-                            // eslint-disable-next-line react/no-access-state-in-setstate
-                            const topics = [...this.state.topics];
-                            topics[i].payload.properties[pi].type = e.target.value;
-                            this.setState({ topics });
-                        }}
-                    />
-                </Grid>
-                <Grid item xs={6}>
-                    {/* <TextField
-                        autoFocus
-                        fullWidth
-                        id='topic-description'
-                        label={(
-                            <>
-                                <FormattedMessage
-                                    id='Apis.Topic.Edit.Advanced'
-                                    defaultMessage='Advanced'
-                                />
-                            </>
-                        )}
-                        value={property.advanced}
-                        helperText='Provide a Advanced function for the property'
-                        name='prop-description'
-                        InputProps={{
-                            id: 'itest-id-apitopic-createtopic-description',
-                            onBlur: ({ target: { value } }) => {
-                                // TODO: validate
-                            },
-                        }}
-                        margin='normal'
-                        variant='outlined'
-                        onChange={(e) => {
-                            const topics = [...this.state.topics];
-                            topics[i].payload.properties[pi].advanced = e.target.value;
-                            this.setState({ topics });
-                        }}
-                    /> */}
-                </Grid>
-                <Grid item xs={2} align='right'>
-                    <IconButton
-                        color='primary'
-                        variant='contained'
-                    >
-                        <SaveIcon onClick={() => this.handleSaveProperty(i, pi)} />
-                    </IconButton>
-                    <IconButton
-                        color='primary'
-                        variant='contained'
-                    >
-                        <CancelIcon onClick={() => this.handleCancelSaveProperty(i, pi)} />
-                    </IconButton>
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                        autoFocus
-                        fullWidth
-                        id='topic-description'
-                        label={(
-                            <>
-                                <FormattedMessage
-                                    id='Apis.Topic.Edit.Description'
-                                    defaultMessage='Description'
-                                />
-                            </>
-                        )}
-                        value={property.description}
-                        helperText='Provide a description for the property'
-                        name='prop-description'
-                        margin='normal'
-                        variant='outlined'
-                        onChange={(e) => {
-                            // eslint-disable-next-line react/no-access-state-in-setstate
-                            const topics = [...this.state.topics];
-                            topics[i].payload.properties[pi].description = e.target.value;
-                            this.setState({ topics });
-                        }}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Divider />
-                </Grid>
-            </Grid>
-        );
-    }
-
-    renderSchemaForTopic(topic) {
-        const { asyncAPI } = this.state;
-        let schema = {};
-        asyncAPI.channelNames().forEach((name) => {
-            const channel = asyncAPI.channel(name);
-            if (name === topic.name) {
-                /* if (topic.mode === 'SUBSCRIBE') {
-                    if (channel.hasSubscribe()) {
-                        if (!channel.subscribe().hasMultipleMessages()) {
-                            if (channel.subscribe().message() !== null) {
-                                schema = channel.subscribe().message().payload();
-                            }
-                        } else {
-                            // eslint-disable-next-line no-lonely-if
-                            if (channel.subscribe().messages()[0] !== null) {
-                                schema = channel.subscribe().messages()[0].payload();
-                            }
-                        }
-                    }
-                }
-                if (topic.mode === 'PUBLISH') {
-                    if (channel.hasPublish()) {
-                        if (!channel.publish().hasMultipleMessages()) {
-                            if (channel.publish().message() !== null) {
-                                schema = channel.publish().message().payload();
-                            }
-                        } else {
-                            // eslint-disable-next-line no-lonely-if
-                            if (channel.publish().messages()[0] !== null) {
-                                schema = channel.publish().messages()[0].payload();
-                            }
-                        }
-                    }
-                } */
-                if (channel.hasSubscribe()) {
-                    if (!channel.subscribe().hasMultipleMessages()) {
-                        if (channel.subscribe().message() !== null) {
-                            schema = channel.subscribe().message().payload();
-                        }
+    /**
+     *
+     * @param {*} spec
+     * @param {*} parent
+     */
+    function resolveSpec(spec, source) {
+        if (typeof source === 'object') {
+            let o = {};
+            Object.entries(source).forEach(([k, v]) => {
+                if (v !== null) {
+                    if (k !== '$ref') {
+                        o[k] = resolveSpec(spec, v);
                     } else {
-                        // eslint-disable-next-line no-lonely-if
-                        if (channel.subscribe().messages()[0] !== null) {
-                            schema = channel.subscribe().messages()[0].payload();
-                        }
+                        const resolvedRef = resolveSpec(spec, getRefTarget(spec, v));
+                        o = { ...o, ...resolvedRef };
                     }
                 }
+            });
+            return o;
+        }
+        return source;
+    }
+
+    /**
+     *
+     * @param {*} state
+     * @param {*} configAction
+     */
+    function websubSubscriptionConfigReducer(state, configAction) {
+        const { action, value } = configAction;
+        const nextState = { ...state };
+        switch (action) {
+            case 'signingAlgorithm':
+            case 'signatureHeader':
+            case 'secret':
+                nextState[action] = value;
+                break;
+            default:
+                return nextState;
+        }
+        return nextState;
+    }
+    const initialWebsubSubscriptionConfig = api.websubSubscriptionConfiguration || {
+        signingAlgorithm: '',
+        signatureHeader: 'x-hub-signature',
+        secret: '',
+    };
+
+    const [websubSubscriptionConfiguration, websubSubscriptionConfigDispatcher] = useReducer(
+        websubSubscriptionConfigReducer, initialWebsubSubscriptionConfig,
+    );
+
+    /**
+     *
+     *
+     * @param {*} currenPaths
+     * @param {*} action
+     */
+    function operationsReducer(currentOperations, operationAction) {
+        const { action, data } = operationAction;
+        const { target, verb, value } = data || {};
+        const addedOperations = cloneDeep(currentOperations);
+        let updatedOperation;
+        if (target) {
+            updatedOperation = cloneDeep(currentOperations[target]);
+        }
+
+        switch (action) {
+            case 'init':
+                return data;
+            case 'description':
+                updatedOperation[action] = value;
+                return {
+                    ...currentOperations,
+                    [target]: { ...currentOperations[target], description: updatedOperation.description },
+                };
+            case 'authType':
+                updatedOperation['x-auth-type'] = value ? 'Any' : 'None';
+                return {
+                    ...currentOperations,
+                    [target]: { ...currentOperations[target], 'x-auth-type': updatedOperation['x-auth-type'] },
+                };
+            case 'add':
+                // eslint-disable-next-line no-case-declarations
+                const parameters = extractAsyncAPIPathParameters(data.target);
+                // If target is not there add an empty object
+                if (!addedOperations[data.target]) {
+                    addedOperations[data.target] = {};
+                }
+                addedOperations[data.target].parameters = parameters;
+                // eslint-disable-next-line no-case-declarations
+                let alreadyExistCount = 0;
+                for (let currentVerb of data.verbs) {
+                    currentVerb = verbMap[currentVerb];
+                    if (addedOperations[data.target][currentVerb]) {
+                        const message = `Operation already exist with ${data.target} and ${currentVerb}`;
+                        Alert.warning(message);
+                        console.warn(message);
+                        alreadyExistCount++;
+                    } else {
+                        addedOperations[data.target][currentVerb] = { };
+                    }
+                }
+                if (alreadyExistCount === data.verbs.length) {
+                    Alert.error('Operation(s) already exist!');
+                    return currentOperations;
+                }
+                return addedOperations;
+            case 'parameter':
+                updatedOperation.parameters = updatedOperation.parameters || { };
+                updatedOperation.parameters[value.name] = { ...value };
+                delete updatedOperation.parameters[value.name].name;
+                return {
+                    ...currentOperations,
+                    [target]: { ...currentOperations[target], parameters: updatedOperation.parameters },
+                };
+            case 'addPayloadProperty':
+                updatedOperation[verb].message = updatedOperation[verb].message || { };
+                updatedOperation[verb].message.payload = updatedOperation[verb].message.payload || { };
+                updatedOperation[verb].message.payload.type = 'object';
+                updatedOperation[verb].message.payload.properties = updatedOperation[verb].message.payload.properties
+                    || { };
+                updatedOperation[verb].message.payload.properties[value.name] = {
+                    description: value.description,
+                    type: value.type,
+                };
+                break;
+            case 'deletePayloadProperty':
+                delete updatedOperation[verb].message.payload.properties[value];
+                break;
+            case 'payloadProperty':
+                updatedOperation[verb].message.payload.properties[value.name] = value;
+                break;
+            case 'scopes': {
+                const defValue = value[0];
+                updatedOperation[verb]['x-scopes'] = [];
+                for (let i = 0; i < defValue.length; i++) {
+                    updatedOperation[verb]['x-scopes'].push(defValue[i]);
+                }
+
+                for (const selectedScope of defValue) {
+                    if (selectedScope
+                        && !securityDefScopes[selectedScope]
+                        && securityDefScopes[selectedScope] !== '') {
+                        let scopeDescription = '';
+                        if (selectedScope in sharedScopesByName) {
+                            if (sharedScopesByName[selectedScope].scope.description !== null) {
+                                scopeDescription = sharedScopesByName[selectedScope].scope.description;
+                            }
+                            securityDefScopes[selectedScope] = scopeDescription;
+                        }
+                        setSecurityDefScopes(securityDefScopes);
+                    }
+                }
+                break;
+            }
+            default:
+                return currentOperations;
+        }
+        return {
+            ...currentOperations,
+            [target]: { ...currentOperations[target], [verb]: updatedOperation[verb] },
+        };
+    }
+    const [operations, operationsDispatcher] = useReducer(operationsReducer, {});
+
+    /**
+     * This method sets the securityDefinitionScopes from the spec
+     * @param {Object} spec The original swagger content.
+     */
+    function setSecurityDefScopesFromSpec(spec) {
+        if (spec.components && spec.components.securitySchemes && spec.components.securitySchemes.default) {
+            const { flows } = spec.components.securitySchemes.default;
+            if (flows.implicit.scopes) {
+                setSecurityDefScopes(cloneDeep(flows.implicit.scopes));
+            }
+        }
+    }
+
+    /**
+     * This method sets the scopes of the spec from the securityDefinitionScopes
+     */
+    function setSpecScopesFromSecurityDefScopes() {
+        if (asyncAPISpec.components
+            && asyncAPISpec.components.securitySchemes
+            && asyncAPISpec.components.securitySchemes.default) {
+            asyncAPISpec.components.securitySchemes.default.flows.implicit.scopes = securityDefScopes;
+        }
+    }
+
+    /**
+     *
+     * @param {*} rawSpec The original swagger content.
+     * @returns {null}
+     */
+    function resolveAndUpdateSpec(rawSpec) {
+        const resolvedChannels = resolveSpec(rawSpec, rawSpec);
+        const resolvedSpec = { ...rawSpec, channels: resolvedChannels.channels };
+        operationsDispatcher({ action: 'init', data: resolvedSpec.channels });
+        setAsyncAPISpec(resolvedSpec);
+        setSecurityDefScopesFromSpec(rawSpec);
+    }
+
+    /**
+     *
+     * Update the asyncapi using /asyncapi PUT operation and then fetch the updated API Object doing a apis/{api-uuid}
+     * GET
+     * @param {JSON} spec Updated full AsyncAPI spec ready to PUT
+     * @returns {Promise} Promise resolving to updated API object
+     */
+    function updateAsyncAPIDefinition(spec) {
+        // Remove unnecessary fields from the spec.
+        // eslint-disable-next-line no-unused-vars
+        Object.entries(spec.channels).forEach(([k, v]) => {
+            if (v.runtime) {
+                // eslint-disable-next-line no-param-reassign
+                delete v.runtime;
             }
         });
-        return JSON.stringify(schema, null, '\t');
+
+        return api
+            .updateAsyncAPIDefinition(spec)
+            .then((response) => resolveAndUpdateSpec(response.body))
+            .then(updateAPI)
+            .catch((error) => {
+                console.error(error);
+                if (error.response) {
+                    setPageError(error.response.body);
+                } else {
+                    Alert.error('Error while updating the definition');
+                }
+            });
     }
 
-    renderTopics() {
-        const { classes, api } = this.props;
-        const { topics, tabValue } = this.state;
-        return (
-            <div className={classes.root}>
-                {topics.map((topic, i) => {
-                    const methods = ['subscribe'];
-                    if (api.type === 'WS') {
-                        methods.push('publish');
+    /**
+     *
+     * This method modifies the security definition scopes by removing the scopes which are not present
+     * in operations and which are shared scopes
+     * @param {Array} apiOperations Operations list
+     */
+    function updateSecurityDefinition(apiOperations) {
+        Object.keys(securityDefScopes).forEach((key) => {
+            let isScopeExistsInOperation = false;
+            for (const [, verbs] of Object.entries(apiOperations)) {
+                for (const [, verbInfo] of Object.entries(verbs)) {
+                    // Checking if the scope resides in the operation
+                    for (const secDef of verbInfo.security || []) {
+                        if (secDef
+                            && secDef.default
+                            && secDef.default.includes(key)) {
+                            isScopeExistsInOperation = true;
+                            break;
+                        }
                     }
-                    return (
-                        <Accordion>
-                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                <Grid container direction='row'>
-                                    <Grid item>
-                                        <Grid container align-items='flex-start' spacing={2}>
-                                            <Grid item>
-                                                {/* {
-                                                    api.type === 'WS' && (
-                                                        <Chip
-                                                            label='PUBLISH'
-                                                            style={{ height: 20, marginRight: 5 }}
-                                                        />
-                                                    )
-                                                }
-                                                <Chip
-                                                    label='SUBSCRIBE'
-                                                    style={{ height: 20, marginRight: 5 }}
-                                                /> */}
-                                                <RenderMethod methods={methods} />
-                                            </Grid>
-                                            <Grid item>
-                                                <Typography>
-                                                    {topic.name}
-                                                </Typography>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button
-                                            color='primary'
-                                            onClick={() => this.handleDeleteTopic(i)}
-                                        >
-                                            <DeleteIcon />
-                                        </Button>
-                                    </Grid>
-                                </Grid>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                                <Grid container direction='column'>
-                                    {api.type === 'WEBSUB' && (
-                                        <Grid item>
-                                            <TextField
-                                                autoFocus
-                                                fullWidth
-                                                disabled
-                                                id='topic-description'
-                                                label={(
-                                                    <>
-                                                        <FormattedMessage
-                                                            id='Apis.Create.Components.DefaultAPIForm.callbackUrl'
-                                                            defaultMessage='Callback URL'
-                                                        />
-                                                    </>
-                                                )}
-                                                value={this.buildCallbackURL(topic)}
-                                                helperText='Use the above callback URL when register at the provider'
-                                                name='description'
-                                                margin='normal'
-                                                variant='outlined'
-                                            />
-                                        </Grid>
-                                    )}
-                                    {api.type === 'WS' && (
-                                        <Grid item>
-                                            <TextField
-                                                autoFocus
-                                                fullWidth
-                                                id='topic-description'
-                                                label={(
-                                                    <>
-                                                        <FormattedMessage
-                                                            id='Apis.Create.Components.DefaultAPIForm.urlmapping'
-                                                            defaultMessage='URL Mapping'
-                                                        />
-                                                    </>
-                                                )}
-                                                value={topic.uriMapping}
-                                                helperText='URL mapping for the WebSocket API'
-                                                name='url-mapping'
-                                                margin='normal'
-                                                variant='outlined'
-                                                onChange={(e) => {
-                                                    // eslint-disable-next-line react/no-access-state-in-setstate
-                                                    const topicsCopy = [...this.state.topics];
-                                                    topicsCopy[i].uriMapping = e.target.value;
-                                                    this.setState({ topics: topicsCopy });
-                                                }}
-                                            />
-                                        </Grid>
-                                    )}
-                                    <Grid item>
-                                        <TextField
-                                            autoFocus
-                                            fullWidth
-                                            id='topic-description'
-                                            label={(
-                                                <>
-                                                    <FormattedMessage
-                                                        id='Apis.Create.Components.DefaultAPIForm.description'
-                                                        defaultMessage='Description'
-                                                    />
-                                                </>
-                                            )}
-                                            value={topic.description}
-                                            helperText='Provide a description for the topic'
-                                            name='description'
-                                            onChange={(e) => {
-                                                // eslint-disable-next-line react/no-access-state-in-setstate
-                                                const topicsCopy = [...this.state.topics];
-                                                topicsCopy[i].description = e.target.value;
-                                                this.setState({ topics: topicsCopy });
-                                            }}
-                                            margin='normal'
-                                            variant='outlined'
-                                        />
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant='h6' component='h6' style={{ marginBottom: 10 }}>
-                                            Payload
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item style={{ paddingBottom: '2%' }}>
-                                        <Tabs
-                                            indicatorColor='primary'
-                                            textColor='primary'
-                                            value={tabValue}
-                                            onChange={(event, value) => this.setState({ tabValue: value })}
-                                        >
-                                            <Tab label='Properties' />
-                                            <Tab label='Schema' />
-                                        </Tabs>
-                                    </Grid>
-                                    {
-                                        tabValue === 0 ? (
-                                            <Grid item style={{ paddingLeft: 0 }}>
-                                                <Grid container direction='column'>
-                                                    <Grid container direction='row'>
-                                                        <Grid item xs={2}>
-                                                            <Typography style={{ fontWeight: 'bold' }}>
-                                                                Name
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={2}>
-                                                            <Typography style={{ fontWeight: 'bold' }}>
-                                                                Type
-                                                            </Typography>
-                                                        </Grid>
-                                                        <Grid item xs={6}>
-                                                            {/* <Typography style={{ fontWeight: 'bold' }}>
-                                                                Advanced
-                                                            </Typography> */}
-                                                        </Grid>
-                                                        <Grid item xs={2} align='right'>
-                                                            <Button
-                                                                color='primary'
-                                                                variant='contained'
-                                                                onClick={() => this.handleAddProperty(i)}
-                                                            >
-                                                                Add New Property
-                                                            </Button>
-                                                        </Grid>
-                                                    </Grid>
-                                                    {
-                                                        topic.payload.properties.map((property, pi) => {
-                                                            return (property && !!property.editable)
-                                                                ? this.renderEditableProperty(property, i, pi)
-                                                                : this.renderProperty(property, i, pi);
-                                                        })
-                                                    }
-                                                </Grid>
-                                            </Grid>
-                                        ) : (
-                                            <Grid item style={{ paddingLeft: 0 }}>
-                                                <Grid container direction='column'>
-                                                    <MonacoEditor
-                                                        // value={JSON.stringify(this.state.definition, null, '\t')}
-                                                        value={this.renderSchemaForTopic(topic)}
-                                                        language='json'
-                                                        width='100%'
-                                                        height='500px'
-                                                        theme='vs-dark'
-                                                        options={{
-                                                            selectOnLineNumbers: true,
-                                                            readOnly: true,
-                                                            smoothScrolling: true,
-                                                            wordWrap: 'on',
-                                                        }}
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                        )
-                                    }
-                                </Grid>
-                            </AccordionDetails>
-                        </Accordion>
-                    );
-                })}
-                <Grid container direction='row' justify='flex-start' spacing={2} style={{ paddingTop: 15 }}>
-                    <Grid item>
-                        <Button
-                            id='itest-id-apitopics-addtopic'
-                            variant='contained'
-                            color='primary'
-                            onClick={this.updateOperations}
-                        >
-                            Save
-                        </Button>
-                    </Grid>
-                    <Grid item>
-                        <Button
-                            id='itest-id-apitopics-canceladdtopic'
-                            onClick={this.handleCancelSave}
-                        >
-                            Cancel
-                        </Button>
-                    </Grid>
+
+                    if (isScopeExistsInOperation) {
+                        break;
+                    }
+                }
+                if (isScopeExistsInOperation) {
+                    break;
+                }
+            }
+            // Checking if the scope exists in operation and is a shared scope
+            if (!isScopeExistsInOperation && (key in sharedScopesByName)) {
+                delete securityDefScopes[key];
+            }
+        });
+        setSecurityDefScopes(securityDefScopes);
+    }
+
+    /**
+     *
+     * Save the OpenAPI changes using REST API, type parameter is required to
+     * identify the locally created data structured, i:e type `operation` will assume that `data` contains the
+     * object structure of locally created operation object which is a combination of REST API
+     * response `operations` field and OpenAPI spec operation information
+     * @param {String} type Type of data object
+     * @param {Object} data Data object
+     * @returns {Promise|null} A promise object which resolve to Swagger PUT response body.
+     */
+    function updateAsyncAPI() {
+        const copyOfOperations = cloneDeep(operations);
+
+        updateSecurityDefinition(copyOfOperations);
+        setSpecScopesFromSecurityDefScopes();
+        if (websubSubscriptionConfiguration !== api.websubSubscriptionConfiguration) {
+            return updateAPI({ websubSubscriptionConfiguration })
+                .catch((error) => {
+                    console.error(error);
+                    Alert.error('Error while updating the API');
+                })
+                .then(() => updateAsyncAPIDefinition({ ...asyncAPISpec, channels: copyOfOperations }));
+        } else {
+            return updateAsyncAPIDefinition({ ...asyncAPISpec, channels: copyOfOperations });
+        }
+    }
+
+    useEffect(() => {
+        if (api.apitype !== 'APIProduct') {
+            API.getAllScopes()
+                .then((response) => {
+                    if (response.body && response.body.list) {
+                        const sharedScopesList = [];
+                        const sharedScopesByNameList = {};
+                        const shared = true;
+                        for (const scope of response.body.list) {
+                            const modifiedScope = {};
+                            modifiedScope.scope = scope;
+                            modifiedScope.shared = shared;
+                            sharedScopesList.push(modifiedScope);
+                            sharedScopesByNameList[scope.name] = modifiedScope;
+                        }
+                        setSharedScopes(sharedScopesList);
+                        setSharedScopesByName(sharedScopesByNameList);
+                    }
+                });
+        }
+    }, []);
+
+    useEffect(() => {
+        // Update the Swagger spec object when API object gets changed
+        api.getAsyncAPIDefinition()
+            .then((response) => {
+                resolveAndUpdateSpec(response.body);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                    setPageError(error.response.body);
+                }
+                console.error(error);
+            });
+    }, [api.id]);
+
+    // Note: Make sure not to use any hooks after/within this condition , because it returns conditionally
+    // If you do so, You will probably get `Rendered more hooks than during the previous render.` exception
+    // if ((!pageError && isEmpty(openAPISpec)) || (resolvedSpec.errors.length === 0 && isEmpty(resolvedSpec.spec))) {
+    if ((!pageError && isEmpty(asyncAPISpec))) {
+        return (
+            <Grid container direction='row' justify='center' alignItems='center'>
+                <Grid item>
+                    <CircularProgress disableShrink />
                 </Grid>
-            </div>
+            </Grid>
         );
     }
 
-    render() {
-        const { classes } = this.props;
-        const { showAddTopic, topics } = this.state;
-        return (
-            <>
-                <Box pb={3}>
-                    <Grid container>
-                        <Grid item>
-                            <Typography variant='h4' align='left' className={classes.mainTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.Overview.async.topic.header'
-                                    defaultMessage='Topics'
-                                />
-                            </Typography>
-                        </Grid>
-                        {
-                            topics.length > 0 && (
-                                <Grid item style={{ paddingLeft: 30 }}>
-                                    <Button
-                                        id='itest-id-apitopics-addtopic'
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={() => this.setState({ showAddTopic: true })}
+    return (
+        <Grid container direction='row' justify='flex-start' spacing={2} alignItems='stretch'>
+            {pageError && (
+                <Grid item md={12}>
+                    <Banner onClose={() => setPageError(null)} disableActions type='error' message={pageError} />
+                </Grid>
+            )}
+            {!isRestricted(['apim:api_create'], api) && !disableAddOperation && api.type === 'WEBSUB' && (
+                <Grid item md={12} xs={12}>
+                    <SubscriptionConfig
+                        websubSubscriptionConfigDispatcher={websubSubscriptionConfigDispatcher}
+                        websubSubscriptionConfiguration={websubSubscriptionConfiguration}
+                    />
+                </Grid>
+            )}
+            {!isRestricted(['apim:api_create'], api) && !disableAddOperation && (
+                <Grid item md={12} xs={12}>
+                    <AddOperation operationsDispatcher={operationsDispatcher} isAsyncAPI={isAsyncAPI} api={api} />
+                </Grid>
+            )}
+            <Grid item md={12}>
+                <Paper>
+                    {
+                        Object.entries(operations).map(([target, operation]) => (
+                            <Grid key={target} item md={12}>
+                                <GroupOfOperations tag={target} operation={operation}>
+                                    <Grid
+                                        container
+                                        direction='column'
+                                        justify='flex-start'
+                                        spacing={1}
+                                        alignItems='stretch'
                                     >
-                                        Add Topic
-                                    </Button>
-                                </Grid>
-                            )
-                        }
-                    </Grid>
-
-                </Box>
-                <div className={classes.contentWrapper}>
-                    {topics.length === 0 && !showAddTopic && (
-                        <Paper className={classes.root}>
-                            <Grid container xs={12}>
-                                <Grid item xs={1}>
-                                    <InfoIcon color='primary' fontSize='large' />
-                                </Grid>
-                                <Grid container xs={11} spacing={2}>
-                                    <Grid item xs={12}>
-                                        <Typography variant='h6' align='left'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.Overview.topic.createtopics'
-                                                defaultMessage='Create Topics'
-                                            />
-                                        </Typography>
+                                        {operation.subscribe && (
+                                            <Grid key={target + '_subscribe'} item md={12}>
+                                                <AsyncOperation
+                                                    target={target}
+                                                    verb='subscribe'
+                                                    highlight
+                                                    operation={operation}
+                                                    spec={asyncAPISpec}
+                                                    api={api}
+                                                    operationsDispatcher={operationsDispatcher}
+                                                    sharedScopes={sharedScopes}
+                                                />
+                                            </Grid>
+                                        )}
+                                        {operation.publish && (
+                                            <Grid key={target + '_publish'} item md={12}>
+                                                <AsyncOperation
+                                                    target={target}
+                                                    verb='publish'
+                                                    highlight
+                                                    operation={operation}
+                                                    spec={asyncAPISpec}
+                                                    api={api}
+                                                    operationsDispatcher={operationsDispatcher}
+                                                    sharedScopes={sharedScopes}
+                                                />
+                                            </Grid>
+                                        )}
                                     </Grid>
-                                    <Grid item xs={12}>
-                                        <Typography component='p' align='left'>
-                                            API needs to have at least one topic. Channels (topics) that will allow
-                                            client applications to publish or subscribe to messages (events).
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Button
-                                            id='itest-id-apitopics-addtopic'
-                                            variant='contained'
-                                            color='primary'
-                                            onClick={() => this.setState({ showAddTopic: true })}
-                                        >
-                                            Add Topic
-                                        </Button>
-                                    </Grid>
-                                </Grid>
+                                </GroupOfOperations>
                             </Grid>
-                        </Paper>
-                    )}
-
-                    {showAddTopic && (
-                        <NewTopic
-                            handleAddTopic={this.handleAddTopic}
-                            handleCancelAddTopic={() => this.setState({ showAddTopic: false })}
+                        ))
+                    }
+                </Paper>
+                <Grid
+                    style={{ marginTop: '25px' }}
+                    container
+                    direction='row'
+                    justify='space-between'
+                    alignItems='center'
+                >
+                    {!disableUpdate && (
+                        <SaveOperations
+                            operationsDispatcher={operationsDispatcher}
+                            updateAsyncAPI={updateAsyncAPI}
+                            api={api}
                         />
                     )}
-
-                    {topics.length > 0 && this.renderTopics()}
-                </div>
-            </>
-        );
-    }
+                </Grid>
+            </Grid>
+        </Grid>
+    );
 }
 
-Topics.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    api: PropTypes.shape({
-        operations: PropTypes.arrayOf(PropTypes.shape({})),
-        scopes: PropTypes.arrayOf(PropTypes.shape({})),
-        updateOperations: PropTypes.func,
-        policies: PropTypes.func,
-        id: PropTypes.string,
-    }).isRequired,
-    updateAPI: PropTypes.func.isRequired,
+Topics.defaultProps = {
+    operationProps: { disableDelete: false },
+    disableUpdate: false,
+    disableAddOperation: false,
 };
 
-export default withStyles(styles)(Topics);
+Topics.propTypes = {
+    disableAddOperation: PropTypes.bool,
+    disableUpdate: PropTypes.bool,
+    operationProps: PropTypes.shape({
+        disableDelete: PropTypes.bool,
+    }),
+};
