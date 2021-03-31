@@ -406,7 +406,6 @@ public interface APIPersistence {
      */
     Mediation getMediationPolicy(Organization org, String apiId, String mediationPolicyId)
             throws MediationPolicyPersistenceException;
-
     /**
      * Get a list of all the mediation policies of the API
      *
@@ -416,7 +415,6 @@ public interface APIPersistence {
      * @throws MediationPolicyPersistenceException
      */
     List<MediationInfo> getAllMediationPolicies(Organization org, String apiId) throws MediationPolicyPersistenceException;
-
     /**
      * Delete a mediation policy of the API
      *
@@ -450,7 +448,6 @@ public interface APIPersistence {
      * @throws ThumbnailPersistenceException
      */
     ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
-
     /**
      * Delete thumbnail icon of the API
      *
@@ -459,8 +456,6 @@ public interface APIPersistence {
      * @throws ThumbnailPersistenceException
      */
     void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException;
-
-
     /**
      * Add API product to the persistence layer
      *
@@ -483,7 +478,6 @@ public interface APIPersistence {
      */
     PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException;
-
     /**
      * Get the API product information stored in persistence layer, that is used for publisher operations
      *
@@ -493,7 +487,6 @@ public interface APIPersistence {
      * @throws APIPersistenceException
      */
     PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId) throws APIPersistenceException;
-
     /**
      * Search API Products to be displayed on Publisher API product listing
      *
