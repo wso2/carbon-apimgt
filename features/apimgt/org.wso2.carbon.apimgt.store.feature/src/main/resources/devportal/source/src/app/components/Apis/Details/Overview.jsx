@@ -67,8 +67,11 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.grey[700],
     },
     textLabel: {
-        fontWeight: 500,
+        fontWeight: 400,
         color: theme.palette.grey[800],
+    },
+    textValue: {
+        textIndent: theme.spacing(1),
     },
     apiThumb: {
         padding: theme.spacing(),
@@ -332,7 +335,7 @@ function Overview() {
                                         />
                                     </Typography>
                                     {' '}
-                                    <Typography variant='body2' gutterBottom align='left'>
+                                    <Typography variant='body2' gutterBottom align='left' className={classes.textValue}>
                                         {api.version}
                                     </Typography>
                                     <VerticalDivider height={20} />
@@ -343,7 +346,7 @@ function Overview() {
                                         />
                                     </Typography>
                                     {' '}
-                                    <Typography variant='body2' gutterBottom align='left'>
+                                    <Typography variant='body2' gutterBottom align='left' className={classes.textValue}>
                                         {getProvider(api)}
                                     </Typography>
                                 </Box>
