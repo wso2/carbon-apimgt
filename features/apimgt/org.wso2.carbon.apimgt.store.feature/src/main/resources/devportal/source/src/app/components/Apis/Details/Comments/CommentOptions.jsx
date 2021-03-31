@@ -19,10 +19,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
-import VerticalDivider from '../../../Shared/VerticalDivider';
 import AuthManager from '../../../../data/AuthManager';
 
 const styles = theme => ({
@@ -146,10 +144,12 @@ class CommentOptions extends React.Component {
         const {
             classes, comment, editIndex, index, theme,
         } = this.props;
+        const canDelete = (comment.createdBy === AuthManager.getUser().name)
+            || (AuthManager.getUser().name === theme.custom.adminRole);
         return (
             <Grid container className={classes.verticalSpace} key={comment.id}>
                 {/* only the comment owner or admin can delete a comment */}
-                {AuthManager.getUser() && (AuthManager.getUser().name === (theme.custom.adminRole || comment.createdBy)) && [
+                {canDelete && [
                         <Grid item key='key-delete'>
                             <Button
                                 size='small'
