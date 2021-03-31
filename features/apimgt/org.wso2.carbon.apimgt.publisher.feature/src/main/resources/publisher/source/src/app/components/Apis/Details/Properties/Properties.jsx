@@ -19,7 +19,7 @@
 /* eslint-disable react/jsx-no-bind */
 
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import cloneDeep from 'lodash.clonedeep';
 import isEmpty from 'lodash.isempty';
@@ -36,7 +36,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { FormattedMessage, injectIntl } from 'react-intl';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Box from '@material-ui/core/Box';
@@ -157,6 +157,7 @@ function Properties(props) {
      */
     const { intl } = props;
     const classes = useStyles();
+    const history = useHistory();
     const { api, updateAPI } = useContext(APIContext);
     const additionalPropertiesTemp = cloneDeep(api.additionalProperties);
 
@@ -171,7 +172,7 @@ function Properties(props) {
     const [showAddProperty, setShowAddProperty] = useState(false);
     const [propertyKey, setPropertyKey] = useState(null);
     const [propertyValue, setPropertyValue] = useState(null);
-    const [updating, setUpdating] = useState(false);
+    const [isUpdating, setUpdating] = useState(false);
     const [editing, setEditing] = useState(false);
     const [isAdditionalPropertiesStale, setIsAdditionalPropertiesStale] = useState(false);
     const [isVisibleInStore, setIsVisibleInStore] = useState(false);
@@ -221,7 +222,7 @@ function Properties(props) {
      * @param {*} updateAPI
      * @memberof Properties
      */
-    const handleSubmit = () => {
+    const handleSave = () => {
         setUpdating(true);
         if (Object.prototype.hasOwnProperty.call(additionalPropertiesTemp, 'github_repo')) {
             additionalProperties.github_repo = api.additionalProperties.github_repo;
@@ -242,6 +243,35 @@ function Properties(props) {
                     doRedirectToLogin();
                 }
             });
+    };
+
+
+    const handleSaveAndDeploy = () => {
+        setUpdating(true);
+        if (Object.prototype.hasOwnProperty.call(additionalPropertiesTemp, 'github_repo')) {
+            additionalProperties.github_repo = api.additionalProperties.github_repo;
+        }
+        if (Object.prototype.hasOwnProperty.call(additionalPropertiesTemp, 'slack_url')) {
+            additionalProperties.slack_url = api.additionalProperties.slack_url;
+        }
+        const updatePromise = updateAPI({ additionalProperties });
+        updatePromise
+            .then(() => {
+                setUpdating(false);
+            })
+            .catch((error) => {
+                setUpdating(false);
+                if (process.env.NODE_ENV !== 'production') console.log(error);
+                const { status } = error;
+                if (status === 401) {
+                    doRedirectToLogin();
+                }
+            })
+            .finally(() => history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            }));
     };
 
     /**
@@ -675,32 +705,27 @@ function Properties(props) {
                             >
                                 <Grid item>
                                     <div>
-                                        <Button
-                                            variant='contained'
-                                            color='primary'
-                                            onClick={handleSubmit}
-                                            disabled={
-                                                editing || api.isRevision || updating || (isEmpty(additionalProperties)
-                                                && !isAdditionalPropertiesStale)
-                                                || isRestricted(['apim:api_create', 'apim:api_publish'], api)
-                                            }
-                                        >
-                                            {updating && (
-                                                <>
-                                                    <CircularProgress size={20} />
+                                        {editing || api.isRevision || (isEmpty(additionalProperties)
+                                            && !isAdditionalPropertiesStale)
+                                            || isRestricted(['apim:api_create', 'apim:api_publish'], api) ? (
+                                                <Button
+                                                    disabled
+                                                    type='submit'
+                                                    variant='contained'
+                                                    color='primary'
+                                                >
                                                     <FormattedMessage
-                                                        id='Apis.Details.Properties.Properties.updating'
-                                                        defaultMessage='Updating ...'
+                                                        id='Apis.Details.Configuration.Configuration.save'
+                                                        defaultMessage='Save'
                                                     />
-                                                </>
-                                            )}
-                                            {!updating && (
-                                                <FormattedMessage
-                                                    id='Apis.Details.Properties.Properties.save'
-                                                    defaultMessage='Save'
+                                                </Button>
+                                            ) : (
+                                                <CustomSplitButton
+                                                    handleSave={handleSave}
+                                                    handleSaveAndDeploy={handleSaveAndDeploy}
+                                                    isUpdating={isUpdating}
                                                 />
                                             )}
-                                        </Button>
                                     </div>
                                 </Grid>
                                 <Grid item>
