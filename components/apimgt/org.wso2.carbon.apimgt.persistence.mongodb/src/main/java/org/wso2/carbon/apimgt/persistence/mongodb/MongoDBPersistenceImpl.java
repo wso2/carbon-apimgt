@@ -496,6 +496,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             fieldList.add("documentationList.textContent");
             return fieldList;
         }
+
         return fieldList;
     }
 
@@ -1103,9 +1104,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             DevPortalAPI api = MongoAPIMapper.INSTANCE.toDevPortalApi(mongoDBAPIDocument);
             API mappedAPI = APIMapper.INSTANCE.toApi(api);
             List<APICategory> mappedAPIApiCategories = mappedAPI.getApiCategories();
-            for (APICategory apiCategory: mappedAPIApiCategories) {
-                categoriesList.add(apiCategory);
-            }
+            categoriesList.addAll(mappedAPIApiCategories);
         }
         return  categoriesList;
     }
