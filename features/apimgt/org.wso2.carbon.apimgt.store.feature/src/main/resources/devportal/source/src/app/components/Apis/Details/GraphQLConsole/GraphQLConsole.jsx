@@ -91,7 +91,9 @@ export default function GraphQLConsole() {
             .then((apiResponse) => {
                 const apiData = apiResponse.obj;
                 if (apiData.endpointURLs) {
-                    const environment = apiData.endpointURLs.map((endpoint) => { return endpoint.environmentName; });
+                    const environment = apiData.endpointURLs.map((endpoint) => {
+                        return { name: endpoint.environmentName, displayName: endpoint.environmentDisplayName };
+                    });
                     setEnvironments(environment);
                 }
                 if (apiData.scopes) {
