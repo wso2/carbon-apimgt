@@ -49,6 +49,7 @@ import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
@@ -555,7 +556,8 @@ class Details extends Component {
         if (!isAPIProduct) {
             promisedUpdate = restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id);
         } else if (isAPIProduct) {
-            promisedUpdate = restApiProduct.getProductRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id);
+            promisedUpdate = restApiProduct.getProductRevisionsWithEnv(api.isRevision
+                ? api.revisionedApiProductId : api.id);
         }
         return promisedUpdate
             .then((result) => {
@@ -791,9 +793,15 @@ class Details extends Component {
                                     <AccordianSummary
                                         expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
                                     >
-                                        <Typography className={classes.leftLInkText}>
-                                            API Configurations
-                                        </Typography>
+                                        <Tooltip
+                                            title={'Changes made to API Configuration section requires a '
+                                                + 'new deployment, in order to affect in the Gateway'}
+                                            placement='bottom'
+                                        >
+                                            <Typography className={classes.leftLInkText}>
+                                                API Configurations
+                                            </Typography>
+                                        </Tooltip>
                                     </AccordianSummary>
                                     <AccordionDetails>
                                         <div>
