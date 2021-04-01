@@ -21,7 +21,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { injectIntl } from 'react-intl';
 import { app } from 'Settings';
 import { ApiContext } from 'AppComponents/Apis/Details/ApiContext';
-import EmbadCode from 'AppComponents/Apis/Details/Social/EmbadCode';
+import EmbedCode from 'AppComponents/Apis/Details/Social/EmbedCode';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 
 const useStyles = makeStyles((theme) => ({
@@ -73,7 +73,7 @@ function Social() {
         custom: {
             social: {
                 showSharing: {
-                    active, showFacebook, showReddit, showTwitter, showEmbad, showEmail,
+                    active, showFacebook, showReddit, showTwitter, showEmbed, showEmail,
                 },
             },
         },
@@ -166,11 +166,11 @@ function Social() {
                         />
                     </a>
                 )}
-                {active && showEmbad && (
+                {active && showEmbed && (
                     <>
                         <div className={classes.divider} />
                         {/* TODO: Fix spelling mistake ~tmkb */}
-                        <EmbadCode />
+                        <EmbedCode />
                     </>
                 )}
                 {active && showEmail && (

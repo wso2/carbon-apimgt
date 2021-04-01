@@ -246,7 +246,7 @@ const DefaultConfigurations = {
                 showFacebook: true,
                 showReddit: true,
                 showTwitter: true,
-                showEmbad: true,
+                showEmbed: true,
                 showEmail: true,
             },
         },
