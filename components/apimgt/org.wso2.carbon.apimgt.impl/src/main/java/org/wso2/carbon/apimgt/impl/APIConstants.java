@@ -1049,6 +1049,7 @@ public final class APIConstants {
     public static final String REST_API_TOKEN_CACHE_NAME = "RESTAPITokenCache";
     public static final String REST_API_INVALID_TOKEN_CACHE_NAME = "RESTAPIInvalidTokenCache";
     public static final String GATEWAY_JWT_TOKEN_CACHE = "GatewayJWTTokenCache";
+    public static final String EXTENTIONS_CACHE_MANAGER = "EXTENTIONS_CACHE_MANAGER";
 
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";

@@ -96,6 +96,13 @@ public class CacheProvider {
     }
 
     /**
+     * @return Product REST API scope cache
+     */
+    public static Cache getRESTAPIScopeCache() {
+        return getCache(APIConstants.REST_API_SCOPE_CACHE);
+    }
+
+    /**
      * @return Product REST API invalid token cache
      */
     public static Cache getRESTAPIInvalidTokenCache() {

@@ -11390,10 +11390,6 @@ public final class APIUtil {
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
-        // Invalidate Cache
-        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                .getCache(APIConstants.REST_API_SCOPE_CACHE)
-                .put(tenantDomain, null);
     }
 
     /**
