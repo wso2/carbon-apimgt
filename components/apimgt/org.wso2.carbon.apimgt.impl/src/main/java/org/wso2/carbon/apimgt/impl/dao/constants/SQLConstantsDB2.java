@@ -177,7 +177,7 @@ public class SQLConstantsDB2 extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
-            "select distinct x.* from (" +
+            "(" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
@@ -198,8 +198,8 @@ public class SQLConstantsDB2 extends SQLConstants{
                     "    SUB.TENANT_ID = ? "+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " OR APP.NAME like ?"+
-                    " )) a )x " +
+                    " AND APP.NAME like ?"+
+                    " )) a ) " +
                     " ORDER BY $1 $2 limit ? , ? ";
 
     public static final String GET_REPLIES_SQL =

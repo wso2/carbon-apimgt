@@ -199,8 +199,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
-            "select distinct x.* from (" +
-                    "SELECT " +
+                    "   SELECT " +
                     "   APP.APPLICATION_ID as APPLICATION_ID, " +
                     "   SUB.CREATED_BY AS CREATED_BY, " +
                     "   APP.GROUP_ID AS GROUP_ID, " +
@@ -218,10 +217,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "    SUB.TENANT_ID = ? "+
                     " And "+
                     "   ( SUB.CREATED_BY like ?"+
-                    " OR APP.NAME like ?"+
+                    " AND APP.NAME like ?"+
                     " ) ORDER BY $1 $2 " +
-                    " limit ? , ? "+
-                    " )x ";
+                    " limit ? , ? ";
 
     public static final String GET_ALL_SERVICES_BY_WITH_SERVICE_KEY = "SELECT " +
             "   UUID," +
