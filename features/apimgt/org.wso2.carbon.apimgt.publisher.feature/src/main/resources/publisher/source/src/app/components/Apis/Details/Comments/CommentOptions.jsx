@@ -22,6 +22,7 @@ import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
+import Utils from 'AppData/Utils';
 
 const styles = (theme) => ({
     link: {
@@ -145,15 +146,7 @@ class CommentOptions extends React.Component {
         const {
             classes, comment, theme,
         } = this.props;
-        const user = AuthManager.getUser();
-        let username = null;
-        if (user) {
-            username = user.name;
-            const count = (username.match(/@/g) || []).length;
-            if (user.name.endsWith('@carbon.super') && count <= 1) {
-                username = user.name.replace('@carbon.super', '');
-            }
-        }
+        const username = Utils.getUserNameWithoutDomain(AuthManager.getUser().name);
         const canDelete = (comment.createdBy === username)
             || (username === theme.custom.adminRole);
         const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
