@@ -933,9 +933,12 @@ public class PublisherCommonUtils {
         if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
             apiToAdd.setStatus(APIConstants.CREATED);
         }
-        //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
-        //  the owner as a different user
-        apiToAdd.setApiOwner(provider);
+
+        if (!apiToAdd.isAdvertiseOnly() || StringUtils.isBlank(apiToAdd.getApiOwner())) {
+            //we are setting the api owner as the logged in user until we support checking admin privileges and
+            //assigning the owner as a different user
+            apiToAdd.setApiOwner(provider);
+        }
 
         if (body.getKeyManagers() instanceof List) {
             apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());

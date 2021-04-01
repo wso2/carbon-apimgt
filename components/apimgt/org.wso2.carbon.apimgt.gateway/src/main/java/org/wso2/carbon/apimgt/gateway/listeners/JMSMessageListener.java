@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.gateway.listeners;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
@@ -37,6 +40,7 @@ import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.Message;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 public class JMSMessageListener implements MessageListener {
@@ -68,16 +72,12 @@ public class JMSMessageListener implements MessageListener {
                     log.debug("Event received in JMS Event Receiver - " + message);
                 }
                 Topic jmsDestination = (Topic) message.getJMSDestination();
-                if (message instanceof MapMessage) {
-                    MapMessage mapMessage = (MapMessage) message;
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    Enumeration enumeration = mapMessage.getMapNames();
-                    while (enumeration.hasMoreElements()) {
-                        String key = (String) enumeration.nextElement();
-                        map.put(key, mapMessage.getObject(key));
-                    }
+                if (message instanceof TextMessage) {
+                    String textMessage = ((TextMessage) message).getText();
+                    JsonNode payloadData = new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                            path(APIConstants.EVENT_PAYLOAD_DATA);
                     if (APIConstants.TopicNames.TOPIC_THROTTLE_DATA.equalsIgnoreCase(jmsDestination.getTopicName())) {
-                        if (map.get(APIConstants.THROTTLE_KEY) != null) {
+                        if (payloadData.get(APIConstants.THROTTLE_KEY) != null) {
                             /*
                              * This message contains throttle data in map which contains Keys
                              * throttleKey - Key of particular throttling level
@@ -85,22 +85,22 @@ public class JMSMessageListener implements MessageListener {
                              * expiryTimeStamp - When the throttling time window will expires
                              */
 
-                            handleThrottleUpdateMessage(map);
-                        } else if (map.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
+                            handleThrottleUpdateMessage(payloadData);
+                        } else if (payloadData.get(APIConstants.BLOCKING_CONDITION_KEY) != null) {
                             /*
                              * This message contains blocking condition data
                              * blockingCondition - Blocking condition type
                              * conditionValue - blocking condition value
                              * state - State whether blocking condition is enabled or not
                              */
-                            handleBlockingMessage(map);
-                        } else if (map.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
+                            handleBlockingMessage(payloadData);
+                        } else if (payloadData.get(APIConstants.POLICY_TEMPLATE_KEY) != null) {
                             /*
                              * This message contains key template data
                              * keyTemplateValue - Value of key template
                              * keyTemplateState - whether key template active or not
                              */
-                            handleKeyTemplateMessage(map);
+                            handleKeyTemplateMessage(payloadData);
                         }
                     }
                 } else {
@@ -113,15 +113,16 @@ public class JMSMessageListener implements MessageListener {
             log.error("JMSException occurred when processing the received message ", e);
         } catch (ParseException e) {
             log.error("Error while processing evaluatedConditions", e);
+        } catch (JsonProcessingException e) {
+            log.error("Error while parsing JMS payload", e);
         }
     }
 
-    private void handleThrottleUpdateMessage(Map<String, Object> map) throws ParseException {
-
-        String throttleKey = map.get(APIConstants.AdvancedThrottleConstants.THROTTLE_KEY).toString();
-        String throttleState = map.get(APIConstants.AdvancedThrottleConstants.IS_THROTTLED).toString();
-        Long timeStamp = Long.parseLong(map.get(APIConstants.AdvancedThrottleConstants.EXPIRY_TIMESTAMP).toString());
-        Object evaluatedConditionObject = map.get(APIConstants.AdvancedThrottleConstants.EVALUATED_CONDITIONS);
+    private void handleThrottleUpdateMessage(JsonNode msg) throws ParseException {
+        String throttleKey = msg.get(APIConstants.AdvancedThrottleConstants.THROTTLE_KEY).asText();
+        String throttleState = msg.get(APIConstants.AdvancedThrottleConstants.IS_THROTTLED).asText();
+        Long timeStamp = Long.parseLong(msg.get(APIConstants.AdvancedThrottleConstants.EXPIRY_TIMESTAMP).asText());
+        Object evaluatedConditionObject = msg.get(APIConstants.AdvancedThrottleConstants.EVALUATED_CONDITIONS);
 
         if (log.isDebugEnabled()) {
             log.debug("Received Key -  throttleKey : " + throttleKey + " , " +
@@ -138,7 +139,7 @@ public class JMSMessageListener implements MessageListener {
                 if (evaluatedConditionObject != null) {
                     ServiceReferenceHolder.getInstance().getAPIThrottleDataService().addThrottledApiConditions
                             (extractedKey.getResourceKey(), extractedKey.getName(), APIUtil.extractConditionDto(
-                                    (String) evaluatedConditionObject));
+                                    evaluatedConditionObject.toString()));
                 }
                 if (!ServiceReferenceHolder.getInstance().getAPIThrottleDataService().isAPIThrottled(extractedKey
                         .getResourceKey())) {
@@ -169,20 +170,19 @@ public class JMSMessageListener implements MessageListener {
     //Synchronized due to blocking data contains or not can updated by multiple threads. Will not be a performance
     // isssue
     //as this will not happen more frequently
-    private synchronized void handleBlockingMessage(Map<String, Object> map) {
-
+    private synchronized void handleBlockingMessage(JsonNode msg) {
         if (log.isDebugEnabled()) {
-            log.debug("Received Key -  blockingCondition : " + map.get(APIConstants.BLOCKING_CONDITION_KEY).toString() +
+            log.debug("Received Key -  blockingCondition : " + msg.get(APIConstants.BLOCKING_CONDITION_KEY).asText() +
                     " , " +
-                    "conditionValue :" + map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString() + " , " +
-                    "tenantDomain : " + map.get(APIConstants.BLOCKING_CONDITION_DOMAIN));
+                    "conditionValue :" + msg.get(APIConstants.BLOCKING_CONDITION_VALUE).asText() + " , " +
+                    "tenantDomain : " + msg.get(APIConstants.BLOCKING_CONDITION_DOMAIN).asText());
         }
 
-        String condition = map.get(APIConstants.BLOCKING_CONDITION_KEY).toString();
-        String conditionValue = map.get(APIConstants.BLOCKING_CONDITION_VALUE).toString();
-        String conditionState = map.get(APIConstants.BLOCKING_CONDITION_STATE).toString();
-        int conditionId = (int) map.get(APIConstants.BLOCKING_CONDITION_ID);
-        String tenantDomain = map.get(APIConstants.BLOCKING_CONDITION_DOMAIN).toString();
+        String condition = msg.get(APIConstants.BLOCKING_CONDITION_KEY).asText();
+        String conditionValue = msg.get(APIConstants.BLOCKING_CONDITION_VALUE).asText();
+        String conditionState = msg.get(APIConstants.BLOCKING_CONDITION_STATE).asText();
+        int conditionId = msg.get(APIConstants.BLOCKING_CONDITION_ID).asInt();
+        String tenantDomain = msg.get(APIConstants.BLOCKING_CONDITION_DOMAIN).asText();
 
         if (APIConstants.BLOCKING_CONDITIONS_APPLICATION.equals(condition)) {
             if (APIConstants.AdvancedThrottleConstants.TRUE.equals(conditionState)) {
@@ -230,7 +230,6 @@ public class JMSMessageListener implements MessageListener {
     }
 
     private APICondition extractAPIorResourceKey(String throttleKey) {
-
         Matcher m = resourcePattern.matcher(throttleKey);
         if (m.matches()) {
             if (m.groupCount() == RESOURCE_PATTERN_GROUPS) {
@@ -269,13 +268,12 @@ public class JMSMessageListener implements MessageListener {
         return null;
     }
 
-    private synchronized void handleKeyTemplateMessage(Map<String, Object> map) {
-
+    private synchronized void handleKeyTemplateMessage(JsonNode msg) {
         if (log.isDebugEnabled()) {
-            log.debug("Received Key -  KeyTemplate : " + map.get(APIConstants.POLICY_TEMPLATE_KEY).toString());
+            log.debug("Received Key -  KeyTemplate : " + msg.get(APIConstants.POLICY_TEMPLATE_KEY).asText());
         }
-        String keyTemplateValue = map.get(APIConstants.POLICY_TEMPLATE_KEY).toString();
-        String keyTemplateState = map.get(APIConstants.TEMPLATE_KEY_STATE).toString();
+        String keyTemplateValue = msg.get(APIConstants.POLICY_TEMPLATE_KEY).asText();
+        String keyTemplateState = msg.get(APIConstants.TEMPLATE_KEY_STATE).asText();
         if (APIConstants.AdvancedThrottleConstants.ADD.equals(keyTemplateState)) {
             ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .addKeyTemplate(keyTemplateValue, keyTemplateValue);

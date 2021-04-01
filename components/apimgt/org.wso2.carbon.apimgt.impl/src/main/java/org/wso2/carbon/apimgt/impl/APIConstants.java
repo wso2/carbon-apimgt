@@ -927,6 +927,8 @@ public final class APIConstants {
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
     public static final String API_ANALYTICS_REPORTER_CLASS = API_ANALYTICS + "ReporterClass";
     public static final String API_ANALYTICS_PROPERTIES = API_ANALYTICS + "Properties";
+    public static final String API_ANALYTICS_RESPONSE_SCHEMA_NAME = API_ANALYTICS + "ResponseSchemaName";
+    public static final String API_ANALYTICS_FAULT_SCHEMA_NAME = API_ANALYTICS + "FaultSchemaName";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "StreamProcessorServerURL";
     public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "StreamProcessorAuthServerURL";
     public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
@@ -1406,7 +1408,6 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQ_IN_EXT = "--In";
     public static final String API_CUSTOM_SEQ_OUT_EXT = "--Out";
     public static final String API_CUSTOM_SEQ_FAULT_EXT = "--Fault";
-    public static final String API_CUSTOM_SEQ_JSON_FAULT = "json_fault.xml";
 
     public static final String API_MANAGER_HOSTNAME = "HostName";
     public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";
@@ -2227,7 +2228,7 @@ public final class APIConstants {
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
         public static final String REST_API_ADMIN_VERSION = "v0.17";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
-        public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
+        public static final String REST_API_PUBLISHER_API_IMPORT_RESOURCE = "/apis/import";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
         public static final String IMPORT_API_OVERWRITE = "overwrite";
         public static final String IMPORT_API_ARCHIVE_FILE = "file";

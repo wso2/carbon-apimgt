@@ -80,24 +80,37 @@ const styles = (theme) => ({
  * @param props
  * @returns {*}
  */
-function getTitleForArtifactType(props) {
+function getTitleForArtifactType(props, count) {
     const {
         isAPIProduct, query,
     } = props;
+    const isSingular = count === 1;
     if (query) {
-        return (
+        return isSingular ? (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.search.results.singular'
+                defaultMessage='Search Result'
+            />
+        ) : (
             <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Result(s)' />
         );
     } else if (isAPIProduct) {
-        return (
+        return isSingular ? (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.apiproduct.singular'
+                defaultMessage='API Product'
+            />
+        ) : (
             <FormattedMessage
                 id='Apis.Listing.components.TopMenu.apiproduct(s)'
                 defaultMessage='API Product(s)'
             />
         );
     } else {
-        return (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
+        return isSingular ? (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.api.singular' defaultMessage='API' />
+        ) : (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.api' defaultMessage='API(s)' />
         );
     }
 }
@@ -135,14 +148,14 @@ function TopMenu(props) {
                             <Typography variant='caption' gutterBottom align='left' component='div'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.displaying'
-                                    defaultMessage='Total of'
+                                    defaultMessage='Total:'
                                 />
                                 {' '}
                                 {' '}
                                 {count}
                                 {' '}
                                 {' '}
-                                {getTitleForArtifactType(props)}
+                                {getTitleForArtifactType(props, count)}
                             </Typography>
                         </>
                     )}

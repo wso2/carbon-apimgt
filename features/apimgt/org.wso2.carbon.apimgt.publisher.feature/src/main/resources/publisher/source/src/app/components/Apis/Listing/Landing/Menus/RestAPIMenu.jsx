@@ -7,11 +7,13 @@ import APICreateMenuSection from 'AppComponents/Apis/Listing/components/APICreat
 import SampleAPI from 'AppComponents/Apis/Listing/SampleAPI/SampleAPI';
 import Divider from '@material-ui/core/Divider';
 import Box from '@material-ui/core/Box';
+import Configurations from 'Config';
 
 const RestAPIMenu = (props) => {
     const { icon, isCreateMenu } = props;
     const Component = isCreateMenu ? APICreateMenuSection : LandingMenu;
     const dense = isCreateMenu;
+    const { alwaysShowDeploySampleButton } = Configurations.apis;
     return (
         <Component
             title={(
@@ -55,10 +57,14 @@ const RestAPIMenu = (props) => {
                     defaultMessage='Import Open API'
                 />
             </LandingMenuItem>
-            <Box width={1}>
-                <Divider light variant='middle' />
-            </Box>
-            <SampleAPI dense={dense} />
+            {alwaysShowDeploySampleButton && (
+                <>
+                    <Box width={1}>
+                        <Divider light variant='middle' />
+                    </Box>
+                    <SampleAPI dense={dense} />
+                </>
+            )}
         </Component>
     );
 };

@@ -59,6 +59,7 @@ import Accordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { RevisionContextProvider } from 'AppComponents/Shared/RevisionContext';
 import Overview from './NewOverview/Overview';
 import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
@@ -249,11 +250,15 @@ class Details extends Component {
             // updateAPI: this.updateAPI,
             isAPIProduct,
             imageUpdate: 0,
+            allRevisions: null,
+            allEnvRevision: null,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
         this.updateAPI = this.updateAPI.bind(this);
         this.setImageUpdate = this.setImageUpdate.bind(this);
+        this.getRevision = this.getRevision.bind(this);
+        this.getDeployedEnv = this.getDeployedEnv.bind(this);
     }
 
     /**
@@ -331,6 +336,8 @@ class Details extends Component {
             promisedApi
                 .then((api) => {
                     this.setState({ api });
+                    this.getRevision();
+                    this.getDeployedEnv();
                 })
                 .catch((error) => {
                     if (process.env.NODE_ENV !== 'production') {
@@ -360,6 +367,8 @@ class Details extends Component {
             .then((api) => {
                 this.setState({ isAPIProduct });
                 this.setState({ api });
+                this.getRevision();
+                this.getDeployedEnv();
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -501,6 +510,63 @@ class Details extends Component {
     }
 
     /**
+     * Get Revisions
+     */
+    getRevision() {
+        const { api } = this.state;
+        const restApi = new API();
+        const restApiProduct = new APIProduct();
+        let isAPIProduct = false;
+        if (api.apiType === API.CONSTS.APIProduct) {
+            isAPIProduct = true;
+        }
+
+        let promisedUpdate;
+        let apiId = null;
+        if (!isAPIProduct) {
+            apiId = api.isRevision ? api.revisionedApiId : api.id;
+            promisedUpdate = restApi.getRevisions(apiId);
+        } else if (isAPIProduct) {
+            apiId = api.isRevision ? api.revisionedApiProductId : api.id;
+            promisedUpdate = restApiProduct.getProductRevisions(apiId);
+        }
+        return promisedUpdate
+            .then((result) => {
+                this.setState({ allRevisions: result.body.list });
+            })
+            .catch(() => {
+                Alert.error('Something went wrong while getting the revisions!');
+            });
+    }
+
+    /**
+     * Get Depolyed environment
+     */
+    getDeployedEnv() {
+        const { api } = this.state;
+        const restApi = new API();
+        const restApiProduct = new APIProduct();
+        let isAPIProduct = false;
+        if (api.apiType === API.CONSTS.APIProduct) {
+            isAPIProduct = true;
+        }
+
+        let promisedUpdate;
+        if (!isAPIProduct) {
+            promisedUpdate = restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id);
+        } else if (isAPIProduct) {
+            promisedUpdate = restApiProduct.getProductRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id);
+        }
+        return promisedUpdate
+            .then((result) => {
+                this.setState({ allEnvRevision: result.body.list });
+            })
+            .catch(() => {
+                Alert.error('Something went wrong while getting the revisions!');
+            });
+    }
+
+    /**
      * This method is similar to ReactJS `setState` method, In this `updateAPI()` method, we accept partially updated
      * API object or comple API object. When updating , the provided updatedAPI object will be merged with the existing
      * API object in the state and use it as the payload in the /apis PUT operation.
@@ -564,7 +630,7 @@ class Details extends Component {
      */
     render() {
         const {
-            api, apiNotFound, isAPIProduct, imageUpdate, tenantList,
+            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision,
         } = this.state;
         const {
             classes,
@@ -624,366 +690,388 @@ class Details extends Component {
                         tenantList,
                     }}
                 >
-
-                    <div className={classes.LeftMenu}>
-                        <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
-                            <div className={classes.leftLInkMain}>
-                                <CustomIcon
-                                    width={leftMenuIconMainSize}
-                                    height={leftMenuIconMainSize}
-                                    icon={isAPIProduct ? 'api-product' : 'api'}
-                                />
-                            </div>
-                        </Link>
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.overview',
-                                defaultMessage: 'overview',
-                            })}
-                            to={pathPrefix + 'overview'}
-                            Icon={<DashboardIcon />}
-                            head='valueOnly'
-                        />
-                        <Typography className={classes.headingText}>
-                            Develop
-                        </Typography>
-                        <div className={classes.root}>
-                            <Accordion
-                                defaultExpanded
-                                elevation={0}
-                                classes={{ expanded: classes.expanded }}
-                            >
-                                <AccordianSummary
-                                    expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
+                    <RevisionContextProvider
+                        value={{
+                            allRevisions,
+                            getRevision: this.getRevision,
+                            allEnvRevision,
+                            getDeployedEnv: this.getDeployedEnv,
+                        }}
+                    >
+                        <div className={classes.LeftMenu}>
+                            <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
+                                <div className={classes.leftLInkMain}>
+                                    <CustomIcon
+                                        width={leftMenuIconMainSize}
+                                        height={leftMenuIconMainSize}
+                                        icon={isAPIProduct ? 'api-product' : 'api'}
+                                    />
+                                </div>
+                            </Link>
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.overview',
+                                    defaultMessage: 'overview',
+                                })}
+                                to={pathPrefix + 'overview'}
+                                Icon={<DashboardIcon />}
+                                head='valueOnly'
+                            />
+                            <Typography className={classes.headingText}>
+                                Develop
+                            </Typography>
+                            <div className={classes.root}>
+                                <Accordion
+                                    defaultExpanded
+                                    elevation={0}
+                                    classes={{ expanded: classes.expanded }}
                                 >
-                                    <Typography className={classes.leftLInkText}>
-                                        Portal Configurations
-                                    </Typography>
-                                </AccordianSummary>
-                                <AccordionDetails>
-                                    <div>
-                                        <LeftMenuItem
-                                            className={classes.footeremaillink}
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.design.configs',
-                                                defaultMessage: 'Basic info',
-                                            })}
-                                            route='configuration'
-                                            to={pathPrefix + 'configuration'}
-                                            Icon={<ConfigurationIcon />}
-                                        />
-                                        <LeftMenuItem
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.business.info',
-                                                defaultMessage: 'business info',
-                                            })}
-                                            to={pathPrefix + 'business info'}
-                                            Icon={<BusinessIcon />}
-                                        />
-                                        <LeftMenuItem
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.documents',
-                                                defaultMessage: 'documents',
-                                            })}
-                                            to={pathPrefix + 'documents'}
-                                            Icon={<DocumentsIcon />}
-                                        />
-                                        {!isAPIProduct && (
+                                    <AccordianSummary
+                                        expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
+                                    >
+                                        <Typography className={classes.leftLInkText}>
+                                            Portal Configurations
+                                        </Typography>
+                                    </AccordianSummary>
+                                    <AccordionDetails>
+                                        <div>
+                                            <LeftMenuItem
+                                                className={classes.footeremaillink}
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.design.configs',
+                                                    defaultMessage: 'Basic info',
+                                                })}
+                                                route='configuration'
+                                                to={pathPrefix + 'configuration'}
+                                                Icon={<ConfigurationIcon />}
+                                            />
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.comments',
-                                                    defaultMessage: 'Comments',
+                                                    id: 'Apis.Details.index.business.info',
+                                                    defaultMessage: 'business info',
                                                 })}
-                                                to={pathPrefix + 'comments'}
-                                                Icon={<CommentIcon />}
+                                                to={pathPrefix + 'business info'}
+                                                Icon={<BusinessIcon />}
                                             />
-                                        )}
-                                    </div>
-                                </AccordionDetails>
-                            </Accordion>
-                            <Accordion
-                                elevation={0}
-                                defaultExpanded
-                                classes={{ expanded: classes.expanded }}
-                            >
-                                <AccordianSummary
-                                    expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.subscriptions',
+                                                    defaultMessage: 'subscriptions',
+                                                })}
+                                                to={pathPrefix + 'subscriptions'}
+                                                Icon={<SubscriptionsIcon />}
+                                            />
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.documents',
+                                                    defaultMessage: 'documents',
+                                                })}
+                                                to={pathPrefix + 'documents'}
+                                                Icon={<DocumentsIcon />}
+                                            />
+                                            {!isAPIProduct && (
+                                                <LeftMenuItem
+                                                    text={intl.formatMessage({
+                                                        id: 'Apis.Details.index.comments',
+                                                        defaultMessage: 'Comments',
+                                                    })}
+                                                    route='comments'
+                                                    to={pathPrefix + 'comments'}
+                                                    Icon={<CommentIcon />}
+                                                />
+                                            )}
+                                        </div>
+                                    </AccordionDetails>
+                                </Accordion>
+                                <Accordion
+                                    elevation={0}
+                                    defaultExpanded
+                                    classes={{ expanded: classes.expanded }}
                                 >
-                                    <Typography className={classes.leftLInkText}>
-                                        API Configurations
-                                    </Typography>
-                                </AccordianSummary>
-                                <AccordionDetails>
-                                    <div>
-                                        {!api.isWebSocket() && (
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.runtime.configs',
-                                                    defaultMessage: 'Runtime',
-                                                })}
-                                                route='runtime-configuration'
-                                                to={pathPrefix + 'runtime-configuration'}
-                                                Icon={<RuntimeConfigurationIcon />}
-                                            />
-                                        )}
-                                        {api.isWebSocket() && (
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.runtime.configs',
-                                                    defaultMessage: 'Runtime',
-                                                })}
-                                                route='runtime-configuration'
-                                                to={pathPrefix + 'runtime-configuration-websocket'}
-                                                Icon={<RuntimeConfigurationIcon />}
-                                            />
-                                        )}
-                                        {this.getLeftMenuItemForResourcesByType(api.type)}
-                                        {this.getLeftMenuItemForDefinitionByType(api.type)}
-                                        {!isAPIProduct && api.type !== 'WEBSUB' && (
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.endpoints',
-                                                    defaultMessage: 'endpoints',
-                                                })}
-                                                to={pathPrefix + 'endpoints'}
-                                                Icon={<EndpointIcon />}
-                                            />
-                                        )}
-                                        <LeftMenuItem
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.subscriptions',
-                                                defaultMessage: 'subscriptions',
-                                            })}
-                                            to={pathPrefix + 'subscriptions'}
-                                            Icon={<SubscriptionsIcon />}
-                                        />
+                                    <AccordianSummary
+                                        expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
+                                    >
+                                        <Typography className={classes.leftLInkText}>
+                                            API Configurations
+                                        </Typography>
+                                    </AccordianSummary>
+                                    <AccordionDetails>
+                                        <div>
+                                            {!api.isWebSocket() && (
+                                                <LeftMenuItem
+                                                    text={intl.formatMessage({
+                                                        id: 'Apis.Details.index.runtime.configs',
+                                                        defaultMessage: 'Runtime',
+                                                    })}
+                                                    route='runtime-configuration'
+                                                    to={pathPrefix + 'runtime-configuration'}
+                                                    Icon={<RuntimeConfigurationIcon />}
+                                                />
+                                            )}
+                                            {api.isWebSocket() && (
+                                                <LeftMenuItem
+                                                    text={intl.formatMessage({
+                                                        id: 'Apis.Details.index.runtime.configs',
+                                                        defaultMessage: 'Runtime',
+                                                    })}
+                                                    route='runtime-configuration'
+                                                    to={pathPrefix + 'runtime-configuration-websocket'}
+                                                    Icon={<RuntimeConfigurationIcon />}
+                                                />
+                                            )}
+                                            {this.getLeftMenuItemForResourcesByType(api.type)}
+                                            {this.getLeftMenuItemForDefinitionByType(api.type)}
+                                            {!isAPIProduct && api.type !== 'WEBSUB' && (
+                                                <LeftMenuItem
+                                                    text={intl.formatMessage({
+                                                        id: 'Apis.Details.index.endpoints',
+                                                        defaultMessage: 'endpoints',
+                                                    })}
+                                                    to={pathPrefix + 'endpoints'}
+                                                    Icon={<EndpointIcon />}
+                                                />
+                                            )}
+                                            {!api.isWebSocket() && !isAPIProduct && (
+                                                <LeftMenuItem
+                                                    text={intl.formatMessage({
+                                                        id: 'Apis.Details.index.left.menu.scope',
+                                                        defaultMessage: 'Local Scopes',
+                                                    })}
+                                                    route='scopes'
+                                                    to={pathPrefix + 'scopes'}
+                                                    Icon={<ScopesIcon />}
+                                                />
+                                            )}
 
-                                        {!api.isWebSocket() && !isAPIProduct && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.left.menu.scope',
-                                                    defaultMessage: 'Local Scopes',
+                                                    id: 'Apis.Details.index.properties',
+                                                    defaultMessage: 'properties',
                                                 })}
-                                                to={pathPrefix + 'scopes'}
-                                                Icon={<ScopesIcon />}
+                                                to={pathPrefix + 'properties'}
+                                                Icon={<PropertiesIcon />}
                                             />
-                                        )}
 
-                                        <LeftMenuItem
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.properties',
-                                                defaultMessage: 'properties',
-                                            })}
-                                            to={pathPrefix + 'properties'}
-                                            Icon={<PropertiesIcon />}
-                                        />
-
-                                        {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.monetization',
-                                                    defaultMessage: 'monetization',
-                                                })}
-                                                to={pathPrefix + 'monetization'}
-                                                Icon={<MonetizationIcon />}
-                                            />
-                                        )}
-                                    </div>
-                                </AccordionDetails>
-                            </Accordion>
-                        </div>
-                        <Divider />
-                        <Typography className={classes.headingText}>Deploy</Typography>
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.environments',
-                                defaultMessage: 'Deployments',
-                            })}
-                            route='deployments'
-                            to={pathPrefix + 'deployments'}
-                            Icon={<PersonPinCircleOutlinedIcon />}
-                        />
-                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && !isRestricted(['apim:api_publish'], api) && api.lifeCycleStatus !== 'RETIRED' && (
-                            <div>
-                                <Divider />
-                                <Typography className={classes.headingText}>Test</Typography>
-                                <LeftMenuItem
-                                    text={intl.formatMessage({
-                                        id: 'Apis.Details.index.Tryout.menu.name',
-                                        defaultMessage: 'Try Out',
-                                    })}
-                                    to={pathPrefix + 'test-console'}
-                                    iconText='test'
-                                />
+                                            {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                                                <LeftMenuItem
+                                                    text={intl.formatMessage({
+                                                        id: 'Apis.Details.index.monetization',
+                                                        defaultMessage: 'monetization',
+                                                    })}
+                                                    to={pathPrefix + 'monetization'}
+                                                    Icon={<MonetizationIcon />}
+                                                />
+                                            )}
+                                        </div>
+                                    </AccordionDetails>
+                                </Accordion>
                             </div>
-                        )}
-                        {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
-                            <div>
-                                <Divider />
-                                <Typography className={classes.headingText}>Publish</Typography>
-                                <LeftMenuItem
-                                    text={intl.formatMessage({
-                                        id: 'Apis.Details.index.lifecycle',
-                                        defaultMessage: 'lifecycle',
-                                    })}
-                                    to={pathPrefix + 'lifecycle'}
-                                    Icon={<LifeCycleIcon />}
-                                />
-                            </div>
-                        )}
-                        {!isAPIProduct && settingsContext.externalStoresEnabled && (
-                            <>
-                                <Divider />
-                                <LeftMenuItem
-                                    text={intl.formatMessage({
-                                        id: 'Apis.Details.index.external-stores',
-                                        defaultMessage: 'external dev portals',
-                                    })}
-                                    to={pathPrefix + 'external-devportals'}
-                                    Icon={<StoreIcon />}
-                                />
-                            </>
-                        )}
-                        <Divider />
-                    </div>
-                    <div className={classes.content}>
-                        <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
-                        <div className={classes.contentInside}>
-                            <LastUpdatedTime lastUpdatedTime={api.lastUpdatedTime} />
-                            <Switch>
-                                <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
-                                <Route
-                                    path={Details.subPaths.OVERVIEW_PRODUCT}
-                                    key={Details.subPaths.OVERVIEW_PRODUCT}
-                                    component={() => <Overview api={api} />}
-                                />
-                                <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
-                                <Route
-                                    path={Details.subPaths.API_DEFINITION}
-                                    component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.WSDL}
-                                    component={() => <WSDL api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.API_DEFINITION_PRODUCT}
-                                    component={() => <APIDefinition api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.SCHEMA_DEFINITION}
-                                    component={() => <APIDefinition api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.ASYNCAPI_DEFINITION}
-                                    component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
-                                />
-                                <Route path={Details.subPaths.LIFE_CYCLE} component={() => <LifeCycle api={api} />} />
-                                <Route
-                                    path={Details.subPaths.CONFIGURATION}
-                                    component={() => <DesignConfigurations api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.RUNTIME_CONFIGURATION}
-                                    component={() => <RuntimeConfiguration api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.RUNTIME_CONFIGURATION_WEBSOCKET}
-                                    component={() => <RuntimeConfigurationWebSocket api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.TOPICS}
-                                    component={() => <Topics api={api} updateAPI={this.updateAPI} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.CONFIGURATION_PRODUCT}
-                                    component={() => <DesignConfigurations api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.RUNTIME_CONFIGURATION_PRODUCT}
-                                    component={() => <RuntimeConfiguration api={api} />}
-                                />
-                                <Route path={Details.subPaths.ENDPOINTS} component={() => <Endpoints api={api} />} />
-                                <Route
-                                    path={Details.subPaths.ENVIRONMENTS}
-                                    component={() => <Environments api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.ENVIRONMENTS_PRODUCT}
-                                    component={() => <Environments api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.OPERATIONS}
-                                    component={() => <Operations api={api} updateAPI={this.updateAPI} />}
-                                />
-                                <Route
-                                    exact
-                                    path={Details.subPaths.RESOURCES_PRODUCT}
-                                    component={APIProductOperations}
-                                />
-                                <Route
-                                    path={Details.subPaths.RESOURCES_PRODUCT_EDIT}
-                                    component={ProductResourcesEdit}
-                                />
-
-                                <Route
-                                    path={Details.subPaths.RESOURCES}
-                                    key={Details.subPaths.RESOURCES}
-                                    component={APIOperations}
-                                />
-
-                                <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
-                                <Route path={Details.subPaths.DOCUMENTS} component={() => <Documents api={api} />} />
-                                <Route
-                                    path={Details.subPaths.DOCUMENTS_PRODUCT}
-                                    component={() => <Documents api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.SUBSCRIPTIONS}
-                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.SUBSCRIPTIONS_PRODUCT}
-                                    component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
-                                />
-                                <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
-                                <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
-                                <Route
-                                    path={Details.subPaths.BUSINESS_INFO}
-                                    component={() => <BusinessInformation api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.BUSINESS_INFO_PRODUCT}
-                                    component={() => <BusinessInformation api={api} />}
-                                />
-                                <Route path={Details.subPaths.PROPERTIES} component={() => <Properties api={api} />} />
-                                <Route
-                                    path={Details.subPaths.PROPERTIES_PRODUCT}
-                                    component={() => <Properties api={api} />}
-                                />
-                                <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
-                                <Route path={Details.subPaths.SUBSCRIPTIONS} component={() => <Subscriptions />} />
-                                <Route
-                                    path={Details.subPaths.MONETIZATION}
-                                    component={() => <Monetization api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.MONETIZATION_PRODUCT}
-                                    component={() => <Monetization api={api} />}
-                                />
-                                <Route
-                                    path={Details.subPaths.TRYOUT}
-                                    component={() => <TryOutConsole apiObj={api} />}
-                                />
-                                <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
-                                <Route
-                                    path={Details.subPaths.COMMENTS}
-                                    component={() => <Comments apiObj={api} />}
-                                />
-                            </Switch>
+                            <Divider />
+                            <Typography className={classes.headingText}>Deploy</Typography>
+                            <LeftMenuItem
+                                text={intl.formatMessage({
+                                    id: 'Apis.Details.index.environments',
+                                    defaultMessage: 'Deployments',
+                                })}
+                                route='deployments'
+                                to={pathPrefix + 'deployments'}
+                                Icon={<PersonPinCircleOutlinedIcon />}
+                            />
+                            {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
+                                && api.lifeCycleStatus !== 'RETIRED' && (
+                                <div>
+                                    <Divider />
+                                    <Typography className={classes.headingText}>Test</Typography>
+                                    <LeftMenuItem
+                                        route='test-console'
+                                        text={intl.formatMessage({
+                                            id: 'Apis.Details.index.Tryout.menu.name',
+                                            defaultMessage: 'Try Out',
+                                        })}
+                                        to={pathPrefix + 'test-console'}
+                                        iconText='test'
+                                    />
+                                </div>
+                            )}
+                            {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
+                                <div>
+                                    <Divider />
+                                    <Typography className={classes.headingText}>Publish</Typography>
+                                    <LeftMenuItem
+                                        text={intl.formatMessage({
+                                            id: 'Apis.Details.index.lifecycle',
+                                            defaultMessage: 'lifecycle',
+                                        })}
+                                        to={pathPrefix + 'lifecycle'}
+                                        Icon={<LifeCycleIcon />}
+                                    />
+                                </div>
+                            )}
+                            {!isAPIProduct && settingsContext.externalStoresEnabled && (
+                                <>
+                                    <Divider />
+                                    <LeftMenuItem
+                                        text={intl.formatMessage({
+                                            id: 'Apis.Details.index.external-stores',
+                                            defaultMessage: 'external dev portals',
+                                        })}
+                                        to={pathPrefix + 'external-devportals'}
+                                        Icon={<StoreIcon />}
+                                    />
+                                </>
+                            )}
+                            <Divider />
                         </div>
-                    </div>
+                        <div className={classes.content}>
+                            <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
+                            <div className={classes.contentInside}>
+                                <LastUpdatedTime lastUpdatedTime={api.lastUpdatedTime} />
+                                <Switch>
+                                    <Redirect exact from={Details.subPaths.BASE} to={redirectUrl} />
+                                    <Route
+                                        path={Details.subPaths.OVERVIEW_PRODUCT}
+                                        key={Details.subPaths.OVERVIEW_PRODUCT}
+                                        component={() => <Overview api={api} />}
+                                    />
+                                    <Route path={Details.subPaths.OVERVIEW} component={() => <Overview api={api} />} />
+                                    <Route
+                                        path={Details.subPaths.API_DEFINITION}
+                                        component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.WSDL}
+                                        component={() => <WSDL api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.API_DEFINITION_PRODUCT}
+                                        component={() => <APIDefinition api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.SCHEMA_DEFINITION}
+                                        component={() => <APIDefinition api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.ASYNCAPI_DEFINITION}
+                                        component={() => <APIDefinition api={api} updateAPI={this.updateAPI} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.LIFE_CYCLE}
+                                        component={() => <LifeCycle api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.CONFIGURATION}
+                                        component={() => <DesignConfigurations api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.RUNTIME_CONFIGURATION}
+                                        component={() => <RuntimeConfiguration api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.RUNTIME_CONFIGURATION_WEBSOCKET}
+                                        component={() => <RuntimeConfigurationWebSocket api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.TOPICS}
+                                        component={() => <Topics api={api} updateAPI={this.updateAPI} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.CONFIGURATION_PRODUCT}
+                                        component={() => <DesignConfigurations api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.RUNTIME_CONFIGURATION_PRODUCT}
+                                        component={() => <RuntimeConfiguration api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.ENDPOINTS}
+                                        component={() => <Endpoints api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.ENVIRONMENTS}
+                                        component={() => <Environments api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.ENVIRONMENTS_PRODUCT}
+                                        component={() => <Environments api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.OPERATIONS}
+                                        component={() => <Operations api={api} updateAPI={this.updateAPI} />}
+                                    />
+                                    <Route
+                                        exact
+                                        path={Details.subPaths.RESOURCES_PRODUCT}
+                                        component={APIProductOperations}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.RESOURCES_PRODUCT_EDIT}
+                                        component={ProductResourcesEdit}
+                                    />
+
+                                    <Route
+                                        path={Details.subPaths.RESOURCES}
+                                        key={Details.subPaths.RESOURCES}
+                                        component={APIOperations}
+                                    />
+
+                                    <Route path={Details.subPaths.SCOPES} component={() => <Scope api={api} />} />
+                                    <Route
+                                        path={Details.subPaths.DOCUMENTS}
+                                        component={() => <Documents api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.DOCUMENTS_PRODUCT}
+                                        component={() => <Documents api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.SUBSCRIPTIONS}
+                                        component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.SUBSCRIPTIONS_PRODUCT}
+                                        component={() => <Subscriptions api={api} updateAPI={this.updateAPI} />}
+                                    />
+                                    <Route path={Details.subPaths.SECURITY} component={() => <Security api={api} />} />
+                                    <Route path={Details.subPaths.COMMENTS} component={() => <Comments api={api} />} />
+                                    <Route
+                                        path={Details.subPaths.BUSINESS_INFO}
+                                        component={() => <BusinessInformation api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.BUSINESS_INFO_PRODUCT}
+                                        component={() => <BusinessInformation api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.PROPERTIES}
+                                        component={() => <Properties api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.PROPERTIES_PRODUCT}
+                                        component={() => <Properties api={api} />}
+                                    />
+                                    <Route path={Details.subPaths.NEW_VERSION} component={() => <CreateNewVersion />} />
+                                    <Route path={Details.subPaths.SUBSCRIPTIONS} component={() => <Subscriptions />} />
+                                    <Route
+                                        path={Details.subPaths.MONETIZATION}
+                                        component={() => <Monetization api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.MONETIZATION_PRODUCT}
+                                        component={() => <Monetization api={api} />}
+                                    />
+                                    <Route
+                                        path={Details.subPaths.TRYOUT}
+                                        component={() => <TryOutConsole apiObj={api} />}
+                                    />
+                                    <Route path={Details.subPaths.EXTERNAL_STORES} component={ExternalStores} />
+                                    <Route
+                                        path={Details.subPaths.COMMENTS}
+                                        component={() => <Comments apiObj={api} />}
+                                    />
+                                </Switch>
+                            </div>
+                        </div>
+                    </RevisionContextProvider>
                 </APIProvider>
             </>
         );

@@ -17,13 +17,14 @@
 import React, {
     useContext, useEffect, useState, useReducer,
 } from 'react';
-import { Grid, CircularProgress } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import { Link, withRouter } from 'react-router-dom';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import NewEndpointCreate from 'AppComponents/Apis/Details/Endpoints/NewEndpointCreate';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import cloneDeep from 'lodash.clonedeep';
@@ -74,7 +75,6 @@ function Endpoints(props) {
     const [swagger, setSwagger] = useState(defaultSwagger);
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
     const [isUpdating, setUpdating] = useState(false);
-    const [isEndpointUrlAvailable, setIsEndpointUrlAvailable] = useState(false);
 
     const apiReducer = (initState, configAction) => {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
@@ -85,6 +85,7 @@ function Endpoints(props) {
                 if (value) {
                     return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
                 }
+                delete tmpEndpointConfig[action];
                 return { ...initState, endpointConfig: { ...tmpEndpointConfig } };
             }
             case 'select_endpoint_category': {
@@ -172,7 +173,7 @@ function Endpoints(props) {
      *
      * @param {boolean} isRedirect Used for dynamic endpoints to redirect to the runtime config page.
      */
-    const saveAPI = (isRedirect) => {
+    const handleSave = (isRedirect) => {
         const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
         setUpdating(true);
         if (endpointImplementationType === 'INLINE') {
@@ -193,6 +194,28 @@ function Endpoints(props) {
                     history.push('/apis/' + api.id + '/runtime-configuration');
                 }
             });
+        }
+    };
+
+    const handleSaveAndDeploy = () => {
+        const { endpointConfig, endpointImplementationType, endpointSecurity } = apiObject;
+        setUpdating(true);
+        if (endpointImplementationType === 'INLINE') {
+            api.updateSwagger(swagger).then((resp) => {
+                setSwagger(resp.obj);
+            }).then(() => {
+                updateAPI({ endpointConfig, endpointImplementationType, endpointSecurity });
+            }).finally(() => history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            }));
+        } else {
+            updateAPI(apiObject).finally(() => history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            }));
         }
     };
 
@@ -325,6 +348,12 @@ function Endpoints(props) {
                 isValidEndpoint = endpointConfig.sandbox_endpoints.url !== ''
                         || endpointConfig.production_endpoints.url !== '';
             }
+            if (endpointConfig.sandbox_endpoints) {
+                isValidEndpoint &&= endpointConfig.sandbox_endpoints.url !== '';
+            }
+            if (endpointConfig.production_endpoints) {
+                isValidEndpoint &&= endpointConfig.production_endpoints.url !== '';
+            }
             return !isValidEndpoint ? {
                 isValid: false,
                 message: intl.formatMessage({
@@ -354,7 +383,7 @@ function Endpoints(props) {
     }, [apiObject]);
 
     const saveAndRedirect = () => {
-        saveAPI(true);
+        handleSave(true);
     };
     /**
      * Method to update the swagger object.
@@ -398,7 +427,6 @@ function Endpoints(props) {
                                         onChangeAPI={apiDispatcher}
                                         endpointsDispatcher={apiDispatcher}
                                         saveAndRedirect={saveAndRedirect}
-                                        setIsEndpointUrlAvailable={setIsEndpointUrlAvailable}
                                     />
                                 </Grid>
                             </Grid>
@@ -421,20 +449,26 @@ function Endpoints(props) {
                                 className={classes.buttonSection}
                             >
                                 <Grid item>
-                                    <Button
-                                        disabled={isUpdating || api.isRevision || !endpointValidity.isValid
-                                    || isRestricted(['apim:api_create'], api) || !isEndpointUrlAvailable}
-                                        type='submit'
-                                        variant='contained'
-                                        color='primary'
-                                        onClick={() => saveAPI()}
-                                    >
-                                        <FormattedMessage
-                                            id='Apis.Details.Endpoints.Endpoints.save'
-                                            defaultMessage='Save'
-                                        />
-                                        {isUpdating && <CircularProgress size={24} />}
-                                    </Button>
+                                    {api.isRevision || !endpointValidity.isValid
+                                        || isRestricted(['apim:api_create'], api) ? (
+                                            <Button
+                                                disabled
+                                                type='submit'
+                                                variant='contained'
+                                                color='primary'
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Details.Configuration.Configuration.save'
+                                                    defaultMessage='Save'
+                                                />
+                                            </Button>
+                                        ) : (
+                                            <CustomSplitButton
+                                                handleSave={handleSave}
+                                                handleSaveAndDeploy={handleSaveAndDeploy}
+                                                isUpdating={isUpdating}
+                                            />
+                                        )}
                                 </Grid>
                                 <Grid item>
                                     <Link to={'/apis/' + api.id + '/overview'}>
