@@ -159,7 +159,7 @@ export default function ListApplications() {
                                     defaultMessage: 'Search',
                                     id: 'Applications.Listing.Listing.applications.search.label',
                                 })}
-                                placeholder='Search application by name'
+                                placeholder='Search application by owner'
                                 InputProps={{
                                     disableUnderline: true,
                                     className: classes.searchInput,
