@@ -119,11 +119,8 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-/**
- *
- * @returns
- */
-export default function NewCustomizedStepper() {
+
+export default function CustomizedStepper() {
     const classes = useStyles();
     const [api, updateAPI] = useAPI();
     const [isUpdating, setUpdating] = useState(false);
@@ -555,7 +552,7 @@ export default function NewCustomizedStepper() {
     );
 }
 
-NewCustomizedStepper.propTypes = {
+CustomizedStepper.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,

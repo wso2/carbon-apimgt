@@ -17,6 +17,7 @@
 
 package org.wso2.carbon.apimgt.common.analytics.publishers.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.am.analytics.publisher.exception.MetricCreationException;
@@ -24,8 +25,8 @@ import org.wso2.am.analytics.publisher.reporter.CounterMetric;
 import org.wso2.am.analytics.publisher.reporter.MetricReporter;
 import org.wso2.am.analytics.publisher.reporter.MetricReporterFactory;
 import org.wso2.am.analytics.publisher.reporter.MetricSchema;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.Constants;
-
 import java.util.Map;
 
 /**
@@ -47,8 +48,8 @@ public class AnalyticsDataPublisher {
         return instance;
     }
 
-    public void initialize(Map<String, String> configs) {
-
+    public void initialize(AnalyticsCommonConfiguration commonConfig) {
+        Map<String, String> configs = commonConfig.getConfigurations();
         String reporterClass = configs.get("publisher.reporter.class");
         try {
             MetricReporter metricReporter;
@@ -58,11 +59,25 @@ public class AnalyticsDataPublisher {
             } else {
                 metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
             }
-            this.successMetricReporter = metricReporter
-                    .createCounterMetric(Constants.RESPONSE_METRIC_NAME, MetricSchema.RESPONSE);
-            this.faultyMetricReporter = metricReporter
-                    .createCounterMetric(Constants.FAULTY_METRIC_NAME, MetricSchema.ERROR);
-        } catch (MetricCreationException e) {
+
+            if (!StringUtils.isEmpty(commonConfig.getResponseSchema())) {
+                this.successMetricReporter = metricReporter.createCounterMetric(Constants.RESPONSE_METRIC_NAME,
+                                MetricSchema.valueOf(commonConfig.getResponseSchema()));
+            } else {
+                this.successMetricReporter = metricReporter
+                        .createCounterMetric(Constants.RESPONSE_METRIC_NAME, MetricSchema.RESPONSE);
+            }
+
+            if (!StringUtils.isEmpty(commonConfig.getFaultSchema())) {
+                this.faultyMetricReporter = metricReporter.createCounterMetric(Constants.FAULTY_METRIC_NAME,
+                                MetricSchema.valueOf(commonConfig.getFaultSchema()));
+            } else {
+                this.faultyMetricReporter = metricReporter
+                        .createCounterMetric(Constants.FAULTY_METRIC_NAME, MetricSchema.ERROR);
+            }
+
+            // Illegal Argument is possible as the enum conversion could fail
+        } catch (MetricCreationException | IllegalArgumentException e) {
             log.error("Error initializing event publisher.", e);
         }
     }

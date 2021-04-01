@@ -1,1 +1,0 @@
-{"clientId":"F7OxqmHj87KVoh9zhFLra6QoJkAa","clientName":"publisher_webpack_dev","callBackURL":"https://localhost:8081/publisher/services/auth/callback/login","clientSecret":"i8B_ZEMCYYlGb4eNj5DkAv5pf6wa","isSaasApplication":true,"appOwner":null,"jsonString":"{\"grant_types\":\"authorization_code refresh_token\"}","jsonAppAttribute":"{}","tokenType":null}

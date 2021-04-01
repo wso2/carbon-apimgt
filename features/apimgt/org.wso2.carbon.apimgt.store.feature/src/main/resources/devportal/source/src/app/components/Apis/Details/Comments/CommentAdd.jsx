@@ -158,7 +158,9 @@ class CommentAdd extends React.Component {
             }));
         }
         this.setState({ currentLength: 0 });
-        handleShowReply(-1);
+        if (replyTo !== null) {
+            handleShowReply();
+        }
     }
 
     /**
