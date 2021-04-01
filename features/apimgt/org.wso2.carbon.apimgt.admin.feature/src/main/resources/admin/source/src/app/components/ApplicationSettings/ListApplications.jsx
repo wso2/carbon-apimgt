@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
 import { useIntl, FormattedMessage } from 'react-intl';
@@ -24,7 +24,7 @@ import EditApplication from 'AppComponents/ApplicationSettings/EditApplication';
 import AppsTableContent from 'AppComponents/ApplicationSettings/AppsTableContent';
 import ApplicationTableHead from 'AppComponents/ApplicationSettings/ApplicationTableHead';
 import EditIcon from '@material-ui/icons/Edit';
-import Table from "@material-ui/core/Table";
+import Table from '@material-ui/core/Table';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import TableFooter from '@material-ui/core/TableFooter';
 import TablePagination from '@material-ui/core/TablePagination';
@@ -70,6 +70,25 @@ export default function ListApplications() {
     const [page, setPage] = useState(0);
     const [owner, setOwner] = useState('');
 
+    /**
+    * API call to get application list
+    * @returns {Promise}.
+    */
+    function apiCall(pageNo) {
+        const restApi = new API();
+        return restApi
+            .getApplicationList({ limit: rowsPerPage, offset: pageNo * rowsPerPage, user: owner })
+            .then((result) => {
+                setApplicationList(result.body.list);
+                const { pagination: { total } } = result.body;
+                setTotalApps(total);
+                return result.body.list;
+            })
+            .catch((error) => {
+                throw error;
+            });
+    }
+
     useEffect(() => {
         apiCall(page).then((result) => {
             setApplicationList(result);
@@ -82,30 +101,11 @@ export default function ListApplications() {
         });
     }, [rowsPerPage]);
 
-    /**
-    * API call to get application list
-    * @returns {Promise}.
-    */
-    function apiCall(page) {
-        const restApi = new API();
-        return restApi
-            .getApplicationList({ limit: rowsPerPage, offset: page * rowsPerPage, user: owner })
-            .then((result) => {
-                setApplicationList(result.body.list);
-                const { pagination: { total } } = result.body;
-                setTotalApps(total);
-                return result.body.list;
-            })
-            .catch((error) => {
-                throw error;
-            });
-    }
-
-    function handleChangePage(event, page) {
-        setPage(page);
-        apiCall(page).then((result) => {
+    function handleChangePage(event, pageNo) {
+        setPage(pageNo);
+        apiCall(pageNo).then((result) => {
             setApplicationList(result);
-        })
+        });
     }
 
     function handleChangeRowsPerPage(event) {
@@ -119,37 +119,37 @@ export default function ListApplications() {
         });
     }
 
+    function clearSearch() {
+        setPage(0);
+        setOwner('');
+        apiCall(page).then((result) => {
+            setApplicationList(result);
+        });
+    }
+
     function setQuery(event) {
         const newQuery = event.target.value;
-        if(newQuery === '') {
+        if (newQuery === '') {
             clearSearch();
         } else {
             setOwner(newQuery);
         }
     }
 
-    function clearSearch() {
-        setPage(0);
-        setOwner('');
-        apiCall(page).then((result) => {
-            setApplicationList(result);
-        })
-    }
-
     function filterApps() {
         setPage(0);
         apiCall(page).then((result) => {
             setApplicationList(result);
-        })
+        });
     }
 
     return (
         <ContentBase>
-            <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
+            <AppBar className={classes.searchBar} position='static' color='default' elevation={0}>
                 <Toolbar>
-                    <Grid container spacing={2} alignItems="center">
+                    <Grid container spacing={2} alignItems='center'>
                         <Grid item>
-                            <SearchIcon className={classes.block} color="inherit" />
+                            <SearchIcon className={classes.block} color='inherit' />
                         </Grid>
                         <Grid item xs>
                             <TextField
@@ -159,7 +159,7 @@ export default function ListApplications() {
                                     defaultMessage: 'Search',
                                     id: 'Applications.Listing.Listing.applications.search.label',
                                 })}
-                                placeholder="Search application by name"
+                                placeholder='Search application by name'
                                 InputProps={{
                                     disableUnderline: true,
                                     className: classes.searchInput,
@@ -168,17 +168,28 @@ export default function ListApplications() {
                                 onChange={setQuery}
                                 // onKeyPress={this.handleSearchKeyPress}
                             />
-                            {owner.length > 0 && (<Tooltip title={intl.formatMessage({
-                                defaultMessage: 'Clear Search',
-                                id: 'Applications.Listing.Listing.clear.search',
-                            })}>
-                                <IconButton aria-label="delete" className={classes.clearSearch} onClick={clearSearch}>
-                                    <HighlightOffRoundedIcon />
-                                </IconButton>
-                            </Tooltip>)}
+                            { owner.length > 0
+                                && (
+                                    <Tooltip
+                                        title={
+                                            intl.formatMessage({
+                                                defaultMessage: 'Clear Search',
+                                                id: 'Applications.Listing.Listing.clear.search',
+                                            })
+                                        }
+                                    >
+                                        <IconButton
+                                            aria-label='delete'
+                                            className={classes.clearSearch}
+                                            onClick={clearSearch}
+                                        >
+                                            <HighlightOffRoundedIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
                         </Grid>
                         <Grid item>
-                            <Button variant="contained" className={classes.addUser} onClick={filterApps}>
+                            <Button variant='contained' className={classes.addUser} onClick={filterApps}>
                                 <FormattedMessage
                                     id='Applications.Listing.Listing.applications.search'
                                     defaultMessage='Search'
@@ -190,7 +201,7 @@ export default function ListApplications() {
                 </Toolbar>
             </AppBar>
             <Table id='itest-application-list-table'>
-                <ApplicationTableHead/>
+                <ApplicationTableHead />
                 <AppsTableContent
                     apps={applicationList}
                     page={page}

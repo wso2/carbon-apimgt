@@ -30,7 +30,7 @@ import { FormattedMessage } from 'react-intl';
  * @extends {Component}
  */
 const applicationTableHead = (props) => {
-    const createSortHandler = property => (event) => {
+    const createSortHandler = (property) => (event) => {
         props.onRequestSort(event, property);
     };
     const columnData = [

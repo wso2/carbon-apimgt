@@ -17,26 +17,19 @@
  */
 
 import React, { Component } from 'react';
-import {Link as RouterLink, Link} from 'react-router-dom';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
-import { FormattedMessage } from 'react-intl';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import EditApplication from 'AppComponents/ApplicationSettings/EditApplication';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import AuthManager from 'AppData/AuthManager';
-import EditIcon from "@material-ui/core/SvgIcon/SvgIcon";
-
 
 /**
  * @inheritdoc
  * @param {*} theme theme object
  */
-const styles = theme => ({
+const styles = (theme) => ({
     fullHeight: {
         height: '100%',
     },
@@ -44,7 +37,7 @@ const styles = theme => ({
         height: theme.spacing(5),
         '& td': {
             padding: theme.spacing(0.5),
-        }
+        },
     },
     appOwner: {
         pointerEvents: 'none',
@@ -52,7 +45,7 @@ const styles = theme => ({
     appName: {
         '& a': {
             color: '#1b9ec7 !important',
-        }
+        },
     },
     appTablePaper: {
         '& table tr td': {
@@ -72,7 +65,7 @@ const styles = theme => ({
         },
     },
 });
-const StyledTableCell = withStyles(theme => ({
+const StyledTableCell = withStyles((theme) => ({
     head: {
         backgroundColor: theme.palette.common.black,
         color: theme.palette.common.white,
@@ -85,7 +78,7 @@ const StyledTableCell = withStyles(theme => ({
     },
 }))(TableCell);
 
-const StyledTableRow = withStyles(theme => ({
+const StyledTableRow = withStyles((theme) => ({
     root: {
         '&:nth-of-type(odd)': {
             backgroundColor: theme.palette.background.default,
@@ -123,7 +116,7 @@ class AppsTableContent extends Component {
                     />
                 )}
             </>
-        )
+        );
     };
 
     /**
@@ -132,7 +125,7 @@ class AppsTableContent extends Component {
      */
     render() {
         const {
-            apps, classes, editComponentProps, EditComponent, apiCall, order, orderBy,
+            apps, classes, editComponentProps, apiCall,
         } = this.props;
         const { notFound } = this.state;
 
@@ -142,22 +135,22 @@ class AppsTableContent extends Component {
         return (
             <TableBody className={classes.fullHeight}>
                 {apps && apps.map((app) => {
-                        return (
-                            <StyledTableRow className={classes.tableRow} key={app.applicationId}>
-                                <StyledTableCell align='left'>
-                                    {app.name}
-                                </StyledTableCell>
-                                <StyledTableCell align='left'>{app.owner}</StyledTableCell>
-                                <StyledTableCell align='left'>
-                                    <EditApplication
-                                        dataRow={app}
-                                        updateList={apiCall}
-                                        {...editComponentProps}
-                                    />
-                                </StyledTableCell>
-                            </StyledTableRow>
-                        );
-                    })}
+                    return (
+                        <StyledTableRow className={classes.tableRow} key={app.applicationId}>
+                            <StyledTableCell align='left'>
+                                {app.name}
+                            </StyledTableCell>
+                            <StyledTableCell align='left'>{app.owner}</StyledTableCell>
+                            <StyledTableCell align='left'>
+                                <EditApplication
+                                    dataRow={app}
+                                    updateList={apiCall}
+                                    {...editComponentProps}
+                                />
+                            </StyledTableCell>
+                        </StyledTableRow>
+                    );
+                })}
             </TableBody>
         );
     }
@@ -167,4 +160,3 @@ AppsTableContent.propTypes = {
     apps: PropTypes.instanceOf(Map).isRequired,
 };
 export default withStyles(styles)(AppsTableContent);
-
