@@ -238,7 +238,11 @@ class SubscriptionTableData extends React.Component {
                 <TableCell>{apiInfo.lifeCycleStatus}</TableCell>
                 <TableCell>{throttlingPolicy}</TableCell>
                 <TableCell>{status}</TableCell>
-                <TableCell>    
+                <TableCell>
+                    <ScopeValidation
+                        resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
+                        resourceMethod={resourceMethods.PUT}
+                    >  
                         <Button
                             color="default"
                             onClick={this.handleRequestOpenEditMenu}
@@ -248,7 +252,8 @@ class SubscriptionTableData extends React.Component {
                                 id='Applications.Details.SubscriptionTableData.edit.text'
                                 defaultMessage='Edit'
                             />
-                        </Button>               
+                        </Button>  
+                    </ScopeValidation>               
                         <Dialog open={openMenuEdit} transition={Slide}>
                             <DialogTitle><FormattedMessage
                                         id='Applications.Details.SubscriptionTableData.update.subscription'
