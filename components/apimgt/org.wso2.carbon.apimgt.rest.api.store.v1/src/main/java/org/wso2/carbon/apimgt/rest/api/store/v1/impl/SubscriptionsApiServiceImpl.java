@@ -317,7 +317,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
             //  throw an APIMgtAuthorizationFailedException with the reason as the message
-            RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper, body.getThrottlingPolicy());
+            RestAPIStoreUtils.checkSubscriptionAllowed(apiTypeWrapper, body.getRequestedThrottlingPolicy());
 
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 

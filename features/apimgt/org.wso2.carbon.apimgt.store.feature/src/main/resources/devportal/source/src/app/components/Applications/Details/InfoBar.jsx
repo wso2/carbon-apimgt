@@ -278,12 +278,11 @@ class InfoBar extends React.Component {
         promisedApplication
             .then((response) => {
                 this.setState({ applicationOwner: response.obj.owner });
-                const promisedPolicy = client.getTierByName(response.obj.throttlingPolicy, 'application');
-                return Promise.all([response, promisedPolicy]);
+                return Promise.all([response]);
             })
             .then((response) => {
                 const [application, tier] = response.map(data => data.obj);
-                this.setState({ application, tierDescription: tier.description });
+                this.setState({ application });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
