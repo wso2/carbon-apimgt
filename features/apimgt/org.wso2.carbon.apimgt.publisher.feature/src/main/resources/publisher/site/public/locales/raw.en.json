@@ -2478,6 +2478,9 @@
   "Apis.Details.Resources.components.AddOperation.operation.target.or.verb.cannot.be.empty.warning": {
     "defaultMessage": "Operation target or operation verb(s) can't be empty"
   },
+  "Apis.Details.Resources.components.AddOperation.operation.topic.cannot.have.path.params.warning": {
+    "defaultMessage": "WebSub topic can't have path parameters"
+  },
   "Apis.Details.Resources.components.AddOperation.option": {
     "defaultMessage": "OPTIONS"
   },
