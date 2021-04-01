@@ -102,8 +102,7 @@ import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Aggregates.match;
 import static com.mongodb.client.model.Aggregates.project;
 import static com.mongodb.client.model.Aggregates.unwind;
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Projections.include;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.pull;
@@ -285,7 +284,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         int limit = offset;
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
-        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getPublisherSearchAggregate(searchQuery, skip, limit))
+        MongoCursor<MongoDBPublisherAPI> aggregate = collection.aggregate(getPublisherSearchAggregate(searchQuery, skip, limit, org))
                 .cursor();
         PublisherAPISearchResult publisherAPISearchResult = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
@@ -309,7 +308,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
         MongoCursor<MongoDBPublisherAPI> aggregate = collection
-                .aggregate(getPublisherSearchAggregate(searchQuery, skip, limit)).cursor();
+                .aggregate(getPublisherSearchAggregate(searchQuery, skip, limit, org)).cursor();
         PublisherContentSearchResult contentSearchResult = new PublisherContentSearchResult();
         List<SearchContent> content = new ArrayList<>();
         while (aggregate.hasNext()) {
@@ -332,7 +331,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
         MongoCursor<MongoDBDevPortalAPI> aggregate = collection
-                .aggregate(getDevportalSearchAggregate(searchQuery, skip, limit)).cursor();
+                .aggregate(getDevportalSearchAggregate(searchQuery, skip, limit, org)).cursor();
         DevPortalContentSearchResult contentSearchResult = new DevPortalContentSearchResult();
         List<SearchContent> content = new ArrayList<>();
         while (aggregate.hasNext()) {
@@ -347,7 +346,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return contentSearchResult;
     }
 
-    private Document buildSearchAggregate(String query) {
+    private Document buildSearchAggregate(String query, Organization organization) {
         String searchQuery;
         List<Document> mustArray = new ArrayList();
         if (query.contains(" ")) {
@@ -356,7 +355,11 @@ public class MongoDBPersistenceImpl implements APIPersistence {
                 List<String> paths = new ArrayList<>();
                 if (area.contains(":")) {
                     String[] queryArray = area.split(":");
-                    paths.addAll(getSearchField(queryArray[0]));
+                    List<String> fieldList = getSearchField(queryArray[0]);
+                    if (fieldList.isEmpty()) {
+                        fieldList = getAdditionalPropertySearchField(queryArray[0], organization);
+                    }
+                    paths.addAll(fieldList);
                     searchQuery = "*" + queryArray[1] + "*";
                 } else {
                     searchQuery = "*" + query + "*";
@@ -374,14 +377,22 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             List<String> paths = new ArrayList<>();
             if (query.contains(":")) {
                 String[] queryArray = query.split(":");
-                paths.addAll(getSearchField(queryArray[0]));
+                List<String> fieldList = getSearchField(queryArray[0]);
+                if (fieldList.isEmpty()) {
+                    fieldList = getAdditionalPropertySearchField(queryArray[0], organization);
+                }
+                paths.addAll(fieldList);
                 searchQuery = "*" + queryArray[1] + "*";
             } else {
                 searchQuery = "*" + query + "*";
                 if (query == "") {
                     searchQuery = "*";
                 }
-                paths.addAll(getSearchField("content"));
+                List<String> fieldList = getSearchField("content");
+                if (fieldList.isEmpty()) {
+                    fieldList = getAdditionalPropertySearchField("content", organization);
+                }
+                paths.addAll(fieldList);
             }
             Document wildCard = new Document();
             Document wildCardBody = new Document();
@@ -402,8 +413,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return search;
     }
 
-    private List<Document> getPublisherSearchAggregate(String query, int skip, int limit) {
-        Document searchDoc = buildSearchAggregate(query);
+    private List<Document> getPublisherSearchAggregate(String query, int skip, int limit, Organization organization) {
+        Document searchDoc = buildSearchAggregate(query, organization);
         Document skipDoc = new Document();
         Document limitDoc = new Document();
 
@@ -429,6 +440,12 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         list.add(skipDoc);
         list.add(limitDoc);
         return list;
+    }
+
+    private List<String> getAdditionalPropertySearchField(String queryCriteria, Organization organization) {
+        List<String> fieldList = new ArrayList<>();
+
+        return  fieldList;
     }
 
     private List<String> getSearchField(String queryCriteria) {
@@ -500,8 +517,8 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         return fieldList;
     }
 
-    private List<Document> getDevportalSearchAggregate(String query, int skip, int limit) {
-        Document searchDoc = buildSearchAggregate(query);
+    private List<Document> getDevportalSearchAggregate(String query, int skip, int limit, Organization organization) {
+        Document searchDoc = buildSearchAggregate(query, organization);
         Document skipDoc = new Document();
         Document limitDoc = new Document();
 
@@ -549,7 +566,7 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         int limit = offset;
         MongoCollection<MongoDBDevPortalAPI> collection = MongoDBConnectionUtil.getDevPortalCollection(ctx.getOrganization().getName());
         long totalCount = collection.countDocuments();
-        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getDevportalSearchAggregate(searchQuery, skip, limit))
+        MongoCursor<MongoDBDevPortalAPI> aggregate = collection.aggregate(getDevportalSearchAggregate(searchQuery, skip, limit, org))
                 .cursor();
         DevPortalAPISearchResult devPortalAPISearchResult = new DevPortalAPISearchResult();
         List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
