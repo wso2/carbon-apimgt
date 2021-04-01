@@ -139,7 +139,7 @@ function Overview(props) {
                                         <Typography variant='caption' gutterBottom align='left'>
                                             <FormattedMessage
                                                 id='Applications.Details.Overview.description'
-                                                defaultMessage='Descriptioerrorn'
+                                                defaultMessage='Description'
                                             />
                                         </Typography>
                                     </span>
@@ -170,7 +170,7 @@ function Overview(props) {
                                             <TableCell>
                                                 {application.throttlingPolicy}
                                                 {' '}
-                                                <span className= {tierDisabled ? classes.disabledTier: ""}>{`(${ tierDescription})`}</span>
+                                                <span className= {tierDisabled ? classes.disabledTier: ""}>{`(${tierDescription})`}</span>
                                             </TableCell>
                                         )}
                                 </TableRow>
