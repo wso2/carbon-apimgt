@@ -142,9 +142,9 @@ export default function AsyncApiUI(props) {
     function generateSSESubscriptionCommand(topic) {
         const token = generateAccessToken();
         if (topic.name.includes('*')) {
-            return `curl -X POST '${endPoint}' -H 'Authorization: ${token}'`;
+            return `curl -X GET '${endPoint}' -H 'Authorization: ${token}'`;
         } else {
-            return `curl -X POST '${endPoint}/${getTopicName(topic)}' -H 'Authorization: ${token}'`;
+            return `curl -X GET '${endPoint}/${getTopicName(topic)}' -H 'Authorization: ${token}'`;
         }
     }
 
