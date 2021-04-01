@@ -144,8 +144,9 @@ class CommentOptions extends React.Component {
         const {
             classes, comment, editIndex, index, theme,
         } = this.props;
-        const canDelete = (comment.createdBy === AuthManager.getUser().name)
-            || (AuthManager.getUser().name === theme.custom.adminRole);
+        const username = (AuthManager.getUser() && AuthManager.getUser().name);
+        const canDelete = (comment.createdBy === username)
+            || (username === theme.custom.adminRole);
         return (
             <Grid container className={classes.verticalSpace} key={comment.id}>
                 {/* only the comment owner or admin can delete a comment */}
@@ -167,7 +168,7 @@ class CommentOptions extends React.Component {
 
                     ]}
 
-                {comment.parentCommentId === null && [
+                {comment.parentCommentId === null && AuthManager.getUser() && [
                     <Grid item key='key-reply'>
                         <Button
                             size='small'
