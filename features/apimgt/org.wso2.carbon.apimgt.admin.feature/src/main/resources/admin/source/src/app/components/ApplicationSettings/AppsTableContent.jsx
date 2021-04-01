@@ -74,7 +74,9 @@ const StyledTableCell = withStyles((theme) => ({
         fontSize: 14,
     },
     root: {
-        padding: `0 0 0  ${theme.spacing(2)}px`,
+        '&:first-child': {
+            paddingLeft: theme.spacing(2),
+        },
     },
 }))(TableCell);
 
