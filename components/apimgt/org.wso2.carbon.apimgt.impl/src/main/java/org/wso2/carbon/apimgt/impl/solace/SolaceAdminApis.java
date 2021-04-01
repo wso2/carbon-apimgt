@@ -102,6 +102,19 @@ public class SolaceAdminApis {
         return null;
     }
 
+    // check existence of API in solace
+    public HttpResponse registeredAPIGet(String organization, String apiTitle) {
+        HttpClient httpClient = HttpClients.createDefault();
+        HttpGet request = new HttpGet(baseUrl + "/" + organization + "/" + apiTitle);
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+        try {
+            return httpClient.execute(request);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // check API product in Solace
     public HttpResponse apiProductGet(String organization, String apiProductName) {
         HttpClient httpClient = HttpClients.createDefault();

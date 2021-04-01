@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -463,6 +463,10 @@ public class APIManagerConfiguration {
                     thirdPartyEnvironment.setProvider(thirdPartyEnvironmentElem.getAttributeValue(new QName("provider")));
                     thirdPartyEnvironment.setName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName("EnvironmentName")).getText());
                     thirdPartyEnvironment.setOrganization(thirdPartyEnvironmentElem.getFirstChildWithName(new QName("Organization")).getText());
+                    thirdPartyEnvironment.setDisplayName(thirdPartyEnvironmentElem.getFirstChildWithName(new QName("DisplayName")).getText());
+                    if (StringUtils.isEmpty(thirdPartyEnvironment.getDisplayName())) {
+                        thirdPartyEnvironment.setDisplayName(thirdPartyEnvironment.getName());
+                    }
                     OMElement description =
                             thirdPartyEnvironmentElem.getFirstChildWithName(new QName("Description"));
                     if (description != null) {

@@ -23,6 +23,7 @@ public class ThirdPartyEnvironmentDTO   {
     private String name = null;
     private String organization = null;
     private String provider = null;
+    private String displayName = null;
 
   /**
    **/
@@ -78,6 +79,23 @@ public class ThirdPartyEnvironmentDTO   {
     this.provider = provider;
   }
 
+  /**
+   **/
+  public ThirdPartyEnvironmentDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "default", value = "")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -90,12 +108,13 @@ public class ThirdPartyEnvironmentDTO   {
     ThirdPartyEnvironmentDTO thirdPartyEnvironment = (ThirdPartyEnvironmentDTO) o;
     return Objects.equals(name, thirdPartyEnvironment.name) &&
         Objects.equals(organization, thirdPartyEnvironment.organization) &&
-        Objects.equals(provider, thirdPartyEnvironment.provider);
+        Objects.equals(provider, thirdPartyEnvironment.provider) &&
+        Objects.equals(displayName, thirdPartyEnvironment.displayName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, organization, provider);
+    return Objects.hash(name, organization, provider, displayName);
   }
 
   @Override
@@ -106,6 +125,7 @@ public class ThirdPartyEnvironmentDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    organization: ").append(toIndentedString(organization)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("}");
     return sb.toString();
   }

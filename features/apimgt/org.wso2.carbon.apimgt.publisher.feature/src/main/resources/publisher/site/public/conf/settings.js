@@ -41,6 +41,9 @@ const AppConfig = {
         X509: 'X509',
         API_KEY: 'API Key',
     },
+    apis: {
+        alwaysShowDeploySampleButton: true,
+    },
 };
 
 if (typeof module !== 'undefined') {

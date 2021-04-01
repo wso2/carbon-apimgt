@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>9.0.89-SNAPSHOT</version>
+        <version>9.0.96-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -60,5 +60,6 @@
         <module>org.wso2.carbon.apimgt.rest.api.publisher.v1.common</module>
         <module>org.wso2.carbon.apimgt.common.gateway</module>
         <module>org.wso2.carbon.apimgt.common.jms</module>
+        <module>org.wso2.carbon.apimgt.common.analytics</module>
     </modules>
 </project>

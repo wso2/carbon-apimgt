@@ -9372,19 +9372,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         boolean deployedToSolace = false;
         boolean solaceBrokerAPI = false;
-        final String solaceProviderName = "Solace Message Broker";
         Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
         Set<String> environmentsToAddOtherThanThirdParty = new HashSet<>();
         if (environmentsToAdd.size() > 0) {
             for (String environment : environmentsToAdd) {
-                /*if (StringUtils.equalsIgnoreCase(solaceProviderName, environment)) {
-                    try {
-                        solaceBrokerAPI = true;
-                        deployedToSolace = deployToSolaceBroker(api);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }*/
                 if (thirdPartyEnvironments.containsKey(environment)) {
                     if ("solace".equalsIgnoreCase(thirdPartyEnvironments.get(environment).getProvider())) {
                         solaceBrokerAPI = true;
@@ -9414,24 +9405,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayManager.deployToGateway(api, tenantDomain, environmentsToAddOtherThanThirdParty);
         }
 
-        /*if (solaceBrokerAPI && deployedToSolace) {
-            // apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-            // api.getEnvironments().add(solaceProviderName);
-            // try {
-            //    updateAPI(api);
-            //} catch (FaultGatewaysException e) {
-            //    e.printStackTrace();
-            // }
-        } else if (solaceBrokerAPI && !deployedToSolace) {
-            throw new APIManagementException("Error while deploying API in Solace");
-        } else if (!solaceBrokerAPI) {
-            GatewayArtifactsMgtDAO.getInstance()
-                    .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
-            apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
-            if (environmentsToAdd.size() > 0) {
-                gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
-            }
-        }*/
         String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
         String defaultVersion = getDefaultVersion(apiIdentifier);
         apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
@@ -9911,265 +9884,73 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
         String[] apiContextParts = api.getContext().split("/");
         String apiNameWithContext = api.getId().getName() + "-" + apiContextParts[1] + "-" + apiContextParts[2];
-        /*String baseUrl = "http://ec2-18-157-186-227.eu-central-1.compute.amazonaws.com:3000/v1/";
-        String urlForOrganizations = baseUrl + "/organizations";
-        HttpClient httpClient = HttpClients.createDefault();
-        HttpClient httpClient2 = HttpClients.createDefault();
-
-        //set authorization String
-        String encoding = Base64.getEncoder().encodeToString(("wso2:hzxVWwFQs2EEK5kK").getBytes());
-
-        String organization = "WSO2";
-        String env = "devEnv";
-
-        // 1. Check whether the organization is available
-        //HttpGet request1 = new HttpGet(urlForOrganizations + "/" + organization);
-        //request1.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding );
-        //HttpResponse response1 = httpClient.execute(request1);
-
-        HttpResponse response2 = null;
-        HttpResponse response3 = null;
-        HttpResponse response4 = null;
-
-        if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-
-            // 2. check whether the environment is available
-            HttpGet request2 = new HttpGet(baseUrl + "/" + organization + "/" + "environments" + "/" + env);
-            request2.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-            response2 = httpClient.execute(request2);
-
-            if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-
-                // 3. create the api in solace broker
-                HttpPut request3 = new HttpPut(baseUrl + "/" + organization + "/apis/" + aai20Document.info.title);
-                request3.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-                request3.setHeader(HttpHeaders.CONTENT_TYPE, "text/plain");
-                //convert json to yaml
-                JsonNode jsonNodeTree = new ObjectMapper().readTree(apiDefinition);
-                String jsonAsYaml = new YAMLMapper().writeValueAsString(jsonNodeTree);
-                //add definition to request body
-                StringEntity params = new StringEntity(jsonAsYaml);
-                request3.setEntity(params);
-                //response
-                response3 = httpClient2.execute(request3);
-
-                if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-
-                    // 4. create the API product in solace broker
-                    HttpPost request4 = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
-                    request4.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-                    request4.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-                    //setRequestBody
-                    org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, env, apiNameWithContext);
-                    StringEntity params2 = new StringEntity(requestBody.toString());
-                    request4.setEntity(params2);
-                    //response
-                    response4 = httpClient2.execute(request4);
-
-                    if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-                        return true;
-                    } else {
-                        throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.getStatusLine().getReasonPhrase());
-                    }
-
-                } else {
-                    throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine().getReasonPhrase());
-                }
-
-            } else {
-                throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
-            }
-        }*/
-
         SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
 
         // check availability of environment
         HttpResponse response1 = solaceAdminApis.environmentGET(environment.getOrganization(), environment.getName());
-        if (response1 != null) {
-
-            if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-
-                log.info("environment '" + environment.getName() + "' found in Solace broker");
-                // register the API in Solace Broker
-                HttpResponse response2 = solaceAdminApis.registerAPI(environment.getOrganization(), aai20Document.info.title, apiDefinition);
-
-                if (response2 != null) {
-
+        if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            log.info("environment '" + environment.getName() + "' found in Solace broker");
+            // check api product already exists in solace
+            HttpResponse response4 = solaceAdminApis.apiProductGet(environment.getOrganization(), apiNameWithContext);
+            if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                // api Product Already found in solace. No need to deploy again into Solace
+                log.info("API product '" +apiNameWithContext+ "' already found in Solace. No need to create again");
+                return true;
+            } else if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                // api product not found in solace. check existence of registered API in solace
+                log.info("API product '" +apiNameWithContext+ "' not found in Solace. Checking the existence of API");
+                HttpResponse response5 = solaceAdminApis.registeredAPIGet(environment.getOrganization(), aai20Document.info.title);
+                if (response5.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    log.info("API '" +aai20Document.info.title+ "' already registered in Solace. Creating API product using registered API");
+                    // create API product only
+                    HttpResponse response3 = solaceAdminApis.createAPIProduct(environment.getOrganization(), environment.getName(), aai20Document, apiNameWithContext);
+                    if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                        log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
+                        return true;
+                    } else {
+                        log.error("Error while creating API product in Solace");
+                        throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine().getReasonPhrase());
+                    }
+                } else if (response5.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                    log.info("API '" +aai20Document.info.title+ "' not registered in Solace. Creating both API and API product");
+                    // register the API in Solace Broker
+                    HttpResponse response2 = solaceAdminApis.registerAPI(environment.getOrganization(), aai20Document.info.title, apiDefinition);
                     if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-
                         log.info("API '" + aai20Document.info.title + "' has been registered in Solace broker");
                         //create API Product in Solace broker
                         HttpResponse response3 = solaceAdminApis.createAPIProduct(environment.getOrganization(), environment.getName(), aai20Document, apiNameWithContext);
-
-                        if (response3 != null) {
-
-                            if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-
-                                log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
-                                return true;
-
-                            } else {
-                                log.error("Error while creating API product in Solace");
-                                throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
-                            }
-
+                        if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                            log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
+                            return true;
                         } else {
-                            throw new NullPointerException();
+                            log.error("Error while creating API product in Solace");
+                            // delete registered API in solace
+                            HttpResponse response6 = solaceAdminApis.deleteRegisteredAPI(environment.getOrganization(), aai20Document.info.title);
+                            if (response6.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+                                log.info("Successfully deleted registered API '" +aai20Document.info.title+ "' from Solace");
+                            } else {
+                                log.error("Error while deleting registered API '" + aai20Document.info.title + "' in Solace");
+                                throw new HttpResponseException(response6.getStatusLine().getStatusCode(), response6.getStatusLine().getReasonPhrase());
+                            }
+                            throw new HttpResponseException(response3.getStatusLine().getStatusCode(), response3.getStatusLine().getReasonPhrase());
                         }
-
                     } else {
                         log.error("Error while registering API in Solace - '" + aai20Document.info.title + "'");
                         throw new HttpResponseException(response2.getStatusLine().getStatusCode(), response2.getStatusLine().getReasonPhrase());
                     }
-
                 } else {
-                    throw new NullPointerException();
+                    log.error("Error while finding API '" +aai20Document.info.title+ "' in Solace");
+                    throw new HttpResponseException(response5.getStatusLine().getStatusCode(), response5.getStatusLine().getReasonPhrase());
                 }
-
             } else {
-                log.error("Cannot find specified Solace environment - '" + environment.getName() + "'");
-                throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().getReasonPhrase());
+                log.error("Error while finding API product '" +apiNameWithContext+ "' in Solace");
+                throw new HttpResponseException(response4.getStatusLine().getStatusCode(), response4.getStatusLine().getReasonPhrase());
             }
-
         } else {
-            throw new NullPointerException();
+            log.error("Cannot find specified Solace environment - '" + environment.getName() + "'");
+            throw new HttpResponseException(response1.getStatusLine().getStatusCode(), response1.getStatusLine().getReasonPhrase());
         }
-
     }
-
-    /*private org.json.JSONObject buildAPIProductRequestBody(Aai20Document aai20Document, String environment, String apiNameWithContext) throws JsonProcessingException {
-        org.json.JSONObject requestBody = new org.json.JSONObject();
-
-        org.json.JSONArray apiName = new org.json.JSONArray();
-        apiName.put(aai20Document.info.title);
-        requestBody.put("apis", apiName);
-
-        requestBody.put("approvalType", "manual");
-        if (aai20Document.info.description != null) {
-            requestBody.put("description", aai20Document.info.description);
-        } else {
-            requestBody.put("description", aai20Document.info.title);
-        }
-        requestBody.put("displayName", aai20Document.info.title);
-        requestBody.put("pubResources", new org.json.JSONArray());
-        requestBody.put("subResources", new org.json.JSONArray());
-        requestBody.put("name", apiNameWithContext);
-
-        org.json.JSONArray environments = new org.json.JSONArray();
-        environments.put(environment);
-        requestBody.put("environments", environments);
-
-        HashSet<String> parameters = new HashSet<>();
-        for (AaiChannelItem channel : aai20Document.getChannels()) {
-            parameters.addAll(channel.parameters.keySet());
-        }
-        org.json.JSONArray attributes = new org.json.JSONArray();
-        for (String parameter : parameters) {
-            AaiParameter parameterObj = aai20Document.components.parameters.get(parameter);
-            if (parameterObj.schema != null) {
-                ObjectNode schemaNode = (ObjectNode) parameterObj.schema;
-                org.json.JSONObject schemaJson = new org.json.JSONObject(schemaNode.toString());
-                if (schemaJson.has("enum")) {
-                    org.json.JSONArray enumArray = schemaJson.getJSONArray("enum");
-                    List<String> enumList = new ArrayList<>();
-                    for (int i = 0; i < enumArray.length(); i++) {
-                        enumList.add(enumArray.getString(i));
-                    }
-                    //List<Object> enumList = enumArray.toList();
-                    StringBuilder enumStringBuilder = new StringBuilder();
-                    for (String value : enumList) {
-                        enumStringBuilder.append(value).append(", ");
-                    }
-                    String enumString = enumStringBuilder.substring(0, enumStringBuilder.length()-2);
-
-                    org.json.JSONObject attributeObject = new org.json.JSONObject();
-                    attributeObject.put("name", parameter);
-                    attributeObject.put("value", enumString);
-                    attributes.put(attributeObject);
-                }
-            }
-        }
-        requestBody.put("attributes", attributes);
-
-        HashSet<String> protocolsHashSet = new HashSet<>();
-        for (AaiChannelItem channel : aai20Document.getChannels()) {
-            protocolsHashSet.addAll(getProtocols(channel));
-        }
-        org.json.JSONArray protocols = new org.json.JSONArray();
-        for (String protocol : protocolsHashSet) {
-            org.json.JSONObject protocolObject = new org.json.JSONObject();
-            protocolObject.put("name", protocol);
-            protocolObject.put("version", getProtocolVersion(protocol));
-            protocols.put(protocolObject);
-        }
-        requestBody.put("protocols", protocols);
-
-        return requestBody;
-    }
-
-    private HashSet<String> getProtocols (AaiChannelItem channel) {
-
-        HashSet<String> protocols = new HashSet<>();
-
-        if (channel.subscribe != null) {
-            if (channel.subscribe.bindings != null) {
-                protocols.addAll(getProtocolsFromBindings(channel.subscribe.bindings));
-            }
-        }
-        if (channel.publish != null) {
-            if (channel.publish.bindings != null) {
-                protocols.addAll(getProtocolsFromBindings(channel.publish.bindings));
-            }
-        }
-
-        return protocols;
-    }
-
-    private HashSet<String> getProtocolsFromBindings(AaiOperationBindings bindings) {
-
-        HashSet<String> protocolsFromBindings = new HashSet<>();
-
-        if (bindings.http != null) { protocolsFromBindings.add("http"); }
-        if (bindings.ws != null) { protocolsFromBindings.add("ws"); }
-        if (bindings.kafka != null) { protocolsFromBindings.add("kafka"); }
-        if (bindings.amqp != null) { protocolsFromBindings.add("amqp"); }
-        if (bindings.amqp1 != null) { protocolsFromBindings.add("amqp1"); }
-        if (bindings.mqtt != null) { protocolsFromBindings.add("mqtt"); }
-        if (bindings.mqtt5 != null) { protocolsFromBindings.add("mqtt5"); }
-        if (bindings.nats != null) { protocolsFromBindings.add("nats"); }
-        if (bindings.jms != null) { protocolsFromBindings.add("jms"); }
-        if (bindings.sns != null) { protocolsFromBindings.add("sns"); }
-        if (bindings.sqs != null) { protocolsFromBindings.add("sqs"); }
-        if (bindings.stomp != null) { protocolsFromBindings.add("stomp"); }
-        if (bindings.redis != null) { protocolsFromBindings.add("redis"); }
-
-        if (bindings.hasExtraProperties()) {
-            protocolsFromBindings.addAll(bindings.getExtraPropertyNames());
-        }
-
-        return protocolsFromBindings;
-    }
-
-    private String getProtocolVersion(String protocol) {
-        HashMap<String, String> protocolsWithVersions = new HashMap<>();
-        protocolsWithVersions.put("http", "1.1");
-        protocolsWithVersions.put("mqtt", "3.1.1");
-        //protocolsWithVersions.put("mqtt5", "5.0");
-        protocolsWithVersions.put("amqp", "1.0.0");
-        protocolsWithVersions.put("amqps", "1.0.0");
-        //protocolsWithVersions.put("amqp1", "1.0");
-        protocolsWithVersions.put("secure-mqtt", "3.1.1");
-        protocolsWithVersions.put("ws-mqtt", "3.1.1");
-        protocolsWithVersions.put("wss-mqtt", "3.1.1");
-        protocolsWithVersions.put("jms", "1.1");
-        protocolsWithVersions.put("https", "1.1");
-        protocolsWithVersions.put("smf", "smf");
-        protocolsWithVersions.put("smfs", "smfs");
-        if (protocolsWithVersions.get(protocol) != null) {
-            return protocolsWithVersions.get(protocol);
-        }
-        return "";
-    }*/
 
     private boolean undeployFromSolaceBroker(API api, ThirdPartyEnvironment environment) throws HttpResponseException {
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
