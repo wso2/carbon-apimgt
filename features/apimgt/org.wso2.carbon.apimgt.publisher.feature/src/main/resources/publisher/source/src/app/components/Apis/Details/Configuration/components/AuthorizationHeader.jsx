@@ -27,6 +27,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 import APIValidation from 'AppData/APIValidation';
+import { useRuntimeConfigurationContext } from '../RuntimeConfigurationContext';
 
 /**
  *
@@ -35,17 +36,6 @@ import APIValidation from 'AppData/APIValidation';
  * @param {*} props
  * @returns
  */
-
-/* function validateHeader(field, value) {
-        const headerValidity = APIValidation.authorizationHeader.required().validate(value, { abortEarly: false }).error;
-        if (headerValidity === null) {
-            if (nameValidity === null) {
-                setIsHeaderNameValid(true);
-            }
-        } else {
-            setIsHeaderNameValid(false);
-        }
-    } */
 
 export default function AuthorizationHeader(props) {
     const { api, configDispatcher } = props;
@@ -71,14 +61,19 @@ export default function AuthorizationHeader(props) {
         configDispatcher({ action: 'authorizationHeader', value: '' });
     }
 
+    const { setDisabled } = useRuntimeConfigurationContext();
+
     function validateHeader(value) {
-            const headerValidity = APIValidation.authorizationHeader.required().validate(value, { abortEarly: false }).error;
-            if (headerValidity === null) {
-                setIsHeaderNameValid(true);
-            } else {
-                setIsHeaderNameValid(false);
-            }
+        const headerValidity = APIValidation.authorizationHeader.required()
+            .validate(value, { abortEarly: false }).error;
+        if (headerValidity === null) {
+            setIsHeaderNameValid(true);
+            setDisabled(false);
+        } else {
+            setIsHeaderNameValid(false);
+            setDisabled(true);
         }
+    }
 
     return (
         <Grid container spacing={1} alignItems='center'>
@@ -93,13 +88,15 @@ export default function AuthorizationHeader(props) {
                         />
                     )}
                     value={hasResourceWithSecurity ? (api.authorizationHeader || ' ') : ''}
-                    error={ !isHeaderNameValid }
+                    error={!isHeaderNameValid}
                     helperText={
-                        (!isHeaderNameValid) &&
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.AuthHeader.helper.text'
-                            defaultMessage='Authorization header name cannot contain spaces or special characters'
-                        />
+                        (!isHeaderNameValid)
+                        && (
+                            <FormattedMessage
+                                id='Apis.Details.Configuration.AuthHeader.helper.text'
+                                defaultMessage='Authorization header name cannot contain spaces or special characters'
+                            />
+                        )
                     }
                     InputProps={{
                         id: 'itest-id-headerName-input',
