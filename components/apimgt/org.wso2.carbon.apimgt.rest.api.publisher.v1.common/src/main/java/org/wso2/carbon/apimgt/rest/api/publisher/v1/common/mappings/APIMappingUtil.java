@@ -319,7 +319,7 @@ public class APIMappingUtil {
             model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
-        if (dto.getGatewayEnvironments().size() > 0) {
+        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
             List<String> gatewaysList = dto.getGatewayEnvironments();
             model.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
         } else if (dto.getGatewayEnvironments() != null) {
@@ -2350,7 +2350,7 @@ public class APIMappingUtil {
         String transports = StringUtils.join(dto.getTransport(), ',');
         product.setTransports(transports);
 
-        if (dto.getGatewayEnvironments().size() > 0) {
+        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
             List<String> gatewaysList = dto.getGatewayEnvironments();
             product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
         } else if (dto.getGatewayEnvironments() != null) {
