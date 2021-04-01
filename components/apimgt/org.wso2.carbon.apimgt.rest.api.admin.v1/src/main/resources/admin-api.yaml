@@ -1540,6 +1540,20 @@ paths:
           users **only at a migration process**.
         schema:
           type: string
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+          enum:
+            - name
+            - owner
+      - name: sortOrder
+        in: query
+        schema:
+          type: string
+          enum:
+            - asc
+            - desc
       responses:
         200:
           description: |

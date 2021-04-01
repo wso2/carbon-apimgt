@@ -84,19 +84,22 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsGet(String user, Integer limit, Integer offset, String accept,
-                                    String name, String appTenantDomain, MessageContext messageContext) {
-
+    public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String applicationName,
+                                    String tenantDomain, String sortBy, String sortOrder,
+                                    MessageContext messageContext) {
         // To store the initial value of the user (specially if it is null or empty)
         String givenUser = user;
-
         // if no username provided user associated with access token will be used
         if (user == null || StringUtils.isEmpty(user)) {
             user = RestApiCommonUtil.getLoggedInUsername();
+            givenUser = StringUtils.EMPTY;
         }
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        sortOrder = sortOrder != null ? sortOrder : RestApiConstants.DEFAULT_SORT_ORDER;
+        sortBy = getApplicationsSortByField(sortBy);
+        applicationName = applicationName != null ? applicationName: StringUtils.EMPTY;
 
         ApplicationListDTO applicationListDTO;
         try {
@@ -114,37 +117,35 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 // If no user is passed, get the applications for the tenant (not only for the user)
                 APIAdmin apiAdmin = new APIAdminImpl();
                 int tenantId = APIUtil.getTenantId(user);
-                if ((givenUser == null || StringUtils.isEmpty(givenUser)) &&
-                        (name == null || StringUtils.isEmpty(name))) {
-                    allMatchedApps = apiAdmin.getApplicationsByTenantIdWithPagination(tenantId, 0, offset, limit,
-                            "", "", APIConstants.APPLICATION_NAME, RestApiConstants
-                                    .DEFAULT_SORT_ORDER).toArray(new Application[0]);
-                    allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, StringUtils.EMPTY, null);
-                } else if (givenUser != null && (name == null || StringUtils.isEmpty(name))) {
-                    allMatchedApps = apiConsumer.getApplicationsByOwner(user, limit, offset);
-                    allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, user, null);
-                } else {
-                    allMatchedApps = apiConsumer.getApplicationsWithPagination(new Subscriber(user), "",
-                            offset, limit, name, APIConstants.APPLICATION_NAME, RestApiConstants.DEFAULT_SORT_ORDER);
-                    allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, user, null);
-                }
+                allMatchedApps = apiAdmin.getApplicationsWithPagination(user, givenUser, tenantId, limit, offset,
+                        applicationName, sortBy, sortOrder);
+                allApplicationsCount = apiAdmin.getApplicationsCount(tenantId, givenUser, applicationName);
             } else { // flow at migration process
-                if (StringUtils.isEmpty(appTenantDomain)) {
-                    appTenantDomain = MultitenantUtils.getTenantDomain(user);
+                if (StringUtils.isEmpty(tenantDomain)) {
+                    tenantDomain = MultitenantUtils.getTenantDomain(user);
                 }
-                RestApiUtil.handleMigrationSpecificPermissionViolations(appTenantDomain,
+                RestApiUtil.handleMigrationSpecificPermissionViolations(tenantDomain,
                         RestApiCommonUtil.getLoggedInUsername());
                 APIAdmin apiAdmin = new APIAdminImpl();
-                allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(appTenantDomain);
+                allMatchedApps = apiAdmin.getAllApplicationsOfTenantForMigration(tenantDomain);
             }
-            //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps);
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, limit, offset, allApplicationsCount);
-
             return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving applications of the user " + user, e, log);
         }
         return null;
+    }
+
+    private static String getApplicationsSortByField(String sortBy) {
+        String updatedSortBy = StringUtils.EMPTY;
+        // Default sortBy field is name
+        if (sortBy == null || "name".equals(sortBy)) {
+            updatedSortBy = "NAME";
+        } else if ("owner".equals(sortBy)) {
+            updatedSortBy = "CREATED_BY";
+        }
+        return updatedSortBy;
     }
 }

@@ -1055,7 +1055,7 @@ public class SQLConstants {
             "   SUB.TENANT_ID=?" +
             " And "+
             "    ( SUB.CREATED_BY like ?" +
-            " OR APP.NAME like ? )";
+            " AND APP.NAME like ? )";
 
     public static final String GET_APPLICATION_BY_SUBSCRIBERID_AND_NAME_SQL =
             " SELECT " +
