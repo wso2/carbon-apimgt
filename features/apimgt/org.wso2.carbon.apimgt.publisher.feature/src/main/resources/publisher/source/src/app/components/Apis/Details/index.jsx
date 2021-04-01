@@ -101,6 +101,7 @@ const styles = (theme) => ({
         left: 0,
         top: 0,
         overflowY: 'auto',
+        overflowX: 'hidden',
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
@@ -899,21 +900,21 @@ class Details extends Component {
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
                             {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                                && api.lifeCycleStatus !== 'RETIRED' && (
-                                <div>
-                                    <Divider />
-                                    <Typography className={classes.headingText}>Test</Typography>
-                                    <LeftMenuItem
-                                        route='test-console'
-                                        text={intl.formatMessage({
-                                            id: 'Apis.Details.index.Tryout.menu.name',
-                                            defaultMessage: 'Try Out',
-                                        })}
-                                        to={pathPrefix + 'test-console'}
-                                        iconText='test'
-                                    />
-                                </div>
-                            )}
+                                && (
+                                    <div>
+                                        <Divider />
+                                        <Typography className={classes.headingText}>Test</Typography>
+                                        <LeftMenuItem
+                                            route='test-console'
+                                            text={intl.formatMessage({
+                                                id: 'Apis.Details.index.Tryout.menu.name',
+                                                defaultMessage: 'Try Out',
+                                            })}
+                                            to={pathPrefix + 'test-console'}
+                                            iconText='test'
+                                        />
+                                    </div>
+                                )}
                             {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
                                 <div>
                                     <Divider />

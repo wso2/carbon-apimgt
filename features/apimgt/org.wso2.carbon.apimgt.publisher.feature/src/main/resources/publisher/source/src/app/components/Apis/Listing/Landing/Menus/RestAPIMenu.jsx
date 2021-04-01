@@ -19,18 +19,23 @@ const RestAPIMenu = (props) => {
     const [showSampleDeploy, setShowSampleDeploy] = useState(false);
 
     useEffect(() => {
-        const composeQuery = '?query=name:PizzaShackAPI version:1.0 context:pizzashack';
-        const composeQueryJSON = queryString.parse(composeQuery);
-        composeQueryJSON.limit = 1;
-        composeQueryJSON.offset = 0;
-        API.search(composeQueryJSON).then((resp) => {
-            const data = JSON.parse(resp.data);
-            setShowSampleDeploy(data.count === 0);
-        });
+        if (isCreateMenu) {
+            const composeQuery = '?query=name:PizzaShackAPI version:1.0 context:pizzashack';
+            const composeQueryJSON = queryString.parse(composeQuery);
+            composeQueryJSON.limit = 1;
+            composeQueryJSON.offset = 0;
+            API.search(composeQueryJSON).then((resp) => {
+                const data = JSON.parse(resp.data);
+                setShowSampleDeploy(data.count === 0);
+            });
+        } else {
+            setShowSampleDeploy(true);
+        }
     }, []);
 
     return (
         <Component
+            id='itest-rest-api-create-menu'
             title={(
                 <FormattedMessage
                     id='Apis.Listing.SampleAPI.SampleAPI.rest.api'
@@ -72,7 +77,7 @@ const RestAPIMenu = (props) => {
                     defaultMessage='Import Open API'
                 />
             </LandingMenuItem>
-            {alwaysShowDeploySampleButton && showSampleDeploy && (
+            {(!isCreateMenu || (isCreateMenu && alwaysShowDeploySampleButton)) && showSampleDeploy && (
                 <>
                     <Box width={1}>
                         <Divider light variant='middle' />

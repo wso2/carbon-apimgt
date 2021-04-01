@@ -75,4 +75,8 @@ export default class Resource {
     isWebSub() {
         return this.type === 'WEBSUB';
     }
+
+    isAsyncAPI() {
+        return (this.type === 'WS' || this.type === 'WEBSUB' || this.type === 'SSE');
+    }
 }
