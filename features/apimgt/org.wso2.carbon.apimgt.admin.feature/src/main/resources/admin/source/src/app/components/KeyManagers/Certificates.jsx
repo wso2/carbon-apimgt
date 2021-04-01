@@ -18,11 +18,11 @@ import Alert from 'AppComponents/Shared/Alert';
 
 const cache = {};
 /**
- * Renders the cetificate add/edit page.
+ * Renders the certificate add/edit page.
  * @param {JSON} props Input props form parent components.
- * @returns {JSX} Cetificate upload/add UI.
+ * @returns {JSX} Certificate upload/add UI.
  */
-export default function Cetificates(props) {
+export default function Certificates(props) {
     const intl = useIntl();
     const { certificates: { type, value }, dispatch } = props;
     const [selectedTab, setSelectedTab] = useState(0);
@@ -44,7 +44,7 @@ export default function Cetificates(props) {
         };
         reader.onerror = () => {
             Alert.success(intl.formatMessage({
-                id: 'KeyManagers.Cetificates.file.error',
+                id: 'KeyManagers.certificates.file.error',
                 defaultMessage: 'Error reading file',
             }));
         };
@@ -52,7 +52,7 @@ export default function Cetificates(props) {
 
     const handleChange = (event) => {
         const { value: selected, name } = event.target;
-        if (name === 'cetificateType') {
+        if (name === 'certificateType') {
             dispatch({
                 field: 'certificates',
                 value: {
@@ -65,7 +65,7 @@ export default function Cetificates(props) {
                 field: 'certificates',
                 value: {
                     type,
-                    value: name === 'cetificateValueUrl' ? selected : btoa(selected),
+                    value: name === 'certificateValueUrl' ? selected : btoa(selected),
                 },
             });
         }
@@ -78,8 +78,8 @@ export default function Cetificates(props) {
             <FormControl component='fieldset'>
                 <RadioGroup
                     style={{ flexDirection: 'row' }}
-                    aria-label='cetificate'
-                    name='cetificateType'
+                    aria-label='certificate'
+                    name='certificateType'
                     value={type}
                     onChange={handleChange}
                 >
@@ -91,14 +91,14 @@ export default function Cetificates(props) {
                 <TextField
                     label={intl.formatMessage(
                         {
-                            id: 'KeyManagers.Cetificates.jwks.url',
+                            id: 'KeyManagers.certificates.jwks.url',
                             defaultMessage: 'URL',
                         },
                     )}
                     fullWidth
                     variant='outlined'
                     value={value}
-                    name='cetificateValueUrl'
+                    name='certificateValueUrl'
                     onChange={handleChange}
                 />
             )}
@@ -115,7 +115,7 @@ export default function Cetificates(props) {
                             <TextField
                                 label={intl.formatMessage(
                                     {
-                                        id: 'KeyManagers.Cetificates.paste.label',
+                                        id: 'KeyManagers.certificates.paste.label',
                                         defaultMessage: 'Paste the content of the PEM file',
                                     },
                                 )}
@@ -124,7 +124,7 @@ export default function Cetificates(props) {
                                 rows={6}
                                 variant='outlined'
                                 value={atob(value)}
-                                name='cetificateValue'
+                                name='certificateValue'
                                 onChange={handleChange}
                             />
                         ) : (
@@ -135,7 +135,7 @@ export default function Cetificates(props) {
                                         <Box flex='1'>{file.name}</Box>
                                         <Typography variant='caption'>
                                             <FormattedMessage
-                                                id='KeyManagers.Cetificates.override.message'
+                                                id='KeyManagers.certificates.override.message'
                                                 defaultMessage='Upload new file to override the current certificate'
                                             />
                                         </Typography>
@@ -148,7 +148,7 @@ export default function Cetificates(props) {
                                     baseStyle={{ padding: '16px 20px' }}
                                 >
                                     <FormattedMessage
-                                        id='KeyManagers.Cetificates.drag.and.drop.message'
+                                        id='KeyManagers.certificates.drag.and.drop.message'
                                         defaultMessage='Drag and Drop files here {break} or {break}'
                                         values={{ break: <br /> }}
                                     />
@@ -157,7 +157,7 @@ export default function Cetificates(props) {
                                         variant='contained'
                                     >
                                         <FormattedMessage
-                                            id='KeyManagers.Cetificates.browse.files.to.upload'
+                                            id='KeyManagers.certificates.browse.files.to.upload'
                                             defaultMessage='Browse File to Upload'
                                         />
                                     </Button>
@@ -170,7 +170,7 @@ export default function Cetificates(props) {
         </>
     );
 }
-Cetificates.propTypes = {
+Certificates.propTypes = {
     certificates: PropTypes.shape({}).isRequired,
     dispatch: PropTypes.func.isRequired,
 };
