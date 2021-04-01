@@ -17,7 +17,6 @@
 
 package org.wso2.carbon.apimgt.impl.handlers;
 
-import org.eclipse.wst.validation.internal.ResourceConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
