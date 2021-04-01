@@ -188,7 +188,7 @@
   "Apis.Listing.APICardView.already.subscribed": "Subscribed",
   "Apis.Listing.APICardView.not.allowed'": "Not Allowed",
   "Apis.Listing.APIList.id": "Id",
-  "Apis.Listing.APIList.isSubscriptionAvailable": "isSubscriptionAvailable",
+  "Apis.Listing.APIList.isSubscriptionAvailable": "IS Subscription Available",
   "Apis.Listing.APIList.name": "Name",
   "Apis.Listing.APIList.subscription.status": "Subscription Status",
   "Apis.Listing.APIList.version": "Version",
