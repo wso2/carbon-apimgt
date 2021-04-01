@@ -1,3 +1,4 @@
 site/public/dist/
 .vscode
 coverage
+services/dev_proxy/keys.json
