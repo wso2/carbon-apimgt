@@ -3,12 +3,15 @@
     "version": "4.0.0",
     "description": "WSO2 API Manager Publisher Web App Note: `eslint-plugin-react` have a fixed version due to implementing prop-types does mark nested destructed props from `eslint-plugin-react` next version onwards\n --max_old_space_size: This is max size of the old space( managed heap) in Mbytes make sure not to increase it more than the memory size of builder machines(Prod build)",
     "main": "/source/index.jsx",
+    "engines": {
+        "node": "14.*"
+    },
     "scripts": {
         "test": "npm run i18n;jest --silent",
         "test:coverage": "jest --coverage ; python3 -m http.server -d coverage/",
         "build:prod": "npm run i18n; npm run i18n:compile; rimraf site/public/dist/ && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production --stats=errors-only",
-        "build:dev": "rimraf site/public/dist/ && cross-env NODE_ENV=development webpack -d --watch ",
-        "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
+        "build:dev": "rimraf site/public/dist/ && cross-env NODE_ENV=development webpack --mode development --watch ",
+        "analysis": "NODE_ENV=analysis NODE_OPTIONS=--max_old_space_size=8172 webpack --mode production --progress",
         "lint": "eslint --ignore-pattern '*.test.js' --ignore-pattern '*.test.jsx' --quiet -c .eslintrc.js --ext .jsx,.js source",
         "i18n": "formatjs extract 'source/src/app/**/*.jsx' --throws --out-file site/public/locales/raw.en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]'",
         "i18n:compile": "formatjs compile site/public/locales/raw.en.json --ast --out-file site/public/locales/en.json",

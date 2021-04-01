@@ -95,7 +95,8 @@ function mergeRoleAliasesAndScopeMappings(roleAliases, scopeMappings) {
     for (const roleAlias of roleAliases) {
         const { role, aliases } = roleAlias;
         for (const alias of aliases) {
-            if (alias) {
+            // If an alias exist for this role and alias should not equal to same role name
+            if (alias && alias !== role) {
                 if (roleAliasesMap[alias]) {
                     roleAliasesMap[alias].aliases.push(role);
                 } else {

@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.description.TransportInDescription;
+import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -61,7 +63,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.Optional;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -663,20 +664,22 @@ public class CertificateMgtUtils {
 
         AxisConfiguration axisConfiguration =
                 ServiceReferenceHolder.getContextService().getServerConfigContext().getAxisConfiguration();
-        OMElement dynamicSSLProfilesConfigElement =
-                axisConfiguration.getTransportOut(APIConstants.HTTPS_PROTOCOL).getParameter("dynamicSSLProfilesConfig")
-                        .getParameterElement();
-
-        if (dynamicSSLProfilesConfigElement != null) {
-            OMElement filePathElement =
-                    dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
-            if (filePathElement != null) {
-                String sslProfilePath = filePathElement.getText();
-                if (sslProfilePath.contains(".xml")) {
-                    return getFullPath(sslProfilePath);
+        TransportOutDescription transportOut = axisConfiguration.getTransportOut(APIConstants.HTTPS_PROTOCOL);
+        if (transportOut != null && transportOut.getParameter("dynamicSSLProfilesConfig") != null) {
+            OMElement dynamicSSLProfilesConfigElement =
+                    transportOut.getParameter("dynamicSSLProfilesConfig").getParameterElement();
+            if (dynamicSSLProfilesConfigElement != null) {
+                OMElement filePathElement =
+                        dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
+                if (filePathElement != null) {
+                    String sslProfilePath = filePathElement.getText();
+                    if (sslProfilePath.contains(".xml")) {
+                        return getFullPath(sslProfilePath);
+                    }
                 }
             }
         }
+
         return null;
     }
 
@@ -684,17 +687,18 @@ public class CertificateMgtUtils {
 
         AxisConfiguration axisConfiguration =
                 ServiceReferenceHolder.getContextService().getServerConfigContext().getAxisConfiguration();
-        OMElement dynamicSSLProfilesConfigElement =
-                axisConfiguration.getTransportIn(APIConstants.HTTPS_PROTOCOL).getParameter("dynamicSSLProfilesConfig")
-                        .getParameterElement();
-
-        if (dynamicSSLProfilesConfigElement != null) {
-            OMElement filePathElement =
-                    dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
-            if (filePathElement != null) {
-                String sslProfilePath = filePathElement.getText();
-                if (sslProfilePath.contains(".xml")) {
-                    return getFullPath(sslProfilePath);
+        TransportInDescription transportIn = axisConfiguration.getTransportIn(APIConstants.HTTPS_PROTOCOL);
+        if (transportIn != null && transportIn.getParameter("dynamicSSLProfilesConfig") != null) {
+            OMElement dynamicSSLProfilesConfigElement =
+                    transportIn.getParameter("dynamicSSLProfilesConfig").getParameterElement();
+            if (dynamicSSLProfilesConfigElement != null) {
+                OMElement filePathElement =
+                        dynamicSSLProfilesConfigElement.getFirstChildWithName(new QName("filePath"));
+                if (filePathElement != null) {
+                    String sslProfilePath = filePathElement.getText();
+                    if (sslProfilePath.contains(".xml")) {
+                        return getFullPath(sslProfilePath);
+                    }
                 }
             }
         }

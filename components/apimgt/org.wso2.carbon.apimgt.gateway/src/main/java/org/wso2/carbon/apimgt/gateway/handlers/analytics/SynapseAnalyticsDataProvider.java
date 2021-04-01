@@ -24,19 +24,19 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.commons.CorrelationConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.exceptions.DataNotFoundException;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.EventCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultCategory;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.enums.FaultSubCategory;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Application;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Error;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Latencies;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.EventCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultCategory;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.common.gateway.analytics.collectors.AnalyticsDataProvider;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.API;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Application;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Error;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Latencies;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.MetaInfo;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Operation;
-import org.wso2.carbon.apimgt.common.gateway.analytics.publishers.dto.Target;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -51,17 +51,30 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.Arrays;
 import java.util.Map;
 
-
 public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
+
     private static final Log log = LogFactory.getLog(SynapseAnalyticsDataProvider.class);
     private MessageContext messageContext;
 
     public SynapseAnalyticsDataProvider(MessageContext messageContext) {
+
         this.messageContext = messageContext;
+    }
+
+    public static String sortGraphQLOperations(String apiResourceTemplates) {
+
+        if (apiResourceTemplates == null || !apiResourceTemplates.contains(",")) {
+            return apiResourceTemplates;
+        }
+        String[] list = apiResourceTemplates.split(",");
+        // sorting alphabetical order
+        Arrays.sort(list);
+        return String.join(",", list);
     }
 
     @Override
     public EventCategory getEventCategory() {
+
         if (isSuccessRequest()) {
             return EventCategory.SUCCESS;
         } else if (isFaultRequest()) {
@@ -73,18 +86,21 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public boolean isAnonymous() {
+
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         return isAuthenticated() && APIConstants.END_USER_ANONYMOUS.equalsIgnoreCase(authContext.getUsername());
     }
 
     @Override
     public boolean isAuthenticated() {
+
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         return authContext != null && authContext.isAuthenticated();
     }
 
     @Override
     public FaultCategory getFaultType() {
+
         if (isAuthFaultRequest()) {
             return FaultCategory.AUTH;
         } else if (isThrottledFaultRequest()) {
@@ -98,6 +114,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public API getApi() throws DataNotFoundException {
+
         String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(apiContext);
@@ -116,7 +133,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
             }
         }
 
-        if(apiObj != null) {
+        if (apiObj != null) {
             api.setApiId(apiObj.getUuid());
             api.setApiType(apiObj.getApiType());
             api.setApiName(apiObj.getApiName());
@@ -129,6 +146,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public Application getApplication() throws DataNotFoundException {
+
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
         if (authContext == null) {
             throw new DataNotFoundException("Error occurred when getting Application information");
@@ -143,6 +161,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public Operation getOperation() throws DataNotFoundException {
+
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
         String apiResourceTemplate = (String) messageContext.getProperty(APIConstants.API_ELECTED_RESOURCE);
         Operation operation = new Operation();
@@ -158,11 +177,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public Target getTarget() {
+
         Target target = new Target();
-        boolean isCacheHit = messageContext.getPropertyKeySet().contains(Constants.CACHED_RESPONSE_KEY);
+
         String endpointAddress = (String) messageContext.getProperty(APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS);
         int targetResponseCode = getTargetResponseCode();
-        target.setResponseCacheHit(isCacheHit);
+        target.setResponseCacheHit(isCacheHit());
         target.setDestination(endpointAddress);
         target.setTargetResponseCode(targetResponseCode);
         return target;
@@ -170,6 +190,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public Latencies getLatencies() {
+
         long backendLatency = getBackendLatency();
         long responseLatency = getResponseLatency();
         long requestMediationLatency = getRequestMediationLatency();
@@ -183,12 +204,25 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         return latencies;
     }
 
+    private boolean isCacheHit() {
+
+        Object cacheHitObject = messageContext.getProperty(Constants.REQUEST_CACHE_HIT);
+        boolean isCacheHit = false;
+        if (cacheHitObject instanceof String) {
+            isCacheHit = Boolean.parseBoolean((String) cacheHitObject);
+        } else if (cacheHitObject instanceof Boolean) {
+            isCacheHit = (boolean) cacheHitObject;
+        }
+        return isCacheHit;
+    }
+
     @Override
     public MetaInfo getMetaInfo() {
+
         MetaInfo metaInfo = new MetaInfo();
-        Object correlationId  = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+        Object correlationId = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(CorrelationConstants.CORRELATION_ID);
-        if (correlationId instanceof String){
+        if (correlationId instanceof String) {
             metaInfo.setCorrelationId((String) correlationId);
         }
         metaInfo.setGatewayType(APIMgtGatewayConstants.GATEWAY_TYPE);
@@ -208,6 +242,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public int getProxyResponseCode() {
+
         Object clientResponseCodeObj = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                 .getProperty(SynapseConstants.HTTP_SC);
         int proxyResponseCode;
@@ -221,16 +256,25 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public int getTargetResponseCode() {
-        return (int) messageContext.getProperty(Constants.BACKEND_RESPONSE_CODE);
+
+        Object responseCodeObject = messageContext.getProperty(Constants.BACKEND_RESPONSE_CODE);
+        if (responseCodeObject != null) {
+            return (int) responseCodeObject;
+        }
+        Object responseCode = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(SynapseConstants.HTTP_SC);
+        return (int) responseCode;
     }
 
     @Override
     public long getRequestTime() {
+
         return (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
     }
 
     @Override
     public Error getError(FaultCategory faultCategory) {
+
         int errorCode = (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
         FaultCodeClassifier faultCodeClassifier = new FaultCodeClassifier(messageContext);
         FaultSubCategory faultSubCategory = faultCodeClassifier.getFaultSubCategory(faultCategory, errorCode);
@@ -242,11 +286,13 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
     @Override
     public String getUserAgentHeader() {
+
         return (String) messageContext.getProperty(Constants.USER_AGENT_PROPERTY);
     }
 
     @Override
     public String getEndUserIP() {
+
         if (messageContext.getPropertyKeySet().contains(Constants.USER_IP_PROPERTY)) {
             return (String) messageContext.getProperty(Constants.USER_IP_PROPERTY);
         }
@@ -254,27 +300,32 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private boolean isSuccessRequest() {
+
         return !messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE)
                 && APISecurityUtils.getAuthenticationContext(messageContext) != null;
     }
 
     private boolean isFaultRequest() {
+
         return messageContext.getPropertyKeySet().contains(SynapseConstants.ERROR_CODE);
     }
 
     private boolean isAuthFaultRequest() {
+
         int errorCode = getErrorCode();
         return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
                 && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
     }
 
     private boolean isThrottledFaultRequest() {
+
         int errorCode = getErrorCode();
         return errorCode >= Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE_START
                 && errorCode < Constants.ERROR_CODE_RANGES.THROTTLED_FAILURE__END;
     }
 
     private boolean isTargetFaultRequest() {
+
         int errorCode = getErrorCode();
         return (errorCode >= Constants.ERROR_CODE_RANGES.TARGET_FAILURE_START
                 && errorCode < Constants.ERROR_CODE_RANGES.TARGET_FAILURE__END)
@@ -282,39 +333,43 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     }
 
     private int getErrorCode() {
+
         return (int) messageContext.getProperty(SynapseConstants.ERROR_CODE);
     }
 
     public long getBackendLatency() {
+
+        if (isCacheHit()) {
+            return 0L;
+        }
         long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
         long backendEndTime = (long) messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
         return backendEndTime - backendStartTime;
     }
 
     public long getResponseLatency() {
+
         long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
         return System.currentTimeMillis() - requestInTime;
     }
 
     public long getRequestMediationLatency() {
+
         long requestInTime = (long) messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
+        if (isCacheHit()) {
+            return System.currentTimeMillis() - requestInTime;
+        }
         long backendStartTime = (long) messageContext.getProperty(Constants.BACKEND_START_TIME_PROPERTY);
         return backendStartTime - requestInTime;
     }
 
     public long getResponseMediationLatency() {
+
+        if (isCacheHit()) {
+            return 0;
+        }
         long backendEndTime = (long) messageContext.getProperty(Constants.BACKEND_END_TIME_PROPERTY);
         return System.currentTimeMillis() - backendEndTime;
-    }
-
-    public static String sortGraphQLOperations(String apiResourceTemplates) {
-        if (apiResourceTemplates == null || !apiResourceTemplates.contains(",")) {
-            return apiResourceTemplates;
-        }
-        String[] list = apiResourceTemplates.split(",");
-        // sorting alphabetical order
-        Arrays.sort(list);
-        return String.join(",", list);
     }
 
 }
