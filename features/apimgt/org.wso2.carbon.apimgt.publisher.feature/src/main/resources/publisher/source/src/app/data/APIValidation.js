@@ -121,11 +121,11 @@ const documentSchema = Joi.extend((joi) => ({
 }));
 
 const definition = {
-    apiName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+    apiName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+[\]/]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Name ' + getMessage(error.type, 50) }));
         }),
-    apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$]+$/).required().error((errors) => {
+    apiVersion: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&/$[\]\s]+$/).required().error((errors) => {
         const tmpErrors = [...errors];
         errors.forEach((err, index) => {
             const tmpError = { ...err };
@@ -134,11 +134,11 @@ const definition = {
         });
         return tmpErrors;
     }),
-    apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[^~!@#:%^&*+=|\\<>"',&\s]*$/).required()
+    apiContext: Joi.string().max(60).regex(/(?!.*\/t\/.*|.*\/t$)^[^~!@#:%^&*+=|\\<>"',&\s[\]]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Context ' + getMessage(error.type, 60) }));
         }),
-    documentName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+    documentName: Joi.string().max(50).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+[\]/]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Document name ' + getMessage(error.type, 50) }));
         }),
@@ -157,7 +157,7 @@ const definition = {
         });
         return tmpErrors;
     }),
-    alias: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+    alias: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+[\]/]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Alias ' + getMessage(error.type, 30) }));
         }),
