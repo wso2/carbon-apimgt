@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -462,6 +463,8 @@ public class ImportUtils {
                             }
                             deploymentVhost = gatewayEnvironment.getVhosts().get(0).getHost();
                         }
+                        // resolve vhost to null if it is the default vhost of read only environment
+                        deploymentVhost = VHostUtils.resolveIfDefaultVhostToNull(deploymentName, deploymentVhost);
                         JsonElement displayOnDevportalElement =
                                 deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
                         boolean displayOnDevportal =
