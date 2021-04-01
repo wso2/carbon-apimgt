@@ -442,6 +442,7 @@ public class APIMappingUtil {
         if (!apidto.isIsAWSAPI()) {
             apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
         } else {
+            //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
             JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
             JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
             JsonArray servers = configObject.getAsJsonArray("servers");
