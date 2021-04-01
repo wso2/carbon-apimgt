@@ -1,17 +1,13 @@
-name: API Manager Build with Test
+name: API Manager Build with Test - Forks
 
 on:
   push:
-    branches:
-      - master
     paths-ignore:
      - '**/org.wso2.carbon.apimgt.admin.feature/src/main/resources/admin/**'
      - '**/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher/**'
      - '**/org.wso2.carbon.apimgt.store.feature/src/main/resources/devportal/**'
      
   workflow_dispatch:
-    branches:
-      - master
 
 jobs:
   build-carbon:
