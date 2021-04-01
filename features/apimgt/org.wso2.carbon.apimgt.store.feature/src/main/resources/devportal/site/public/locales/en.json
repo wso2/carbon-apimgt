@@ -34,7 +34,6 @@
   "Apis.Details.Comments.Comment.something.went.wrong": "Something went wrong while deleting comment",
   "Apis.Details.Comments.CommentAdd.btn.add.comment": "Comment",
   "Apis.Details.Comments.CommentAdd.btn.cancel": "Cancel",
-  "Apis.Details.Comments.CommentAdd.comment": "Comment",
   "Apis.Details.Comments.CommentAdd.error.blank.comment": "You cannot enter a blank comment",
   "Apis.Details.Comments.CommentAdd.something.went.wrong": "Something went wrong while adding the comment",
   "Apis.Details.Comments.CommentAdd.write.comment.help": "Write a comment",
