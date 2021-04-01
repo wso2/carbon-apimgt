@@ -16,266 +16,342 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import React, { useReducer, useState } from 'react';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
 import Redirect from 'react-router-dom/Redirect';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { withStyles } from '@material-ui/core/styles';
-import green from '@material-ui/core/colors/green';
-import Create from '@material-ui/icons/Create';
-import GetApp from '@material-ui/icons/GetApp';
-import { PropTypes } from 'prop-types';
-import { FormattedMessage, injectIntl } from 'react-intl';
-
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+import { FormattedMessage } from 'react-intl';
 import API from 'AppData/api';
-import Alert from 'AppComponents/Shared/Alert';
-import InlineMessage from 'AppComponents/Shared/InlineMessage';
 import AuthManager from 'AppData/AuthManager';
-import APICreateMenu from '../components/APICreateMenu';
-import getSampleSwagger from './SamplePetStore.js';
+import { usePublisherSettings } from 'AppComponents/Shared/AppContext';
+import LandingMenuItem from 'AppComponents/Apis/Listing/Landing/components/LandingMenuItem';
+import TaskState from 'AppComponents/Apis/Listing/SampleAPI/components/TaskState';
+import { makeStyles } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useTheme } from '@material-ui/core';
+import { Link as RouterLink } from 'react-router-dom';
+import Link from '@material-ui/core/Link';
+import Button from '@material-ui/core/Button';
 
-const styles = (theme) => ({
-    buttonProgress: {
-        color: green[500],
-        position: 'relative',
+import { getSampleAPIData, getSampleOpenAPI } from 'AppData/SamplePizzaShack';
+
+
+const useStyles = makeStyles({
+    modal: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    headline: {
-        paddingTop: theme.spacing(1.25),
-        paddingLeft: theme.spacing(2.5),
-    },
-    head: {
-        paddingBottom: theme.spacing(2),
-        fontWeight: 200,
-    },
-    content: {
-        paddingBottom: theme.spacing(2),
-    },
-    buttonLeft: {
-        marginRight: theme.spacing(1),
+    statusBox: {
+        outline: 'none',
     },
 });
 
+const initialTaskStates = {
+    create: { inProgress: true, completed: false, errors: false },
+    update: { inProgress: false, completed: false, errors: false },
+    revision: { inProgress: false, completed: false, errors: false },
+    deploy: { inProgress: false, completed: false, errors: false },
+    publish: { inProgress: false, completed: false, errors: false },
+};
+
+const tasksReducer = (state, action) => {
+    const { name, status } = action;
+    if (name === 'reset') {
+        return initialTaskStates;
+    }
+    // In the case of a key collision, the right-most (last) object's value wins out
+    return { ...state, [name]: { ...state[name], ...status } };
+};
+
 /**
- * Show Initial Welcome card if no APIs are available to list
- * Handle deploying a sample API (Create and Publish)
+ * Handle deploying a sample API (Create, Deploy and Publish)
  *
  * @class SampleAPI
  * @extends {Component}
  */
-class SampleAPI extends Component {
-    /**
-     *Creates an instance of SampleAPI.
-     * @param {Object} props @inheritdoc
-     * @memberof SampleAPI
-     */
-    constructor(props) {
-        super(props);
-        this.state = {
-            published: false,
-            api: null,
-            deploying: false,
-        };
-        this.sampleApi = new API();
-        this.handleDeploySample = this.handleDeploySample.bind(this);
-        this.createSampleAPI = this.createSampleAPI.bind(this);
-    }
 
+const SampleAPI = (props) => {
+    const { dense } = props;
+    const [tasksStatus, tasksStatusDispatcher] = useReducer(tasksReducer, initialTaskStates);
+    const [showStatus, setShowStatus] = useState(false);
+    const [newSampleAPI, setNewSampleAPI] = useState();
+    const classes = useStyles();
+    const publisherSettings = usePublisherSettings();
+
+    const theme = useTheme();
+    const isXsOrBelow = useMediaQuery(theme.breakpoints.down('xs'));
+
+    const taskManager = async (promisedTask, name) => {
+        tasksStatusDispatcher({ name, status: { inProgress: true } });
+        let taskResult;
+        try {
+            taskResult = await promisedTask;
+        } catch (errors) {
+            console.error(errors);
+            tasksStatusDispatcher({ name, status: { errors } });
+        }
+        tasksStatusDispatcher({ name, status: { inProgress: false, completed: true } });
+        return taskResult;
+    };
     /**
      *Handle onClick event for `Deploy Sample API` Button
      * @memberof SampleAPI
      */
-    handleDeploySample() {
-        const { intl } = this.props;
-        this.setState({ deploying: true });
-        const promisedSampleAPI = this.createSampleAPI();
-        const swaggerUpdatePromise = promisedSampleAPI.then((sampleAPI) => {
-            sampleAPI.updateSwagger(getSampleSwagger('Unlimited'));
-            return sampleAPI;
-        });
-        swaggerUpdatePromise.catch((error) => {
-            console.error(error);
-            Alert.error(error);
-        });
+    const handleDeploySample = async () => {
+        setShowStatus(true);
+        const restApi = new API();
+
+        const sampleAPIObj = new API(getSampleAPIData());
+        // Creat the sample API -- 1st API call
+        const sampleAPI = await taskManager(sampleAPIObj.save(), 'create');
+        setNewSampleAPI(sampleAPI);
+
+        // Update the sample API -- 2nd API call
+        await taskManager(sampleAPI.updateSwagger(getSampleOpenAPI()), 'update');
+
         if (!AuthManager.isNotPublisher()) {
-            swaggerUpdatePromise.then((sampleAPI) => {
-                sampleAPI.publish()
-                    .then(() => {
-                        this.setState({ published: true, api: sampleAPI });
-                        Alert.info(intl.formatMessage({
-                            id: 'Apis.Listing.SampleAPI.SampleAPI.created',
-                            defaultMessage: 'Sample PizzaShackAPI API created successfully',
-                        }));
-                    })
-                    .catch((error) => {
-                        this.setState({ deploying: false });
-                        Alert.error(error);
+            const revisionPayload = {
+                description: 'Initial Revision',
+            };
+
+            // Creat a revision of sample API -- 3rd API call
+            const sampleAPIRevision = await taskManager(
+                restApi.createRevision(sampleAPI.id, revisionPayload),
+                'revision',
+            );
+            const envList = publisherSettings.environment.map((env) => env.name);
+            const deployRevisionPayload = [];
+            const getFirstVhost = (envName) => {
+                const env = publisherSettings.environment.find(
+                    (ev) => ev.name === envName && ev.vhosts.length > 0,
+                );
+                return env && env.vhosts[0].host;
+            };
+            if (envList && envList.length > 0) {
+                if (envList.includes('Default') && getFirstVhost('Default')) {
+                    deployRevisionPayload.push({
+                        name: 'Default',
+                        displayOnDevportal: true,
+                        vhost: getFirstVhost('Default'),
                     });
-            });
-        } else {
-            swaggerUpdatePromise.then((sampleApi) => {
-                this.setState({ published: true, api: sampleApi });
-                Alert.info(intl.formatMessage({
-                    id: 'Apis.Listing.SampleAPI.SampleAPI.created',
-                    defaultMessage: 'Sample PizzaShackAPI API created successfully',
-                }));
-            })
-                .catch((error) => {
-                    Alert.error(error);
-                });
-        }
-    }
-
-    /**
-     * Construct the sample API date and invoke API.create method to create API
-     * @returns {Promise} SwaggerJs client promise appending an error handler and mapping response.obj as resolved value
-     * @memberof SampleAPI
-     */
-    createSampleAPI() {
-        const data = {
-            name: 'PizzaShackAPI',
-            description: 'This is a simple API for Pizza Shack online pizza delivery store.',
-            context: '/pizzashack',
-            version: '1.0.0',
-            transport: ['http', 'https'],
-            tags: ['pizza'],
-            policies: ['Unlimited'],
-            securityScheme: ['oauth2'],
-            visibility: 'PUBLIC',
-            gatewayEnvironments: ['Production and Sandbox'],
-            businessInformation: {
-                businessOwner: 'Jane Roe',
-                businessOwnerEmail: 'marketing@pizzashack.com',
-                technicalOwner: 'John Doe',
-                technicalOwnerEmail: 'architecture@pizzashack.com',
-            },
-            endpointConfig: {
-                endpoint_type: 'http',
-                sandbox_endpoints: {
-                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                },
-                production_endpoints: {
-                    url: 'https://localhost:9443/am/sample/pizzashack/v1/api/',
-                },
-            },
-            operations: [
-                {
-                    target: '/order/{orderId}',
-                    verb: 'GET',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/order/{orderId}',
-                    verb: 'DELETE',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/order/{orderId}',
-                    verb: 'PUT',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/menu',
-                    verb: 'GET',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-                {
-                    target: '/order',
-                    verb: 'POST',
-                    throttlingPolicy: 'Unlimited',
-                    authType: 'Application & Application User',
-                },
-            ],
-        };
-
-        const sampleAPI = new API(data);
-        return sampleAPI.save().catch((error) => {
-            console.error(error);
-            this.setState({ deploying: false });
-            const { response } = error;
-            if (response) {
-                const { code, description, message } = response.body;
-                Alert.error(`ERROR[${code}] : ${description} | ${message}`);
-            } else {
-                Alert.error(error);
+                } else if (getFirstVhost(envList[0])) {
+                    deployRevisionPayload.push({
+                        name: envList[0],
+                        displayOnDevportal: true,
+                        vhost: getFirstVhost(envList[0]),
+                    });
+                }
             }
-        });
-    }
+            const revisionId = sampleAPIRevision.body.id;
 
-    /**
-     *
-     * @inheritdoc
-     * @returns {React.Component} @inheritdoc
-     * @memberof SampleAPI
-     */
-    render() {
-        const { published, api, deploying } = this.state;
-        const { classes } = this.props;
+            // Deploy a revision of sample API -- 4th API call
+            await taskManager(restApi.deployRevision(sampleAPI.id,
+                revisionId, deployRevisionPayload), 'deploy');
 
-        if (published && api) {
-            const url = '/apis/' + api.id + '/overview';
-            return <Redirect to={url} />;
+            // Deploy a revision of sample API -- 5th API call
+            await taskManager(sampleAPI.publish(), 'publish');
         }
-        return (
-            <InlineMessage type='info' height={140}>
-                <div className={classes.contentWrapper}>
-                    <Typography variant='h5' component='h3' className={classes.head}>
-                        <FormattedMessage
-                            id='welcome.to.wso2.api.manager'
-                            defaultMessage='Welcome to WSO2 API Manager'
-                        />
-                    </Typography>
-                    <Typography component='p' className={classes.content}>
-                        <FormattedMessage
-                            id='Apis.Listing.SampleAPI.SampleAPI.description'
-                            defaultMessage={
-                                'WSO2 API Publisher enables API providers to'
-                                + ' publish APIs, share documentation, provision API keys and gather feedback'
-                                + ' on features, quality and usage. To get started, Create an API'
-                                + ' or Publish a sample API.'
-                            }
-                        />
-                    </Typography>
-                    <div className={classes.actions}>
-                        <APICreateMenu buttonProps={{
-                            size: 'small',
-                            color: 'primary',
-                            variant: 'contained',
-                            className: classes.buttonLeft,
-                        }}
-                        >
-                            <Create />
-                            <FormattedMessage id='create.new.api' defaultMessage='Create New API' />
-                        </APICreateMenu>
-                        {!AuthManager.isNotCreator()
-                            && (
-                                <Button
-                                    size='small'
-                                    color='primary'
-                                    disabled={deploying}
-                                    variant='contained'
-                                    onClick={this.handleDeploySample}
-                                >
-                                    <GetApp />
-                                    <FormattedMessage id='deploy.sample.api' defaultMessage='Deploy Sample API' />
-                                    {deploying && <CircularProgress size={24} className={classes.buttonProgress} />}
-                                </Button>
-                            )}
-                    </div>
-                </div>
-            </InlineMessage>
-        );
-    }
-}
+    };
 
-SampleAPI.propTypes = {
-    classes: PropTypes.shape({}).isRequired,
-    intl: PropTypes.shape({ formatMessage: PropTypes.func }).isRequired,
+    const allDone = !AuthManager.isNotPublisher() ? Object.values(tasksStatus)
+        .map((tasks) => tasks.completed)
+        .reduce((done, current) => current && done) : (tasksStatus.create.completed && newSampleAPI);
+    const anyErrors = Object.values(tasksStatus).map((tasks) => tasks.errors).find((error) => error !== false);
+    if (allDone && !anyErrors) {
+        const url = '/apis/' + newSampleAPI.id + '/overview';
+        return <Redirect to={url} />;
+    }
+    return (
+        <>
+            <LandingMenuItem
+                dense={dense}
+                id='itest-id-deploy-sample'
+                onClick={handleDeploySample}
+                component='button'
+                helperText={(
+                    <FormattedMessage
+                        id='Apis.Listing.SampleAPI.SampleAPI.rest.d.sample.content'
+                        defaultMessage={`Sample Pizza Shack
+                                    API`}
+                    />
+                )}
+            >
+                <FormattedMessage
+                    id={'Apis.Listing.SampleAPI.SampleAPI.'
+                        + 'rest.d.sample.title'}
+                    defaultMessage='Deploy Sample API'
+                />
+
+            </LandingMenuItem>
+
+            <Modal
+                aria-labelledby='transition-modal-title'
+                aria-describedby='transition-modal-description'
+                className={classes.modal}
+                open={showStatus}
+                // onClose={handleClose}
+                closeAfterTransition
+                BackdropComponent={Backdrop}
+                BackdropProps={{
+                    timeout: 500,
+                }}
+            >
+                <Fade in={showStatus}>
+                    <Box
+                        bgcolor='background.paper'
+                        borderRadius='borderRadius'
+                        width={isXsOrBelow ? 4 / 5 : 1 / 4}
+                        className={classes.statusBox}
+                        p={2}
+                    >
+                        <Grid
+                            container
+                            direction='row'
+                            justify='center'
+                            alignItems='center'
+                        >
+                            <TaskState
+                                completed={tasksStatus.create.completed}
+                                errors={tasksStatus.create.errors}
+                                inProgress={tasksStatus.create.inProgress}
+                                completedMessage={(
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPI.popup.create.complete'
+                                        defaultMessage='API created successfully!'
+                                    />
+                                )}
+                                inProgressMessage={(
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPI.popup.create.inprogress'
+                                        defaultMessage='Creating sample API ...'
+                                    />
+                                )}
+                            >
+                                Create API
+                            </TaskState>
+                            <TaskState
+                                completed={tasksStatus.update.completed}
+                                errors={tasksStatus.update.errors}
+                                inProgress={tasksStatus.update.inProgress}
+                                completedMessage={(
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPI.popup.update.complete'
+                                        defaultMessage='API updated successfully!'
+                                    />
+                                )}
+                                inProgressMessage={(
+                                    <FormattedMessage
+                                        id='Apis.Listing.SampleAPI.popup.update.inprogress'
+                                        defaultMessage='Updating sample API ...'
+                                    />
+                                )}
+                            >
+                                Update API
+                            </TaskState>
+                            {!AuthManager.isNotPublisher() && (
+                                <>
+                                    <TaskState
+                                        completed={tasksStatus.revision.completed}
+                                        errors={tasksStatus.revision.errors}
+                                        inProgress={tasksStatus.revision.inProgress}
+                                        completedMessage={(
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.popup.revision.complete'
+                                                defaultMessage='API revision created successfully!'
+                                            />
+                                        )}
+                                        inProgressMessage={(
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.popup.revision.inprogress'
+                                                defaultMessage='Creating a revision of sample API ...'
+                                            />
+                                        )}
+                                    >
+                                        Revision API
+                                    </TaskState>
+                                    <TaskState
+                                        completed={tasksStatus.deploy.completed}
+                                        errors={tasksStatus.deploy.errors}
+                                        inProgress={tasksStatus.deploy.inProgress}
+                                        completedMessage={(
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.popup.deploy.complete'
+                                                defaultMessage='API deployed successfully!'
+                                            />
+                                        )}
+                                        inProgressMessage={(
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.popup.deploy.inprogress'
+                                                defaultMessage='Deploying sample API ...'
+                                            />
+                                        )}
+                                    >
+                                        Deploying API
+                                    </TaskState>
+                                    <TaskState
+                                        completed={tasksStatus.publish.completed}
+                                        errors={tasksStatus.publish.errors}
+                                        inProgress={tasksStatus.publish.inProgress}
+                                        completedMessage={(
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.popup.publish.complete'
+                                                defaultMessage='API published successfully!'
+                                            />
+                                        )}
+                                        inProgressMessage={(
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.popup.publish.inprogress'
+                                                defaultMessage='Publishing sample API to developer portal ...'
+                                            />
+                                        )}
+                                    >
+                                        Publish API
+                                    </TaskState>
+                                </>
+                            )}
+                            {anyErrors && (
+                                <>
+                                    <Grid item xs={8} />
+                                    <Grid item xs={2}>
+                                        <Button
+                                            onClick={() => {
+                                                setShowStatus(false);
+                                                tasksStatusDispatcher({ name: 'reset' });
+                                            }}
+                                            variant='outlined'
+                                        >
+                                            <FormattedMessage
+                                                id='Apis.Listing.SampleAPI.continue.on.close'
+                                                defaultMessage='Close'
+                                            />
+                                        </Button>
+                                    </Grid>
+                                    {newSampleAPI && (
+                                        <Grid item xs={2}>
+                                            <Link
+                                                underline='none'
+                                                component={RouterLink}
+                                                to={`/apis/${newSampleAPI.id}/overview`}
+                                            >
+                                                <FormattedMessage
+                                                    id='Apis.Listing.SampleAPI.continue.on.error'
+                                                    defaultMessage='Continue'
+                                                />
+                                            </Link>
+                                        </Grid>
+                                    )}
+                                </>
+                            )}
+                        </Grid>
+                    </Box>
+                </Fade>
+            </Modal>
+        </>
+    );
 };
 
-export default injectIntl(withStyles(styles)(SampleAPI));
+export default SampleAPI;

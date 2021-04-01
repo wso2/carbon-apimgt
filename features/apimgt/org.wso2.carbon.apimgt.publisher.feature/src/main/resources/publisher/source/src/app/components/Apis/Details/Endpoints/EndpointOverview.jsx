@@ -136,6 +136,7 @@ function EndpointOverview(props) {
         swaggerDef,
         updateSwagger,
         saveAndRedirect,
+        setIsEndpointUrlAvailable,
     } = props;
     const { endpointConfig, endpointSecurity } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
@@ -247,6 +248,10 @@ function EndpointOverview(props) {
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototype Endpoint' },
             ];
+        } else if (type === 'SSE') {
+            supportedEndpointTypes = [
+                { key: 'http', value: 'HTTP/REST Endpoint' },
+            ];
         } else {
             supportedEndpointTypes = [
                 { key: 'http', value: 'HTTP/REST Endpoint' },
@@ -278,6 +283,28 @@ function EndpointOverview(props) {
             setEndpointSecurityInfo(endpointSecurity);
         }
     }, [props]);
+
+    useEffect(() => {
+        const prodEpSpecified = endpointCategory.prod
+            && endpointConfig.production_endpoints
+            && endpointConfig.production_endpoints.url !== '';
+        const sandboxEptNotSpecified = !endpointCategory.sandbox && !endpointConfig.sandbox_endpoints;
+        const sandboxEpSpecified = endpointCategory.sandbox
+            && endpointConfig.sandbox_endpoints
+            && endpointConfig.sandbox_endpoints.url !== '';
+        const productionEptNotSpecified = !endpointCategory.production && !endpointConfig.production_endpoints;
+        if (endpointConfig && (endpointConfig.endpoint_type === 'http' || endpointConfig.endpoint_type === 'address')) {
+            if (
+                (prodEpSpecified && sandboxEpSpecified)
+                || (prodEpSpecified && sandboxEptNotSpecified)
+                || (sandboxEpSpecified && productionEptNotSpecified)
+            ) {
+                setIsEndpointUrlAvailable(true);
+            } else {
+                setIsEndpointUrlAvailable(false);
+            }
+        }
+    }, [endpointConfig, endpointCategory]);
 
     const getEndpoints = (type) => {
         if (epConfig[type]) {

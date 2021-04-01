@@ -58,7 +58,6 @@ public class APIProduct {
     private String definition;
     private JSONObject additionalProperties = new JSONObject();
     private Set<String> environments = new HashSet<>();
-    private List<Label> gatewayLabels = new ArrayList<>();
     private boolean enableSchemaValidation = false;
     private Set<Scope> scopes = new HashSet<>();
 
@@ -108,6 +107,21 @@ public class APIProduct {
      * Property to hold enable/disable status of the store visibility.
      */
     private boolean enableStore = true;
+
+    /**
+     * Property to indicate whether this is a revision.
+     */
+    private boolean isRevision = false;
+
+    /**
+     * Property to hold API Product id of a revision.
+     */
+    private String revisionedApiProductId;
+
+    /**
+     * Property to hold revision id
+     */
+    private int revisionId;
 
     public APIProduct(){}
 
@@ -201,11 +215,22 @@ public class APIProduct {
     public JSONObject getMonetizationProperties() {
         return monetizationProperties;
     }
+    @Deprecated
     public boolean getMonetizationStatus() {
         return isMonetizationEnabled;
     }
+    @Deprecated
     public void setMonetizationStatus(boolean monetizationStatus) {
         this.isMonetizationEnabled = monetizationStatus;
+    }
+    public boolean isMonetizationEnabled() {
+        return isMonetizationEnabled;
+    }
+    public void setMonetizationEnabled(boolean isMonetizationEnabled) {
+        this.isMonetizationEnabled = isMonetizationEnabled;
+    }
+    public boolean isEnableSchemaValidation() {
+        return enableSchemaValidation;
     }
     public void setMonetizationProperties(JSONObject monetizationProperties) {
         this.monetizationProperties = monetizationProperties;
@@ -376,6 +401,7 @@ public class APIProduct {
      *
      * @return Status of the validator property.
      */
+    @Deprecated
     public boolean isEnabledSchemaValidation() {
         return enableSchemaValidation;
     }
@@ -502,18 +528,14 @@ public class APIProduct {
                 + tenantDomain + ", productResources=" + productResources + "]";
     }
 
-    public List<Label> getGatewayLabels() {
-        return gatewayLabels;
-    }
-
-    public void setGatewayLabels(List<Label> gatewayLabels) {
-        this.gatewayLabels = gatewayLabels;
-    }
-
     public Set<String> getTags() {
         return Collections.unmodifiableSet(tags);
     }
 
+    public void setTags(Set<String> tags) {
+        this.tags.addAll(tags);
+    }
+    @Deprecated
     public void addTags(Set<String> tags) {
         this.tags.addAll(tags);
     }
@@ -556,4 +578,34 @@ public class APIProduct {
         return apiCategories;
     }
 
+    public boolean isAsync() {
+        if (getType().equals("WS") || getType().equals("WEBSUB") || getType().equals("SSE")) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isRevision() {
+        return isRevision;
+    }
+
+    public void setRevision(boolean revision) {
+        isRevision = revision;
+    }
+
+    public String getRevisionedApiProductId() {
+        return revisionedApiProductId;
+    }
+
+    public void setRevisionedApiProductId(String revisionedApiProductId) {
+        this.revisionedApiProductId = revisionedApiProductId;
+    }
+
+    public int getRevisionId() {
+        return revisionId;
+    }
+
+    public void setRevisionId(int revisionId) {
+        this.revisionId = revisionId;
+    }
 }

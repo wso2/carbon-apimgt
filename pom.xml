@@ -6,7 +6,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.8.139-SNAPSHOT</version>
+    <version>9.0.100-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>https://wso2.org</url>
 
@@ -26,12 +26,8 @@
 
     <modules>
         <module>service-stubs/apimgt</module>
-        <module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
-        <module>components/forum</module>
         <module>features/apimgt</module>
-        <module>features/forum</module>
-        <module>features/categories</module>
     </modules>
 
     <build>
@@ -53,16 +49,7 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <version>${maven-bundle-plugin.version}</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>${maven.findbugsplugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>${maven.checkstyleplugin.version}</version>
-                </plugin>
+
                 <plugin>
                     <groupId>io.swagger</groupId>
                     <artifactId>swagger-codegen-maven-plugin</artifactId>
@@ -286,18 +273,15 @@
                     <executions>
                         <execution>
                             <id>validate</id>
-                            <phase>validate</phase>
+                            <phase>compile</phase>
                             <configuration>
-                                <configLocation>
-                                    https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml
-                                </configLocation>
-                                <suppressionsLocation>
-                                    https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml
-                                </suppressionsLocation>
+                                <configLocation>${project.parent.parent.basedir}/checkstyle.xml</configLocation>
+                                <suppressionsLocation>${project.parent.parent.basedir}/suppressions.xml</suppressionsLocation>
                                 <encoding>UTF-8</encoding>
                                 <consoleOutput>true</consoleOutput>
                                 <failsOnError>true</failsOnError>
                                 <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                                <excludes>**/gen/**/*</excludes>
                             </configuration>
                             <goals>
                                 <goal>check</goal>
@@ -415,6 +399,12 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.apicurio</groupId>
+                <artifactId>apicurio-data-models</artifactId>
+                <version>1.1.5</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.agent</artifactId>
                 <classifier>runtime</classifier>
@@ -432,6 +422,18 @@
                 <groupId>org.wso2.carbon.messaging</groupId>
                 <artifactId>org.wso2.carbon.andes</artifactId>
                 <version>${carbon.broker.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.andes.wso2</groupId>
+                <artifactId>andes-client</artifactId>
+                <version>${carbon.broker.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-transport-base</artifactId>
+                <version>${axis2.wso2.version}</version>
             </dependency>
 
             <dependency>
@@ -537,13 +539,6 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.api</artifactId>
@@ -565,6 +560,12 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
@@ -634,6 +635,17 @@
                 <artifactId>org.wso2.carbon.apimgt.hybrid.gateway.common</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.hybrid.gateway.usage.publisher</artifactId>
@@ -698,20 +710,13 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.admin</artifactId>
-                <type>war</type>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.rest.api.admin.v1</artifactId>
                 <type>war</type>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.rest.api.gateway.v1</artifactId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.gateway</artifactId>
                 <type>war</type>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
@@ -738,7 +743,18 @@
                 <artifactId>org.wso2.carbon.apimgt.throttle.policy.deployer</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>war</type>
+            </dependency>
 
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
@@ -1131,6 +1147,20 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.service.catalog.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.persistence.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.ws.commons.axiom.wso2</groupId>
                 <artifactId>axiom</artifactId>
                 <version>${orbit.version.axiom}</version>
@@ -1146,19 +1176,6 @@
                 <groupId>org.wso2.carbon.commons</groupId>
                 <artifactId>org.wso2.carbon.application.mgt.stub</artifactId>
                 <version>${carbon.commons.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.forum</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.forum.server.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
             </dependency>
 
             <dependency>
@@ -1469,11 +1486,7 @@
                 <version>${carbon.metrics.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.throttle.service.interceptors</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.wso2.wsdl4j</groupId>
                 <artifactId>wsdl4j.wso2</artifactId>
@@ -1595,6 +1608,12 @@
                 <scope>compile</scope>
             </dependency>
             <dependency>
+                <groupId>io.opentracing</groupId>
+                <artifactId>opentracing-api</artifactId>
+                <version>${opentracing.mock.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.orbit.re2j</groupId>
                 <artifactId>re2j</artifactId>
                 <version>${re2j.version}</version>
@@ -1628,7 +1647,6 @@
                 <groupId>org.wso2.orbit.org.everit.json</groupId>
                 <artifactId>org.everit.json.schema</artifactId>
                 <version>${everit.version}</version>
-                <scope>compile</scope>
             </dependency>
             <dependency>
                 <groupId>org.wso2.securevault</groupId>
@@ -1768,9 +1786,44 @@
                 <version>${servicemix.bundles.jedis.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.orbit.org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${org.wso2.orbit.org.mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${org.mapstruct.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>javax.cache.wso2</artifactId>
                 <version>${carbon.kernel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.am.analytics.publisher</groupId>
+                <artifactId>org.wso2.am.analytics.publisher.client</artifactId>
+                <version>${analytics.event.publisher.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
+                <artifactId>swagger-request-validator-core</artifactId>
+                <version>${org.wso2.orbit.atlassian.oai.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.jms</groupId>
+                <artifactId>javax.jms-api</artifactId>
+                <version>${javax.jms.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1783,18 +1836,20 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.8.139-SNAPSHOT</carbon.apimgt.version>
-        <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
+        <carbon.apimgt.version>9.0.100-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <carbon.analytics.common.version>5.2.27</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.2.34</carbon.analytics.common.version>
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.6.1</carbon.kernel.version>
         <carbon.kernel.feature.version>4.6.1</carbon.kernel.feature.version>
         <carbon.kernel.package.import.version.range>[4.5.0, 5.0.0)</carbon.kernel.package.import.version.range>
 
         <carbon.commons.version>4.7.35</carbon.commons.version>
-        <carbon.registry.version>4.7.35</carbon.registry.version>
-        <carbon.mediation.version>4.7.61</carbon.mediation.version>
+        <carbon.registry.version>4.7.38</carbon.registry.version>
+        <carbon.mediation.version>4.7.87</carbon.mediation.version>
+
+        <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
         <!-- Carbon Identity versions -->
         <carbon.identity.version>5.18.187</carbon.identity.version>
@@ -1815,8 +1870,8 @@
         <graphql.java.version>13.0.wso2v2</graphql.java.version>
 
         <carbon.governance.version>4.8.19</carbon.governance.version>
-        <carbon.deployment.version>4.11.0</carbon.deployment.version>
-        <carbon.multitenancy.version>4.9.8</carbon.multitenancy.version>
+        <carbon.deployment.version>4.11.1</carbon.deployment.version>
+        <carbon.multitenancy.version>4.9.10</carbon.multitenancy.version>
         <wso2-uri-templates.version>1.6.5</wso2-uri-templates.version>
         <apimserver.version>1.10.0</apimserver.version>
         <siddhi.version>3.2.6</siddhi.version>
@@ -1868,7 +1923,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.14.12</jaggery.version>
+        <jaggery.version>0.14.13</jaggery.version>
 
 	<!-- OSGi -->
         <imp.package.version.osgi.service>[1.2.0,1.3.0)</imp.package.version.osgi.service>
@@ -1876,7 +1931,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-	    <synapse.version>2.1.7-wso2v183</synapse.version>
+	    <synapse.version>2.1.7-wso2v210</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
@@ -1902,7 +1957,7 @@
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
         <owasp.encoder.version>1.2.2</owasp.encoder.version>
 
-        <httpclient.version>4.3.6.wso2v2</httpclient.version>
+        <httpclient.version>4.3.6.wso2v3</httpclient.version>
         <wss4j.version>1.5.11-wso2v18</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
@@ -1924,6 +1979,7 @@
         <openapi.generator.version>4.3.1.wso2v2</openapi.generator.version>
         <caffeine.version>2.8.1</caffeine.version>
         <cal10n.version>0.8.1</cal10n.version>
+        <commons-lang.version>2.4</commons-lang.version>
 
         <!-- imp package version ranges -->
         <imp.pkg.version.axis2>[1.6.1, 1.7.0)</imp.pkg.version.axis2>
@@ -1964,13 +2020,13 @@
         <fasterxml.jackson.databind.version>2.10.3</fasterxml.jackson.databind.version>
         <fasterxml.jackson.core.version>2.9.8.wso2v1</fasterxml.jackson.core.version>
         <javax.validation-api>1.1.0.Final</javax.validation-api>
-        <carbon.broker.version>3.3.12</carbon.broker.version>
+        <carbon.broker.version>3.3.14</carbon.broker.version>
         <waffle-jna.version>1.6.wso2v6</waffle-jna.version>
         <version.snake.yaml>1.26</version.snake.yaml>
         <wsdl4j.version>1.6.3.wso2v3</wsdl4j.version>
         <slf4j.test.version>1.7.29</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
-        <jacoco.version>0.7.9</jacoco.version>
+        <jacoco.version>0.8.0</jacoco.version>
         <xml-apis.version>1.4.01</xml-apis.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <wiremock.version>2.5.0</wiremock.version>
@@ -2002,7 +2058,7 @@
         <opentracing.api.version>0.31.0</opentracing.api.version>
         <opentracing.mock.version>0.31.0</opentracing.mock.version>
         <aspectj.version>1.9.5</aspectj.version>
-        <everit.version>1.5.0.wso2.v1</everit.version>
+        <everit.version>1.5.0.wso2.v2</everit.version>
         <json.orbit.version>3.0.0.wso2v1</json.orbit.version>
         <aspectj.version>1.9.4</aspectj.version>
         <wso2.securevault.version>1.1.3</wso2.securevault.version>
@@ -2030,5 +2086,13 @@
         <maven.spotbugsplugin.version>3.1.10</maven.spotbugsplugin.version>
         <maven.checkstyle.plugin.version>3.0.0</maven.checkstyle.plugin.version>
         <version.checkstyle>8.34</version.checkstyle>
+        <org.wso2.orbit.org.mapstruct.version>1.4.1.wso2v1</org.wso2.orbit.org.mapstruct.version>
+        <org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
+        <analytics.event.publisher.client.version>1.0.0-BETA</analytics.event.publisher.client.version>
+        <analytics.event.publisher.client.version.range>[1.0.0,2.0.0)</analytics.event.publisher.client.version.range>
+        <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
+        <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
+        <skip.aspectj>false</skip.aspectj>
+        <javax.jms.version>2.0.1</javax.jms.version>
     </properties>
 </project>

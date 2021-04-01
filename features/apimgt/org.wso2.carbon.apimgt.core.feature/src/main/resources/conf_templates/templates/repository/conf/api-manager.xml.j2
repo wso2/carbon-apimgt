@@ -32,7 +32,7 @@
         <Password>${admin.password}</Password>
         <!-- Indicates whether the permissions checking of the user (on the Publisher and Developer Portal) should be done
            via a remote service. The check will be done on the local server when false. -->
-        <CheckPermissionsRemotely>false</CheckPermissionsRemotely>
+        <CheckPermissionsRemotely>{{apim.auth_manager.check_permissions_remotely}}</CheckPermissionsRemotely>
         <!-- Indicates whether the authentication endpoint has been reverse proxied through the Gateway when using
              APIM with IS-KM. -->
         {% if apim.auth_manager.iskm_reverseproxy_enabled is defined %}
@@ -128,6 +128,7 @@
             {% for environment_name in apim.gateway.environment%}
             <Environment type="{{environment_name.type}}" api-console="{{environment_name.display_in_api_console}}" isDefault="{{environment_name.show_as_token_endpoint_url}}">
                 <Name>{{environment_name.name}}</Name>
+                <DisplayName>{{environment_name.display_name}}</DisplayName>
                 <Description>{{environment_name.description}}</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>{{environment_name.service_url}}</ServerURL>
@@ -155,6 +156,16 @@
                 {% else %}
                 <GatewayWSEndpoint></GatewayWSEndpoint>
                 {% endif %}
+                <VirtualHosts>
+                    {% for vhost in environment_name.virtual_host %}
+                    <VirtualHost>
+                        <HttpEndpoint>{{vhost.http_endpoint}}</HttpEndpoint>
+                        <HttpsEndpoint>{{vhost.https_endpoint}}</HttpsEndpoint>
+                        <WsEndpoint>{{vhost.ws_endpoint}}</WsEndpoint>
+                        <WssEndpoint>{{vhost.wss_endpoint}}</WssEndpoint>
+                    </VirtualHost>
+                    {% endfor %}
+                </VirtualHosts>
             </Environment>
             {% endfor %}
         </Environments>
@@ -253,104 +264,27 @@
     <Analytics>
         <!-- Enable Analytics for API Manager -->
         <Enabled>{{apim.analytics.enable}}</Enabled>
-        <!-- Server URL of the remote StreamProcessor server used to collect statistics. Must
-             be specified in protocol://hostname:port/ format.
 
-             An event can also be published to multiple Receiver Groups each having 1 or more receivers. Receiver
-             Groups are delimited by curly braces whereas receivers are delimited by commas.
-             Ex - Multiple Receivers within a single group
-             tcp://localhost:7612/,tcp://localhost:7613/,tcp://localhost:7614/
+        <AuthToken>{{apim.analytics.auth_token}}</AuthToken>
 
-             Ex - Multiple Receiver Groups with two receivers each
-             {tcp://localhost:7612/,tcp://localhost:7613},{tcp://localhost:7712/,tcp://localhost:7713/} -->
-        {% if apim.analytics.receiver_urls is defined %}
-        <StreamProcessorServerURL>{{apim.analytics.receiver_urls}}</StreamProcessorServerURL>
-        {% elif apim.analytics.url_group is defined %}
-        <StreamProcessorServerURL>
-            {%- for group in apim.analytics.url_group -%}
-            {%- if group.type == "loadbalance" -%}
-            { {{- group.analytics_url.toList()|join(',') -}} }
-            {%- else -%}{ {{- group.analytics_url.toList()|join('|') -}} }
-            {%- endif -%}
-            {{- "," if not loop.last -}}
-            {%- endfor -%}
-        </StreamProcessorServerURL>
-        {% else %}
-        <StreamProcessorServerURL>{tcp://localhost:7612}</StreamProcessorServerURL>
+        {% if apim.analytics.response_schema_name is defined %}
+        <ResponseSchemaName>{{apim.analytics.response_schema_name}}</ResponseSchemaName>
+        {% endif %}
+        {% if apim.analytics.fault_schema_name is defined %}
+        <FaultSchemaName>{{apim.analytics.fault_schema_name}}</FaultSchemaName>
         {% endif %}
 
-
-        {% if apim.analytics.receiver_auth_urls is defined %}
-        <StreamProcessorAuthServerURL>{{apim.analytics.receiver_auth_urls}}</StreamProcessorAuthServerURL>
-        {% elif apim.analytics.url_group is defined%}
-        <StreamProcessorAuthServerURL>
-            {%- for group in apim.analytics.url_group -%}
-            {%- if group.type == "loadbalance" -%}
-            { {{- group.analytics_auth_url.toList()|join(',') -}} }
-            {%- else -%}{ {{- group.analytics_auth_url.toList()|join('|') -}} }
-            {%- endif -%}
-            {{- "," if not loop.last -}}
-            {%- endfor -%}
-        </StreamProcessorAuthServerURL>
+        <!-- Event publisher implementation -->
+        {% if apim.analytics.reporter_impl is defined %}
+        <ReporterClass>{{apim.analytics.reporter_impl}}</ReporterClass>
         {% endif %}
-        <!-- Administrator username to login to the remote StreamProcessor server. -->
-        <StreamProcessorUsername>{{apim.analytics.receiver_username}}</StreamProcessorUsername>
 
-        <!-- Administrator password to login to the remote StreamProcessor server. -->
-        <StreamProcessorPassword>{{apim.analytics.receiver_password}}</StreamProcessorPassword>
-
-        <!-- For APIM implemented Statistic client for RDBMS -->
-        <StatsProviderImpl>{{apim.analytics.provider_impl}}</StatsProviderImpl>
-
-        <!-- StreamProcessor REST API configuration -->
-        <StreamProcessorRestApiURL>{{apim.analytics.store_api_url}}</StreamProcessorRestApiURL>
-
-        <StreamProcessorRestApiUsername>{{apim.analytics.store_api_username}}</StreamProcessorRestApiUsername>
-
-        <StreamProcessorRestApiPassword>{{apim.analytics.store_api_password}}</StreamProcessorRestApiPassword>
-
-        <!-- Below property is used to skip trying to connect to event receiver nodes when publishing events even if
-            the stats enabled flag is set to true. -->
-        <SkipEventReceiverConnection>false</SkipEventReceiverConnection>
-
-        <!--Skip workflow data publisher initiation and even publishing-->
-        <SkipWorkflowEventPublisher>true</SkipWorkflowEventPublisher>
-
-        <!-- API Usage Data Publisher. -->
-        <PublisherClass>{{apim.analytics.event_publisher_impl}}</PublisherClass>
-
-        <!-- If below property set to true,then the response message size will be calculated and publish
-             with each successful API invocation event. -->
-        <PublishResponseMessageSize>{{apim.analytics.publish_response_size}}</PublishResponseMessageSize>
-        <!-- Data publishing stream names and versions of API requests, responses and faults. If the default values
-            are changed, the toolbox also needs to be changed accordingly. -->
-
-        <Streams>
-            <Request>
-                <Name>org.wso2.apimgt.statistics.request</Name>
-                <Version>3.2.0</Version>
-            </Request>
-            <Fault>
-                <Name>org.wso2.apimgt.statistics.fault</Name>
-                <Version>3.2.0</Version>
-            </Fault>
-            <Throttle>
-                <Name>org.wso2.apimgt.statistics.throttle</Name>
-                <Version>3.2.0</Version>
-            </Throttle>
-            <Workflow>
-                <Name>org.wso2.apimgt.statistics.workflow</Name>
-                <Version>1.0.0</Version>
-            </Workflow>
-            <AlertTypes>
-                <Name>org.wso2.analytics.apim.alertStakeholderInfo</Name>
-                <Version>1.0.1</Version>
-            </AlertTypes>
-            <botData>
-                <Name>org.wso2.botDetectionData.request.stream</Name>
-                <Version>1.0.0</Version>
-            </botData>
-        </Streams>
+        <!-- Properties for Event publisher implementation -->
+        <Properties>
+            {% for key,value in apim.analytics.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </Properties>
 
     </Analytics>
 
@@ -421,6 +355,8 @@
         org.wso2.carbon.identity.oauth.tokenprocessor.HashingPersistenceProcessor and change the value of
         <EnableClientSecretHash> to true in the identity.xml -->
         <EnableTokenHashMode>{{apim.oauth_config.enable_token_hashing}}</EnableTokenHashMode>
+        <!-- Whether to validate certificate bound access tokens-->
+        <EnableCertificateBoundAccessToken>{{apim.oauth_config.enable_certificate_bound_access_token}}</EnableCertificateBoundAccessToken>
 
     </OAuthConfigurations>
 
@@ -462,7 +398,7 @@
         <DefaultGroupExtractorClaimUri>{{apim.devportal.application_sharing_claim}}</DefaultGroupExtractorClaimUri>
         <!--This property is used to indicate how we do user name comparision for token generation https://wso2.org/jira/browse/APIMANAGER-2225-->
         <CompareCaseInsensitively>{{apim.devportal.login_username_case_insensitive}}</CompareCaseInsensitively>
-        <DisplayURL>false</DisplayURL>
+        <DisplayURL>{{apim.devportal.display_url}}</DisplayURL>
         <URL>{{apim.devportal.url}}</URL>
 
         <!-- Server URL of the API Developer Portal. -->
@@ -497,15 +433,18 @@
         <MapExistingAuthApps>{{apim.devportal.enable_key_provisioning}}</MapExistingAuthApps>
 
         <!--This parameter specifies the alias value of the Api Key which will be used for Api Key Authentication-->
+        <APIKeyKeystore>{{apim.devportal.api_key_keystore}}</APIKeyKeystore>
         <ApiKeyAlias>{{apim.devportal.api_key_alias}}</ApiKeyAlias>
+        <ApiKeyGeneratorImpl>{{apim.devportal.api_key_generator_impl}}</ApiKeyGeneratorImpl>
 
         <!--This parameter specifies whether Anonymous Mode is enabled. By default it is true.-->
         <EnableAnonymousMode>{{apim.devportal.enable_anonymous_mode}}</EnableAnonymousMode>
         <EnableCrossTenantSubscription>{{apim.devportal.enable_cross_tenant_subscriptions}}</EnableCrossTenantSubscription>
+        <DefaultReservedUsername>{{apim.devportal.default_reserved_username}}</DefaultReservedUsername>
     </APIStore>
 
     <APIPublisher>
-        <DisplayURL>false</DisplayURL>
+        <DisplayURL>{{apim.publisher.display_url}}</DisplayURL>
         <URL>https://localhost:${mgt.transport.https.port}/publisher</URL>
         <!-- This parameter specifies enabling the capability of setting API documentation level granular visibility levels.
              By default any document associate with an API will have the same permissions set as the API.With enabling below
@@ -518,6 +457,8 @@
         <EnableAccessControl>true</EnableAccessControl>
         <!-- This property is to add the claims that needs to be displayed in Publisher -->
         <SubscriberClaims>{{apim.publisher.subscriber_claims}}</SubscriberClaims>
+         <!--This parameter specifies the alias value of the internal Api Key which will be used for Api Key Authentication-->
+        <InternalKeyAlias>{{apim.publisher.key_alias}}</InternalKeyAlias>
     </APIPublisher>
 
     <!-- Status observers can be registered against the API Publisher to listen for
@@ -572,7 +513,7 @@
             {% endfor %}
          {% endif %}
              <AllowedURI>
-                <URI>/api/am/store/{version}/tenants</URI>
+                <URI>/api/am/devportal/{version}/tenants</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
              </AllowedURI>
             <AllowedURI>
@@ -580,7 +521,7 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/swagger.json</URI>
+                <URI>/api/am/devportal/{version}/swagger.json</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -592,7 +533,7 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/swagger.yaml</URI>
+                <URI>/api/am/devportal/{version}/swagger.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -600,111 +541,111 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis</URI>
+                <URI>/api/am/devportal/{version}/apis</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/swagger</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/wsdl</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/wsdl</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/comments</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/comments</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/comments/{commentId}</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/comments/{commentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                 <URI>/api/am/store/{version}/apis/{apiId}/subscription-policies</URI>
+                 <URI>/api/am/devportal/{version}/apis/{apiId}/subscription-policies</URI>
                  <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/throttling-policies/{policyLevel}</URI>
+                <URI>/api/am/devportal/{version}/throttling-policies/{policyLevel}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/throttling-policies/{policyLevel}/{policyId}</URI>
+                <URI>/api/am/devportal/{version}/throttling-policies/{policyLevel}/{policyId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                 <URI>/api/am/store/{version}/apis/{apiId}/graphql-schema</URI>
+                 <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-schema</URI>
                  <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents/{documentId}/content</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/thumbnail</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/ratings</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/ratings</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products</URI>
+                <URI>/api/am/devportal/{version}/api-products</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/swagger</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/documents</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/documents</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/documents/{documentId}</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/documents/{documentId}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/documents/{documentId}/content</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/documents/{documentId}/content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-products/{apiId}/thumbnail</URI>
+                <URI>/api/am/devportal/{version}/api-products/{apiId}/thumbnail</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/tags</URI>
+                <URI>/api/am/devportal/{version}/tags</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/search</URI>
+                <URI>/api/am/devportal/{version}/search</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/settings</URI>
+                <URI>/api/am/devportal/{version}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
@@ -716,57 +657,61 @@
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/endpoint-registry/{version}/settings</URI>
+                <URI>/api/am/service-catalog/{serviceCatalogVersion}/settings</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/api-categories</URI>
+                <URI>/api/am/devportal/{version}/api-categories</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/graphql-policies/complexity</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-policies/complexity</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/graphql-policies/complexity/types</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/graphql-policies/complexity/types</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/service-catalog/{serviceCatalogVersion}/oas.yaml</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/apis</URI>
+                <URI>/api/am/devportal/{version}/apis</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/apis/generate-sdk</URI>
+                <URI>/api/am/devportal/{version}/apis/generate-sdk</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/apis/{apiId}/documents</URI>
+                <URI>/api/am/devportal/{version}/apis/{apiId}/documents</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/applications</URI>
+                <URI>/api/am/devportal/{version}/applications</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/applications/generate-keys</URI>
+                <URI>/api/am/devportal/{version}/applications/generate-keys</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/subscriptions</URI>
+                <URI>/api/am/devportal/{version}/subscriptions</URI>
                 <HTTPMethods>GET,POST</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/tags</URI>
+                <URI>/api/am/devportal/{version}/tags</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
-                <URI>/api/am/store/{version}/tiers/{tierLevel}/{tierName}</URI>
+                <URI>/api/am/devportal/{version}/tiers/{tierLevel}/{tierName}</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </ETagSkipURI>
             <ETagSkipURI>
@@ -990,10 +935,12 @@
     <Monetization>
         <MonetizationImpl>{{apim.monetization.monetization_impl}}</MonetizationImpl>
         <UsagePublisher>
-            <Granularity>{{apim.monetization.granularity}}</Granularity>
-            <!--Number of days to reduce from the current time to get the last publish time of monetization
-            usgae publish job, when there is no record of the last publish time.-->
-            <PublishTimeDurationInDays>{{apim.monetization.publish_duration}}</PublishTimeDurationInDays>
+             {% if apim.monetization.analytics_query_api_endpoint is defined %}
+                   <AnalyticsQueryAPIEndpoint>{{apim.monetization.analytics_query_api_endpoint}}</AnalyticsQueryAPIEndpoint>
+             {% endif %}
+             {% if apim.monetization.analytics_access_token is defined %}
+                    <AnalyticsAccessToken>{{apim.monetization.analytics_access_token}}</AnalyticsAccessToken>
+             {% endif %}
         </UsagePublisher>
         {% if apim.monetization.additional_attributes is defined %}
             <AdditionalAttributes>
@@ -1310,6 +1257,54 @@
         {% if apim.sync_runtime_artifacts.gateway.event_waiting_time is defined %}
         <EventWaitingTime>{{apim.sync_runtime_artifacts.gateway.event_waiting_time}}</EventWaitingTime>
         {% endif %}
+        <SkipList>
+        <APIS>
+            <API>_OpenService_.xml</API>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.apis is defined %}
+            {%- for api in apim.sync_runtime_artifacts.gateway.skip_list.apis -%}
+            <API>{{api}}</API>
+            {% endfor %}
+        {% endif %}
+        </APIS>
+        <Endpoints>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.endpoints is defined %}
+            {%- for endpoint in apim.sync_runtime_artifacts.gateway.skip_list.endpoints -%}
+            <Endpoint>{{endpoint}}</Endpoint>
+            {% endfor %}
+         {% endif %}
+        </Endpoints>
+        <Sequences>
+            <Sequence>_auth_failure_handler_.xml</Sequence>
+            <Sequence>_build_.xml</Sequence>
+            <Sequence>_cors_request_handler_.xml</Sequence>
+            <Sequence>dispatchSeq.xml</Sequence>
+            <Sequence>fault.xml</Sequence>
+            <Sequence>_graphql_failure_handler_.xml</Sequence>
+            <Sequence>main.xml</Sequence>
+            <Sequence>outDispatchSeq.xml</Sequence>
+            <Sequence>_production_key_error_.xml</Sequence>
+            <Sequence>_resource_mismatch_handler_.xml</Sequence>
+            <Sequence>_sandbox_key_error_.xml</Sequence>
+            <Sequence>_threat_fault_.xml</Sequence>
+            <Sequence>_throttle_out_handler_.xml</Sequence>
+            <Sequence>_token_fault_.xml</Sequence>
+            <Sequence>webhooksFaultSequence.xml</Sequence>
+            <Sequence>_block_api_handler_.xml</Sequence>
+            <Sequence>_backend_failure_handler_.xml</Sequence>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
+            {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
+            <Sequence>{{sequence}}</Sequence>
+            {% endfor %}
+         {% endif %}
+        </Sequences>
+        <LocalEntries>
+        {% if apim.sync_runtime_artifacts.gateway.skip_list.local_entries is defined %}
+            {%- for local_entry in apim.sync_runtime_artifacts.gateway.skip_list.local_entries -%}
+            <LocalEntry>{{local_entry}}</LocalEntry>
+            {% endfor %}
+         {% endif %}
+        </LocalEntries>
+        </SkipList>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 
@@ -1334,8 +1329,25 @@
          </ContainerMgtInfo>
          {% endfor %}
      </ContainerMgt>
-
+    <ProxyConfig>
+        <Enable>{{apim.proxy_config.enable}}</Enable>
+        <Host>{{apim.proxy_config.host}}</Host>
+        <Port>{{apim.proxy_config.port}}</Port>
+        <Username>{{apim.proxy_config.username}}</Username>
+        <Password>{{apim.proxy_config.password}}</Password>
+    </ProxyConfig>
      <!--This parameter is used to Enable the password changing feature in devportal. When this is enabled, a user can
       change his/her password via devportal. By default this feature is enabled.-->
      <EnableChangePassword>{{apim.enable_change_password}}</EnableChangePassword>
+
+    {% if apim.extension.listener is defined %}
+    <ExtensionListeners>
+        {%- for listener in apim.extension.listener -%}
+        <ExtensionListener>
+            <Type>{{listener.type}}</Type>
+            <ClassName>{{listener.class}}</ClassName>
+        </ExtensionListener>
+        {% endfor %}
+    </ExtensionListeners>
+    {% endif %}
 </APIManager>

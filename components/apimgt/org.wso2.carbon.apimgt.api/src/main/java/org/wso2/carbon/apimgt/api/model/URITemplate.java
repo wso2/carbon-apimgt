@@ -191,10 +191,12 @@ public class URITemplate implements Serializable{
         httpVerbs.add(httpVerb);
     }
 
-    public String getHttpVerbs() {
+    public LinkedHashSet<String> getHttpVerbs() {
 
-        return httpVerb;
+        return httpVerbs;
     }
+
+
 
     public void setAuthTypes(String authType) {
 
@@ -265,8 +267,8 @@ public class URITemplate implements Serializable{
     public Scope getScope() {
         return scope;
     }
-    public Scope getScopes() {
-        return scope;
+    public List<Scope> getScopes() {
+        return scopes;
     }
 
     public void setScope(Scope scope) {

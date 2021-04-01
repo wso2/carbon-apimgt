@@ -15,12 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
@@ -43,9 +43,27 @@ import ProvideGraphQL from './Steps/ProvideGraphQL';
  * @returns
  */
 export default function ApiCreateGraphQL(props) {
+    const intl = useIntl();
     const [wizardStep, setWizardStep] = useState(0);
     const { history } = props;
     const { settings } = useAppContext();
+    const [policies, setPolicies] = useState([]);
+
+    useEffect(() => {
+        API.policies('subscription').then((response) => {
+            const allPolicies = response.body.list;
+            if (allPolicies.length === 0) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Create.GraphQL.ApiCreateGraphQL.error.policies.not.available',
+                    defaultMessage: 'Throttling policies not available. Contact your administrator',
+                }));
+            } else if (allPolicies.filter((p) => p.name === 'Unlimited').length > 0) {
+                setPolicies(['Unlimited']);
+            } else {
+                setPolicies([allPolicies[0].name]);
+            }
+        });
+    }, []);
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -62,7 +80,6 @@ export default function ApiCreateGraphQL(props) {
             case 'version':
             case 'endpoint':
             case 'context':
-            case 'policies':
             case 'isFormValid':
                 return { ...currentState, [action]: value };
             case 'inputType':
@@ -124,7 +141,6 @@ export default function ApiCreateGraphQL(props) {
             version,
             context,
             endpoint,
-            policies,
             implementationType,
             inputValue,
             graphQLInfo: { operations },

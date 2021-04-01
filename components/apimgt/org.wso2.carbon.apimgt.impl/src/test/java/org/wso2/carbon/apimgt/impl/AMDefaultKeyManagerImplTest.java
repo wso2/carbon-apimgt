@@ -81,6 +81,7 @@ public class AMDefaultKeyManagerImplTest {
     @Test
     public void testCreateApplication() throws APIManagementException, KeyManagerClientException {
 
+        PowerMockito.mockStatic(APIUtil.class);
         System.setProperty("carbon.home", "jhkjn");
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         OAuthAppRequest oauthRequest = new OAuthAppRequest();
@@ -95,6 +96,7 @@ public class AMDefaultKeyManagerImplTest {
         oauthRequest.setMappingId("123");
         oauthRequest.setOAuthApplicationInfo(oauthApplication);
 
+        PowerMockito.when(APIUtil.isCrossTenantSubscriptionsEnabled()).thenReturn(false);
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         ClientInfo response = new ClientInfo();
         response.setClientId(CLIENT_ID);

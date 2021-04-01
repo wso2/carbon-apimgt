@@ -35,6 +35,10 @@
         "Roles": "admin,Internal/creator"
       },
       {
+        "Name": "apim:api_generate_key",
+        "Roles": "admin,Internal/creator"
+      },
+      {
         "Name": "apim:api_view",
         "Roles": "admin,Internal/publisher,Internal/creator,Internal/analytics"
       },
@@ -44,7 +48,7 @@
       },
       {
         "Name": "apim:subscribe",
-        "Roles": "admin,Internal/subscriber"
+        "Roles": "admin,Internal/subscriber,Internal/devops"
       },
       {
         "Name": "apim:tier_view",
@@ -276,6 +280,18 @@
       },
       {
         "Name": "apim:scope_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:role_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:environment_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:environment_read",
         "Roles": "admin"
       }
     ]

@@ -411,7 +411,7 @@ class Listing extends Component {
                             <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='applications' />
                         </div>
                         <div className={classes.mainTitleWrapper}>
-                            <Typography variant='h4' className={classes.mainTitle}>
+                            <Typography variant='h4' component='h1' className={classes.mainTitle}>
                                 <FormattedMessage
                                     id='Applications.Listing.Listing.applications'
                                     defaultMessage='Applications'
@@ -422,7 +422,7 @@ class Listing extends Component {
                                     resourcePath={resourcePaths.APPLICATIONS}
                                     resourceMethod={resourceMethods.POST}
                                 >
-                                    <Link to='/applications/create'>
+                                    <Link id="itest-application-create-link" to='/applications/create'>
                                         <Button
                                             variant='contained'
                                             color='primary'
@@ -459,6 +459,11 @@ class Listing extends Component {
                                 <Grid item xs>
                                     <TextField
                                         fullWidth
+                                        id='search-label'
+                                        label={intl.formatMessage({
+                                            defaultMessage: 'Search',
+                                            id: 'Applications.Listing.Listing.applications.search.label',
+                                        })}
                                         placeholder="Search application by name"
                                         InputProps={{
                                             disableUnderline: true,
@@ -495,7 +500,7 @@ class Listing extends Component {
                         {data.size > 0 ? (
                             <div className={classes.appContent}>
                                 <Paper className={classes.appTablePaper}>
-                                    <Table>
+                                    <Table id='itest-application-list-table'>
                                         <ApplicationTableHead
                                             order={order}
                                             orderBy={orderBy}

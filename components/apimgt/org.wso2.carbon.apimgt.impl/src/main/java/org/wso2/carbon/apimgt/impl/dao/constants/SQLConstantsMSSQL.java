@@ -51,9 +51,9 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID COLLATE Latin1_General_CS_AS =?))" +
             " And " +
             "    NAME like ?" +
-            " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
-            " ORDER BY $1 $2 ";
+            " ) a " +
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+            " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
 
@@ -85,7 +85,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
-            " ORDER BY $1 $2 ";
+            " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
@@ -117,10 +117,9 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " And "+
-                    "    NAME like ?" +
-                    " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
-                    " ORDER BY $1 $2 ";
+                    "    NAME like ? ) a " +
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+                    " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
 
@@ -156,9 +155,9 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     " )" +
                     " And " +
                     "    NAME like ?"+
-                    " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
-                    " ORDER BY $1 $2 ";
+                    " ) a " +
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+                    " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
@@ -186,9 +185,9 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "    SUB.USER_ID COLLATE Latin1_General_CS_AS =?"+
             " And "+
             "    NAME like ?"+
-            " ) a WHERE a.row > ? and a.row <= ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
-            " ORDER BY $1 $2 ";
+            " )a " +
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+            " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
@@ -216,9 +215,9 @@ public class SQLConstantsMSSQL extends SQLConstants{
             "    LOWER(SUB.USER_ID) = LOWER(?)" +
             " And "+
             "    NAME like ?"+
-            " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
-            " ORDER BY $1 $2 ";
+            " ) a " +
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)" +
+            " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
             "select distinct x.* from (" +
@@ -243,10 +242,53 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
                     " OR APP.NAME like ?"+
-                    " )) a WHERE a.row > ? and a.row <= a.row + ?"+
-                    " )x"+
-                    " ORDER BY $1 $2 ";
+                    " )) a " +
+                    " )x" +
+                    " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
+    public static final String GET_REPLIES_SQL =
+            "SELECT " +
+                "AM_API_COMMENTS.COMMENT_ID, " +
+                "AM_API_COMMENTS.COMMENT_TEXT, " +
+                "AM_API_COMMENTS.CREATED_BY, " +
+                "AM_API_COMMENTS.CREATED_TIME, " +
+                "AM_API_COMMENTS.UPDATED_TIME, " +
+                "AM_API_COMMENTS.API_ID, " +
+                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
+                "AM_API_COMMENTS.ENTRY_POINT, " +
+                "AM_API_COMMENTS.CATEGORY " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID = ? " +
+                "ORDER BY AM_API_COMMENTS.CREATED_TIME ASC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String GET_ROOT_COMMENTS_SQL =
+            "SELECT " +
+                "AM_API_COMMENTS.COMMENT_ID, " +
+                "AM_API_COMMENTS.COMMENT_TEXT, " +
+                "AM_API_COMMENTS.CREATED_BY, " +
+                "AM_API_COMMENTS.CREATED_TIME, " +
+                "AM_API_COMMENTS.UPDATED_TIME, " +
+                "AM_API_COMMENTS.API_ID, " +
+                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
+                "AM_API_COMMENTS.ENTRY_POINT, " +
+                "AM_API_COMMENTS.CATEGORY " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID IS NULL " +
+                "ORDER BY AM_API_COMMENTS.CREATED_TIME DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 }
 
 

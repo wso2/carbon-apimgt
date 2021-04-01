@@ -42,13 +42,17 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -60,12 +64,11 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.registry.api.Collection;
-import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -81,6 +84,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class uses for Export API functionality.
+ */
 public class ExportUtils {
 
     private static final Log log = LogFactory.getLog(ExportUtils.class);
@@ -89,7 +95,7 @@ public class ExportUtils {
     private static final String SOAPTOREST = "SoapToRest";
 
     /**
-     * Validate name, version and provider before exporting an API/API Product
+     * Validate name, version and provider before exporting an API/API Product.
      *
      * @param name         API/API Product Name
      * @param version      API/API Product version
@@ -132,20 +138,29 @@ public class ExportUtils {
      * Exports an API from API Manager for a given API. Meta information, API icon, documentation,
      * WSDL and sequences are exported.
      *
-     * @param apiProvider    API Provider
-     * @param apiIdentifier  API Identifier
-     * @param apiDtoToReturn API DTO
-     * @param userName       Username
-     * @param exportFormat   Format of output documents. Can be YAML or JSON
-     * @param preserveStatus Preserve API status on export
+     * @param apiProvider          API Provider
+     * @param apiIdentifier        API Identifier
+     * @param apiDtoToReturn       API DTO
+     * @param userName             Username
+     * @param exportFormat         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus       Preserve API status on export
+     * @param preserveDocs         Preserve documentation on Export.
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
-    public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn,
-            String userName, ExportFormat exportFormat, boolean preserveStatus, boolean preserveDocs)
+    public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
+                                 String userName, ExportFormat exportFormat, boolean preserveStatus,
+                                 boolean preserveDocs, String originalDevPortalUrl)
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
+        // If explicitly advertise only property has been specified as true, make it true and update the API DTO.
+        if (StringUtils.isNotBlank(originalDevPortalUrl)) {
+            setAdvertiseOnlySpecificPropertiesToDTO(apiDtoToReturn, originalDevPortalUrl);
+        }
+
         try {
             // Create temp location for storing API data
             File exportFolder = CommonUtil.createTempDirectory(apiIdentifier);
@@ -162,38 +177,56 @@ public class ExportUtils {
             }
             addSOAPToRESTMediationToArchive(archivePath, apiIdentifier, registry);
             if (preserveDocs) {
-                addDocumentationToArchive(archivePath, apiIdentifier, registry, exportFormat, apiProvider);
+                addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
+                        APIConstants.API_IDENTIFIER_TYPE);
             }
 
             if (StringUtils.isNotEmpty(apiDtoToReturn.getWsdlUrl()) && preserveDocs) {
-                addWSDLtoArchive(archivePath, apiIdentifier, registry);
+                addWSDLtoArchive(archivePath, apiIdentifier, apiProvider);
             } else if (log.isDebugEnabled()) {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
             }
-
-            addSequencesToArchive(archivePath, apiIdentifier, apiDtoToReturn, registry, apiProvider);
 
             // Set API status to created if the status is not preserved
             if (!preserveStatus) {
                 apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
             }
 
-            addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
-            addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
+            addGatewayEnvironmentsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
 
-            // Export mTLS authentication related certificates
-            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
+            if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
+                addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
+                addSequencesToArchive(archivePath, api);
+                // Export mTLS authentication related certificates
                 if (log.isDebugEnabled()) {
                     log.debug("Mutual SSL enabled. Exporting client certificates.");
                 }
                 addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat);
             }
+            addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier);
             CommonUtil.archiveDirectory(exportAPIBasePath);
             FileUtils.deleteQuietly(new File(exportAPIBasePath));
             return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         }
+    }
+
+    /**
+     * Set the properties specific to advertise only APIs
+     *
+     * @param apiDto               API DTO to export
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
+     */
+    private static void setAdvertiseOnlySpecificPropertiesToDTO(APIDTO apiDto, String originalDevPortalUrl) {
+        AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
+        advertiseInfoDTO.setAdvertised(Boolean.TRUE);
+        // Change owner to original provider as the provider will be overriding after importing
+        advertiseInfoDTO.setApiOwner(apiDto.getProvider());
+        advertiseInfoDTO.setOriginalDevPortalUrl(originalDevPortalUrl);
+        apiDto.setAdvertiseInfo(advertiseInfoDTO);
+        apiDto.setMediationPolicies(null);
     }
 
     /**
@@ -216,41 +249,36 @@ public class ExportUtils {
             throws APIManagementException, APIImportExportException {
 
         int tenantId = 0;
-        try {
-            // Create temp location for storing API Product data
-            File exportFolder = CommonUtil.createTempDirectory(apiProductIdentifier);
-            String exportAPIBasePath = exportFolder.toString();
-            String archivePath = exportAPIBasePath
-                    .concat(File.separator + apiProductIdentifier.getName() + "-" + apiProductIdentifier.getVersion());
-            tenantId = APIUtil.getTenantId(userName);
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
+        // Create temp location for storing API Product data
+        File exportFolder = CommonUtil.createTempDirectory(apiProductIdentifier);
+        String exportAPIBasePath = exportFolder.toString();
+        String archivePath = exportAPIBasePath
+                .concat(File.separator + apiProductIdentifier.getName() + "-" + apiProductIdentifier.getVersion());
+        tenantId = APIUtil.getTenantId(userName);
 
-            CommonUtil.createDirectory(archivePath);
+        CommonUtil.createDirectory(archivePath);
 
-            if (preserveDocs) {
-                addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider,
-                        APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
-                addDocumentationToArchive(archivePath, apiProductIdentifier, registry, exportFormat, apiProvider);
+        if (preserveDocs) {
+            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider,
+                    APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
+            addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
+                    APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
 
-            }
-            addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
-            addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
-                    preserveStatus, preserveDocs, preserveCredentials);
-
-            // Export mTLS authentication related certificates
-            if (apiProvider.isClientCertificateBasedAuthenticationConfigured()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Mutual SSL enabled. Exporting client certificates.");
-                }
-                addClientCertificatesToArchive(archivePath, apiProductIdentifier, tenantId, apiProvider, exportFormat);
-            }
-            CommonUtil.archiveDirectory(exportAPIBasePath);
-            FileUtils.deleteQuietly(new File(exportAPIBasePath));
-            return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         }
+        addGatewayEnvironmentsToArchive(archivePath, apiProductDtoToReturn.getId(), exportFormat, apiProvider);
+        addAPIProductMetaInformationToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider);
+        addDependentAPIsToArchive(archivePath, apiProductDtoToReturn, exportFormat, apiProvider, userName,
+                preserveStatus, preserveDocs, preserveCredentials);
+
+        // Export mTLS authentication related certificates
+        if (log.isDebugEnabled()) {
+            log.debug("Mutual SSL enabled. Exporting client certificates.");
+        }
+        addClientCertificatesToArchive(archivePath, apiProductIdentifier, tenantId, apiProvider, exportFormat);
+
+        CommonUtil.archiveDirectory(exportAPIBasePath);
+        FileUtils.deleteQuietly(new File(exportAPIBasePath));
+        return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
     }
 
     /**
@@ -264,12 +292,13 @@ public class ExportUtils {
      *                                  storing in the archive directory
      */
     public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider,
-            String type) throws APIImportExportException, APIManagementException {
+                                             String type) throws APIImportExportException, APIManagementException {
 
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
             ResourceFile thumbnailResource = StringUtils.equals(type, APIConstants.API_IDENTIFIER_TYPE) ?
-                    apiProvider.getIcon((APIIdentifier) identifier) :
+                    apiProvider.getIcon(identifier.getUUID(), tenantDomain) :
                     apiProvider.getProductIcon((APIProductIdentifier) identifier);
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
@@ -277,9 +306,9 @@ public class ExportUtils {
                 if (extension != null) {
                     CommonUtil.createDirectory(localImagePath);
                     try (InputStream imageDataStream = thumbnailResource.getContent();
-                            OutputStream outputStream = new FileOutputStream(
-                                    localImagePath + File.separator + APIConstants.API_ICON_IMAGE + APIConstants.DOT
-                                            + extension)) {
+                         OutputStream outputStream = new FileOutputStream(
+                                 localImagePath + File.separator + APIConstants.API_ICON_IMAGE + APIConstants.DOT
+                                         + extension)) {
                         IOUtils.copy(imageDataStream, outputStream);
                         if (log.isDebugEnabled()) {
                             log.debug("Thumbnail image retrieved successfully for API/API Product: " + identifier
@@ -304,7 +333,7 @@ public class ExportUtils {
     }
 
     /**
-     * Retrieve SOAP to REST mediation logic for the exporting API and store it in the archive directory
+     * Retrieve SOAP to REST mediation logic for the exporting API and store it in the archive directory.
      *
      * @param archivePath   File path to export the SOAPToREST mediation logic
      * @param apiIdentifier ID of the requesting API
@@ -313,7 +342,7 @@ public class ExportUtils {
      *                                  storing in the archive directory
      */
     public static void addSOAPToRESTMediationToArchive(String archivePath, APIIdentifier apiIdentifier,
-            UserRegistry registry) throws APIImportExportException {
+                                                       UserRegistry registry) throws APIImportExportException {
 
         String soapToRestBaseUrl =
                 "/apimgt/applicationdata/provider" + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getProviderName()
@@ -332,10 +361,10 @@ public class ExportUtils {
                 if (inFlow != null) {
                     for (String inFlowPath : inFlow.getChildren()) {
                         try (InputStream inputStream = registry.get(inFlowPath).getContentStream();
-                                OutputStream outputStream = new FileOutputStream(
-                                        archivePath + File.separator + SOAPTOREST + File.separator + IN + inFlowPath
-                                                .substring(
-                                                        inFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)));) {
+                             OutputStream outputStream = new FileOutputStream(
+                                     archivePath + File.separator + SOAPTOREST + File.separator + IN + inFlowPath
+                                             .substring(
+                                                     inFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)));) {
                             IOUtils.copy(inputStream, outputStream);
                         }
                     }
@@ -343,9 +372,9 @@ public class ExportUtils {
                 if (outFlow != null) {
                     for (String outFlowPath : outFlow.getChildren()) {
                         try (InputStream inputStream = registry.get(outFlowPath).getContentStream();
-                                OutputStream outputStream = new FileOutputStream(
-                                        archivePath + File.separator + SOAPTOREST + File.separator + OUT + outFlowPath.
-                                                substring(outFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)))) {
+                             OutputStream outputStream = new FileOutputStream(
+                                     archivePath + File.separator + SOAPTOREST + File.separator + OUT + outFlowPath.
+                                             substring(outFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)))) {
                             IOUtils.copy(inputStream, outputStream);
                         }
                     }
@@ -364,19 +393,21 @@ public class ExportUtils {
      *
      * @param archivePath  File path to export the documents
      * @param identifier   ID of the requesting API or API Product
-     * @param registry     Current tenant registry
      * @param exportFormat Format for export
      * @param apiProvider  API Provider
+     * @param type         Type of the Project (whether an API or an API Product)
      * @throws APIImportExportException If an error occurs while retrieving documents from the
      *                                  registry or storing in the archive directory
      * @throws APIManagementException   If an error occurs while retrieving document details
      */
-    public static void addDocumentationToArchive(String archivePath, Identifier identifier, Registry registry,
-            ExportFormat exportFormat, APIProvider apiProvider)
+    public static void addDocumentationToArchive(String archivePath, Identifier identifier,
+                                                 ExportFormat exportFormat, APIProvider apiProvider, String type)
             throws APIImportExportException, APIManagementException {
 
-        List<Documentation> docList = apiProvider.getAllDocumentation(identifier);
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        List<Documentation> docList = StringUtils.equals(type, APIConstants.API_IDENTIFIER_TYPE) ?
+                apiProvider.getAllDocumentation(identifier.getUUID(), tenantDomain) :
+                apiProvider.getAllDocumentation(identifier);
         if (!docList.isEmpty()) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String docDirectoryPath = archivePath + File.separator + ImportExportConstants.DOCUMENT_DIRECTORY;
@@ -384,46 +415,48 @@ public class ExportUtils {
             try {
                 for (Documentation doc : docList) {
                     // Retrieving the document again since objects in docList might have missing fields
-                    Documentation individualDocument = apiProvider.getDocumentation(doc.getId(), tenantDomain);
+                    Documentation individualDocument = apiProvider.getDocumentation(identifier.getUUID(), doc.getId(),
+                            tenantDomain);
                     String sourceType = individualDocument.getSourceType().name();
                     String resourcePath = null;
+                    InputStream inputStream = null;
                     String localFileName = null;
                     String individualDocDirectoryPath =
                             docDirectoryPath + File.separator + cleanFolderName(individualDocument.getName());
                     CommonUtil.createDirectory(individualDocDirectoryPath);
-                    if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
-                        localFileName = individualDocument.getFilePath().substring(
-                                individualDocument.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
-                        resourcePath = APIUtil.getDocumentationFilePath(identifier, localFileName);
-                        individualDocument.setFilePath(localFileName);
-                    } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)
-                            || Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
-                        // Inline/Markdown content file name would be same as the documentation name
-                        localFileName = individualDocument.getName();
-                        resourcePath =
-                                APIUtil.getAPIOrAPIProductDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR
-                                        + RegistryConstants.PATH_SEPARATOR + localFileName;
+                    DocumentationContent documentationContent =
+                            apiProvider.getDocumentationContent(identifier.getUUID(), doc.getId(), tenantDomain);
+                    if (documentationContent != null) {
+                        if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
+                            localFileName = individualDocument.getFilePath().substring(
+                                    individualDocument.getFilePath().lastIndexOf(RegistryConstants.PATH_SEPARATOR) + 1);
+                            inputStream = documentationContent.getResourceFile().getContent();
+                            individualDocument.setFilePath(localFileName);
+                        } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)
+                                || Documentation.DocumentSourceType.MARKDOWN.toString().equalsIgnoreCase(sourceType)) {
+                            // Inline/Markdown content file name would be same as the documentation name
+                            localFileName = individualDocument.getName();
+                            inputStream = new ByteArrayInputStream(documentationContent.getTextContent().getBytes());
+                        }
                     }
-                    CommonUtil.writeDtoToFile(individualDocDirectoryPath + ImportExportConstants.DOCUMENT_FILE_NAME, exportFormat,
+
+                    CommonUtil.writeDtoToFile(individualDocDirectoryPath + ImportExportConstants.DOCUMENT_FILE_NAME,
+                            exportFormat,
                             ImportExportConstants.TYPE_DOCUMENTS,
                             DocumentationMappingUtil.fromDocumentationToDTO(individualDocument));
 
-                    if (resourcePath != null) {
+                    if (inputStream != null) {
                         // Write content for Inline/Markdown/File type documentations only
                         // Check whether resource exists in the registry
-                        if (registry.resourceExists(resourcePath)) {
-                            Resource docFile = registry.get(resourcePath);
-                            try (OutputStream outputStream = new FileOutputStream(
-                                    individualDocDirectoryPath + File.separator + localFileName);
-                                    InputStream fileInputStream = docFile.getContentStream()) {
-                                IOUtils.copy(fileInputStream, outputStream);
-                            }
-                        } else {
-                            // Log error and avoid throwing as we give capability to export document artifact without
-                            // the content if does not exists
-                            log.error("Documentation resource for API/API Product: " + identifier.getName()
-                                    + " not found in " + resourcePath);
+                        try (OutputStream outputStream = new FileOutputStream(
+                                individualDocDirectoryPath + File.separator + localFileName);) {
+                            IOUtils.copy(inputStream, outputStream);
                         }
+                    } else {
+                        // Log error and avoid throwing as we give capability to export document artifact without
+                        // the content if does not exists
+                        log.error("Documentation resource for API/API Product: " + identifier.getName()
+                                + " not found in " + resourcePath);
                     }
                 }
                 if (log.isDebugEnabled()) {
@@ -433,11 +466,6 @@ public class ExportUtils {
             } catch (IOException e) {
                 throw new APIImportExportException(
                         "I/O error while writing documentation to file for API/API Product: " + identifier.getName()
-                                + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + identifier.getVersion(),
-                        e);
-            } catch (RegistryException e) {
-                throw new APIImportExportException(
-                        "Error while retrieving documentation for API/API Product: " + identifier.getName()
                                 + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + identifier.getVersion(),
                         e);
             }
@@ -462,24 +490,25 @@ public class ExportUtils {
      *
      * @param archivePath   File path to export the WSDL
      * @param apiIdentifier ID of the requesting API
-     * @param registry      Current tenant registry
      * @throws APIImportExportException If an error occurs while retrieving WSDL from the registry or
      *                                  storing in the archive directory
      */
-    public static void addWSDLtoArchive(String archivePath, APIIdentifier apiIdentifier, Registry registry)
+    public static void addWSDLtoArchive(String archivePath, APIIdentifier apiIdentifier, APIProvider apiProvider)
             throws APIImportExportException {
+
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         String wsdlPath =
                 APIConstants.API_WSDL_RESOURCE_LOCATION + apiIdentifier.getProviderName() + "--" + apiIdentifier
                         .getApiName() + apiIdentifier.getVersion() + APIConstants.WSDL_FILE_EXTENSION;
         try {
-            if (registry.resourceExists(wsdlPath)) {
+            ResourceFile wsdlResource = apiProvider.getWSDL(apiIdentifier.getUUID(), tenantDomain);
+            if (wsdlResource != null) {
                 CommonUtil.createDirectory(archivePath + File.separator + "WSDL");
-                Resource wsdl = registry.get(wsdlPath);
-                try (InputStream wsdlStream = wsdl.getContentStream();
-                        OutputStream outputStream = new FileOutputStream(
-                                archivePath + File.separator + "WSDL" + File.separator + apiIdentifier.getApiName()
-                                        + "-" + apiIdentifier.getVersion() + APIConstants.WSDL_FILE_EXTENSION)) {
+                try (InputStream wsdlStream = wsdlResource.getContent();
+                     OutputStream outputStream = new FileOutputStream(
+                             archivePath + File.separator + "WSDL" + File.separator + apiIdentifier.getApiName()
+                                     + "-" + apiIdentifier.getVersion() + APIConstants.WSDL_FILE_EXTENSION)) {
                     IOUtils.copy(wsdlStream, outputStream);
                     if (log.isDebugEnabled()) {
                         log.debug("WSDL file: " + wsdlPath + " retrieved successfully");
@@ -488,10 +517,8 @@ public class ExportUtils {
             } else if (log.isDebugEnabled()) {
                 log.debug("WSDL resource does not exists in path: " + wsdlPath + ". Skipping WSDL export.");
             }
-        } catch (IOException e) {
+        } catch (IOException | APIManagementException e) {
             throw new APIImportExportException("I/O error while writing WSDL: " + wsdlPath + " to file", e);
-        } catch (RegistryException e) {
-            throw new APIImportExportException("Error while retrieving WSDL: " + wsdlPath + " to file", e);
         }
     }
 
@@ -499,58 +526,72 @@ public class ExportUtils {
      * Retrieve available custom sequences and API specific sequences for API export, and store it in the archive
      * directory.
      *
-     * @param archivePath   File path to export the sequences
-     * @param apiIdentifier API Identifier
-     * @param apiDto        API DTO
-     * @param registry      Current tenant registry
-     * @param apiProvider   API Provider
+     * @param archivePath File path to export the sequences
      * @throws APIImportExportException If an error occurs while exporting sequences
      */
-    public static void addSequencesToArchive(String archivePath, APIIdentifier apiIdentifier, APIDTO apiDto,
-            Registry registry, APIProvider apiProvider)
-            throws APIImportExportException, APIManagementException, RegistryException {
+    public static void addSequencesToArchive(String archivePath, API api)
+            throws APIImportExportException, APIManagementException {
 
         String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
-        List<MediationPolicyDTO> mediationPolicyDtos = apiDto.getMediationPolicies();
-
-        if (!mediationPolicyDtos.isEmpty()) {
+        Mediation inSequenceMediation = api.getInSequenceMediation();
+        Mediation outSequenceMediation = api.getOutSequenceMediation();
+        Mediation faultSequenceMediation = api.getFaultSequenceMediation();
+        if (inSequenceMediation != null || outSequenceMediation != null || faultSequenceMediation != null) {
             CommonUtil.createDirectory(seqArchivePath);
-            for (MediationPolicyDTO mediationPolicyDto : mediationPolicyDtos) {
-                if (mediationPolicyDto.isShared()) {
-                    String individualSequenceExportPath =
-                            seqArchivePath + File.separator + mediationPolicyDto.getType().toLowerCase()
-                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
-                    if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                        CommonUtil.createDirectory(individualSequenceExportPath);
-                    }
-                    //Get registry resource correspond to identifier
-                    Resource mediationResource = apiProvider
-                            .getCustomMediationResourceFromUuid(mediationPolicyDto.getId());
-                    writeSequenceToArchive(mediationResource, individualSequenceExportPath, registry,
-                            mediationPolicyDto.getName(), apiIdentifier);
-                }
-            }
-
-            // Getting list of API specific custom mediation policies
-            List<Mediation> apiSpecificMediationList = apiProvider.getAllApiSpecificMediationPolicies(apiIdentifier);
-            if (!apiSpecificMediationList.isEmpty()) {
-                for (Mediation mediation : apiSpecificMediationList) {
-                    String individualSequenceExportPath =
-                            seqArchivePath + File.separator + mediation.getType().toLowerCase()
+            if (inSequenceMediation != null) {
+                String individualSequenceExportPath;
+                if (inSequenceMediation.isGlobal()) {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX +
+                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                } else {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.IN_SEQUENCE_PREFIX
                                     + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
                                     + ImportExportConstants.CUSTOM_TYPE;
-                    if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
-                        CommonUtil.createDirectory(individualSequenceExportPath);
-                    }
-                    // Get registry resource correspond to identifier
-                    String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
-                    apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
-                    Resource mediationResource = apiProvider
-                            .getApiSpecificMediationResourceFromUuid(apiIdentifier, mediation.getUuid(),
-                                    apiResourcePath);
-                    writeSequenceToArchive(mediationResource, individualSequenceExportPath, registry,
-                            mediation.getName(), apiIdentifier);
                 }
+                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                    CommonUtil.createDirectory(individualSequenceExportPath);
+                }
+                writeSequenceToArchive(inSequenceMediation, individualSequenceExportPath,
+                        inSequenceMediation.getName());
+            }
+            if (outSequenceMediation != null) {
+                String individualSequenceExportPath;
+                if (outSequenceMediation.isGlobal()) {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX +
+                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                } else {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.OUT_SEQUENCE_PREFIX
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                    + ImportExportConstants.CUSTOM_TYPE;
+                }
+                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                    CommonUtil.createDirectory(individualSequenceExportPath);
+                }
+                writeSequenceToArchive(outSequenceMediation, individualSequenceExportPath,
+                        outSequenceMediation.getName());
+            }
+            if (faultSequenceMediation != null) {
+                String individualSequenceExportPath;
+                if (faultSequenceMediation.isGlobal()) {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX +
+                                    ImportExportConstants.SEQUENCE_LOCATION_POSTFIX;
+                } else {
+                    individualSequenceExportPath =
+                            seqArchivePath + File.separator + ImportExportConstants.FAULT_SEQUENCE_PREFIX
+                                    + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                    + ImportExportConstants.CUSTOM_TYPE;
+
+                }
+                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                    CommonUtil.createDirectory(individualSequenceExportPath);
+                }
+                writeSequenceToArchive(faultSequenceMediation, individualSequenceExportPath,
+                        faultSequenceMediation.getName());
             }
         }
     }
@@ -558,35 +599,24 @@ public class ExportUtils {
     /**
      * Write the sequence to API archive.
      *
-     * @param mediationResource Mediation resource
-     * @param individualSequenceExportPath         Path to export the mediation sequence
-     * @param registry     Current tenant registry
-     * @param mediationName     Name of the mediation policy
-     * @param apiIdentifier     API Identifier
-     * @throws RegistryException If an error occurs while retrieving registry elements
+     * @param mediation                    Mediation resource
+     * @param individualSequenceExportPath Path to export the mediation sequence
+     * @param mediationName                Name of the mediation policy
      * @throws APIManagementException If an error occurs while writing the mediation policy to file
      */
-    private static void writeSequenceToArchive(Resource mediationResource, String individualSequenceExportPath,
-            Registry registry, String mediationName, APIIdentifier apiIdentifier)
-            throws RegistryException, APIManagementException {
-        if (mediationResource != null) {
-            // Get the registry resource path
-            String resourcePath = mediationResource.getPath();
-            // Check whether resource exists in the registry
-            if (registry.resourceExists(resourcePath)) {
-                Resource mediationFile = registry.get(resourcePath);
-                try (OutputStream outputStream = new FileOutputStream(
-                        individualSequenceExportPath + File.separator + mediationName + APIConstants.DOT
-                                + APIConstants.XML_DOC_EXTENSION);
-                        InputStream fileInputStream = mediationFile.getContentStream()) {
-                    IOUtils.copy(fileInputStream, outputStream);
-                } catch (IOException e) {
-                    throw new APIManagementException("Error while writing the mediation sequence"+ mediationName+ "to file", e);
-                }
-            } else {
+    private static void writeSequenceToArchive(Mediation mediation, String individualSequenceExportPath,
+                                               String mediationName)
+            throws APIManagementException {
+
+        if (mediation != null) {
+            try (OutputStream outputStream = new FileOutputStream(
+                    individualSequenceExportPath + File.separator + mediationName + APIConstants.DOT
+                            + APIConstants.XML_DOC_EXTENSION);
+                 InputStream fileInputStream = new ByteArrayInputStream(mediation.getConfig().getBytes())) {
+                IOUtils.copy(fileInputStream, outputStream);
+            } catch (IOException e) {
                 throw new APIManagementException(
-                        "Resource specified by " + resourcePath + " cannot be found in the registry",
-                        ExceptionCodes.RESOURCE_NOT_FOUND);
+                        "Error while writing the mediation sequence" + mediationName + "to file", e);
             }
         }
     }
@@ -601,7 +631,7 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while exporting endpoint certificates
      */
     public static void addEndpointCertificatesToArchive(String archivePath, APIDTO apiDto, int tenantId,
-            ExportFormat exportFormat) throws APIImportExportException {
+                                                        ExportFormat exportFormat) throws APIImportExportException {
 
         List<String> productionEndpoints;
         List<String> sandboxEndpoints;
@@ -613,7 +643,7 @@ public class ExportUtils {
                 archivePath + File.separator + ImportExportConstants.ENDPOINT_CERTIFICATES_DIRECTORY;
         CommonUtil.createDirectory(endpointCertsDirectoryPath);
 
-        if (StringUtils.isEmpty(endpointConfigString)) {
+        if (StringUtils.isEmpty(endpointConfigString) || "null".equals(endpointConfigString)) {
             if (log.isDebugEnabled()) {
                 log.debug("Endpoint Details are empty for API: " + apiDto.getName() + StringUtils.SPACE
                         + APIConstants.API_DATA_VERSION + ": " + apiDto.getVersion());
@@ -655,6 +685,42 @@ public class ExportUtils {
     }
 
     /**
+     * Retrieve the deployed gateway environments and store those in the archive directory.
+     *
+     * @param archivePath  File path to export the endpoint certificates
+     * @param apiID        UUID of the API/ API Product
+     * @param exportFormat Export format of file
+     * @param apiProvider  API Provider
+     * @throws APIImportExportException If an error occurs while exporting gateway environments
+     */
+    public static void addGatewayEnvironmentsToArchive(String archivePath, String apiID,
+                                                       ExportFormat exportFormat, APIProvider apiProvider)
+            throws APIManagementException {
+
+        try {
+            List<APIRevisionDeployment> deploymentsList = apiProvider.getAPIRevisionDeploymentList(apiID);
+            JsonArray deploymentsArray = new JsonArray();
+            for (APIRevisionDeployment deployment : deploymentsList) {
+                JsonObject deploymentObject = new JsonObject();
+                deploymentObject.addProperty(ImportExportConstants.DEPLOYMENT_NAME, deployment.getDeployment());
+                deploymentObject.addProperty(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION,
+                        deployment.isDisplayOnDevportal());
+                deploymentsArray.add(deploymentObject);
+            }
+            if (deploymentsArray.size() > 0) {
+                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.DEPLOYMENT_INFO_LOCATION, exportFormat,
+                        ImportExportConstants.TYPE_DEPLOYMENT_ENVIRONMENTS, deploymentsArray);
+            }
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(
+                    "Error in converting deployment environment details to JSON object in API: " + apiID, e);
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while saving deployment environment details for API: " + apiID + " as YAML", e);
+        }
+    }
+
+    /**
      * Get Endpoint Certificate MetaData and Certificate detail and build JSON Array.
      *
      * @param tenantId          Tenant id of the user
@@ -664,7 +730,8 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while retrieving endpoint certificate metadata and content
      */
     private static JsonArray getEndpointCertificateContentAndMetaData(int tenantId, String url,
-            String certDirectoryPath) throws APIImportExportException {
+                                                                      String certDirectoryPath)
+            throws APIImportExportException {
 
         List<CertificateMetadataDTO> certificateMetadataDTOS;
         CertificateManager certificateManager = CertificateManagerImpl.getInstance();
@@ -718,26 +785,30 @@ public class ExportUtils {
         List<String> urls = new ArrayList<>();
         if (endpointConfig != null) {
             try {
-                Object item;
-                item = endpointConfig.get(type);
-                if (item instanceof JSONArray) {
-                    JSONArray endpointsJSON = new JSONArray(endpointConfig.getJSONArray(type).toString());
-                    for (int i = 0; i < endpointsJSON.length(); i++) {
+                if (endpointConfig.has(type)) {
+                    Object item = endpointConfig.get(type);
+                    if (item instanceof JSONArray) {
+                        JSONArray endpointsJSON = new JSONArray(endpointConfig.getJSONArray(type).toString());
+                        for (int i = 0; i < endpointsJSON.length(); i++) {
+                            try {
+                                String urlValue =
+                                        endpointsJSON.getJSONObject(i).get(APIConstants.API_DATA_URL).toString();
+                                urls.add(urlValue);
+                            } catch (JSONException ex) {
+                                log.error(
+                                        "Endpoint URL extraction from endpoints JSON object failed in API: " + apiName,
+                                        ex);
+                            }
+                        }
+                    } else if (item instanceof JSONObject) {
+                        JSONObject endpointJSON = new JSONObject(endpointConfig.getJSONObject(type).toString());
                         try {
-                            String urlValue = endpointsJSON.getJSONObject(i).get(APIConstants.API_DATA_URL).toString();
+                            String urlValue = endpointJSON.get(APIConstants.API_DATA_URL).toString();
                             urls.add(urlValue);
                         } catch (JSONException ex) {
-                            log.error("Endpoint URL extraction from endpoints JSON object failed in API: " + apiName,
+                            log.error("Endpoint URL extraction from endpoint JSON object failed in API: " + apiName,
                                     ex);
                         }
-                    }
-                } else if (item instanceof JSONObject) {
-                    JSONObject endpointJSON = new JSONObject(endpointConfig.getJSONObject(type).toString());
-                    try {
-                        String urlValue = endpointJSON.get(APIConstants.API_DATA_URL).toString();
-                        urls.add(urlValue);
-                    } catch (JSONException ex) {
-                        log.error("Endpoint URL extraction from endpoint JSON object failed in API: " + apiName, ex);
                     }
                 }
             } catch (JSONException ex) {
@@ -760,33 +831,47 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier)
+                                                      ExportFormat exportFormat, APIProvider apiProvider,
+                                                      APIIdentifier apiIdentifier)
             throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
         try {
-            // If a web socket API is exported, it does not contain a swagger file.
+            // If a streaming API is exported, it does not contain a swagger file.
             // Therefore swagger export is only required for REST or SOAP based APIs
             String apiType = apiDtoToReturn.getType().toString();
-            if (!APIConstants.APITransportType.WS.toString().equalsIgnoreCase(apiType)) {
+            if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
                 // For Graphql APIs, the graphql schema definition should be exported.
                 if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
                     String schemaContent = apiProvider.getGraphqlSchema(apiIdentifier);
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
+                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(apiIdentifier);
+                    if (graphqlComplexityInfo.getList().size() != 0) {
+                        GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
+                                GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
+                        CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION,
+                                exportFormat, ImportExportConstants.GRAPHQL_COMPLEXITY, graphQLQueryComplexityInfoDTO);
+                    }
                 }
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(
                             APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()), apiProvider);
-                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION, exportFormat,
+                    CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
+                            exportFormat,
                             formattedSwaggerJson);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()
                             + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
                 }
+            } else {
+                String asyncApiJson = new AsyncApiParser().generateAsyncAPIDefinition(
+                        APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider()));
+                CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
+                        exportFormat, asyncApiJson);
             }
             CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API, apiDtoToReturn);
@@ -802,7 +887,7 @@ public class ExportUtils {
     }
 
     /**
-     * Retrieve Mutual SSL related certificates and store those in the archive directory
+     * Retrieve Mutual SSL related certificates and store those in the archive directory.
      *
      * @param archivePath  Folder path to export client certificates
      * @param identifier   Identifier
@@ -812,7 +897,8 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs when writing to file or retrieving certificate metadata
      */
     public static void addClientCertificatesToArchive(String archivePath, Identifier identifier, int tenantId,
-            APIProvider provider, ExportFormat exportFormat) throws APIImportExportException {
+                                                      APIProvider provider, ExportFormat exportFormat)
+            throws APIImportExportException {
 
         List<ClientCertificateDTO> certificateMetadataDTOs;
         try {
@@ -851,7 +937,7 @@ public class ExportUtils {
      * @return list of certificate detail JSON objects
      */
     private static JsonArray getClientCertificateContentAndMetaData(List<ClientCertificateDTO> clientCertificateDTOs,
-            String certDirectoryPath) {
+                                                                    String certDirectoryPath) {
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonArray certificatesList = new JsonArray();
@@ -885,7 +971,8 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
     public static void addAPIProductMetaInformationToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider) throws APIImportExportException {
+                                                             ExportFormat exportFormat, APIProvider apiProvider)
+            throws APIImportExportException {
 
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
@@ -899,7 +986,7 @@ public class ExportUtils {
                 log.debug(
                         "Meta information retrieved successfully for API Product: " + apiProductDtoToReturn.getName());
             }
-            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
+            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_PRODUCT_FILE_LOCATION, exportFormat,
                     ImportExportConstants.TYPE_API_PRODUCT, apiProductDtoToReturn);
         } catch (APIManagementException e) {
             throw new APIImportExportException(
@@ -925,7 +1012,8 @@ public class ExportUtils {
     public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
                                                  ExportFormat exportFormat, APIProvider provider, String userName,
                                                  Boolean isStatusPreserved, boolean preserveDocs,
-                                                 boolean preserveCredentials) throws APIImportExportException, APIManagementException {
+                                                 boolean preserveCredentials)
+            throws APIImportExportException, APIManagementException {
 
         String apisDirectoryPath = archivePath + File.separator + ImportExportConstants.APIS_DIRECTORY;
         CommonUtil.createDirectory(apisDirectoryPath);
@@ -934,11 +1022,10 @@ public class ExportUtils {
         for (ProductAPIDTO productAPIDTO : apisList) {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
-            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials);
-            File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, userName, exportFormat,
-                    isStatusPreserved, preserveDocs);
+            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
+            File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
+                    isStatusPreserved, preserveDocs, StringUtils.EMPTY);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }
-
 }

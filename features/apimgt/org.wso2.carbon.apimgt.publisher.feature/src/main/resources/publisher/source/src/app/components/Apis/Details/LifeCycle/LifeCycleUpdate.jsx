@@ -101,8 +101,7 @@ class LifeCycleUpdate extends Component {
         }
         promisedUpdate
             .then((response) => {
-            /* TODO: Handle IO erros ~tmkb */
-                this.props.handleUpdate(true);
+                /* TODO: Handle IO erros ~tmkb */
                 const newState = response.body.lifecycleState.state;
                 const { workflowStatus } = response.body;
                 this.context.updateAPI({ enableStore: true });
@@ -184,24 +183,14 @@ class LifeCycleUpdate extends Component {
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
-                let { displayName } = state;
-                if (lcState.state === 'Prototyped') {
-                    displayName = 'Redeploy';
-                }
                 return {
                     ...state,
-                    displayName,
                     disabled: !isPrototype || api.endpointConfig == null,
                 };
             }
             if (state.event === 'Publish') {
-                let { displayName } = state;
-                if (lcState.state === 'Published') {
-                    displayName = 'Redeploy';
-                }
                 return {
                     ...state,
-                    displayName,
                     disabled:
                         api.endpointConfig === null
                         || (isMutualSSLEnabled && !isCertAvailable)
@@ -275,7 +264,8 @@ class LifeCycleUpdate extends Component {
                             this occurs in states where have allowed re-publishing in prototype and published sates */
                                     return (
                                         <Button
-                                            disabled={transitionState.disabled || this.state.isUpdating}
+                                            disabled={transitionState.disabled
+                                                || this.state.isUpdating || api.isRevision}
                                             variant='contained'
                                             color='primary'
                                             className={classes.stateButton}
@@ -318,7 +308,6 @@ LifeCycleUpdate.propTypes = {
     checkList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
     lcState: PropTypes.shape({}).isRequired,
     handleChangeCheckList: PropTypes.func.isRequired,
-    handleUpdate: PropTypes.func.isRequired,
     theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,

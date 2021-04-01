@@ -174,7 +174,7 @@ class Scopes extends React.Component {
                                         <td>
                                             <Link
                                                 to={
-                                                    !isRestricted(['apim:api_create'], api) && {
+                                                    !isRestricted(['apim:api_create'], api) && !api.isRevision && {
                                                         pathname: editUrl,
                                                         state: {
                                                             scopeName,
@@ -186,11 +186,11 @@ class Scopes extends React.Component {
                                                     disabled={isRestricted(
                                                         ['apim:api_create'],
                                                         api,
-                                                    )}
+                                                    ) || api.isRevision}
                                                 >
                                                     <Icon>edit</Icon>
                                                     <FormattedMessage
-                                                        id='Apis.Details.Documents.Edit.documents.text.editor.edit'
+                                                        id='Apis.Details.scopes.Edit.text.editor.edit'
                                                         defaultMessage='Edit'
                                                     />
                                                 </Button>
@@ -227,6 +227,7 @@ class Scopes extends React.Component {
             viewColumns: false,
             customToolbar: false,
         };
+
         const scopesList = api.scopes.filter((apiScope) => {
             return !apiScope.shared;
         }).map((apiScope) => {
@@ -255,7 +256,7 @@ class Scopes extends React.Component {
                     <div className={classes.titleWrapper}>
                         <Typography variant='h4' align='left' className={classes.mainTitle}>
                             <FormattedMessage
-                                id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                                id='Apis.Details.local.Scopes.heading.scope.heading'
                                 defaultMessage='Local Scopes'
                             />
                         </Typography>
@@ -292,12 +293,12 @@ class Scopes extends React.Component {
                                 />
                             </Typography>
                             <div className={classes.actions}>
-                                <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                                <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                                     <Button
                                         variant='contained'
                                         color='primary'
                                         className={classes.button}
-                                        disabled={isRestricted(['apim:api_create'], api)}
+                                        disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                                     >
                                         <FormattedMessage
                                             id='Apis.Details.Scopes.Scopes.create.scopes.button'
@@ -317,7 +318,7 @@ class Scopes extends React.Component {
                 <div className={classes.titleWrapper}>
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
-                            id='Apis.Details.Scopes.Scopes.heading.scope.heading'
+                            id='Apis.Details.local.Scopes.heading.edit.heading'
                             defaultMessage='Local Scopes'
                         />
                     </Typography>
@@ -335,11 +336,11 @@ class Scopes extends React.Component {
                             <HelpOutlineIcon fontSize='small' />
                         </IconButton>
                     </Tooltip>
-                    <Link to={!isRestricted(['apim:api_create'], api) && url}>
+                    <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                         <Button
                             size='small'
                             className={classes.button}
-                            disabled={isRestricted(['apim:api_create'], api)}
+                            disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                         >
                             <AddCircle className={classes.buttonIcon} />
                             <FormattedMessage
@@ -371,7 +372,7 @@ class Scopes extends React.Component {
 
 Scopes.propTypes = {
     match: PropTypes.shape({
-        params: PropTypes.object,
+        params: PropTypes.shape({}),
     }),
     api: PropTypes.instanceOf(Object).isRequired,
     classes: PropTypes.shape({}).isRequired,

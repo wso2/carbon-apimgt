@@ -84,8 +84,6 @@ export default function CheckboxLabels(props) {
     } = props;
     const isEndpointAvailable = api.endpointConfig !== null && !api.endpointConfig.implementation_status;
     const isEnvironmentAvailable = api.gatewayEnvironments.length !== 0;
-    const isContainerMngEnvironmentAvailable = api.deploymentEnvironments
-        && api.deploymentEnvironments.some((env) => env.clusterName.length > 0);
     const isPrototypedAvailable = (api.endpointConfig !== null
         && api.endpointConfig.implementation_status === 'prototyped')
         || api.endpointImplementationType === 'INLINE';
@@ -172,7 +170,7 @@ export default function CheckboxLabels(props) {
                             ) }
                         </>
                         <Grid xs={12} className={classes.grid}>
-                            {isEnvironmentAvailable || isContainerMngEnvironmentAvailable ? (
+                            {isEnvironmentAvailable ? (
                                 <CheckIcon className={classes.iconTrue} />
                             ) : (
                                 <WarningRoundedIcon className={classes.iconWarn} />
@@ -183,7 +181,7 @@ export default function CheckboxLabels(props) {
                                     defaultMessage='Gateway Environment(s) selected'
                                 />
                             </Typography>
-                            <Link to={'/apis/' + api.id + '/environments'}>
+                            <Link to={'/apis/' + api.id + '/deployments'}>
                                 <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                             </Link>
                         </Grid>
@@ -216,7 +214,7 @@ export default function CheckboxLabels(props) {
                                     </Link>
                                 </Grid>
                                 <Grid xs={12} className={classes.grid}>
-                                    {isEnvironmentAvailable || isContainerMngEnvironmentAvailable ? (
+                                    {isEnvironmentAvailable ? (
                                         <CheckIcon className={classes.iconTrue} />
                                     ) : (
                                         <WarningRoundedIcon className={classes.iconWarn} />
@@ -227,7 +225,7 @@ export default function CheckboxLabels(props) {
                                             defaultMessage='Gateway Environment(s) selected'
                                         />
                                     </Typography>
-                                    <Link to={'/apis/' + api.id + '/environments'}>
+                                    <Link to={'/apis/' + api.id + '/deployments'}>
                                         <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
                                     </Link>
                                 </Grid>

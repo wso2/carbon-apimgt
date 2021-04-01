@@ -11,6 +11,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.common.gateway.util.JWTUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -126,8 +127,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.appTenant = appTenant;
         this.apiTenant = apiTenant;
         this.appId = appId;
-        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-        this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
+        this.apiName = GatewayUtils.getAPINameFromContextAndVersion(messageContext);
         this.messageSizeInBytes = 0;
 
         ArrayList<VerbInfoDTO> list = (ArrayList<VerbInfoDTO>) messageContext.getProperty(APIConstants.VERB_INFO_DTO);
@@ -184,16 +184,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
     }
 
     public void run() {
-
         JSONObject jsonObMap = new JSONObject();
-
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
-        //Set transport headers of the message
-        TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
-                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-
         String remoteIP = GatewayUtils.getIp(axis2MessageContext);
         if (log.isDebugEnabled()) {
             log.debug("Remote IP address : " + remoteIP);
@@ -238,7 +231,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         //Publish jwt claims
         if (getThrottleProperties().isEnableJwtConditions()) {
             if (authenticationContext.getCallerToken() != null) {
-                Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
+                Map<String, String> assertions = JWTUtil.getJWTClaims(authenticationContext.getCallerToken());
                 if (assertions != null) {
                     jsonObMap.putAll(assertions);
                 }

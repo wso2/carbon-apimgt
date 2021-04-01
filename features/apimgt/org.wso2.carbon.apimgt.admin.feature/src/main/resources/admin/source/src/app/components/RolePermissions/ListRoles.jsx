@@ -19,13 +19,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import ContentBase from 'AppComponents/AdminPages/Addons/ContentBase';
 import PermissionAPI from 'AppData/PermissionScopes';
 import Grid from '@material-ui/core/Grid';
-import Alert from 'AppComponents/Shared/Alert';
 import Progress from 'AppComponents/Shared/Progress';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import cloneDeep from 'lodash.clonedeep';
 import { FormattedMessage, useIntl } from 'react-intl';
 import WarningBase from 'AppComponents/AdminPages/Addons/WarningBase';
+import { Alert as MUIAlert } from '@material-ui/lab';
 import PermissionsSelector from './TreeView/PermissionsSelector';
 import AdminTable from './AdminTable/AdminTable';
 import AdminTableHead from './AdminTable/AdminTableHead';
@@ -40,9 +40,17 @@ const headCells = [
         numeric: false, disablePadding: false, label: 'Roles',
     },
     {
-        id: 'permissions', numeric: false, disablePadding: false, label: 'Permissions',
+        id: 'permissions', numeric: false, disablePadding: false, label: 'Scope Assignments',
     },
 ];
+
+const pageDesc = (
+    <FormattedMessage
+        id='RolePermissions.ListRoles.page.description'
+        defaultMessage={'Scope assignments are only related to internal, APIM-specific scope assignments. They are not'
+        + ' related to role permission assignments in the Management Console.'}
+    />
+);
 
 /**
  *
@@ -87,7 +95,8 @@ function mergeRoleAliasesAndScopeMappings(roleAliases, scopeMappings) {
     for (const roleAlias of roleAliases) {
         const { role, aliases } = roleAlias;
         for (const alias of aliases) {
-            if (alias) {
+            // If an alias exist for this role and alias should not equal to same role name
+            if (alias && alias !== role) {
                 if (roleAliasesMap[alias]) {
                     roleAliasesMap[alias].aliases.push(role);
                 } else {
@@ -136,6 +145,7 @@ export default function ListRoles() {
     const [isOpen, setIsOpen] = useState(false);
     const [hasListPermission, setHasListPermission] = useState(true);
     const intl = useIntl();
+    const [errorMessage, setError] = useState(null);
 
     useEffect(() => {
         PermissionAPI.getRoleAliases();
@@ -150,7 +160,10 @@ export default function ListRoles() {
             if (status === 401) {
                 setHasListPermission(false);
             } else {
-                Alert.error('Error while retrieving permission info');
+                setError(intl.formatMessage({
+                    id: 'RolePermissions.ListRoles.error.retrieving.perm',
+                    defaultMessage: 'Error while retrieving permission info',
+                }));
                 console.error(error);
             }
         });
@@ -209,7 +222,7 @@ export default function ListRoles() {
                     pageStyle: 'half',
                     title: intl.formatMessage({
                         id: 'RolePermissions.ListRoles.title.role.permissions',
-                        defaultMessage: 'Role Permissions',
+                        defaultMessage: 'Scope Assignments',
                     }),
                 }}
                 title={(
@@ -221,18 +234,31 @@ export default function ListRoles() {
                 content={(
                     <FormattedMessage
                         id='RolePermissions.ListRoles.permission.denied.content'
-                        defaultMessage={'You dont have enough permission to view Role Permissions.'
+                        defaultMessage={'You do not have enough permission to view Scope Assignments.'
                         + ' Please contact the site administrator.'}
                     />
                 )}
             />
         );
     }
-    if (!permissionMappings || !appMappings) {
-        return <Progress message='Resolving user ...' />;
+    if (!errorMessage && (!permissionMappings || !appMappings)) {
+        return (
+            <ContentBase pageStyle='paperLess'>
+                <Progress message='Resolving user ...' />
+            </ContentBase>
+
+        );
+    }
+    if (errorMessage) {
+        return (
+            <ContentBase title='Role Permissions'>
+                <MUIAlert severity='error'>{errorMessage}</MUIAlert>
+            </ContentBase>
+
+        );
     }
     return (
-        <ContentBase title='Role Permissions'>
+        <ContentBase title='Scope Assignments' pageDescription={pageDesc}>
             <ListAddOns>
                 <Grid item>
                     <Button
@@ -240,7 +266,10 @@ export default function ListRoles() {
                         color='primary'
                         onClick={() => setIsOpen(true)}
                     >
-                        Add role permission
+                        <FormattedMessage
+                            id='RolePermissions.ListRoles.scope.assignment.button'
+                            defaultMessage='Add scope mappings'
+                        />
                     </Button>
                     {
                         isOpen && (

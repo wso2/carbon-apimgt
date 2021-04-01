@@ -39,65 +39,55 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.api.API;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
-import org.apache.synapse.rest.API;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
+import java.net.UnknownHostException;
+import java.util.*;
 import javax.cache.Caching;
 import javax.security.cert.CertificateException;
 import javax.security.cert.X509Certificate;
 import javax.xml.namespace.QName;
 
 public class Utils {
-    
+
     private static final Log log = LogFactory.getLog(Utils.class);
 
     public static void sendFault(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-
         axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
-        messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
-        messageContext.setTo(null);        
-        axis2MC.removeProperty("NO_ENTITY_BODY");
-
-        // Always remove the ContentType - Let the formatter do its thing
-        axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers != null) {
-            headers.remove(HttpHeaders.AUTHORIZATION);
-
-            headers.remove(HttpHeaders.HOST);
-        }
         Axis2Sender.sendBack(messageContext);
     }
-    
+
     public static void setFaultPayload(MessageContext messageContext, OMElement payload) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -106,30 +96,30 @@ public class Utils {
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
         Set<String> supportedMimes = new HashSet<String>(Arrays.asList("application/x-www-form-urlencoded",
-                                                                       "multipart/form-data",
-                                                                       "text/html",
-                                                                       "application/xml",
-                                                                       "text/xml",
-                                                                       "application/soap+xml",
-                                                                       "text/plain",
-                                                                       "application/json",
-                                                                       "application/json/badgerfish",
-                                                                       "text/javascript"));
+                "multipart/form-data",
+                "text/html",
+                "application/xml",
+                "text/xml",
+                "application/soap+xml",
+                "text/plain",
+                "application/json",
+                "application/json/badgerfish",
+                "text/javascript"));
 
         // If an Accept header has been provided and is supported by the Gateway
-        if(!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)){
+        if (!StringUtils.isEmpty(acceptType) && supportedMimes.contains(acceptType)) {
             axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
         } else {
             // If there isn't Accept Header in the request, will use error_message_type property
             // from _auth_failure_handler_.xml file
             if (messageContext.getProperty("error_message_type") != null) {
                 axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                                    messageContext.getProperty("error_message_type"));
+                        messageContext.getProperty("error_message_type"));
             }
         }
     }
-    
-    public static void setSOAPFault(MessageContext messageContext, String code, 
+
+    public static void setSOAPFault(MessageContext messageContext, String code,
                                     String reason, String detail) {
         SOAPFactory factory = (messageContext.isSOAP11() ?
                 OMAbstractFactory.getSOAP11Factory() : OMAbstractFactory.getSOAP12Factory());
@@ -148,7 +138,7 @@ public class Utils {
             faultCode.setText(new QName(fault.getNamespace().getNamespaceURI(), code));
         } else {
             SOAPFaultValue value = factory.createSOAPFaultValue(faultCode);
-            value.setText(new QName(fault.getNamespace().getNamespaceURI(), code));            
+            value.setText(new QName(fault.getNamespace().getNamespaceURI(), code));
         }
         fault.setCode(faultCode);
 
@@ -159,19 +149,19 @@ public class Utils {
             SOAPFaultText text = factory.createSOAPFaultText();
             text.setText(reason);
             text.setLang("en");
-            faultReason.addSOAPText(text);            
+            faultReason.addSOAPText(text);
         }
         fault.setReason(faultReason);
 
         SOAPFaultDetail soapFaultDetail = factory.createSOAPFaultDetail();
         soapFaultDetail.setText(detail);
         fault.setDetail(soapFaultDetail);
-        
+
         // set the all headers of original SOAP Envelope to the Fault Envelope
         if (messageContext.getEnvelope() != null) {
             SOAPHeader soapHeader = messageContext.getEnvelope().getHeader();
             if (soapHeader != null) {
-                for (Iterator iterator = soapHeader.examineAllHeaderBlocks(); iterator.hasNext();) {
+                for (Iterator iterator = soapHeader.examineAllHeaderBlocks(); iterator.hasNext(); ) {
                     Object o = iterator.next();
                     if (o instanceof SOAPHeaderBlock) {
                         SOAPHeaderBlock header = (SOAPHeaderBlock) o;
@@ -201,10 +191,11 @@ public class Utils {
         // set original messageID as relatesTo
         if (messageContext.getMessageID() != null) {
             RelatesTo relatesTo = new RelatesTo(messageContext.getMessageID());
-            messageContext.setRelatesTo(new RelatesTo[] { relatesTo });
+            messageContext.setRelatesTo(new RelatesTo[]{relatesTo});
         }
     }
 //// moving methods to Util
+
     /**
      * validates if an accessToken has expired or not
      *
@@ -245,10 +236,10 @@ public class Utils {
         String requestPath;
         String versionStrategy = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY);
 
-        if(VersionStrategyFactory.TYPE_URL.equals(versionStrategy)){
+        if (VersionStrategyFactory.TYPE_URL.equals(versionStrategy)) {
             // most used strategy. server:port/context/version/resource
             requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
-         }else{
+        } else {
             // default version. assume there is no version is used
             requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
         }
@@ -328,6 +319,43 @@ public class Utils {
     }
 
     /**
+     * Removes the apikey that was cached in the tenant's cache space and adds it to the invalid apiKey token cache.
+     *
+     * @param tokenIdentifier    - Token Identifier to be removed from the cache.
+     * @param cachedTenantDomain - Tenant domain from which the apikey should be removed.
+     */
+    public static void invalidateApiKeyInTenantCache(String tokenIdentifier, String cachedTenantDomain) {
+        //If the apiKey is cached in the tenant cache
+        if (cachedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(cachedTenantDomain)) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Removing cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+            }
+            try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(cachedTenantDomain, true);
+                removeCacheEntryFromGatewayAPiKeyCache(tokenIdentifier);
+                putInvalidApiKeyEntryIntoInvalidApiKeyCache(tokenIdentifier, cachedTenantDomain);
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed cache entry " + tokenIdentifier + " from " + cachedTenantDomain + " domain");
+                }
+            } finally {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    /**
+     * Add a token identifier to the invalid apikey cache of the given tenant domain
+     *
+     * @param tokenIdentifier Token identifier to be added to the invalid token cache
+     * @param tenantDomain    Tenant domain of the apikey
+     */
+    public static void putInvalidApiKeyEntryIntoInvalidApiKeyCache(String tokenIdentifier, String tenantDomain) {
+        CacheProvider.getInvalidGatewayApiKeyCache().put(tokenIdentifier, tenantDomain);
+    }
+
+    /**
      * Remove a token from gateway token cache
      *
      * @param key Access token which should be removed from the cache
@@ -350,8 +378,8 @@ public class Utils {
     /**
      * Add a token to the invalid token cache of the given tenant domain
      *
-     * @param cachedToken   Access token to be added to the invalid token cache
-     * @param tenantDomain  Tenant domain of the token
+     * @param cachedToken  Access token to be added to the invalid token cache
+     * @param tenantDomain Tenant domain of the token
      */
     public static void putInvalidTokenEntryIntoInvalidTokenCache(String cachedToken, String tenantDomain) {
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
@@ -367,6 +395,16 @@ public class Utils {
     public static String getCachedTenantDomain(String token) {
         return (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                 .getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(token);
+    }
+
+    /**
+     * Get the tenant domain of a cached api key
+     *
+     * @param token Cached access token
+     * @return Tenant domain
+     */
+    public static String getApiKeyCachedTenantDomain(String token) {
+        return (String) CacheProvider.getGatewayApiKeyCache().get(token);
     }
 
     public static String getClientCertificateHeader() {
@@ -397,7 +435,7 @@ public class Utils {
         if (headers.containsKey(Utils.getClientCertificateHeader())) {
             try {
                 if (!isClientCertificateValidationEnabled() || APIUtil
-                        .isCertificateExistsInTrustStore(certificateFromMessageContext)){
+                        .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
                     String certificate = (String) headers.get(Utils.getClientCertificateHeader());
                     byte[] bytes;
                     if (certificate != null) {
@@ -484,7 +522,7 @@ public class Utils {
     }
 
     private static Map<String, String> getCustomAnalyticsProperties(MessageContext messageContext,
-            String propertyPathKey) {
+                                                                    String propertyPathKey) {
         Set<String> keys = messageContext.getPropertyKeySet();
         String properties = (String) messageContext.getProperty(propertyPathKey);
         if (StringUtils.isBlank(properties)) {
@@ -502,12 +540,85 @@ public class Utils {
 
     public static API getSelectedAPI(MessageContext messageContext) {
 
-        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         Object apiObject = messageContext.getProperty(RESTConstants.PROCESSED_API);
         if (apiObject != null) {
             return (API) apiObject;
         } else {
+            String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
             return messageContext.getConfiguration().getAPI(apiName);
+        }
+    }
+
+    public static void setSubRequestPath(API api, MessageContext synCtx) {
+
+        synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, getSubRequestPath(api, synCtx));
+    }
+
+    public static String getSubRequestPath(API api, MessageContext synCtx) {
+
+        Object requestSubPath = synCtx.getProperty(RESTConstants.REST_SUB_REQUEST_PATH);
+        if (requestSubPath != null) {
+            return (String) requestSubPath;
+        }
+        String subPath = null;
+        String path = ApiUtils.getFullRequestPath(synCtx);
+        if (api != null) {
+            if (VersionStrategyFactory.TYPE_URL.equals(api.getVersionStrategy().getVersionType())) {
+                subPath = path.substring(
+                        api.getContext().length() + api.getVersionStrategy().getVersion().length() + 1);
+            } else {
+                subPath = path.substring(api.getContext().length());
+            }
+        }
+        if (subPath != null && subPath.isEmpty()) {
+            subPath = "/";
+        }
+        synCtx.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+        return subPath;
+    }
+
+    public static JSONObject setRemoteIp(JSONObject jsonObMap, String remoteIP) {
+        if (remoteIP != null && remoteIP.length() > 0) {
+            try {
+                InetAddress address = APIUtil.getAddress(remoteIP);
+                if (address instanceof Inet4Address) {
+                    jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(remoteIP));
+                } else if (address instanceof Inet6Address) {
+                    jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(remoteIP));
+                }
+            } catch (UnknownHostException e) {
+                //ignore the error and log it
+                log.error("Error while parsing host IP " + remoteIP, e);
+            }
+        }
+        return jsonObMap;
+    }
+
+    public static TreeMap<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> getSelectedAPIList(String path,
+                                                                                          String tenantDomain) {
+        TreeMap<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> selectedAPIMap =
+                new TreeMap<>(new ContextLengthSorter());
+        SubscriptionDataStore tenantSubscriptionStore =
+                SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain);
+        if (tenantSubscriptionStore != null) {
+            Map<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> contextAPIMap =
+                    tenantSubscriptionStore.getAllAPIsByContextList();
+            if (contextAPIMap != null) {
+                contextAPIMap.forEach((context, api) -> {
+                    if (ApiUtils.matchApiPath(path, context)) {
+                        selectedAPIMap.put(context, api);
+                    }
+                });
+            }
+        }
+
+        return selectedAPIMap;
+    }
+    private static class ContextLengthSorter implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            return o2.length() - o1.length();
         }
     }
 }

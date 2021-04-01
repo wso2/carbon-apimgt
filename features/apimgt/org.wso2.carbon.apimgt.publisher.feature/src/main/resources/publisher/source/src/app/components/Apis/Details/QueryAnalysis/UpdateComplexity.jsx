@@ -34,7 +34,6 @@ import TableBody from '@material-ui/core/TableBody';
 import TableHead from '@material-ui/core/TableHead';
 import Box from '@material-ui/core/Box';
 
-
 const useStyles = makeStyles((theme) => ({
     searchWrapper: {
         width: '100%',

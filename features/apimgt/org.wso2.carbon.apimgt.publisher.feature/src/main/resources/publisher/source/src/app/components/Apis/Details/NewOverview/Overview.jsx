@@ -33,6 +33,7 @@ import Configuration from './Configuration';
 import CustomizedStepper from './CustomizedStepper';
 import MetaData from './MetaData';
 import Endpoints from './Endpoints';
+import Topics from './Topics';
 
 const styles = (theme) => ({
     root: {
@@ -147,10 +148,12 @@ function Overview(props) {
         switch (apiType) {
             case 'GRAPHQL':
                 return <Operations parentClasses={classes} api={api} />;
-            case 'APIProduct':
+            case 'APIPRODUCT':
                 return <ProductResources parentClasses={classes} api={api} />;
             case 'WS':
-                return '';
+            case 'WEBSUB':
+            case 'SSE':
+                return <Topics parentClasses={classes} api={api} />;
             default:
                 return <Resources parentClasses={classes} api={api} />;
         }
@@ -190,14 +193,26 @@ function Overview(props) {
                         <Grid item xs={12} md={12} lg={12}>
                             <div className={classes.specialGap}>
                                 <Grid container spacing={24}>
-                                    <Grid item xs={12} md={6} lg={6}>
-                                        <Grid item xs={12} md={8} lg={8}>
-                                            {getResourcesClassForAPIs(api.type)}
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item xs={12} md={6} lg={6}>
-                                        {loadEndpoints}
-                                    </Grid>
+                                    {
+                                        api.type === 'WEBSUB' ? (
+                                            <Grid item xs={12} md={12} lg={12}>
+                                                <Grid item xs={12} md={12} lg={12}>
+                                                    {getResourcesClassForAPIs(api.apiType)}
+                                                </Grid>
+                                            </Grid>
+                                        ) : (
+                                            <>
+                                                <Grid item xs={12} md={6} lg={6}>
+                                                    <Grid item xs={12} md={8} lg={8}>
+                                                        {getResourcesClassForAPIs(api.apiType)}
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid item xs={12} md={6} lg={6}>
+                                                    {loadEndpoints}
+                                                </Grid>
+                                            </>
+                                        )
+                                    }
                                 </Grid>
                             </div>
                         </Grid>

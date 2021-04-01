@@ -345,13 +345,16 @@ public class CertificateMgtDAO {
                         certificateMetadataDTO = new CertificateMetadataDTO();
                         certificateMetadataDTO.setAlias(resultSet.getString("ALIAS"));
                         certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
+                        try (InputStream certificate = resultSet.getBinaryStream("CERTIFICATE")) {
+                            certificateMetadataDTO.setCertificate(APIMgtDBUtil.getStringFromInputStream(certificate));
+                        }
                         certificateMetadataList.add(certificateMetadataDTO);
                     }
 
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             handleException("Error while retrieving certificate metadata.", e);
         }
         return certificateMetadataList;

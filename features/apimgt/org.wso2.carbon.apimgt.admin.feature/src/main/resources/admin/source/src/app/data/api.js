@@ -146,6 +146,16 @@ class API extends Resource {
     }
 
     /**
+     * Validate a given role
+     */
+    validateSystemRole(role) {
+        const promise = this.client.then(client => {
+            return client.apis.Roles.validateSystemRole({ roleId: role });
+        });
+        return promise;
+    }
+
+    /**
      * Get list of advanced throttling policies
      */
     getThrottlingPoliciesAdvanced() {
@@ -435,42 +445,38 @@ class API extends Resource {
     }
 
     /**
-     * Get a list of available Microgateway labels
+     * Get a list of available Gateway Environments
      */
-    getMicrogatewayLabelList() {
+    getGatewayEnvironmentList() {
         return this.client.then((client) => {
-            return client.apis['Label Collection'].get_labels(
+            return client.apis['Environments'].get_environments(
                 this._requestMetaData(),
             );
         });
     }
 
-     /**
-     * Delete a Microgateway Label
+    /**
+     * Delete a Gateway Environment
      */
-    deleteMicrogatewayLabel(id) {
+    deleteGatewayEnvironment(id) {
         return this.client.then((client) => {
-            return client.apis['Label'].delete_labels__labelId_(
-                { labelId: id },
+            return client.apis['Environments'].delete_environments__environmentId_(
+                { environmentId: id },
                 this._requestMetaData(),
             );
         });
     }
 
-     /**
-     * Add a Microgateway Label
+    /**
+     * Add a Gateway Environment
      */
-    addMicrogatewayLabel(name, description, hosts,  callback = null) {
+    addGatewayEnvironment(name, displayName, description, vhosts,  callback = null) {
         return this.client.then((client) => {
-            const data = {
-                name: name,
-                description: description,
-                accessUrls: hosts,
-            };
+            const data = { name, displayName, description, vhosts };
             const payload = {
                 'Content-Type': 'application/json',
             };
-            return client.apis['Label'].post_labels(
+            return client.apis['Environments'].post_environments(
                 payload,
                 { requestBody: data },
                 this._requestMetaData(),
@@ -478,18 +484,14 @@ class API extends Resource {
         });
     }
 
-     /**
-     * Update a Microgateway Label
+    /**
+     * Update a Gateway Environment
      */
-    updateMicrogatewayLabel(id, name, description, hosts,  callback = null) {
+    updateGatewayEnvironment(id, name, displayName, description, vhosts,  callback = null) {
         return this.client.then((client) => {
-            const data = {
-                name: name,
-                description: description,
-                accessUrls: hosts,
-            };
-            return client.apis['Label'].put_labels__labelId_(
-                { labelId: id },
+            const data = { name, displayName, description, vhosts };
+            return client.apis['Environments'].put_environments__environmentId_(
+                { environmentId: id },
                 { requestBody: data },
                 this._requestMetaData(),
             );

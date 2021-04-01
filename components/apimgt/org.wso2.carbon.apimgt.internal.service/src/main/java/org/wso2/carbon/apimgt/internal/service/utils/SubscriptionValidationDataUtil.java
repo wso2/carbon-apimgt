@@ -23,17 +23,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.subscription.API;
-import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.APIPolicyConditionGroup;
 import org.wso2.carbon.apimgt.api.model.subscription.Application;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationKeyMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.GlobalPolicy;
+import org.wso2.carbon.apimgt.api.model.subscription.Policy;
 import org.wso2.carbon.apimgt.api.model.subscription.Subscription;
 import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
-import org.wso2.carbon.apimgt.api.model.subscription.GlobalPolicy;
 import org.wso2.carbon.apimgt.internal.service.dto.APIDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.APIListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApiPolicyConditionGroupDTO;
@@ -45,23 +50,20 @@ import org.wso2.carbon.apimgt.internal.service.dto.ApplicationKeyMappingListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ApplicationPolicyListDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.EventCountLimitDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.GroupIdDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ScopesListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.SubscriptionPolicyListDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.BandwidthLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.RequestCountLimitDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyDTO;
-import org.wso2.carbon.apimgt.internal.service.dto.GlobalPolicyListDTO;
-import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -77,6 +79,7 @@ public class SubscriptionValidationDataUtil {
         APIDTO apidto = null;
         if (model != null) {
             apidto = new APIDTO();
+            apidto.setUuid(model.getApiUUID());
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
             apidto.setName(model.getName());
@@ -85,6 +88,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
+            apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
@@ -107,6 +111,7 @@ public class SubscriptionValidationDataUtil {
         APIListDTO apiListdto = new APIListDTO();
         if (model != null) {
             APIDTO apidto = new APIDTO();
+            apidto.setUuid(model.getApiUUID());
             apidto.setApiId(model.getApiId());
             apidto.setVersion(model.getVersion());
             apidto.setContext(model.getContext());
@@ -114,6 +119,7 @@ public class SubscriptionValidationDataUtil {
             apidto.setProvider(model.getProvider());
             apidto.setApiType(model.getApiType());
             apidto.setName(model.getName());
+            apidto.setStatus(model.getStatus());
             apidto.setIsDefaultVersion(model.isDefaultVersion());
             Map<String,URLMapping> urlMappings = model.getAllResources();
             List<URLMappingDTO> urlMappingsDTO = new ArrayList<>();
@@ -253,6 +259,9 @@ public class SubscriptionValidationDataUtil {
         } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
             BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
             defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
+        } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())){
+            EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
+            defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
         }
         return defaultLimit;
     }
@@ -275,6 +284,9 @@ public class SubscriptionValidationDataUtil {
             } else if (PolicyConstants.BANDWIDTH_TYPE.equals(quotaPolicy.getType())) {
                 BandwidthLimit bandwidthLimit = (BandwidthLimit) quotaPolicy.getLimit();
                 defaultLimit.setBandwidth(fromBandwidthLimitToDTO(bandwidthLimit));
+            } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())){
+                EventCountLimit eventCountLimit = (EventCountLimit) quotaPolicy.getLimit();
+                defaultLimit.setEventCount(fromEventCountLimitToDTO(eventCountLimit));
             }
             return defaultLimit;
         }
@@ -309,6 +321,21 @@ public class SubscriptionValidationDataUtil {
         dto.setTimeUnit(requestCountLimit.getTimeUnit());
         dto.setUnitTime(requestCountLimit.getUnitTime());
         dto.setRequestCount(requestCountLimit.getRequestCount());
+        return dto;
+    }
+
+    /**
+     * Converts a Event Count Limit model object into a Event Count Limit DTO object
+     *
+     * @param EventCountLimit Event Count Limit model object
+     * @return Event Count Limit DTO object derived from model
+     */
+    private static EventCountLimitDTO fromEventCountLimitToDTO(EventCountLimit eventCountLimit) {
+
+        EventCountLimitDTO dto = new EventCountLimitDTO();
+        dto.setTimeUnit(eventCountLimit.getTimeUnit());
+        dto.setUnitTime(eventCountLimit.getUnitTime());
+        dto.setEventCount(eventCountLimit.getEventCount());
         return dto;
     }
 

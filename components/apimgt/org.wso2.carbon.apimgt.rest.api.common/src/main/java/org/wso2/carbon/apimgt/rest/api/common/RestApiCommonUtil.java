@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -16,6 +17,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Date;
@@ -30,11 +32,6 @@ public class RestApiCommonUtil {
     public static final ThreadLocal userThreadLocal = new ThreadLocal();
     private static final Log log = LogFactory.getLog(RestApiCommonUtil.class);
 
-    public static void setThreadLocalRequestedTenant(String user) {
-
-        userThreadLocal.set(user);
-    }
-
     public static void unsetThreadLocalRequestedTenant() {
 
         userThreadLocal.remove();
@@ -45,12 +42,18 @@ public class RestApiCommonUtil {
         return (String) userThreadLocal.get();
     }
 
+    public static void setThreadLocalRequestedTenant(String user) {
+
+        userThreadLocal.set(user);
+    }
+
     public static APIProvider getLoggedInUserProvider() throws APIManagementException {
 
         return APIManagerFactory.getInstance().getAPIProvider(getLoggedInUsername());
     }
 
-    /** Returns an APIConsumer which is corresponding to the current logged in user taken from the carbon context
+    /**
+     * Returns an APIConsumer which is corresponding to the current logged in user taken from the carbon context
      *
      * @return an APIConsumer which is corresponding to the current logged in user
      * @throws APIManagementException
@@ -89,8 +92,8 @@ public class RestApiCommonUtil {
      * specified
      *
      * @param offset current starting index
-     * @param limit current max records
-     * @param size maximum index possible
+     * @param limit  current max records
+     * @param size   maximum index possible
      * @return the next/previous offset/limit parameters as a hash-map
      */
     public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
@@ -123,11 +126,12 @@ public class RestApiCommonUtil {
         return result;
     }
 
-    /** Returns the paginated url for APIs API
+    /**
+     * Returns the paginated url for APIs API
      *
      * @param offset starting index
-     * @param limit max number of objects returned
-     * @param query search query value
+     * @param limit  max number of objects returned
+     * @param query  search query value
      * @return constructed paginated url
      */
     public static String getAPIPaginatedURL(Integer offset, Integer limit, String query) {
@@ -139,27 +143,52 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for Applications API
+    /**
+     * Returns the paginated url for Applications API
      *
-     * @param offset starting index
-     * @param limit max number of objects returned
+     * @param offset  starting index
+     * @param limit   max number of objects returned
      * @param groupId groupId of the Application
      * @return constructed paginated url
      */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
 
+        return getApplicationPaginatedURLWithSortParams(offset, limit, groupId, null, null);
+    }
+
+    /**
+     * Returns the paginated url for Applications API when it comes to sortOrder and sortBy
+     *
+     * @param offset    starting index
+     * @param limit     max number of objects returned
+     * @param groupId   group ID of the application
+     * @param sortOrder specified sorting order ex: ASC
+     * @param sortBy    specified parameter for the sort ex: name
+     * @return constructed paginated url
+     */
+    public static String getApplicationPaginatedURLWithSortParams(Integer offset, Integer limit, String groupId,
+                                                                  String sortOrder, String sortBy) {
+
         groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
+        if (StringUtils.isNoneBlank(sortBy) || StringUtils.isNotBlank(sortOrder)) {
+            sortOrder = sortOrder == null ? "" : sortOrder;
+            sortBy = sortBy == null ? "" : sortBy;
+            paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL_WITH_SORTBY_SORTORDER;
+            paginatedURL = paginatedURL.replace(RestApiConstants.SORTBY_PARAM, sortBy);
+            paginatedURL = paginatedURL.replace(RestApiConstants.SORTORDER_PARAM, sortOrder);
+        }
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
         return paginatedURL;
     }
 
-    /** Returns the paginated url for admin  /Applications API
+    /**
+     * Returns the paginated url for admin  /Applications API
      *
      * @param offset starting index
-     * @param limit max number of objects returned
+     * @param limit  max number of objects returned
      * @return constructed paginated url
      */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit) {
@@ -170,11 +199,12 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for subscriptions for a particular API identifier
+    /**
+     * Returns the paginated url for subscriptions for a particular API identifier
      *
-     * @param offset starting index
-     * @param limit max number of objects returned
-     * @param apiId API Identifier
+     * @param offset  starting index
+     * @param limit   max number of objects returned
+     * @param apiId   API Identifier
      * @param groupId groupId of the Application
      * @return constructed paginated url
      */
@@ -190,10 +220,11 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for subscriptions for a particular application
+    /**
+     * Returns the paginated url for subscriptions for a particular application
      *
-     * @param offset starting index
-     * @param limit max number of objects returned
+     * @param offset        starting index
+     * @param limit         max number of objects returned
      * @param applicationId application id
      * @return constructed paginated url
      */
@@ -207,10 +238,11 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for documentations
+    /**
+     * Returns the paginated url for documentations
      *
      * @param offset starting index
-     * @param limit max number of objects returned
+     * @param limit  max number of objects returned
      * @return constructed paginated url
      */
     public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
@@ -222,10 +254,11 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for API ratings
+    /**
+     * Returns the paginated url for API ratings
      *
      * @param offset starting index
-     * @param limit max number of objects returned
+     * @param limit  max number of objects returned
      * @return constructed paginated url
      */
     public static String getRatingPaginatedURL(Integer offset, Integer limit, String apiId) {
@@ -237,11 +270,12 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for tiers
+    /**
+     * Returns the paginated url for tiers
      *
      * @param tierLevel tier level (api/application or resource)
-     * @param offset starting index
-     * @param limit max number of objects returned
+     * @param offset    starting index
+     * @param limit     max number of objects returned
      * @return constructed paginated url
      */
     public static String getTiersPaginatedURL(String tierLevel, Integer offset, Integer limit) {
@@ -253,10 +287,11 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for tags
+    /**
+     * Returns the paginated url for tags
      *
      * @param offset starting index
-     * @param limit max number of objects returned
+     * @param limit  max number of objects returned
      * @return constructed paginated url
      */
     public static String getTagsPaginatedURL(Integer offset, Integer limit) {
@@ -282,10 +317,11 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for tags
+    /**
+     * Returns the paginated url for tags
      *
      * @param offset starting index
-     * @param limit max number of objects returned
+     * @param limit  max number of objects returned
      * @return constructed paginated url
      */
     public static String getResourcePathPaginatedURL(Integer offset, Integer limit) {
@@ -296,11 +332,12 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for APIProducts API
+    /**
+     * Returns the paginated url for APIProducts API
      *
      * @param offset starting index
-     * @param limit max number of objects returned
-     * @param query search query value
+     * @param limit  max number of objects returned
+     * @param query  search query value
      * @return constructed paginated url
      */
     public static String getAPIProductPaginatedURL(Integer offset, Integer limit, String query) {
@@ -312,13 +349,14 @@ public class RestApiCommonUtil {
         return paginatedURL;
     }
 
-    /** Returns the paginated url for product documentations
+    /**
+     * Returns the paginated url for product documentations
      *
      * @param offset starting index
-     * @param limit max number of objects returned
+     * @param limit  max number of objects returned
      * @return constructed paginated url
      */
-    public static String getProductDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
+    public static String getProductDocumentPaginatedURL(Integer offset, Integer limit, String apiId) {
 
         String paginatedURL = RestApiConstants.PRODUCT_DOCUMENTS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
@@ -354,17 +392,29 @@ public class RestApiCommonUtil {
     }
 
     public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
+
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 
     /**
      * This method retrieves the Swagger Definition for an API to be displayed
-     * @param api API
-     * @return String
-     * */
+     *
+     * @param api         API
+     * @param apiProvider API Provider
+     * @return String with the swagger definition
+     */
     public static String retrieveSwaggerDefinition(API api, APIProvider apiProvider)
             throws APIManagementException {
-        String apiSwagger = apiProvider.getOpenAPIDefinition(api.getId());
+
+        String apiSwagger = null;
+        String providerName = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
+        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        if (api.getUuid() != null) {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getUuid(), providerTenantDomain);
+        } else {
+            apiSwagger = apiProvider.getOpenAPIDefinition(api.getId(), providerTenantDomain);
+        }
+
         APIDefinition parser = OASParserUtil.getOASParser(apiSwagger);
         return parser.getOASDefinitionForPublisher(api, apiSwagger);
     }
@@ -378,6 +428,7 @@ public class RestApiCommonUtil {
      */
     public static void validateUserTenantWithAPIIdentifier(APIIdentifier apiIdentifier)
             throws APIMgtAuthorizationFailedException {
+
         String username = getLoggedInUsername();
         String providerName = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
         String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
@@ -403,4 +454,32 @@ public class RestApiCommonUtil {
         return matcher.matches();
 
     }
+
+    /**
+     * This method retrieves the AsyncAPI Definition for an API to be displayed
+     *
+     * @param api API
+     * @return String
+     */
+    public static String retrieveAsyncAPIDefinition(API api, APIProvider apiProvider)
+            throws APIManagementException {
+
+        return apiProvider.getAsyncAPIDefinition(api.getId());
+    }
+
+    public static String getValidateTenantDomain(String xWSO2Tenant) {
+
+        String tenantDomain = getLoggedInUserTenantDomain();
+        if (xWSO2Tenant == null) {
+            return tenantDomain;
+        } else {
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                return xWSO2Tenant;
+            } else {
+                return tenantDomain;
+            }
+        }
+
+    }
+
 }

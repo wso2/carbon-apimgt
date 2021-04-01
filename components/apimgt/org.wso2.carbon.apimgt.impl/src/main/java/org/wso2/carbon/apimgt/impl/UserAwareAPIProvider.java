@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
@@ -50,7 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -78,17 +76,13 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void addAPI(API api) throws APIManagementException {
-        checkCreatePermission();
-        super.addAPI(api);
+    public API addAPI(API api) throws APIManagementException {
+        return super.addAPI(api);
     }
 
     @Override
     public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException {
-        checkCreatePermission();
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
+        checkAccessControlPermission(api.getId());
         super.createNewAPIVersion(api, newVersion);
     }
 
@@ -100,10 +94,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
-        checkCreatePermission();
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
+        checkAccessControlPermission(api.getId());
         super.updateAPI(api);
     }
 
@@ -114,42 +105,15 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway,
-            boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
-            throws APIManagementException, FaultGatewaysException {
-        checkAccessControlPermission(identifier);
-        return super
-                .updateAPIStatus(identifier, status, publishToGateway, deprecateOldVersions, makeKeysForwardCompatible);
-    }
-
-    @Override
     public void manageAPI(API api) throws APIManagementException,FaultGatewaysException {
-        boolean permitted = APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
-                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
-        if(!permitted){
-            String permission = APIConstants.Permissions.API_CREATE + " or " + APIConstants.Permissions.API_PUBLISH;
-            throw new APIManagementException("User '" + username + "' does not have the " +
-                    "required permission: " + permission);
-        }
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
+        checkAccessControlPermission(api.getId());
         super.updateAPI(api);
-    }
-
-    @Override
-    public void deleteAPI(APIIdentifier identifier, String apiUUid) throws APIManagementException {
-        checkCreatePermission();
-        checkAccessControlPermission(identifier);
-        super.deleteAPI(identifier, apiUUid);
     }
 
     @Override
     public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
             throws APIManagementException {
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
+        checkAccessControlPermission(api.getId());
         return super.updateAPIsInExternalAPIStores(api, apiStoreSet, apiOlderVersionExist);
     }
 
@@ -169,22 +133,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public List<String> getCustomFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
         checkAccessControlPermission(apiIdentifier);
         return super.getCustomFaultSequences(apiIdentifier);
-    }
-
-    @Override
-    public void changeAPIStatus(API api, String status, String userId,
-                                boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
-        checkPublishPermission();
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
-        super.changeAPIStatus(api, status, userId, updateGatewayConfig);
-    }
-
-    @Override
-    public void changeAPIStatus(API api, APIStatus status, String userId,
-            boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
-        changeAPIStatus(api, status.getStatus(), userId, updateGatewayConfig);
     }
 
     @Override
@@ -224,13 +172,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void addDocumentation(Identifier id,
                                  Documentation documentation) throws APIManagementException {
 
-        if (!checkCreateOrPublishPermission()) {
-            throw new APIManagementException("User '" + username + "' has neither '" + APIConstants.Permissions.API_CREATE
-                    + "' nor the '" + APIConstants.Permissions.API_PUBLISH + "' permission to add API documentation");
-        }
         //todo : implement access control check for api products too
         if (id instanceof APIIdentifier) {
-            checkAccessControlPermission((APIIdentifier) id);
+            checkAccessControlPermission(id);
         }
         super.addDocumentation(id, documentation);
     }
@@ -251,22 +195,22 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getOpenAPIDefinition(Identifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(Identifier apiId, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getOpenAPIDefinition(apiId);
+        return super.getOpenAPIDefinition(apiId, orgId);
     }
 
     @Override
-    public void removeDocumentation(APIIdentifier apiId, String docName, String docType) throws APIManagementException {
-        checkCreatePermission();
+
+    public void removeDocumentation(APIIdentifier apiId, String docName, String docType, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        super.removeDocumentation(apiId, docName, docType);
+        super.removeDocumentation(apiId, docName, docType, orgId);
     }
 
     @Override
-    public void removeDocumentation(Identifier id, String docId) throws APIManagementException {
+    public void removeDocumentation(Identifier id, String docId, String orgId) throws APIManagementException {
         checkAccessControlPermission(id);
-        super.removeDocumentation(id, docId);
+        super.removeDocumentation(id, docId, orgId);
     }
 
     @Override
@@ -275,35 +219,20 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void updateDocumentation(APIIdentifier apiId,
-                                    Documentation documentation) throws APIManagementException {
-        if (!checkCreateOrPublishPermission()) {
-            throw new APIManagementException("User '" + username + "' has neither '" +
-                    APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
-                    "' permission to update API documentation");
-        }
-        checkAccessControlPermission(apiId);
-        super.updateDocumentation(apiId, documentation);
+    public Documentation updateDocumentation(String apiId, Documentation documentation, String orgId) throws APIManagementException {
+        //checkAccessControlPermission(apiId);
+        return super.updateDocumentation(apiId, documentation, orgId);
     }
 
     @Override
     public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
-
-        if (!checkCreateOrPublishPermission()) {
-            throw new APIManagementException("User '" + username + "' has neither '" +
-                    APIConstants.Permissions.API_CREATE + "' nor the '" + APIConstants.Permissions.API_PUBLISH +
-                    "' permission to add content for API documentation");
-        }
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
+        checkAccessControlPermission(api.getId());
         super.addDocumentationContent(api, documentationName, text);
     }
 
     @Override
     public void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException {
-        checkCreatePermission();
         checkAccessControlPermission(apiId);
         super.copyAllDocumentation(apiId, toVersion);
     }
@@ -316,44 +245,21 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException {
-        checkPublishPermission();
         apiMgtDAO.updateSubscription(apiId, subStatus, appId);
     }
 
     @Override
     public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
-        checkPublishPermission();
         super.updateSubscription(subscribedAPI);
     }
 
     @Override
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
-        if (checkCreateOrPublishPermission()) {
-            return super.getSubscriptionByUUID(uuid);
-        }
-        return null;
-    }
-
-    public void checkCreatePermission() throws APIManagementException {
-        APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
-    }
-
-    public void checkManageTiersPermission() throws APIManagementException {
-        APIUtil.checkPermission(username, APIConstants.Permissions.MANAGE_TIERS);
-    }
-
-    public void checkPublishPermission() throws APIManagementException {
-        APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
-    }
-
-    public boolean checkCreateOrPublishPermission() throws APIManagementException {
-        return APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_CREATE) ||
-                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
+        return super.getSubscriptionByUUID(uuid);
     }
 
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
             throws APIManagementException, FaultGatewaysException {
-        checkPublishPermission();
         checkAccessControlPermission(apiIdentifier);
         return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
     }
@@ -367,7 +273,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException {
-        checkPublishPermission();
         checkAccessControlPermission(apiIdentifier);
         return super.changeAPILCCheckListItems(apiIdentifier, checkItem, checkItemValue);
     }
@@ -428,9 +333,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText, String orgId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        super.saveSwagger20Definition(apiId, jsonText);
+        super.saveSwagger20Definition(apiId, jsonText, orgId);
     }
 
     @Override
@@ -455,9 +360,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public boolean isAPIUpdateValid(API api) throws APIManagementException {
-        if (api != null) {
-            checkAccessControlPermission(api.getId());
-        }
+        checkAccessControlPermission(api.getId());
         return super.isAPIUpdateValid(api);
     }
 
@@ -495,18 +398,15 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             throws APIManagementException {
         Map<Documentation, API> apiByDocumentation = APIUtil
                 .searchAPIsByDoc(registry, tenantId, username, searchTerm, APIConstants.PUBLISHER_CLIENT);
-        Map<Documentation, API> filteredAPIDocumentation = new HashMap<Documentation, API>();
-        if (apiByDocumentation != null) {
-            for (Map.Entry<Documentation, API> entry : apiByDocumentation.entrySet()) {
-                API api = entry.getValue();
-                if (api != null) {
-                    checkAccessControlPermission(api.getId());
-                    filteredAPIDocumentation.put(entry.getKey(), api);
-                }
+        Map<Documentation, API> filteredAPIDocumentation = new HashMap<>();
+        for (Map.Entry<Documentation, API> entry : apiByDocumentation.entrySet()) {
+            API api = entry.getValue();
+            if (api != null) {
+                checkAccessControlPermission(api.getId());
+                filteredAPIDocumentation.put(entry.getKey(), api);
             }
-            return filteredAPIDocumentation;
         }
-        return null;
+        return filteredAPIDocumentation;
     }
 
     @Override
@@ -539,32 +439,27 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int addCertificate(String userName, String certificate, String alias, String endpoint) throws APIManagementException {
-        checkCreatePermission();
         return super.addCertificate(userName, certificate, alias, endpoint);
     }
 
     @Override
     public int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException {
-        checkCreatePermission();
         return super.deleteCertificate(userName, alias, endpoint);
     }
 
     @Override
     public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
-        checkCreatePermission();
         return super.getCertificates(userName);
     }
 
     @Override
     public List<CertificateMetadataDTO> searchCertificates(int tenantId, String alias, String endpoint)
             throws APIManagementException {
-        checkCreatePermission();
         return super.searchCertificates(tenantId, alias, endpoint);
     }
 
     @Override
     public boolean isCertificatePresent(int tenantId, String alias) throws APIManagementException {
-        checkCreatePermission();
         return super.isCertificatePresent(tenantId, alias);
     }
 
@@ -589,13 +484,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public CertificateInformationDTO getCertificateStatus(String alias) throws APIManagementException {
-        checkCreatePermission();
         return super.getCertificateStatus(alias);
     }
 
     @Override
     public int updateCertificate(String certificateString, String alias) throws APIManagementException {
-        checkCreatePermission();
         return super.updateCertificate(certificateString, alias);
     }
 
@@ -608,13 +501,17 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public ByteArrayInputStream getCertificateContent(String alias) throws APIManagementException {
-        checkCreatePermission();
         return super.getCertificateContent(alias);
     }
 
     @Override
     public void deleteWorkflowTask(APIIdentifier apiIdentifier) throws APIManagementException {
-        checkPublishPermission();
         super.deleteWorkflowTask(apiIdentifier);
+    }
+
+    @Override
+    public String getAsyncAPIDefinition(Identifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getAsyncAPIDefinition(apiId);
     }
 }

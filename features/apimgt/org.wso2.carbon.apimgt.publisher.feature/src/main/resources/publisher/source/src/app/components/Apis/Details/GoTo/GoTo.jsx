@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
         right: 60,
         top: 0,
         width: 300,
-        background: 'white',
+        background: theme.palette.background.paper,
         border: 'solid 1px #ccc',
         borderRadius: 5,
     },
@@ -199,7 +199,6 @@ function getSuggestions(value, isAPIProduct, isGraphQL, { showEmpty = false } = 
             return keep;
         });
 }
-
 
 /**
  * Method to render the GoTo search feature

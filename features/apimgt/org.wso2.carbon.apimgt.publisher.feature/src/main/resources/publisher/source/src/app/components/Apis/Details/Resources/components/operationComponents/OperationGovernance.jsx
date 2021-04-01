@@ -39,7 +39,6 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { getOperationScopes } from '../../operationUtils';
 
-
 /**
  *
  * Renders the security , throttling policies and scopes selection section in the operation collapsed page
@@ -50,12 +49,14 @@ import { getOperationScopes } from '../../operationUtils';
 export default function OperationGovernance(props) {
     const {
         operation, operationsDispatcher, operationRateLimits, api, disableUpdate, spec, target, verb, sharedScopes,
+        setFocusOperationLevel,
     } = props;
     const operationScopes = getOperationScopes(operation, spec);
     const isOperationRateLimiting = api.apiThrottlingPolicy === null;
     const filteredApiScopes = api.scopes.filter((sharedScope) => !sharedScope.shared);
     const intl = useIntl();
     const scrollToTop = () => {
+        setFocusOperationLevel(true);
         document.querySelector('#react-root').scrollTop = 195;
     };
     return (
@@ -214,14 +215,18 @@ export default function OperationGovernance(props) {
                             </MenuItem>
                         ))}
                     </TextField>
-                    <Button onClick={scrollToTop}>
-                        <FormattedMessage
-                            id={'Apis.Details.Resources.components.operationComponents.'
-                            + 'OperationGovernance.rate.limiting.button.text'}
-                            defaultMessage='Toggle per api rate limiting'
-                        />
-                        <ExpandLessIcon />
-                    </Button>
+                    {!isOperationRateLimiting && (
+                        <Button onClick={scrollToTop}>
+                            <FormattedMessage
+                                id={
+                                    'Apis.Details.Resources.components.operationComponents.'
+                                    + 'OperationGovernance.rate.limiting.button.text'
+                                }
+                                defaultMessage='Change rate limiting level'
+                            />
+                            <ExpandLessIcon />
+                        </Button>
+                    )}
                 </Box>
             </Grid>
             <Grid item md={6} />

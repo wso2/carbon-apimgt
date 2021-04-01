@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import graphql.language.FieldDefinition;
 import graphql.language.ObjectTypeDefinition;
@@ -30,9 +29,6 @@ import graphql.schema.idl.UnExecutableSchemaGenerator;
 import graphql.schema.idl.errors.SchemaProblem;
 import graphql.schema.validation.SchemaValidationError;
 import graphql.schema.validation.SchemaValidator;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,33 +42,41 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIProductResource;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +87,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This is a publisher rest api utility class.
+ */
 public class PublisherCommonUtils {
 
     private static final Log log = LogFactory.getLog(PublisherCommonUtils.class);
@@ -101,6 +108,7 @@ public class PublisherCommonUtils {
      */
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
+
         APIIdentifier apiIdentifier = originalAPI.getId();
         // Validate if the USER_REST_API_SCOPES is not set in WebAppAuthenticator when scopes are validated
         if (tokenScopes == null) {
@@ -108,10 +116,12 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
-        boolean isWSAPI = originalAPI.getType() != null && APIConstants.APITransportType.WS.toString()
-                .equals(originalAPI.getType());
         boolean isGraphql = originalAPI.getType() != null && APIConstants.APITransportType.GRAPHQL.toString()
                 .equals(originalAPI.getType());
+        boolean isAsyncAPI = originalAPI.getType() != null
+                && (APIConstants.APITransportType.WS.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
+                || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType()));
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -157,19 +167,25 @@ public class PublisherCommonUtils {
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
         // OAuth 2.0 backend protection: Api Key and Api Secret encryption while updating the API
+        String customParametersString = "{}";
         if (endpointConfig != null) {
             if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
-                LinkedHashMap endpointSecurity = (LinkedHashMap) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
                 if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                    LinkedHashMap endpointSecurityProduction = (LinkedHashMap) endpointSecurity
+                    Map endpointSecurityProduction = (Map) endpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
                     String productionEndpointType = (String) endpointSecurityProduction
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>) endpointSecurityProduction
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    if (!(endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                        LinkedHashMap<String, String> customParametersHashMap =
+                                (LinkedHashMap<String, String>) endpointSecurityProduction
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    }
+
                     endpointSecurityProduction
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
@@ -177,7 +193,7 @@ public class PublisherCommonUtils {
                         String apiSecret = endpointSecurityProduction
                                 .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
 
-                        if (!apiSecret.equals("")) {
+                        if (StringUtils.isNotEmpty(apiSecret)) {
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecurityProduction
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
@@ -192,15 +208,18 @@ public class PublisherCommonUtils {
                     apiDtoToUpdate.setEndpointConfig(endpointConfig);
                 }
                 if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                    LinkedHashMap endpointSecuritySandbox = (LinkedHashMap) endpointSecurity
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                     String sandboxEndpointType = (String) endpointSecuritySandbox
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
 
                     // Change default value of customParameters JSONObject to String
-                    LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>) endpointSecuritySandbox
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    String customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    if (!(endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                        Map<String, String> customParametersHashMap = (Map<String, String>) endpointSecuritySandbox
+                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                    }
                     endpointSecuritySandbox
                             .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
 
@@ -208,7 +227,7 @@ public class PublisherCommonUtils {
                         String apiSecret = endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
                                 .toString();
 
-                        if (!apiSecret.equals("")) {
+                        if (StringUtils.isNotEmpty(apiSecret)) {
                             String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
                             endpointSecuritySandbox
                                     .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
@@ -270,11 +289,6 @@ public class PublisherCommonUtils {
 
         // Validate API Security
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecurity != null && apiSecurity
-                .contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-            throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                    ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-        }
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
         String originalStatus = originalAPI.getStatus();
@@ -319,7 +333,7 @@ public class PublisherCommonUtils {
             }
         }
         // Validate if resources are empty
-        if (!isWSAPI && (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty())) {
+        if (apiDtoToUpdate.getOperations() == null || apiDtoToUpdate.getOperations().isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
         API apiToUpdate = APIMappingUtil.fromDTOtoAPI(apiDtoToUpdate, apiIdentifier.getProviderName());
@@ -335,21 +349,26 @@ public class PublisherCommonUtils {
             apiToUpdate.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         }
 
-        //attach micro-geteway labels
-        assignLabelsToDTO(apiDtoToUpdate, apiToUpdate);
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         //preserve monetization status in the update flow
-        apiProvider.configureMonetizationInAPIArtifact(originalAPI);
+        //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
+        apiIdentifier.setUuid(apiToUpdate.getUuid());
 
-        if (!isWSAPI) {
-            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier);
+        if (!isAsyncAPI) {
+            String oldDefinition = apiProvider.getOpenAPIDefinition(apiIdentifier, tenantDomain);
             APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
             SwaggerData swaggerData = new SwaggerData(apiToUpdate);
             String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition);
+            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, tenantDomain);
             if (!isGraphql) {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
+        } else {
+             String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
+            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
 
@@ -362,13 +381,15 @@ public class PublisherCommonUtils {
             }
         }
 
-        apiProvider.manageAPI(apiToUpdate);
+        apiProvider.updateAPI(apiToUpdate, originalAPI);
 
-        return apiProvider.getAPI(apiIdentifier);
+        return apiProvider.getAPIbyUUID(originalAPI.getUuid(),
+                CarbonContext.getThreadLocalCarbonContext().getTenantDomain());
+        // TODO use returend api
     }
 
     /**
-     * Check whether the token has APIDTO class level Scope annotation
+     * Check whether the token has APIDTO class level Scope annotation.
      *
      * @return true if the token has APIDTO class level Scope annotation
      */
@@ -386,10 +407,12 @@ public class PublisherCommonUtils {
 
     /**
      * Override the API DTO field values with the user passed new values considering the field-wise scopes defined as
-     * allowed to update in REST API definition yaml
+     * allowed to update in REST API definition yaml.
      */
     private static JSONObject overrideDTOValues(JSONObject originalApiDtoJson, JSONObject newApiDtoJson, Field field,
-            String[] tokenScopes, Scope[] fieldAnnotatedScopes) throws APIManagementException {
+                                                String[] tokenScopes, Scope[] fieldAnnotatedScopes)
+            throws APIManagementException {
+
         for (String tokenScope : tokenScopes) {
             for (Scope scopeAnt : fieldAnnotatedScopes) {
                 if (scopeAnt.name().equals(tokenScope)) {
@@ -405,7 +428,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Get the API DTO object in which the API field values are overridden with the user passed new values
+     * Get the API DTO object in which the API field values are overridden with the user passed new values.
      *
      * @throws APIManagementException
      */
@@ -455,6 +478,7 @@ public class PublisherCommonUtils {
      * @return List of removed resources that are reused among API Products
      */
     private static List<APIResource> getRemovedProductResources(APIDTO updatedDTO, API existingAPI) {
+
         List<APIOperationsDTO> updatedOperations = updatedDTO.getOperations();
         Set<URITemplate> existingUriTemplates = existingAPI.getUriTemplates();
         List<APIResource> removedReusedResources = new ArrayList<>();
@@ -534,6 +558,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException API Management Exception.
      */
     public static String validateRoles(List<String> inputRoles) throws APIManagementException {
+
         String userName = RestApiCommonUtil.getLoggedInUsername();
         boolean isMatched = false;
         if (inputRoles != null && !inputRoles.isEmpty()) {
@@ -584,7 +609,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * validate user inout scopes
+     * validate user inout scopes.
      *
      * @param api api information
      * @throws APIManagementException throw if validation failure
@@ -640,29 +665,7 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * This method is used to assign micro gateway labels to the DTO
-     *
-     * @param apiDTO API DTO
-     * @param api    the API object
-     * @return the API object with labels
-     */
-    public static API assignLabelsToDTO(APIDTO apiDTO, API api) {
-
-        if (apiDTO.getLabels() != null) {
-            List<String> labels = apiDTO.getLabels();
-            List<Label> labelList = new ArrayList<>();
-            for (String label : labels) {
-                Label mgLabel = new Label();
-                mgLabel.setName(label);
-                labelList.add(mgLabel);
-            }
-            api.setGatewayLabels(labelList);
-        }
-        return api;
-    }
-
-    /**
-     * Add API with the generated swagger from the DTO
+     * Add API with the generated swagger from the DTO.
      *
      * @param apiDto     API DTO of the API
      * @param oasVersion Open API Definition version
@@ -673,7 +676,11 @@ public class PublisherCommonUtils {
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username)
             throws APIManagementException, CryptoException {
-        boolean isWSAPI = APIDTO.TypeEnum.WS == apiDto.getType();
+
+        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
+        boolean isAsyncAPI =
+                isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
+                        APIDTO.TypeEnum.SSE.equals(apiDto.getType());
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
 
@@ -697,6 +704,13 @@ public class PublisherCommonUtils {
             }
         }
 
+       /* if (isWSAPI) {
+            ArrayList<String> websocketTransports = new ArrayList<>();
+            websocketTransports.add(APIConstants.WS_PROTOCOL);
+            websocketTransports.add(APIConstants.WSS_PROTOCOL);
+            apiDto.setTransport(websocketTransports);
+        }*/
+
         API apiToAdd = prepareToCreateAPIByDTO(apiDto, apiProvider, username);
         validateScopes(apiToAdd);
         //validate API categories
@@ -707,10 +721,8 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID));
             }
         }
-        //adding the api
-        apiProvider.addAPI(apiToAdd);
 
-        if (!isWSAPI) {
+        if (!isAsyncAPI) {
             APIDefinition oasParser;
             if (RestApiConstants.OAS_VERSION_2.equalsIgnoreCase(oasVersion)) {
                 oasParser = new OAS2Parser();
@@ -719,13 +731,26 @@ public class PublisherCommonUtils {
             }
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
-            apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition);
+            apiToAdd.setSwaggerDefinition(apiDefinition);
+        } else {
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String asyncApiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            apiToAdd.setAsyncApiDefinition(asyncApiDefinition);
         }
+
+        if (isAsyncAPI) {
+            AsyncApiParser asyncApiParser = new AsyncApiParser();
+            String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, apiDefinition);
+        }
+
+        //adding the api
+        apiProvider.addAPI(apiToAdd);
         return apiToAdd;
     }
 
     /**
-     * Validate endpoint configurations of {@link APIDTO} for web socket endpoints
+     * Validate endpoint configurations of {@link APIDTO} for web socket endpoints.
      *
      * @param api api model
      * @return validity of the web socket api
@@ -750,8 +775,42 @@ public class PublisherCommonUtils {
         return isValid;
     }
 
+    public static String constructEndpointConfigForService(String serviceUrl, String protocol) {
+
+        StringBuilder sb = new StringBuilder();
+        String endpointType = APIDTO.TypeEnum.HTTP.value().toLowerCase();
+        if (StringUtils.isNotEmpty(protocol) && (APIDTO.TypeEnum.SSE.equals(protocol.toUpperCase())
+                || APIDTO.TypeEnum.WS.equals(protocol.toUpperCase()))) {
+            endpointType = "ws";
+        }
+        if (StringUtils.isNotEmpty(serviceUrl)) {
+            sb.append("{\"endpoint_type\": \"")
+                    .append(endpointType)
+                    .append("\",")
+                    .append("\"production_endpoints\": {\"url\": \"")
+                    .append(serviceUrl)
+                    .append("\"}}");
+        } // TODO Need to check on the endpoint security
+        return sb.toString();
+    }
+
+    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) {
+
+        switch (definitionType) {
+            case WSDL1:
+            case WSDL2:
+                return APIDTO.TypeEnum.SOAP;
+            case GRAPHQL_SDL:
+                return APIDTO.TypeEnum.GRAPHQL;
+            case ASYNC_API:
+                return APIDTO.TypeEnum.fromValue(protocol.toUpperCase());
+            default:
+                return APIDTO.TypeEnum.HTTP;
+        }
+    }
+
     /**
-     * Prepares the API Model object to be created using the DTO object
+     * Prepares the API Model object to be created using the DTO object.
      *
      * @param body        APIDTO of the API
      * @param apiProvider API Provider
@@ -761,19 +820,11 @@ public class PublisherCommonUtils {
      */
     public static API prepareToCreateAPIByDTO(APIDTO body, APIProvider apiProvider, String username)
             throws APIManagementException {
-        List<String> apiSecuritySchemes = body.getSecurityScheme();//todo check list vs string
+
         String context = body.getContext();
         //Make sure context starts with "/". ex: /pizza
         context = context.startsWith("/") ? context : ("/" + context);
 
-        if (!apiProvider.isClientCertificateBasedAuthenticationConfigured() && apiSecuritySchemes != null) {
-            for (String apiSecurityScheme : apiSecuritySchemes) {
-                if (apiSecurityScheme.contains(APIConstants.API_SECURITY_MUTUAL_SSL)) {
-                    throw new APIManagementException("Mutual SSL based authentication is not supported in this server.",
-                            ExceptionCodes.MUTUAL_SSL_NOT_SUPPORTED);
-                }
-            }
-        }
         if (body.getAccessControlRoles() != null) {
             String errorMessage = PublisherCommonUtils.validateUserRoles(body.getAccessControlRoles());
 
@@ -797,7 +848,7 @@ public class PublisherCommonUtils {
         if (apiProvider.isApiNameWithDifferentCaseExist(body.getName())) {
             throw new APIManagementException(
                     "Error occurred while adding API. API with name " + body.getName() + " already exists.",
-                    ExceptionCodes.API_ALREADY_EXISTS);
+                    ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, body.getName()));
         }
         if (body.getAuthorizationHeader() == null) {
             body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
@@ -825,24 +876,17 @@ public class PublisherCommonUtils {
             for (String version : apiVersions) {
                 if (version.equalsIgnoreCase(body.getVersion())) {
                     //If version already exists
-                    if (apiProvider.isDuplicateContextTemplate(context)) {
-                        throw new APIManagementException(
-                                "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context, ExceptionCodes.API_ALREADY_EXISTS);
-                    } else {
-                        throw new APIManagementException(
-                                "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context,
-                                ExceptionCodes.API_ALREADY_EXISTS);
-                    }
+                    throw new APIManagementException(
+                            "Error occurred while adding the API. The version already exists: " + version,
+                            ExceptionCodes.from(ExceptionCodes.API_VERSION_ALREADY_EXISTS, version, body.getName()));
                 }
             }
         } else {
             //If no any previous version exists
             if (apiProvider.isDuplicateContextTemplate(context)) {
                 throw new APIManagementException(
-                        "Error occurred while adding the API. A duplicate API context " + "already exists for "
-                                + context, ExceptionCodes.API_ALREADY_EXISTS);
+                        "Error occurred while adding the API. A duplicate API context already exists for "
+                                + context, ExceptionCodes.from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
             }
         }
 
@@ -889,12 +933,13 @@ public class PublisherCommonUtils {
         if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
             apiToAdd.setStatus(APIConstants.CREATED);
         }
-        //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
-        //  the owner as a different user
-        apiToAdd.setApiOwner(provider);
 
-        //attach micro-gateway labels
-        PublisherCommonUtils.assignLabelsToDTO(body, apiToAdd);
+        if (!apiToAdd.isAdvertiseOnly() || StringUtils.isBlank(apiToAdd.getApiOwner())) {
+            //we are setting the api owner as the logged in user until we support checking admin privileges and
+            //assigning the owner as a different user
+            apiToAdd.setApiOwner(provider);
+        }
+
         if (body.getKeyManagers() instanceof List) {
             apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
         } else if (body.getKeyManagers() == null) {
@@ -905,8 +950,47 @@ public class PublisherCommonUtils {
         return apiToAdd;
     }
 
+    public static String updateAPIDefinition(String apiId, APIDefinitionValidationResponse response,
+                                             ServiceEntry service) throws APIManagementException,
+            FaultGatewaysException {
+
+        if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
+                ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
+            return updateSwagger(apiId, response, true);
+        } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
+            return updateAsyncAPIDefinition(apiId, response);
+        }
+        return null;
+    }
+
     /**
-     * update swagger definition of the given api
+     * update AsyncPI definition of the given api.
+     *
+     * @param apiId    API Id
+     * @param response response of the AsyncAPI definition validation call
+     * @return updated AsyncAPI definition
+     * @throws APIManagementException when error occurred updating AsyncAPI definition
+     * @throws FaultGatewaysException when error occurred publishing API to the gateway
+     */
+    public static String updateAsyncAPIDefinition(String apiId, APIDefinitionValidationResponse response)
+            throws APIManagementException, FaultGatewaysException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        //this will fall if user does not have access to the API or the API does not exist
+        API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        String apiDefinition = response.getJsonContent();
+        //updating APi with the new AsyncAPI definition
+        apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
+        apiProvider.updateAPI(existingAPI);
+        //load new topics
+        apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(existingAPI, apiDefinition));
+        //retrieves the updated AsyncAPI definition
+        return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
+    }
+
+    /**
+     * update swagger definition of the given api.
      *
      * @param apiId    API Id
      * @param response response of a swagger definition validation call
@@ -914,15 +998,20 @@ public class PublisherCommonUtils {
      * @throws APIManagementException when error occurred updating swagger
      * @throws FaultGatewaysException when error occurred publishing API to the gateway
      */
-    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response)
+    public static String updateSwagger(String apiId, APIDefinitionValidationResponse response, boolean isServiceAPI)
             throws APIManagementException, FaultGatewaysException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         //this will fail if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         APIDefinition oasParser = response.getParser();
         String apiDefinition = response.getJsonContent();
-        apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        if (isServiceAPI) {
+            apiDefinition = oasParser.copyVendorExtensions(existingAPI.getSwaggerDefinition(), apiDefinition);
+        } else {
+            apiDefinition = OASParserUtil.preProcess(apiDefinition);
+        }
         Set<URITemplate> uriTemplates = null;
         uriTemplates = oasParser.getURITemplates(apiDefinition);
 
@@ -960,15 +1049,19 @@ public class PublisherCommonUtils {
         //Update API is called to update URITemplates and scopes of the API
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
-        apiProvider.saveSwagger20Definition(existingAPI.getId(), updatedApiDefinition);
-        apiProvider.updateAPI(existingAPI);
+        apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, tenantDomain);
+        existingAPI.setSwaggerDefinition(updatedApiDefinition);
+        API unModifiedAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        existingAPI.setStatus(unModifiedAPI.getStatus());
+        apiProvider.updateAPI(existingAPI, unModifiedAPI);
         //retrieves the updated swagger definition
-        String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
+        String apiSwagger = apiProvider.getOpenAPIDefinition(apiId, tenantDomain); // TODO see why we need to get it
+        // instead of passing same
         return oasParser.getOASDefinitionForPublisher(existingAPI, apiSwagger);
     }
 
     /**
-     * Add GraphQL schema
+     * Add GraphQL schema.
      *
      * @param originalAPI      API
      * @param schemaDefinition GraphQL schema definition to add
@@ -977,6 +1070,7 @@ public class PublisherCommonUtils {
      */
     public static API addGraphQLSchema(API originalAPI, String schemaDefinition, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
+
         List<APIOperationsDTO> operationListWithOldData = APIMappingUtil
                 .getOperationListWithOldData(originalAPI.getUriTemplates(),
                         extractGraphQLOperationList(schemaDefinition));
@@ -991,12 +1085,13 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Extract GraphQL Operations from given schema
+     * Extract GraphQL Operations from given schema.
      *
      * @param schema graphQL Schema
      * @return the arrayList of APIOperationsDTOextractGraphQLOperationList
      */
     public static List<APIOperationsDTO> extractGraphQLOperationList(String schema) {
+
         List<APIOperationsDTO> operationArray = new ArrayList<>();
         SchemaParser schemaParser = new SchemaParser();
         TypeDefinitionRegistry typeRegistry = schemaParser.parse(schema);
@@ -1017,13 +1112,14 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Validate GraphQL Schema
+     * Validate GraphQL Schema.
      *
      * @param filename file name of the schema
      * @param schema   GraphQL schema
      */
     public static GraphQLValidationResponseDTO validateGraphQLSchema(String filename, String schema)
             throws APIManagementException {
+
         String errorMessage;
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
         boolean isValid = false;
@@ -1084,6 +1180,7 @@ public class PublisherCommonUtils {
      */
     public static Documentation addDocumentationToAPI(DocumentDTO documentDto, String apiId)
             throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDto);
         String documentName = documentDto.getName();
@@ -1104,27 +1201,25 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid document sourceUrl Format",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         }
-        //this will fail if user does not have access to the API or the API does not exist
-        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
+
+        if (apiProvider.isDocumentationExist(apiId, documentName, tenantDomain)) {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
-        apiProvider.addDocumentation(apiIdentifier, documentation);
+        documentation = apiProvider.addDocumentation(apiId, documentation, tenantDomain);
 
-        //retrieve the newly added document
-        String newDocumentId = documentation.getId();
-        return apiProvider.getDocumentation(newDocumentId, tenantDomain);
+        return documentation;
     }
 
     /**
-     * Checks whether the list of tiers are valid given the all valid tiers
+     * Checks whether the list of tiers are valid given the all valid tiers.
      *
      * @param allTiers     All defined tiers
      * @param currentTiers tiers to check if they are a subset of defined tiers
      * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
      */
     public static List<String> getInvalidTierNames(Set<Tier> allTiers, List<String> currentTiers) {
+
         List<String> invalidTiers = new ArrayList<>();
         for (String tierName : currentTiers) {
             boolean isTierValid = false;
@@ -1152,7 +1247,9 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating an existing API Product
      */
     public static APIProduct updateApiProduct(APIProduct originalAPIProduct, APIProductDTO apiProductDtoToUpdate,
-            APIProvider apiProvider, String username) throws APIManagementException, FaultGatewaysException {
+                                              APIProvider apiProvider, String username, String orgId)
+            throws APIManagementException, FaultGatewaysException {
+
         List<String> apiSecurity = apiProductDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiProductDtoToUpdate.getPolicies();
@@ -1199,7 +1296,7 @@ public class PublisherCommonUtils {
         product.setUuid(originalAPIProduct.getUuid());
 
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider.updateAPIProduct(product);
-        apiProvider.updateAPIProductSwagger(apiToProductResourceMapping, product);
+        apiProvider.updateAPIProductSwagger(originalAPIProduct.getUuid(), apiToProductResourceMapping, product, orgId);
 
         //preserve monetization status in the update flow
         apiProvider.configureMonetizationInAPIProductArtifact(product);
@@ -1207,21 +1304,22 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Add API Product with the generated swagger from the DTO
+     * Add API Product with the generated swagger from the DTO.
      *
      * @param apiProductDTO API Product DTO
-     * @param provider      Provider name
      * @param username      Username
      * @return Created API Product object
      * @throws APIManagementException Error while creating the API Product
      * @throws FaultGatewaysException Error while adding the API Product to gateway
      */
-    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String provider,
-            String username) throws APIManagementException, FaultGatewaysException {
+    public static APIProduct addAPIProductWithGeneratedSwaggerDefinition(APIProductDTO apiProductDTO, String username)
+            throws APIManagementException, FaultGatewaysException {
+
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
         // if not add product
-        provider = apiProductDTO.getProvider();
+        String provider = apiProductDTO.getProvider();
         String context = apiProductDTO.getContext();
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
@@ -1275,20 +1373,26 @@ public class PublisherCommonUtils {
         //Check whether the context already exists
         if (apiProvider.isContextExist(context)) {
             throw new APIManagementException(
-                    "Error occurred while adding API Product. API Product with the context " + context
-                            + " already exists.", ExceptionCodes.API_ALREADY_EXISTS);
+                    "Error occurred while adding API Product. API Product with the context " + context + " already " +
+                            "exists.", ExceptionCodes.from(ExceptionCodes.API_PRODUCT_CONTEXT_ALREADY_EXISTS, context));
         }
 
         APIProduct productToBeAdded = APIMappingUtil.fromDTOtoAPIProduct(apiProductDTO, provider);
 
+        APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         Map<API, List<APIProductResource>> apiToProductResourceMapping = apiProvider
                 .addAPIProductWithoutPublishingToGateway(productToBeAdded);
-        apiProvider.addAPIProductSwagger(apiToProductResourceMapping, productToBeAdded);
-
-        APIProductIdentifier createdAPIProductIdentifier = productToBeAdded.getId();
         APIProduct createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
+        apiProvider.addAPIProductSwagger(createdProduct.getUuid(), apiToProductResourceMapping, createdProduct,
+                tenantDomain);
 
-        apiProvider.saveToGateway(createdProduct);
+        createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
+    }
+
+    public static boolean isStreamingAPI(APIDTO apidto) {
+
+        return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
+                APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
     }
 }

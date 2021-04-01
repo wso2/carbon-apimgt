@@ -70,7 +70,7 @@ const styles = (theme) => ({
     },
     infoButton: {
         margin: theme.spacing(1),
-        color: 'white',
+        color: theme.palette.background.paper,
     },
     InfoToolTip: {
         backgroundColor: '#f5f5f9',
@@ -115,6 +115,18 @@ class HeaderSearch extends React.Component {
     }
 
     /**
+     * On enter pressed after giving a search text
+     * @param event
+     */
+    onKeyDown(event) {
+        if (event.key === 'Enter' && !this.suggestionSelected) {
+            const { history } = this.props;
+            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
+        }
+        this.suggestionSelected = false;
+    }
+
+    /**
      * To provide accessibility for Enter key upon suggestion selection
      * @param {React.SyntheticEvent} event event
      * @param {Object} suggestion This is either API object or document coming from search API call
@@ -128,19 +140,6 @@ class HeaderSearch extends React.Component {
             history.push(path);
         }
     }
-
-    /**
-     * On enter pressed after giving a search text
-     * @param event
-     */
-    onKeyDown(event) {
-        if (event.key === 'Enter' && !this.suggestionSelected) {
-            const { history } = this.props;
-            history.push('/apis/search?query=' + buildSearchQuery(event.target.value));
-        }
-        this.suggestionSelected = false;
-    }
-
 
     /**
      * On change search input element
@@ -328,12 +327,6 @@ class HeaderSearch extends React.Component {
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option12'
                                         defaultMessage='Api Category [ Syntax - api-category:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option7'
-                                        defaultMessage='Sub-Context [ Syntax - subcontext:xxxx ]'
                                     />
                                 </li>
                                 <li style={{ marginTop: '5px' }}>

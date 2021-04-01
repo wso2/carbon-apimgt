@@ -4,21 +4,25 @@ import graphql.analysis.FieldComplexityCalculator;
 import graphql.analysis.FieldComplexityEnvironment;
 import graphql.language.Argument;
 import graphql.language.IntValue;
-import graphql.language.Value;
-import graphql.schema.CoercingParseLiteralException;
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This Class can be used to calculate fields complexity values of GraphQL Query.
@@ -30,12 +34,18 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
 
     public FieldComplexityCalculatorImpl(MessageContext messageContext) {
         try {
-            String graphQLAccessControlPolicy = (String) messageContext.getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
-            JSONObject jsonObject = (JSONObject) jsonParser.parse(graphQLAccessControlPolicy);
-            policyDefinition = (JSONObject) jsonObject.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
+            String graphQLAccessControlPolicy = (String) messageContext
+                    .getProperty(APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY);
+            if (graphQLAccessControlPolicy == null) {
+                policyDefinition = new JSONObject();
+            } else {
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(graphQLAccessControlPolicy);
+                 policyDefinition = (JSONObject) jsonObject.get(APIConstants.QUERY_ANALYSIS_COMPLEXITY);
+            }
+
         } catch (ParseException e) {
             String errorMessage = "Policy definition parsing failed. ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            handleFailure(messageContext, errorMessage, errorMessage);
         }
     }
 
@@ -76,4 +86,23 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
         }
         return argumentValue;
     }
+
+    /**
+     * This method handle the failure
+     *  @param messageContext   message context of the request
+     * @param errorMessage     error message of the failure
+     * @param errorDescription error description of the failure
+     */
+    private void handleFailure(MessageContext messageContext, String errorMessage, String errorDescription) {
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, GraphQLConstants.GRAPHQL_INVALID_QUERY);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION, errorDescription);
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            return;
+        }
+        Utils.sendFault(messageContext, HttpStatus.SC_BAD_REQUEST);
+    }
+
+
 }

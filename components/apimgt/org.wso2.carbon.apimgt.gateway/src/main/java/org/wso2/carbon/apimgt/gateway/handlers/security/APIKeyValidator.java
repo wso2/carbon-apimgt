@@ -23,11 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.API;
+import org.apache.synapse.api.API;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
-import org.apache.synapse.rest.Resource;
-import org.apache.synapse.rest.dispatch.RESTDispatcher;
+import org.apache.synapse.api.Resource;
+import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -92,10 +92,6 @@ public class APIKeyValidator {
         this.gatewayKeyCacheEnabled = isGatewayTokenCacheEnabled();
 
         this.isGatewayAPIResourceValidationEnabled = isAPIResourceValidationEnabled();
-    }
-
-    protected String getKeyValidatorClientType() {
-        return APISecurityUtils.getKeyValidatorClientType();
     }
 
     protected Cache getGatewayKeyCache() {
@@ -340,7 +336,6 @@ public class APIKeyValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-        String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
 
         String electedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
         ArrayList<String> resourceArray = null;

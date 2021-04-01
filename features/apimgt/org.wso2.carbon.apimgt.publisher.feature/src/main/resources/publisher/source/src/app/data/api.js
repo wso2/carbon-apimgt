@@ -18,6 +18,7 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
+import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**
@@ -203,15 +204,15 @@ class API extends Resource {
 
     /**
      * export an API Directory as A Zpi file
-     * @returns {promise} Promise Containing the ZPI file of the selected API 
+     * @returns {promise} Promise Containing the ZPI file of the selected API
      */
-    exportApi(apiId) {
+    export() {
         const apiZip = this.client.then((client) => {
             return client.apis['Import Export'].exportAPI({
-                apiId: apiId
-            },  this._requestMetaData({ 
-                    'accept': 'application/zip'
-                })
+                apiId: this.id
+            }, this._requestMetaData({
+                'accept': 'application/zip'
+            })
             );
         });
         return apiZip;
@@ -315,6 +316,29 @@ class API extends Resource {
             const payload = {
                 'Content-Type': 'application/json',
                 openAPIVersion,
+            };
+            const requestBody = {
+                'requestBody': data,
+            };
+            return client.apis['APIs'].createAPI(payload, requestBody, this._requestMetaData());
+        });
+        return promisedAPIResponse.then(response => {
+            return new API(response.body);
+        });
+    }
+
+    saveStreamingAPI() {
+        const promisedAPIResponse = this.client.then(client => {
+            const properties = client.spec.components.schemas.API.properties;
+            const data = {};
+            Object.keys(this).forEach(apiAttribute => {
+                if (apiAttribute in properties) {
+                    data[apiAttribute] = this[apiAttribute];
+                }
+            });
+
+            const payload = {
+                'Content-Type': 'application/json',
             };
             const requestBody = {
                 'requestBody': data,
@@ -438,12 +462,13 @@ class API extends Resource {
      * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    createNewAPIVersion(version, isDefaultVersion, callback = null) {
+    createNewAPIVersion(version, isDefaultVersion, serviceVersion, callback = null) {
         const promise_copy_api = this.client.then(client => {
             return client.apis['APIs'].createNewAPIVersion(
                 {
                     apiId: this.id,
                     newVersion: version,
+                    serviceVersion: serviceVersion,
                     defaultVersion: isDefaultVersion,
                 },
                 this._requestMetaData(),
@@ -457,33 +482,15 @@ class API extends Resource {
     }
 
     /**
-     * Get the swagger of an API
-     * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwagger(id = this.id, callback = null) {
-        const promise_get = this.client.then(client => {
-            return client.apis['APIs'].getAPISwagger(
-                {
-                    apiId: id,
-                },
-                this._requestMetaData(),
-            );
-        });
-        return promise_get;
-    }
-
-    /**
      * Mock sample responses for Inline Prototyping
      * of a swagger OAS defintion
-     * 
+     *
      * @param id {String} The api id.
      */
-    generateMockScripts(id=this.id) {
-        const promise_get = this.client.then(client => { 
+    generateMockScripts(id = this.id) {
+        const promise_get = this.client.then(client => {
             return client.apis['APIs'].generateMockScripts(
-                { 
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -495,13 +502,13 @@ class API extends Resource {
 
     /**
      * Resets sample responses for inline prototyping
-     * 
-     * @param {String} id 
+     *
+     * @param {String} id
      */
-    getGeneratedMockScriptsOfAPI(id=this.id) {
-        const promise_get = this.client.then(client => { 
-            return client.apis['APIs'].getGeneratedMockScriptsOfAPI( 
-                { 
+    getGeneratedMockScriptsOfAPI(id = this.id) {
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].getGeneratedMockScriptsOfAPI(
+                {
                     apiId: id,
                 },
                 this._requestMetaData(),
@@ -544,7 +551,7 @@ class API extends Resource {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promise_scopes = apiClient.then(client => {
             return client.apis['Scopes'].getSharedScopes(
-                { limit, offset},
+                { limit, offset },
                 this._requestMetaData(),
             );
         });
@@ -634,11 +641,6 @@ class API extends Resource {
         return promised_status;
     }
 
-    getDeployments() {
-        return this.client.then(client => {
-            return client.apis['Deployments'].deploymentsGet();
-        });
-    }
     /**
      * Get a particular scope
      * @param scopeId {String} UUID of the scope
@@ -1370,7 +1372,7 @@ class API extends Resource {
 
     /**
      * Downloads the WSDL of an API
-     * 
+     *
      * @param {string} apiId Id (UUID) of the API
      */
     getWSDL(apiId) {
@@ -1387,7 +1389,7 @@ class API extends Resource {
 
     /**
      * Get WSDL meta info of an API - indicates whether the WSDL is a ZIP or a single file.
-     * 
+     *
      * @param {string} apiId Id (UUID) of the API
      */
     getWSDLInfo(apiId) {
@@ -1404,8 +1406,8 @@ class API extends Resource {
 
     /**
      * Updates the API's WSDL with the WSDL of the provided URL
-     * 
-     * @param {string} apiId Id (UUID) of the API 
+     *
+     * @param {string} apiId Id (UUID) of the API
      * @param {string} url WSDL url
      */
     updateWSDLByUrl(apiId, url) {
@@ -1429,8 +1431,8 @@ class API extends Resource {
 
     /**
      * Updates the API's WSDL with the WSDL of the provided file (zip or .wsdl)
-     * 
-     * @param {string} apiId Id (UUID) of the API 
+     *
+     * @param {string} apiId Id (UUID) of the API
      * @param {*} file WSDL file (zip or .wsdl)
      */
     updateWSDLByFileOrArchive(apiId, file) {
@@ -1578,53 +1580,6 @@ class API extends Resource {
     }
 
     /**
-     * Add new comment to an existing API
-     * @param apiId apiId of the api to which the comment is added
-     * @param commentInfo comment text
-     * * TODO: remove
-     */
-    addComment(apiId, commentInfo, callback = null) {
-        let promise = this.client
-            .then(client => {
-                return client.apis['Comment (Individual)'].post_apis__apiId__comments(
-                    { apiId: apiId, body: commentInfo },
-                    this._requestMetaData(),
-                );
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        if (callback) {
-            return promise.then(callback);
-        } else {
-            return promise;
-        }
-    }
-
-    /**
-     * Get all comments for a particular API
-     * @param apiId api id of the api to which the comment is added
-     * * TODO: remove
-     */
-    getAllComments(apiId, callback = null) {
-        let promise_get = this.client
-            .then(client => {
-                return client.apis['Comment (Collection)'].get_apis__apiId__comments(
-                    { apiId: apiId },
-                    this._requestMetaData(),
-                );
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        if (callback) {
-            return promise_get.then(callback);
-        } else {
-            return promise_get;
-        }
-    }
-
-    /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to
      * @param commentId comment id of the comment which has to be deleted
@@ -1702,18 +1657,9 @@ class API extends Resource {
     }
 
     /**
-     * Get list of microgateway labels
-     */
-    microgatewayLabelsGet() {
-        return this.client.then(client => {
-            return client.apis['Label Collection'].getLabels();
-        });
-    }
-
-    /**
      * Get the complexity related details of an API
      */
-    
+
     getGraphqlPoliciesComplexity(id) {
         const promisePolicies = this.client.then(client => {
             return client.apis['GraphQL Policies'].getGraphQLPolicyComplexityOfAPI(
@@ -1725,7 +1671,7 @@ class API extends Resource {
         });
         return promisePolicies.then(response => response.body);
     }
-    
+
     /**
      * Update complexity related details of an API
      */
@@ -1759,7 +1705,7 @@ class API extends Resource {
         return promisePolicies.then(response => response.body);
     }
 
-    
+
 
     /**
      *
@@ -1813,42 +1759,39 @@ class API extends Resource {
         });
     }
 
-     /**
-     * Get details of a given API
-     * @param id {string} UUID of the api.
-     * @param callback {function} A callback function to invoke after receiving successful response.
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
+    /**
+    * Get details of a given API
+    * @param id {string} UUID of the api.
+    * @param callback {function} A callback function to invoke after receiving successful response.
+    * @returns {promise} With given callback attached to the success chain else API invoke promise.
+    */
     static getAPIById(id, callback = null) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         const promiseGet = apiClient.then((client) => {
             return client.apis.APIs.getAPI({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
-            console.log('original object from API1');
             return promiseGet.then(callback);
         } else {
-            console.log('original object from API2' + promiseGet.obj);
             return promiseGet;
         }
     }
 
     /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param environmentName {String} API environment name
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * Generate Internal Key
+     * @param id {string} UUID of the api.
+     * @param callback {function} A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
+    static generateInternalKey(id, callback = null) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        const promiseGet = apiClient.then((client) => {
-            return client.apis.APIs.getAPISwagger({ apiId, environmentName }, this._requestMetaData());
+        const promiseKey = apiClient.then((client) => {
+            return client.apis.APIs.generateInternalAPIKey({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
-            return promiseGet.then(callback);
+            return promiseKey.then(callback);
         } else {
-            return promiseGet;
+            return promiseKey;
         }
     }
 
@@ -1896,38 +1839,17 @@ class API extends Resource {
     /**
      * Get the swagger of an API
      * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param environmentName {String} API environment name
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    static getSwaggerByAPIIdAndEnvironment(apiId, environmentName, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        const promiseGet = apiClient.then((client) => {
-            return client.apis.APIs.getAPISwagger({ apiId, environmentName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
+    getSwagger(id = this.id, environmentName = '') {
+        const payload = { apiId: id };
+        if(environmentName) {
+            payload[environmentName] = environmentName;
         }
-    }
-
-    /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    static getSwaggerByAPIId(apiId, callback = null) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        const promiseGet = apiClient.then((client) => {
-            return client.apis.APIs.getAPISwagger({ apiId }, this._requestMetaData());
+        return this.client.then((client) => {
+            return client.apis.APIs.getAPISwagger(payload, this._requestMetaData());
         });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
     }
 
     /**
@@ -1975,7 +1897,7 @@ class API extends Resource {
         } else {
             return promisedAPI;
         }
-       
+
     }
 
     /**
@@ -2028,6 +1950,231 @@ class API extends Resource {
             return client.apis['Unified Search'].search(params, Resource._requestMetaData());
         });
     }
+
+    /**
+     * Get list of revisions.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisions(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            return client.apis['API Revisions'].getAPIRevisions({
+                apiId: apiId,
+            },
+            );
+        });
+    }
+
+    /**
+     * Get list of revisions with environments.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    getRevisionsWithEnv(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            return client.apis['API Revisions'].getAPIRevisions(
+                {
+                    apiId: apiId,
+                    query: 'deployed:true',
+                },
+            );
+        });
+    }
+
+    /**
+     * Return the deployed revisions of this API 
+     * @returns 
+     */
+    getDeployedRevisions() {
+        return this.client.then(client => {
+            return client.apis['API Revisions'].getAPIRevisionDeployments({
+                apiId: this.id,
+            },
+            );
+        });
+    }
+
+    /**
+     * Add revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    createRevision(apiId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].createAPIRevision(
+                    { apiId: apiId },
+                    { requestBody: body },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Delete revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    deleteRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deleteAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Undeploy revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    undeployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].undeployAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+    * Undeploy revision.
+    *
+    * @param {string} apiId Id of the API.
+    * @param {Object} body Revision Object.
+    * */
+    deployRevision(apiId, revisionId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].deployAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    { requestBody: body },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Restore revision.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {Object} body Revision Object.
+     * */
+    restoreRevision(apiId, revisionId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].restoreAPIRevision(
+                    {
+                        apiId: apiId,
+                        revisionId: revisionId
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Change displayInDevportal.
+     *
+     * @param {string} apiId Id of the API.
+     * @param {string} deploymentId Id of the deployment.
+     * @param {Object} body Revision Object.
+     * */
+    displayInDevportalAPI(apiId, deploymentId, body) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['API Revisions'].updateAPIDeployment(
+                    {
+                        apiId: apiId,
+                        deploymentId: deploymentId
+                    },
+                    { requestBody: body},
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Create API from service
+     * @returns {promise} Add response.
+     */
+    static createApiFromService(serviceKey, apiMetaData, type) {
+        if (type != '') {
+            apiMetaData['type'] = type;
+        }
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        const promisedServiceResponse = apiClient.then(client => {
+            return client.apis['APIs'].importServiceFromCatalog(
+                {
+                    serviceKey: serviceKey,
+                },
+                { requestBody: apiMetaData},
+                this._requestMetaData()
+            );
+        });
+        return promisedServiceResponse.then(response => response.body);
+    }
+
+    /**
+    * Reimport service.
+    *
+    * @param {string} apiId Id of the API.
+    * */
+    static reimportService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
+    /**
+     * Create new version service.
+     *
+     * @param {string} apiId Id of the API.
+     * */
+    static newVersionService(apiId) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(
+            client => {
+                return client.apis['APIs'].reimportServiceFromCatalog(
+                    {
+                        apiId: apiId,
+                    },
+                    this._requestMetaData(),
+                );
+            });
+    }
+
 
     /**
      * Get details of a given API
@@ -2130,13 +2277,29 @@ class API extends Resource {
         });
     }
 
+    static policiesByQuotaType(quotaType) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            return client.apis['Throttling Policies'].getSubscriptionThrottlingPolicies(
+                {
+                    tierQuotaType: quotaType,
+                },
+                this._requestMetaData(),
+            );
+        });
+    }
+
     /**
      * Get all the endpoint certificates.
      * */
-    static getEndpointCertificates() {
+    static getEndpointCertificates(params) {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
-            return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            if (params) {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates(params);
+            } else {
+                return client.apis['Endpoint Certificates'].getEndpointCertificates();
+            }
         });
     }
 
@@ -2638,6 +2801,232 @@ class API extends Resource {
                 this._requestMetaData(),
             );
         });
+    }
+
+    static updateTopics(apiId, topics) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        return apiClient.then(client => {
+            const payload = {
+                'Content-Type': 'application/json',
+                apiId
+            };
+            const requestBody = {
+                'requestBody': topics,
+            };
+            return client.apis["APIs"].updateTopics(payload, requestBody, this._requestMetaData());
+        });
+    }
+
+    static validateAsyncAPIByFile(asyncAPIData) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        let payload, promisedValidate;
+        payload = {
+            file: asyncAPIData,
+            'Content-Type': 'multipart/form-data',
+        };
+        const requestBody = {
+            requestBody: {
+                file: asyncAPIData
+            },
+        };
+        promisedValidate = apiClient.then(client => {
+            return client.apis.Validation.validateAsyncAPISpecification(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+        });
+        return promisedValidate;
+    }
+
+    static validateAsyncAPIByUrl(url, params = { returnContent: false }) {
+        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
+        const payload = {
+            'Content-Type': 'multipart/form-data',
+            ...params
+        };
+        const requestBody = {
+            requestBody: {
+                url: url,
+            },
+        };
+        return apiClient.then(client => {
+            return client.apis['Validation'].validateAsyncAPISpecification(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+        });
+    }
+
+    importAsyncAPIByFile(asyncAPIData, callback = null) {
+        let payload, promisedCreate;
+        promisedCreate = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                requestBody: {
+                    file: asyncAPIData,
+                    additionalProperties: JSON.stringify(apiData),
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                null,
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promisedCreate;
+    }
+
+    importAsyncAPIByUrl(asyncAPIUrl) {
+        let payload, promise_create;
+
+        promise_create = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                requestBody: {
+                    url: asyncAPIUrl,
+                    additionalProperties: JSON.stringify(apiData),
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].importAsyncAPISpecification(
+                null,
+                payload,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data'
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_create;
+    }
+
+    /**
+     * Get the swagger of an API
+     * @param id {String} UUID of the API in which the AsyncAPI definition is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise
+     */
+    getAsyncAPIDefinition(id = this.id, callback = null) {
+        const promise_get = this.client.then(client => {
+            return client.apis['APIs'].get_apis__apiId__asyncapi(
+                {
+                    apiId: id,
+                },
+                this._requestMetaData(),
+            );
+        });
+        return promise_get;
+    }
+
+    /**
+     * Update an api via PUT HTTP method, Need to gie the updated API object as the arguement.
+     * @param api {Object} Updated API object(JSON) which needs to be updated
+     */
+    updateAsyncAPIDefinition(asyncAPI) {
+        const promised_update = this.client.then(client => {
+            const payload = {
+                apiId: this.id,
+                'Content-Type': 'multipart/form-data',
+            };
+            const requestBody = {
+                requestBody: {
+                    apiDefinition: JSON.stringify(asyncAPI)
+                }
+            };
+            return client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+        });
+        return promised_update;
+    }
+
+    /**
+     * Update AsyncAPI definition of a given API by URL content
+     * @param apiId         API Identifier
+     * @param AsyncAPIUrl    AsyncAPI definition content URL
+     * @returns {boolean|*}
+     */
+    updateAsyncAPIDefinitionByUrl(apiId, AsyncAPIUrl) {
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                apiId: apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    url: AsyncAPIUrl,
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_updated;
+    }
+
+    /**
+     * Update AsyncAPI definition of a given API by file content
+     * @param apiId         API Identifier
+     * @param AsyncAPIFile   AsyncAPI definition file content
+     * @returns {boolean|*}
+     */
+    updateAsyncAPIDefinitionByFile(apiId, AsyncAPIFile) {
+        console.log('hello');
+        console.log(apiId);
+        console.log(AsyncAPIFile);
+        let payload, promise_updated;
+
+        promise_updated = this.client.then(client => {
+            const apiData = this.getDataFromSpecFields(client);
+
+            payload = {
+                apiId: apiId,
+                'Content-Type': 'multipart/form-data',
+            };
+
+            const requestBody = {
+                requestBody: {
+                    file: AsyncAPIFile,
+                }
+            };
+
+            const promisedResponse = client.apis['APIs'].put_apis__apiId__asyncapi(
+                payload,
+                requestBody,
+                this._requestMetaData({
+                    'Content-Type': 'multipart/form-data',
+                }),
+            );
+            return promisedResponse.then(response => new API(response.body));
+        });
+        return promise_updated;
     }
 }
 

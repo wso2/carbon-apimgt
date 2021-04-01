@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useEffect, useState } from 'react';
 import API from 'AppData/api';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
@@ -36,12 +36,16 @@ const useStyles = makeStyles((theme) => ({
  * @returns {Promise}.
  */
 function reducer(state, { field, value }) {
-    return {
-        ...state,
-        [field]: value,
-    };
+    switch (field) {
+        case 'name':
+        case 'owner':
+            return { ...state, [field]: value };
+        case 'editDetails':
+            return value;
+        default:
+            return state;
+    }
 }
-
 /**
  * Render a pop-up dialog to change ownership of an Application
  * @param {JSON} props props passed from parent
@@ -53,30 +57,26 @@ function Edit(props) {
     const {
         updateList, dataRow, icon, triggerButtonText, title, applicationList,
     } = props;
-    let id = null;
-    let initialState = {
+    const [initialState, setInitialState] = useState({
         name: '',
         owner: '',
-    };
+    });
 
-    if (dataRow) {
-        const { name: originalName, owner: originalOwner } = dataRow;
-        id = dataRow.applicationId;
-
-        initialState = {
-            name: originalName,
-            owner: originalOwner,
-        };
-    }
     const [state, dispatch] = useReducer(reducer, initialState);
     const { name, owner } = state;
 
+    useEffect(() => {
+        setInitialState({
+            name: '',
+            owner: '',
+        });
+    }, []);
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
     };
 
     const validateOwner = () => {
-        let validationError = '';
+        let validationError = 'Something went wrong when validating user';
 
         const applicationsWithSameName = applicationList.filter(
             (app) => app.name === name && app.owner === owner,
@@ -95,14 +95,12 @@ function Edit(props) {
                 }).catch((error) => {
                     const { response } = error;
                     // This api returns 404 when the $owner is not found.
-                    // identify the case specially with error code 901502 and display error.
-                    if (response.body) {
-                        if (response.body.code === 901502) {
-                            validationError = `${owner} is not a valid Subscriber`;
-                            reject(validationError);
-                        }
-                    } else {
-                        validationError = 'Something went wrong when validating user';
+                    // error codes: 901502, 901500 for user not found and scope not found
+                    if (response?.body?.code === 901502 || response?.body?.code === 901500) {
+                        validationError = `${owner} is not a valid Subscriber`;
+                    }
+                }).finally(() => {
+                    if (validationError) {
                         reject(validationError);
                     }
                 });
@@ -113,7 +111,7 @@ function Edit(props) {
 
     const formSaveCallback = () => {
         return validateOwner().then(() => {
-            return restApi.updateApplicationOwner(id, owner)
+            return restApi.updateApplicationOwner(dataRow.applicationId, owner)
                 .then(() => {
                     return (
                         <FormattedMessage
@@ -124,8 +122,12 @@ function Edit(props) {
                 })
                 .catch((error) => {
                     const { response } = error;
-                    if (response.body) {
-                        throw response.body.description;
+                    if (response?.body?.code === 500) {
+                        const notValidSubscriber = 'Error while updating ownership to ' + owner;
+                        throw notValidSubscriber;
+                    } else {
+                        const updateError = 'Something went wrong when updating owner';
+                        throw updateError;
                     }
                 })
                 .finally(() => {
@@ -133,7 +135,12 @@ function Edit(props) {
                 });
         });
     };
-
+    const dialogOpenCallback = () => {
+        if (dataRow) {
+            const { name: originalName, owner: originalOwner } = dataRow;
+            dispatch({ field: 'editDetails', value: { name: originalName, owner: originalOwner } });
+        }
+    };
     return (
         <FormDialogBase
             title={title}
@@ -141,6 +148,7 @@ function Edit(props) {
             icon={icon}
             triggerButtonText={triggerButtonText}
             formSaveCallback={formSaveCallback}
+            dialogOpenCallback={dialogOpenCallback}
         >
             <TextField
                 margin='dense'

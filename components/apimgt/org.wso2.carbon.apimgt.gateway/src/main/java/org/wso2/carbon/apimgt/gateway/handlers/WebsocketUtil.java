@@ -17,6 +17,14 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import org.apache.axiom.util.UIDGenerator;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.context.OperationContext;
+import org.apache.axis2.context.ServiceContext;
+import org.apache.axis2.description.InOutAxisOperation;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -26,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.core.multitenancy.utils.TenantAxisUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.cache.Cache;
@@ -156,7 +165,39 @@ public class WebsocketUtil {
 		return (isApiLevelThrottled || isApplicationLevelThrottled || isSubscriptionLevelThrottled);
 	}
 
-	public static String getAccessTokenCacheKey(String accessToken, String apiContext) {
-		return accessToken + ':' + apiContext;
+	public static String getAccessTokenCacheKey(String accessToken, String apiContext, String matchingResource) {
+		return accessToken + ':' + apiContext + ':' + matchingResource;
 	}
+
+	static MessageContext getSynapseMessageContext(String tenantDomain) throws AxisFault {
+
+		org.apache.axis2.context.MessageContext axis2MsgCtx = createAxis2MessageContext();
+		ServiceContext svcCtx = new ServiceContext();
+		OperationContext opCtx = new OperationContext(new InOutAxisOperation(), svcCtx);
+		axis2MsgCtx.setServiceContext(svcCtx);
+		axis2MsgCtx.setOperationContext(opCtx);
+		if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+			ConfigurationContext tenantConfigCtx = TenantAxisUtils.getTenantConfigurationContext(tenantDomain,
+			                                                                                     axis2MsgCtx
+					                                                                                     .getConfigurationContext());
+			axis2MsgCtx.setConfigurationContext(tenantConfigCtx);
+			axis2MsgCtx.setProperty(MultitenantConstants.TENANT_DOMAIN, tenantDomain);
+		} else {
+			axis2MsgCtx.setProperty(MultitenantConstants.TENANT_DOMAIN, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+		}
+		return MessageContextCreatorForAxis2.getSynapseMessageContext(axis2MsgCtx);
+	}
+
+	private static org.apache.axis2.context.MessageContext createAxis2MessageContext() {
+
+		org.apache.axis2.context.MessageContext axis2MsgCtx = new org.apache.axis2.context.MessageContext();
+		axis2MsgCtx.setMessageID(UIDGenerator.generateURNString());
+		axis2MsgCtx.setConfigurationContext(
+				org.wso2.carbon.inbound.endpoint.osgi.service.ServiceReferenceHolder.getInstance()
+						.getConfigurationContextService().getServerConfigContext());
+		axis2MsgCtx.setProperty(org.apache.axis2.context.MessageContext.CLIENT_API_NON_BLOCKING, Boolean.TRUE);
+		axis2MsgCtx.setServerSide(true);
+		return axis2MsgCtx;
+	}
+
 }

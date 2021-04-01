@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -60,9 +61,11 @@ public class ImportUtils {
      * Retrieve Application Definition as JSON.
      *
      * @param pathToArchive Path Application archive
-     * @throws IOException If an error occurs while reading the file
+     * @throws IOException            If an error occurs while reading the file
+     * @throws APIManagementException If an error occurs while fetching the application definition
      */
-    public static String getApplicationDefinitionAsJson(String pathToArchive) throws IOException {
+    public static String getApplicationDefinitionAsJson(String pathToArchive) throws IOException,
+            APIManagementException {
         String jsonContent = null;
         String pathToYamlFile = pathToArchive + ImportExportConstants.YAML_APPLICATION_FILE_LOCATION;
         String pathToJsonFile = pathToArchive + ImportExportConstants.JSON_APPLICATION_FILE_LOCATION;
@@ -80,6 +83,10 @@ public class ImportUtils {
                 log.debug("Found application definition file " + pathToJsonFile);
             }
             jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+        } else {
+            throw new APIManagementException(
+                    "Cannot find Application definition. application.yaml or application.json should present",
+                    ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
         }
         return jsonContent;
     }
@@ -133,9 +140,11 @@ public class ImportUtils {
      * @param subscribedAPIs Subscribed APIs
      * @param userId         Username of the subscriber
      * @param appId          Application Id
+     * @param update         Whether to update the application or not
      * @param apiConsumer    API Consumer
      * @return a list of APIIdentifiers of the skipped subscriptions
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
+     * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
             int appId, Boolean update, APIConsumer apiConsumer) throws APIManagementException, UserStoreException {
@@ -282,6 +291,6 @@ public class ImportUtils {
         String tokenScopes = apiKey.getTokenScope();
         apiConsumer.requestApprovalForApplicationRegistration(username, application.getName(), apiKey.getType(),
                 apiKey.getCallbackUrl(), accessAllowDomainsArray, Long.toString(apiKey.getValidityPeriod()),
-                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager());
+                tokenScopes, application.getGroupId(), jsonParams, apiKey.getKeyManager(), null);
     }
 }

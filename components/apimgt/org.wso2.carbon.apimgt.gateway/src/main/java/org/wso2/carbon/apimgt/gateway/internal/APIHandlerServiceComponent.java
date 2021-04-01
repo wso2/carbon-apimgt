@@ -28,29 +28,23 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
+import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
+import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
-import org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
-import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
-import org.wso2.carbon.apimgt.gateway.service.APIThrottleDataServiceImpl;
-import org.wso2.carbon.apimgt.gateway.service.CacheInvalidationServiceImpl;
-import org.wso2.carbon.apimgt.gateway.service.RevokedTokenDataImpl;
-import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
-import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
-import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
-import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
+import org.wso2.carbon.apimgt.gateway.utils.redis.RedisCacheUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerDataService;
@@ -88,21 +82,25 @@ public class APIHandlerServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component activated");
         }
+        // Set public cert
+        ServiceReferenceHolder.getInstance().setPublicCert();
+
+        // Set private key
+        ServiceReferenceHolder.getInstance().setPrivateKey();
+
         try {
             ConfigurationContext ctx =
                     ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(),
                             getAxis2ClientXmlLocation());
             ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
-            if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
-                clientPool = APIKeyValidatorClientPool.getInstance();
-            }
+            clientPool = APIKeyValidatorClientPool.getInstance();
             APIManagerConfiguration apiManagerConfiguration =
                     ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
             String gatewayType = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
             GatewayStartupListener gatewayStartupListener = new GatewayStartupListener();
             bundleContext.registerService(ServerStartupObserver.class.getName(), gatewayStartupListener, null);
             bundleContext.registerService(ServerShutdownHandler.class, gatewayStartupListener, null);
-
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class, gatewayStartupListener, null);
             if ("Synapse".equalsIgnoreCase(gatewayType)) {
                 // Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
@@ -137,8 +135,12 @@ public class APIHandlerServiceComponent {
         CacheProvider.createInvalidUsernameCache();
         CacheProvider.createGatewayApiKeyCache();
         CacheProvider.createGatewayApiKeyDataCache();
-        CacheProvider.getInvalidGatewayApiKeyCache();
+        CacheProvider.createInvalidGatewayApiKeyCache();
         CacheProvider.createParsedSignJWTCache();
+        CacheProvider.createGatewayInternalKeyCache();
+        CacheProvider.createGatewayInternalKeyDataCache();
+        CacheProvider.createInvalidInternalKeyCache();
+        initializeRedisCache();
     }
 
     @Deactivate
@@ -147,12 +149,14 @@ public class APIHandlerServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component deactivated");
         }
-        if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(APISecurityUtils.getKeyValidatorClientType())) {
             clientPool.cleanup();
-        }
         if (registration != null) {
             log.debug("Unregistering ThrottleDataService...");
             registration.unregister();
+        }
+        RedisCacheUtils redisCacheUtils = ServiceReferenceHolder.getInstance().getRedisCacheUtils();
+        if (redisCacheUtils != null) {
+            redisCacheUtils.stopRedisCacheSession();
         }
     }
 
@@ -223,6 +227,16 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service bound to the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
+        if (amcService.getAPIAnalyticsConfiguration().isAnalyticsEnabled()) {
+            AnalyticsCommonConfiguration commonConfiguration =
+                    new AnalyticsCommonConfiguration(amcService.getAPIAnalyticsConfiguration()
+                            .getReporterProperties());
+            commonConfiguration.setResponseSchema(amcService.getAPIAnalyticsConfiguration().getResponseSchemaName());
+            commonConfiguration.setFaultSchema(amcService.getAPIAnalyticsConfiguration().getFaultSchemaName());
+            AnalyticsServiceReferenceHolder.getInstance()
+                    .setConfigurations(commonConfiguration);
+        }
+
     }
 
     protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
@@ -436,6 +450,25 @@ public class APIHandlerServiceComponent {
 
         log.debug("Un-setting KeyManagerDataService");
         ServiceReferenceHolder.getInstance().setKeyManagerDataService(null);
+    }
+
+    private void initializeRedisCache() {
+
+        RedisConfig redisConfig =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getRedisConfigProperties();
+        if (redisConfig.isRedisEnabled()) {
+            RedisCacheUtils redisCacheUtils;
+                if (redisConfig.getUser() != null
+                        && redisConfig.getPassword() != null
+                        && redisConfig.getConnectionTimeout() != 0) {
+                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort(),
+                            redisConfig.getConnectionTimeout(), redisConfig.getUser(),
+                            redisConfig.getPassword(), redisConfig.getDatabaseId(), redisConfig.isSslEnabled());
+                } else {
+                    redisCacheUtils = new RedisCacheUtils(redisConfig.getHost(), redisConfig.getPort());
+                }
+                ServiceReferenceHolder.getInstance().setRedisCacheUtil(redisCacheUtils);
+        }
     }
 }
 

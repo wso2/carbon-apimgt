@@ -63,7 +63,7 @@
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
         <GatewayJWTGeneration>
-            <ImplClass>org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl</ImplClass>
+            <ImplClass>org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl</ImplClass>
             <Configuration>
                 <ClaimMappings>
                     <Claim>
@@ -99,7 +99,8 @@
                  An API deployed on a 'hybrid' type gateway will support both production and sandbox keys. -->
             <!-- api-console element specifies whether the environment should be listed in API Console or not -->
             <Environment type="hybrid" api-console="true">
-                <Name>Production and Sandbox</Name>
+                <Name>default</Name>
+                <DisplayName>Default</DisplayName>
                 <Description>This is a hybrid gateway that handles both production and sandbox token traffic.</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>https://localhost:${mgt.transport.https.port}${carbon.context}services/</ServerURL>
@@ -169,72 +170,14 @@
         <!-- Enable Analytics for API Manager -->
         <Enabled>false</Enabled>
 
-        <!-- Server URL of the remote StreamProcessor server used to collect statistics. Must
-             be specified in protocol://hostname:port/ format.
+        <AuthToken></AuthToken>
 
-             An event can also be published to multiple Receiver Groups each having 1 or more receivers. Receiver
-             Groups are delimited by curly braces whereas receivers are delimited by commas.
-             Ex - Multiple Receivers within a single group
-             tcp://localhost:7612/,tcp://localhost:7613/,tcp://localhost:7614/
+        <!-- Event publisher implementation -->
+        <!-- <ReporterClass></ReporterClass> -->
 
-             Ex - Multiple Receiver Groups with two receivers each
-             {tcp://localhost:7612/,tcp://localhost:7613},{tcp://localhost:7712/,tcp://localhost:7713/} -->
-        <StreamProcessorServerURL>{tcp://localhost:7612}</StreamProcessorServerURL>
-        <!--StreamProcessorAuthServerURL>{ssl://localhost:7712}</StreamProcessorAuthServerURL-->
-        <!-- Administrator username to login to the remote StreamProcessor server. -->
-        <StreamProcessorUsername>${admin.username}</StreamProcessorUsername>
-        <!-- Administrator password to login to the remote StreamProcessor server. -->
-        <StreamProcessorPassword>${admin.password}</StreamProcessorPassword>
-
-        <!-- For APIM implemented Statistic client for RDBMS -->
-        <StatsProviderImpl>org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl</StatsProviderImpl>
-
-        <!-- StreamProcessor REST API configuration -->
-        <StreamProcessorRestApiURL>https://localhost:7444</StreamProcessorRestApiURL>
-        <StreamProcessorRestApiUsername>${admin.username}</StreamProcessorRestApiUsername>
-        <StreamProcessorRestApiPassword>${admin.password}</StreamProcessorRestApiPassword>
-
-        <!-- Below property is used to skip trying to connect to event receiver nodes when publishing events even if
-            the stats enabled flag is set to true. -->
-        <SkipEventReceiverConnection>false</SkipEventReceiverConnection>
-
-        <!--Skip workflow data publisher initiation and even publishing-->
-        <SkipWorkflowEventPublisher>false</SkipWorkflowEventPublisher>
-
-        <!-- API Usage Data Publisher. -->
-        <PublisherClass>org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataBridgeDataPublisher</PublisherClass>
-
-        <!-- If below property set to true,then the response message size will be calculated and publish
-             with each successful API invocation event. -->
-        <PublishResponseMessageSize>false</PublishResponseMessageSize>
-        <!-- Data publishing stream names and versions of API requests, responses and faults. If the default values
-            are changed, the toolbox also needs to be changed accordingly. -->
-        <Streams>
-            <Request>
-                <Name>org.wso2.apimgt.statistics.request</Name>
-                <Version>3.2.0</Version>
-            </Request>
-            <Fault>
-                <Name>org.wso2.apimgt.statistics.fault</Name>
-                <Version>3.2.0</Version>
-            </Fault>
-            <Throttle>
-                <Name>org.wso2.apimgt.statistics.throttle</Name>
-                <Version>3.2.0</Version>
-            </Throttle>
-            <Workflow>
-                <Name>org.wso2.apimgt.statistics.workflow</Name>
-                <Version>1.0.0</Version>
-            </Workflow>
-	        <AlertTypes>
-                <Name>org.wso2.analytics.apim.alertStakeholderInfo</Name>
-                <Version>1.0.1</Version>
-            </AlertTypes>
-            <botData>
-                <Name>org.wso2.botDetectionData.request.stream</Name>
-                <Version>1.0.0</Version>
-            </botData>
-        </Streams>
+        <!-- Properties for Event publisher implementation -->
+        <Properties>
+        </Properties>
 
     </Analytics>
 
@@ -729,7 +672,7 @@
     	<ServerUrl>https://localhost:9445/bpmn</ServerUrl>
     	<ServerUser>${admin.username}</ServerUser>
     	<ServerPassword>${admin.password}</ServerPassword>
-    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/publisher/v0.16/workflows/update-workflow-status</WorkflowCallbackAPI>
+    	<WorkflowCallbackAPI>https://localhost:${mgt.transport.https.port}/api/am/admin/v2/workflows/update-workflow-status</WorkflowCallbackAPI>
         <TokenEndPoint>https://localhost:${https.nio.port}/token</TokenEndPoint>
         <DCREndPoint>https://localhost:${mgt.transport.https.port}/client-registration/v0.17/register</DCREndPoint>
         <DCREndPointUser>${admin.username}</DCREndPointUser>

@@ -206,6 +206,12 @@
           "required" : true,
           "type" : "string"
         }, {
+          "name" : "apiId",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api ID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
           "name" : "context",
           "in" : "query",
           "description" : "**Search condition**.\n context of the api\n",
@@ -215,6 +221,12 @@
           "name" : "version",
           "in" : "query",
           "description" : "**Search condition**.\n versio  of the api\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "gatewayLabel",
+          "in" : "query",
+          "description" : "**Search condition**.\n label associated with the APIs\n",
           "required" : false,
           "type" : "string"
         }, {
@@ -468,6 +480,12 @@
           "description" : "**Search condition**.\n Consumer Key of the application\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "keymanager",
+          "in" : "query",
+          "description" : "**Search condition**.\n KeyManager associated to consumer_key of the application\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -525,6 +543,12 @@
         "summary" : "Get all the runtime artifacts for a given API UUID and gateway label",
         "description" : "This will provide access to runtime artifacts in database.\n",
         "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
           "name" : "apiId",
           "in" : "query",
           "description" : "**Search condition**.\n  Api ID\n",
@@ -542,6 +566,18 @@
           "description" : "**Search condition**.\n type of gateway\n",
           "required" : false,
           "type" : "string"
+        }, {
+          "name" : "name",
+          "in" : "query",
+          "description" : "**Search condition**.\n name of API\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "**Search condition**.\n version of API\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -556,36 +592,27 @@
         }
       }
     },
-    "/synapse-artifacts" : {
+    "/endpoint-certificates" : {
       "get" : {
-        "tags" : [ "Retrieving Synapse artifacts" ],
-        "summary" : "Get all the synapse artifacts for a given API UUID and gateway label",
-        "description" : "This will provide access to synapse artifacts in database.\n",
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get all the endpoint certificates for given alias.",
+        "description" : "This will provide access to\n",
         "parameters" : [ {
-          "name" : "apiId",
-          "in" : "query",
-          "description" : "**Search condition**.\n  Api ID\n",
-          "required" : false,
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
           "type" : "string"
         }, {
-          "name" : "gatewayLabel",
+          "name" : "alias",
           "in" : "query",
-          "description" : "**Search condition**.\n label associated with the API\n",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "gatewayInstruction",
-          "in" : "query",
-          "description" : "**Search condition**.\n Publish/Remove\n",
+          "description" : "**Search condition**.\n  Alias\n",
           "required" : false,
           "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "String of gatewayRuntimeArtifacts",
-            "schema" : {
-              "type" : "string"
-            }
+            "description" : "List of endpoint certificates"
           },
           "default" : {
             "description" : "Unexpected error",
@@ -596,24 +623,27 @@
         }
       }
     },
-    "/gateway-synapse-artifacts" : {
+    "/ga-config" : {
       "get" : {
-        "tags" : [ "Retrieving All Synapse artifacts" ],
-        "summary" : "Get all synapse artifacts for a given gateway label",
-        "description" : "This will provide access to the synapse artifacts in database.\n",
+        "tags" : [ "Retrieving Runtime artifacts" ],
+        "summary" : "Get Google analytics config related to tenant.",
+        "description" : "This will provide access to runtime artifacts in database.\n",
         "parameters" : [ {
-          "name" : "gatewayLabel",
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "apiId",
           "in" : "query",
-          "description" : "**Search condition**.\n label associated with the API\n",
+          "description" : "**Search condition**.\n  Api ID\n",
           "required" : false,
           "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "An array of gatewayRuntimeArtifacts",
-            "schema" : {
-              "$ref" : "#/definitions/SynapseArtifactList"
-            }
+            "description" : "google analytics configuration"
           },
           "default" : {
             "description" : "Unexpected error",
@@ -664,6 +694,34 @@
         }
       }
     },
+    "/webhooks-subscriptions" : {
+      "get" : {
+        "tags" : [ "Retrieving webhooks subscriptions" ],
+        "summary" : "Get webhooks subscriptions",
+        "description" : "This will provide list of webhooks subscriptions from the database.\n",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "An array of webhooks subscriptions",
+            "schema" : {
+              "$ref" : "#/definitions/webhooksSubscriptionsList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/notify" : {
       "post" : {
         "tags" : [ "Notification" ],
@@ -689,6 +747,12 @@
             "description" : "Event Received success",
             "schema" : {
               "type" : "object"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
             }
           }
         }
@@ -870,6 +934,10 @@
     },
     "API" : {
       "properties" : {
+        "uuid" : {
+          "type" : "string",
+          "description" : "UUID of API"
+        },
         "apiId" : {
           "type" : "integer"
         },
@@ -1161,6 +1229,87 @@
         }
       }
     },
+    "webhooksSubscriptionsList" : {
+      "properties" : {
+        "list" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/webhooksSubscription"
+          }
+        },
+        "pagination" : {
+          "$ref" : "#/definitions/Pagination"
+        }
+      },
+      "title" : "Scopes List"
+    },
+    "webhooksSubscription" : {
+      "properties" : {
+        "apiUUID" : {
+          "type" : "string",
+          "description" : "The API UUID"
+        },
+        "apiContext" : {
+          "type" : "string",
+          "description" : "The API context."
+        },
+        "apiVersion" : {
+          "type" : "string",
+          "description" : "The API version."
+        },
+        "tenantDomain" : {
+          "type" : "string",
+          "description" : "The tenant domain."
+        },
+        "tenantId" : {
+          "type" : "integer",
+          "example" : -1234,
+          "description" : "The tenant id."
+        },
+        "appID" : {
+          "type" : "string",
+          "example" : "1",
+          "description" : "The application ID of the subscription."
+        },
+        "callbackURL" : {
+          "type" : "string",
+          "description" : "The callback URL"
+        },
+        "topicName" : {
+          "type" : "string",
+          "description" : "The topic name."
+        },
+        "secret" : {
+          "type" : "string",
+          "description" : "Secret value of the subscription."
+        },
+        "expiryTime" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "the expiry time in millis"
+        },
+        "tier" : {
+          "type" : "string",
+          "example" : "Bronze",
+          "description" : "the subscription tier."
+        },
+        "applicationTier" : {
+          "type" : "string",
+          "example" : "Unlimited",
+          "description" : "the application tier."
+        },
+        "apiTier" : {
+          "type" : "string",
+          "example" : "Bronze",
+          "description" : "the API tier."
+        },
+        "subscriberName" : {
+          "type" : "string",
+          "example" : "admin",
+          "description" : "the subscriber name."
+        }
+      }
+    },
     "Policy" : {
       "properties" : {
         "id" : {
@@ -1448,6 +1597,9 @@
         },
         "bandwidth" : {
           "$ref" : "#/definitions/BandwidthLimit"
+        },
+        "eventCount" : {
+          "$ref" : "#/definitions/EventCountLimit"
         }
       },
       "title" : "Throttle Limit"
@@ -1485,6 +1637,23 @@
             "format" : "int64",
             "example" : 1000,
             "description" : "Maximum number of requests allowed"
+          }
+        }
+      } ]
+    },
+    "EventCountLimit" : {
+      "title" : "Event Count Limit object",
+      "allOf" : [ {
+        "$ref" : "#/components/schemas/ThrottleLimitBase"
+      }, {
+        "type" : "object",
+        "required" : [ "eventCount" ],
+        "properties" : {
+          "eventCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 3000,
+            "description" : "Maximum number of events allowed"
           }
         }
       } ]

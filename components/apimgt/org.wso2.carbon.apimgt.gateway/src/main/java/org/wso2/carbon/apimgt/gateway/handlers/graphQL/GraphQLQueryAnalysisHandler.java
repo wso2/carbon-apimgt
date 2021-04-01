@@ -24,7 +24,6 @@ import graphql.analysis.FieldComplexityCalculator;
 import graphql.analysis.MaxQueryComplexityInstrumentation;
 import graphql.analysis.MaxQueryDepthInstrumentation;
 import graphql.schema.GraphQLSchema;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -34,13 +33,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.AbstractHandler;
-import org.bouncycastle.eac.EACException;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +94,7 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @return true, if the query is not blocked or false, if the query is blocked
      */
     private boolean analyseQuery(MessageContext messageContext, String payload) {
+
         try {
             if (analyseQueryDepth(messageContext, payload) &&
                     analyseQueryComplexity(messageContext, payload)) {
@@ -106,9 +104,26 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
             }
         } catch (Exception e) {
             String errorMessage = "Policy definition parsing failed. ";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            log.error(errorMessage, e);
+            handleFailure(messageContext);
+            return false;
         }
-        return false;
+    }
+    /**
+     * This method handle the failure
+     *
+     * @param messageContext   message context of the request
+     */
+    private void handleFailure(MessageContext messageContext) {
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, APISecurityConstants.API_AUTH_GENERAL_ERROR);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        messageContext.setProperty(SynapseConstants.ERROR_EXCEPTION,
+                APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            return;
+        }
+        Utils.sendFault(messageContext, HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -148,8 +163,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                         }
                         return true;
                     }
-                    handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
-                            APISecurityConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
+                    handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP, messageContext,
+                            GraphQLConstants.GRAPHQL_QUERY_TOO_DEEP_MESSAGE, errorList.toString());
                     log.error(errorList.toString());
                     return false;
                 }
@@ -205,8 +220,8 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
                         errorList.clear();
                         errorList.add("maximum query complexity exceeded");
                     }
-                    handleFailure(APISecurityConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
-                            APISecurityConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, errorList.toString());
+                    handleFailure(GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX, messageContext,
+                            GraphQLConstants.GRAPHQL_QUERY_TOO_COMPLEX_MESSAGE, errorList.toString());
                     return false;
                 }
                 return true;
@@ -249,40 +264,15 @@ public class GraphQLQueryAnalysisHandler extends AbstractHandler {
      * @param errorMessage     error message of the failure
      * @param errorDescription error description of the failure
      */
-    private void handleFailure(int errorCodeValue, MessageContext messageContext,
-                               String errorMessage, String errorDescription) {
-        OMElement payload = getFaultPayload(errorCodeValue, errorMessage, errorDescription);
-        Utils.setFaultPayload(messageContext, payload);
-        Mediator sequence = messageContext.getSequence(APISecurityConstants.GRAPHQL_API_FAILURE_HANDLER);
+    private void handleFailure(int errorCodeValue, MessageContext messageContext, String errorMessage, String errorDescription) {
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCodeValue);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
+        Mediator sequence = messageContext.getSequence(GraphQLConstants.GRAPHQL_API_FAILURE_HANDLER);
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
         Utils.sendFault(messageContext, HttpStatus.SC_BAD_REQUEST);
-    }
-
-    /**
-     * @param errorCodeValue error code
-     * @param message        fault message
-     * @param description    description of the fault message
-     * @return the OMElement
-     */
-    private OMElement getFaultPayload(int errorCodeValue, String message, String description) {
-        OMFactory fac = OMAbstractFactory.getOMFactory();
-        OMNamespace ns = fac.createOMNamespace(APISecurityConstants.API_SECURITY_NS,
-                APISecurityConstants.API_SECURITY_NS_PREFIX);
-        OMElement payload = fac.createOMElement("fault", ns);
-
-        OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(errorCodeValue + "");
-        OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText(message);
-        OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText(description);
-
-        payload.addChild(errorCode);
-        payload.addChild(errorMessage);
-        payload.addChild(errorDetail);
-        return payload;
     }
 
     @Override

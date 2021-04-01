@@ -23,7 +23,7 @@ const AppConfig = {
             // from the App when logged out from the IDP (eg: SSO logout from a different App).
             timeout: 2000, // Defines the timeout for the above periodical session status check
         },
-        docUrl: 'https://apim.docs.wso2.com/en/next/',
+        docUrl: 'https://apim.docs.wso2.com/en/4.0.0/',
     },
     idp: {
         origin: 'https://localhost:9443',

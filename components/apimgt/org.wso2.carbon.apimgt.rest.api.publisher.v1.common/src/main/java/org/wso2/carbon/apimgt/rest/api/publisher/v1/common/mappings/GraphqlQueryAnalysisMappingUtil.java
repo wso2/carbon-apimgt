@@ -17,29 +17,41 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
-import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
+import graphql.schema.idl.SchemaParser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLCustomComplexityInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class is responsible for mapping APIM core Query Analysis related objects into REST API documentation
- * related DTOs
+ * related DTOs.
  */
 public class GraphqlQueryAnalysisMappingUtil {
 
+    private static final Log log = LogFactory.getLog(GraphqlQueryAnalysisMappingUtil.class);
+
     /**
-     * Converts a GraphqlComplexityInfo object into a DTO object
+     * Converts a GraphqlComplexityInfo object into a DTO object.
      *
      * @param graphqlComplexityInfo GraphqlComplexityInfo object
      * @return a new GraphQLQueryComplexityInfoDTO object corresponding to given GraphqlComplexityInfo object
      */
     public static GraphQLQueryComplexityInfoDTO fromGraphqlComplexityInfotoDTO(
             GraphqlComplexityInfo graphqlComplexityInfo) {
+
         GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO = new GraphQLQueryComplexityInfoDTO();
-        List<GraphQLCustomComplexityInfoDTO> graphQLCustomComplexityInfoDTOList = new ArrayList<GraphQLCustomComplexityInfoDTO>();
+        List<GraphQLCustomComplexityInfoDTO> graphQLCustomComplexityInfoDTOList =
+                new ArrayList<GraphQLCustomComplexityInfoDTO>();
         for (CustomComplexityDetails customComplexityDetails : graphqlComplexityInfo.getList()) {
             GraphQLCustomComplexityInfoDTO graphQLCustomComplexityInfoDTO = new GraphQLCustomComplexityInfoDTO();
             graphQLCustomComplexityInfoDTO.setType(customComplexityDetails.getType());
@@ -52,33 +64,46 @@ public class GraphqlQueryAnalysisMappingUtil {
     }
 
     /**
-     * Converts a GraphQLQueryComplexityInfo DTO object into a GraphqlComplexityInfo object
+     * Converts a GraphQLQueryComplexityInfo DTO object into a GraphqlComplexityInfo object. During this process a
+     * basic validation is done comparing with the types of the schema
      *
      * @param graphQLQueryComplexityInfoDTO GraphQLQueryComplexityInfoDTO object
+     * @param schema                        GraphQL Schema
      * @return a new GraphqlComplexityInfo object corresponding to given GraphQLQueryComplexityInfoDTO object
      */
-    public static GraphqlComplexityInfo fromDTOtoGraphqlComplexityInfo(
-            GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO) {
+    public static GraphqlComplexityInfo fromDTOtoValidatedGraphqlComplexityInfo(
+            GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO, String schema) {
+
+        SchemaParser schemaParser = new SchemaParser();
+        Set<String> complexityInfoTypeSet = schemaParser.parse(schema).types().keySet();
+
         GraphqlComplexityInfo graphqlComplexityInfo = new GraphqlComplexityInfo();
         List<CustomComplexityDetails> customComplexityDetailsList = new ArrayList<CustomComplexityDetails>();
         for (GraphQLCustomComplexityInfoDTO graphQLCustomComplexityInfoDTO : graphQLQueryComplexityInfoDTO.getList()) {
-            CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
-            customComplexityDetails.setType(graphQLCustomComplexityInfoDTO.getType());
-            customComplexityDetails.setField(graphQLCustomComplexityInfoDTO.getField());
-            customComplexityDetails.setComplexityValue(graphQLCustomComplexityInfoDTO.getComplexityValue());
-            customComplexityDetailsList.add(customComplexityDetails);
+            String complexityType = graphQLCustomComplexityInfoDTO.getType();
+            if (complexityInfoTypeSet.contains(complexityType)) {
+                CustomComplexityDetails customComplexityDetails = new CustomComplexityDetails();
+                customComplexityDetails.setType(complexityType);
+                customComplexityDetails.setField(graphQLCustomComplexityInfoDTO.getField());
+                customComplexityDetails.setComplexityValue(graphQLCustomComplexityInfoDTO.getComplexityValue());
+                customComplexityDetailsList.add(customComplexityDetails);
+            } else {
+                log.error("Complexity Type : " + complexityType + " is not included in the original schema. Hence " +
+                        "skipped.");
+            }
         }
         graphqlComplexityInfo.setList(customComplexityDetailsList);
         return graphqlComplexityInfo;
     }
 
     /**
-     * Converts a list of GraphqlSchemaType objects into a DTO object
+     * Converts a list of GraphqlSchemaType objects into a DTO object.
      *
      * @param typeList List<GraphqlSchemaType>
      * @return a new GraphQLSchemaTypeListDTO object corresponding to given list of GraphqlSchemaType objects
      */
     public static GraphQLSchemaTypeListDTO fromGraphqlSchemaTypeListtoDTO(List<GraphqlSchemaType> typeList) {
+
         GraphQLSchemaTypeListDTO graphQLSchemaTypeListDTO = new GraphQLSchemaTypeListDTO();
         List<GraphQLSchemaTypeDTO> graphQLSchemaTypeDTOList = new ArrayList<>();
         for (GraphqlSchemaType graphqlSchemaType : typeList) {

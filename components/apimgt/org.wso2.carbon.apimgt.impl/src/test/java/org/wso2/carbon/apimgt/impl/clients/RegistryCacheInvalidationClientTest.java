@@ -34,8 +34,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.clients.util.RegistryCacheInvalidationClientWrapper;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.registry.cache.stub.RegistryCacheInvalidationServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.registry.cache.stub.RegistryCacheInvalidationServiceStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
@@ -46,7 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ServiceReferenceHolder.class, ConfigurationContextFactory.class })
+@PrepareForTest({ ServiceReferenceHolder.class, ConfigurationContextFactory.class, APIUtil.class })
 public class RegistryCacheInvalidationClientTest {
     private APIManagerConfiguration amConfig;
     private ConfigurationContextFactory configFactory;
@@ -100,7 +101,8 @@ public class RegistryCacheInvalidationClientTest {
     public void testShouldClearCachesWhenTenantDomainIsProvided()
             throws RemoteException, APIManagementException, LoginAuthenticationExceptionException {
         Mockito.when(authStub.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-        Mockito.when(amConfig.getApiGatewayEnvironments()).thenReturn(validEnvironments);
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getEnvironments()).thenReturn(validEnvironments);
 
         new RegistryCacheInvalidationClientWrapper(authStub, cacheStub).clearTiersResourceCache(TENANT_DOMAIN);
     }
@@ -123,10 +125,9 @@ public class RegistryCacheInvalidationClientTest {
         wrongEnvironments.put(ENV_NAME, wrongEnvironment);
 
         Mockito.when(authStub.login(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-        Mockito.when(amConfig.getApiGatewayEnvironments())
-                .thenReturn(nullEnvironments)
-                .thenReturn(wrongEnvironments);
 
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getEnvironments()).thenReturn(nullEnvironments).thenReturn(wrongEnvironments);
         // check init parameter null check ex: serverURL
         try {
             new RegistryCacheInvalidationClientWrapper(authStub, cacheStub).clearTiersResourceCache(TENANT_DOMAIN);
@@ -150,8 +151,9 @@ public class RegistryCacheInvalidationClientTest {
                 .thenThrow(RemoteException.class)
                 .thenThrow(LoginAuthenticationExceptionException.class)
                 .thenReturn(true);
-        Mockito.when(amConfig.getApiGatewayEnvironments())
-                .thenReturn(validEnvironments);
+
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.getEnvironments()).thenReturn(validEnvironments);
 
         // check remote exception
         try {

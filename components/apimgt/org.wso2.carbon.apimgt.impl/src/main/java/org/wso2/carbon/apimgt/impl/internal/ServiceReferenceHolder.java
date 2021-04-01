@@ -17,14 +17,14 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
+import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
-import org.wso2.carbon.apimgt.impl.jwt.transformer.JWTTransformer;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
-import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -35,106 +35,117 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.security.KeyStore;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
-
+    private static UserRealm userRealm;
+    private static ConfigurationContextService contextService;
     private RegistryService registryService;
     private APIManagerConfigurationService amConfigurationService;
     private RealmService realmService;
-    private static UserRealm userRealm;
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
-    private APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher;
     private KeyStore trustStore;
     private AccessTokenGenerator accessTokenGenerator;
     private KeyManagerConfigurationService keyManagerConfigurationService;
     private OAuthServerConfiguration oauthServerConfiguration;
-    private Map<String,JWTTransformer> jwtTransformerMap = new HashMap<>();
-    private Map<String,KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap  = new HashMap<>();
+    private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
+    private Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap = new HashMap<>();
     private ArtifactSaver artifactSaver;
     private Map<String, List<Notifier>> notifiersMap = new HashMap<>();
     private ImportExportAPI importExportService;
+    private Map<String, GatewayArtifactGenerator> gatewayArtifactGeneratorMap = new HashMap<>();
+
+    private ServiceReferenceHolder() {
+
+    }
 
     public static ConfigurationContextService getContextService() {
+
         return contextService;
     }
 
     public static void setContextService(ConfigurationContextService contextService) {
+
         ServiceReferenceHolder.contextService = contextService;
     }
 
-    private static ConfigurationContextService contextService;
-    private ServiceReferenceHolder() {
-    }
-
     public static ServiceReferenceHolder getInstance() {
+
         return instance;
     }
 
+    public static UserRealm getUserRealm() {
+
+        return userRealm;
+    }
+
+    public static void setUserRealm(UserRealm realm) {
+
+        userRealm = realm;
+    }
+
     public RegistryService getRegistryService() {
+
         return registryService;
     }
 
     public void setRegistryService(RegistryService registryService) {
+
         this.registryService = registryService;
     }
 
     public APIManagerConfigurationService getAPIManagerConfigurationService() {
+
         return amConfigurationService;
     }
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
+
         this.amConfigurationService = amConfigurationService;
     }
 
     public RealmService getRealmService() {
+
         return realmService;
     }
 
     public void setRealmService(RealmService realmService) {
+
         this.realmService = realmService;
     }
-    public static void setUserRealm(UserRealm realm) {
-        userRealm = realm;
-    }
 
-    public static UserRealm getUserRealm() {
-        return userRealm;
-    }
+    public TenantIndexingLoader getIndexLoaderService() {
 
-    public void setIndexLoaderService(TenantIndexingLoader indexLoader) {
-        this.indexLoader = indexLoader;
-    }
-
-    public TenantIndexingLoader getIndexLoaderService(){
         return indexLoader;
     }
 
+    public void setIndexLoaderService(TenantIndexingLoader indexLoader) {
+
+        this.indexLoader = indexLoader;
+    }
+
     public OutputEventAdapterService getOutputEventAdapterService() {
+
         return outputEventAdapterService;
     }
 
     public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
+
         this.outputEventAdapterService = outputEventAdapterService;
     }
 
-    public APIMgtWorkflowDataPublisher getApiMgtWorkflowDataPublisher() {
-        return apiMgtWorkflowDataPublisher;
-    }
-
-    public void setApiMgtWorkflowDataPublisher(APIMgtWorkflowDataPublisher apiMgtWorkflowDataPublisher) {
-        this.apiMgtWorkflowDataPublisher = apiMgtWorkflowDataPublisher;
-    }
-
     public KeyStore getTrustStore() {
+
         return trustStore;
     }
 
     public void setTrustStore(KeyStore trustStore) {
+
         this.trustStore = trustStore;
     }
 
@@ -160,13 +171,14 @@ public class ServiceReferenceHolder {
         this.keyManagerConfigurationService = keyManagerConfigurationService;
     }
 
-    public void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
-        this.oauthServerConfiguration = oauthServerConfiguration;
-    }
-
     public OAuthServerConfiguration getOauthServerConfiguration() {
 
         return oauthServerConfiguration;
+    }
+
+    public void setOauthServerConfiguration(OAuthServerConfiguration oauthServerConfiguration) {
+
+        this.oauthServerConfiguration = oauthServerConfiguration;
     }
 
     public void addJWTTransformer(String issuer, JWTTransformer jwtTransformer) {
@@ -178,16 +190,20 @@ public class ServiceReferenceHolder {
 
         jwtTransformerMap.remove(issuer);
     }
-    public JWTTransformer getJWTTransformer(String issuer){
+
+    public JWTTransformer getJWTTransformer(String issuer) {
+
         return jwtTransformerMap.get(issuer);
     }
 
     public void addKeyManagerConnectorConfiguration(String type,
                                                     KeyManagerConnectorConfiguration keyManagerConnectorConfiguration) {
-        keyManagerConnectorConfigurationMap.put(type,keyManagerConnectorConfiguration);
+
+        keyManagerConnectorConfigurationMap.put(type, keyManagerConnectorConfiguration);
     }
 
     public void removeKeyManagerConnectorConfiguration(String type) {
+
         keyManagerConnectorConfigurationMap.remove(type);
     }
 
@@ -207,10 +223,12 @@ public class ServiceReferenceHolder {
     }
 
     public ArtifactSaver getArtifactSaver() {
+
         return artifactSaver;
     }
 
     public void setArtifactSaver(ArtifactSaver artifactSaver) {
+
         this.artifactSaver = artifactSaver;
     }
 
@@ -222,5 +240,29 @@ public class ServiceReferenceHolder {
     public ImportExportAPI getImportExportService() {
 
         return importExportService;
+    }
+
+    public void addGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
+
+        if (gatewayArtifactGenerator != null) {
+            gatewayArtifactGeneratorMap.put(gatewayArtifactGenerator.getType(), gatewayArtifactGenerator);
+        }
+    }
+
+    public void removeGatewayArtifactGenerator(GatewayArtifactGenerator gatewayArtifactGenerator) {
+
+        if (gatewayArtifactGenerator != null) {
+            gatewayArtifactGeneratorMap.remove(gatewayArtifactGenerator.getType());
+        }
+    }
+
+    public GatewayArtifactGenerator getGatewayArtifactGenerator(String type) {
+
+        return gatewayArtifactGeneratorMap.get(type);
+    }
+
+    public Set<String> getGatewayArtifactGeneratorTypes() {
+
+        return gatewayArtifactGeneratorMap.keySet();
     }
 }

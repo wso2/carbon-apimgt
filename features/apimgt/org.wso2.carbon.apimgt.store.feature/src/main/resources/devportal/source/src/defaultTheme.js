@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const DefaultConfigurations = {
     direction: 'ltr',
     palette: {
@@ -26,14 +27,19 @@ const DefaultConfigurations = {
             lineHeight: 2,
         },
         h4: {
-            fontWeight: 200,
+            fontWeight: 400,
+            fontSize: '1.3rem',
+        },
+        caption: {
+            fontSize: '0.70rem',
+            color: '#666',
         },
     },
     custom: {
         contentAreaWidth: 1240,
         backgroundImage: '', // Add a watermark background to the content area of the page. Example ( '/devportal/site/public/images/back-light.png')
-        defaultApiView: 'grid',   // Sets the default view for the api listing page ( Other values available = 'list' ). 
-                                    // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
+        defaultApiView: 'grid', // Sets the default view for the api listing page ( Other values available = 'list' ).
+        // To disable one option for an example if you want to disable grid completely and get rid of the toggle buttons use ['list'].
         page: {
             style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
             width: 1240, // This value is effected only when the page.style = 'fixed'
@@ -63,7 +69,7 @@ const DefaultConfigurations = {
             leftMenuActive: '#00597f',
             leftMenuActiveSubmenu: '#0d1723',
             activeBackground: '#191e46',
-            rootIconVisible: true,
+            rootIconVisible: false,
             rootIconSize: 42,
             rootIconTextVisible: false,
             rootBackground: '#000',
@@ -75,8 +81,8 @@ const DefaultConfigurations = {
             starColor: '#f6bf21', // Rating star color
             starColorEmpty: '#cfcfcf', // Rating star color empty state
             sliderBackground: '#ffffff',
-            iconOddColor: '#347eff',
-            iconEvenColor: '#89b4ff',
+            iconOddColor: '#d3d3d3',
+            iconEvenColor: '#c3c3c3',
             listGridSelectedColor: '#347eff', // Defines color of the selected icon ( grid/ list ) view of the api listing page
             tagChipBackground: '#7dd7f5',
         },
@@ -113,6 +119,10 @@ const DefaultConfigurations = {
             mutation: '#c1dea0',
             subscription: '#ffcc80',
         },
+        thumbnailTemplates: {
+            active: false,
+            variant: 'plain', // default templates available templates 'plain'.
+        },
         thumbnail: {
             width: 240,
             height: 140,
@@ -124,12 +134,7 @@ const DefaultConfigurations = {
             // And put a string to render a custom image
             backgrounds: [
                 // These backgrounds are use to generate the thumbnails.
-                { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
-                { prime: 0xf47f16ff, sub: 0xcddc39ff },
-                { prime: 0xf44236ff, sub: 0xfec107ff },
                 { prime: 0x2196f3ff, sub: 0xaeea00ff },
-                { prime: 0xff9700ff, sub: 0xffeb3cff },
-                { prime: 0xff9700ff, sub: 0xfe5722ff },
             ],
             document: {
                 icon: 'library_books',
@@ -243,7 +248,7 @@ const DefaultConfigurations = {
                 showTwitter: true,
                 showEmbad: true,
                 showEmail: true,
-            }
+            },
         },
         apiDetailPages: {
             showCredentials: true,
@@ -251,6 +256,7 @@ const DefaultConfigurations = {
             showTryout: true,
             showDocuments: true,
             showSdks: true,
+            showAsyncSpecification: true,
             onlyShowSdks: [], // You can put an array of strings to enable only a given set of sdks. Leave empty to show all. ex: ['java','javascript']
             sdkBackground: '#ffffff',
             swaggerUIBackground: '#efefef',
@@ -311,25 +317,42 @@ const DefaultConfigurations = {
                     imageWidth: 24, // in pixles
                     text: 'Sinhala',
                     direction: 'ltr',
-                }
+                },
             ],
             showFlag: true,
             showText: true,
             minWidth: 60, // Width of the language switcher in pixles
         },
         info: {
-            color: '#64b5f6',    
+            color: '#64b5f6',
         },
-        /* 
+        /*
             This is the config for the public teant store.
             Set "active: false" to redirect the teant user to the url
             given by redirectToIfInactive. It will also hide the link
             SWITCH DEV PORTALS link at the header.
         */
-       publicTenantStore: {
+        publicTenantStore: {
             active: true,
             redirectToIfInactive: 'https://wso2.com/api-management/cloud/',
-        }
+        },
+        curlGenerator: {
+            backgroundColor: '#41444e',
+            color: '#fff',
+        },
+        AsyncTryOut: {
+            backgroundColor: '#89b7d1',
+        },
+        overrides: {
+            MuiOutlinedInput: {
+                root: {
+                    borderColor: '#444',
+                },
+                notchedOutline: {
+                    borderColor: '#444',
+                },
+            },
+        },
     },
 };
 

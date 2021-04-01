@@ -105,7 +105,7 @@ const styles = makeStyles((theme) => ({
  */
 function TryOutController(props) {
     const {
-        securitySchemeType, selectedEnvironment, environments, containerMngEnvironments, labels,
+        securitySchemeType, selectedEnvironment, environments,
         productionAccessToken, sandboxAccessToken, selectedKeyType, setKeys, setSelectedKeyType,
         setSelectedKeyManager,
         setSelectedEnvironment, setProductionAccessToken, setSandboxAccessToken, scopes,
@@ -353,7 +353,9 @@ function TryOutController(props) {
         switch (name) {
             case 'selectedEnvironment':
                 setSelectedEnvironment(value, true);
-                updateSwagger(value);
+                if (api.type !== 'GRAPHQL') {
+                    updateSwagger(value);
+                }
                 if (environmentObject) {
                     const urls = environmentObject.find((elm) => value === elm.environmentName).URLs;
                     setURLs(urls);
@@ -438,35 +440,6 @@ function TryOutController(props) {
         tokenValue = selectedKeyType === 'PRODUCTION' ? productionAccessToken : sandboxAccessToken;
     }
 
-    // The rendering logic of container management menus items are done here
-    // because when grouping container management type and clusters with <> and </>
-    // the handleChange event is not triggered. Hence handle rendering logic here.
-    const containerMngEnvMenuItems = [];
-    if (containerMngEnvironments) {
-        containerMngEnvironments.filter((envType) => envType.clusterDetails.length > 0).forEach((envType) => {
-            // container management system type
-            containerMngEnvMenuItems.push(
-                <MenuItem value='' disabled className={classes.menuItem}>
-                    <em>
-                        {envType.deploymentEnvironmentName}
-                    </em>
-                </MenuItem>,
-            );
-            // clusters of the container management system type
-            envType.clusterDetails.forEach((cluster) => {
-                containerMngEnvMenuItems.push(
-                    <MenuItem
-                        value={cluster.clusterName}
-                        key={cluster.clusterName}
-                        className={classes.menuItem}
-                    >
-                        {cluster.clusterDisplayName}
-                    </MenuItem>,
-                );
-            });
-        });
-    }
-
     const authHeader = `${authorizationHeader}: ${prefix}`;
 
     return (
@@ -475,12 +448,6 @@ function TryOutController(props) {
                 <Box>
                     {securitySchemeType !== 'TEST' && (
                         <>
-                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
-                                <FormattedMessage
-                                    id='api.console.security.heading'
-                                    defaultMessage='Security'
-                                />
-                            </Typography>
                             <Box mb={1}>
                                 <Typography variant='body1'>
                                     <Box display='flex' alignItems='center'>
@@ -512,57 +479,65 @@ function TryOutController(props) {
                                     </Box>
                                 </Typography>
                             </Box>
+                        </>
+                    )}
+                    {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
+                        <>
+                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                                <FormattedMessage
+                                    id='api.console.security.heading'
+                                    defaultMessage='Security'
+                                />
+                            </Typography>
                             <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
                                 <FormattedMessage
                                     id='api.console.security.type.heading'
                                     defaultMessage='Security Type'
                                 />
                             </Typography>
+                            <FormControl component='fieldset'>
+                                <RadioGroup
+                                    name='securityScheme'
+                                    value={securitySchemeType}
+                                    onChange={handleChanges}
+                                    row
+                                >
+                                    <FormControlLabel
+                                        value='OAUTH'
+                                        disabled={!isOAuthEnabled}
+                                        control={<Radio />}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.security.scheme.oauth'
+                                                defaultMessage='OAuth'
+                                            />
+                                        )}
+                                    />
+                                    <FormControlLabel
+                                        value='API-KEY'
+                                        disabled={!isApiKeyEnabled}
+                                        control={<Radio />}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.security.scheme.apikey'
+                                                defaultMessage='API Key'
+                                            />
+                                        )}
+                                    />
+                                    <FormControlLabel
+                                        value='BASIC'
+                                        disabled={!isBasicAuthEnabled}
+                                        control={<Radio />}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Apis.Details.ApiConsole.security.scheme.basic'
+                                                defaultMessage='Basic'
+                                            />
+                                        )}
+                                    />
+                                </RadioGroup>
+                            </FormControl>
                         </>
-                    )}
-                    {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
-                        <FormControl component='fieldset'>
-                            <RadioGroup
-                                name='securityScheme'
-                                value={securitySchemeType}
-                                onChange={handleChanges}
-                                row
-                            >
-                                <FormControlLabel
-                                    value='OAUTH'
-                                    disabled={!isOAuthEnabled}
-                                    control={<Radio />}
-                                    label={(
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiConsole.security.scheme.oauth'
-                                            defaultMessage='OAuth'
-                                        />
-                                    )}
-                                />
-                                <FormControlLabel
-                                    value='API-KEY'
-                                    disabled={!isApiKeyEnabled}
-                                    control={<Radio />}
-                                    label={(
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiConsole.security.scheme.apikey'
-                                            defaultMessage='API Key'
-                                        />
-                                    )}
-                                />
-                                <FormControlLabel
-                                    value='BASIC'
-                                    disabled={!isBasicAuthEnabled}
-                                    control={<Radio />}
-                                    label={(
-                                        <FormattedMessage
-                                            id='Apis.Details.ApiConsole.security.scheme.basic'
-                                            defaultMessage='Basic'
-                                        />
-                                    )}
-                                />
-                            </RadioGroup>
-                        </FormControl>
                     )}
                 </Box>
             </Grid>
@@ -627,6 +602,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     margin='normal'
                                                     variant='outlined'
+                                                    id='username'
                                                     label={(
                                                         <FormattedMessage
                                                             id='username'
@@ -641,6 +617,7 @@ function TryOutController(props) {
                                                 <TextField
                                                     margin='normal'
                                                     variant='outlined'
+                                                    id='input-password'
                                                     label={(
                                                         <FormattedMessage
                                                             id='password'
@@ -749,8 +726,7 @@ function TryOutController(props) {
                             </Box>
                             <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
                                 <Grid xs={12} md={6} item>
-                                    {((environments && environments.length > 0) || (containerMngEnvMenuItems.length > 0)
-                                        || (labels && labels.length > 0))
+                                    {(environments && environments.length > 0)
                                         && (
                                             <>
                                                 <Typography
@@ -766,13 +742,14 @@ function TryOutController(props) {
                                                 <TextField
                                                     fullWidth
                                                     select
+                                                    id='environment'
                                                     label={(
                                                         <FormattedMessage
                                                             defaultMessage='Environment'
                                                             id='Apis.Details.ApiConsole.environment'
                                                         />
                                                     )}
-                                                    value={selectedEnvironment || (environments && environments[0])}
+                                                    value={selectedEnvironment || (environments && environments[0].name)}
                                                     name='selectedEnvironment'
                                                     onChange={handleChanges}
                                                     helperText={(
@@ -797,36 +774,13 @@ function TryOutController(props) {
                                                     {environments && (
                                                         environments.map((env) => (
                                                             <MenuItem
-                                                                value={env}
-                                                                key={env}
+                                                                value={env.name}
+                                                                key={env.name}
                                                                 className={classes.menuItem}
                                                             >
-                                                                {env}
+                                                                {env.displayName}
                                                             </MenuItem>
                                                         )))}
-                                                    {containerMngEnvMenuItems}
-                                                    {labels && labels.length > 0 && (
-                                                        <MenuItem value='' disabled>
-                                                            <em>
-                                                                <FormattedMessage
-                                                                    id='gateways'
-                                                                    defaultMessage='Gateways'
-                                                                    className={classes.menuItem}
-                                                                />
-                                                            </em>
-                                                        </MenuItem>
-                                                    )}
-                                                    {labels && (
-                                                        labels.map((label) => (
-                                                            <MenuItem
-                                                                value={label}
-                                                                key={label}
-                                                                className={classes.menuItem}
-                                                            >
-                                                                {label}
-                                                            </MenuItem>
-                                                        ))
-                                                    )}
                                                 </TextField>
                                             </>
                                         )}

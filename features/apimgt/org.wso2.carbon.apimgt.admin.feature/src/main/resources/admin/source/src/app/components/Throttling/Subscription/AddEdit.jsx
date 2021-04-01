@@ -47,6 +47,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
 import Joi from '@hapi/joi';
+import ChipInput from 'material-ui-chip-input';
+import base64url from 'base64url';
+import Error from '@material-ui/icons/Error';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Chip from '@material-ui/core/Chip';
+import { red } from '@material-ui/core/colors/';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -105,6 +111,7 @@ function reducer(state, newValue) {
         case 'description':
         case 'rateLimitCount':
         case 'rateLimitTimeUnit':
+        case 'subscriberCount':
         case 'billingPlan':
         case 'stopOnQuotaReach':
             return { ...state, [field]: value };
@@ -114,6 +121,7 @@ function reducer(state, newValue) {
         case 'timeUnit':
         case 'dataAmount':
         case 'unitTime':
+        case 'eventCount':
             return {
                 ...state,
                 defaultLimit: { ...state.defaultLimit, [field]: value },
@@ -157,6 +165,9 @@ function AddEdit(props) {
     const { history, match: { params } } = props;
     const restApi = new API();
     const isEdit = (params.id !== null) && (params.id !== undefined);
+    const [validRoles, setValidRoles] = useState(['Internal/everyone']);
+    const [invalidRoles, setInvalidRoles] = useState([]);
+    const [roleValidity, setRoleValidity] = useState(true);
 
     const [initialState, setInitialState] = useState({
         policyName: '',
@@ -168,6 +179,7 @@ function AddEdit(props) {
             type: 'REQUESTCOUNTLIMIT',
             dataAmount: '',
             dataUnit: 'KB',
+            eventCount: '',
         },
         rateLimitCount: '',
         rateLimitTimeUnit: 'sec',
@@ -182,13 +194,14 @@ function AddEdit(props) {
         customAttributes: [],
         stopOnQuotaReach: true,
         permissions: {
-            roles: 'Internal/everyone',
+            roles: ['Internal/everyone'],
             permissionStatus: 'ALLOW',
         },
         graphQL: {
             maxComplexity: '',
             maxDepth: '',
         },
+        subscriberCount: '',
     });
 
     const [customAttributes, setCustomAttributes] = useState([]);
@@ -203,6 +216,7 @@ function AddEdit(props) {
                 let unitTimeEdit = '';
                 let typeEdit = 'REQUESTCOUNTLIMIT';
                 let dataUnitEdit = 'KB';
+                let eventCountEdit = '';
                 if (result.body.defaultLimit.requestCount !== null) {
                     requestCountEdit = result.body.defaultLimit.requestCount.requestCount;
                     timeUnitEdit = result.body.defaultLimit.requestCount.timeUnit;
@@ -214,7 +228,16 @@ function AddEdit(props) {
                     timeUnitEdit = result.body.defaultLimit.bandwidth.timeUnit;
                     unitTimeEdit = result.body.defaultLimit.bandwidth.unitTime;
                     typeEdit = result.body.defaultLimit.type;
+                } else {
+                    eventCountEdit = result.body.defaultLimit.eventCount.eventCount;
+                    unitTimeEdit = result.body.defaultLimit.eventCount.unitTime;
+                    timeUnitEdit = result.body.defaultLimit.eventCount.timeUnit;
+                    typeEdit = result.body.defaultLimit.type;
                 }
+                setValidRoles(result.body.permissions
+                    && result.body.permissions.roles
+                    ? result.body.permissions.roles
+                    : []);
                 const editState = {
                     policyName: result.body.policyName,
                     description: result.body.description,
@@ -225,7 +248,9 @@ function AddEdit(props) {
                         type: typeEdit,
                         dataAmount: dataAmountEdit,
                         dataUnit: dataUnitEdit,
+                        eventCount: eventCountEdit,
                     },
+                    subscriberCount: (result.body.subscriberCount === 0) ? '' : result.body.subscriberCount,
                     rateLimitCount: (result.body.rateLimitCount === 0) ? '' : result.body.rateLimitCount,
                     rateLimitTimeUnit: (result.body.rateLimitCount === 0) ? 'sec' : result.body.rateLimitTimeUnit,
                     billingPlan: result.body.billingPlan,
@@ -242,8 +267,7 @@ function AddEdit(props) {
                         permissionStatus: (result.body.permissions === null)
                             ? 'ALLOW' : result.body.permissions.permissionType,
                         roles: (result.body.permissions === null)
-                            ? 'Internal/everyone' : result.body.permissions.roles
-                            && result.body.permissions.roles.join(','),
+                            ? ['Internal/everyone'] : validRoles,
                     },
                     graphQL: {
                         maxComplexity: (result.body.graphQLMaxComplexity === 0) ? '' : result.body.graphQLMaxComplexity,
@@ -263,6 +287,7 @@ function AddEdit(props) {
                 type: 'REQUESTCOUNTLIMIT',
                 dataAmount: '',
                 dataUnit: 'KB',
+                eventCount: '',
             },
             rateLimitCount: '',
             rateLimitTimeUnit: 'sec',
@@ -277,13 +302,14 @@ function AddEdit(props) {
             customAttributes: [],
             stopOnQuotaReach: true,
             permissions: {
-                roles: 'Internal/everyone',
+                roles: ['Internal/everyone'],
                 permissionStatus: 'ALLOW',
             },
             graphQL: {
                 maxComplexity: '',
                 maxDepth: '',
             },
+            subscriberCount: '',
         });
     }, []);
 
@@ -326,6 +352,13 @@ function AddEdit(props) {
                 }) : '';
                 setValidationError({ requestCount: error });
                 break;
+            case 'eventCount':
+                error = value === '' ? intl.formatMessage({
+                    id: 'Throttling.Subscription.Policy.policy.event.count.empty.error.msg',
+                    defaultMessage: 'Event Count is Empty',
+                }) : '';
+                setValidationError({ eventCount: error });
+                break;
             case 'dataAmount':
                 error = value === '' ? intl.formatMessage({
                     id: 'Throttling.Subscription.Policy.policy.data.amount.empty.error.msg',
@@ -356,6 +389,7 @@ function AddEdit(props) {
             type,
             dataAmount,
             dataUnit,
+            eventCount,
         },
         rateLimitCount,
         rateLimitTimeUnit,
@@ -369,13 +403,13 @@ function AddEdit(props) {
             billingCycle,
         },
         permissions: {
-            roles,
             permissionStatus,
         },
         graphQL: {
             maxComplexity,
             maxDepth,
         },
+        subscriberCount,
     } = state;
 
     const onChange = (e) => {
@@ -390,25 +424,51 @@ function AddEdit(props) {
         let errorText = '';
         const policyNameErrors = validate('policyName', policyName);
         const requestCountErrors = validate('requestCount', requestCount);
+        const eventCountErrors = validate('eventCount', eventCount);
         const dataAmountErrors = validate('dataAmount', dataAmount);
         const unitTimeErrors = validate('unitTime', unitTime);
 
         if (type === 'BANDWIDTHLIMIT') {
             errorText += policyNameErrors + dataAmountErrors + unitTimeErrors;
-        } else {
+        } else if (type === 'REQUESTCOUNTLIMIT') {
             errorText += policyNameErrors + requestCountErrors + unitTimeErrors;
+        } else {
+            errorText += policyNameErrors + eventCountErrors + unitTimeErrors;
         }
         return errorText;
     };
 
-    const getRoleList = (rolesString) => {
-        // Split the roles string using comma, trim spaces and remove empty strings (if any)
-        if (rolesString.indexOf(',') === -1) {
-            return [rolesString];
+    const handleRoleAddition = (role) => {
+        const promise = restApi.validateSystemRole(base64url.encode(role));
+        promise
+            .then(() => {
+                setValidRoles(validRoles.concat(role));
+                if (invalidRoles.length === 0) {
+                    setRoleValidity(true);
+                } else {
+                    setRoleValidity(false);
+                }
+            })
+            .catch((error) => {
+                if (error.status === 404) {
+                    setInvalidRoles(invalidRoles.concat(role));
+                    setRoleValidity(false);
+                } else {
+                    Alert.error('Error when validating role: ' + role);
+                    console.error('Error when validating role ' + error);
+                }
+            });
+    };
+
+    const handleRoleDeletion = (role) => {
+        if (invalidRoles.includes(role)) {
+            const invalidRolesArray = invalidRoles.filter((existingRole) => existingRole !== role);
+            setInvalidRoles(invalidRolesArray);
+            if (invalidRolesArray.length === 0) {
+                setRoleValidity(true);
+            }
         } else {
-            return rolesString.split(',').map((role) => {
-                return role.trim();
-            }).filter((role) => role !== '');
+            setValidRoles(validRoles.filter((existingRole) => existingRole !== role));
         }
     };
 
@@ -420,7 +480,6 @@ function AddEdit(props) {
         }
         let subscriptionThrottlingPolicy;
         let promisedAddSubscriptionPolicy;
-
         if (type === 'REQUESTCOUNTLIMIT') {
             subscriptionThrottlingPolicy = {
                 policyName: state.policyName,
@@ -433,6 +492,7 @@ function AddEdit(props) {
                         unitTime: state.defaultLimit.unitTime,
                     },
                 },
+                subscriberCount: (state.subscriberCount === '') ? 0 : state.subscriberCount,
                 rateLimitCount: (state.rateLimitCount === '') ? 0 : state.rateLimitCount,
                 rateLimitTimeUnit: state.rateLimitTimeUnit,
                 billingPlan: state.billingPlan,
@@ -451,10 +511,10 @@ function AddEdit(props) {
                 },
                 permissions: {
                     permissionType: state.permissions.permissionStatus,
-                    roles: getRoleList(state.permissions.roles),
+                    roles: validRoles,
                 },
             };
-        } else {
+        } else if (type === 'BANDWIDTHLIMIT') {
             subscriptionThrottlingPolicy = {
                 policyName: state.policyName,
                 description: state.description,
@@ -467,6 +527,7 @@ function AddEdit(props) {
                         unitTime: state.defaultLimit.unitTime,
                     },
                 },
+                subscriberCount: (state.subscriberCount === '') ? 0 : state.subscriberCount,
                 rateLimitCount: (state.rateLimitCount === '') ? 0 : state.rateLimitCount,
                 rateLimitTimeUnit: state.rateLimitTimeUnit,
                 billingPlan: state.billingPlan,
@@ -485,7 +546,41 @@ function AddEdit(props) {
                 },
                 permissions: {
                     permissionType: state.permissions.permissionStatus,
-                    roles: getRoleList(state.permissions.roles),
+                    roles: validRoles,
+                },
+            };
+        } else {
+            subscriptionThrottlingPolicy = {
+                policyName: state.policyName,
+                description: state.description,
+                defaultLimit: {
+                    type: state.defaultLimit.type,
+                    eventCount: {
+                        eventCount: state.defaultLimit.eventCount,
+                        timeUnit: state.defaultLimit.timeUnit,
+                        unitTime: state.defaultLimit.unitTime,
+                    },
+                },
+                subscriberCount: (state.subscriberCount === '') ? 0 : state.subscriberCount,
+                rateLimitCount: (state.rateLimitCount === '') ? 0 : state.rateLimitCount,
+                rateLimitTimeUnit: state.rateLimitTimeUnit,
+                billingPlan: state.billingPlan,
+                stopOnQuotaReach: state.stopOnQuotaReach,
+                customAttributes,
+                graphQLMaxComplexity: (state.graphQL.maxComplexity === '') ? 0 : state.graphQL.maxComplexity,
+                graphQLMaxDepth: (state.graphQL.maxDepth === '') ? 0 : state.graphQL.maxDepth,
+                monetization: {
+                    monetizationPlan: state.monetization.monetizationPlan,
+                    properties: {
+                        fixedPrice: state.monetization.fixedPrice,
+                        pricePerRequest: state.monetization.pricePerRequest,
+                        currencyType: state.monetization.currencyType,
+                        billingCycle: state.monetization.billingCycle,
+                    },
+                },
+                permissions: {
+                    permissionType: state.permissions.permissionStatus,
+                    roles: validRoles,
                 },
             };
         }
@@ -691,6 +786,11 @@ function AddEdit(props) {
                                     control={<Radio />}
                                     label='Request Bandwidth'
                                 />
+                                <FormControlLabel
+                                    value='EVENTCOUNTLIMIT'
+                                    control={<Radio />}
+                                    label='Event Based (Async API)'
+                                />
                             </RadioGroup>
                         </Box>
                         <Box component='div' m={1}>
@@ -760,6 +860,34 @@ function AddEdit(props) {
                                             <MenuItem value='MB'>MB</MenuItem>
                                         </Select>
                                     </FormControl>
+                                </Box>
+                            )}
+                            {type === 'EVENTCOUNTLIMIT' && (
+                                <Box display='flex' flexDirection='row'>
+                                    <TextField
+                                        margin='dense'
+                                        name='eventCount'
+                                        value={eventCount}
+                                        type='number'
+                                        onChange={onChange}
+                                        required
+                                        InputProps={{
+                                            id: 'eventCount',
+                                            onBlur: ({ target: { value } }) => {
+                                                validate('eventCount', value);
+                                            },
+                                        }}
+                                        label={(
+                                            <FormattedMessage
+                                                id='Throttling.Subscription.AddEdit.form.eventCount.count'
+                                                defaultMessage='Event Count'
+                                            />
+                                        )}
+                                        fullWidth
+                                        error={validationError.eventCount}
+                                        helperText={validationError.eventCount || 'Number of events allowed'}
+                                        variant='outlined'
+                                    />
                                 </Box>
                             )}
                             <Box display='flex' flexDirection='row'>
@@ -929,6 +1057,56 @@ function AddEdit(props) {
                                                 <FormattedMessage
                                                     id='Throttling.Subscription.AddEdit.form.max.depth'
                                                     defaultMessage='Max Depth'
+                                                />
+                                            </span>
+                                        )}
+                                        fullWidth
+                                        variant='outlined'
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box marginTop={2} marginBottom={2}>
+                            <hr className={classes.hr} />
+                        </Box>
+                    </Grid>
+                    {/* Web Hooks */}
+                    <Grid item xs={12} md={12} lg={3}>
+                        <Box display='flex' flexDirection='row' alignItems='center'>
+                            <Box flex='1'>
+                                <Typography color='inherit' variant='subtitle2' component='div'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.Subscriber.Count'
+                                        defaultMessage='Webhooks'
+                                    />
+                                </Typography>
+                                <Typography color='inherit' variant='caption' component='p'>
+                                    <FormattedMessage
+                                        id='Throttling.Subscription.AddEdit.subscription.count.add.description'
+                                        defaultMessage={'Maximum number of webhooks'
+                                        + ' allowed for a Webhooks API using this policy.'}
+                                    />
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={9}>
+                        <Box component='div' m={1}>
+                            <Box display='flex' flexDirection='row' alignItems='center'>
+                                <Box flex='1'>
+                                    <TextField
+                                        margin='dense'
+                                        name='subscriberCount'
+                                        value={subscriberCount}
+                                        type='number'
+                                        onChange={onChange}
+                                        label={(
+                                            <span>
+                                                <FormattedMessage
+                                                    id='Throttling.Subscription.AddEdit.form.max.webhooks.connections'
+                                                    defaultMessage='Max Subscriptions'
                                                 />
                                             </span>
                                         )}
@@ -1322,58 +1500,70 @@ function AddEdit(props) {
                     <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
                             <Box display='flex' flexDirection='row' alignItems='center'>
-                                {permissionStatus === 'ALLOW' ? (
-                                    <Box flex='1'>
-                                        <TextField
-                                            name='roles'
-                                            margin='dense'
-                                            required
-                                            value={roles}
-                                            onChange={onChange}
-                                            label={(
-                                                <span>
+                                <ChipInput
+                                    label='Roles'
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    variant='outlined'
+                                    value={validRoles.concat(invalidRoles)}
+                                    alwaysShowPlaceholder={false}
+                                    placeholder='Enter roles and press Enter'
+                                    blurBehavior='clear'
+                                    InputProps={{
+                                        endAdornment: !roleValidity && (
+                                            <InputAdornment position='end'>
+                                                <Error color='error' />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    onAdd={handleRoleAddition}
+                                    error={!roleValidity}
+                                    helperText={
+                                        !roleValidity ? (
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.Roles.Invalid'
+                                                defaultMessage='A Role is invalid'
+                                            />
+                                        ) : [
+                                            (permissionStatus === 'ALLOW'
+                                                ? (
                                                     <FormattedMessage
-                                                        id='Throttling.Subscription.AddEdit.form.roles'
-                                                        defaultMessage='Roles'
+                                                        id='Throttling.Subscription.enter.permission.allowed'
+                                                        defaultMessage='This policy is "Allowed" for above roles.'
                                                     />
-                                                </span>
-                                            )}
-                                            fullWidth
-                                            multiline
-                                            helperText={intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.permission.allowed',
-                                                defaultMessage: 'This policy is "Allowed" for above roles.',
-                                            }) + ' ' + intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
-                                                defaultMessage: 'Use comma to seperate roles.',
-                                            })}
-                                            variant='outlined'
+                                                )
+                                                : (
+                                                    <FormattedMessage
+                                                        id='Throttling.Subscription.enter.permission.denied'
+                                                        defaultMessage='This policy is "Denied" for above roles.'
+                                                    />
+                                                )
+                                            ),
+                                            ' ',
+                                            <FormattedMessage
+                                                id='Apis.Details.Scopes.CreateScope.roles.help'
+                                                defaultMessage='Enter a valid role and press `Enter`.'
+                                            />,
+                                        ]
+                                    }
+                                    chipRenderer={({ value }, key) => (
+                                        <Chip
+                                            key={key}
+                                            label={value}
+                                            onDelete={() => {
+                                                handleRoleDeletion(value);
+                                            }}
+                                            style={{
+                                                backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                                margin: '8px 8px 8px 0',
+                                                float: 'left',
+                                            }}
                                         />
-                                    </Box>
-                                ) : (
-                                    <Box flex='1'>
-                                        <TextField
-                                            name='roles'
-                                            margin='dense'
-                                            required
-                                            value={roles}
-                                            onChange={onChange}
-                                            label='Roles'
-                                            fullWidth
-                                            multiline
-                                            helperText={intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.permission.denied',
-                                                defaultMessage: 'This policy is "Denied" for above roles.',
-                                            }) + ' ' + intl.formatMessage({
-                                                id: 'Throttling.Subscription.enter.role.separation.help.text',
-                                                defaultMessage: 'Use comma to seperate roles.',
-                                            })}
-                                            variant='outlined'
-                                        />
-                                    </Box>
-                                )}
+                                    )}
+                                />
                             </Box>
-                            <Box flex='1'>
+                            <Box flex='1' mt={3}>
                                 <RadioGroup
                                     name='permissionStatus'
                                     value={permissionStatus}
@@ -1391,7 +1581,12 @@ function AddEdit(props) {
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <Box component='span' m={1}>
-                            <Button variant='contained' color='primary' onClick={formSaveCallback}>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                onClick={formSaveCallback}
+                                disabled={invalidRoles.length !== 0}
+                            >
                                 {saving ? (<CircularProgress size={16} />) : (
                                     <FormattedMessage
                                         id='Throttling.Subscription.AddEdit.form.add'

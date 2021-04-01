@@ -1,4 +1,22 @@
-import React, { useContext } from 'react';
+/*
+ * Copyright (c), WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React, { useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -8,16 +26,18 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
 import { withStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
+import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
 import ThumbnailView from 'AppComponents/Apis/Listing/components/ImageGenerator/ThumbnailView';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
+import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import API from 'AppData/api';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
-
 
 const styles = (theme) => ({
     root: {
@@ -80,13 +100,27 @@ const styles = (theme) => ({
         display: 'flex',
         flexDirection: 'column',
     },
+    revisionWrapper: {
+        paddingRight: theme.spacing(2),
+    },
+    topRevisionStyle: {
+        marginLeft: theme.spacing(1),
+        maxWidth: 500,
+    },
+    readOnlyStyle: {
+        color: 'red',
+    },
 });
-
 
 const APIDetailsTopMenu = (props) => {
     const {
         classes, theme, api, isAPIProduct, imageUpdate, intl,
     } = props;
+    const history = useHistory();
+    const prevLocation = history.location.pathname;
+    const lastIndex = prevLocation.split('/')[3];
+    // const [revision, setRevision] = useState(null);
+    const [revisionId, setRevisionId] = useState(api.id);
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     /**
  * The component for advanced endpoint configurations.
@@ -97,8 +131,7 @@ const APIDetailsTopMenu = (props) => {
  * @returns {zip} Zpi file containing the API directory.
  */
     function exportAPI() {
-        const restApi = new API();
-        return restApi.exportApi(api.id).then((zipFile) => {
+        return api.export().then((zipFile) => {
             return Utils.forceDownload(zipFile);
         }).catch((error) => {
             if (error.response) {
@@ -113,14 +146,44 @@ const APIDetailsTopMenu = (props) => {
         });
     }
 
-    const isDownlodable = ['API'].includes(api.apiType);
+    // React.useEffect(() => {
+    //     const restApi = new API();
+    //     const restApiProduct = new APIProduct();
+    //     let apiId = null;
+    //     if (!isAPIProduct) {
+    //         apiId = api.isRevision ? api.revisionedApiId : api.id;
+    //         restApi.getRevisions(apiId).then((response) => {
+    //             setRevision(response.body.list);
+    //         })
+    //             .catch((errorMessage) => {
+    //                 console.error(errorMessage);
+    //                 Alert.error(JSON.stringify(errorMessage));
+    //             });
+    //     } else {
+    //         apiId = api.isRevision ? api.revisionedApiProductId : api.id;
+    //         restApiProduct.getProductRevisions(apiId).then((response) => {
+    //             setRevision(response.body.list);
+    //         })
+    //             .catch((errorMessage) => {
+    //                 console.error(errorMessage);
+    //                 Alert.error(JSON.stringify(errorMessage));
+    //             });
+    //     }
+    // }, []);
+
+    const handleChange = (event) => {
+        setRevisionId(event.target.value);
+    };
+
+    const isDownloadable = [API.CONSTS.API, API.CONSTS.APIProduct].includes(api.apiType);
     const { settings, user } = useAppContext();
+    const { allRevisions } = useRevisionContext();
     const { tenantList } = useContext(ApiContext);
     const userNameSplit = user.name.split('@');
     const tenantDomain = userNameSplit[userNameSplit.length - 1];
-    let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
+    let devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview`;
     if (tenantList && tenantList.length > 0) {
-        devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
+        devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
     }
     // todo: need to support rev proxy ~tmkb
     return (
@@ -160,7 +223,72 @@ const APIDetailsTopMenu = (props) => {
                     />
                 </Typography>
             </div>
+
             <div className={classes.dateWrapper} />
+            {api.isRevision && (
+                <Typography variant='subtitle2' className={classes.readOnlyStyle}>
+                    <FormattedMessage
+                        id='Apis.Details.components.APIDetailsTopMenu.read.only.label'
+                        defaultMessage='Read only'
+                    />
+                </Typography>
+            )}
+            <div className={classes.topRevisionStyle}>
+                <TextField
+                    id='revision-selector'
+                    value={revisionId}
+                    select
+                    SelectProps={{
+                        MenuProps: {
+                            anchorOrigin: {
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            },
+                            getContentAnchorEl: null,
+                        },
+                    }}
+                    name='selectRevision'
+                    onChange={handleChange}
+                    margin='dense'
+                    variant='outlined'
+                >
+                    {!isAPIProduct ? (
+                        <MenuItem value={api.isRevision ? api.revisionedApiId : api.id}>
+                            <Link to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/' + lastIndex}>
+                                <FormattedMessage
+                                    id='Apis.Details.components.APIDetailsTopMenu.current.api'
+                                    defaultMessage='Current API'
+                                />
+                            </Link>
+                        </MenuItem>
+                    ) : (
+                        <MenuItem value={api.isRevision ? api.revisionedApiProductId : api.id}>
+                            <Link to={'/api-products/' + (api.isRevision
+                                ? api.revisionedApiProductId : api.id) + '/' + lastIndex}
+                            >
+                                <FormattedMessage
+                                    id='Apis.Details.components.APIDetailsTopMenu.current.api'
+                                    defaultMessage='Current API'
+                                />
+                            </Link>
+                        </MenuItem>
+                    )}
+                    {allRevisions && allRevisions.map((item) => (
+                        <MenuItem value={item.id}>
+                            {!isAPIProduct ? (
+                                <Link to={'/apis/' + item.id + '/' + lastIndex}>
+                                    {item.displayName}
+                                </Link>
+                            ) : (
+                                <Link to={'/api-products/' + item.id + '/' + lastIndex}>
+                                    {item.displayName}
+                                </Link>
+                            )}
+                        </MenuItem>
+                    ))}
+                </TextField>
+            </div>
+
             <VerticalDivider height={70} />
             <GoTo api={api} isAPIProduct={isAPIProduct} />
             {(isVisibleInStore || isAPIProduct) && <VerticalDivider height={70} />}
@@ -185,13 +313,14 @@ const APIDetailsTopMenu = (props) => {
             )}
             {/* Page error banner */}
             {/* end of Page error banner */}
-            {isAPIProduct ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
-            {(isDownlodable) && <VerticalDivider height={70} />}
+            {isAPIProduct || api.isRevision
+                ? null : <CreateNewVersionButton buttonClass={classes.viewInStoreLauncher} api={api} />}
+            {(isDownloadable) && <VerticalDivider height={70} />}
             <div className={classes.downloadApi}>
-                {(isDownlodable) && (
+                {(isDownloadable) && (
                     <a
                         onClick={exportAPI}
-                        onKeyDown='null'
+                        onKeyDown={null}
                         className={classes.downloadApiFlex}
                     >
                         <div>
@@ -206,7 +335,9 @@ const APIDetailsTopMenu = (props) => {
                     </a>
                 )}
             </div>
-            <DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />
+            {!api.isRevision
+                ? (<DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />)
+                : (<div className={classes.revisionWrapper} />)}
         </div>
     );
 };
@@ -218,7 +349,6 @@ APIDetailsTopMenu.propTypes = {
     isAPIProduct: PropTypes.bool.isRequired,
     imageUpdate: PropTypes.number.isRequired,
 };
-
 
 // export default withStyles(styles, { withTheme: true })(APIDetailsTopMenu);
 

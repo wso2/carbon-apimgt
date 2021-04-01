@@ -35,7 +35,7 @@ import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
 import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
-import ServiceCatalog from 'AppComponents/ServiceCatalog/ServiceCatalog';
+import ServiceCatalogRouting from 'AppComponents/ServiceCatalog/ServiceCatalogRouting';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import Scopes from 'AppComponents/Scopes/Scopes';
@@ -44,7 +44,7 @@ import Utils from 'AppData/Utils';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
-    <Suspense fallback={<Progress per={50} message='Loading components ...' />}>
+    <Suspense fallback={<Progress per={30} message='Loading components ...' />}>
         <Apis />
     </Suspense>
 );
@@ -112,22 +112,6 @@ export default class Protected extends Component {
     }
 
     /**
-     * Generate page title from theme config.
-     * @param {object} theme object.
-     * @returns {JSX} link dom tag.
-     */
-    getTitle(localTheme) {
-        const {
-            custom: {
-                title: {
-                    prefix, sufix,
-                },
-            },
-        } = localTheme;
-        return (prefix + sufix);
-    }
-
-    /**
      * Load Theme file.
      *
      * @param {string} tenant tenant name
@@ -159,6 +143,22 @@ export default class Protected extends Component {
     }
 
     /**
+     * Generate page title from theme config.
+     * @param {object} theme object.
+     * @returns {JSX} link dom tag.
+     */
+    getTitle(localTheme) {
+        const {
+            custom: {
+                title: {
+                    prefix, suffix,
+                },
+            },
+        } = localTheme;
+        return (prefix + suffix);
+    }
+
+    /**
      * Handle iframe message
      * @param {event} e Event
      */
@@ -181,7 +181,6 @@ export default class Protected extends Component {
             }, Configurations.app.singleLogout.timeout);
         }
     }
-
 
     /**
      * @returns {React.Component} @inheritDoc
@@ -222,8 +221,8 @@ export default class Protected extends Component {
                                         <Route path='/api-products' component={DeferredAPIs} />
                                         <Route path='/scopes' component={Scopes} />
                                         <Route path='/settings' component={SettingsBase} />
-                                        { enableServiceCatalog
-                                            && <Route path='/service-catalog' component={ServiceCatalog} />}
+                                        {enableServiceCatalog
+                                            && <Route path='/service-catalog' component={ServiceCatalogRouting} />}
                                         <Route component={ResourceNotFound} />
                                     </Switch>
                                 </AppContextProvider>

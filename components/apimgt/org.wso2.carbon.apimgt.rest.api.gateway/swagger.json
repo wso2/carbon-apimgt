@@ -1,0 +1,438 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This document specifies a **RESTful API** for WSO2 **API Manager** - Gateway.\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/master/components/apimgt/org.wso2.carbon.apimgt.rest.api.gateway/src/main/resources/gateway-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
+    "version" : "v2",
+    "title" : "WSO2 API Manager - Gateway",
+    "contact" : {
+      "name" : "WSO2",
+      "url" : "http://wso2.com/products/api-manager/",
+      "email" : "architecture@wso2.com"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "host" : "apis.wso2.com",
+  "basePath" : "/api/am/gateway/v2",
+  "schemes" : [ "https" ],
+  "consumes" : [ "application/json" ],
+  "produces" : [ "application/json" ],
+  "paths" : {
+    "/redeploy-api" : {
+      "post" : {
+        "summary" : "Re Deploy the API in the gateway",
+        "description" : "This operation is used to re deploy an API in the gateway. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
+        "operationId" : "redployAPI",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nAPI successfully deployed in the Gateway.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        },
+        "x-code-samples" : [ {
+          "lang" : "Curl",
+          "source" : "\"curl -k -X POST \"https://127.0.0.1:9443/api/am/gateway/v2/redeploy-api?apiName=PizzaAPI&version=1.0&tenantDomain=registry.com\\\" -H \"Authorization: Basic YWRtaW46YWRtaW4=\""
+        } ]
+      }
+    },
+    "/undeploy-api" : {
+      "post" : {
+        "summary" : "Uneploy the API in the gateway",
+        "description" : "This operation is used to undeploy an API in the gateway. If the Tenant domain is not provided carbon.super will\nbe picked as the Tenant domain.\n",
+        "operationId" : "undeployAPI",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nAPI successfully undeployed from the Gateway.\n",
+            "schema" : {
+              "$ref" : "#/definitions/DeployResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/api-artifact" : {
+      "get" : {
+        "summary" : "Get API artifact from the storage",
+        "description" : "This operation is used to get the local entries, sequences and endpoints from the storage. If the Tenant domain\nis not provided carbon.super will be picked as the Tenant domain.\n",
+        "operationId" : "getAPIArtifacts",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nAPI artifact successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/APIArtifact"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/local-entry" : {
+      "get" : {
+        "summary" : "Get Local Entry from the storage",
+        "description" : "This operation is used to get local entry from the storage.If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
+        "operationId" : "getLocalEntries",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nLocal entry for the API successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/LocalEntry"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/sequence" : {
+      "get" : {
+        "summary" : "Get sequences from the storage",
+        "description" : "This operation is used to get the API sequence from the storage. If the Tenant domain is not provided carbon.super\nwill be picked as the Tenant domain.\n",
+        "operationId" : "getSequences",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nSequences for the API successfully retrieved from the storage.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Sequences"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/end-points" : {
+      "get" : {
+        "summary" : "Get end-points from the storage for the API",
+        "description" : "This operation is used to get the end-points from the storage. If the Tenant domain is not provided\ncarbon.super will be picked as the Tenant domain.\n",
+        "operationId" : "getEndpoints",
+        "parameters" : [ {
+          "name" : "apiName",
+          "in" : "query",
+          "description" : "Name of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "in" : "query",
+          "description" : "version of the API\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "tenantDomain",
+          "in" : "query",
+          "description" : "Tenant Domain of the API\n",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK.\nEnd-points successfully retrieved from the storage for the API.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Endpoints"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request.\nInvalid request or validation error\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          },
+          "404" : {
+            "description" : "Not Found.\nRequested API does not exist.\n",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "DeployResponse" : {
+      "required" : [ "deployStatus" ],
+      "properties" : {
+        "deployStatus" : {
+          "type" : "string",
+          "example" : "DEPLOYED",
+          "description" : "This attribute declares whether deployment task is successfull or failed.\n",
+          "enum" : [ "DEPLOYED", "UNDEPLOYED", "ERROR" ]
+        },
+        "jsonPayload" : {
+          "type" : "string",
+          "description" : "Attributes that returned after the api deployment\n"
+        }
+      },
+      "title" : "Deploy API Response"
+    },
+    "Endpoints" : {
+      "properties" : {
+        "endpoints" : {
+          "type" : "array",
+          "description" : "The end points which has been deployed in the gateway\n",
+          "items" : {
+            "type" : "string",
+            "example" : "<endpoint xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></endpoint>"
+          }
+        }
+      },
+      "title" : "Endpoints Response"
+    },
+    "Sequences" : {
+      "properties" : {
+        "sequences" : {
+          "type" : "array",
+          "description" : "The sequences which has been deployed in the gateway\n",
+          "items" : {
+            "type" : "string",
+            "example" : "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"PizzaShackAPI--v1.0.0_APIproductionEndpoint\"><http uri-template=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"><timeout><responseAction>fault</responseAction></timeout></http><property name=\"ENDPOINT_ADDRESS\" value=\"https://localhost:9443/am/sample/pizzashack/v1/api/\"/></sequnce>"
+          }
+        }
+      },
+      "title" : "Sequences Response"
+    },
+    "LocalEntry" : {
+      "properties" : {
+        "localEntries" : {
+          "type" : "array",
+          "description" : "The local entries which has been deployed in the gateway\n",
+          "items" : {
+            "type" : "string",
+            "example" : "localEntry xmlns=\"http://ws.apache.org/ns/synapse\" key=\"ga-config-key\" type=\"1\"><GoogleAnalyticsTracking xmlns=\"\">\n\t<!--Enable/Disable Google Analytics Tracking -->\n\t<Enabled>false</Enabled>\n\n\t<!-- Google Analytics Tracking ID -->\n\t<TrackingID>UA-XXXXXXXX-X</TrackingID>\n\n</GoogleAnalyticsTracking></localEntry>"
+          }
+        }
+      },
+      "title" : "LocalEntry Response"
+    },
+    "APIArtifact" : {
+      "properties" : {
+        "api" : {
+          "type" : "string",
+          "example" : "",
+          "description" : "API Artifact deployed in Gateway.\n"
+        }
+      },
+      "title" : "API Artifact Response"
+    },
+    "Error" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Error code"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Error message."
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "A detail description about the error message.\n"
+        },
+        "moreInfo" : {
+          "type" : "string",
+          "description" : "Preferably an url with more details about the error.\n"
+        },
+        "error" : {
+          "type" : "array",
+          "description" : "If there are more than one error list them out.\nFor example, list out validation errors by each field.\n",
+          "items" : {
+            "$ref" : "#/definitions/ErrorListItem"
+          }
+        }
+      },
+      "title" : "Error object returned with 4XX HTTP status"
+    },
+    "ErrorListItem" : {
+      "required" : [ "code", "message" ],
+      "properties" : {
+        "code" : {
+          "type" : "string",
+          "description" : "Error code"
+        },
+        "message" : {
+          "type" : "string",
+          "description" : "Description about individual errors occurred\n"
+        }
+      },
+      "title" : "Description of individual errors that may have occurred during a request."
+    }
+  },
+  "parameters" : {
+    "apiName" : {
+      "name" : "apiName",
+      "in" : "query",
+      "description" : "Name of the API\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "version" : {
+      "name" : "version",
+      "in" : "query",
+      "description" : "version of the API\n",
+      "required" : true,
+      "type" : "string"
+    },
+    "tenantDomain" : {
+      "name" : "tenantDomain",
+      "in" : "query",
+      "description" : "Tenant Domain of the API\n",
+      "required" : false,
+      "type" : "string"
+    }
+  }
+}

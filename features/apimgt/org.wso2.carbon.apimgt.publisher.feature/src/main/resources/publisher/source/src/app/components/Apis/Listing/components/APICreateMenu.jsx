@@ -17,129 +17,87 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { makeStyles } from '@material-ui/core/styles';
 import {
-    List, ListItem, ListItemText, Divider,
-} from '@material-ui/core/';
-import { makeStyles } from '@material-ui/styles';
-import { Link } from 'react-router-dom';
+    useTheme,
+} from '@material-ui/core';
+import Box from '@material-ui/core/Box';
+import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
 
-import MenuButton from 'AppComponents/Shared/MenuButton';
-import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
+import RestAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/RestAPIMenu';
+import SoapAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/SoapAPIMenu';
+import GraphqlAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/GraphqlAPIMenu';
+import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/StreamingAPIMenu';
+import ServiceCatalogMenu from 'AppComponents/Apis/Listing/Landing/Menus/ServiceCatalogMenu';
+import MenuButton from 'AppComponents/Shared/MenuButton';
 
-const useStyles = makeStyles((theme) => ({
-    links: {
-        textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.palette.background.paper),
-    },
-}));
+const useStyles = makeStyles((theme) => {
+    return {
+        dividerCls: {
+            height: '180px',
+            position: 'absolute',
+            top: '50%',
+            '-ms-transform': 'translateY(-50%)',
+            transform: 'translateY(-50%)',
+            margin: 'auto',
+        },
+        popover: {
+            [theme.breakpoints.down('sm')]: {
+                width: '95vw',
+            },
+            [theme.breakpoints.up('md')]: {
+                width: '85vw',
+            },
+            [theme.breakpoints.up('lg')]: {
+                width: '65vw',
+            },
+            paddingTop: theme.spacing(2),
+            paddingBottom: theme.spacing(2),
+        },
+    };
+});
 
-const APICreateMenu = (props) => {
-    const classes = useStyles();
-
-    const createTypes = (
-        <List>
-            <ListItem>
-                <Link id='itest-id-createdefault' to='/apis/create/rest' className={classes.links}>
-                    <ListItemText
-                        primary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.primary.rest'
-                                defaultMessage='Design a New REST API'
-                            />
-                        )}
-                        secondary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.secondary.rest'
-                                defaultMessage='Design and prototype a new REST API'
-                            />
-                        )}
-                    />
-                </Link>
-            </ListItem>
-            <Divider />
-            <ListItem>
-                <Link to='/apis/create/openapi' className={classes.links}>
-                    <ListItemText
-                        primary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.primary.swagger'
-                                defaultMessage='I Have an Existing REST API'
-                            />
-                        )}
-                        secondary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.secondary.openapi'
-                                defaultMessage='Use an existing OpenAPI definition file or URL'
-                            />
-                        )}
-                    />
-                </Link>
-            </ListItem>
-            <Divider />
-            <ListItem>
-                <Link to='/apis/create/wsdl' className={classes.links}>
-                    <ListItemText
-                        primary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.primary.soap'
-                                defaultMessage='I Have a SOAP Endpoint'
-                            />
-                        )}
-                        secondary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.secondary.soap'
-                                defaultMessage='Use an existing SOAP or import the WSDL'
-                            />
-                        )}
-                    />
-                </Link>
-            </ListItem>
-            <Divider />
-            <ListItem>
-                <Link to='/apis/create/graphQL' className={classes.links}>
-                    <ListItemText
-                        primary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.primary.graphql'
-                                defaultMessage='I Have a GraphQL SDL schema'
-                            />
-                        )}
-                        secondary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.secondary.graphql'
-                                defaultMessage='Import a GraphQL SDL schema'
-                            />
-                        )}
-                    />
-                </Link>
-            </ListItem>
-            <Divider />
-            <ListItem>
-                <Link to='/apis/create/ws' className={classes.links}>
-                    <ListItemText
-                        primary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.primary.ws'
-                                defaultMessage='Design New WebSocket API'
-                            />
-                        )}
-                        secondary={(
-                            <FormattedMessage
-                                id='Apis.Listing.components.APICreateMenu.secondary.ws'
-                                defaultMessage='Design and prototype a new WebSocket API'
-                            />
-                        )}
-                    />
-                </Link>
-            </ListItem>
-        </List>
+const APICreateMenu = () => {
+    const theme = useTheme();
+    const { dividerCls, popover } = useStyles();
+    const {
+        graphqlIcon,
+        restApiIcon,
+        soapApiIcon,
+        streamingApiIcon,
+    } = theme.custom.landingPage.icons;
+    return (
+        !AuthManager.isNotCreator() && (
+            <MenuButton
+                buttonProps={{
+                    color: 'primary',
+                    variant: 'contained',
+                }}
+                menuList={(
+                    <Grid
+                        className={popover}
+                        container
+                        direction='row'
+                        justify='space-around'
+                        alignItems='flex-start'
+                        spacing={2}
+                    >
+                        <RestAPIMenu isCreateMenu icon={restApiIcon} />
+                        <SoapAPIMenu isCreateMenu icon={soapApiIcon} />
+                        <GraphqlAPIMenu isCreateMenu icon={graphqlIcon} />
+                        <StreamingAPIMenu isCreateMenu icon={streamingApiIcon} />
+                        <Box display={{ xs: 'none', md: 'block' }} mx={2}>
+                            <Divider className={dividerCls} light orientation='vertical' variant='inset' />
+                        </Box>
+                        <ServiceCatalogMenu isCreateMenu icon={streamingApiIcon} />
+                    </Grid>
+                )}
+            >
+                Create API
+            </MenuButton>
+        )
     );
-    return !AuthManager.isNotCreator() && <MenuButton {...props} menuList={createTypes} />;
-};
-
-APICreateMenu.propTypes = {
-    children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]).isRequired,
 };
 export default APICreateMenu;

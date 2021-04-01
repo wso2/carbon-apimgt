@@ -76,7 +76,7 @@ function Delete(props) {
     const { apiName } = props;
     return (
         <div>
-            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api) || api.isRevision}>
                 <Icon>delete_forever</Icon>
                 <FormattedMessage id='Apis.Details.Documents.Delete.document.delete' defaultMessage='Delete' />
             </Button>
@@ -112,7 +112,7 @@ function Delete(props) {
                     </Button>
                     <Button onClick={() => runAction('yes')} color='primary' autoFocus>
                         <FormattedMessage
-                            id='Apis.Details.Documents.Delete.document.listing.delete.yes'
+                            id='Apis.Details.Documents.Delete.document.listing.delete'
                             defaultMessage='Yes. Delete'
                         />
                     </Button>

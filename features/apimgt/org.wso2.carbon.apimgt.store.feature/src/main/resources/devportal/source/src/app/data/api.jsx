@@ -62,6 +62,7 @@ export default class API extends Resource {
      */
     getAPIById(id, callback = null) {
         const promiseGet = this.client.then((client) => {
+            console.log(client);
             return client.apis.APIs.get_apis__apiId_({ apiId: id }, this._requestMetaData());
         });
         if (callback) {
@@ -196,42 +197,6 @@ export default class API extends Resource {
     }
 
     /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param labelName {String} Micro gateway label
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwaggerByAPIIdAndLabel(apiId, labelName, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId, labelName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
-    }
-
-    /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param clusterName {String} Container managed cluster name
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwaggerByAPIIdAndClusterName(apiId, clusterName, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId, clusterName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
-    }
-
-    /**
      * Get application by id
      * @param id {String} UUID of the application
      * @param callback {function} Function which needs to be called upon success
@@ -338,9 +303,9 @@ export default class API extends Resource {
      * @param apiId apiId of the api to which the comment is added
      * @param comment comment text
      */
-    addComment(apiId, comment) {
+    addComment(apiId, comment, replyTo) {
         return this.client.then((client) => {
-            const payload = { apiId };
+            const payload = { apiId ,replyTo};
             return client.apis.Comments.addCommentToAPI(
                 payload,
                 { requestBody: comment },
@@ -353,12 +318,12 @@ export default class API extends Resource {
      * Get all comments for a particular API
      * @param apiId api id of the api to which the comment is added
      */
-    getAllComments(apiId) {
+    getAllComments(apiId, limit, offset) {
         return this.client.then((client) => {
-            return client.apis.Comments.getAllCommentsOfAPI({ apiId }, this._requestMetaData());
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId ,limit: limit, offset: offset}, this._requestMetaData());
         });
     }
-
+    
     /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to
@@ -529,14 +494,16 @@ export default class API extends Resource {
     /**
      * Get keys of an application
      * @param applicationId id of the application that needs to get the keys
+     * @param limit subscription count to return
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSubscriptions(apiId, applicationId, callback = null) {
+    getSubscriptions(apiId, applicationId, limit=25, callback = null) {
         const payload = { apiId };
         if (applicationId) {
             payload[applicationId] = applicationId;
         }
+        payload['limit'] = limit;
         const promisedGet = this.client.then((client) => {
             return client.apis.Subscriptions.get_subscriptions(payload, this._requestMetaData());
         });
@@ -545,6 +512,34 @@ export default class API extends Resource {
         } else {
             return promisedGet;
         }
+    }
+
+    /**
+     * Get webhook subscriptions for a web hook Api.
+     * @param apiId of the web hook api which holds the topics
+     * @param applicationId of the application making the subscription
+     * @returns promise
+     */
+    getWebhookubScriptions(apiId, applicationId) {
+        var promisedTopicSubscriptionGet = this.client.then((client) => {
+                return client.apis["Webhooks"].get_webhooks_subscriptions(
+                    { apiId: apiId, applicationId: applicationId });
+            }
+        );
+        return promisedTopicSubscriptionGet;
+    }
+
+    /**
+     * Get all topics available for a specified webhook API.
+     * @param apiId of the web hook api
+     * @returns promise
+     */
+    getAllTopics(apiId) {
+        const payload = { apiId };
+        const promisedTopicGet = this.client.then((client) => {
+             return client.apis.Topics.get_apis__apiId__topics(payload);
+        });
+        return promisedTopicGet;
     }
 
     /**
@@ -571,20 +566,6 @@ export default class API extends Resource {
         } else {
             return promiseCreateSubscription;
         }
-    }
-
-    /**
-     * Get the available labels.
-     * @returns {Promise.<TResult>}
-     */
-    labels() {
-        const promiseLabels = this.client.then((client) => {
-            return client.apis['Label (Collection)'].get_labels(
-                {},
-                this._requestMetaData(),
-            );
-        });
-        return promiseLabels;
     }
 
     /**
@@ -697,7 +678,7 @@ export default class API extends Resource {
     }
 
     /**
-     * method to get store settings such as grant types, scopes, application sharing settings etc
+     * method to get Developer Portal settings such as grant types, scopes, application sharing settings etc
      * Settings API can be invoked with and without access token, When a token is not present it will return the public
      * settings info, when a valid token is present it will return all the settings info.
      * @returns {Promise} promise object return from SwaggerClient-js
@@ -727,7 +708,7 @@ export default class API extends Resource {
      * */
     getSupportedAlertTypes() {
         return this.client.then((client) => {
-            return client.apis.Alerts.getStoreAlertTypes(this._requestMetaData());
+            return client.apis.Alerts.getDevportalAlertTypes(this._requestMetaData());
         });
     }
 

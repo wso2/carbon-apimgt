@@ -29,6 +29,7 @@ public class APIDefinitionValidationResponse {
     private boolean isValid = false;
     private String content;
     private String jsonContent;
+    private String protocol;
     private Info info;
     private APIDefinition parser;
     private ArrayList<ErrorHandler> errorItems = new ArrayList<>();
@@ -132,5 +133,15 @@ public class APIDefinitionValidationResponse {
 
     public void setParser(APIDefinition parser) {
         this.parser = parser;
+    }
+
+    public String getProtocol() {
+
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+
+        this.protocol = protocol;
     }
 }

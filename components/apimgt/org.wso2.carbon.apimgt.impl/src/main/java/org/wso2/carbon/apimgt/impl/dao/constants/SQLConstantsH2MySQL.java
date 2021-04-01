@@ -46,12 +46,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND SUB.USER_ID = ?))" +
+            "   (GROUP_ID= ?  OR  (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER(?)))" +
             " And " +
             "    NAME like ?" +
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITHGROUPID =
@@ -77,9 +76,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   (GROUP_ID= ?  OR (GROUP_ID='' AND LOWER (SUB.USER_ID) = LOWER (?)))"+
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
             "select distinct x.*,bl.ENABLED from (" +
@@ -109,10 +107,9 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     "     (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
                     " )" +
                     " And " +
-                    "    NAME like ?" +
-                    " limit ? , ? "+
+                    "    NAME like ?"+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 " ;
+                    " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
@@ -143,9 +140,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " )" +
                     " And "+
                     "    NAME like ?"+
-                    " limit ? , ? "+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-                    " ORDER BY $1 $2 " ;
+                    " ORDER BY $1 $2 limit ? , ?";
 
 
 
@@ -169,12 +165,11 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
             " AND " +
-            "    SUB.USER_ID = ? "+
+            "    LOWER(SUB.USER_ID) = LOWER(?)"+
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-             " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
     public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
@@ -199,9 +194,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   LOWER (SUB.USER_ID) =LOWER (?)" +
             " And "+
             "    NAME like ?"+
-            " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) " +
-            " ORDER BY $1 $2 " ;
+            " ORDER BY $1 $2 limit ? , ?";
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
@@ -229,4 +223,74 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " limit ? , ? "+
                     " )x ";
 
+    public static final String GET_ALL_SERVICES_BY_WITH_SERVICE_KEY = "SELECT " +
+            "   UUID," +
+            "   SERVICE_KEY," +
+            "   MD5," +
+            "   SERVICE_NAME," +
+            "   DISPLAY_NAME," +
+            "   SERVICE_VERSION," +
+            "   SERVICE_URL," +
+            "   DEFINITION_TYPE," +
+            "   DEFINITION_URL," +
+            "   DESCRIPTION," +
+            "   SECURITY_TYPE," +
+            "   MUTUAL_SSL_ENABLED," +
+            "   CREATED_TIME," +
+            "   LAST_UPDATED_TIME," +
+            "   CREATED_BY," +
+            "   UPDATED_BY," +
+            "   SERVICE_DEFINITION," +
+            "   METADATA FROM AM_SERVICE_CATALOG" +
+            "   WHERE TENANT_ID = ? " +
+            "   AND SERVICE_NAME LIKE ? " +
+            "   AND SERVICE_VERSION LIKE ? " +
+            "   AND DISPLAY_NAME LIKE ?" +
+            "   AND SERVICE_KEY = ?" +
+            "   ORDER BY $1 $2 " +
+            "   LIMIT ?, ? ";
+
+    public static final String GET_REPLIES_SQL =
+            "SELECT " +
+                "AM_API_COMMENTS.COMMENT_ID, " +
+                "AM_API_COMMENTS.COMMENT_TEXT, " +
+                "AM_API_COMMENTS.CREATED_BY, " +
+                "AM_API_COMMENTS.CREATED_TIME, " +
+                "AM_API_COMMENTS.UPDATED_TIME, " +
+                "AM_API_COMMENTS.API_ID, " +
+                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
+                "AM_API_COMMENTS.ENTRY_POINT, " +
+                "AM_API_COMMENTS.CATEGORY " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID = ? " +
+                "ORDER BY AM_API_COMMENTS.CREATED_TIME ASC LIMIT ?, ?";
+
+    public static final String GET_ROOT_COMMENTS_SQL =
+            "SELECT " +
+                "AM_API_COMMENTS.COMMENT_ID, " +
+                "AM_API_COMMENTS.COMMENT_TEXT, " +
+                "AM_API_COMMENTS.CREATED_BY, " +
+                "AM_API_COMMENTS.CREATED_TIME, " +
+                "AM_API_COMMENTS.UPDATED_TIME, " +
+                "AM_API_COMMENTS.API_ID, " +
+                "AM_API_COMMENTS.PARENT_COMMENT_ID, " +
+                "AM_API_COMMENTS.ENTRY_POINT, " +
+                "AM_API_COMMENTS.CATEGORY " +
+            "FROM " +
+                "AM_API_COMMENTS, " +
+                "AM_API API " +
+            "WHERE " +
+                "API.API_PROVIDER = ? " +
+                "AND API.API_NAME = ? " +
+                "AND API.API_VERSION  = ? " +
+                "AND API.API_ID = AM_API_COMMENTS.API_ID " +
+                "AND PARENT_COMMENT_ID IS NULL " +
+                "ORDER BY AM_API_COMMENTS.CREATED_TIME DESC LIMIT ?, ?";
 }

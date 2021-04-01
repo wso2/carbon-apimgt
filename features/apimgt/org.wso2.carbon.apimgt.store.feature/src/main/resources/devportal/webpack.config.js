@@ -21,6 +21,7 @@ var path = require('path');
 const fs = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 const config = {
     entry: {
@@ -34,9 +35,8 @@ const config = {
     },
     watch: false,
     watchOptions: {
-        aggregateTimeout: 200,
-        poll: true,
-        ignored: ['files/**/*.js', 'node_modules/**'],
+        poll: 1000,
+        ignored: ['files/**/*.js', 'node_modules'],
     },
     devtool: 'source-map',
     resolve: {
@@ -101,23 +101,17 @@ const config = {
     plugins: [
         new CleanWebpackPlugin(),
         new ManifestPlugin(),
+        new ESLintPlugin({
+            extensions: ['js', 'ts', 'jsx'],
+            failOnError: true,
+            quiet: true,
+            exclude: ['node_modules'],
+        }),
     ],
 };
 
 if (process.env.NODE_ENV === 'development') {
     config.mode = 'development';
-} else if (process.env.NODE_ENV === 'production') {
-    /* ESLint will only un in production build to increase the continues build(watch) time in the development mode */
-    const esLintLoader = {
-        enforce: 'pre',
-        test: /\.(js|jsx)$/,
-        loader: 'eslint-loader',
-        options: {
-            failOnError: false,
-            quiet: true,
-        },
-    };
-    config.module.rules.push(esLintLoader);
 }
 
 module.exports = function(env) {

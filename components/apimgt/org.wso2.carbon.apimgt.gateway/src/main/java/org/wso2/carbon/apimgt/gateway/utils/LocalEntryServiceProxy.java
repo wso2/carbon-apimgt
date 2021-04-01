@@ -25,8 +25,6 @@ import org.wso2.carbon.localentry.LocalEntryAdminException;
 import org.wso2.carbon.localentry.service.LocalEntryAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.util.Arrays;
-
 /**
  * This LocalEntryServiceProxy class for operating the synapse localEntries
  */
@@ -71,9 +69,9 @@ public class LocalEntryServiceProxy {
      * @return LocalEntry for the given API
      * @throws AxisFault
      */
-    public Object getEntry(String key) throws AxisFault {
+    public OMElement getEntry(String key) throws AxisFault {
 
-        Object localEntryObject;
+        OMElement localEntryObject;
         try {
             if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 localEntryObject = localEntryAdmin.getEntry(key);
@@ -128,5 +126,19 @@ public class LocalEntryServiceProxy {
                 return false;
             }
         }
+    }
+
+    public String[] getLocalEntries() throws AxisFault {
+
+        try {
+            return localEntryAdmin.getEntryNames();
+        } catch (LocalEntryAdminException e) {
+            throw new AxisFault("Error while retrieving local entries", e);
+        }
+    }
+
+    public boolean localEntryExists(String entryKey) throws LocalEntryAdminException {
+
+        return localEntryAdmin.isEntryExist(entryKey);
     }
 }

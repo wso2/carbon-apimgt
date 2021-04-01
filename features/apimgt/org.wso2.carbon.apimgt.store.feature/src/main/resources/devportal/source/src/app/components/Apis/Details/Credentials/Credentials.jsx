@@ -60,7 +60,7 @@ const styles = (theme) => ({
         paddingBottom: theme.spacing(2),
         '& span, & h5, & label, & td, & li, & div': {
             color: theme.palette.getContrastText(theme.palette.background.paper),
-        }
+        },
     },
     tableMain: {
         '& > table': {
@@ -70,7 +70,7 @@ const styles = (theme) => ({
             marginLeft: theme.spacing(2),
             marginRight: theme.spacing(1),
         },
-        '& table > tr td':{
+        '& table > tr td': {
             paddingLeft: theme.spacing(1),
         },
         '&  table > tr:nth-child(even)': {
@@ -95,6 +95,9 @@ const styles = (theme) => ({
             fontSize: '11px',
             paddingTop: theme.spacing(1),
             paddingBottom: theme.spacing(1),
+        },
+        '& table > tr > th:last-child': {
+            textAlign: 'right',
         },
 
     },
@@ -160,22 +163,30 @@ const styles = (theme) => ({
  * @extends {React.Component}
  */
 class Credentials extends React.Component {
-    static contextType = ApiContext;
+    /**
+     *Creates an instance of Credentials.
+     * @param JSON props
+     * @memberof Credentials
+     */
+    constructor(props) {
+        super(props);
+        this.state = {
+            expanded: true,
+            selectedAppId: false,
+            selectedKeyType: false,
+            subscriptionRequest: {
+                applicationId: '',
+                apiId: '',
+                throttlingPolicy: '',
+            },
+            throttlingPolicyList: [],
+            applicationOwner: '',
+            hashEnabled: false,
+            isSubscribing: false,
+        };
+        this.api = new Api();
+    }
 
-    state = {
-        expanded: true,
-        selectedAppId: false,
-        selectedKeyType: false,
-        subscriptionRequest: {
-            applicationId: '',
-            apiId: '',
-            throttlingPolicy: '',
-        },
-        throttlingPolicyList: [],
-        applicationOwner: '',
-        hashEnabled: false,
-        isSubscribing: false,
-    };
 
     /**
      *  Set the initial values for subscription request
@@ -327,10 +338,10 @@ class Credentials extends React.Component {
             isSubscribing,
         } = this.state;
         const user = AuthManager.getUser();
-        const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2') &&
-        !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
-        const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2') &&
-         !api.securityScheme.includes('api_key');
+        const isOnlyMutualSSL = api.securityScheme.includes('mutualssl') && !api.securityScheme.includes('oauth2')
+        && !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
+        const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2')
+         && !api.securityScheme.includes('api_key');
         const renderCredentialInfo = () => {
             const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
             if (isPrototypedAPI) {
@@ -349,15 +360,15 @@ class Credentials extends React.Component {
                 );
             } else if (isOnlyMutualSSL || isOnlyBasicAuth) {
                 return (
-                        <InlineMessage type='info' className={classes.dialogContainer}>
-                            <Typography component='p'>
+                    <InlineMessage type='info' className={classes.dialogContainer}>
+                        <Typography component='p'>
                             <FormattedMessage
-                                        id='Apis.Details.Creadentials.credetials.mutualssl'
-                                        defaultMessage={'Subscription is not required for Mutual SSL APIs' + 
-                                        ' or APIs with only Basic Authentication.'}
-                                    />
-                            </Typography>
-                        </InlineMessage>
+                                id='Apis.Details.Creadentials.credetials.mutualssl'
+                                defaultMessage={'Subscription is not required for Mutual SSL APIs'
+                                        + ' or APIs with only Basic Authentication.'}
+                            />
+                        </Typography>
+                    </InlineMessage>
                 );
             } else if (applicationsAvailable.length === 0 && subscribedApplications.length === 0) {
                 return (
@@ -393,8 +404,8 @@ class Credentials extends React.Component {
                             >
                                 <Typography variant='h5'>
                                     <FormattedMessage
-                                        id={'Apis.Details.Credentials.Credentials.' +
-                                        'subscribe.to.application'}
+                                        id={'Apis.Details.Credentials.Credentials.'
+                                        + 'subscribe.to.application'}
                                         defaultMessage='Subscribe'
                                     />
                                 </Typography>
@@ -414,8 +425,8 @@ class Credentials extends React.Component {
                                                 />
                                             </Typography>
                                             <Link
-                                                to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null :
-                                                     `/apis/${api.id}/credentials/wizard`}
+                                                to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null
+                                                    : `/apis/${api.id}/credentials/wizard`}
                                                 style={!api.isSubscriptionAvailable
                                                     ? { pointerEvents: 'none' } : null}
                                             >
@@ -423,8 +434,8 @@ class Credentials extends React.Component {
                                                     variant='contained'
                                                     color='primary'
                                                     className={classes.buttonElm}
-                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL || 
-                                                        isOnlyBasicAuth}
+                                                    disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
+                                                        || isOnlyBasicAuth}
                                                 >
                                                     <FormattedMessage
                                                         id={'Apis.Details.Credentials.'
@@ -518,11 +529,17 @@ class Credentials extends React.Component {
                                                     defaultMessage='Application Status'
                                                 />
                                             </th>
-                                            <th className={classes.th} />
+                                            <th className={classes.th}>
+                                                <FormattedMessage
+                                                    id={'Apis.Details.Credentials.Credentials.'
+                                                    + 'api.credentials.subscribed.apps.action'}
+                                                    defaultMessage='Actions'
+                                                />
+                                            </th>
                                         </tr>
                                         {subscribedApplications.map((app, index) => (
                                             <SubscriptionTableRow
-                                                key={index}
+                                                key={app.id}
                                                 loadInfo={this.loadInfo}
                                                 handleSubscriptionDelete={this.handleSubscriptionDelete}
                                                 selectedAppId={selectedAppId}
@@ -547,15 +564,15 @@ class Credentials extends React.Component {
                 <Grid item md={12} lg={11}>
                     <Grid container spacing={5}>
                         <Grid item md={12}>
-                            <Typography onClick={this.handleExpandClick} variant='h4' className={classes.titleSub}>
+                            <Typography onClick={this.handleExpandClick} variant='h4' component='h2' className={classes.titleSub}>
                                 <FormattedMessage
                                     id='Apis.Details.Credentials.Credentials.api.credentials'
                                     defaultMessage='Subscriptions'
                                 />
                                 {applicationsAvailable.length > 0 && (
                                     <Link
-                                        to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null :
-                                             `/apis/${api.id}/credentials/wizard`}
+                                        to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null
+                                            : `/apis/${api.id}/credentials/wizard`}
                                         style={!api.isSubscriptionAvailable
                                             ? { pointerEvents: 'none' } : null}
                                         className={classes.addLinkWrapper}
@@ -613,5 +630,6 @@ Credentials.propTypes = {
     history: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({}).isRequired,
 };
+Credentials.contextType = ApiContext;
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Credentials));

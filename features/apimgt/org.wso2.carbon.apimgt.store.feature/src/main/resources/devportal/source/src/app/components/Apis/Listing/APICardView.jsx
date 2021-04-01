@@ -19,20 +19,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import MUIDataTable from 'mui-datatables';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import NoApi from 'AppComponents/Apis/Listing/NoApi';
 import Loading from 'AppComponents/Base/Loading/Loading';
+import Alert from 'AppComponents/Shared/Alert';
 import ResourceNotFound from '../../Base/Errors/ResourceNotFound';
 import SubscriptionPolicySelect from './SubscriptionPolicySelect';
 
 
-/**
- *
- *
- * @param {*} theme
- */
-const styles = theme => ({
+const styles = () => ({
     root: {
         display: 'flex',
     },
@@ -42,12 +38,14 @@ const styles = theme => ({
 });
 
 /**
- *
- *
  * @class APICardView
+ * @param {number} page page number
  * @extends {React.Component}
  */
 class APICardView extends React.Component {
+    /**
+     * @param {JSON} props properties passed from parent
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -59,13 +57,20 @@ class APICardView extends React.Component {
         this.rowsPerPage = 10;
         this.pageType = null;
     }
+
+    /**
+     * component mount callback
+     */
     componentDidMount() {
         this.getData();
     }
 
+    /**
+     * @param {JSON} prevProps props from previous component instance
+     */
     componentDidUpdate(prevProps) {
         const { subscriptions, searchText } = this.props;
-        if ( subscriptions.length !== prevProps.subscriptions.length ) {
+        if (subscriptions.length !== prevProps.subscriptions.length) {
             this.getData();
         } else if (searchText !== prevProps.searchText) {
             this.page = 0;
@@ -105,17 +110,21 @@ class APICardView extends React.Component {
             });
     };
 
-    xhrRequest = () => {
-        const { searchText } = this.props;
-        const { page, rowsPerPage } = this;
-        const api = new API();
+    /**
+    *
+    * Get List of the Ids of all APIs that have been already subscribed
+    *
+    * @returns {*} Ids of respective APIs
+    * @memberof APICardView
+    */
+    getIdsOfSubscribedEntities() {
+        const { subscriptions } = this.props;
 
-        if (searchText && searchText !== '') {
-            return api.getAllAPIs({ query: `${searchText}&status:published`, limit: this.rowsPerPage, offset: page * rowsPerPage });
-        } else {
-            return api.getAllAPIs({ query: 'status:published', limit: this.rowsPerPage, offset: page * rowsPerPage });
-        }
-    };
+        // Get arrays of the API Ids and remove all null/empty references by executing 'fliter(Boolean)'
+        const subscribedAPIIds = subscriptions.map((sub) => sub.apiId).filter(Boolean);
+
+        return subscribedAPIIds;
+    }
 
     changePage = (page) => {
         const { intl } = this.props;
@@ -129,7 +138,7 @@ class APICardView extends React.Component {
                     data: this.updateUnsubscribedAPIsList(list),
                 });
             })
-            .catch((e) => {
+            .catch(() => {
                 Alert.error(intl.formatMessage({
                     defaultMessage: 'Error While Loading APIs',
                     id: 'Apis.Listing.ApiTableView.error.loading',
@@ -140,46 +149,39 @@ class APICardView extends React.Component {
             });
     };
 
-    /**
-        *
-        * Get List of the Ids of all APIs that have been already subscribed
-        *
-        * @returns {*} Ids of respective APIs
-        * @memberof APICardView
-        */
-    getIdsOfSubscribedEntities() {
-        const { subscriptions } = this.props;
+    xhrRequest = () => {
+        const { searchText } = this.props;
+        const { page, rowsPerPage } = this;
+        const api = new API();
 
-        // Get arrays of the API Ids and remove all null/empty references by executing 'fliter(Boolean)'
-        const subscribedAPIIds = subscriptions.map((sub) => sub.apiId).filter(Boolean);
-
-        return subscribedAPIIds;
-    }
+        if (searchText && searchText !== '') {
+            return api.getAllAPIs({ query: `${searchText} status:published`, limit: this.rowsPerPage, offset: page * rowsPerPage });
+        } else {
+            return api.getAllAPIs({ query: 'status:published', limit: this.rowsPerPage, offset: page * rowsPerPage });
+        }
+    };
 
     /**
-    *
     * Update list of unsubscribed APIs
+    * @param {Array} list array of apis
+    * @returns {Array} filtered list of apis
     * @memberof APICardView
     */
     updateUnsubscribedAPIsList(list) {
-
+        const listLocal = list;
         const subscribedIds = this.getIdsOfSubscribedEntities();
-        for (let i = 0; i < list.length; i++) {
-            if ((!subscribedIds.includes(list[i].id) && !list[i].advertiseInfo.advertised)
-                && list[i].isSubscriptionAvailable) {
-            } else {
-                list[i].throttlingPolicies = null;
+        for (let i = 0; i < listLocal.length; i++) {
+            if (!((!subscribedIds.includes(listLocal[i].id) && !listLocal[i].advertiseInfo.advertised)
+                && listLocal[i].isSubscriptionAvailable)) {
+                listLocal[i].throttlingPolicies = null;
             }
         }
-        return list;
-        //return unsubscribedAPIList;
-
+        return listLocal;
+        // return unsubscribedAPIList;
     }
 
     /**
-     *
-     *
-     * @returns
+     * @returns {JSX} render api card view
      * @memberof APICardView
      */
     render() {
@@ -192,7 +194,7 @@ class APICardView extends React.Component {
         }
 
         const {
-            theme, handleSubscribe, applicationId, intl,
+            handleSubscribe, applicationId, intl,
         } = this.props;
         const columns = [
             {
@@ -222,11 +224,11 @@ class APICardView extends React.Component {
             {
                 name: 'throttlingPolicies',
                 label: intl.formatMessage({
-                    id: 'Apis.Listing.APIList.policy',
-                    defaultMessage: 'Policy',
+                    id: 'Apis.Listing.APIList.subscription.status',
+                    defaultMessage: 'Subscription Status',
                 }),
                 options: {
-                    customBodyRender: (value, tableMeta, updateValue) => {
+                    customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
                             const policies = value;
@@ -234,7 +236,7 @@ class APICardView extends React.Component {
                                 return (intl.formatMessage({
                                     id: 'Apis.Listing.APICardView.already.subscribed',
                                     defaultMessage: 'Subscribed',
-                                }))
+                                }));
                             }
                             return (
                                 <SubscriptionPolicySelect
@@ -246,6 +248,7 @@ class APICardView extends React.Component {
                                 />
                             );
                         }
+                        return <span />;
                     },
                 },
             },
@@ -267,13 +270,15 @@ class APICardView extends React.Component {
                     case 'changePage':
                         this.changePage(tableState.page);
                         break;
+                    default:
+                        break;
                 }
             },
             selectableRows: 'none',
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
-                const { page, count } = this;
-                if (page * numberOfRows > count) {
+                const { page: pageInner, count: countInner } = this;
+                if (pageInner * numberOfRows > countInner) {
                     this.page = 0;
                 }
                 this.rowsPerPage = numberOfRows;
@@ -288,7 +293,7 @@ class APICardView extends React.Component {
         }
         return (
             <MUIDataTable
-                title={''}
+                title=''
                 data={data}
                 columns={columns}
                 options={options}
@@ -298,8 +303,6 @@ class APICardView extends React.Component {
 }
 
 APICardView.propTypes = {
-    classes: PropTypes.object.isRequired,
-    theme: PropTypes.object.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,

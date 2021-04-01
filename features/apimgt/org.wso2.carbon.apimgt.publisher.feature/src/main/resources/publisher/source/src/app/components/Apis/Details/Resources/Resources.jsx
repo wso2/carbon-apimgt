@@ -29,7 +29,7 @@ import Banner from 'AppComponents/Shared/Banner';
 import API from 'AppData/api';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
-import SwaggerParser from 'swagger-parser';
+import SwaggerParser from '@apidevtools/swagger-parser';
 import { isRestricted } from 'AppData/AuthManager';
 import CONSTS from 'AppData/Constants';
 import Operation from './components/Operation';
@@ -72,6 +72,7 @@ export default function Resources(props) {
     const [apiThrottlingPolicy, setApiThrottlingPolicy] = useState(api.apiThrottlingPolicy);
     const [arns, setArns] = useState([]);
     const [resolvedSpec, setResolvedSpec] = useState({ spec: {}, errors: [] });
+    const [focusOperationLevel, setFocusOperationLevel] = useState(false);
 
     /**
      *
@@ -563,6 +564,8 @@ export default function Resources(props) {
                         value={apiThrottlingPolicy}
                         onChange={setApiThrottlingPolicy}
                         isAPIProduct={api.isAPIProduct()}
+                        focusOperationLevel={focusOperationLevel}
+                        setFocusOperationLevel={setFocusOperationLevel}
                     />
                 </Grid>
             )}
@@ -620,6 +623,7 @@ export default function Resources(props) {
                                                     {...operationProps}
                                                     resolvedSpec={resolvedSpec.spec}
                                                     sharedScopes={sharedScopes}
+                                                    setFocusOperationLevel={setFocusOperationLevel}
                                                 />
                                             </Grid>
                                         ) : null;
@@ -636,14 +640,18 @@ export default function Resources(props) {
                     justify='space-between'
                     alignItems='center'
                 >
-                    {!disableUpdate && (
-                        <SaveOperations
-                            operationsDispatcher={operationsDispatcher}
-                            updateOpenAPI={updateOpenAPI}
-                            api={api}
-                        />
-                    )}
-                    {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
+                    <Grid item>
+                        {!disableUpdate && (
+                            <SaveOperations
+                                operationsDispatcher={operationsDispatcher}
+                                updateOpenAPI={updateOpenAPI}
+                                api={api}
+                            />
+                        )}
+                    </Grid>
+                    <Grid item>
+                        {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>

@@ -21,6 +21,8 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Map;
+
 public class APIManagerAnalyticsConfiguration {
     private static final Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
     private String dasReceiverUrlGroups;
@@ -51,7 +53,11 @@ public class APIManagerAnalyticsConfiguration {
     private String datacenterId;
     private String botDataStreamName;
     private String botDataStreamVersion;
-    
+    private String reporterClass;
+    private String responseSchemaName;
+    private String faultSchemaName;
+    private Map<String, String> reporterProperties;
+
     private APIManagerAnalyticsConfiguration() {
     }
     private static class APIManagerAnalyticsConfigurationHolder {
@@ -65,57 +71,12 @@ public class APIManagerAnalyticsConfiguration {
 
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
         String usageEnabled = config.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
-        if (analyticsEnabled){
-            String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
-            skipEventReceiverConnection = skipEventReceiverConnStr != null && JavaUtils.isTrueExplicitly
-                    (skipEventReceiverConnStr);
-            String skipWorkflowDataPublisherStr = config
-                    .getFirstProperty(APIConstants.API_USAGE_SKIP_WORKFLOW_EVENT_RECEIVER_CONN);
-            skipWorkFlowEventReceiverConnection =
-                    skipWorkflowDataPublisherStr != null && JavaUtils.isTrueExplicitly(skipWorkflowDataPublisherStr);
-            publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
-            requestStreamName = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
-            requestStreamVersion = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_VERSION);
-            if (requestStreamName == null || requestStreamVersion == null) {
-                log.error("Request stream name or version is null. Check api-manager.xml");
-            }
-            botDataStreamName = config.getFirstProperty("Analytics.Streams.botData.Name");
-            botDataStreamVersion = config.getFirstProperty("Analytics.Streams.botData.Version");
-
-            responseStreamName = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
-            responseStreamVersion = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);
-
-            faultStreamName = config.getFirstProperty(APIConstants.API_FAULT_STREAM_NAME);
-            faultStreamVersion = config.getFirstProperty(APIConstants.API_FAULT_STREAM_VERSION);
-            if (faultStreamName == null || faultStreamVersion == null) {
-                log.error("Fault stream name or version is null. Check api-manager.xml");
-            }
-            throttleStreamName = config.getFirstProperty(APIConstants.API_THROTTLE_STREAM_NAME);
-            throttleStreamVersion = config.getFirstProperty(APIConstants.API_THRORRLE_STREAM_VERSION);
-            if (throttleStreamName == null || throttleStreamVersion == null) {
-                log.error("Throttle stream name or version is null. Check api-manager.xml");
-            }
-            executionTimeStreamName = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_NAME);
-            executionTimeStreamVersion = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_VERSION);
-
-            alertTypeStreamName = config.getFirstProperty(APIConstants.API_ALERT_TYPES_STREAM_NAME);
-            alertTypeStreamVersion = config.getFirstProperty(APIConstants.API_ALERT_TYPES_STREAM_VERSION);
-            if (alertTypeStreamName == null || alertTypeStreamVersion == null) {
-                log.error("Execution Time stream name or version is null. Check api-manager.xml");
-            }
-
-            dasReceiverUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-            dasReceiverAuthUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_AUTH_URL_GROUPS);
-            dasReceiverServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-            dasReceiverServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-
-            dasServerUrl = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
-            dasServerUser = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
-            dasServerPassword = config.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
-            String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
-            buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
-            datacenterId = System.getProperty("datacenterId");
+        this.analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
+        if (this.analyticsEnabled) {
+            this.reporterClass = config.getFirstProperty(APIConstants.API_ANALYTICS_REPORTER_CLASS);
+            this.responseSchemaName = config.getFirstProperty(APIConstants.API_ANALYTICS_RESPONSE_SCHEMA_NAME);
+            this.faultSchemaName = config.getFirstProperty(APIConstants.API_ANALYTICS_FAULT_SCHEMA_NAME);
+            this.reporterProperties = config.getAnalyticsProperties();
         }
     }
 
@@ -262,5 +223,28 @@ public class APIManagerAnalyticsConfiguration {
     public void setDatacenterId(String datacenterId) {
         this.datacenterId = datacenterId;
     }
-    
+
+    public String getReporterClass() {
+        return reporterClass;
+    }
+
+    public void setReporterClass(String reporterClass) {
+        this.reporterClass = reporterClass;
+    }
+
+    public Map<String, String> getReporterProperties() {
+        return reporterProperties;
+    }
+
+    public void setReporterProperties(Map<String, String> reporterProperties) {
+        this.reporterProperties = reporterProperties;
+    }
+
+    public String getResponseSchemaName() {
+        return responseSchemaName;
+    }
+
+    public String getFaultSchemaName() {
+        return faultSchemaName;
+    }
 }
