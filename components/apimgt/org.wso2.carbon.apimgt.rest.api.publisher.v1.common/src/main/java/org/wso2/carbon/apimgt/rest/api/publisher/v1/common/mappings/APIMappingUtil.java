@@ -2867,16 +2867,29 @@ public class APIMappingUtil {
     /**
      * Set AWS Secret Key based on preserveCredentials state
      *
-     * @param awsEndpointConfig Endpoint configuration of the API
+     * @param awsEndpointConfig   Endpoint configuration of the API
      * @param preserveCredentials Condition to preserve credentials
      * @return Updated endpoint config
      */
     private static JSONObject handleAWSCredentials(JSONObject awsEndpointConfig, boolean preserveCredentials) {
-        if (!preserveCredentials) {
-            if (StringUtils.isNotEmpty((String) awsEndpointConfig.get(APIConstants.AMZN_SECRET_KEY))) {
+
+        if (StringUtils.isNotEmpty((String) awsEndpointConfig.get(APIConstants.AMZN_SECRET_KEY))) {
+            if (!preserveCredentials) {
                 awsEndpointConfig.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
+                return awsEndpointConfig;
+            } else {
+                String secretKey = (String) awsEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                // Decrypting the key since CTL project goes between environments which have different encryption keys.
+                try {
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    String decryptedSecret = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
+                            APIConstants.DigestAuthConstants.CHARSET);
+                    awsEndpointConfig.put(APIConstants.AMZN_SECRET_KEY, decryptedSecret);
+                    return awsEndpointConfig;
+                } catch (CryptoException | UnsupportedEncodingException e) {
+                    log.error("Error while decrypting the Amazon key", e);
+                }
             }
-            return awsEndpointConfig;
         }
         return awsEndpointConfig;
     }
