@@ -44,7 +44,7 @@ export default function Certificates(props) {
         };
         reader.onerror = () => {
             Alert.success(intl.formatMessage({
-                id: 'KeyManagers.certificates.file.error',
+                id: 'KeyManagers.Certificates.file.error',
                 defaultMessage: 'Error reading file',
             }));
         };
@@ -91,7 +91,7 @@ export default function Certificates(props) {
                 <TextField
                     label={intl.formatMessage(
                         {
-                            id: 'KeyManagers.certificates.jwks.url',
+                            id: 'KeyManagers.Certificates.jwks.url',
                             defaultMessage: 'URL',
                         },
                     )}
@@ -115,7 +115,7 @@ export default function Certificates(props) {
                             <TextField
                                 label={intl.formatMessage(
                                     {
-                                        id: 'KeyManagers.certificates.paste.label',
+                                        id: 'KeyManagers.Certificates.paste.label',
                                         defaultMessage: 'Paste the content of the PEM file',
                                     },
                                 )}
@@ -135,7 +135,7 @@ export default function Certificates(props) {
                                         <Box flex='1'>{file.name}</Box>
                                         <Typography variant='caption'>
                                             <FormattedMessage
-                                                id='KeyManagers.certificates.override.message'
+                                                id='KeyManagers.Certificates.override.message'
                                                 defaultMessage='Upload new file to override the current certificate'
                                             />
                                         </Typography>
@@ -148,7 +148,7 @@ export default function Certificates(props) {
                                     baseStyle={{ padding: '16px 20px' }}
                                 >
                                     <FormattedMessage
-                                        id='KeyManagers.certificates.drag.and.drop.message'
+                                        id='KeyManagers.Certificates.drag.and.drop.message'
                                         defaultMessage='Drag and Drop files here {break} or {break}'
                                         values={{ break: <br /> }}
                                     />
@@ -157,7 +157,7 @@ export default function Certificates(props) {
                                         variant='contained'
                                     >
                                         <FormattedMessage
-                                            id='KeyManagers.certificates.browse.files.to.upload'
+                                            id='KeyManagers.Certificates.browse.files.to.upload'
                                             defaultMessage='Browse File to Upload'
                                         />
                                     </Button>
