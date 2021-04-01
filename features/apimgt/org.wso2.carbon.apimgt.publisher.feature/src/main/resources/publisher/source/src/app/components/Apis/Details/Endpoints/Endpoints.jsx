@@ -75,7 +75,6 @@ function Endpoints(props) {
     const [swagger, setSwagger] = useState(defaultSwagger);
     const [endpointValidity, setAPIEndpointsValid] = useState({ isValid: true, message: '' });
     const [isUpdating, setUpdating] = useState(false);
-    const [isEndpointUrlAvailable, setIsEndpointUrlAvailable] = useState(false);
 
     const apiReducer = (initState, configAction) => {
         const tmpEndpointConfig = cloneDeep(initState.endpointConfig);
@@ -86,6 +85,7 @@ function Endpoints(props) {
                 if (value) {
                     return { ...initState, endpointConfig: { ...tmpEndpointConfig, [action]: value } };
                 }
+                delete tmpEndpointConfig[action];
                 return { ...initState, endpointConfig: { ...tmpEndpointConfig } };
             }
             case 'select_endpoint_category': {
@@ -348,6 +348,12 @@ function Endpoints(props) {
                 isValidEndpoint = endpointConfig.sandbox_endpoints.url !== ''
                         || endpointConfig.production_endpoints.url !== '';
             }
+            if (endpointConfig.sandbox_endpoints) {
+                isValidEndpoint &&= endpointConfig.sandbox_endpoints.url !== '';
+            }
+            if (endpointConfig.production_endpoints) {
+                isValidEndpoint &&= endpointConfig.production_endpoints.url !== '';
+            }
             return !isValidEndpoint ? {
                 isValid: false,
                 message: intl.formatMessage({
@@ -421,7 +427,6 @@ function Endpoints(props) {
                                         onChangeAPI={apiDispatcher}
                                         endpointsDispatcher={apiDispatcher}
                                         saveAndRedirect={saveAndRedirect}
-                                        setIsEndpointUrlAvailable={setIsEndpointUrlAvailable}
                                     />
                                 </Grid>
                             </Grid>
@@ -445,7 +450,7 @@ function Endpoints(props) {
                             >
                                 <Grid item>
                                     {api.isRevision || !endpointValidity.isValid
-                                        || isRestricted(['apim:api_create'], api) || !isEndpointUrlAvailable ? (
+                                        || isRestricted(['apim:api_create'], api) ? (
                                             <Button
                                                 disabled
                                                 type='submit'

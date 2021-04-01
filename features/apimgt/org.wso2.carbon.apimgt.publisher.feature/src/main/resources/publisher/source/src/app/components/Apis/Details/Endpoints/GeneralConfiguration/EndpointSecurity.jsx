@@ -601,6 +601,9 @@ function EndpointSecurity(props) {
                                 { ...endpointSecurityInfo, password: event.target.value },
                             )}
                             onBlur={() => validateAndUpdateSecurityInfo('password')}
+                            InputProps={{
+                                autoComplete: 'new-password',
+                            }}
                         />
                     </Grid>
                 </>

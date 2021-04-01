@@ -628,6 +628,9 @@ function TryOutController(props) {
                                                     onChange={handleChanges}
                                                     value={password || ''}
                                                     fullWidth
+                                                    InputProps={{
+                                                        autoComplete: 'new-password',
+                                                    }}
                                                 />
                                             </Grid>
                                         </>
@@ -641,7 +644,7 @@ function TryOutController(props) {
                                             label={(
                                                 <FormattedMessage
                                                     id='access.token'
-                                                    sdefaultMessage='Access Token'
+                                                    defaultMessage='Access Token'
                                                 />
                                             )}
                                             name='accessToken'
@@ -656,6 +659,7 @@ function TryOutController(props) {
                                             )}
                                             id='accessTokenInput'
                                             InputProps={{
+                                                autoComplete: 'new-password',
                                                 endAdornment: (
                                                     <InputAdornment position='end'>
                                                         <IconButton
