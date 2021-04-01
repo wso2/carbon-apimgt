@@ -127,7 +127,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15475,7 +15474,7 @@ public class ApiMgtDAO {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    revisionId = rs.getInt(1);
+                    revisionId = rs.getInt("REVISIONS_CREATED");
                 }
             }
         } catch (SQLException e) {
@@ -15707,7 +15706,7 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16650,7 +16649,7 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16935,6 +16934,16 @@ public class ApiMgtDAO {
             statement.setString(2, md5);
             statement.setInt(3, apiId);
             statement.executeUpdate();
+        }
+    }
+
+    private void updateLatestRevisionNumber(Connection connection, String apiUUID, int revisionId) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.UPDATE_REVISION_CREATED_BY_API_SQL)) {
+            preparedStatement.setInt(1, revisionId);
+            preparedStatement.setString(2, apiUUID);
+            preparedStatement.executeUpdate();
         }
     }
 }
