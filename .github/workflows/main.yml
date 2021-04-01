@@ -14,7 +14,6 @@ on:
       - master
 
 jobs:
-
   build-carbon:
     runs-on: ubuntu-latest
     steps:
