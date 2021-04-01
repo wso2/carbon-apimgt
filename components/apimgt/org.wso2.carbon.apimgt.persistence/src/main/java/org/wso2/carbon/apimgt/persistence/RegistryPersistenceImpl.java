@@ -1318,11 +1318,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherContentSearchResult result = null;
         try {
-            RegistryHolder holder = getRegistry(ctx.getUserame(), org.getName());
+            RegistryHolder holder = getRegistry(org.getName());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-            String tenantAwareUsername = getTenantAwareUsername(ctx.getUserame());
 
+            String requestedTenantDomain = org.getName();
+            String tenantAwareUsername = getTenantAwareUsername(RegistryPersistenceUtil.getTenantAdminUserName(requestedTenantDomain));
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
             
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
@@ -1449,7 +1450,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 result.setResults(contentData);
             } 
 
-        } catch (RegistryException | IndexerException | DocumentationPersistenceException e) {
+        } catch (RegistryException | IndexerException | DocumentationPersistenceException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching for content ", e);
         } finally {
             if (isTenantFlowStarted) {

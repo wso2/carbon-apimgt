@@ -8854,7 +8854,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String userame = userNameWithoutChange;
         Organization org = new Organization(tenantDomain);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
-        String[] roles = APIUtil.getFilteredUserRoles(userame);;
+        String[] roles = APIUtil.getFilteredUserRoles(userame);
         UserContext ctx = new UserContext(userame, org, properties, roles);
 
 
