@@ -83,9 +83,8 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "Specific IP when \"IPSPECIFIC\" is used as the ipConditionType")
+  @ApiModelProperty(value = "Specific IP when \"IPSPECIFIC\" is used as the ipConditionType")
   @JsonProperty("specificIP")
-  @NotNull
   public String getSpecificIP() {
     return specificIP;
   }
