@@ -149,7 +149,9 @@ class CommentAdd extends React.Component {
             Alert.error('You cannot enter a blank comment');
         }
         this.setState({ currentLength: 0 });
-        handleShowReply();
+        if (replyTo !== null) {
+            handleShowReply();
+        }
     }
 
     /**

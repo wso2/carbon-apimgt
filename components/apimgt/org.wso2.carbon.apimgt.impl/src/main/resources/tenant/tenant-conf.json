@@ -285,6 +285,14 @@
       {
         "Name": "apim:role_manage",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:environment_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:environment_read",
+        "Roles": "admin"
       }
     ]
   },

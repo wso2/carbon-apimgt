@@ -21,7 +21,6 @@ import {
 } from '@material-ui/core';
 
 import ScopesIcon from '@material-ui/icons/ListAlt';
-import NotificationImportantIcon from '@material-ui/icons/NotificationImportant';
 import PropTypes from 'prop-types';
 import { Link, withRouter } from 'react-router-dom';
 import Collapse from '@material-ui/core/Collapse';
@@ -92,12 +91,8 @@ const styles = (theme) => ({
 function GlobalNavLinks(props) {
     const [selected, setSelected] = useState('apis');
     const [openAPIs, setOpenAPIs] = React.useState(true);
-    const [openSettings, setOpenSettings] = React.useState(false);
     const handleAPIsClick = () => {
         setOpenAPIs(!openAPIs);
-    };
-    const handleSettingsClick = () => {
-        setOpenSettings(!openSettings);
     };
     const {
         classes, theme, smallView, history, toggleGlobalNavBar,
@@ -262,49 +257,6 @@ function GlobalNavLinks(props) {
                     <Divider className={classes.divider} />
                 </>
             )}
-            <ListItem className={classes.categoryHeader} button onClick={handleSettingsClick}>
-                <ListItemText
-                    classes={{
-                        primary: classes.categoryHeaderPrimary,
-                    }}
-                >
-                    <FormattedMessage id='Base.Header.navbar.GlobalNavBar.Settings' defaultMessage='Settings' />
-                </ListItemText>
-                {openSettings ? <ExpandLess /> : <ExpandMore />}
-
-            </ListItem>
-            <Collapse in={openSettings} timeout='auto' unmountOnExit>
-                <Link
-                    to='/settings'
-                    className={classNames({ [classes.selected]: selected === 'alerts', [classes.links]: true })}
-                >
-                    <ListItem button onClick={toggleGlobalNavBar}>
-                        <ListItemIcon
-                            classes={{ root: classNames({ [classes.smallIcon]: smallView }) }}
-                            className={classes.itemIcon}
-                        >
-                            <NotificationImportantIcon className={classes.alertIconColor} />
-                        </ListItemIcon>
-                        <ListItemText
-                            classes={{
-                                primary: classNames({
-                                    [classes.selectedText]: selected === 'alerts',
-                                    [classes.listText]: selected !== 'alerts',
-                                }),
-                            }}
-                            primary={
-                                (
-                                    <FormattedMessage
-                                        id='Base.Header.navbar.GlobalNavBar.manage.alerts'
-                                        defaultMessage='Manage Alerts'
-                                    />
-                                )
-                            }
-                        />
-                    </ListItem>
-                </Link>
-            </Collapse>
-            <Divider className={classes.divider} />
         </>
     );
 }

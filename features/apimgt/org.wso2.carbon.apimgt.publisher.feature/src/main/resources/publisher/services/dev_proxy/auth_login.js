@@ -55,7 +55,7 @@ async function generateToken(code, keys) {
         agent,
     });
     const data = await response.json();
-    console.log(data);
+    console.log('OAuth token generated !');
     return data;
 }
 
@@ -86,12 +86,14 @@ async function doDCR() {
     return data;
 }
 
-const clientRoutingBypass = async (req, res, proxyOptions) => {
-    if (fs.existsSync(path.join(__dirname, '../../', req.path))) {
+const clientRoutingBypass = (req, res, proxyOptions) => {
+    if (req.path.startsWith('/publisher/site/public/images/')) {
         return req.path.split('/publisher')[1];
-    } else if (!req.path.startsWith('/publisher/services')) {
+    } else if (req.headers.accept.indexOf('html') !== -1) {
+        console.log('Skipping proxy for browser request.');
         return '/publisher/index.html';
     }
+    return null;
 };
 
 /**
