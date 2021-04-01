@@ -715,7 +715,7 @@ return null;
   
   @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
-  public String getAuthorizationHeader() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)")  public String getAuthorizationHeader() {
     return authorizationHeader;
   }
   public void setAuthorizationHeader(String authorizationHeader) {
