@@ -27,7 +27,6 @@ import { isRestricted } from 'AppData/AuthManager';
 import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import API from 'AppData/api';
 import APIValidation from 'AppData/APIValidation';
-import { useRuntimeConfigurationContext } from '../RuntimeConfigurationContext';
 
 /**
  *
@@ -61,17 +60,15 @@ export default function AuthorizationHeader(props) {
         configDispatcher({ action: 'authorizationHeader', value: '' });
     }
 
-    const { setDisabled } = useRuntimeConfigurationContext();
-
     function validateHeader(value) {
         const headerValidity = APIValidation.authorizationHeader.required()
             .validate(value, { abortEarly: false }).error;
         if (headerValidity === null) {
             setIsHeaderNameValid(true);
-            setDisabled(false);
+            configDispatcher({ action: 'saveButtonDisabled', value: false });
         } else {
             setIsHeaderNameValid(false);
-            setDisabled(true);
+            configDispatcher({ action: 'saveButtonDisabled', value: true });
         }
     }
 

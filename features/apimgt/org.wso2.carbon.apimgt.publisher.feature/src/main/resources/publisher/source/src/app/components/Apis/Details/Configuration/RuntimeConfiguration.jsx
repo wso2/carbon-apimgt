@@ -52,7 +52,6 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
-import RuntimeConfigurationContext from './RuntimeConfigurationContext';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -153,6 +152,7 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
+        saveButtonDisabled: false,
     };
     return apiConfigJson;
 }
@@ -283,6 +283,9 @@ export default function RuntimeConfiguration() {
                     nextState.keyManagers = keyManagersConfigured;
                 }
                 return nextState;
+            case 'saveButtonDisabled':
+                nextState.saveButtonDisabled = value;
+                return nextState;
             default:
                 return state;
         }
@@ -299,7 +302,6 @@ export default function RuntimeConfiguration() {
     const [inPolicy, setInPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'IN')[0]);
     const [outPolicy, setOutPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'OUT')[0]);
     const [faultPolicy, setFaultPolicy] = useState(mediationPolicies.filter((seq) => seq.type === 'FAULT')[0]);
-    const [saveDisabled, setSaveDisabled] = useState(false);
     const intl = useIntl();
     useEffect(() => {
         Api.keyManagers().then((response) => {
@@ -361,10 +363,6 @@ export default function RuntimeConfiguration() {
                     Alert.error(description);
                 }
             });
-    }
-
-    function setDisabled(isDisabled) {
-        setSaveDisabled(isDisabled);
     }
 
     /**
@@ -488,9 +486,7 @@ export default function RuntimeConfiguration() {
                         >
                             <Grid item xs={12} style={{ marginBottom: 30, position: 'relative' }}>
                                 <Paper className={classes.paper} elevation={0}>
-                                    <RuntimeConfigurationContext.Provider value={{ setDisabled }}>
-                                        <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
-                                    </RuntimeConfigurationContext.Provider>
+                                    <APISecurity api={apiConfig} configDispatcher={configDispatcher} />
                                     { api.type !== 'WS' && (
                                         <CORSConfiguration api={apiConfig} configDispatcher={configDispatcher} />
                                     )}
@@ -608,7 +604,7 @@ export default function RuntimeConfiguration() {
                         <Grid item>
                             {api.isRevision
                                 || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
-                                || isRestricted(['apim:api_create'], api)) || saveDisabled ? (
+                                || isRestricted(['apim:api_create'], api)) || apiConfig.saveButtonDisabled ? (
                                     <Button
                                         disabled
                                         type='submit'
