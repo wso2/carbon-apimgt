@@ -1825,6 +1825,11 @@
                 <artifactId>javax.jms-api</artifactId>
                 <version>${javax.jms.version}</version>
             </dependency>
+                <dependency>
+                    <groupId>com.damnhandy.wso2</groupId>
+                    <artifactId>handy-uri-templates</artifactId>
+                    <version>${damnhandy.version}</version>
+                </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -2094,5 +2099,7 @@
         <maven.spotbugsplugin.exclude.file>spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <skip.aspectj>false</skip.aspectj>
         <javax.jms.version>2.0.1</javax.jms.version>
+        <com.damnhandy.version>2.1.6</com.damnhandy.version>
+        <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
     </properties>
 </project>
