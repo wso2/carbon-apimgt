@@ -966,11 +966,6 @@
           "example" : "APIProduct",
           "description" : "Type of the API."
         },
-        "status" : {
-          "type" : "string",
-          "example" : "APIProduct",
-          "description" : "Type of the API."
-        },
         "isDefaultVersion" : {
           "type" : "boolean",
           "example" : false,
