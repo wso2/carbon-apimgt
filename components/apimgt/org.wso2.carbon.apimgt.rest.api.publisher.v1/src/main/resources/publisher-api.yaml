@@ -7909,7 +7909,7 @@ components:
           maxLength: 30
           minLength: 1
           type: string
-          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$[\]\s/]+$'
+          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$[\]\s+/]+$'
           example: 1.0.0
         provider:
           maxLength: 50
