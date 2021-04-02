@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
-import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.report.LevelResolver;
 import com.atlassian.oai.validator.report.ValidationReport;
 import io.swagger.parser.OpenAPIParser;
@@ -75,8 +74,7 @@ public class SchemaValidator extends AbstractHandler {
             return true;
         }
         OpenApiInteractionValidator validator = getOpenAPIValidator(swagger);
-        Request request;
-        request = OpenAPIRequest.from(messageContext);
+        OpenAPIRequest request = new OpenAPIRequest(messageContext);
 
         ValidationReport validationReport = validator.validateRequest(request);
         if (validationReport.hasErrors()) {
@@ -96,8 +94,7 @@ public class SchemaValidator extends AbstractHandler {
 
         String swagger = messageContext.getProperty("OPEN_API_STRING").toString();
         OpenApiInteractionValidator validator = getOpenAPIValidator(swagger);
-        OpenAPIResponse response;
-        response = OpenAPIResponse.from(messageContext);
+        OpenAPIResponse response = new OpenAPIResponse(messageContext);
 
         ValidationReport validationReport = validator.validateResponse(response.getPath(), response.getMethod(),
                 response);

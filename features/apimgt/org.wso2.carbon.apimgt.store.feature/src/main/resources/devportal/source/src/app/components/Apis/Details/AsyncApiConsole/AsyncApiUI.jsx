@@ -22,8 +22,38 @@ import Api from '../../../../data/api';
 import Progress from '../../../Shared/Progress';
 import WebhookSubscriptionUI from './WebhookSubscriptionUI';
 import GenericSubscriptionUI from './GenericSubscriptionUI';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import { makeStyles } from "@material-ui/core/styles/index";
+import CONSTANTS from 'AppData/Constants';
+import Alert from 'AppComponents/Shared/Alert';
+import { useIntl } from 'react-intl';
 
+const useStyles = makeStyles((theme) => (
+    {
+        endpointSelectorRoot: {
+            paddingBottom: '20px',
+        },
+        // this styling is used to resemble the switch to swagger-ui switch
+        selectList: {
+            minWidth: '130px',
+            maxWidth: '100%',
+            border: '2px solid #41444e',
+            fontFamily: 'sans-serif',
+            fontSize: '14px',
+            fontWeight: 700,
+            padding: '2px 2px 2px 10px',
+            border: '2px solid #41444e',
+            borderRadius: '4px',
+            color: '#3b4151',
+        }
+    }
+));
 export default function AsyncApiUI(props) {
+    const classes = useStyles();
+    const intl = useIntl();
     const {
         authorizationHeader,
         URLs,
@@ -31,7 +61,14 @@ export default function AsyncApiUI(props) {
         accessTokenProvider,
     } = props;
     const { api } = useContext(ApiContext);
+
+    let initialEndpoint = URLs.http;
+    if (api.type === CONSTANTS.API_TYPES.WS) {
+        initialEndpoint = URLs.ws;
+    }
+
     const [allTopics, setAllTopics] = useState('');
+    const [endPoint, setEndpoint] = useState(initialEndpoint);
 
     useEffect(() => {
         const apiID = api.id;
@@ -41,8 +78,16 @@ export default function AsyncApiUI(props) {
             setAllTopics(response.body);
         }).catch((error) => {
             console.log(error);
+            Alert.error(intl.formatMessage({
+                id: 'Apis.Details.AsyncApiConsole.AsyncApiUI.topics.get.error',
+                defaultMessage: 'Error while retrieving topics for the API.',
+            }));
         });
     }, []);
+
+    const handleServerChange = (event) => {
+        setEndpoint(event.target.value);
+    };
 
     function generateAccessToken() {
         let token;
@@ -61,9 +106,8 @@ export default function AsyncApiUI(props) {
             topic, callback, secret, mode, lease,
         } = subscription;
         const token = generateAccessToken();
-        const apiEndpointUrl = URLs.http;
         if (mode === 'subscribe') {
-            let curl = `curl -X POST '${apiEndpointUrl}?hub.topic=${encodeURIComponent(topic)}&hub.callback=${encodeURIComponent(callback)}&hub.mode=${mode}`;
+            let curl = `curl -X POST '${endPoint}?hub.topic=${encodeURIComponent(topic)}&hub.callback=${encodeURIComponent(callback)}&hub.mode=${mode}`;
             if (secret) {
                 curl += `&hub.secret=${secret}`;
             }
@@ -73,7 +117,7 @@ export default function AsyncApiUI(props) {
             curl += `' -H 'Authorization: ${token}'`;
             return curl;
         } else {
-            return `curl -X POST '${apiEndpointUrl}?hub.topic=${encodeURIComponent(topic)}&hub.callback=${encodeURIComponent(callback)}&hub.mode=${mode}' -H 'Authorization: ${token}'`;
+            return `curl -X POST '${endPoint}?hub.topic=${encodeURIComponent(topic)}&hub.callback=${encodeURIComponent(callback)}&hub.mode=${mode}' -H 'Authorization: ${token}'`;
         }
     }
 
@@ -88,21 +132,19 @@ export default function AsyncApiUI(props) {
 
     function generateWSSubscriptionCommand(topic) {
         const token = generateAccessToken();
-        const apiEndpointUrl = URLs.ws;
         if (topic.name.includes('*')) {
-            return `wscat -c '${apiEndpointUrl}' -H 'Authorization: ${token}'`;
+            return `wscat -c '${endPoint}' -H 'Authorization: ${token}'`;
         } else {
-            return `wscat -c '${apiEndpointUrl}/${getTopicName(topic)}' -H 'Authorization: ${token}'`;
+            return `wscat -c '${endPoint}/${getTopicName(topic)}' -H 'Authorization: ${token}'`;
         }
     }
 
     function generateSSESubscriptionCommand(topic) {
         const token = generateAccessToken();
-        const apiEndpointUrl = URLs.http;
         if (topic.name.includes('*')) {
-            return `curl -X POST '${apiEndpointUrl}' -H 'Authorization: ${token}'`;
+            return `curl -X POST '${endPoint}' -H 'Authorization: ${token}'`;
         } else {
-            return `curl -X POST '${apiEndpointUrl}/${getTopicName(topic)}' -H 'Authorization: ${token}'`;
+            return `curl -X POST '${endPoint}/${getTopicName(topic)}' -H 'Authorization: ${token}'`;
         }
     }
 
@@ -111,20 +153,37 @@ export default function AsyncApiUI(props) {
     } else {
         return (
             <>
-                {api.type === 'WEBSUB' && allTopics.list.map((topic, index) => (
+                <FormControl className={classes.endpointSelectorRoot}>
+                    <InputLabel>Servers</InputLabel>
+                    <Select
+                        className={classes.selectList}
+                        id="api-endpoint-select"
+                        value={endPoint}
+                        displayEmpty
+                        onChange={handleServerChange}
+                    >
+                        {Object.entries(URLs).map(([key, value]) => {
+                            if (value) {
+                                return <MenuItem value={value} key={key}>{value}</MenuItem>;
+                            }
+                        })}
+                    </Select>
+                </FormControl>
+
+                {api.type === CONSTANTS.API_TYPES.WEBSUB && allTopics.list.map((topic, index) => (
                     <WebhookSubscriptionUI
                         topic={topic}
                         generateGenericWHSubscriptionCurl={generateGenericWHSubscriptionCurl}
                     />
                 ))}
-                {api.type === 'SSE' && allTopics.list.map((topic, index) => (
+                {api.type === CONSTANTS.API_TYPES.SSE && allTopics.list.map((topic, index) => (
                     <GenericSubscriptionUI
-                        command={generateSSESubscriptionCommand(topic)}
+                        generateGenericSubscriptionCommand={generateSSESubscriptionCommand}
                         topic={topic}/>
                 ))}
-                {api.type === 'WS' && allTopics.list.map((topic, index) => (
+                {api.type === CONSTANTS.API_TYPES.WS && allTopics.list.map((topic, index) => (
                     <GenericSubscriptionUI
-                        command={generateWSSubscriptionCommand(topic)}
+                        generateGenericSubscriptionCommand={generateWSSubscriptionCommand}
                         topic={topic}/>
                 ))}
             </>

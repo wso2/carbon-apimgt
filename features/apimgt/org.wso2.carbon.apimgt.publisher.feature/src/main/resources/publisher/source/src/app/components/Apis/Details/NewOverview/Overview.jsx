@@ -148,7 +148,7 @@ function Overview(props) {
         switch (apiType) {
             case 'GRAPHQL':
                 return <Operations parentClasses={classes} api={api} />;
-            case 'APIProduct':
+            case 'APIPRODUCT':
                 return <ProductResources parentClasses={classes} api={api} />;
             case 'WS':
             case 'WEBSUB':
@@ -197,14 +197,14 @@ function Overview(props) {
                                         api.type === 'WEBSUB' ? (
                                             <Grid item xs={12} md={12} lg={12}>
                                                 <Grid item xs={12} md={12} lg={12}>
-                                                    {getResourcesClassForAPIs(api.type)}
+                                                    {getResourcesClassForAPIs(api.apiType)}
                                                 </Grid>
                                             </Grid>
                                         ) : (
                                             <>
                                                 <Grid item xs={12} md={6} lg={6}>
                                                     <Grid item xs={12} md={8} lg={8}>
-                                                        {getResourcesClassForAPIs(api.type)}
+                                                        {getResourcesClassForAPIs(api.apiType)}
                                                     </Grid>
                                                 </Grid>
                                                 <Grid item xs={12} md={6} lg={6}>

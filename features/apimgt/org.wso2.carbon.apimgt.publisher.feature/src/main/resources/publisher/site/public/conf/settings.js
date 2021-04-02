@@ -22,6 +22,8 @@ const AppConfig = {
             timeout: 4000, // Defines the timeout for the above periodical session status check
         },
         propertyDisplaySuffix: '__display',
+        loadDefaultLocales: true, // If false, Default en.json file will not be used/loaded in app.
+        // loadDefaultLocales = false is good for performance but text overrides using the locale file will not work
     },
     serviceCatalogDefinitionTypes: {
         OAS2: 'Swagger',
@@ -39,8 +41,36 @@ const AppConfig = {
         X509: 'X509',
         API_KEY: 'API Key',
     },
+    apis: {
+        alwaysShowDeploySampleButton: true,
+        endpoint: {
+            aws: {
+                regions: {
+                    'us-east-1': 'us-east-1: US East (N. Virginia)',
+                    'us-east-2': 'us-east-2: US East (Ohio)',
+                    'us-west-1': 'us-west-1: US West (N. California)',
+                    'us-west-2': 'us-west-2: US West (Oregon)',
+                    'ap-east-1': 'ap-east-1: Asia Pacific (Hong Kong)',
+                    'ap-south-1': 'ap-south-1: Asia Pacific (Mumbai)',
+                    'ap-northeast-1': 'ap-northeast-1: Asia Pacific (Tokyo)',
+                    'ap-northeast-2': 'ap-northeast-2: Asia Pacific (Seoul)',
+                    'ap-northeast-3': 'ap-northeast-3: Asia Pacific (Osaka-Local)',
+                    'ap-southeast-1': 'ap-southeast-1: Asia Pacific (Singapore)',
+                    'ap-southeast-2': 'ap-southeast-2: Asia Pacific (Sydney)',
+                    'ca-central-1': 'ca-central-1: Canada (Central)',
+                    'eu-central-1': 'eu-central-1: Europe (Frankfurt)',
+                    'eu-west-1': 'eu-west-1: Europe (Ireland)',
+                    'eu-west-2': 'eu-west-2: Europe (London)',
+                    'eu-west-3': 'eu-west-3: Europe (Paris)',
+                    'eu-north-1': 'eu-north-1: Europe (Stockholm)',
+                    'me-south-1': 'me-south-1: Middle East (Bahrain)',
+                    'sa-east-1': 'sa-east-1: South America (São Paulo)',
+                },
+            },
+        },
+    },
 };
 
 if (typeof module !== 'undefined') {
-    module.exports = AppConfig; // To be used in JS unit tests
+    module.exports = AppConfig; // For Jest unit tests
 }

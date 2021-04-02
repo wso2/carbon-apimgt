@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -32,23 +31,33 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIType;
-import org.wso2.carbon.apimgt.impl.containermgt.ContainerBasedConstants;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIEndpointURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationAttributesDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APITiersDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIURLsDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.Timestamp;
@@ -58,12 +67,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
@@ -191,8 +197,6 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
-
-        dto.setIngressURLs(extractIngressURLs(model));
 
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
@@ -836,68 +840,6 @@ public class APIMappingUtil {
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
         return apiInfoDTO;
-    }
-
-    /**
-     * Extracts the API deployment environment details with ingress url for each cluster
-     *
-     * @param api API object
-     * @return the API Deployment environments details
-     * @throws APIManagementException error while extracting the information
-     */
-    private static List<APIIngressURLsDTO> extractIngressURLs(API api)
-            throws APIManagementException {
-        List<APIIngressURLsDTO> apiDeployedIngressURLs = new ArrayList<>();
-        if (api.getDeploymentEnvironments() != null && !api.getDeploymentEnvironments().isEmpty()) {
-            Set<org.wso2.carbon.apimgt.api.model.DeploymentEnvironments> selectedDeploymentEnvironments =
-                    new HashSet<>(api.getDeploymentEnvironments());
-
-            if (selectedDeploymentEnvironments != null && !selectedDeploymentEnvironments.isEmpty()) {
-                for (org.wso2.carbon.apimgt.api.model.DeploymentEnvironments
-                        deploymentEnvironment : selectedDeploymentEnvironments) {
-                    APIIngressURLsDTO ingressURLDTO = new APIIngressURLsDTO();
-                    JSONArray clusterConfigs = APIUtil.getAllClustersFromConfig();
-                    for (Object clusterConfig : clusterConfigs) {
-                        JSONObject clusterConf = (JSONObject) clusterConfig;
-                        List<APIDeploymentClusterInfoDTO> clusterInfoArray = new ArrayList<>();
-                        if (clusterConf.get(ContainerBasedConstants.TYPE).toString()
-                                .equalsIgnoreCase(deploymentEnvironment.getType())) {
-                            JSONArray containerMgtInfoArray = (JSONArray) (clusterConf
-                                    .get(ContainerBasedConstants.CONTAINER_MANAGEMENT_INFO));
-                            for (Object containerMgtInfoObj : containerMgtInfoArray) {
-                                JSONObject containerMgtInfo = (JSONObject) containerMgtInfoObj;
-                                APIDeploymentClusterInfoDTO apiDeploymentClusterInfoDTO =
-                                        new APIDeploymentClusterInfoDTO();
-                                if (deploymentEnvironment.getClusterNames().contains(containerMgtInfo
-                                        .get(ContainerBasedConstants.CLUSTER_NAME).toString())) {
-                                    apiDeploymentClusterInfoDTO.setClusterName(containerMgtInfo
-                                            .get(ContainerBasedConstants.CLUSTER_NAME).toString());
-                                    apiDeploymentClusterInfoDTO.setClusterDisplayName(containerMgtInfo
-                                            .get(ContainerBasedConstants.DISPLAY_NAME).toString());
-                                    if(((JSONObject) containerMgtInfo.get(ContainerBasedConstants.PROPERTIES))
-                                            .get(ContainerBasedConstants.ACCESS_URL) != null){
-                                        apiDeploymentClusterInfoDTO.setIngressURL(((JSONObject) containerMgtInfo
-                                                .get(ContainerBasedConstants.PROPERTIES))
-                                                .get(ContainerBasedConstants.ACCESS_URL).toString());
-                                    }
-                                    clusterInfoArray.add(apiDeploymentClusterInfoDTO);
-                                }
-                            }
-                            if (!clusterInfoArray.isEmpty()) {
-                                ingressURLDTO.setClusterDetails(clusterInfoArray);
-                                ingressURLDTO.setDeploymentEnvironmentName(deploymentEnvironment.getType());
-                            }
-
-                        }
-                    }
-                    if (ingressURLDTO.getDeploymentEnvironmentName() != null && !ingressURLDTO.getClusterDetails()
-                            .isEmpty()) {
-                        apiDeployedIngressURLs.add(ingressURLDTO);
-                    }
-                }
-            }
-        }
-        return apiDeployedIngressURLs;
     }
 
     //    /**

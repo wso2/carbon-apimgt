@@ -23,11 +23,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage, useIntl } from 'react-intl';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from 'AppComponents/Shared/Alert';
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -36,6 +35,7 @@ import cloneDeep from 'lodash.clonedeep';
 import Api from 'AppData/api';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import ResponseCaching from './components/ResponseCaching';
 import CORSConfiguration from './components/CORSConfiguration';
 import SchemaValidation from './components/SchemaValidation';
@@ -52,7 +52,6 @@ import {
     API_SECURITY_MUTUAL_SSL_MANDATORY,
     API_SECURITY_MUTUAL_SSL,
 } from './components/APISecurity/components/apiSecurityConstants';
-import Subscription from './components/Subscription';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -145,7 +144,7 @@ function copyAPIConfig(api) {
         wsdlUrl: api.wsdlUrl,
         transport: [...api.transport],
         securityScheme: [...api.securityScheme],
-        keyManagers: [...api.keyManagers || []],
+        keyManagers: [...(api.keyManagers || [])],
         corsConfiguration: {
             corsConfigurationEnabled: api.corsConfiguration.corsConfigurationEnabled,
             accessControlAllowCredentials: api.corsConfiguration.accessControlAllowCredentials,
@@ -153,14 +152,11 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        websubSubscriptionConfiguration: {
-            secret: api.websubSubscriptionConfiguration.secret,
-            signingAlgorithm: api.websubSubscriptionConfiguration.signingAlgorithm,
-            signatureHeader: api.websubSubscriptionConfiguration.signatureHeader,
-        },
     };
     return apiConfigJson;
 }
+
+
 /**
  * This component handles the basic configurations UI in the API details page
  *
@@ -286,24 +282,14 @@ export default function RuntimeConfiguration() {
                     nextState.keyManagers = keyManagersConfigured;
                 }
                 return nextState;
-            case 'secret':
-            case 'signingAlgorithm':
-            case 'signatureHeader':
-                nextState.websubSubscriptionConfiguration[action] = value;
-                return nextState;
             default:
                 return state;
         }
     }
     const { api, updateAPI } = useContext(APIContext);
+    const history = useHistory();
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
     const isWebSub = api.type === 'WEBSUB';
-    api.websubSubscriptionConfiguration = api.websubSubscriptionConfiguration || {
-        secret: '',
-        signingAlgorithm: '',
-        signatureHeader: '',
-    };
-
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
@@ -416,6 +402,51 @@ export default function RuntimeConfiguration() {
             .finally(() => setIsUpdating(false));
     }
 
+    /**
+     *
+     * Handle the configuration view save button action
+     */
+    function handleSaveAndDeploy() {
+        const newMediationPolicies = getMediationPoliciesToSave();
+        if (api.isAPIProduct()) {
+            delete apiConfig.keyManagers; // remove keyManagers property if API type is API Product
+        } else {
+            apiConfig.mediationPolicies = newMediationPolicies;
+        }
+        if (updateComplexityList !== null) {
+            updateComplexity();
+        }
+        // Validate the key managers
+        if (
+            !api.isAPIProduct()
+            && apiConfig.securityScheme.includes('oauth2')
+            && !apiConfig.keyManagers.includes('all')
+            && (apiConfig.keyManagers && apiConfig.keyManagers.length === 0)
+        ) {
+            Alert.error(
+                intl.formatMessage(
+                    {
+                        id: 'Apis.Details.Configuration.RuntimeConfiguration.no.km.error',
+                        defaultMessage: 'Select one or more Key Managers',
+                    },
+                ),
+            );
+            return;
+        }
+        setIsUpdating(true);
+        updateAPI(apiConfig)
+            .catch((error) => {
+                if (error.response) {
+                    Alert.error(error.response.body.description);
+                }
+            })
+            .finally(() => history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            }));
+    }
+
     return (
         <>
             <Box pb={3}>
@@ -475,9 +506,6 @@ export default function RuntimeConfiguration() {
                                                 isRestricted={isRestricted(['apim:api_create'], api)}
                                             />
                                         </Box>
-                                    )}
-                                    {api.type === 'WEBSUB' && (
-                                        <Subscription api={apiConfig} configDispatcher={configDispatcher} />
                                     )}
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />
@@ -570,21 +598,27 @@ export default function RuntimeConfiguration() {
                 <Grid container>
                     <Grid container direction='row' alignItems='center' spacing={1} style={{ marginTop: 20 }}>
                         <Grid item>
-                            <Button
-                                disabled={isUpdating || api.isRevision
+                            {api.isRevision
                                 || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
-                                    || isRestricted(['apim:api_create'], api))}
-                                type='submit'
-                                variant='contained'
-                                color='primary'
-                                onClick={handleSave}
-                            >
-                                <FormattedMessage
-                                    id='Apis.Details.Configuration.Configuration.save'
-                                    defaultMessage='Save'
-                                />
-                                {isUpdating && <CircularProgress size={15} />}
-                            </Button>
+                                || isRestricted(['apim:api_create'], api)) ? (
+                                    <Button
+                                        disabled
+                                        type='submit'
+                                        variant='contained'
+                                        color='primary'
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Configuration.Configuration.save'
+                                            defaultMessage='Save'
+                                        />
+                                    </Button>
+                                ) : (
+                                    <CustomSplitButton
+                                        handleSave={handleSave}
+                                        handleSaveAndDeploy={handleSaveAndDeploy}
+                                        isUpdating={isUpdating}
+                                    />
+                                )}
                         </Grid>
                         <Grid item>
                             <Link to={'/apis/' + api.id + '/overview'}>

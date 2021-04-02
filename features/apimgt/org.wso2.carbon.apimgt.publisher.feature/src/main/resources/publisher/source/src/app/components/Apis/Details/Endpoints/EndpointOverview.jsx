@@ -283,6 +283,7 @@ function EndpointOverview(props) {
         }
     }, [props]);
 
+
     const getEndpoints = (type) => {
         if (epConfig[type]) {
             return epConfig[type].length > 0

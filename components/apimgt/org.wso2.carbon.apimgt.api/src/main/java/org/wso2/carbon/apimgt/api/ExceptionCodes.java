@@ -107,7 +107,8 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_CREATING_API_REVISION(900352, "Can not create API Revision ", 400, "Failed to create API revision registry artifacts: %s "),
     ERROR_DELETING_API_REVISION(900353, "Can not delete API Revision ", 400, "Failed to delete API revision registry artifacts: %s "),
     ERROR_RESTORING_API_REVISION(900354, "Can not restore API Revision ", 400, "Failed to restore API revision registry artifacts: %s "),
-
+    DEPLOYMENT_ID_NOT_FOUND(900355, "Deployment Id Not Found", 400, "Deployment Id Not Found"),
+    EXISTING_DEPLOYMENT_NOT_FOUND(900356, "Existing Deployment Not Found", 404, "Deployment with %s not found"),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
@@ -431,11 +432,13 @@ public enum ExceptionCodes implements ErrorHandler {
     ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty"),
 
     // API import/export related codes
-    ERROR_READING_META_DATA(900900, "Error while reading meta information from the definition", 400,
+    ERROR_READING_META_DATA(900907, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
-    ERROR_READING_PARAMS_FILE(900901, "Error while reading meta information from the params file", 400,
+    ERROR_READING_PARAMS_FILE(900908, "Error while reading meta information from the params file", 400,
             "Error while reading meta information from the params file"),
-    NO_API_ARTIFACT_FOUND(900902, "No Api artifacts found for given criteria", 404,
+    ERROR_FETCHING_DEFINITION_FILE(900909, "Cannot find the definition file of the project", 400,
+            "Cannot find the yaml/json file with the project definition."),
+    NO_API_ARTIFACT_FOUND(900910, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
 
     //AsyncApi related error codes

@@ -41,19 +41,18 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebSocketTopicMappingConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryService;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportConstants;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
@@ -574,6 +573,8 @@ public class TemplateBuilderUtil {
             addEndpoints(api, apiTemplateBuilder, productAPIDto);
             setCustomSequencesToBeAdded(apiProduct, api, productAPIDto, apiExtractedPath, apidto);
             setAPIFaultSequencesToBeAdded(api, productAPIDto, apiExtractedPath, apidto);
+            String prefix = id.getName() + "--v" + id.getVersion();
+            setSecureVaultPropertyToBeAdded(prefix, api, productAPIDto);
         }
 
         return productAPIDto;
@@ -701,7 +702,7 @@ public class TemplateBuilderUtil {
                 }
             }
         }
-        setSecureVaultPropertyToBeAdded(api, gatewayAPIDTO);
+        setSecureVaultPropertyToBeAdded(null, api, gatewayAPIDTO);
         return gatewayAPIDTO;
     }
 
@@ -771,30 +772,6 @@ public class TemplateBuilderUtil {
         }
         gatewayAPIDTO.setSequencesToBeRemove(
                 GatewayUtils.addStringToList(faultSeqExt, gatewayAPIDTO.getSequencesToBeRemove()));
-    }
-
-    /**
-     * Store the secured endpoint username password to registry.
-     *
-     * @param api
-     * @param tenantDomain
-     * @throws APIManagementException
-     */
-    private static void setSecureVaultProperty(APIGatewayAdminClient securityAdminClient, API api, String tenantDomain)
-            throws APIManagementException {
-
-        boolean isSecureVaultEnabled =
-                Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
-        if (api.isEndpointSecured() && isSecureVaultEnabled) {
-            try {
-                securityAdminClient.setSecureVaultProperty(api, tenantDomain);
-            } catch (Exception e) {
-                String msg = "Error in setting secured password.";
-                log.error(msg + ' ' + e.getLocalizedMessage(), e);
-                throw new APIManagementException(msg);
-            }
-        }
     }
 
     /**
@@ -931,7 +908,7 @@ public class TemplateBuilderUtil {
 
     }
 
-    private static void setSecureVaultPropertyToBeAdded(API api, GatewayAPIDTO gatewayAPIDTO) {
+    private static void setSecureVaultPropertyToBeAdded(String prefix, API api, GatewayAPIDTO gatewayAPIDTO) {
 
         boolean isSecureVaultEnabled =
                 Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
@@ -952,37 +929,65 @@ public class TemplateBuilderUtil {
                         productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
                 boolean isSandboxEndpointSecured = (boolean)
                         sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-                String secureVaultAlias = api.getId().getProviderName() + "--" + api.getId().getApiName() +
-                        api.getId().getVersion();
                 //for production endpoints
                 if (isProductionEndpointSecured) {
-                    CredentialDto credentialDto = new CredentialDto();
-                    credentialDto.setAlias(secureVaultAlias.concat("--").concat(APIConstants.
-                            ENDPOINT_SECURITY_PRODUCTION));
-                    credentialDto.setPassword((String)
-                            productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
-                    gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
-                            gatewayAPIDTO.getCredentialsToBeAdd()));
-                    if (log.isDebugEnabled()) {
-                        log.debug("SecureVault alias " + secureVaultAlias + "--production" + " is created for " +
-                                api.getId().getApiName());
-                    }
+                    addCredentialsToList(prefix, api, gatewayAPIDTO, productionEndpointSecurity,
+                            APIConstants.ENDPOINT_SECURITY_PRODUCTION);
                 }
-                // for sandbox endpoints
                 if (isSandboxEndpointSecured) {
-                    CredentialDto credentialDto = new CredentialDto();
-                    credentialDto.setAlias(secureVaultAlias.concat("--").concat(APIConstants.
-                            ENDPOINT_SECURITY_SANDBOX));
-                    credentialDto.setPassword((String)
-                            sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
-                    gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
-                            gatewayAPIDTO.getCredentialsToBeAdd()));
-                    if (log.isDebugEnabled()) {
-                        log.debug("SecureVault alias " + secureVaultAlias + "--sandbox" + " is created for " +
-                                api.getId().getApiName());
-                    }
+                    addCredentialsToList(prefix, api, gatewayAPIDTO, sandboxEndpointSecurity,
+                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+
                 }
             }
+        }
+    }
+
+    private static void addCredentialsToList(String prefix, API api, GatewayAPIDTO gatewayAPIDTO,
+                                             org.json.JSONObject endpointSecurity, String type) {
+
+        if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) endpointSecurity
+                .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+            CredentialDto clientSecretDto = new CredentialDto();
+            if (StringUtils.isNotEmpty(prefix)) {
+                clientSecretDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                        .retrieveOauthClientSecretAlias(api.getId().getApiName(), api.getId().getVersion(), type)));
+            } else {
+                clientSecretDto.setAlias(GatewayUtils.retrieveOauthClientSecretAlias(api.getId().getApiName()
+                        , api.getId().getVersion(), type));
+            }
+            clientSecretDto.setPassword((String) endpointSecurity
+                    .get(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET));
+            gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(clientSecretDto,
+                    gatewayAPIDTO.getCredentialsToBeAdd()));
+            if (endpointSecurity.has(APIConstants.ENDPOINT_SECURITY_PASSWORD)) {
+                CredentialDto passwordDto = new CredentialDto();
+                if (StringUtils.isNotEmpty(prefix)) {
+                    passwordDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                            .retrieveOAuthPasswordAlias(api.getId().getApiName(), api.getId().getVersion(), type)));
+                } else {
+                    passwordDto.setAlias(GatewayUtils.retrieveOAuthPasswordAlias(api.getId().getApiName()
+                            , api.getId().getVersion(), type));
+                }
+                passwordDto.setPassword((String) endpointSecurity
+                        .get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
+                gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(passwordDto,
+                        gatewayAPIDTO.getCredentialsToBeAdd()));
+            }
+        } else if (APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase((String)
+                endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+            CredentialDto credentialDto = new CredentialDto();
+            if (StringUtils.isNotEmpty(prefix)) {
+                credentialDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                        .retrieveBasicAuthAlias(api.getId().getApiName(), api.getId().getVersion(), type)));
+            } else {
+                credentialDto.setAlias(GatewayUtils.retrieveBasicAuthAlias(api.getId().getApiName()
+                        , api.getId().getVersion(), type));
+            }
+            credentialDto.setPassword((String)
+                    endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
+            gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(credentialDto,
+                    gatewayAPIDTO.getCredentialsToBeAdd()));
         }
     }
 
@@ -1093,7 +1098,7 @@ public class TemplateBuilderUtil {
     private static Map<String, APIDTO> retrieveAssociatedApis(String extractedPath) throws APIManagementException {
 
         Map<String, APIDTO> apidtoMap = new HashMap();
-        String apisDirectoryPath = extractedPath + File.separator + APIImportExportConstants.APIS_DIRECTORY;
+        String apisDirectoryPath = extractedPath + File.separator + ImportExportConstants.APIS_DIRECTORY;
         File apisDirectory = new File(apisDirectoryPath);
         File[] apisDirectoryListing = apisDirectory.listFiles();
         if (apisDirectoryListing != null) {

@@ -46,8 +46,8 @@ public class SQLConstants {
 
     public static final String ADD_APPLICATION_KEY_MAPPING_SQL =
             " INSERT INTO " +
-            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE,KEY_MANAGER,UUID) " +
-            " VALUES(?,?,?,?,?)";
+            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE,KEY_MANAGER,UUID,CREATE_MODE) " +
+            " VALUES(?,?,?,?,?,?)";
 
     public static final String GET_SUBSCRIBED_APIS_OF_USER_SQL =
             " SELECT " +
@@ -339,6 +339,7 @@ public class SQLConstants {
             "   SUBS.UUID AS UUID, " +
             "   SUBS.CREATED_TIME AS CREATED_TIME, " +
             "   SUBS.UPDATED_TIME AS UPDATED_TIME, " +
+            "   API.API_UUID AS API_UUID, " +
             "   API.API_ID AS API_ID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
@@ -1696,6 +1697,25 @@ public class SQLConstants {
                     "AUM.REVISION_UUID IS NULL " +
             " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
+    public static final String GET_URL_TEMPLATES_OF_API_WITH_PRODUCT_MAPPINGS_SQL =
+            " SELECT " +
+                    "  AUM.URL_MAPPING_ID," +
+                    "   AUM.URL_PATTERN," +
+                    "   AUM.HTTP_METHOD," +
+                    "   AUM.AUTH_SCHEME," +
+                    "   AUM.THROTTLING_TIER," +
+                    "   AUM.MEDIATION_SCRIPT," +
+                    "   ARSM.SCOPE_NAME " +
+                    " FROM " +
+                    "   AM_API_URL_MAPPING AUM " +
+                    " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                    " LEFT OUTER JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID" +
+                    " WHERE " +
+                    "  API.API_PROVIDER = ? AND " +
+                    "  API.API_NAME = ? AND " +
+                    "  API.API_VERSION = ? " +
+                    " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
     public static final String GET_URL_TEMPLATES_OF_API_REVISION_SQL =
             " SELECT " +
                     "  AUM.URL_MAPPING_ID," +
@@ -1731,6 +1751,22 @@ public class SQLConstants {
             "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
             "   WHERE API.API_PROVIDER = ? AND " +
             "   API.API_NAME = ? AND API.API_VERSION = ? AND AUM.REVISION_UUID IS NULL AND APM.REVISION_UUID = 'Current API')";
+
+    public static final String GET_ASSOCIATED_API_PRODUCT_URL_TEMPLATES_SQL =
+            " SELECT " +
+                    "  API.API_PROVIDER," +
+                    "  API.API_NAME," +
+                    "  API.API_VERSION," +
+                    "  APM.URL_MAPPING_ID  " +
+                    "  FROM " +
+                    "  AM_API API " +
+                    "  INNER JOIN AM_API_PRODUCT_MAPPING APM ON API.API_ID = APM.API_ID " +
+                    "  WHERE APM.URL_MAPPING_ID IN " +
+                    "   (SELECT AUM.URL_MAPPING_ID " +
+                    "   FROM AM_API_URL_MAPPING AUM " +
+                    "   INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                    "   WHERE API.API_PROVIDER = ? AND " +
+                    "   API.API_NAME = ? AND API.API_VERSION = ? AND APM.REVISION_UUID = 'Current API')";
 
     public static final String ADD_COMMENT_SQL =
             " INSERT INTO " +
@@ -2665,7 +2701,7 @@ public class SQLConstants {
             "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
                     "KEY_MANAGER = ?";
     public static final String GET_KEY_MAPPING_INFO_FROM_APP_ID = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE," +
-            "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
+            "STATE,APP_INFO,CREATE_MODE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
     public static final String ADD_GW_PUBLISHED_API_DETAILS = "INSERT INTO AM_GW_PUBLISHED_API_DETAILS (API_ID, " +
             "API_NAME, API_VERSION, TENANT_DOMAIN,API_TYPE) VALUES (?,?,?,?,?)";
@@ -2700,7 +2736,7 @@ public class SQLConstants {
     public static final String CHECK_ARTIFACT_EXISTS = "SELECT 1 FROM AM_GW_API_ARTIFACTS" +
             " WHERE API_ID = ? AND REVISION_ID = ?";
     public static final String ADD_GW_PUBLISHED_LABELS = "INSERT INTO AM_GW_API_DEPLOYMENTS (API_ID,REVISION_ID," +
-            "LABEL) VALUES (?,?,?)";
+            "LABEL,VHOST) VALUES (?,?,?,?)";
     public static final String DELETE_GW_PUBLISHED_LABELS = "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ? AND " +
             "REVISION_ID = ?";
     public static final String DELETE_GW_PUBLISHED_LABELS_BY_API_ID_REVISION_ID_DEPLOYMENT = "DELETE FROM " +
@@ -2720,7 +2756,7 @@ public class SQLConstants {
                     ".API_PROVIDER AS API_PROVIDER," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
-                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL,AM_GW_API_DEPLOYMENTS.VHOST AS VHOST " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_API_DEPLOYMENTS.API_ID= ? AND AM_GW_API_DEPLOYMENTS.LABEL IN (_GATEWAY_LABELS_) AND " +
@@ -2735,7 +2771,7 @@ public class SQLConstants {
                     ".API_PROVIDER AS API_PROVIDER," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
-                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL,AM_GW_API_DEPLOYMENTS.VHOST AS VHOST " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_API_DEPLOYMENTS.LABEL IN (_GATEWAY_LABELS_) AND AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN " +
@@ -2749,7 +2785,7 @@ public class SQLConstants {
                     "API_PROVIDER,AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS " +
                     "API_VERSION," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
-                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL,AM_GW_API_DEPLOYMENTS.VHOST AS VHOST " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
@@ -3321,8 +3357,8 @@ public class SQLConstants {
                         " VALUES (?,?,?,?)";
         public static final String DELETE_API_REVISION_DEPLOYMENTS_MAPPING_BY_REVISION_UUID =
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
-        public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_TYPE
-                = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ?";
+        public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_NAME_AND_REVISION_UUID
+                = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ? ";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPING_BY_REVISION_UUID
                 = "SELECT * FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_API_REVISION_DEPLOYMENT_MAPPINGS_BY_API_UUID
@@ -3333,6 +3369,8 @@ public class SQLConstants {
                 "ADRM.REVISION_UUID = AR.REVISION_UUID WHERE AR.API_UUID = ?";
         public static final String REMOVE_API_REVISION_DEPLOYMENT_MAPPING =
                 " DELETE FROM AM_DEPLOYMENT_REVISION_MAPPING WHERE NAME = ? AND REVISION_UUID = ?";
+        public static final String UPDATE_API_REVISION_DEPLOYMENT_MAPPING =
+                " UPDATE AM_DEPLOYMENT_REVISION_MAPPING SET DISPLAY_ON_DEVPORTAL = ? WHERE NAME = ? AND REVISION_UUID = ? ";
         public static final String REMOVE_CURRENT_API_ENTRIES_IN_AM_API_URL_MAPPING_BY_API_ID =
                 "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID IS NULL";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +

@@ -102,6 +102,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.registry.common.ResourceData;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Collection;
@@ -700,7 +701,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
             RegistryHolder holder = getRegistry(tenantDomain);
             Registry registry = holder.getRegistry();
             tenantFlowStarted = holder.isTenantFlowStarted();
-            //String username = holder.getRegistryUser();
 
             GenericArtifact apiArtifact = getAPIArtifact(apiId, registry);
             if (apiArtifact != null) {
@@ -861,8 +861,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherAPISearchResult result = null;
         try {
-            RegistryHolder holder = getRegistry(ctx.getUserame(), requestedTenantDomain);
-            Registry userRegistry = holder.getRegistry();
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry sysRegistry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
             int tenantIDLocal = holder.getTenantId();
             log.debug("Requested query for publisher search: " + searchQuery);
@@ -871,14 +871,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
             
             log.debug("Modified query for publisher search: " + modifiedQuery);
 
-            String userNameLocal = getTenantAwareUsername(ctx.getUserame());
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
+            String tenantAdminUsername = getTenantAwareUsername(
+                    RegistryPersistenceUtil.getTenantAdminUserName(requestedTenantDomain));
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAdminUsername);
 
             if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                result = searchPaginatedPublisherAPIsByDoc(userRegistry, tenantIDLocal, searchQuery.split(":")[1],
-                        userNameLocal, start, offset);
+                result = searchPaginatedPublisherAPIsByDoc(sysRegistry, tenantIDLocal, searchQuery.split(":")[1],
+                        tenantAdminUsername, start, offset);
             } else {
-                result = searchPaginatedPublisherAPIs(userRegistry, tenantIDLocal, modifiedQuery, start, offset);
+                result = searchPaginatedPublisherAPIs(sysRegistry, tenantIDLocal, modifiedQuery, start, offset);
             }
         } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while searching APIs " , e);
@@ -978,7 +979,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     isAllowDisplayAPIsWithMultipleStatus());
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
-            String userNameLocal = getTenantAwareUsername(ctx.getUserame());
+            String userNameLocal;
+            if (holder.isAnonymousMode()) {
+                userNameLocal = APIConstants.WSO2_ANONYMOUS_USER;
+            } else {
+                userNameLocal = getTenantAwareUsername(ctx.getUserame());
+            }
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
             if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
@@ -1193,7 +1199,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
         PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
         try {
 
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             if (artifactManager == null) {
@@ -2913,6 +2918,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
         private Registry registry;
         private boolean isTenantFlowStarted;
         private int tenantId;
+        private boolean isAnonymousMode;
+
+        public boolean isAnonymousMode() {
+            return isAnonymousMode;
+        }
+
+        public void setAnonymousMode(boolean anonymousMode) {
+            isAnonymousMode = anonymousMode;
+        }
 
         public Registry getRegistry() {
             return registry;
@@ -3013,6 +3027,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, id);
                     holder.setTenantId(id);
                 } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant
+                    holder.setAnonymousMode(true);
                     log.debug("Cross tenant user from tenant " + userTenantDomain + " accessing "
                             + requestedTenantDomain + " registry");
                     loadTenantRegistry(id);

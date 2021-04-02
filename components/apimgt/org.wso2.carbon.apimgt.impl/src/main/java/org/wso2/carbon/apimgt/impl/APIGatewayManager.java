@@ -24,15 +24,13 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
-import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
-import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.HashSet;
@@ -145,13 +143,6 @@ public class APIGatewayManager {
     }
 
     public void unDeployFromGateway(API api, String tenantDomain, Set<String> gatewaysToRemove) {
-
-        // Extracting API details for the recommendation system
-        if (recommendationEnvironment != null) {
-            RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(api, tenantDomain);
-            Thread recommendationThread = new Thread(extractor);
-            recommendationThread.start();
-        }
 
         if (debugEnabled) {
             log.debug("Status of " + api.getId() + " has been updated to DB");

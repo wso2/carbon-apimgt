@@ -30,7 +30,7 @@ export default function ConfirmDialog(props) {
     }
 
     return (
-        <Dialog open={open} onClose={handleRequestClose}>
+        <Dialog onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} open={open} onClose={handleRequestClose}>
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <DialogContentText>{message}</DialogContentText>

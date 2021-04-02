@@ -331,13 +331,6 @@ public final class APIConstants {
     public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
-    public static final String API_OVERVIEW_ENDPOINT_OAUTH = "overview_endpointOAuth";
-    public static final String API_OVERVIEW_ENDPOINT_GRANT_TYPE = "overview_grantType";
-    public static final String API_OVERVIEW_ENDPOINT_HTTP_METHOD = "overview_httpMethod";
-    public static final String API_OVERVIEW_ENDPOINT_TOKEN_URL = "overview_endpointTokenUrl";
-    public static final String API_OVERVIEW_ENDPOINT_CLIENT_ID = "overview_clientId";
-    public static final String API_OVERVIEW_ENDPOINT_CLIENT_SECRET = "overview_clientSecret";
-    public static final String API_OVERVIEW_ENDPOINT_CUSTOM_PARAMETERS = "overview_customParameters";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
     public static final String API_OVERVIEW_INSEQUENCE = "overview_inSequence";
     public static final String API_OVERVIEW_OUTSEQUENCE = "overview_outSequence";
@@ -353,7 +346,6 @@ public final class APIConstants {
     public static final String API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY = "oauth_basic_auth_api_key_mandatory";
     public static final String CERTIFICATE_COMMON_NAME = "CN";
     public static final List<String> APPLICATION_LEVEL_SECURITY = Arrays.asList("basic_auth", "api_key", "oauth2");
-    public static final String API_OVERVIEW_DEPLOYMENTS = "overview_deployments";
     public static final String BEGIN_CERTIFICATE_STRING = "-----BEGIN CERTIFICATE-----\n";
     public static final String BEGIN_CERTIFICATE_STRING_SPACE = "-----BEGIN CERTIFICATE----- ";
     public static final String END_CERTIFICATE_STRING = "-----END CERTIFICATE-----";
@@ -587,8 +579,6 @@ public final class APIConstants {
     public static final String IDENTITY_TOKEN_ENDPOINT_CONTEXT = "/oauth2/token";
     public static final String GATEWAY_SIGNED_JWT_CACHE = "SignedJWTParseCache";
 
-    public static final String DEFAULT_RESERVED_USERNAME = "apim_reserved_user";
-
     public static final String DEFAULT_WEBSOCKET_VERSION = "defaultVersion";
     public static final String ENCRYPTED_VALUE = "encrypted";
     public static final String VALUE = "value";
@@ -606,6 +596,7 @@ public final class APIConstants {
     public static final String API_TYPE_WS = "WS";
     public static final String GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME = "gatewayInternalKeyDataCache";
     public static final String GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME = "gatewayInvalidInternalKeyCache";
+    public static final String GRANT_TYPE_PASSWORD = "password";
 
     public static class TokenStatus {
 
@@ -797,6 +788,8 @@ public final class APIConstants {
     public static final String API_DEVPORTAL_ANONYMOUS_MODE = API_STORE + "EnableAnonymousMode";
     public static final String API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION = API_STORE +
             "EnableCrossTenantSubscription";
+    public static final String API_DEVPORTAL_DEFAULT_RESERVED_USERNAME = API_STORE +
+            "DefaultReservedUsername";
 
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
@@ -934,6 +927,8 @@ public final class APIConstants {
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
     public static final String API_ANALYTICS_REPORTER_CLASS = API_ANALYTICS + "ReporterClass";
     public static final String API_ANALYTICS_PROPERTIES = API_ANALYTICS + "Properties";
+    public static final String API_ANALYTICS_RESPONSE_SCHEMA_NAME = API_ANALYTICS + "ResponseSchemaName";
+    public static final String API_ANALYTICS_FAULT_SCHEMA_NAME = API_ANALYTICS + "FaultSchemaName";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "StreamProcessorServerURL";
     public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "StreamProcessorAuthServerURL";
     public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
@@ -1211,6 +1206,7 @@ public final class APIConstants {
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
         public static final String KEY_MAPPING_ID = "keyMappingId";
+        public static final String MODE = "mode";
     }
 
     public static class AccessTokenConstants {
@@ -1383,6 +1379,12 @@ public final class APIConstants {
     public static final String HTTP_CLIENT_MAX_TOTAL = "HttpClient.MaxTotal";
     public static final String HTTP_CLIENT_DEFAULT_MAX_PER_ROUTE = "HttpClient.DefaultMaxPerRoute";
 
+    public static final String PROXY_ENABLE = "ProxyConfig.Enable";
+    public static final String PROXY_HOST = "ProxyConfig.Host";
+    public static final String PROXY_PORT = "ProxyConfig.Port";
+    public static final String PROXY_USERNAME = "ProxyConfig.Username";
+    public static final String PROXY_PASSWORD = "ProxyConfig.Password";
+
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
     public static final String KEYMANAGER_SERVERURL = API_KEY_VALIDATOR + "ServerURL";
@@ -1406,7 +1408,6 @@ public final class APIConstants {
     public static final String API_CUSTOM_SEQ_IN_EXT = "--In";
     public static final String API_CUSTOM_SEQ_OUT_EXT = "--Out";
     public static final String API_CUSTOM_SEQ_FAULT_EXT = "--Fault";
-    public static final String API_CUSTOM_SEQ_JSON_FAULT = "json_fault.xml";
 
     public static final String API_MANAGER_HOSTNAME = "HostName";
     public static final String API_MANAGER_HOSTNAME_UNKNOWN = "UNKNOWN_HOST";
@@ -2227,7 +2228,7 @@ public final class APIConstants {
         public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
         public static final String REST_API_ADMIN_VERSION = "v0.17";
         public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
-        public static final String REST_API_ADMIN_IMPORT_API_RESOURCE = "/import/api";
+        public static final String REST_API_PUBLISHER_API_IMPORT_RESOURCE = "/apis/import";
         public static final String IMPORT_API_PRESERVE_PROVIDER = "preserveProvider";
         public static final String IMPORT_API_OVERWRITE = "overwrite";
         public static final String IMPORT_API_ARCHIVE_FILE = "file";
@@ -2540,14 +2541,6 @@ public final class APIConstants {
 
     }
 
-    public static class ContainerMgtAttributes {
-
-        public static final String DEPLOYMENTS = "Deployments";
-        public static final String CONTAINER_MANAGEMENT = "ContainerMgt";
-        public static final String CONTAINER_MANAGEMENT_INFO = "ContainerMgtInfo";
-
-    }
-
     public static class AsyncApi {
         public static final String ASYNC_MESSAGE_TYPE = "ASYNC_MESSAGE_TYPE";
         public static final String ASYNC_MESSAGE_TYPE_SUBSCRIBE = "init-request:";
@@ -2713,5 +2706,10 @@ public final class APIConstants {
         public static final String EXTENSION_LISTENER = "ExtensionListener";
         public static final String EXTENSION_TYPE = "Type";
         public static final String EXTENSION_LISTENER_CLASS_NAME = "ClassName";
+    }
+
+    public static class GatewayArtifactConstants {
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE = "deployments";
+        public static final String DEPLOYMENT_DESCRIPTOR_FILE_TYPE = "deployments";
     }
 }

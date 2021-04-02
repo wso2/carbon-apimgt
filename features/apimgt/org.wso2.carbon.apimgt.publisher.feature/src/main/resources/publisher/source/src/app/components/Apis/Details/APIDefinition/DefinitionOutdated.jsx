@@ -73,7 +73,7 @@ export default function DefinitionOutdated(props) {
 
     function showdiff() {
         setShowDiff(true);
-        const promisedServices = ServiceCatalog.searchServices(api.serviceInfo.key);
+        const promisedServices = ServiceCatalog.searchServiceByKey(api.serviceInfo.key);
         promisedServices.then((data) => {
             return ServiceCatalog.getServiceDefinition(data.body.list[0].id).then((file) => {
                 setNewDefinition(JSON.stringify(file, null, 2));

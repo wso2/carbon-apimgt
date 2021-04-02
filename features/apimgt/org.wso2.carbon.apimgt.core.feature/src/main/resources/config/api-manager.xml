@@ -63,7 +63,7 @@
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
         <GatewayJWTGeneration>
-            <ImplClass>org.wso2.carbon.apimgt.gateway.handlers.security.jwt.generator.APIMgtGatewayJWTGeneratorImpl</ImplClass>
+            <ImplClass>org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl</ImplClass>
             <Configuration>
                 <ClaimMappings>
                     <Claim>
@@ -169,6 +169,8 @@
     <Analytics>
         <!-- Enable Analytics for API Manager -->
         <Enabled>false</Enabled>
+
+        <AuthToken></AuthToken>
 
         <!-- Event publisher implementation -->
         <!-- <ReporterClass></ReporterClass> -->

@@ -158,7 +158,9 @@ class CommentAdd extends React.Component {
             }));
         }
         this.setState({ currentLength: 0 });
-        handleShowReply(-1);
+        if (replyTo !== null) {
+            handleShowReply();
+        }
     }
 
     /**
@@ -186,10 +188,6 @@ class CommentAdd extends React.Component {
                             autoFocus
                             multiline
                             rows='4'
-                            label={intl.formatMessage({
-                                defaultMessage: 'Comment',
-                                id: 'Apis.Details.Comments.CommentAdd.comment',
-                            })}
                             className={classes.textField}
                             margin='normal'
                             placeholder={intl.formatMessage({

@@ -1,281 +1,159 @@
-/*
- * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- * WSO2 Inc. licenses this file to you under the Apache License,
- * Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
-import Typography from '@material-ui/core/Typography';
-import Box from '@material-ui/core/Box';
+import Tooltip from '@material-ui/core/Tooltip';
+import { FormattedMessage } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
+import Alert from 'AppComponents/Shared/Alert';
 import Grid from '@material-ui/core/Grid';
-import green from '@material-ui/core/colors/green';
+import StepConnector from '@material-ui/core/StepConnector';
+import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAppContext } from 'AppComponents/Shared/AppContext';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { Link } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
-import Tooltip from '@material-ui/core/Tooltip';
-import Button from '@material-ui/core/Button';
-import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
-import Alert from 'AppComponents/Shared/Alert';
+import grey from '@material-ui/core/colors/grey';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import AuthManager from 'AppData/AuthManager';
+import Typography from '@material-ui/core/Typography';
+
+const ColorlibConnector = withStyles({
+    alternativeLabel: {
+        top: 22,
+    },
+    active: {
+        '& $line': {
+            backgroundImage:
+                'linear-gradient(to left, #50BCEC 50%, #B1D31E 50%)',
+        },
+    },
+    completed: {
+        '& $line': {
+            backgroundImage:
+                'linear-gradient( #B1D31E, #B1D31E)',
+        },
+    },
+    line: {
+        height: 3,
+        border: 0,
+        backgroundColor: '#eaeaf0',
+        borderRadius: 1,
+    },
+})(StepConnector);
+
+const useColorlibStepIconStyles = makeStyles({
+    root: {
+        backgroundColor: '#ccc',
+        zIndex: 1,
+        color: '#fff',
+        width: 56,
+        height: 56,
+        display: 'flex',
+        borderRadius: '50%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        border: '6px solid #E2E2E2',
+    },
+    active: {
+        backgroundColor: '#50BCEC',
+        border: '6px solid #E2E2E2',
+    },
+    completed: {
+        backgroundColor: '#B1D31E',
+        border: '6px solid #E2E2E2',
+    },
+});
+
+function ColorlibStepIcon(props) {
+    const classes = useColorlibStepIconStyles();
+    const { active, completed } = props;
+
+    return (
+        <div
+            className={clsx(classes.root, {
+                [classes.active]: active,
+                [classes.completed]: completed,
+            })}
+        />
+    );
+}
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        width: '90%',
+        width: '100%',
     },
     button: {
-        color: theme.palette.secondary,
         marginRight: theme.spacing(1),
     },
-    gridRequirements: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: theme.spacing(2),
-    },
-    gridSmall: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 0,
+    instructions: {
         marginTop: theme.spacing(1),
-    },
-    gridEndpoint: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 0,
-        marginRight: theme.spacing(4.2),
-        marginTop: theme.spacing(0.5),
-    },
-    lifeCycleStateStyle: {
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 0,
-        marginRight: theme.spacing(4.2),
-        marginTop: theme.spacing(0.5),
+        marginBottom: theme.spacing(1),
     },
     iconTrue: {
-        color: green[500],
         display: 'block',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginRight: theme.spacing(1),
+        backgroundColor: '#B1D31E',
+        zIndex: 1,
+        color: '#fff',
+        width: 15,
+        height: 15,
+        borderRadius: '50%',
     },
     iconFalse: {
-        color: theme.palette.grey[500],
+        color: '#fff',
         display: 'block',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginRight: theme.spacing(1),
-    },
-    arrowIcon: {
-        position: 'absolute',
-        top: '16px',
-        right: '-76px',
-        fontSize: '7.9461rem',
-        color: theme.palette.background.default,
-        zIndex: theme.zIndex.overviewArrow,
-    },
-    label: {
-        paddingLeft: '0',
-        paddingRight: '0',
-        flexBasis: '33.3333%',
-        maxWidth: '33.3333%',
-    },
-    stepper: {
-        background: 'transparent',
-        marginLeft: theme.spacing(10),
-    },
-    box: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'transparent',
-        padding: '2px',
-        height: '82px',
-        borderRight: '0',
-        marginRight: '0',
-    },
-    pointerStart: {
-        height: 82,
-        position: 'relative',
-        background: theme.custom.overviewStepper.backgrounds.completed,
-        marginRight: '21px',
-        '&:before': {
-            content: '""',
-            position: 'absolute',
-            right: '-41px',
-            bottom: 0,
-            width: 0,
-            height: 0,
-            borderLeft: '41px solid',
-            borderLeftColor: theme.custom.overviewStepper.backgrounds.completed,
-            borderTop: '41px solid transparent',
-            borderBottom: '41px solid transparent',
-        },
-    },
-    pointerMiddle: {
-        height: 82,
-        position: 'relative',
-        background: theme.custom.overviewStepper.backgrounds.active,
-        margin: '0 20px',
-        '&:before': {
-            content: '""',
-            position: 'absolute',
-            right: '-41px',
-            bottom: 0,
-            width: 0,
-            height: 0,
-            borderLeft: '41px solid',
-            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
-            borderTop: '41px solid transparent',
-            borderBottom: '41px solid transparent',
-        },
-        '&:after': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            width: 0,
-            height: 0,
-            borderLeft: '41px solid',
-            borderLeftColor: theme.custom.wrapperBackground,
-            borderTop: '41px solid transparent',
-            borderBottom: '41px solid transparent',
-        },
-    },
-    pointerMiddle1: {
-        height: 82,
-        position: 'relative',
-        background: theme.custom.overviewStepper.backgrounds.active,
-        margin: '0 20px',
-        '&:before': {
-            content: '""',
-            position: 'absolute',
-            right: '-41px',
-            bottom: 0,
-            width: 0,
-            height: 0,
-            borderLeft: '41px solid',
-            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
-            borderTop: '41px solid transparent',
-            borderBottom: '41px solid transparent',
-        },
-        '&:after': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            width: 0,
-            height: 0,
-            borderLeft: '41px solid',
-            borderLeftColor: theme.custom.wrapperBackground,
-            borderTop: '41px solid transparent',
-            borderBottom: '41px solid transparent',
-        },
-    },
-    pointerEnd: {
-        height: 82,
-        position: 'relative',
-        background: theme.custom.overviewStepper.backgrounds.inactive,
-        marginLeft: '21px',
-        '&:after': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            width: 0,
-            height: 0,
-            borderLeft: '41px solid',
-            borderLeftColor: theme.custom.wrapperBackground,
-            borderTop: '41px solid transparent',
-            borderBottom: '41px solid transparent',
-        },
-    },
-    pointerMiddleCompleted: {
-        background: theme.custom.overviewStepper.backgrounds.completed,
-        '&:before': {
-            borderLeftColor: theme.custom.overviewStepper.backgrounds.completed,
-        },
-    },
-    pointerMiddleActive: {
-        background: theme.custom.overviewStepper.backgrounds.active,
-        '&:before': {
-            borderLeftColor: theme.custom.overviewStepper.backgrounds.active,
-        },
-    },
-    pointerMiddleDisabled: {
-        background: theme.custom.overviewStepper.backgrounds.inactive,
-        '&:before': {
-            borderLeftColor: theme.custom.overviewStepper.backgrounds.inactive,
-        },
-    },
-    pointerEndActive: {
-        background: theme.custom.overviewStepper.backgrounds.active,
-    },
-    pointerEndCompleted: {
-        background: theme.custom.overviewStepper.backgrounds.completed,
-    },
-    stepIcon: {
-        fontSize: theme.custom.overviewStepper.iconSize,
-    },
-    progressWrapper: {
-        padding: theme.spacing(),
-        textAlign: 'center',
+        backgroundColor: grey[500],
+        zIndex: 1,
+        width: 15,
+        height: 15,
+        borderRadius: '50%',
     },
 }));
 
-/**
- * This component renders the API steps
- *
- */
-export default function CustomizedSteppers() {
-    const [api, updateAPI] = useAPI();
+
+export default function CustomizedStepper() {
     const classes = useStyles();
-    // const { settings, user } = useAppContext();
-    const isEndpointAvailable = api.endpointConfig !== null;
-    const isTierAvailable = api.policies.length !== 0;
-    const isPrototypedAvailable = api.endpointConfig !== null
-        && api.endpointConfig.implementation_status === 'prototyped';
-    const [lifecycleState, setlifecycleState] = useState(null);
+    const [api, updateAPI] = useAPI();
     const [isUpdating, setUpdating] = useState(false);
     const [deploymentsAvailable, setDeploymentsAvailable] = useState(false);
-    // const { tenantList } = useContext(ApiContext);
-    // const userNameSplit = user.name.split('@');
-    // const tenantDomain = userNameSplit[userNameSplit.length - 1];
-    // let devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview`;
-    // if (tenantList && tenantList.length > 0) {
-    //     devportalUrl = `${settings.storeUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
-    // }
+    const isPrototypedAvailable = api.endpointConfig !== null
+    && api.endpointConfig.implementation_status === 'prototyped';
+    const isEndpointAvailable = api.endpointConfig !== null;
+    const isTierAvailable = api.policies.length !== 0;
+    const { tenantList } = useContext(ApiContext);
+    const { settings, user } = useAppContext();
+    const userNameSplit = user.name.split('@');
+    const tenantDomain = userNameSplit[userNameSplit.length - 1];
+    let devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview`;
+    if (tenantList && tenantList.length > 0) {
+        devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
+    }
+    const steps = ['Develop', 'Deploy', 'Test', 'Publish'];
+
+    let activeStep = 0;
+    if (api && (api.type === 'WEBSUB' || isEndpointAvailable) && isTierAvailable && !deploymentsAvailable) {
+        activeStep = 1;
+    } else if ((api && !isEndpointAvailable && api.type !== 'WEBSUB') || (api && !isTierAvailable)) {
+        activeStep = 0;
+    } else if (api && (isEndpointAvailable || api.type === 'WEBSUB') && isTierAvailable
+        && deploymentsAvailable && (api.lifeCycleStatus !== 'PUBLISHED' && api.lifeCycleStatus !== 'PROTOTYPED')) {
+        activeStep = 3;
+    } else if ((api.lifeCycleStatus === 'PUBLISHED' || api.lifeCycleStatus === 'PROTOTYPED') && api
+        && (isEndpointAvailable || api.type === 'WEBSUB' || isPrototypedAvailable)
+        && isTierAvailable && deploymentsAvailable) {
+        activeStep = 4;
+    }
 
     useEffect(() => {
-        api.getLcState(api.id)
-            .then((result) => {
-                setlifecycleState(result.body.state);
-            });
         api.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
             setDeploymentsAvailable(result.body.count > 0);
         });
@@ -310,30 +188,64 @@ export default function CustomizedSteppers() {
     }
 
     /**
- * This function renders the final lifecycle state
- * @param {*} state
- */
+     * This function renders the final lifecycle state
+     * @param {*} state
+     */
     function finalLifecycleState(state) {
         switch (state) {
-            case 'Published':
+            case 'PUBLISHED':
                 return (
                     <>
-                        {lifecycleState === 'Published' ? (
-                            <CheckIcon className={classes.iconTrue} />
-                        ) : (
-                            <CloseIcon className={classes.iconFalse} />
-                        )}
-                        <Typography variant='h7'>
-                            <b>
-                                <FormattedMessage
-                                    id='Apis.Details.Overview.CustomizedStepper.published'
-                                    defaultMessage='Published'
-                                />
-                            </b>
-                        </Typography>
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='center'
+                            justify='center'
+                        >
+                            <Grid item>
+                                <CheckIcon className={classes.iconTrue} />
+                            </Grid>
+                            <Box ml={1}>
+                                <Grid item>
+                                    <Typography variant='h7'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.CustomizedStepper.publish'
+                                            defaultMessage=' Published (Current API)'
+                                        />
+                                    </Typography>
+                                </Grid>
+                            </Box>
+                        </Grid>
+                        <Grid
+                            container
+                            direction='row'
+                            alignItems='center'
+                            justify='center'
+                        >
+                            <Box mt={1}>
+                                <Typography variant='h7' color='primary'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.CustomizedStepper.view.devportal'
+                                        defaultMessage='View in devportal'
+                                    />
+                                </Typography>
+                            </Box>
+                            <Box ml={1} mt={1}>
+                                <a
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    href={devportalUrl}
+                                >
+                                    <LaunchIcon
+                                        color='primary'
+                                        fontSize='small'
+                                    />
+                                </a>
+                            </Box>
+                        </Grid>
                     </>
                 );
-            case 'Prototyped':
+            case 'PROTOTYPED':
                 return (
                     <Typography variant='h7'>
                         <b>
@@ -344,7 +256,7 @@ export default function CustomizedSteppers() {
                         </b>
                     </Typography>
                 );
-            case 'Blocked':
+            case 'BLOCKED':
                 return (
                     <Typography variant='h7'>
                         <b>
@@ -355,7 +267,7 @@ export default function CustomizedSteppers() {
                         </b>
                     </Typography>
                 );
-            case 'Deprecated':
+            case 'DEPRECATED':
                 return (
                     <Typography variant='h7'>
                         <b>
@@ -366,7 +278,7 @@ export default function CustomizedSteppers() {
                         </b>
                     </Typography>
                 );
-            case 'Retired':
+            case 'RETIRED':
                 return (
                     <Typography variant='h7'>
                         <b>
@@ -386,7 +298,9 @@ export default function CustomizedSteppers() {
                                 variant='contained'
                                 color='primary'
                                 onClick={() => updateLCStateOfAPI(api.id, 'Deploy as a Prototype')}
-                                disabled={api.workflowStatus === 'CREATED' || AuthManager.isNotPublisher()}
+                                disabled={api.workflowStatus === 'CREATED'
+                                    || AuthManager.isNotPublisher()
+                                    || !deploymentsAvailable}
                             >
                                 Deploy as a prototype
                                 {isUpdating && <CircularProgress size={20} />}
@@ -398,6 +312,7 @@ export default function CustomizedSteppers() {
                                 color='primary'
                                 onClick={() => updateLCStateOfAPI(api.id, 'Publish')}
                                 disabled={((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable)
+                                    || !deploymentsAvailable
                                     || api.isRevision || AuthManager.isNotPublisher()
                                     || api.workflowStatus === 'CREATED'}
                             >
@@ -418,167 +333,228 @@ export default function CustomizedSteppers() {
         }
     }
 
-    if (!lifecycleState) {
-        return (
-            <div className={classes.progressWrapper}>
-                <CircularProgress size={20} />
-            </div>
-        );
-    }
-    let activeStep = 0;
-    if (lifecycleState === 'Created' && ((isEndpointAvailable && isTierAvailable) || isPrototypedAvailable)) {
-        activeStep = 2;
-    } else if (lifecycleState === 'Created') {
-        activeStep = 1;
-    } else if (lifecycleState !== 'Created' && deploymentsAvailable) {
-        activeStep = 3;
-    } else if (lifecycleState !== 'Created' && !deploymentsAvailable) {
-        activeStep = 2;
-    }
-
-    const step2Class = activeStep > 1 ? classes.pointerMiddleCompleted : '';
-    let step3Class;
-    if (activeStep === 2) {
-        step3Class = classes.pointerEndActive;
-    } else if (activeStep === 3) {
-        step3Class = classes.pointerEndCompleted;
-    } else {
-        step3Class = '';
-    }
-
     return (
         <div className={classes.root}>
-            <Stepper alternativeLabel activeStep={activeStep} className={classes.stepper}>
-                <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
-                        <div className={classes.pointerStart}>
-                            <Box className={classes.box}>
-                                <Typography variant='h5'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.CustomizedStepper.create'
-                                        defaultMessage='Created'
-                                    />
-                                </Typography>
-                            </Box>
-                        </div>
-                    </StepLabel>
-                </Step>
-                <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
-                        <div className={`${classes.pointerMiddle} ${step2Class}`}>
-                            <Box p={2} borderLeft='0' borderRight='0'>
-                                { api.type !== 'WEBSUB' && (
-                                    <Tooltip
-                                        title={isEndpointAvailable ? '' : 'You have to specify an endpoint for the API'}
-                                        placement='top'
+            <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
+                {steps.map((label) => (
+                    <Step key={label}>
+                        <StepLabel StepIconComponent={ColorlibStepIcon}>
+                            {label === 'Develop' && (
+                                <div>
+                                    <Grid
+                                        container
+                                        direction='row'
+                                        justify='center'
                                     >
-                                        <Grid className={classes.gridEndpoint}>
-                                            {isEndpointAvailable ? (
+                                        <Grid item>
+                                            {api ? (
                                                 <CheckIcon className={classes.iconTrue} />
                                             ) : (
                                                 <CloseIcon className={classes.iconFalse} />
                                             )}
-                                            <Typography variant='h7'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.CustomizedStepper.business.plan.endpoint'
-                                                    defaultMessage='Endpoint'
-                                                />
-                                            </Typography>
-                                            <Link to={'/apis/' + api.id + '/endpoints'}>
-                                                <LaunchIcon
-                                                    style={{ marginLeft: '5px' }}
-                                                    color='primary'
-                                                    fontSize='small'
-                                                />
-                                            </Link>
                                         </Grid>
-                                    </Tooltip>
-                                )}
-                                <Tooltip
-                                    title={isTierAvailable ? '' : 'You have to select the business plan for the API'}
-                                    placement='bottom'
-                                >
-                                    <Grid xs={12} className={classes.gridSmall}>
-                                        {isTierAvailable ? (
-                                            <CheckIcon className={classes.iconTrue} />
-                                        ) : (
-                                            <CloseIcon className={classes.iconFalse} />
-                                        )}
-                                        <Typography variant='h7'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans'
-                                                defaultMessage=' Business plans'
-                                            />
-                                        </Typography>
-                                        <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                            <LaunchIcon
-                                                style={{ marginLeft: '5px' }}
-                                                color='primary'
-                                                fontSize='small'
-                                            />
-                                        </Link>
+                                        <Box ml={1} mb={1}>
+                                            <Grid>
+                                                <Typography variant='h7'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.CustomizedStepper.Develop'
+                                                        defaultMessage=' Develop'
+                                                    />
+                                                </Typography>
+                                            </Grid>
+                                        </Box>
                                     </Grid>
-                                </Tooltip>
-                            </Box>
-                        </div>
-                    </StepLabel>
-                </Step>
-                <Step className={classes.label}>
-                    <StepLabel style={{ position: 'relative' }} StepIconProps={{ classes: { root: classes.stepIcon } }}>
-                        <div className={`${classes.pointerEnd} ${step3Class}`}>
-                            <Box p={2} borderLeft='0' borderRight='0'>
-                                <Grid className={classes.lifeCycleStateStyle}>
-                                    {finalLifecycleState(lifecycleState)}
-                                </Grid>
+                                    {api.type !== 'WEBSUB' && (
+                                        <Box ml={3}>
+                                            <Grid
+                                                container
+                                                direction='row'
+                                                justify='center'
+                                                style={{ marginLeft: '2px' }}
+                                            >
+                                                <Grid item>
+                                                    {isEndpointAvailable ? (
+                                                        <CheckIcon className={classes.iconTrue} />
+                                                    ) : (
+                                                        <CloseIcon className={classes.iconFalse} />
+                                                    )}
+                                                </Grid>
+                                                <Box ml={1} mb={1}>
+                                                    <Grid item>
+                                                        <Typography variant='h7'>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Overview.CustomizedStepper.Endpoint'
+                                                                defaultMessage=' Endpoint'
+                                                            />
+                                                        </Typography>
+                                                    </Grid>
+                                                </Box>
+                                                <Box ml={1} mb={1}>
+                                                    <Grid item>
+                                                        <Link to={'/apis/' + api.id + '/endpoints'}>
+                                                            <LaunchIcon
+                                                                color='primary'
+                                                                fontSize='small'
+                                                            />
+                                                        </Link>
+                                                    </Grid>
+                                                </Box>
+                                            </Grid>
+                                        </Box>
+                                    )}
+                                    <Box ml={6}>
+                                        <Grid
+                                            container
+                                            direction='row'
+                                            justify='center'
+                                            style={{ marginLeft: '2px' }}
+                                        >
+                                            <Grid item>
+                                                {isTierAvailable ? (
+                                                    <CheckIcon className={classes.iconTrue} />
+                                                ) : (
+                                                    <CloseIcon className={classes.iconFalse} />
+                                                )}
+                                            </Grid>
+                                            <Box ml={1}>
+                                                <Grid item>
+                                                    <Typography variant='h7'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Overview.CustomizedStepper.Tier'
+                                                            defaultMessage=' Business Plan'
+                                                        />
+                                                    </Typography>
+                                                </Grid>
+                                            </Box>
+                                            <Grid item>
+                                                <Link to={'/apis/' + api.id + '/subscriptions'}>
+                                                    <Box ml={1}>
+                                                        <LaunchIcon
+                                                            color='primary'
+                                                            fontSize='small'
+                                                        />
+                                                    </Box>
+                                                </Link>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                </div>
+                            )}
+                            {label === 'Deploy' && (
                                 <Tooltip
                                     title={deploymentsAvailable ? '' : 'Deploy a revision of this API to the Gateway'}
                                     placement='bottom'
                                 >
-                                    <Grid xs={12} className={classes.gridSmall}>
-                                        {deploymentsAvailable ? (
-                                            <CheckIcon className={classes.iconTrue} />
-                                        ) : (
-                                            <CloseIcon className={classes.iconFalse} />
-                                        )}
-                                        <Typography variant='h7'>
-                                            <FormattedMessage
-                                                id='Apis.Details.Overview.CustomizedStepper.Deployments'
-                                                defaultMessage=' Deployments'
-                                            />
-                                        </Typography>
-                                        {(((api.type !== 'WEBSUB' && !isEndpointAvailable) || !isTierAvailable)
-                                        || AuthManager.isNotPublisher() || api.workflowStatus === 'CREATED')
-                                            ? (
-                                                <LaunchIcon
-                                                    style={{ marginLeft: '5px' }}
-                                                    color='default'
-                                                    fontSize='small'
+                                    <Grid
+                                        container
+                                        direction='row'
+                                        alignItems='center'
+                                        justify='center'
+                                    >
+                                        <Box mb={1}>
+                                            <Grid item>
+                                                {deploymentsAvailable ? (
+                                                    <CheckIcon className={classes.iconTrue} />
+                                                ) : (
+                                                    <CloseIcon className={classes.iconFalse} />
+                                                )}
+                                            </Grid>
+                                        </Box>
+                                        <Box ml={1} mb={1}>
+                                            <Grid item>
+                                                <Typography variant='h7'>
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Overview.CustomizedStepper.Deploy'
+                                                        defaultMessage=' Deploy'
+                                                    />
+                                                </Typography>
+                                            </Grid>
+                                        </Box>
+                                        <Grid item>
+                                            {(((api.type !== 'WEBSUB' && !isEndpointAvailable))
+                                            || !isTierAvailable
+                                            || api.workflowStatus === 'CREATED')
+                                                ? (
+                                                    <Box ml={1}>
+                                                        <LaunchIcon
+                                                            color='default'
+                                                            fontSize='small'
+                                                        />
+                                                    </Box>
+                                                ) : (
+                                                    <Link to={'/apis/' + api.id + '/deployments'}>
+                                                        <Box ml={1}>
+                                                            <LaunchIcon
+                                                                color='primary'
+                                                                fontSize='small'
+                                                            />
+                                                        </Box>
+                                                    </Link>
+                                                )}
+                                        </Grid>
+                                    </Grid>
+                                </Tooltip>
+                            )}
+                            {label === 'Test' && (
+                                <Tooltip
+                                    title={api.lifeCycleStatus === 'RETIERD' ? 'Cannot use test option while API'
+                                        + ' is in retired state' : ''}
+                                    placement='bottom'
+                                >
+                                    <Grid
+                                        container
+                                        direction='row'
+                                        alignItems='center'
+                                        justify='center'
+                                    >
+                                        <Grid item>
+                                            <Typography variant='h7'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Overview.CustomizedStepper.Test'
+                                                    defaultMessage=' Test'
                                                 />
-                                            ) : (
-                                                <Link to={'/apis/' + api.id + '/deployments'}>
+                                            </Typography>
+                                        </Grid>
+                                        {api.lifeCycleStatus === 'RETIERD' || !deploymentsAvailable
+                                            || !isEndpointAvailable
+                                            || !isTierAvailable
+                                            || (api.type !== 'HTTP' && api.type !== 'SOAP')
+                                            ? (
+                                                <Box ml={1}>
                                                     <LaunchIcon
-                                                        style={{ marginLeft: '5px' }}
-                                                        color='primary'
+                                                        color='default'
                                                         fontSize='small'
                                                     />
+                                                </Box>
+                                            ) : (
+                                                <Link to={'/apis/' + api.id + '/test-console'}>
+                                                    <Box ml={1}>
+                                                        <LaunchIcon
+                                                            color='primary'
+                                                            fontSize='small'
+                                                        />
+                                                    </Box>
                                                 </Link>
                                             )}
                                     </Grid>
                                 </Tooltip>
-                            </Box>
-                        </div>
-                    </StepLabel>
-                </Step>
+                            )}
+                            {label === 'Publish' && (
+                                <>
+                                    {finalLifecycleState(api.lifeCycleStatus)}
+                                </>
+                            )}
+                        </StepLabel>
+                    </Step>
+                ))}
             </Stepper>
         </div>
     );
 }
 
-CustomizedSteppers.propTypes = {
+CustomizedStepper.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.shape({
         id: PropTypes.string,
     }).isRequired,
 };
-
-CustomizedSteppers.contextType = ApiContext;

@@ -447,7 +447,7 @@ public class OAS3Parser extends APIDefinition {
                                     extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
                         }
                         if (extensions.containsKey(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)) {
-                            template.setAmznResourceTimeout(((Long)
+                            template.setAmznResourceTimeout(((Number)
                                     extensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                         }
                     }

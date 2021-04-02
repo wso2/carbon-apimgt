@@ -197,24 +197,6 @@ export default class API extends Resource {
     }
 
     /**
-     * Get the swagger of an API
-     * @param apiId {String} UUID of the API in which the swagger is needed
-     * @param clusterName {String} Container managed cluster name
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwaggerByAPIIdAndClusterName(apiId, clusterName, callback = null) {
-        const promiseGet = this.client.then((client) => {
-            return client.apis.APIs.get_apis__apiId__swagger({ apiId, clusterName }, this._requestMetaData());
-        });
-        if (callback) {
-            return promiseGet.then(callback);
-        } else {
-            return promiseGet;
-        }
-    }
-
-    /**
      * Get application by id
      * @param id {String} UUID of the application
      * @param callback {function} Function which needs to be called upon success
@@ -716,113 +698,6 @@ export default class API extends Resource {
     getKeyManagers() {
         return this.client.then((client) => {
             return client.apis['Key Managers (Collection)'].get_key_managers(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the supported alert types by the publisher.
-     * @return {Promise}
-     * */
-    getSupportedAlertTypes() {
-        return this.client.then((client) => {
-            return client.apis.Alerts.getDevportalAlertTypes(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the subscribed alert types by the current user.
-     * @returns {Promise}
-     * */
-    getSubscribedAlertTypesByUser() {
-        return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].getSubscribedAlertTypes(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Subscribe to the provided set of alerts.
-     * @return {Promise}
-     * */
-    subscribeAlerts(alerts) {
-        return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts(
-                {},
-                { requestBody: alerts },
-                this._requestMetaData()
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Unsubscribe from all the alerts.
-     * @return {Promise}
-     * */
-    unsubscribeAlerts() {
-        return this.client.then((client) => {
-            return client.apis['Alert Subscriptions'].unsubscribeAllAlerts(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the configuration for the given alert type.
-     * @param {string} alertType The alert type name.
-     * @return {Promise}
-     * */
-    getAlertConfigurations(alertType) {
-        return this.client.then((client) => {
-            return client.apis['Alert Configuration'].getAllAlertConfigs(
-                {
-                    alertType,
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Add configuration for the given alert type.
-     * @param {string} alertType The alert type name.
-     * @param {object} alertConfig Alert configurations.
-     * @param {string} configId The alert configuration id.
-     * @return {Promise}
-     * */
-    putAlertConfiguration(alertType, alertConfig, configId) {
-        return this.client.then((client) => {
-            return client.apis['Alert Configuration'].addAlertConfig(
-                {
-                    alertType,
-                    configurationId: configId,
-                },
-                {
-                    requestBody: alertConfig
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Delete configuration.
-     * @param {string} alertType The alert type name.
-     * @param {string} configId The alert configuration id.
-     * @return {Promise}
-     * */
-    deleteAlertConfiguration(alertType, configId) {
-        return this.client.then((client) => {
-            return client.apis['Alert Configuration'].deleteAlertConfig(
-                {
-                    alertType,
-                    configurationId: configId,
-                },
-                this._requestMetaData(),
-            );
         });
     }
 
