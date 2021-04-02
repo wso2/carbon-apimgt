@@ -335,7 +335,7 @@ export default function Environments() {
         const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
         let vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
         if (!vhost) { // if vhost is deleted after deploying the revision, there is no matching vhost
-            vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails.vhost };
+            vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails && envDetails.vhost };
         }
         allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
