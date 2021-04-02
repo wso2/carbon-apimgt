@@ -17,7 +17,6 @@
  * under the License.
  */
 import React, { useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
@@ -28,13 +27,13 @@ import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import Avatar from '@material-ui/core/Avatar';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import Tooltip from '@material-ui/core/Tooltip';
 import Box from '@material-ui/core/Box';
 import Icon from '@material-ui/core/Icon';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { ApiContext } from './ApiContext';
+import GoToTryOut from './GoToTryOut';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -85,9 +84,6 @@ const useStyles = makeStyles((theme) => ({
         fontSize: '0.85rem',
         marginRight: 20,
         fontWeight: 400,
-    },
-    tryoutLabel: {
-        whiteSpace: 'nowrap',
     },
 }));
 
@@ -234,19 +230,7 @@ function Environments(props) {
                         </Paper>
                     </>
                 )}
-                <Button
-                    component={Link}
-                    to={'/apis/' + api.id + '/test'}
-                    variant='outlined'
-                    color='primary'
-                    size='small'
-                    classes={{ label: classes.tryoutLabel }}
-                >
-                    <FormattedMessage
-                        id='Apis.Details.Environments.btn.tryout'
-                        defaultMessage='Try Out'
-                    />
-                </Button>
+                <GoToTryOut />
             </Box>
             <Box ml={8} alignItems='center' mt={1}>
                 {getDefaultVersionUrl() && (

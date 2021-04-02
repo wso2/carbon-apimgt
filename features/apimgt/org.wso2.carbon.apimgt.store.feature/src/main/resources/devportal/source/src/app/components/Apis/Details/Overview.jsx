@@ -89,6 +89,7 @@ const useStyles = makeStyles((theme) => ({
         width: 150,
         height: 150,
         marginRight: theme.spacing(),
+        marginTop: theme.spacing(2),
     },
     sectionTitle: {
         color: theme.palette.grey[800],
@@ -102,6 +103,12 @@ const useStyles = makeStyles((theme) => ({
         '& th': {
             fontWeight: 400,
         },
+    },
+    requestCount: {
+        fontSize: 22,
+    },
+    requestUnit: {
+        fontSize: 13,
     },
 }));
 /**
@@ -129,6 +136,7 @@ function Overview() {
     const [allDocuments, setAllDocuments] = useState(null);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
     const [swaggerDescription, setSwaggerDescription] = useState(null);
+    const [allPolicies, setAllPolicies] = useState(null);
     const [rating, setRating] = useState({
         avgRating: 0,
         total: 0,
@@ -152,6 +160,10 @@ function Overview() {
         }
     }
 
+    const isApiPolicy = (policyName) => {
+        const filteredApiPolicies = api.tiers.filter((t) => t.tierName === policyName);
+        return filteredApiPolicies && filteredApiPolicies.length > 0;
+    };
 
     useEffect(() => {
         const restApi = new API();
@@ -194,6 +206,33 @@ function Overview() {
                     }
                     setAllDocuments([]);
                 });
+            restApi.getAllTiers('subscription')
+                .then((response) => {
+                    try {
+                        // Filter policies base on async or not.
+                        const filteredList = response.body.list.filter((str) => isApiPolicy(str.name));
+                        setAllPolicies(filteredList);
+                    } catch (e) {
+                        console.log(e);
+                        Alert.error(intl.formatMessage({
+                            id: 'Apis.Details.Overview.error.occurred',
+                            defaultMessage: 'Error occurred',
+                        }));
+                    }
+                }).catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                    const { status } = error;
+                    if (status === 404) {
+                        Alert.error(intl.formatMessage({
+                            id: 'Apis.Details.Overview.error.occurred',
+                            defaultMessage: 'Error occurred',
+                        }));
+                        setNotFound(true);
+                    }
+                    setAllDocuments([]);
+                });
         }
     }, []);
 
@@ -219,6 +258,7 @@ function Overview() {
         }
         return provider;
     };
+
     /**
      * @param {number} ratings rating value
      */
@@ -363,16 +403,28 @@ function Overview() {
                                 />
                             </Typography>
                         </Box>
-                        <Box display='flex' flexDirection='row' alignItems='center' mt={2} ml={1} textAlign='center'>
-                            {api.tiers.map((tier) => (
-                                <Card className={classes.cardRoot} key={tier.tierName}>
+                        <Box flexWrap='wrap' display='flex' flexDirection='row' alignItems='center' mt={2} ml={1} textAlign='center'>
+                            {allPolicies && allPolicies.map((tier) => (
+                                <Card className={classes.cardRoot} key={tier.name}>
                                     <CardContent>
                                         <Typography className={classes.cardMainTitle} color='textSecondary' gutterBottom>
-                                            {tier.tierName}
+                                            {tier.name}
                                         </Typography>
+                                        <Box mt={2}>
+                                            <Typography className={classes.requestCount} color='textSecondary'>
+                                                {tier.requestCount === 2147483647 ? 'Unlimited' : tier.requestCount}
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <Typography className={classes.requestUnit} color='textSecondary'>
+                                                Requests/
+                                                {tier.timeUnit}
+                                            </Typography>
+                                        </Box>
                                     </CardContent>
                                 </Card>
                             ))}
+
                         </Box>
                         {(showCredentials && subscribedApplications.length > 0) && (
                             <>
@@ -392,21 +444,21 @@ function Overview() {
                                                     <TableCell>
                                                         <FormattedMessage
                                                             id={'Apis.Details.Overview.'
-                                                    + 'api.credentials.subscribed.apps.name'}
+                                                                + 'api.credentials.subscribed.apps.name'}
                                                             defaultMessage='Application Name'
                                                         />
                                                     </TableCell>
                                                     <TableCell>
                                                         <FormattedMessage
                                                             id={'Apis.Details.Overview.api.'
-                                                    + 'credentials.subscribed.apps.tier'}
+                                                                + 'credentials.subscribed.apps.tier'}
                                                             defaultMessage='Throttling Tier'
                                                         />
                                                     </TableCell>
                                                     <TableCell>
                                                         <FormattedMessage
                                                             id={'Apis.Details.Overview.'
-                                                    + 'api.credentials.subscribed.apps.status'}
+                                                                + 'api.credentials.subscribed.apps.status'}
                                                             defaultMessage='Application Status'
                                                         />
                                                     </TableCell>
@@ -567,9 +619,11 @@ function Overview() {
                             />
                         </Typography>
                     </Box>
-                    <Box mt={2}>
-                        <SourceDownload selectedEndpoint={selectedEndpoint} />
-                    </Box>
+                    {(api.type === 'HTTP' || api.type === 'SOAPTOREST' || api.type === 'SOAP') && (
+                        <Box mt={2}>
+                            <SourceDownload selectedEndpoint={selectedEndpoint} />
+                        </Box>
+                    )}
                     {/* Key Managers */}
                     {getKeyManagers() && (
                         <>
