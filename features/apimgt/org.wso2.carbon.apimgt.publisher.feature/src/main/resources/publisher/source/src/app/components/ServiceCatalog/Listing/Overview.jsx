@@ -152,6 +152,15 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
+     * Handles the transition of the drawer.
+     * @param {object} props1 list of props
+     * @return {object} The Slide transition component
+     * */
+function transition(props1) {
+    return <Slide direction='up' {...props1} />;
+}
+
+/**
  * Service Catalog Overview Page
  *
  * @param {any} props props
@@ -235,6 +244,9 @@ function Overview(props) {
                     }));
                 }
             });
+        } else {
+            // The service definition is already loaded. Hence open editor.
+            setOpenReadOnlyDefinition(true);
         }
     };
 
@@ -247,15 +259,6 @@ function Overview(props) {
      * */
     function closeEditor() {
         setOpenReadOnlyDefinition(false);
-    }
-
-    /**
-     * Handles the transition of the drawer.
-     * @param {object} props1 list of props
-     * @return {object} The Slide transition component
-     * */
-    function transition(props1) {
-        return <Slide direction='up' {...props1} />;
     }
 
     const listingRedirect = () => {
