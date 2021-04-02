@@ -17,7 +17,6 @@
  */
 
 import React, { useState, Suspense, lazy } from 'react';
-import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
@@ -110,24 +109,24 @@ export default function MarkdownEditor(props) {
 
     return (
         <div>
-            <Link onClick={toggleOpen}>
-                <Button
-                    color='primary'
-                    disabled={isRestricted(['apim:api_create'], apiFromContext)}
-                >
-                    {api.description || overview ? (
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.MarkdownEditor.edit.content.button'
-                            defaultMessage='Edit Content'
-                        />
-                    ) : (
-                        <FormattedMessage
-                            id='Apis.Details.Configuration.components.MarkdownEditor.add.content.button'
-                            defaultMessage='Add Content'
-                        />
-                    )}
-                </Button>
-            </Link>
+            <Button
+                variant='outlined'
+                color='primary'
+                disabled={isRestricted(['apim:api_create'], apiFromContext)}
+                onClick={toggleOpen}
+            >
+                {api.description || overview ? (
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.MarkdownEditor.edit.content.button'
+                        defaultMessage='Edit Content'
+                    />
+                ) : (
+                    <FormattedMessage
+                        id='Apis.Details.Configuration.components.MarkdownEditor.add.content.button'
+                        defaultMessage='Add Content'
+                    />
+                )}
+            </Button>
             <Dialog fullScreen open={open} onClose={toggleOpen} TransitionComponent={Transition}>
                 <Paper square className={classes.popupHeader}>
                     <IconButton color='inherit' onClick={toggleOpen} aria-label='Close'>
