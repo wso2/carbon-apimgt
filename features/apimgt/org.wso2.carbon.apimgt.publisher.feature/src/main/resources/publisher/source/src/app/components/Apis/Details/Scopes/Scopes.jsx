@@ -53,6 +53,12 @@ const styles = (theme) => ({
     heading: {
         flexGrow: 1,
         marginTop: 10,
+        '& table td:nth-child(2)': {
+            'word-break': 'break-word',
+        },
+        '& table td button span, & table th': {
+            'white-space': 'nowrap',
+        },
     },
     titleWrapper: {
         display: 'flex',
