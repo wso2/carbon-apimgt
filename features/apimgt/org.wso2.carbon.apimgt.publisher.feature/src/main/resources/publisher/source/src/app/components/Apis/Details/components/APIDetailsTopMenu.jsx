@@ -113,7 +113,7 @@ const styles = (theme) => ({
         color: 'red',
     },
     active: {
-        background: 'radial-gradient(#29bb89, #f7ea00)',
+        background: theme.custom.revision.activeRevision.background,
         width: 8,
         height: 8,
         borderRadius: '50%',
