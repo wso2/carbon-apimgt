@@ -208,12 +208,17 @@ export default function CheckboxLabels(props) {
                                         )}
                                         <Typography>
                                             <FormattedMessage
-                                                id='Apis.Details.Configuration.Configuration.prototype.endpoints.provided'
+                                                id={'Apis.Details.Configuration.Configuration.prototype.endpoints'
+                                                    + '.provided'}
                                                 defaultMessage='Prototype Endpoint provided'
                                             />
                                         </Typography>
                                         <Link to={'/apis/' + api.id + '/endpoints'}>
-                                            <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
+                                            <LaunchIcon
+                                                style={{ marginLeft: '2px' }}
+                                                color='primary'
+                                                fontSize='small'
+                                            />
                                         </Link>
                                     </Grid>
                                 )}
