@@ -112,6 +112,19 @@ function APICategories(props) {
                     SelectProps={{
                         multiple: true,
                         renderValue: (selected) => (Array.isArray(selected) ? selected.join(', ') : selected),
+                        MenuProps: {
+                            anchorOrigin: {
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            },
+                            getContentAnchorEl: null,
+                            keepMounted: true,
+                            PaperProps: {
+                                style: {
+                                    maxHeight: 300,
+                                },
+                            },
+                        },
                     }}
                     onChange={(e) => configDispatcher({ action: 'categories', value: e.target.value })}
                     InputProps={{
