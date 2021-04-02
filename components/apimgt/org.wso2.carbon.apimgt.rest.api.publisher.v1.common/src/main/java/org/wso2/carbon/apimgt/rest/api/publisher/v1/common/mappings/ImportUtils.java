@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -74,6 +75,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -440,20 +442,36 @@ public class ImportUtils {
 
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (deploymentInfoArray != null && deploymentInfoArray.size() > 0) {
-            Set<String> gatewayEnvironmentsSet = APIUtil.getEnvironments().keySet();
+            Map<String, Environment> gatewayEnvironments = APIUtil.getEnvironments();
 
             for (int i = 0; i < deploymentInfoArray.size(); i++) {
                 JsonObject deploymentJson = deploymentInfoArray.get(i).getAsJsonObject();
                 JsonElement deploymentNameElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_NAME);
                 if (deploymentNameElement != null) {
                     String deploymentName = deploymentNameElement.getAsString();
-                    if (gatewayEnvironmentsSet.contains(deploymentName)) {
+                    Environment gatewayEnvironment = gatewayEnvironments.get(deploymentName);
+                    if (gatewayEnvironment != null) {
+                        JsonElement deploymentVhostElement = deploymentJson.get(ImportExportConstants.DEPLOYMENT_VHOST);
+                        String deploymentVhost;
+                        if (deploymentVhostElement != null) {
+                            deploymentVhost = deploymentVhostElement.getAsString();
+                        } else {
+                            // set the default vhost of the given environment
+                            if (gatewayEnvironment.getVhosts().isEmpty()) {
+                                throw new APIManagementException("No VHosts defined for the environment: "
+                                        + deploymentName);
+                            }
+                            deploymentVhost = gatewayEnvironment.getVhosts().get(0).getHost();
+                        }
+                        // resolve vhost to null if it is the default vhost of read only environment
+                        deploymentVhost = VHostUtils.resolveIfDefaultVhostToNull(deploymentName, deploymentVhost);
                         JsonElement displayOnDevportalElement =
                                 deploymentJson.get(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION);
                         boolean displayOnDevportal =
                                 displayOnDevportalElement == null || displayOnDevportalElement.getAsBoolean();
                         APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                         apiRevisionDeployment.setDeployment(deploymentName);
+                        apiRevisionDeployment.setVhost(deploymentVhost);
                         apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
                         apiRevisionDeployments.add(apiRevisionDeployment);
                     } else {
