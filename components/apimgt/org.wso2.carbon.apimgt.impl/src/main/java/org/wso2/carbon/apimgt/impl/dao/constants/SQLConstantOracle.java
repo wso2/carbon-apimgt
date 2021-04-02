@@ -217,7 +217,7 @@ public class SQLConstantOracle extends SQLConstants{
                     " ORDER BY $1 $2 ";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
-            "select distinct x.* from (" +
+            "(" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   rownum r," +
@@ -238,9 +238,9 @@ public class SQLConstantOracle extends SQLConstants{
                     "    SUB.TENANT_ID = ? "+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " OR APP.NAME like ?"+
+                    " AND APP.NAME like ?"+
                     " )) a WHERE r BETWEEN ?+1 AND ?"+
-                    " )x "+
+                    " ) "+
                     " ORDER BY $1 $2 ";
 
     public static final String GET_REPLIES_SQL =

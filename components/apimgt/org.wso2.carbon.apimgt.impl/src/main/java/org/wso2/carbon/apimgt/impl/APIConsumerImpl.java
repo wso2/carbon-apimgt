@@ -4779,8 +4779,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Application[] getApplicationsByOwner(String userId) throws APIManagementException {
-        return apiMgtDAO.getApplicationsByOwner(userId);
+    public Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException {
+        return apiMgtDAO.getApplicationsByOwner(userId, limit, offset);
     }
 
     public boolean isSubscriberValid(String userId)
