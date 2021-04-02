@@ -151,7 +151,7 @@ export default function GoToTryOut() {
         }).then((response) => {
             if (response.keyState === keyStates.CREATED || response.keyState === keyStates.REJECTED) {
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.error.keymanager',
+                    id: 'Apis.Details.GoToTryOut.error.keymanager',
                     defaultMessage: 'Key Generation is Blocked.',
                 }));
             } else {
@@ -165,7 +165,7 @@ export default function GoToTryOut() {
             const { status } = error;
             if (status === 404) {
                 Alert.error(intl.formatMessage({
-                    id: 'Apis.Details.Credentials.Wizard.GenerateKeysStep.error.404',
+                    id: 'Apis.Details.GoToTryOut.error.404',
                     defaultMessage: 'Resource not found.',
                 }));
             }
@@ -227,7 +227,7 @@ export default function GoToTryOut() {
             classes={{ root: classes.asyncButton, label: classes.tryoutLabel }}
         >
             <FormattedMessage
-                id='Apis.Details.GoToTryOut.btn.tryout'
+                id='Apis.Details.GoToTryOut.btn.view.definition'
                 defaultMessage='View Definition'
             />
         </Button>
@@ -303,7 +303,7 @@ export default function GoToTryOut() {
                                 inProgress={tasksStatus.subscribe.inProgress}
                                 completedMessage={(
                                     <FormattedMessage
-                                        id='Apis.Details.GoToTryOut.popup.subscribe.complete'
+                                        id='Apis.Details.GoToTryOut.popup.subscribe.complete.success'
                                         defaultMessage='API subscribe to DefaultApplication successfully!'
                                     />
                                 )}
