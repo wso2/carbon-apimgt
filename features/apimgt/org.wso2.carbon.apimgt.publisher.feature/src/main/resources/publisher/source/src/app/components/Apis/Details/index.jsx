@@ -853,7 +853,7 @@ class Details extends Component {
                                                     Icon={<EndpointIcon />}
                                                 />
                                             )}
-                                            {!api.isWebSocket() && !isAPIProduct && (
+                                            {!isAPIProduct && (
                                                 <LeftMenuItem
                                                     text={intl.formatMessage({
                                                         id: 'Apis.Details.index.left.menu.scope',

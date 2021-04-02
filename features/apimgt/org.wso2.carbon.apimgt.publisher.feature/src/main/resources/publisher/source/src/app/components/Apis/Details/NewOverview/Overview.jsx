@@ -197,14 +197,14 @@ function Overview(props) {
                                         api.type === 'WEBSUB' ? (
                                             <Grid item xs={12} md={12} lg={12}>
                                                 <Grid item xs={12} md={12} lg={12}>
-                                                    {getResourcesClassForAPIs(api.apiType)}
+                                                    {getResourcesClassForAPIs(api.type)}
                                                 </Grid>
                                             </Grid>
                                         ) : (
                                             <>
                                                 <Grid item xs={12} md={6} lg={6}>
                                                     <Grid item xs={12} md={8} lg={8}>
-                                                        {getResourcesClassForAPIs(api.apiType)}
+                                                        {getResourcesClassForAPIs(api.type)}
                                                     </Grid>
                                                 </Grid>
                                                 <Grid item xs={12} md={6} lg={6}>
