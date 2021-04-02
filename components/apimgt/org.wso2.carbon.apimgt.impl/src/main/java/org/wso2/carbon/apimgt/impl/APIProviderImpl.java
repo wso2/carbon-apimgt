@@ -8559,6 +8559,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIInformation(uuid, requestedTenantDomain, org, api);
                 loadMediationPoliciesToAPI(api, requestedTenantDomain);
                 populateRevisionInformation(api, uuid);
+                populateAPITier(api);
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
                 return api;
@@ -8572,6 +8573,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e);
+        }
+    }
+
+    private void populateAPITier(API api) throws APIManagementException {
+
+        if (api.isRevision()) {
+            String apiLevelTier = apiMgtDAO.getAPILevelTier(api.getRevisionedApiId(), api.getUuid());
+            api.setApiLevelPolicy(apiLevelTier);
         }
     }
 
