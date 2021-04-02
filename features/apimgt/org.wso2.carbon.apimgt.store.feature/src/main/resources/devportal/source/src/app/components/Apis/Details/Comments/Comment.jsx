@@ -260,7 +260,7 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, apiId, allComments, commentsUpdate, isOverview,
+            classes, comments, apiId, allComments, commentsUpdate, isOverview, crossTenentUser,
         } = this.props;
 
         const { editIndex, openDialog, replyId } = this.state;
@@ -298,14 +298,16 @@ class Comment extends React.Component {
 
                                             <Typography className={classes.commentText}>{comment.content}</Typography>
 
-                                            <CommentOptions
-                                                comment={comment}
-                                                editIndex={editIndex}
-                                                index={index}
-                                                showAddComment={this.showAddComment}
-                                                handleClickOpen={this.handleClickOpen}
-                                                showEditComment={this.showEditComment}
-                                            />
+                                            {!crossTenentUser && (
+                                                <CommentOptions
+                                                    comment={comment}
+                                                    editIndex={editIndex}
+                                                    index={index}
+                                                    showAddComment={this.showAddComment}
+                                                    handleClickOpen={this.handleClickOpen}
+                                                    showEditComment={this.showEditComment}
+                                                />
+                                            )}
 
                                             {comment.id === replyId && (
                                                 <Box ml={6} mb={2}>
@@ -354,14 +356,16 @@ class Comment extends React.Component {
                                                                     />
                                                                 )}
 
-                                                                <CommentOptions
-                                                                    comment={reply}
-                                                                    editIndex={editIndex}
-                                                                    index={index}
-                                                                    showAddComment={this.showAddComment}
-                                                                    handleClickOpen={this.handleClickOpen}
-                                                                    showEditComment={this.showEditComment}
-                                                                />
+                                                                {!crossTenentUser && (
+                                                                    <CommentOptions
+                                                                        comment={reply}
+                                                                        editIndex={editIndex}
+                                                                        index={index}
+                                                                        showAddComment={this.showAddComment}
+                                                                        handleClickOpen={this.handleClickOpen}
+                                                                        showEditComment={this.showEditComment}
+                                                                    />
+                                                                )}
                                                             </Grid>
                                                         </Grid>
                                                     </Box>
@@ -395,6 +399,7 @@ Comment.propTypes = {
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
     isOverview: PropTypes.bool,
+    crossTenentUser: PropTypes.bool .isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Comment));
