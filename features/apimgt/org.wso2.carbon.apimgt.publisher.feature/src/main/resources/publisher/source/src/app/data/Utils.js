@@ -414,10 +414,10 @@ class Utils {
 
     /**
      * Get the super tenent user without domain
-     * @param {String} userName - Name of the user                                                                                                                                                                        
+     * @param {String} userName - Name of the user
      * @returns {String} - user name without domain
      */
-     static getUserNameWithoutDomain(userName) {
+    static getUserNameWithoutDomain(userName) {
         let username = userName;
         const count = (username.match(/@/g) || []).length;
         if (username.endsWith('@carbon.super') && count <= 1) {
