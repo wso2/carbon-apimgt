@@ -37,7 +37,6 @@ import StoreIcon from '@material-ui/icons/Store';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import CommentIcon from '@material-ui/icons/Comment';
 import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
 import { injectIntl, defineMessages } from 'react-intl';
 import {
     Redirect, Route, Switch, Link, matchPath,
@@ -685,7 +684,7 @@ class Details extends Component {
                 <>
                     <AuthorizedError />
                 </>
-            )
+            );
         }
 
         if (!api) {
