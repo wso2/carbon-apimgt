@@ -44,6 +44,7 @@ import {
 import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import AuthorizedError from 'AppComponents/Base/Errors/AuthorizedError';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import API from 'AppData/api';
@@ -253,6 +254,7 @@ class Details extends Component {
             imageUpdate: 0,
             allRevisions: null,
             allEnvRevision: null,
+            authorizedAPI: false,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
@@ -347,6 +349,8 @@ class Details extends Component {
                     const { status } = error;
                     if (status === 404) {
                         this.setState({ apiNotFound: true });
+                    } else if (status === 403) {
+                        this.setState({ authorizedAPI: true });
                     } else if (status === 401) {
                         doRedirectToLogin();
                     }
@@ -378,6 +382,8 @@ class Details extends Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ apiNotFound: true });
+                } else if (status === 403) {
+                    this.setState({ authorizedAPI: true });
                 }
             });
     }
@@ -632,7 +638,7 @@ class Details extends Component {
      */
     render() {
         const {
-            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision,
+            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision, authorizedAPI,
         } = this.state;
         const {
             classes,
@@ -672,6 +678,13 @@ class Details extends Component {
                 body: intl.formatMessage(resourceNotFoundMessageText.bodyMessage, { apiUUID: `${apiUUID}` }),
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
+        }
+        if (authorizedAPI) {
+            return (
+                <>
+                    <AuthorizedError />
+                </>
+            );
         }
 
         if (!api) {
