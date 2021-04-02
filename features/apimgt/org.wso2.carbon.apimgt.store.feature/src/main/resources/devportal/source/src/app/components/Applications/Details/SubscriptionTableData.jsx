@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /*
  * Copyright (c), WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -19,14 +20,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
-import Select from '@material-ui/core/Select';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -36,10 +35,9 @@ import { ScopeValidation, resourceMethods, resourcePaths } from 'AppComponents/S
 import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import Subscription from 'AppData/Subscription';
-import Invoice from './Invoice';
 import { mdiOpenInNew } from '@mdi/js';
-import {Icon as MDIcon} from '@mdi/react';
-import AddToHomeScreenIcon from '@material-ui/icons/AddToHomeScreen';
+import { Icon as MDIcon } from '@mdi/react';
+import Invoice from './Invoice';
 
 /**
  *
@@ -61,7 +59,7 @@ class SubscriptionTableData extends React.Component {
             isMonetizedAPI: false,
             isDynamicUsagePolicy: false,
             tiers: [],
-            selectedTier: "",
+            selectedTier: '',
         };
         this.handleRequestClose = this.handleRequestClose.bind(this);
         this.handleRequestOpen = this.handleRequestOpen.bind(this);
@@ -75,13 +73,10 @@ class SubscriptionTableData extends React.Component {
         this.setSelectedTier = this.setSelectedTier.bind(this);
     }
 
-    /**
-     *
-     *
-     * @memberof SubscriptionTableData
-     */
-    handleRequestClose() {
-        this.setState({ openMenu: false });
+    componentDidMount() {
+        this.checkIfMonetizedAPI(this.props.subscription.apiId);
+        this.checkIfDynamicUsagePolicy(this.props.subscription.subscriptionId);
+        this.populateSubscriptionTiers(this.props.subscription.apiId);
     }
 
     /**
@@ -89,8 +84,8 @@ class SubscriptionTableData extends React.Component {
     *
     * @memberof SubscriptionTableData
     */
-    handleRequestOpen() {
-        this.setState({ openMenu: true });
+    setSelectedTier(e) {
+        this.setState({ selectedTier: e });
     }
 
     /**
@@ -126,15 +121,20 @@ class SubscriptionTableData extends React.Component {
     }
 
     /**
-    *
-    *
     * @memberof SubscriptionTableData
     */
-    setSelectedTier (e) {
-    this.setState({ selectedTier: e });
+    handleRequestOpen() {
+        this.setState({ openMenu: true });
     }
 
-/**
+    /**
+     * @memberof SubscriptionTableData
+     */
+    handleRequestClose() {
+        this.setState({ openMenu: false });
+    }
+
+    /**
      *
      * Handle onclick for subscription update
      * @param {*} apiId subscription id
@@ -155,7 +155,7 @@ class SubscriptionTableData extends React.Component {
      * Getting the policies from api details
      *
      */
-    populateSubscriptionTiers(apiUUID){
+    populateSubscriptionTiers(apiUUID) {
         const apiClient = new Api();
         const promisedApi = apiClient.getAPIById(apiUUID);
         promisedApi.then((response) => {
@@ -164,13 +164,10 @@ class SubscriptionTableData extends React.Component {
                 const apiTiers = api.tiers;
                 const tiers = [];
                 for (let i = 0; i < apiTiers.length; i++) {
-                    const tierName = apiTiers[i].tierName;
+                    const { tierName } = apiTiers[i];
                     tiers.push({ value: tierName, label: tierName });
                 }
                 this.setState({ tiers });
-                if (tiers.length > 0) {
-                    this.setState({ policyName: tiers[0].value });
-                }
             }
         });
     }
@@ -205,19 +202,15 @@ class SubscriptionTableData extends React.Component {
                     const promisedPolicy = apiClient.getTierByName(subscriptionData.throttlingPolicy, 'subscription');
                     promisedPolicy.then((policyResponse) => {
                         const policyData = JSON.parse(policyResponse.data);
-                        if (policyData.monetizationAttributes.billingType && (policyData.monetizationAttributes.billingType === 'DYNAMICRATE')) {
+                        if (policyData.monetizationAttributes.billingType
+                             && (policyData.monetizationAttributes.billingType
+                                === 'DYNAMICRATE')) {
                             this.setState({ isDynamicUsagePolicy: true });
                         }
                     });
                 }
             }
         });
-    }
-
-    componentDidMount() {
-        this.checkIfMonetizedAPI(this.props.subscription.apiId);
-        this.checkIfDynamicUsagePolicy(this.props.subscription.subscriptionId);
-        this.populateSubscriptionTiers(this.props.subscription.apiId);
     }
 
     /**
@@ -227,15 +220,26 @@ class SubscriptionTableData extends React.Component {
     render() {
         const {
             subscription: {
-                apiInfo, status, throttlingPolicy, subscriptionId, apiId, requestedThrottlingPolicy, applicationId
+                apiInfo, status, throttlingPolicy, subscriptionId, apiId, requestedThrottlingPolicy, applicationId,
             },
         } = this.props;
-        const {openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier} = this.state;
-        let link = <Link to={'/apis/' + apiId} external>{apiInfo.name + ' - ' + apiInfo.version + ' '}
-            <MDIcon path={mdiOpenInNew} size='12px'/></Link>;
+        const {
+            openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier,
+        } = this.state;
+        let link = (
+            <Link to={'/apis/' + apiId} external>
+                {apiInfo.name + ' - ' + apiInfo.version + ' '}
+                <MDIcon path={mdiOpenInNew} size='12px' />
+            </Link>
+        );
         if (apiInfo.type === 'WEBSUB') {
-            link = <Link
-                to={'/applications/' + applicationId + '/webhooks/' + apiId}>{apiInfo.name + ' - ' + apiInfo.version}</Link>;
+            link = (
+                <Link
+                    to={'/applications/' + applicationId + '/webhooks/' + apiId}
+                >
+                    {apiInfo.name + ' - ' + apiInfo.version}
+                </Link>
+            );
         }
         return (
             <TableRow hover>
@@ -245,154 +249,172 @@ class SubscriptionTableData extends React.Component {
                 <TableCell>{apiInfo.lifeCycleStatus}</TableCell>
                 <TableCell>{throttlingPolicy}</TableCell>
                 <TableCell>{status}</TableCell>
-                <TableCell>    
-                        <Button
-                            color="default"
-                            onClick={this.handleRequestOpenEditMenu}
-                            startIcon={<Icon>edit</Icon>}
-                        >
+                <TableCell>
+                    <Button
+                        color='default'
+                        onClick={this.handleRequestOpenEditMenu}
+                        startIcon={<Icon>edit</Icon>}
+                    >
+                        <FormattedMessage
+                            id='Applications.Details.SubscriptionTableData.edit.text'
+                            defaultMessage='Edit'
+                        />
+                    </Button>
+                    <Dialog open={openMenuEdit} transition={Slide}>
+                        <DialogTitle>
                             <FormattedMessage
-                                id='Applications.Details.SubscriptionTableData.edit.text'
-                                defaultMessage='Edit'
+                                id='Applications.Details.SubscriptionTableData.update.subscription'
+                                defaultMessage='Update Subscription'
                             />
-                        </Button>               
-                        <Dialog open={openMenuEdit} transition={Slide}>
-                            <DialogTitle><FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.update.subscription'
-                                        defaultMessage='Update Subscription'
-                                    /></DialogTitle>
-                            <DialogContent>
-                                <DialogContentText>
-                                    <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.update.business.plan'
-                                        defaultMessage='Current Business Plan : '
-                                    />
-                                        {throttlingPolicy}
-                                    <div>
-                                        {   (status === 'BLOCKED')
+                        </DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                <FormattedMessage
+                                    id='Applications.Details.SubscriptionTableData.update.business.plan'
+                                    defaultMessage='Current Business Plan : '
+                                />
+                                {throttlingPolicy}
+                                <div>
+                                    { (status === 'BLOCKED')
+                                        ? (
+                                            <FormattedMessage
+                                                id={'Applications.Details.SubscriptionTableData.update.'
+                                                + 'throttling.policy.blocked'}
+                                                defaultMessage={'Subscription is in BLOCKED state. '
+                                                + 'You need to unblock the subscription inorder to edit the tier'}
+                                            />
+                                        )
+                                        : (status === 'ON_HOLD')
                                             ? (
                                                 <FormattedMessage
-                                                    id='Applications.Details.SubscriptionTableData.update.throttling.policy.blocked'
-                                                    defaultMessage='Subscription is in BLOCKED state. You need to unblock the subscription inorder to edit the tier'
+                                                    id={'Applications.Details.SubscriptionTableData.update.'
+                                                    + 'throttling.policy.onHold'}
+                                                    defaultMessage={'Subscription is currently ON_HOLD state.'
+                                                    + ' You need to get approval to the subscription before editing the tier'}
                                                 />
                                             )
-                                             : (status === 'ON_HOLD')
-                                            ? (
-                                                <FormattedMessage
-                                                    id='Applications.Details.SubscriptionTableData.update.throttling.policy.onHold'
-                                                    defaultMessage='Subscription is currently ON_HOLD state. You need to get approval to the subscription before editing the tier'
-                                                />
-                                            )
-                                             : (status === 'REJECTED')
-                                            ? (
-                                                <FormattedMessage
-                                                    id='Applications.Details.SubscriptionTableData.update.throttling.policy.rejected'
-                                                    defaultMessage='Subscription is currently REJECTED state. You need to get approval to the subscription before editing the tier'
-                                                />
-                                            )
-                                             :(   
-                                                <div>
-                                                    <TextField
-                                                        required
-                                                        fullWidth
-                                                        id='outlined-select-currency'
-                                                        select
-                                                        label={(
-                                                            <FormattedMessage
-                                                                defaultMessage='Business Plan'
-                                                                id='Applications.Details.SubscriptionTableData.update.business.plan.name'
-                                                            />
-                                                        )}
-                                                        value={selectedTier}
-                                                        name='throttlingPolicy'
-                                                        onChange={e => this.setSelectedTier(e.target.value)}
-                                                        helperText={(
-                                                            <FormattedMessage
-                                                                defaultMessage={`Assign a new Business plan to the existing subscription`}
-                                                                id='Applications.Details.SubscriptionTableData.update.throttling.policy.helper'
-                                                            />
-                                                        )}
-                                                        margin='normal'
-                                                        variant='outlined'
-                                                    >
-                                                        {this.state.tiers.map((tier) => (
-                                                            <MenuItem key={tier.value} value={tier.value}>
-                                                                {tier.label}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </TextField>
-                                                    { (status === 'TIER_UPDATE_PENDING')
-                                                    &&  (
+                                            : (status === 'REJECTED')
+                                                ? (
+                                                    <FormattedMessage
+                                                        id={'Applications.Details.SubscriptionTableData.update.'
+                                                        + 'throttling.policy.rejected'}
+                                                        defaultMessage={'Subscription is currently REJECTED state.'
+                                                        + ' You need to get approval to the subscription before editing the tier'}
+                                                    />
+                                                )
+                                                : (
+                                                    <div>
+                                                        <TextField
+                                                            required
+                                                            fullWidth
+                                                            id='outlined-select-currency'
+                                                            select
+                                                            label={(
+                                                                <FormattedMessage
+                                                                    defaultMessage='Business Plan'
+                                                                    id={'Applications.Details.SubscriptionTableData.'
+                                                                    + 'update.business.plan.name'}
+                                                                />
+                                                            )}
+                                                            value={selectedTier}
+                                                            name='throttlingPolicy'
+                                                            onChange={(e) => this.setSelectedTier(e.target.value)}
+                                                            helperText={(
+                                                                <FormattedMessage
+                                                                    defaultMessage={'Assign a new Business plan to the '
+                                                                    + 'existing subscription'}
+                                                                    id={'Applications.Details.SubscriptionTableData.'
+                                                                    + 'update.throttling.policy.helper'}
+                                                                />
+                                                            )}
+                                                            margin='normal'
+                                                            variant='outlined'
+                                                        >
+                                                            {this.state.tiers.map((tier) => (
+                                                                <MenuItem key={tier.value} value={tier.value}>
+                                                                    {tier.label}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                        { (status === 'TIER_UPDATE_PENDING')
+                                                    && (
                                                         <div>
                                                             <FormattedMessage
-                                                                id='Applications.Details.SubscriptionTableData.update.throttling.policy.tier.update'
+                                                                id={'Applications.Details.SubscriptionTableData.update.'
+                                                                + 'throttling.policy.tier.update'}
                                                                 defaultMessage='Pending Tier Update : '
                                                             />
                                                             {requestedThrottlingPolicy}
-                                                        </div>     
+                                                        </div>
                                                     )}
-                                                </div>
-                                            )}
-                                    </div>
-                                </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button dense onClick={this.handleRequestCloseEditMenu}>
-                                    <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </Button>
-                                <Button variant="contained" disabled={(status === 'BLOCKED' || status === 'ON_HOLD' || status === 'REJECTED')} dense color='primary' onClick={() => this.handleSubscriptionTierUpdate(apiId,
-                                    subscriptionId, selectedTier, status, throttlingPolicy)}>
-                                    <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.update'
-                                        defaultMessage='Update'
-                                    />
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
-                        <ScopeValidation
-                            resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
-                            resourceMethod={resourceMethods.DELETE}
-                        >
+                                                    </div>
+                                                )}
+                                </div>
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button dense onClick={this.handleRequestCloseEditMenu}>
+                                <FormattedMessage
+                                    id='Applications.Details.SubscriptionTableData.cancel'
+                                    defaultMessage='Cancel'
+                                />
+                            </Button>
                             <Button
-                                color="default"
-                                onClick={this.handleRequestOpen}
-                                startIcon={<Icon>delete</Icon>}
+                                variant='contained'
+                                disabled={(status === 'BLOCKED' || status === 'ON_HOLD' || status === 'REJECTED')}
+                                dense
+                                color='primary'
+                                onClick={() => this.handleSubscriptionTierUpdate(apiId,
+                                    subscriptionId, selectedTier, status, throttlingPolicy)}
                             >
                                 <FormattedMessage
-                                    id='Applications.Details.SubscriptionTableData.delete.text'
+                                    id='Applications.Details.SubscriptionTableData.update'
+                                    defaultMessage='Update'
+                                />
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                    <ScopeValidation
+                        resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
+                        resourceMethod={resourceMethods.DELETE}
+                    >
+                        <Button
+                            color='default'
+                            onClick={this.handleRequestOpen}
+                            startIcon={<Icon>delete</Icon>}
+                        >
+                            <FormattedMessage
+                                id='Applications.Details.SubscriptionTableData.delete.text'
+                                defaultMessage='Delete'
+                            />
+                        </Button>
+                    </ScopeValidation>
+
+                    <Dialog open={openMenu} transition={Slide}>
+                        <DialogTitle>Confirm</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                <FormattedMessage
+                                    id='Applications.Details.SubscriptionTableData.delete.subscription.confirmation'
+                                    defaultMessage='Are you sure you want to delete the Subscription?'
+                                />
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button dense onClick={this.handleRequestClose}>
+                                <FormattedMessage
+                                    id='Applications.Details.SubscriptionTableData.cancel'
+                                    defaultMessage='Cancel'
+                                />
+                            </Button>
+                            <Button dense variant='contained' color='primary' onClick={() => this.handleRequestDelete(subscriptionId)}>
+                                <FormattedMessage
+                                    id='Applications.Details.SubscriptionTableData.delete'
                                     defaultMessage='Delete'
                                 />
                             </Button>
-                        </ScopeValidation>
-
-                        <Dialog open={openMenu} transition={Slide}>
-                            <DialogTitle>Confirm</DialogTitle>
-                            <DialogContent>
-                                <DialogContentText>
-                                    <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.delete.subscription.confirmation'
-                                        defaultMessage='Are you sure you want to delete the Subscription?'
-                                    />
-                                </DialogContentText>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button dense onClick={this.handleRequestClose}>
-                                    <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </Button>
-                                <Button dense variant="contained" color='primary' onClick={() => this.handleRequestDelete(subscriptionId)}>
-                                    <FormattedMessage
-                                        id='Applications.Details.SubscriptionTableData.delete'
-                                        defaultMessage='Delete'
-                                    />
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
+                        </DialogActions>
+                    </Dialog>
                     { isMonetizedAPI && <Invoice subscriptionId={subscriptionId} isDynamicUsagePolicy={isDynamicUsagePolicy} /> }
                 </TableCell>
             </TableRow>

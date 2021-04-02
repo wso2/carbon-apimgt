@@ -575,7 +575,9 @@ public class JMSUtils extends BaseUtils {
                         (JMSConstants.DESTINATION_TYPE_TOPIC.equalsIgnoreCase(destinationType) ?
                                 "dynamicTopics/" : "dynamicQueues/") + destinationName);
             } catch (NamingException x) {
-                log.warn("Cannot locate destination : " + destinationName);
+                if (log.isDebugEnabled()) {
+                    log.debug("Cannot locate destination : " + destinationName);
+                }
                 throw x;
             }
         } catch (NamingException e) {
