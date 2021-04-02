@@ -161,13 +161,11 @@ export default function Topics(props) {
                     [target]: { ...currentOperations[target], 'x-auth-type': updatedOperation['x-auth-type'] },
                 };
             case 'add':
-                // eslint-disable-next-line no-case-declarations
-                const parameters = extractAsyncAPIPathParameters(data.target);
                 // If target is not there add an empty object
                 if (!addedOperations[data.target]) {
                     addedOperations[data.target] = {};
                 }
-                addedOperations[data.target].parameters = parameters;
+                addedOperations[data.target].parameters = extractAsyncAPIPathParameters(data.target);
                 // eslint-disable-next-line no-case-declarations
                 let alreadyExistCount = 0;
                 for (let currentVerb of data.verbs) {

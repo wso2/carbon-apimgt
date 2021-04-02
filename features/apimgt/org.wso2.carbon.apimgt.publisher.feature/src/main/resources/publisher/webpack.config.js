@@ -29,11 +29,15 @@ const { clientRoutingBypass, devServerBefore } = require('./services/dev_proxy/a
 // https://github.com/webpack/webpack/issues/6460#issuecomment-364286147
 module.exports = (env, argv) => {
     const isDevelopmentBuild = argv.mode === 'development';
-
+    /**
+     * Notes:
+     *      - swaggerWorkerInit entry has being removed until we resolve
+     *              https://github.com/wso2/product-apim/issues/10694 issue, need to change index.html too
+     */
     const config = {
         entry: {
             index: './source/index.jsx',
-            swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js',
+            // swaggerWorkerInit: './source/src/app/webWorkers/swaggerWorkerInit.js',
         },
         output: {
             path: path.resolve(__dirname, 'site/public/dist'),

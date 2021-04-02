@@ -6943,6 +6943,102 @@
       "value": "Import From Service Catalog"
     }
   ],
+  "Apis.Settings.Alert.AlertConfiguration.add": [
+    {
+      "type": 0,
+      "value": "New Configuration"
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.error.msg": [
+    {
+      "type": 0,
+      "value": "Error occurred while adding alert configuration"
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg": [
+    {
+      "type": 0,
+      "value": "Alert Configuration added successfully"
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.error.msg": [
+    {
+      "type": 0,
+      "value": "Error occurred while deleting the configuration."
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.success.msg": [
+    {
+      "type": 0,
+      "value": "Alert Configuration deleted successfully"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.name": [
+    {
+      "type": 0,
+      "value": "API Name"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.name.label": [
+    {
+      "type": 0,
+      "value": "API Name"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.version": [
+    {
+      "type": 0,
+      "value": "API Version"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.version.label": [
+    {
+      "type": 0,
+      "value": "API Version"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.configuration": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " Configurations"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.no.config.message": [
+    {
+      "type": 0,
+      "value": "You do not have any configurations. Click on "
+    },
+    {
+      "type": 1,
+      "value": "newConfig"
+    },
+    {
+      "type": 0,
+      "value": " button to add a configuration."
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.select.api.helper": [
+    {
+      "type": 0,
+      "value": "Select the API Name"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.select.version.helper": [
+    {
+      "type": 0,
+      "value": "Search Result"
+    }
+  ],
+  "Apis.Listing.import.from.service.catalog.title": [
+    {
+      "type": 0,
+      "value": "Import From Service Catalog"
+    }
+  ],
   "Apis.Shared.AppErrorBoundary.something.went.wrong": [
     {
       "type": 0,

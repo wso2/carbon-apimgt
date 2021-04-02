@@ -131,17 +131,18 @@ const APIDetailsTopMenu = (props) => {
     const [revisionId, setRevisionId] = useState(api.id);
     const isVisibleInStore = ['PROTOTYPED', 'PUBLISHED'].includes(api.lifeCycleStatus);
     /**
- * The component for advanced endpoint configurations.
- * @param {string} name The name of the
- * @param {string} version Version of the API
- * @param {string} provider Provider of the API
- * @param {string} format Weather to recive files in YALM of JSON format
- * @returns {zip} Zpi file containing the API directory.
- */
+         * The component for advanced endpoint configurations.
+         * @param {string} name The name of the
+         * @param {string} version Version of the API
+         * @param {string} provider Provider of the API
+         * @param {string} format Weather to recive files in YALM of JSON format
+         * @returns {zip} Zpi file containing the API directory.
+     */
     function exportAPI() {
         return api.export().then((zipFile) => {
             return Utils.forceDownload(zipFile);
         }).catch((error) => {
+            console.error(error);
             if (error.response) {
                 Alert.error(error.response.body.description);
             } else {
@@ -150,7 +151,6 @@ const APIDetailsTopMenu = (props) => {
                     defaultMessage: 'Something went wrong while downloading the API.',
                 }));
             }
-            console.error(error);
         });
     }
 
@@ -190,7 +190,7 @@ const APIDetailsTopMenu = (props) => {
                     <ThumbnailView api={api} width={70} height={50} imageUpdate={imageUpdate} />
                 </Box>
                 <div style={{ marginLeft: theme.spacing(1), maxWidth: 500 }}>
-                    <Typography variant='h4' className={classes.apiName}>
+                    <Typography id='itest-api-name-version' variant='h4' className={classes.apiName}>
                         {api.name}
                         {' '}
                         {isAPIProduct ? '' : ':' + api.version}
