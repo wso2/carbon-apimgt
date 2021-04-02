@@ -102,7 +102,6 @@ const styles = (theme) => {
             justifyContent: 'center',
             display: 'flex',
             height: theme.custom.infoBar.height,
-            textDecoration: 'none',
         },
         leftLInkMainText: {
             fontSize: 18,
@@ -161,8 +160,6 @@ class Details extends Component {
         super(props);
         this.state = {
             application: null,
-            active: 'overview',
-            open: true,
         };
     }
 
@@ -198,16 +195,17 @@ class Details extends Component {
     handleMenuSelect = (menuLink) => {
         const { history, match } = this.props;
         history.push({ pathname: '/applications/' + match.params.application_uuid + '/' + menuLink });
-        this.setState({ active: menuLink });
     };
+
     toTitleCase = (str) => {
         return str.replace(
             /\w\S*/g,
-            function (txt) {
+            (txt) => {
                 return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            }
+            },
         );
     };
+
     renderManager = (application, keyType, secScheme) => {
         const { classes } = this.props;
         return (
@@ -260,7 +258,9 @@ class Details extends Component {
      * @memberof Details
      */
     render() {
-        const { classes, match, theme, intl, } = this.props;
+        const {
+            classes, match, theme, intl,
+        } = this.props;
         const { notFound, application } = this.state;
         const pathPrefix = '/applications/' + match.params.application_uuid;
         const redirectUrl = pathPrefix + '/overview';
@@ -285,10 +285,10 @@ class Details extends Component {
                     <title>{`${prefix} ${application.name}${sufix}`}</title>
                 </Helmet>
                 <nav
-                    role="navigation"
+                    role='navigation'
                     aria-label={intl.formatMessage({
                         id: 'Applications.Details.index.secondary.navigation',
-                        defaultMessage: 'Secondary Navigation'
+                        defaultMessage: 'Secondary Navigation',
                     })}
                     className={classNames(
                         classes.LeftMenu,
@@ -309,60 +309,120 @@ class Details extends Component {
                             <CustomIcon width={rootIconSize} height={rootIconSize} icon='applications' />
                             {rootIconTextVisible && (
                                 <Typography className={classes.leftLInkMainText}>
-                                    <FormattedMessage id='Applications.Details.applications.all' defaultMessage='ALL APPs' />
+                                    <FormattedMessage
+                                        id='Applications.Details.applications.all'
+                                        defaultMessage='ALL APPs'
+                                    />
                                 </Typography>
                             )}
                         </Link>
                     )}
                     <LeftMenuItem
-                        text={<FormattedMessage id='Applications.Details.menu.overview' defaultMessage='Overview' />}
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.overview'
+                                defaultMessage='Overview'
+                            />
+                        )}
                         iconText='overview'
                         route='overview'
                         to={pathPrefix + '/overview'}
-                        open={open} />
+                        open
+                    />
                     <LeftMenuItem
-                        text={<FormattedMessage id='Applications.Details.menu.prod.keys' defaultMessage='Production Keys' />}
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.prod.keys'
+                                defaultMessage='Production Keys'
+                            />
+                        )}
                         iconText='productionkeys'
                         route='productionkeys'
                         to={pathPrefix + '/productionkeys/oauth'}
-                        open={open} />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />}
+                        open
+                    />
+                    <LeftMenuItem
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.oauth.tokens'
+                                defaultMessage='OAuth2 Tokens'
+                            />
+                        )}
                         route='productionkeys/oauth'
                         to={pathPrefix + '/productionkeys/oauth'}
                         submenu
-                        open={open}
-                        Icon={<ScreenLockLandscapeIcon />}  
-                        />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />}
+                        Icon={<ScreenLockLandscapeIcon />}
+                        open
+                    />
+                    <LeftMenuItem
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.api.key'
+                                defaultMessage='Api Key'
+                            />
+                        )}
                         route='productionkeys/apikey'
                         to={pathPrefix + '/productionkeys/apikey'}
                         submenu
-                        open={open}
-                        Icon={<VpnKeyIcon />} />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.sandbox.keys' defaultMessage='Sandbox Keys' />}
+                        Icon={<VpnKeyIcon />}
+                        open
+                    />
+                    <LeftMenuItem
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.sandbox.keys'
+                                defaultMessage='Sandbox Keys'
+                            />
+                        )}
                         iconText='productionkeys'
                         route='sandboxkeys'
                         to={pathPrefix + '/sandboxkeys/oauth'}
-                        open={open} />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.oauth.tokens' defaultMessage='OAuth2 Tokens' />}
-                        route='sandboxkeys/oauth' to={pathPrefix + '/sandboxkeys/oauth'}
+                        open
+                    />
+                    <LeftMenuItem
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.oauth.tokens'
+                                defaultMessage='OAuth2 Tokens'
+                            />
+                        )}
+                        route='sandboxkeys/oauth'
+                        to={pathPrefix + '/sandboxkeys/oauth'}
                         submenu
-                        open={open}
-                        Icon={<ScreenLockLandscapeIcon />} />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.api.key' defaultMessage='Api Key' />}
+                        Icon={<ScreenLockLandscapeIcon />}
+                        open
+                    />
+                    <LeftMenuItem
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.api.key'
+                                defaultMessage='Api Key'
+                            />
+                        )}
                         route='sandboxkeys/apikey'
                         to={pathPrefix + '/sandboxkeys/apikey'}
                         submenu
-                        open={open}
-                        Icon={<VpnKeyIcon />} />
-                    <LeftMenuItem text={<FormattedMessage id='Applications.Details.menu.subscriptions' defaultMessage='Subscriptions' />}
+                        Icon={<VpnKeyIcon />}
+                        open
+                    />
+                    <LeftMenuItem
+                        text={(
+                            <FormattedMessage
+                                id='Applications.Details.menu.subscriptions'
+                                defaultMessage='Subscriptions'
+                            />
+                        )}
                         iconText='subscriptions'
                         route='subscriptions'
                         to={pathPrefix + '/subscriptions'}
-                        open={open} />
+                        open
+                    />
                 </nav>
                 <div className={classes.content}>
-                    <InfoBar applicationId={match.params.application_uuid} innerRef={node => (this.infoBar = node)} />
+                    <InfoBar
+                        applicationId={match.params.application_uuid}
+                        innerRef={(node) => { this.infoBar = node; }}
+                    />
                     <div
                         className={classNames(
                             { [classes.contentLoader]: position === 'horizontal' },

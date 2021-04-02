@@ -79,7 +79,7 @@ const styles = (theme) => ({
  */
 function View(props) {
     const {
-        classes, doc, apiId, fullScreen, intl,
+        classes, doc, apiId, fullScreen, intl, dontShowName,
     } = props;
     const { api } = useContext(ApiContext);
     const [code, setCode] = useState('');
@@ -182,7 +182,7 @@ function View(props) {
         <>
             {!fullScreen && <div className={classes.docBadge}>{doc.type}</div>}
 
-            {doc.summary && (
+            {(!dontShowName && doc.summary) && (
                 <Typography variant='body1' className={classes.docSummary}>
                     {doc.summary}
                 </Typography>
@@ -230,7 +230,9 @@ function View(props) {
         </>
     );
 }
-
+View.defaultProps = {
+    dontShowName: false,
+};
 View.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     doc: PropTypes.shape({}).isRequired,
@@ -239,6 +241,7 @@ View.propTypes = {
         formatMessage: PropTypes.func,
     }).isRequired,
     fullScreen: PropTypes.bool.isRequired,
+    dontShowName: PropTypes.bool,
 };
 
 export default injectIntl(withStyles(styles)(View));

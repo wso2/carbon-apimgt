@@ -3417,8 +3417,6 @@ components:
           description: Value of the header
     IPCondition:
       title: IP based throttling condition
-      required:
-      - specificIP
       type: object
       properties:
         ipConditionType:

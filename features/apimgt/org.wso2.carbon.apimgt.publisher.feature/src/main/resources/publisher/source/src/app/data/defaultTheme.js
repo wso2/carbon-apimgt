@@ -214,5 +214,10 @@ export default {
                 swagger: '/site/public/images/service_catalog/icons/swagger.svg',
             },
         },
+        revision: {
+            activeRevision: {
+                background: 'radial-gradient(#29bb89, #f7ea00)',
+            },
+        },
     },
 };

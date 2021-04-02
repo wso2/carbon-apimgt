@@ -29,13 +29,14 @@ const useStyles = makeStyles((theme) => ({
         display: 'inline-block',
         '& img': {
             width: 32,
-            marginLeft: theme.spacing(1),
+            marginRight: theme.spacing(1),
         },
     },
     oneFlex: {
         flex: 1,
     },
     socialLinkWrapper: {
+        marginTop: 16,
         display: 'flex',
         alignItems: 'center',
         paddingRight: theme.spacing(2),

@@ -15,7 +15,7 @@ const DefaultConfigurations = {
             contrastText: '#ffcc00',
         },
         background: {
-            default: '#f9f9f9',
+            default: '#ffffff',
             paper: '#ffffff',
             drawer: '#1a1f2f',
         },
@@ -343,6 +343,7 @@ const DefaultConfigurations = {
         AsyncTryOut: {
             backgroundColor: '#89b7d1',
         },
+        showSwaggerDescriptionOnOverview: false,
         overrides: {
             MuiOutlinedInput: {
                 root: {
