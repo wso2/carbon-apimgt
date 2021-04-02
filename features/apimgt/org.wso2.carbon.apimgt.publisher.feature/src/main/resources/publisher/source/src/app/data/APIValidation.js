@@ -162,6 +162,7 @@ const definition = {
     apiDocument: documentSchema.document().isDocumentPresent(),
     operationVerbs: Joi.array().items(Joi.string()).min(1).unique(),
     operationTarget: Joi.string().required(),
+    websubOperationTarget: Joi.string().regex(/^[^{}]*$/).required(),
     name: Joi.string().min(1).max(255),
     email: Joi.string().email({ tlds: true }).required(),
 };
