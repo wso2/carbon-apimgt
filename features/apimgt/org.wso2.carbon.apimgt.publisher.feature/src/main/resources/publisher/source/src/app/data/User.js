@@ -182,11 +182,8 @@ export default class User {
     }
 
     /**
-     * Get the super tenent user without domain
-     * @param {String} userName - Name of the user
-     * @returns {String} - user name without domain
+     * Check whether the current user has admin role or not
      */
-
     isAdmin() {
         return this.scopes.includes('apim:admin');
     }

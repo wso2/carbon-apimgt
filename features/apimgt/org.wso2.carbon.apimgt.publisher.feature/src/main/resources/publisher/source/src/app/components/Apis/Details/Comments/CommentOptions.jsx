@@ -149,7 +149,7 @@ class CommentOptions extends React.Component {
         const user = AuthManager.getUser();
         const username = Utils.getUserNameWithoutDomain(user.name);
         const canDelete = (comment.createdBy === username) || user.isAdmin();
-        const canModify = comment.createdBy === username;
+        // const canModify = comment.createdBy === username;
         return (
             <Grid container spacing={1} className={classes.verticalSpace} key={comment.id}>
 
@@ -183,7 +183,7 @@ class CommentOptions extends React.Component {
                 ]}
 
                 {/* only the comment owner can modify the comment from the exact entry point */}
-                {canModify && [
+                {/* {canModify && [
                     <Grid item key='key-edit'>
                         <Button
                             size='small'
@@ -194,7 +194,7 @@ class CommentOptions extends React.Component {
                             <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
                         </Button>
                     </Grid>,
-                ]}
+                ]} */}
 
             </Grid>
         );
