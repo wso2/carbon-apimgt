@@ -8112,5 +8112,11 @@
       "type": 0,
       "value": "Maximum file size limit to 1MB"
     }
+  ],
+  "Apis.Details.Configuration.AuthHeader.helper.text": [
+    {
+      "type": 0,
+      "value": "Authorization header name cannot contain spaces or special characters"
+    }
   ]
 }

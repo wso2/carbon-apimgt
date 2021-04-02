@@ -142,6 +142,10 @@ const definition = {
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Document name ' + getMessage(error.type, 50) }));
         }),
+    authorizationHeader: Joi.string().regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+        .error((errors) => {
+            return errors.map((error) => ({ ...error, message: 'Authorization Header ' + getMessage(error.type) }));
+        }),
     role: roleSchema.systemRole().role(),
     scope: scopeSchema.scopes().scope(),
     url: Joi.string().uri({ scheme: ['http', 'https'] }).error((errors) => {
