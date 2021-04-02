@@ -4548,6 +4548,10 @@ public class ApiMgtDAO {
         Application[] applications = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName.contains("Oracle")) {
+                limit = offset + limit;
+            }
             sqlQuery = sqlQuery.replace("$1", sortBy);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
             prepStmt = connection.prepareStatement(sqlQuery);
