@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+import { injectIntl, FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Typography, Tooltip } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
@@ -25,10 +26,9 @@ import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import Box from '@material-ui/core/Box';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
-import { injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import Alert from 'AppComponents/Shared/Alert';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
@@ -111,6 +111,7 @@ class Comment extends React.Component {
         this.handleClose = this.handleClose.bind(this);
         this.filterRemainingComments = this.filterRemainingComments.bind(this);
         this.filterCommentToDelete = this.filterCommentToDelete.bind(this);
+        this.handleLoadMoreReplies = this.handleLoadMoreReplies.bind(this);
     }
 
     /**
@@ -254,6 +255,52 @@ class Comment extends React.Component {
     }
 
     /**
+     * Handles loading more comment replies
+     * @param {Object} comment comment for which replies should be loaded
+     * @memberof Comments
+     */
+    handleLoadMoreReplies(comment) {
+        const { apiId, comments, commentsUpdate } = this.props;
+        const { id, replies: { count, list } } = comment;
+        const restApi = new API();
+
+        restApi
+            .getAllCommentReplies(apiId, id, 3, count)
+            .then((result) => {
+                if (result.body) {
+                    const { list: replyList, count: replyCount } = result.body;
+                    const newComments = comments.reduce((acc, cur) => {
+                        let temp = cur;
+                        if (cur.id === id) {
+                            const newRepliesList = list.concat(replyList);
+                            const newCount = count + replyCount;
+                            const newLimit = newCount <= 3 ? 3 : newCount;
+
+                            temp = {
+                                ...cur,
+                                replies: {
+                                    count: newCount,
+                                    list: newRepliesList,
+                                    pagination: { ...cur.replies.pagination, limit: newLimit },
+                                },
+                            };
+                        }
+                        return [...acc, temp];
+                    }, []);
+                    if (commentsUpdate) {
+                        commentsUpdate(newComments);
+                    }
+                }
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+            });
+    }
+
+
+    /**
      * Render method of the component
      * @returns {React.Component} Comment html component
      * @memberof Comment
@@ -367,6 +414,33 @@ class Comment extends React.Component {
                                                     </Box>
                                                 </>
                                             ))}
+                                            {comment.replies && comment.replies.count < comment.replies.pagination.total
+                                                && (
+                                                    <div className={classes.contentWrapper}>
+                                                        <Grid container spacing={4} className={classes.root}>
+                                                            <Grid item>
+                                                                <Typography className={classes.verticalSpace} variant='body1'>
+                                                                    <a
+                                                                        className={classes.link + ' ' + classes.loadMoreLink}
+                                                                        onClick={() => this.handleLoadMoreReplies(comment)}
+                                                                        onKeyDown={() => this.handleLoadMoreReplies(comment)}
+                                                                    >
+                                                                        <FormattedMessage
+                                                                            id='Apis.Details.Comments.Comment.load.more.replies'
+                                                                            defaultMessage='Show More Replies'
+                                                                        />
+                                                                    </a>
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item>
+                                                                <Typography className={classes.verticalSpace} zvariant='body1'>
+                                                                    {'(' + (comment.replies.count) + ' of '
+                                                                        + comment.replies.pagination.total + ')'}
+                                                                </Typography>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </div>
+                                                )}
                                         </Grid>
                                     </Grid>
                                 </div>
