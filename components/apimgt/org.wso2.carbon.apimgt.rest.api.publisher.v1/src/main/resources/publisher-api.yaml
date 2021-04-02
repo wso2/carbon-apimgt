@@ -7850,7 +7850,7 @@ components:
         name:
           maxLength: 50
           minLength: 1
-          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+\[\]\/]*$)'
           type: string
           example: PizzaShackAPI
         mode:
@@ -7893,7 +7893,7 @@ components:
         name:
           maxLength: 50
           minLength: 1
-          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+]*$)'
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\s+\[\]\/]*$)'
           type: string
           example: PizzaShackAPI
         description:
@@ -7909,7 +7909,7 @@ components:
           maxLength: 30
           minLength: 1
           type: string
-          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$]+$'
+          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
           example: 1.0.0
         provider:
           maxLength: 50
