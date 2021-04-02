@@ -1004,8 +1004,9 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new UserAwareAPIConsumerWrapper(userRegistry, apiMgtDAO);
         Mockito.when(userRegistry.getUserRealm()).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
-        Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
-                thenReturn(new String[] { "role1", "role2" });
+        String[] currentUserRoles = {"role1", "role2"};
+        PowerMockito.when(APIUtil.getListOfRoles(Mockito.anyString())).thenReturn(currentUserRoles);
+
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 0);
         TierPermissionDTO tierPermissionDTO = new TierPermissionDTO();
         TierPermissionDTO tierPermissionDTO1 = new TierPermissionDTO();
