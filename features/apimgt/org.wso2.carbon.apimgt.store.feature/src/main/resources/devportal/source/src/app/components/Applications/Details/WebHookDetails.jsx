@@ -16,11 +16,11 @@
  * under the License.
  */
 
-import React, {useState, useEffect} from 'react';
-import {makeStyles} from "@material-ui/core/styles/index";
-import {matchPath} from "react-router";
+import React, { useState, useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles/index';
+import { matchPath } from 'react-router';
 import Typography from '@material-ui/core/Typography';
-import {FormattedMessage} from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -29,12 +29,13 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import Grid from '@material-ui/core/Grid';
 import Alert from 'AppComponents/Shared/Alert';
 import Api from 'AppData/api';
-import _ from 'lodash'
+import _ from 'lodash';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime'
-dayjs.extend(relativeTime)
+import relativeTime from 'dayjs/plugin/relativeTime';
 import CancelIcon from '@material-ui/icons/Cancel';
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+
+dayjs.extend(relativeTime);
 
 const useStyles = makeStyles((theme) => (
     {
@@ -74,7 +75,7 @@ const useStyles = makeStyles((theme) => (
             },
         },
         listWrapper: {
-            width: '50%'
+            width: '50%',
         },
         subscriptionRow: {
             paddingLeft: '16px',
@@ -83,7 +84,7 @@ const useStyles = makeStyles((theme) => (
             fontSize: '12px',
         },
         subscriptionTimestamp: {
-            float: 'right'
+            float: 'right',
         },
         SubscriptionHeader: {
             paddingBottom: '0px',
@@ -93,33 +94,33 @@ const useStyles = makeStyles((theme) => (
     }
 ));
 
+/**
+ * @param {JSON} props props passed from parent
+ * @returns {JSX} jsx output
+ */
 export default function WebHookDetails(props) {
     const classes = useStyles();
-    const {location: {pathname}} = props;
-    let match = matchPath(pathname, {
+    const { location: { pathname } } = props;
+    const match = matchPath(pathname, {
         path: '/applications/:applicationId/webhooks/:apiId',
         exact: true,
         strict: false,
     });
-    const applicationId = props.match.params.applicationId;
-    const apiId = match.params.apiId;
+    const { applicationId } = props.match.params;
+    const { apiId } = match.params;
 
     const [subscribedTopics, setSubscribedTopics] = useState('');
 
     const getLogoForDeliveryStatus = (subscription) => {
         switch (subscription.deliveryStatus) {
             case 1:
-                return <CheckCircleIcon style={{color: 'green', fontSize: '14px', paddingTop: '3px'}}/>;
+                return <CheckCircleIcon style={{ color: 'green', fontSize: '14px', paddingTop: '3px' }} />;
             case 2:
-                return <CancelIcon style={{color: 'red', fontSize: '14px', paddingTop: '3px'}}/>;
+                return <CancelIcon style={{ color: 'red', fontSize: '14px', paddingTop: '3px' }} />;
             default:
-                return <RemoveCircleIcon style={{color: 'black', fontSize: '14px', paddingTop: '3px'}}/>;
+                return <RemoveCircleIcon style={{ color: 'black', fontSize: '14px', paddingTop: '3px' }} />;
         }
     };
-
-    function getRelativeTIme(standardTime) {
-        return dayjs(standardTime).fromNow()
-    }
 
     useEffect(() => {
         const apiClient = new Api();
@@ -144,47 +145,51 @@ export default function WebHookDetails(props) {
                 </Typography>
             </div>
             <List className={classes.listWrapper}>
-                {Object.keys(subscribedTopics).length < 1 &&
-                <Typography color="textPrimary" display="block">
-                    <FormattedMessage
-                        id='Applications.Details.Subscriptions.api.webhooks.subscriptions.unavailable'
-                        defaultMessage='No Webhook subscriptions available at this time.'
-                    />
-                </Typography>
-                }
-                {Object.keys(subscribedTopics).map((key, i) => (
+                {Object.keys(subscribedTopics).length < 1
+                && (
+                    <Typography color='textPrimary' display='block'>
+                        <FormattedMessage
+                            id='Applications.Details.Subscriptions.api.webhooks.subscriptions.unavailable'
+                            defaultMessage='No Webhook subscriptions available at this time.'
+                        />
+                    </Typography>
+                )}
+                {Object.keys(subscribedTopics).map((key) => (
                     <>
                         <ListItem className={classes.SubscriptionHeader}>
-                            <ListItemText primary={key}/>
+                            <ListItemText primary={key} />
                         </ListItem>
-                        {subscribedTopics[key].map((subscription, index) => (
-                            <Grid container direction="row">
+                        {subscribedTopics[key].map((subscription) => (
+                            <Grid container direction='row'>
                                 <Grid item xs={1}>
                                     {getLogoForDeliveryStatus(subscription)}
                                 </Grid>
                                 <Grid item xs={8}>
                                     <Typography
-                                        color="textPrimary"
-                                        display="block"
-                                        className={classes.callbackurl}>
+                                        color='textPrimary'
+                                        display='block'
+                                        className={classes.callbackurl}
+                                    >
                                         {subscription.callBackUrl}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={3}>
                                     {subscription.deliveryTime ? (
                                         <Typography
-                                            color="textSecondary"
-                                            display="block"
-                                            variant="caption"
-                                            className={classes.subscriptionTimestamp}>
+                                            color='textSecondary'
+                                            display='block'
+                                            variant='caption'
+                                            className={classes.subscriptionTimestamp}
+                                        >
                                             {subscription.deliveryTime}
                                         </Typography>
                                     ) : (
                                         <Typography
-                                            color="textSecondary"
-                                            display="block"
-                                            variant="caption"
-                                            className={classes.subscriptionTimestamp}>
+                                            color='textSecondary'
+                                            display='block'
+                                            variant='caption'
+                                            className={classes.subscriptionTimestamp}
+                                        >
                                             <FormattedMessage
                                                 id='Applications.Details.Subscriptions.api.webhooks.delivery.time.unavailable'
                                                 defaultMessage='Delivery data unavailable'
@@ -192,10 +197,10 @@ export default function WebHookDetails(props) {
                                         </Typography>
                                     )}
                                 </Grid>
-                                <Divider component="li"/>
+                                <Divider component='li' />
                             </Grid>
                         ))}
-                        <Divider component="li"/>
+                        <Divider component='li' />
                     </>
                 ))}
             </List>

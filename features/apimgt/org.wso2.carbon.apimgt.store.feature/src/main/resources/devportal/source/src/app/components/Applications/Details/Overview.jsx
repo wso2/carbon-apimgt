@@ -12,7 +12,6 @@ import { app } from 'Settings';
 import Loading from 'AppComponents/Base/Loading/Loading';
 import API from 'AppData/api';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
-import Application from 'AppData/Application';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -94,10 +93,10 @@ function Overview(props) {
         promisedApplication
             .then((response) => {
                 const promisedTier = client.getTierByName(response.obj.throttlingPolicy, 'application');
-                const app = response.obj;
+                const appInner = response.obj;
                 promisedTier.then((tierResponse) => {
                     setTierDescription(tierResponse.obj.description);
-                    setApplication(app);
+                    setApplication(appInner);
                 });
             }).catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -117,7 +116,6 @@ function Overview(props) {
     if (!application) {
         return <Loading />;
     }
-    const pathPrefix = '/applications/' + applicationId;
     return (
         <>
             <div className={classes.root}>

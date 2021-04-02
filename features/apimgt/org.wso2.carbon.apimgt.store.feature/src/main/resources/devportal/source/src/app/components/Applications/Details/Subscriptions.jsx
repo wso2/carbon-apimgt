@@ -26,12 +26,8 @@ import TableRow from '@material-ui/core/TableRow';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
-import Divider from '@material-ui/core/Divider';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -95,7 +91,7 @@ const styles = (theme) => ({
         paddingLeft: theme.spacing(2),
     },
     cardContent: {
-        '& table tr td':{
+        '& table tr td': {
             paddingLeft: theme.spacing(1),
         },
         '& table tr:nth-child(even)': {
@@ -169,7 +165,6 @@ class Subscriptions extends React.Component {
         super(props);
         this.state = {
             subscriptions: null,
-            unsubscribedAPIList: [],
             apisNotFound: false,
             subscriptionsNotFound: false,
             isAuthorize: true,
@@ -286,7 +281,14 @@ class Subscriptions extends React.Component {
             },
         } = this.props;
         const client = new Subscription();
-        const promisedUpdate = client.updateSubscription(applicationId, apiId, subscriptionId, currentThrottlingPolicy, status, requestedThrottlingPolicy);
+        const promisedUpdate = client.updateSubscription(
+            applicationId,
+            apiId,
+            subscriptionId,
+            currentThrottlingPolicy,
+            status,
+            requestedThrottlingPolicy,
+        );
 
         promisedUpdate
             .then((response) => {
@@ -299,8 +301,8 @@ class Subscriptions extends React.Component {
                 this.updateSubscriptions(applicationId);
             })
             .catch((error) => {
-                const { status } = error;
-                if (status === 401) {
+                const { status: statusInner } = error;
+                if (statusInner === 401) {
                     this.setState({ isAuthorize: false });
                 }
                 Alert.error('Error occurred when updating subscription');
@@ -360,22 +362,27 @@ class Subscriptions extends React.Component {
                 }));
             });
     }
+
     handleSearchTextChange() {
         this.setState({ searchText: this.searchTextTmp });
-    };
+    }
+
     handleSearchTextTmpChange(event) {
         this.searchTextTmp = event.target.value;
-    };
+    }
+
     handleClearSearch() {
         this.setState({ searchText: '' });
         this.searchInputElem.value = '';
-    };
+    }
+
     handleEnterPress(e) {
         if (e.keyCode === 13) {
             e.preventDefault();
             this.handleSearchTextChange();
         }
     }
+
     /**
      * @inheritdoc
      * @memberof Subscriptions
@@ -443,62 +450,66 @@ class Subscriptions extends React.Component {
                                 )
                                 : (
                                     <div className={classes.cardContent}>
-                                            {subscriptionsNotFound ? (
-                                                <ResourceNotFound />
-                                            ) : (
-                                                    <Table className={classes.subsTable}>
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell className={classes.firstCell}>
-                                                                    <FormattedMessage
-                                                                        id='Applications.Details.Subscriptions.api.name'
-                                                                        defaultMessage='API'
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <FormattedMessage
-                                                                        id={`Applications.Details.Subscriptions
+                                        {subscriptionsNotFound ? (
+                                            <ResourceNotFound />
+                                        ) : (
+                                            <Table className={classes.subsTable}>
+                                                <TableHead>
+                                                    <TableRow>
+                                                        <TableCell className={classes.firstCell}>
+                                                            <FormattedMessage
+                                                                id='Applications.Details.Subscriptions.api.name'
+                                                                defaultMessage='API'
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <FormattedMessage
+                                                                id={`Applications.Details.Subscriptions
                                                                         .subscription.state`}
-                                                                        defaultMessage='Lifecycle State'
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <FormattedMessage
-                                                                        id={`Applications.Details.Subscriptions
+                                                                defaultMessage='Lifecycle State'
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <FormattedMessage
+                                                                id={`Applications.Details.Subscriptions
                                                                         .business.plan`}
-                                                                        defaultMessage='Business Plan'
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <FormattedMessage
-                                                                        id='Applications.Details.Subscriptions.Status'
-                                                                        defaultMessage='Subscription Status'
-                                                                    />
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <FormattedMessage
-                                                                        id='Applications.Details.Subscriptions.action'
-                                                                        defaultMessage='Action'
-                                                                    />
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>
-                                                            {subscriptions
+                                                                defaultMessage='Business Plan'
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <FormattedMessage
+                                                                id='Applications.Details.Subscriptions.Status'
+                                                                defaultMessage='Subscription Status'
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <FormattedMessage
+                                                                id='Applications.Details.Subscriptions.action'
+                                                                defaultMessage='Action'
+                                                            />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                </TableHead>
+                                                <TableBody>
+                                                    {subscriptions
                                                                 && subscriptions.map((subscription) => {
                                                                     return (
                                                                         <SubscriptionTableData
                                                                             key={subscription.subscriptionId}
                                                                             subscription={subscription}
-                                                                            handleSubscriptionDelete={this.handleSubscriptionDelete}
-                                                                            handleSubscriptionUpdate={this.handleSubscriptionUpdate}
+                                                                            handleSubscriptionDelete={
+                                                                                this.handleSubscriptionDelete
+                                                                            }
+                                                                            handleSubscriptionUpdate={
+                                                                                this.handleSubscriptionUpdate
+                                                                            }
                                                                         />
                                                                     );
                                                                 })}
-                                                        </TableBody>
-                                                    </Table>
-                                                )}
-                                        </div>
+                                                </TableBody>
+                                            </Table>
+                                        )}
+                                    </div>
                                 )}
                         </Grid>
                     </Grid>
@@ -517,34 +528,56 @@ class Subscriptions extends React.Component {
                                 />
                             </Typography>
                             <Box className={classes.searchWrapper}>
-                                <Paper component="form" className={classes.searchRoot}>
-                                    {searchText && <HighlightOffIcon className={classes.clearSearchIcon}
-                                        onClick={this.handleClearSearch}
-                                    />}
+                                <Paper component='form' className={classes.searchRoot}>
+                                    {searchText && (
+                                        <HighlightOffIcon
+                                            className={classes.clearSearchIcon}
+                                            onClick={this.handleClearSearch}
+                                        />
+                                    )}
                                     <InputBase
                                         className={classes.input}
-                                        placeholder={intl.formatMessage({ defaultMessage: 'Search APIs', id: 'Applications.Details.Subscriptions.search' })}
-                                        inputProps={{ 'aria-label': intl.formatMessage({ defaultMessage: 'Search APIs', id: 'Applications.Details.Subscriptions.search' }) }}
-                                        inputRef= {el => this.searchInputElem = el} 
+                                        placeholder={intl.formatMessage({
+                                            defaultMessage: 'Search APIs',
+                                            id: 'Applications.Details.Subscriptions.search',
+                                        })}
+                                        inputProps={{
+                                            'aria-label': intl.formatMessage({
+                                                defaultMessage: 'Search APIs',
+                                                id: 'Applications.Details.Subscriptions.search',
+                                            }),
+                                        }}
+                                        inputRef={(el) => { this.searchInputElem = el; }}
                                         onChange={this.handleSearchTextTmpChange}
                                         onKeyDown={this.handleEnterPress}
                                     />
-                                    <IconButton className={classes.iconButton} aria-label="search" onClick={this.handleSearchTextChange}>
+                                    <IconButton
+                                        className={classes.iconButton}
+                                        aria-label='search'
+                                        onClick={this.handleSearchTextChange}
+                                    >
                                         <SearchIcon />
                                     </IconButton>
                                 </Paper>
                                 <Box className={classes.searchResults}>
-                                    {(searchText && searchText !== '') ? <>
+                                    {(searchText && searchText !== '') ? (
+                                        <>
+                                            <Typography variant='caption'>
+                                                <FormattedMessage
+                                                    id='Applications.Details.Subscriptions.filter.msg'
+                                                    defaultMessage='Filtered APIs for '
+                                                />
+                                                {searchText}
+                                            </Typography>
+                                        </>
+                                    ) : (
                                         <Typography variant='caption'>
                                             <FormattedMessage
-                                                id='Applications.Details.Subscriptions.filter.msg'
-                                                defaultMessage='Filtered APIs for '
-                                            />{searchText}</Typography>
-                                    </> : (<Typography variant='caption'>
-                                        <FormattedMessage
-                                            id='Applications.Details.Subscriptions.filter.msg.all.apis'
-                                            defaultMessage='Displaying all APIs'
-                                        /></Typography>)}
+                                                id='Applications.Details.Subscriptions.filter.msg.all.apis'
+                                                defaultMessage='Displaying all APIs'
+                                            />
+                                        </Typography>
+                                    )}
                                 </Box>
 
                             </Box>
@@ -558,7 +591,7 @@ class Subscriptions extends React.Component {
                                 apisNotFound={apisNotFound}
                                 subscriptions={subscriptions}
                                 applicationId={applicationId}
-                                handleSubscribe={(app, api, policy) => this.handleSubscribe(app, api, policy)}
+                                handleSubscribe={(appInner, api, policy) => this.handleSubscribe(appInner, api, policy)}
                                 searchText={searchText}
                             />
                         </Box>
@@ -567,7 +600,7 @@ class Subscriptions extends React.Component {
             );
         } else {
             return (
-              <Progress />  
+                <Progress />
             );
         }
     }
