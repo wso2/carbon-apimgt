@@ -603,12 +603,6 @@
       "value": "Show Diff"
     }
   ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.yes": [
-    {
-      "type": 0,
-      "value": "SAVE"
-    }
-  ],
   "Apis.Details.APIDefinition.APIDefinition.convert.to": [
     {
       "type": 0,
@@ -1513,6 +1507,12 @@
     {
       "type": 0,
       "value": "* You are not authorized to update particular fields of the API due to insufficient permissions"
+    }
+  ],
+  "Apis.Details.Configuration.Resources.save": [
+    {
+      "type": 0,
+      "value": "Save"
     }
   ],
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
@@ -3045,12 +3045,6 @@
     {
       "type": 0,
       "value": "Endpoint Security User Name/ Password should not be empty"
-    }
-  ],
-  "Apis.Details.Endpoints.Endpoints.save": [
-    {
-      "type": 0,
-      "value": "Save"
     }
   ],
   "Apis.Details.Endpoints.Endpoints.update.not.allowed": [
@@ -4855,22 +4849,10 @@
       "value": "Cancel"
     }
   ],
-  "Apis.Details.ProductResources.ProductResourcesEdit.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.ProductResources.ProductResourcesEdit.title": [
     {
       "type": 0,
       "value": "Manage Resources"
-    }
-  ],
-  "Apis.Details.ProductResources.ProductResourcesEdit.updating": [
-    {
-      "type": 0,
-      "value": "Updating ..."
     }
   ],
   "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                                    empty.title": [
@@ -5083,22 +5065,10 @@
       "value": "Value"
     }
   ],
-  "Apis.Details.Properties.Properties.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.Properties.Properties.update.not.allowed": [
     {
       "type": 0,
       "value": "*You are not authorized to update properties of the API due to insufficient permissions"
-    }
-  ],
-  "Apis.Details.Properties.Properties.updating": [
-    {
-      "type": 0,
-      "value": "Updating ..."
     }
   ],
   "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity": [
@@ -6901,16 +6871,28 @@
       "value": "Uploading"
     }
   ],
-  "Apis.Listing.components.TopMenu.api(s)": [
+  "Apis.Listing.components.TopMenu.api": [
     {
       "type": 0,
       "value": "API(s)"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.api.singular": [
+    {
+      "type": 0,
+      "value": "API"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproduct(s)": [
     {
       "type": 0,
       "value": "API Product(s)"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.apiproduct.singular": [
+    {
+      "type": 0,
+      "value": "API Product"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproducts": [
@@ -6940,13 +6922,19 @@
   "Apis.Listing.components.TopMenu.displaying": [
     {
       "type": 0,
-      "value": "Total of"
+      "value": "Total:"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
       "value": "Search Result(s)"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.search.results.singular": [
+    {
+      "type": 0,
+      "value": "Search Result"
     }
   ],
   "Apis.Listing.import.from.service.catalog.title": [

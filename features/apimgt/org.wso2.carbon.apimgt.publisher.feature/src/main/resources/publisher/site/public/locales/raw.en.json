@@ -269,9 +269,6 @@
   "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": {
     "defaultMessage": "Show Diff"
   },
-  "Apis.Details.APIDefinition.APIDefinition.btn.yes": {
-    "defaultMessage": "SAVE"
-  },
   "Apis.Details.APIDefinition.APIDefinition.convert.to": {
     "defaultMessage": "Convert to"
   },
@@ -671,6 +668,9 @@
   },
   "Apis.Details.Configuration.Configuration.update.not.allowed": {
     "defaultMessage": "* You are not authorized to update particular fields of the API due to insufficient permissions"
+  },
+  "Apis.Details.Configuration.Resources.save": {
+    "defaultMessage": "Save"
   },
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": {
     "defaultMessage": "Please refer respective APIs for endpoint information"
@@ -1433,9 +1433,6 @@
   },
   "Apis.Details.Endpoints.Endpoints.missing.security.username.error": {
     "defaultMessage": "Endpoint Security User Name/ Password should not be empty"
-  },
-  "Apis.Details.Endpoints.Endpoints.save": {
-    "defaultMessage": "Save"
   },
   "Apis.Details.Endpoints.Endpoints.update.not.allowed": {
     "defaultMessage": "*You are not authorized to update endpoints of the API due to insufficient permissions"
@@ -2310,14 +2307,8 @@
   "Apis.Details.ProductResources.ProductResourcesEdit.cancel": {
     "defaultMessage": "Cancel"
   },
-  "Apis.Details.ProductResources.ProductResourcesEdit.save": {
-    "defaultMessage": "Save"
-  },
   "Apis.Details.ProductResources.ProductResourcesEdit.title": {
     "defaultMessage": "Manage Resources"
-  },
-  "Apis.Details.ProductResources.ProductResourcesEdit.updating": {
-    "defaultMessage": "Updating ..."
   },
   "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                                    empty.title": {
     "defaultMessage": "Use the left side panel to add resources"
@@ -2424,14 +2415,8 @@
   "Apis.Details.Properties.Properties.property.value": {
     "defaultMessage": "Value"
   },
-  "Apis.Details.Properties.Properties.save": {
-    "defaultMessage": "Save"
-  },
   "Apis.Details.Properties.Properties.update.not.allowed": {
     "defaultMessage": "*You are not authorized to update properties of the API due to insufficient permissions"
-  },
-  "Apis.Details.Properties.Properties.updating": {
-    "defaultMessage": "Updating ..."
   },
   "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity": {
     "defaultMessage": "Fields"
@@ -3294,11 +3279,17 @@
   "Apis.Listing.components.ImageGenerator.ThumbnailView.uploading.btn": {
     "defaultMessage": "Uploading"
   },
-  "Apis.Listing.components.TopMenu.api(s)": {
+  "Apis.Listing.components.TopMenu.api": {
     "defaultMessage": "API(s)"
+  },
+  "Apis.Listing.components.TopMenu.api.singular": {
+    "defaultMessage": "API"
   },
   "Apis.Listing.components.TopMenu.apiproduct(s)": {
     "defaultMessage": "API Product(s)"
+  },
+  "Apis.Listing.components.TopMenu.apiproduct.singular": {
+    "defaultMessage": "API Product"
   },
   "Apis.Listing.components.TopMenu.apiproducts": {
     "defaultMessage": "API Products"
@@ -3313,10 +3304,13 @@
     "defaultMessage": "Create API"
   },
   "Apis.Listing.components.TopMenu.displaying": {
-    "defaultMessage": "Total of"
+    "defaultMessage": "Total:"
   },
   "Apis.Listing.components.TopMenu.search.results": {
     "defaultMessage": "Search Result(s)"
+  },
+  "Apis.Listing.components.TopMenu.search.results.singular": {
+    "defaultMessage": "Search Result"
   },
   "Apis.Listing.import.from.service.catalog.title": {
     "defaultMessage": "Import From Service Catalog"

@@ -19,7 +19,7 @@
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["operationObj"] }] */
 
 import React, { useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
@@ -27,6 +27,7 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import cloneDeep from 'lodash.clonedeep';
 import APIContext from 'AppComponents/Apis/Details/components/ApiContext';
+import CustomSplitButton from 'AppComponents/Shared/CustomSplitButton';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
 import ProductResourcesEditWorkspace from './ProductResourcesEditWorkspace';
 
@@ -57,14 +58,15 @@ function ProductResourcesEdit() {
     // Get the current api product object from the context
     const { api, updateAPI } = useContext(APIContext);
     const apiCopy = cloneDeep(api);
+    const history = useHistory();
     const { apis } = apiCopy;
 
     // Define states
     const [apiResources, setApiResources] = useState(apis);
-    const [updating, setUpdating] = useState(false);
+    const [isUpdating, setUpdating] = useState(false);
     // Initialize the rest api libraries
 
-    const save = () => {
+    const handleSave = () => {
         setUpdating(true);
 
         const updatePromise = updateAPI({ apis: apiResources }, true);
@@ -80,6 +82,28 @@ function ProductResourcesEdit() {
                     doRedirectToLogin();
                 }
             });
+    };
+
+    const handleSaveAndDeploy = () => {
+        setUpdating(true);
+
+        const updatePromise = updateAPI({ apis: apiResources }, true);
+        updatePromise
+            .then(() => {
+                setUpdating(false);
+            })
+            .catch((error) => {
+                setUpdating(false);
+                if (process.env.NODE_ENV !== 'production') console.log(error);
+                const { status } = error;
+                if (status === 401) {
+                    doRedirectToLogin();
+                }
+            }).finally(() => history.push({
+                pathname: api.isAPIProduct() ? `/api-products/${api.id}/deployments`
+                    : `/apis/${api.id}/deployments`,
+                state: 'deploy',
+            }));
     };
 
     return (
@@ -102,20 +126,11 @@ function ProductResourcesEdit() {
                     <Grid container direction='row' alignItems='flex-start' spacing={1}>
                         <Grid item>
                             <div>
-                                <Button variant='contained' color='primary' onClick={save} disabled={updating}>
-                                    {updating && (
-                                        <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResourcesEdit.updating'
-                                            defaultMessage='Updating ...'
-                                        />
-                                    )}
-                                    {!updating && (
-                                        <FormattedMessage
-                                            id='Apis.Details.ProductResources.ProductResourcesEdit.save'
-                                            defaultMessage='Save'
-                                        />
-                                    )}
-                                </Button>
+                                <CustomSplitButton
+                                    handleSave={handleSave}
+                                    handleSaveAndDeploy={handleSaveAndDeploy}
+                                    isUpdating={isUpdating}
+                                />
                             </div>
                         </Grid>
                         <Grid item>

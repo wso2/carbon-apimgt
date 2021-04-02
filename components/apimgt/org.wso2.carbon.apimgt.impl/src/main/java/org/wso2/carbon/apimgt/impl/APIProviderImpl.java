@@ -32,6 +32,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -6856,8 +6857,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param blockConditionsDTO Blockcondition Dto event
      */
     private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
+        String conditionType = blockConditionsDTO.getConditionType();
+        String conditionValue = blockConditionsDTO.getConditionValue();
+        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
+                APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
+            conditionValue = StringEscapeUtils.escapeJava(conditionValue);
+        }
         Object[] objects = new Object[]{blockConditionsDTO.getConditionId(), blockConditionsDTO.getConditionType(),
-                blockConditionsDTO.getConditionValue(),state, tenantDomain};
+                conditionValue, state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
