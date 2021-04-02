@@ -144,12 +144,12 @@ class CommentOptions extends React.Component {
      */
     render() {
         const {
-            classes, comment, theme,
+            classes, comment,
         } = this.props;
-        const username = Utils.getUserNameWithoutDomain(AuthManager.getUser().name);
-        const canDelete = (comment.createdBy === username)
-            || (username === theme.custom.adminRole);
-        const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
+        const user = AuthManager.getUser();
+        const username = Utils.getUserNameWithoutDomain(user.name);
+        const canDelete = (comment.createdBy === username) || user.isAdmin();
+        const canModify = comment.createdBy === username;
         return (
             <Grid container spacing={1} className={classes.verticalSpace} key={comment.id}>
 

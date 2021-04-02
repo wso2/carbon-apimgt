@@ -180,6 +180,16 @@ export default class User {
             sessionState: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
         };
     }
+
+    /**
+     * Get the super tenent user without domain
+     * @param {String} userName - Name of the user
+     * @returns {String} - user name without domain
+     */
+
+    isAdmin() {
+        return this.scopes.includes('apim:admin');
+    }
 }
 
 User.CONST = {
