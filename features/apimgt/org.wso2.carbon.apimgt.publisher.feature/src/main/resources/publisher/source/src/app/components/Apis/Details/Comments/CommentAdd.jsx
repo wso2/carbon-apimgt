@@ -116,8 +116,9 @@ class CommentAdd extends React.Component {
      * * */
     handleClickAddComment() {
         const {
-            apiId, replyTo, allComments, commentsUpdate, handleShowReply,
+            api, replyTo, allComments, commentsUpdate, handleShowReply,
         } = this.props;
+        const apiId = api.id;
         const { content } = this.state;
         const comment = {
             content: content.trim(), category: 'general',
@@ -161,7 +162,7 @@ class CommentAdd extends React.Component {
      */
     render() {
         const {
-            classes, cancelButton, theme, intl,
+            classes, cancelButton, theme, intl, api,
         } = this.props;
         const { content, currentLength } = this.state;
         return (
@@ -178,6 +179,7 @@ class CommentAdd extends React.Component {
                             id='standard-multiline-flexible'
                             autoFocus
                             multiline
+                            disabled={api.isRevision}
                             className={classes.textField}
                             margin='normal'
                             placeholder={intl.formatMessage({
@@ -234,7 +236,7 @@ CommentAdd.defaultProps = {
 CommentAdd.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     cancelButton: PropTypes.bool.isRequired,
-    apiId: PropTypes.string.isRequired,
+    api: PropTypes.instanceOf(Object).isRequired,
     replyTo: PropTypes.string,
     handleShowReply: PropTypes.func,
     commentsUpdate: PropTypes.func,

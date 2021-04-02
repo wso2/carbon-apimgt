@@ -246,7 +246,7 @@ class Comments extends Component {
 
                 <div className={classes.paper}>
                     <CommentAdd
-                        apiId={api.id}
+                        api={api}
                         commentsUpdate={this.updateCommentList}
                         allComments={allComments}
                         replyTo={null}
@@ -280,7 +280,7 @@ class Comments extends Component {
                 )}
                 <Comment
                     comments={comments}
-                    apiId={api.id}
+                    api={api}
                     commentsUpdate={this.updateCommentList}
                     allComments={allComments}
                 />
