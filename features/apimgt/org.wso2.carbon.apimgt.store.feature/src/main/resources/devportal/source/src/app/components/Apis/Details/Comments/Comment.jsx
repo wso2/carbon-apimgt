@@ -112,6 +112,8 @@ class Comment extends React.Component {
         this.filterRemainingComments = this.filterRemainingComments.bind(this);
         this.filterCommentToDelete = this.filterCommentToDelete.bind(this);
         this.handleLoadMoreReplies = this.handleLoadMoreReplies.bind(this);
+        this.handleAddReply = this.handleAddReply.bind(this);
+        this.handleDeleteReply = this.handleDeleteReply.bind(this);
     }
 
     /**
@@ -215,7 +217,7 @@ class Comment extends React.Component {
 
         const { deleteComment } = this.state;
         const {
-            apiId, allComments, commentsUpdate, intl,
+            apiId, intl, onDeleteComment,
         } = this.props;
         const commentIdOfCommentToDelete = deleteComment.id;
         const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
@@ -225,14 +227,12 @@ class Comment extends React.Component {
             .deleteComment(apiId, commentIdOfCommentToDelete)
             .then(() => {
                 if (parentCommentIdOfCommentToDelete === null) {
-                    const remainingComments = allComments.filter(this.filterRemainingComments);
-                    commentsUpdate(remainingComments);
+                    if (onDeleteComment) {
+                        onDeleteComment(commentIdOfCommentToDelete);
+                    }
                     Alert.info('Comment has been successfully deleted');
                 } else {
-                    const index = allComments.findIndex(this.filterCommentToDelete);
-                    const remainingReplies = allComments[index].replies.list.filter(this.filterRemainingComments);
-                    allComments[index].replies.list = remainingReplies;
-                    commentsUpdate(allComments);
+                    this.handleDeleteReply(parentCommentIdOfCommentToDelete, commentIdOfCommentToDelete);
                     Alert.info('Reply comment has been successfully deleted');
                 }
             })
@@ -299,6 +299,100 @@ class Comment extends React.Component {
             });
     }
 
+    /**
+     * Delete reply
+     * @param {string} parentCommentId parent comment of reply
+     * @param {string} replyCommentId deleted reply comment
+     * @memberof Comments
+     */
+    handleDeleteReply(parentCommentId, replyCommentId) {
+        const { comments, updateComment, apiId } = this.props;
+        const existingComment = comments.find((item) => item.id === parentCommentId);
+        const { replies } = existingComment;
+        // updated values
+        const updatedRepliesList = replies.list.filter((reply) => reply.id !== replyCommentId);
+        const newTotal = replies.pagination.total - 1;
+        const newLimit = replies.pagination.limit > newTotal ? newTotal : replies.pagination.limit;
+        const newCount = replies.count - 1;
+
+        if (newTotal > newCount) {
+            const restApi = new API();
+            restApi
+                .getAllCommentReplies(apiId, parentCommentId, 1, newLimit - 1)
+                .then((result) => {
+                    const data = JSON.parse(result.data);
+                    if (data) {
+                        const updatedComment = {
+                            ...existingComment,
+                            replies: {
+                                ...replies,
+                                list: [...updatedRepliesList, ...data.list],
+                                pagination: {
+                                    ...replies.pagination,
+                                    total: newTotal,
+                                },
+                            },
+                        };
+                        if (updateComment) {
+                            updateComment(updatedComment);
+                        }
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                });
+        } else {
+            const updatedComment = {
+                ...existingComment,
+                replies: {
+                    ...replies,
+                    count: newCount,
+                    list: updatedRepliesList,
+                    pagination: {
+                        ...replies.pagination,
+                        limit: newLimit,
+                        total: newTotal,
+                    },
+                },
+            };
+            if (updateComment) {
+                updateComment(updatedComment);
+            }
+        }
+    }
+
+    /**
+     * Add new reply
+     * @param {Object} comment added reply comment
+     * @memberof Comments
+     */
+    handleAddReply(comment) {
+        const { comments, updateComment } = this.props;
+        const { parentCommentId } = comment;
+        const existingComment = comments.find((item) => item.id === parentCommentId);
+        const { replies } = existingComment;
+        const newCount = (replies.count || 0) + 1;
+        const newLimit = newCount <= 3 ? 3 : newCount;
+        const updatedComment = {
+            ...existingComment,
+            replies: {
+                ...replies,
+                count: newCount,
+                list: [...replies.list, comment],
+                pagination: {
+                    ...replies.pagination,
+                    limit: newLimit,
+                    offset: replies.pagination.offset || 0,
+                    total: replies.pagination.total + 1,
+                },
+            },
+        };
+        if (updateComment) {
+            updateComment(updatedComment);
+        }
+    }
 
     /**
      * Render method of the component
@@ -365,6 +459,7 @@ class Comment extends React.Component {
                                                         commentsUpdate={commentsUpdate}
                                                         handleShowReply={this.handleShowReply}
                                                         cancelButton
+                                                        addReply={this.handleAddReply}
                                                     />
                                                 </Box>
                                             )}
