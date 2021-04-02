@@ -341,6 +341,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             newDocumentation.setFilePath(oldDocument.getFilePath());
+            newDocumentation.setId(oldDocument.getId());
             apiProvider.updateDocumentation(apiProductId, newDocumentation, tenantDomain);
 
             //retrieve the updated documentation
