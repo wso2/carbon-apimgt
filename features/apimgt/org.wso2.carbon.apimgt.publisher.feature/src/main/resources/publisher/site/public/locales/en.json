@@ -323,6 +323,22 @@
     {
       "type": 0,
       "value": " Browse files"
+    },
+    {
+      "type": 1,
+      "value": "break"
+    },
+    {
+      "type": 0,
+      "value": "("
+    },
+    {
+      "type": 1,
+      "value": "accept"
+    },
+    {
+      "type": 0,
+      "value": ")"
     }
   ],
   "Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.file.upload": [
@@ -537,12 +553,6 @@
       "value": "API Definition updated successfully"
     }
   ],
-  "Apis.Details.APIDefinition.APIDefinition.api.outdated.definition": [
-    {
-      "type": 0,
-      "value": "Current API definition outdated, You can either re-import existing resource or create new version"
-    }
-  ],
   "Apis.Details.APIDefinition.APIDefinition.async.api.definition.updated.successfully": [
     {
       "type": 0,
@@ -567,40 +577,16 @@
       "value": "Audit API"
     }
   ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.cancel": [
-    {
-      "type": 0,
-      "value": "Cancel"
-    }
-  ],
   "Apis.Details.APIDefinition.APIDefinition.btn.close": [
     {
       "type": 0,
       "value": "Close"
     }
   ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.hide.diff": [
-    {
-      "type": 0,
-      "value": "Hide Diff"
-    }
-  ],
   "Apis.Details.APIDefinition.APIDefinition.btn.no": [
     {
       "type": 0,
       "value": "CANCEL"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.reimport": [
-    {
-      "type": 0,
-      "value": "Re-import"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": [
-    {
-      "type": 0,
-      "value": "Show Diff"
     }
   ],
   "Apis.Details.APIDefinition.APIDefinition.convert.to": [
@@ -715,18 +701,6 @@
     {
       "type": 0,
       "value": "Import WSDL"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.outdated.api.definition": [
-    {
-      "type": 0,
-      "value": "Outdated Definition"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.outdated.definition": [
-    {
-      "type": 0,
-      "value": "Outdated Definition"
     }
   ],
   "Apis.Details.APIDefinition.APIDefinition.save.api.definition": [
@@ -1047,6 +1021,78 @@
       "value": "Severity ranges from:"
     }
   ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.api.outdated.definition": [
+    {
+      "type": 0,
+      "value": "Current API definition is outdated. You can either re-import the new definition or create a new version of this API."
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.cancel": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.hide.diff": [
+    {
+      "type": 0,
+      "value": "Hide Diff"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.reimport": [
+    {
+      "type": 0,
+      "value": "Re-import"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.show.diff": [
+    {
+      "type": 0,
+      "value": "Show Diff"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.import.error": [
+    {
+      "type": 0,
+      "value": "Error while re-importing API definition"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.import.success": [
+    {
+      "type": 0,
+      "value": "Re-imported API definition successfully!"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.new.api.definition.error": [
+    {
+      "type": 0,
+      "value": "Something went wrong while getting the new API definition."
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition": [
+    {
+      "type": 0,
+      "value": "Outdated Definition"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition.error": [
+    {
+      "type": 0,
+      "value": "Something went wrong while getting the outdated API definition."
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition.heading": [
+    {
+      "type": 0,
+      "value": "Outdated Definition"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.service.retrieve.error": [
+    {
+      "type": 0,
+      "value": "Something went wrong while retrieving service information"
+    }
+  ],
   "Apis.Details.APIDefinition.ImportDefinition.WSDL.updated.successfully": [
     {
       "type": 0,
@@ -1333,6 +1379,12 @@
     {
       "type": 0,
       "value": "Edit Complexity Values"
+    }
+  ],
+  "Apis.Details.Configuration.AuthHeader.helper.text": [
+    {
+      "type": 0,
+      "value": "Authorization header name cannot contain spaces or special characters"
     }
   ],
   "Apis.Details.Configuration.Components.APISecurity.Components.\n                                    ApplicationLevel.http": [
@@ -6871,22 +6923,10 @@
       "value": "Uploading"
     }
   ],
-  "Apis.Listing.components.TopMenu.api": [
-    {
-      "type": 0,
-      "value": "API(s)"
-    }
-  ],
   "Apis.Listing.components.TopMenu.api.singular": [
     {
       "type": 0,
       "value": "API"
-    }
-  ],
-  "Apis.Listing.components.TopMenu.apiproduct(s)": [
-    {
-      "type": 0,
-      "value": "API Product(s)"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproduct.singular": [
@@ -6928,106 +6968,10 @@
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
-      "value": "Search Result(s)"
+      "value": "Search Results"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results.singular": [
-    {
-      "type": 0,
-      "value": "Search Result"
-    }
-  ],
-  "Apis.Listing.import.from.service.catalog.title": [
-    {
-      "type": 0,
-      "value": "Import From Service Catalog"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.add": [
-    {
-      "type": 0,
-      "value": "New Configuration"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while adding alert configuration"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg": [
-    {
-      "type": 0,
-      "value": "Alert Configuration added successfully"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while deleting the configuration."
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.success.msg": [
-    {
-      "type": 0,
-      "value": "Alert Configuration deleted successfully"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.name": [
-    {
-      "type": 0,
-      "value": "API Name"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.name.label": [
-    {
-      "type": 0,
-      "value": "API Name"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.version": [
-    {
-      "type": 0,
-      "value": "API Version"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.version.label": [
-    {
-      "type": 0,
-      "value": "API Version"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.configuration": [
-    {
-      "type": 1,
-      "value": "name"
-    },
-    {
-      "type": 0,
-      "value": " Configurations"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.no.config.message": [
-    {
-      "type": 0,
-      "value": "You do not have any configurations. Click on "
-    },
-    {
-      "type": 1,
-      "value": "newConfig"
-    },
-    {
-      "type": 0,
-      "value": " button to add a configuration."
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.select.api.helper": [
-    {
-      "type": 0,
-      "value": "Select the API Name"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.select.version.helper": [
     {
       "type": 0,
       "value": "Search Result"
@@ -7107,6 +7051,18 @@
     {
       "type": 0,
       "value": "View Invoice"
+    }
+  ],
+  "Base.Errors.AuthorizedError.default_body": [
+    {
+      "type": 0,
+      "value": "User is not authorized to access the API"
+    }
+  ],
+  "Base.Errors.AuthorizedError.default_tittle": [
+    {
+      "type": 0,
+      "value": "Authorized Error"
     }
   ],
   "Base.Errors.ResourceNotFound.api.list": [
@@ -7747,6 +7703,24 @@
       "value": "Service Catalog"
     }
   ],
+  "ServiceCatalog.Listing.Listing.heading.displaying.service": [
+    {
+      "type": 0,
+      "value": "Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Listing.heading.displaying.services": [
+    {
+      "type": 0,
+      "value": "Services"
+    }
+  ],
+  "ServiceCatalog.Listing.Listing.heading.displaying.total": [
+    {
+      "type": 0,
+      "value": "Total:"
+    }
+  ],
   "ServiceCatalog.Listing.Listing.service.deleted.successfully": [
     {
       "type": 0,
@@ -8207,12 +8181,6 @@
     {
       "type": 0,
       "value": "Maximum file size limit to 1MB"
-    }
-  ],
-  "Apis.Details.Configuration.AuthHeader.helper.text": [
-    {
-      "type": 0,
-      "value": "Authorization header name cannot contain spaces or special characters"
     }
   ]
 }
