@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
  * @param {JSON} props props passed from parent
  * @returns {JSX} code in a modal
  */
-function EmbadCode(props) {
+function EmbedCode(props) {
     const { intl } = props;
     const classes = useStyles();
     // getModalStyle is not a pure function, we roll the style only on the first render
@@ -75,8 +75,8 @@ function EmbadCode(props) {
     const handleClose = () => {
         setOpen(false);
     };
-    const embadCode = '<iframe width="450" height="120" src="'
-        + url + '" frameBorder="0" allowFullScreen title="Embad API" />';
+    const embedCode = '<iframe width="450" height="120" src="'
+        + url + '" frameBorder="0" allowFullScreen title="Embed API" />';
 
     return (
         <div>
@@ -90,12 +90,12 @@ function EmbadCode(props) {
                 <div style={modalStyle} className={classes.paper}>
                     <h2 id='simple-modal-title'>
                         <FormattedMessage
-                            id='Apis.Details.Social.EmbadCode'
+                            id='Apis.Details.Social.EmbedCode'
                             defaultMessage='Embed'
                         />
                     </h2>
                     <div className={classes.code}>
-                        <code>{embadCode}</code>
+                        <code>{embedCode}</code>
                     </div>
                     <Tooltip
                         title={
@@ -113,7 +113,7 @@ function EmbadCode(props) {
                         className={classes.iconStyle}
                     >
                         <CopyToClipboard
-                            text={embadCode}
+                            text={embedCode}
                             onCopy={onCopy}
                         >
                             <Icon color='secondary'>file_copy</Icon>
@@ -125,4 +125,4 @@ function EmbadCode(props) {
     );
 }
 
-export default injectIntl(EmbadCode);
+export default injectIntl(EmbedCode);

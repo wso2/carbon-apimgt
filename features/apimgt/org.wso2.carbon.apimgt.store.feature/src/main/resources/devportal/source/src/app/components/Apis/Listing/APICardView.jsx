@@ -208,6 +208,16 @@ class APICardView extends React.Component {
                 },
             },
             {
+                name: 'isSubscriptionAvailable',
+                label: intl.formatMessage({
+                    id: 'Apis.Listing.APIList.isSubscriptionAvailable',
+                    defaultMessage: 'isSubscriptionAvailable',
+                }),
+                options: {
+                    display: 'excluded',
+                },
+            },
+            {
                 name: 'name',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.APIList.name',
@@ -231,7 +241,14 @@ class APICardView extends React.Component {
                     customBodyRender: (value, tableMeta) => {
                         if (tableMeta.rowData) {
                             const apiId = tableMeta.rowData[0];
+                            const isSubscriptionAvailable = tableMeta.rowData[1];
                             const policies = value;
+                            if (!isSubscriptionAvailable) {
+                                return (intl.formatMessage({
+                                    id: 'Apis.Listing.APICardView.not.allowed',
+                                    defaultMessage: 'Not Allowed',
+                                }));
+                            }
                             if (!policies) {
                                 return (intl.formatMessage({
                                     id: 'Apis.Listing.APICardView.already.subscribed',
