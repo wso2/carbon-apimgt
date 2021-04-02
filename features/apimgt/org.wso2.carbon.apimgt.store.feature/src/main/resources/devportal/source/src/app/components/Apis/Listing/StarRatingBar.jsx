@@ -35,7 +35,7 @@ import { FormattedMessage } from 'react-intl';
 
 const styles = (theme) => ({
     starRate: {
-        fontSize: 25,
+        fontSize: 30,
         color: theme.custom.infoBar.starColor,
     },
     noStarRate: {
@@ -61,13 +61,13 @@ const styles = (theme) => ({
         background: '#efefef',
         borderRadius: '3px',
         position: 'absolute',
-        left: '62px',
-        top: '-5px',
+        right: 0,
+        top: '-50px',
+        marginLeft: '125px',
     },
     rateThis: {
         lineHeight: '15px',
         width: 40,
-        marginTop: '-6px',
     },
 });
 
@@ -234,7 +234,7 @@ class StarRatingBar extends React.Component {
                                             <FormattedMessage defaultMessage='Rate This' id='Apis.Listing.StarRatingBar.rate.this' />
                                         ) : (
                                             <Box>
-                                                <Box fontSize={22} ml={1} mb={1}>{userRating}</Box>
+                                                <Box fontSize={22} ml={1} mb={0.5}>{userRating}</Box>
                                                 <Box>You</Box>
                                             </Box>
                                         )}

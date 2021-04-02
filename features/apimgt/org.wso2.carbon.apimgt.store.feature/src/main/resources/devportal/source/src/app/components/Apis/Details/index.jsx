@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-state */
 /* eslint-disable react/jsx-props-no-spreading */
 /*
  * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
@@ -33,15 +34,15 @@ import Alert from 'AppComponents/Shared/Alert';
 import classNames from 'classnames';
 import { Helmet } from 'react-helmet';
 import { app } from 'Settings';
+import CONSTANTS from 'AppData/Constants';
 import CustomIcon from '../../Shared/CustomIcon';
 import LeftMenuItem from '../../Shared/LeftMenuItem';
 import { ResourceNotFound } from '../../Base/Errors/index';
-import InfoBar from './InfoBar';
+import Breadcrumb from './Breadcrumb';
 import { ApiContext } from './ApiContext';
 import Progress from '../../Shared/Progress';
 import Wizard from './Credentials/Wizard/Wizard';
 import User from '../../../data/User';
-import CONSTANTS from 'AppData/Constants';
 
 
 const ApiConsole = lazy(() => import('./ApiConsole/ApiConsole' /* webpackChunkName: "APIConsole" */));
@@ -56,18 +57,18 @@ const AsyncApiDefinition = lazy(() => import('./Definitions/AsyncApi/AsyncApiDef
 
 const LoadableSwitch = withRouter((props) => {
     const { match, api } = props;
-    const apiUuid = match.params.apiUuid;
+    const { apiUuid } = match.params;
     const path = '/apis/';
     const { advertised } = api.advertiseInfo;
     const redirectURL = path + apiUuid + '/overview';
 
     let tryoutRoute;
     if (api.type === 'GRAPHQL') {
-        tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />
+        tryoutRoute = <Route path='/apis/:apiUuid/test' component={GraphQLConsole} />;
     } else if (api.type === CONSTANTS.API_TYPES.WS || api.type === CONSTANTS.API_TYPES.WEBSUB || api.type === CONSTANTS.API_TYPES.SSE) {
-        tryoutRoute = <Route path='/apis/:apiUuid/test' component={AsyncApiConsole} />
+        tryoutRoute = <Route path='/apis/:apiUuid/test' component={AsyncApiConsole} />;
     } else {
-        tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />
+        tryoutRoute = <Route path='/apis/:apiUuid/test' component={ApiConsole} />;
     }
 
     return (
@@ -149,7 +150,6 @@ const styles = (theme) => {
             cursor: 'pointer',
             background: theme.custom.leftMenu.rootBackground,
             color: theme.palette.getContrastText(theme.custom.leftMenu.rootBackground),
-            textDecoration: 'none',
             alignItems: 'center',
             justifyContent: 'center',
             display: 'flex',
@@ -259,17 +259,14 @@ class Details extends React.Component {
             if (user != null) {
                 this.setState({ open: user.isSideBarOpen });
                 existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null);
-                const subscriptionLimit = Settings.app.subscribeApplicationLimit || 5000;
+                const subscriptionLimit = app.subscribeApplicationLimit || 5000;
                 existingSubscriptions = restApi.getSubscriptions(this.api_uuid, null, subscriptionLimit);
                 promisedApplications = restApi.getAllApplications(null, subscriptionLimit);
 
                 Promise.all([existingSubscriptions, promisedApplications])
                     .then((response) => {
                         const [subscriptions, applications] = response.map((data) => data.obj);
-                        const appIdToNameMapping = applications.list.reduce((acc, cur) => {
-                            acc[cur.applicationId] = cur.name;
-                            return acc;
-                        }, {});
+
                         // get the application IDs of existing subscriptions
                         const subscribedApplications = subscriptions.list.map((element) => {
                             return {
@@ -285,7 +282,7 @@ class Details extends React.Component {
                         // the available applications to subscribe
                         const subscribedAppIds = subscribedApplications.map((sub) => sub.value);
                         const applicationsAvailable = applications.list
-                            .filter((app) => !subscribedAppIds.includes(app.applicationId) && app.status === 'APPROVED')
+                            .filter((appInner) => !subscribedAppIds.includes(appInner.applicationId) && appInner.status === 'APPROVED')
                             .map((filteredApp) => {
                                 return {
                                     value: filteredApp.applicationId,
@@ -329,15 +326,16 @@ class Details extends React.Component {
     }
 
     /**
-     *
-     *
      * @memberof Details
      */
     componentDidMount() {
         this.updateSubscriptionData();
     }
 
-
+    /**
+     * handle component did update
+     * @param {JSON} prevProps previous props
+     */
     componentDidUpdate(prevProps) {
         const { match: { params: { apiUuid: prevApiUuid } } } = prevProps;
         const { match: { params: { apiUuid: newApiUuid } } } = this.props;
@@ -347,15 +345,18 @@ class Details extends React.Component {
         }
     }
 
-    handleDrawerOpen() {
-        this.setState({ open: true });
-        const user = AuthManager.getUser();
-        if (user !== null) {
-            user.isSideBarOpen = true;
-            AuthManager.setUser(user);
-        }
-    };
 
+    /**
+     * @param {JSON} api api object
+     * @memberof Details
+     */
+    setDetailsAPI(api) {
+        this.setState({ api });
+    }
+
+    /**
+     * @memberof Details
+     */
     handleDrawerClose() {
         this.setState({ open: false });
         const user = AuthManager.getUser();
@@ -363,34 +364,41 @@ class Details extends React.Component {
             user.isSideBarOpen = false;
             AuthManager.setUser(user);
         }
-    };
+    }
 
     /**
-     *
-     *
-     * @param {*} api
-     * @memberof Details
+     * handle left side drawer open
      */
-    setDetailsAPI(api) {
-        this.setState({ api });
-    }
-
-    isAsyncAPI(api) {
-        return (api && (api.type === CONSTANTS.API_TYPES.WS || api.type === CONSTANTS.API_TYPES.WEBSUB || api.type === CONSTANTS.API_TYPES.SSE));
+    handleDrawerOpen() {
+        this.setState({ open: true });
+        const user = AuthManager.getUser();
+        if (user !== null) {
+            user.isSideBarOpen = true;
+            AuthManager.setUser(user);
+        }
     }
 
     /**
-     *
-     *
-     * @returns
+     * handle lef side drawer open
+     * @param {JSON} api api object
+     * @returns {boolean} is the api async api
+     */
+    isAsyncAPI(api) {
+        return (api
+            && (api.type === CONSTANTS.API_TYPES.WS
+                || api.type === CONSTANTS.API_TYPES.WEBSUB
+                || api.type === CONSTANTS.API_TYPES.SSE));
+    }
+
+    /**
+     * @returns {JSX} rendered outpu
      * @memberof Details
      */
     render() {
         const {
-            classes, theme, intl, match,
+            classes, theme, intl,
         } = this.props;
         const user = AuthManager.getUser();
-        const { apiUuid } = match.params;
         const { api, notFound, open } = this.state;
         const {
             custom: {
@@ -398,11 +406,11 @@ class Details extends React.Component {
                     rootIconSize, rootIconTextVisible, rootIconVisible, position,
                 },
                 apiDetailPages: {
-                    showCredentials, showComments, showTryout, showDocuments, showSdks, showAsyncSpecification
+                    showCredentials, showComments, showTryout, showDocuments, showSdks, showAsyncSpecification,
                 },
                 title: {
                     prefix, sufix,
-                }
+                },
             },
         } = theme;
         const globalStyle = 'body{ font-family: ' + theme.typography.fontFamily + '}';
@@ -423,15 +431,15 @@ class Details extends React.Component {
                 <style>{globalStyle}</style>
                 {!isWidget && (
                     <nav
-                        role="navigation"
+                        role='navigation'
                         aria-label={intl.formatMessage({
                             id: 'Apis.Details.index.secondary.navigation',
-                            defaultMessage: 'Secondary Navigation'
+                            defaultMessage: 'Secondary Navigation',
                         })}
                         className={classNames(
                             classes.leftMenu,
                             {
-                                [classes.leftMenuHorizontal]: position === 'horizontal'
+                                [classes.leftMenuHorizontal]: position === 'horizontal',
                             },
                             {
                                 [classes.leftMenuVerticalLeft]: position === 'vertical-left' && open,
@@ -468,12 +476,12 @@ class Details extends React.Component {
                                     <>
 
                                         <LeftMenuItem
-                                            text={
+                                            text={(
                                                 <FormattedMessage
                                                     id='Apis.Details.index.subscriptions'
                                                     defaultMessage='Subscriptions'
                                                 />
-                                            }
+                                            )}
                                             route='credentials'
                                             iconText='credentials'
                                             to={pathPrefix + 'credentials'}
@@ -484,8 +492,12 @@ class Details extends React.Component {
                                 )}
                                 {showTryout && (
                                     <LeftMenuItem
-                                        text={<FormattedMessage id='Apis.Details.index.try.out'
-                                            defaultMessage='Try out' />}
+                                        text={(
+                                            <FormattedMessage
+                                                id='Apis.Details.index.try.out'
+                                                defaultMessage='Try out'
+                                            />
+                                        )}
                                         route='test'
                                         iconText='test'
                                         to={pathPrefix + 'test'}
@@ -495,8 +507,12 @@ class Details extends React.Component {
                                 )}
                                 {isAsyncApi && showAsyncSpecification && (
                                     <LeftMenuItem
-                                        text={<FormattedMessage id='Apis.Details.index.definition'
-                                            defaultMessage='Definition' />}
+                                        text={(
+                                            <FormattedMessage
+                                                id='Apis.Details.index.definition'
+                                                defaultMessage='Definition'
+                                            />
+                                        )}
                                         route='definition'
                                         iconText='Definition'
                                         to={pathPrefix + 'definition'}
@@ -506,10 +522,12 @@ class Details extends React.Component {
                                 {showComments && (
 
                                     <LeftMenuItem
-                                        text={
-                                            <FormattedMessage id='Apis.Details.index.comments'
-                                                defaultMessage='Comments' />
-                                        }
+                                        text={(
+                                            <FormattedMessage
+                                                id='Apis.Details.index.comments'
+                                                defaultMessage='Comments'
+                                            />
+                                        )}
                                         route='comments'
                                         iconText='comments'
                                         to={pathPrefix + 'comments'}
@@ -522,8 +540,12 @@ class Details extends React.Component {
                         {showDocuments && (
 
                             <LeftMenuItem
-                                text={<FormattedMessage id='Apis.Details.index.documentation'
-                                    defaultMessage='Documentation' />}
+                                text={(
+                                    <FormattedMessage
+                                        id='Apis.Details.index.documentation'
+                                        defaultMessage='Documentation'
+                                    />
+                                )}
                                 route='documents'
                                 iconText='docs'
                                 to={pathPrefix + 'documents'}
@@ -543,19 +565,27 @@ class Details extends React.Component {
 
                         )}
                         {open ? (
-                            <div onClick={this.handleDrawerClose}
-                                style={{ width: 100, paddingLeft: '15px', position: 'absolute', bottom: 0, cursor: 'pointer', }}
+                            <div
+                                onClick={this.handleDrawerClose}
+                                onKeyDown={this.handleDrawerClose}
+                                style={{
+                                    width: 100, paddingLeft: '15px', position: 'absolute', bottom: 0, cursor: 'pointer',
+                                }}
                             >
                                 <ArrowBackIosIcon fontSize='medium' style={{ color: 'white' }} />
                             </div>
                         ) : (
-                                <div onClick={this.handleDrawerOpen}
-                                    style={{ paddingLeft: '15px', position: 'absolute', bottom: 0, cursor: 'pointer', }}
-                                >
-                                    <ArrowForwardIosIcon fontSize='medium' style={{ color: 'white' }} />
-                                </div>
+                            <div
+                                onClick={this.handleDrawerOpen}
+                                onKeyDown={this.handleDrawerOpen}
+                                style={{
+                                    paddingLeft: '15px', position: 'absolute', bottom: 0, cursor: 'pointer',
+                                }}
+                            >
+                                <ArrowForwardIosIcon fontSize='medium' style={{ color: 'white' }} />
+                            </div>
 
-                            )}
+                        )}
 
                     </nav>
                 )}
@@ -566,7 +596,7 @@ class Details extends React.Component {
                         { [classes.contentExpandView]: !open },
                     )}
                 >
-                    <InfoBar apiId={apiUuid} innerRef={(node) => (this.infoBar = node)} intl={intl} {...this.props} />
+                    <Breadcrumb />
                     <div
                         className={classNames(
                             { [classes.contentLoader]: position === 'horizontal' },
@@ -581,8 +611,8 @@ class Details extends React.Component {
                 </div>
             </ApiContext.Provider>
         ) : (
-                <div className='apim-dual-ring' />
-            );
+            <div className='apim-dual-ring' />
+        );
     }
 }
 
