@@ -35,7 +35,6 @@ import TopMenu from 'AppComponents/Apis/Listing/components/TopMenu';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import SampleAPIProduct from 'AppComponents/Apis/Listing/SampleAPI/SampleAPIProduct';
 import Alert from 'AppComponents/Shared/Alert';
-import { ApiListContextProvider } from 'AppComponents/Shared/ApiListContext';
 
 const styles = (theme) => ({
     contentInside: {
@@ -444,11 +443,7 @@ class TableView extends React.Component {
         }
         if (apisAndApiProducts.length === 0 && !query) {
             return (
-                <ApiListContextProvider
-                    value={{
-                        apisAndApiProducts,
-                    }}
-                >
+                <>
                     <TopMenu
                         data={apisAndApiProducts}
                         count={totalCount}
@@ -462,16 +457,12 @@ class TableView extends React.Component {
                     ) : (
                         <APILanding />
                     )}
-                </ApiListContextProvider>
+                </>
             );
         }
 
         return (
-            <ApiListContextProvider
-                value={{
-                    apisAndApiProducts,
-                }}
-            >
+            <>
                 <TopMenu
                     data={apisAndApiProducts}
                     count={totalCount}
@@ -486,7 +477,7 @@ class TableView extends React.Component {
                         <MUIDataTable title='' data={apisAndApiProducts} columns={columns} options={options} />
                     </MuiThemeProvider>
                 </div>
-            </ApiListContextProvider>
+            </>
         );
     }
 }
