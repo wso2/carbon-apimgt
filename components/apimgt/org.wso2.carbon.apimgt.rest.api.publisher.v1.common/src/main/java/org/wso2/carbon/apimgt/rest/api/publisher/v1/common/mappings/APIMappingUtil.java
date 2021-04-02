@@ -864,7 +864,7 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO    fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
@@ -929,12 +929,10 @@ public class APIMappingUtil {
             try {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
-                // AWS Lambda: set constant secret key
-                if (endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                        .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
-                    if (!StringUtils.isEmpty((String) endpointConfigJson.get(APIConstants.AMZN_SECRET_KEY))) {
-                        endpointConfigJson.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
-                    }
+                // AWS Lambda: set secret key based on preserveCredentials
+                if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
+                        .equals(endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    handleAWSCredentials(endpointConfigJson, preserveCredentials);
                 }
                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                 if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
@@ -2899,6 +2897,36 @@ public class APIMappingUtil {
             }
         }
         return endpointSecurityElement;
+    }
+
+    /**
+     * Set AWS Secret Key based on preserveCredentials state
+     *
+     * @param awsEndpointConfig   Endpoint configuration of the API
+     * @param preserveCredentials Condition to preserve credentials
+     * @return Updated endpoint config
+     */
+    private static JSONObject handleAWSCredentials(JSONObject awsEndpointConfig, boolean preserveCredentials) {
+
+        if (StringUtils.isNotEmpty((String) awsEndpointConfig.get(APIConstants.AMZN_SECRET_KEY))) {
+            if (!preserveCredentials) {
+                awsEndpointConfig.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
+                return awsEndpointConfig;
+            } else {
+                String secretKey = (String) awsEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                // Decrypting the key since CTL project goes between environments which have different encryption keys.
+                try {
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    String decryptedSecret = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
+                            APIConstants.DigestAuthConstants.CHARSET);
+                    awsEndpointConfig.put(APIConstants.AMZN_SECRET_KEY, decryptedSecret);
+                    return awsEndpointConfig;
+                } catch (CryptoException | UnsupportedEncodingException e) {
+                    log.error("Error while decrypting the Amazon key", e);
+                }
+            }
+        }
+        return awsEndpointConfig;
     }
 
     public static APIRevisionDTO fromAPIRevisiontoDTO(APIRevision model) throws APIManagementException {
