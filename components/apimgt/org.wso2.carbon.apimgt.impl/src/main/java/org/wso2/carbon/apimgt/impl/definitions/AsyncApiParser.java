@@ -1407,13 +1407,17 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public Set<URITemplate> getURITemplates(String apiDefinition) throws APIManagementException {
+    public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
+        return getURITemplates(resourceConfigsJSON, true);
+    }
+
+    public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish) {
         Set<URITemplate> uriTemplates = new HashSet<>();
         Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
         if (document.channels != null && document.channels.size() > 0) {
             for (Map.Entry<String, AaiChannelItem> entry : document.channels.entrySet()) {
                 Aai20ChannelItem channel = (Aai20ChannelItem) entry.getValue();
-                if (channel.publish != null) {
+                if (includePublish && channel.publish != null) {
                     uriTemplates.add(buildURITemplate(APIConstants.HTTP_VERB_PUBLISH, entry.getKey()));
                 }
                 if (channel.subscribe != null) {

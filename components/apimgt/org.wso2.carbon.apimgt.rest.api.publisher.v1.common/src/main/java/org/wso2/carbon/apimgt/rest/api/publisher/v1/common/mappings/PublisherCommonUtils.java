@@ -56,7 +56,6 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
@@ -983,7 +982,8 @@ public class PublisherCommonUtils {
 
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         // Set uri templates
-        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(apiDefinition);
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
+                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()));
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
@@ -995,8 +995,6 @@ public class PublisherCommonUtils {
         //updating APi with the new AsyncAPI definition
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
-        //load new topics
-        apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(existingAPI, apiDefinition));
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
     }

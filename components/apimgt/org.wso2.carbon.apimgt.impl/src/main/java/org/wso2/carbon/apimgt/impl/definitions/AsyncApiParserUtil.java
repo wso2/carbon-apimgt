@@ -200,26 +200,4 @@ public class AsyncApiParserUtil {
         }
         return apiDocContent;
     }
-
-    public static API loadTopicsFromAsyncAPIDefinition(API api, String definitionJSON) {
-        Set<URITemplate> uriTemplates = api.getUriTemplates();
-        uriTemplates.clear();
-
-        AaiDocument definition = (AaiDocument) Library.readDocumentFromJSONString(definitionJSON);
-        if (definition.getChannels().size() > 0) {
-            for (String topic : definition.channels.keySet()) {
-                if (definition.channels.get(topic).subscribe != null) {
-                    URITemplate uriTemplate = new URITemplate();
-                    uriTemplate.setUriTemplate(topic);
-                    uriTemplate.setHTTPVerb("SUBSCRIBE");
-                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-                    uriTemplate.setThrottlingTier(APIConstants.UNLIMITED_TIER);
-                    uriTemplates.add(uriTemplate);
-                }
-            }
-        }
-
-        api.setUriTemplates(uriTemplates);
-        return api;
-    }
 }
