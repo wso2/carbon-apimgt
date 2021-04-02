@@ -298,7 +298,7 @@ return null;
   @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+[\\]/]*$)") @Size(min=1,max=50)  public String getName() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+\\[\\]/]*$)") @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -351,7 +351,7 @@ return null;
   @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("version")
   @NotNull
- @Pattern(regexp="^[^~!@#;:%^*()+={}|\\\\<>\"',&/$[\\]\\s+/]+$") @Size(min=1,max=30)  public String getVersion() {
+ @Pattern(regexp="^[^~!@#;:%^*()+={}|\\\\<>\"',&/$\\[\\]\\s+/]+$") @Size(min=1,max=30)  public String getVersion() {
     return version;
   }
   public void setVersion(String version) {
