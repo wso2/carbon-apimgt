@@ -152,7 +152,6 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        saveButtonDisabled: false,
     };
     return apiConfigJson;
 }
@@ -167,6 +166,7 @@ function copyAPIConfig(api) {
  */
 export default function RuntimeConfiguration() {
     const [keyManagersConfigured, setKeyManagersConfigured] = useState([]);
+    const [saveButtonDisabled, setSaveButtonDisabled] = useState(false);
     /**
      *
      * Reduce the configuration UI related actions in to updated state
@@ -284,8 +284,8 @@ export default function RuntimeConfiguration() {
                 }
                 return nextState;
             case 'saveButtonDisabled':
-                nextState.saveButtonDisabled = value;
-                return nextState;
+                setSaveButtonDisabled(value);
+                return state;
             default:
                 return state;
         }
@@ -604,7 +604,7 @@ export default function RuntimeConfiguration() {
                         <Grid item>
                             {api.isRevision
                                 || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
-                                || isRestricted(['apim:api_create'], api)) || apiConfig.saveButtonDisabled ? (
+                                || isRestricted(['apim:api_create'], api)) || saveButtonDisabled ? (
                                     <Button
                                         disabled
                                         type='submit'
