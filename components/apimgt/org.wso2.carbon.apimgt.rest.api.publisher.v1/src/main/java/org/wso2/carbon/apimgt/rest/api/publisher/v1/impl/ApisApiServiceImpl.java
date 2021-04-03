@@ -3290,7 +3290,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
             String extension = FilenameUtils.getExtension(fileName);
-            if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
                         "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg and .gif",
                         log);
