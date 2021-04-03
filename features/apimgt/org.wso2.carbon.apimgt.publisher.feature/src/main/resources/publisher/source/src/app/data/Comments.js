@@ -95,7 +95,8 @@ class Comments extends Resource {
     deleteComment(apiId, commentId, callback = null) {
         let promise = this.client
             .then(client => {
-                return client.apis['Comment (Individual)'].delete_apis__apiId__comments__commentId_(
+                console.log("deleteing comment");
+                return client.apis.Comments.deleteComment(
                     { apiId: apiId, commentId: commentId },
                     this._requestMetaData(),
                 );
