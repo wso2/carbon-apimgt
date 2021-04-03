@@ -324,13 +324,13 @@ class Listing extends React.Component {
                                     />
                                     <Link
                                         to={!isRestricted(['apim:shared_scope_manage'])
-                                                    && {
-                                                        pathname: editUrl,
-                                                        state: {
-                                                            scopeName,
-                                                            scopeId,
-                                                        },
-                                                    }}
+                                            && {
+                                                pathname: editUrl,
+                                                state: {
+                                                    scopeName,
+                                                    scopeId,
+                                                },
+                                            }}
                                         className={isRestricted(['apim:shared_scope_manage'])
                                             ? classes.disableLink : ''}
                                     >
@@ -406,7 +406,7 @@ class Listing extends React.Component {
                             id='Scopes.Listing.Listing.scopes.enable.fine.gained.access.control'
                             defaultMessage={
                                 'Scopes enable fine-grained access control to API resources'
-                        + ' based on user roles.'
+                                + ' based on user roles.'
                             }
                         />
                     )}
@@ -418,7 +418,14 @@ class Listing extends React.Component {
 
         return (
             <div className={classes.heading}>
-                <Grid className={classes.titleWrapper} xs={12} sm={12} md={11} lg={11} item>
+                <Grid
+                    className={classes.titleWrapper}
+                    xs={12}
+                    sm={12}
+                    md={11}
+                    lg={11}
+                    item
+                >
                     <Typography variant='h4' align='left' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Scopes.Listing.Listing.heading.scope.heading'

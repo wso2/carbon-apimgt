@@ -989,7 +989,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     isAllowDisplayAPIsWithMultipleStatus());
             log.debug("Modified query for devportal search: " + modifiedQuery);
 
-            String userNameLocal = getTenantAwareUsername(ctx.getUserame());
+            String userNameLocal;
+            if (holder.isAnonymousMode()) {
+                userNameLocal = APIConstants.WSO2_ANONYMOUS_USER;
+            } else {
+                userNameLocal = getTenantAwareUsername(ctx.getUserame());
+            }
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
             if (searchQuery != null && searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
@@ -1068,6 +1073,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     }
                 }
                 apiInfo.setAvailableTierNames(availableTiers);
+                apiInfo.setSubscriptionAvailability(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+                apiInfo.setSubscriptionAvailableOrgs(
+                        artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
                 devPortalAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1176,6 +1185,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                                 apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                                apiInfo.setSubscriptionAvailability(
+                                        artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
+                                apiInfo.setSubscriptionAvailableOrgs(artifact
+                                        .getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
                                 devPortalAPIInfoList.add(apiInfo);
                             }
 
@@ -1323,11 +1336,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherContentSearchResult result = null;
         try {
-            RegistryHolder holder = getRegistry(ctx.getUserame(), org.getName());
+            RegistryHolder holder = getRegistry(org.getName());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-            String tenantAwareUsername = getTenantAwareUsername(ctx.getUserame());
 
+            String requestedTenantDomain = org.getName();
+            String tenantAwareUsername = getTenantAwareUsername(RegistryPersistenceUtil.getTenantAdminUserName(requestedTenantDomain));
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
             
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
@@ -1454,7 +1468,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 result.setResults(contentData);
             } 
 
-        } catch (RegistryException | IndexerException | DocumentationPersistenceException e) {
+        } catch (RegistryException | IndexerException | DocumentationPersistenceException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching for content ", e);
         } finally {
             if (isTenantFlowStarted) {
@@ -2923,6 +2937,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
         private Registry registry;
         private boolean isTenantFlowStarted;
         private int tenantId;
+        private boolean isAnonymousMode;
+
+        public boolean isAnonymousMode() {
+            return isAnonymousMode;
+        }
+
+        public void setAnonymousMode(boolean anonymousMode) {
+            isAnonymousMode = anonymousMode;
+        }
 
         public Registry getRegistry() {
             return registry;
@@ -3023,6 +3046,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     registry = getRegistryService().getGovernanceUserRegistry(tenantAwareUserName, id);
                     holder.setTenantId(id);
                 } else if (userTenantDomain != null && !userTenantDomain.equals(requestedTenantDomain)) { // cross tenant
+                    holder.setAnonymousMode(true);
                     log.debug("Cross tenant user from tenant " + userTenantDomain + " accessing "
                             + requestedTenantDomain + " registry");
                     loadTenantRegistry(id);

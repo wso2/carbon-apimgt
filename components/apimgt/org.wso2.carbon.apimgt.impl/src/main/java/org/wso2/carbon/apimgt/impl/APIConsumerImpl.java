@@ -4718,41 +4718,36 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (apiProviderTenantId == 0) {
             apiProviderTenantId = tenantId;
         }
-        try {
-            if (apiProviderTenantId != 0) {
-                /* Get the roles of the Current User */
-                currentUserRoles = ((UserRegistry) ((UserAwareAPIConsumer) this).registry).
-                        getUserRealm().getUserStoreManager().getRoleListOfUser(((UserRegistry) this.registry)
-                        .getUserName());
+        if (apiProviderTenantId != 0) {
+            /* Get the roles of the Current User */
+            String userName = (userNameWithoutChange != null)? userNameWithoutChange: username;
+            currentUserRoles = APIUtil.getListOfRoles(userName);
 
-                Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderTenantId);
+            Set<TierPermissionDTO> tierPermissions = apiMgtDAO.getThrottleTierPermissions(apiProviderTenantId);
 
-                for (TierPermissionDTO tierPermission : tierPermissions) {
-                    String type = tierPermission.getPermissionType();
+            for (TierPermissionDTO tierPermission : tierPermissions) {
+                String type = tierPermission.getPermissionType();
 
-                    List<String> currentRolesList = new ArrayList<String>(Arrays.asList(currentUserRoles));
-                    String[] rolesList = tierPermission.getRoles();
-                    List<String> roles = new ArrayList<>();
-                    if (rolesList != null) {
-                        roles = new ArrayList<>(Arrays.asList(rolesList));
+                List<String> currentRolesList = new ArrayList<String>(Arrays.asList(currentUserRoles));
+                String[] rolesList = tierPermission.getRoles();
+                List<String> roles = new ArrayList<>();
+                if (rolesList != null) {
+                    roles = new ArrayList<>(Arrays.asList(rolesList));
+                }
+                currentRolesList.retainAll(roles);
+
+                if (APIConstants.TIER_PERMISSION_ALLOW.equals(type)) {
+                    /* Current User is not allowed for this Tier*/
+                    if (currentRolesList.isEmpty()) {
+                        deniedTiers.add(tierPermission.getTierName());
                     }
-                    currentRolesList.retainAll(roles);
-
-                    if (APIConstants.TIER_PERMISSION_ALLOW.equals(type)) {
-                        /* Current User is not allowed for this Tier*/
-                        if (currentRolesList.isEmpty()) {
-                            deniedTiers.add(tierPermission.getTierName());
-                        }
-                    } else {
-                        /* Current User is denied for this Tier*/
-                        if (currentRolesList.size() > 0) {
-                            deniedTiers.add(tierPermission.getTierName());
-                        }
+                } else {
+                    /* Current User is denied for this Tier*/
+                    if (currentRolesList.size() > 0) {
+                        deniedTiers.add(tierPermission.getTierName());
                     }
                 }
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("cannot retrieve user role list for tenant" + tenantDomain, e);
         }
         return deniedTiers;
     }
@@ -4996,8 +4991,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public Application[] getApplicationsByOwner(String userId) throws APIManagementException {
-        return apiMgtDAO.getApplicationsByOwner(userId);
+    public Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException {
+        return apiMgtDAO.getApplicationsByOwner(userId, limit, offset);
     }
 
     public boolean isSubscriberValid(String userId)

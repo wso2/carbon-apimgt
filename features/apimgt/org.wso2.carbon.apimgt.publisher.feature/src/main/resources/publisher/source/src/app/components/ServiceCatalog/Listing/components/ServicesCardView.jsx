@@ -13,7 +13,7 @@ export default function ServicesCardView(props) {
         <Grid
             container
             direction='row'
-            justify='flex-start'
+            justify='center'
             alignItems='flex-start'
             spacing={3}
         >

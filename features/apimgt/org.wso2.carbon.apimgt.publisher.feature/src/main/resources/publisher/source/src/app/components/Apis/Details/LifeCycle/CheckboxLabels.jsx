@@ -115,22 +115,24 @@ export default function CheckboxLabels(props) {
                         </Typography>
                     </Grid>
                     <Grid xs={12}>
-                        <Grid xs={12} className={classes.grid}>
-                            {isEndpointAvailable ? (
-                                <CheckIcon className={classes.iconTrue} />
-                            ) : (
-                                <CloseIcon className={classes.iconFalse} />
-                            )}
-                            <Typography>
-                                <FormattedMessage
-                                    id='Apis.Details.LifeCycle.CheckboxLabels.endpoints.provided'
-                                    defaultMessage='Endpoint provided'
-                                />
-                            </Typography>
-                            <Link to={'/apis/' + api.id + '/endpoints'}>
-                                <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
-                            </Link>
-                        </Grid>
+                        {api.type !== 'WEBSUB' && (
+                            <Grid xs={12} className={classes.grid}>
+                                {isEndpointAvailable ? (
+                                    <CheckIcon className={classes.iconTrue} />
+                                ) : (
+                                    <CloseIcon className={classes.iconFalse} />
+                                )}
+                                <Typography>
+                                    <FormattedMessage
+                                        id='Apis.Details.LifeCycle.CheckboxLabels.endpoints.provided'
+                                        defaultMessage='Endpoint provided'
+                                    />
+                                </Typography>
+                                <Link to={'/apis/' + api.id + '/endpoints'}>
+                                    <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
+                                </Link>
+                            </Grid>
+                        )}
                         <>
                             {isAppLayerSecurityMandatory && (
                                 <Grid xs={12} className={classes.grid}>
@@ -197,22 +199,29 @@ export default function CheckboxLabels(props) {
                                 </Typography>
                             </Grid>
                             <Grid xs={12}>
-                                <Grid xs={12} className={classes.grid}>
-                                    {isPrototypedAvailable ? (
-                                        <CheckIcon className={classes.iconTrue} />
-                                    ) : (
-                                        <CloseIcon className={classes.iconFalse} />
-                                    )}
-                                    <Typography>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.prototype.endpoints.provided'
-                                            defaultMessage='Prototype Endpoint provided'
-                                        />
-                                    </Typography>
-                                    <Link to={'/apis/' + api.id + '/endpoints'}>
-                                        <LaunchIcon style={{ marginLeft: '2px' }} color='primary' fontSize='small' />
-                                    </Link>
-                                </Grid>
+                                {api.type !== 'WEBSUB' && (
+                                    <Grid xs={12} className={classes.grid}>
+                                        {isPrototypedAvailable ? (
+                                            <CheckIcon className={classes.iconTrue} />
+                                        ) : (
+                                            <CloseIcon className={classes.iconFalse} />
+                                        )}
+                                        <Typography>
+                                            <FormattedMessage
+                                                id={'Apis.Details.Configuration.Configuration.prototype.endpoints'
+                                                    + '.provided'}
+                                                defaultMessage='Prototype Endpoint provided'
+                                            />
+                                        </Typography>
+                                        <Link to={'/apis/' + api.id + '/endpoints'}>
+                                            <LaunchIcon
+                                                style={{ marginLeft: '2px' }}
+                                                color='primary'
+                                                fontSize='small'
+                                            />
+                                        </Link>
+                                    </Grid>
+                                )}
                                 <Grid xs={12} className={classes.grid}>
                                     {isEnvironmentAvailable ? (
                                         <CheckIcon className={classes.iconTrue} />

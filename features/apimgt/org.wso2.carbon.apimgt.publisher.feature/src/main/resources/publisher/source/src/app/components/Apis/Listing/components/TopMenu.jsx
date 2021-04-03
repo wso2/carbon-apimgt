@@ -20,6 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
@@ -80,24 +81,37 @@ const styles = (theme) => ({
  * @param props
  * @returns {*}
  */
-function getTitleForArtifactType(props) {
+function getTitleForArtifactType(props, count) {
     const {
         isAPIProduct, query,
     } = props;
+    const isSingular = count === 1;
     if (query) {
-        return (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Result(s)' />
+        return isSingular ? (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.search.results.singular'
+                defaultMessage='Search Result'
+            />
+        ) : (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Results' />
         );
     } else if (isAPIProduct) {
-        return (
+        return isSingular ? (
             <FormattedMessage
-                id='Apis.Listing.components.TopMenu.apiproduct(s)'
-                defaultMessage='API Product(s)'
+                id='Apis.Listing.components.TopMenu.apiproduct.singular'
+                defaultMessage='API Product'
+            />
+        ) : (
+            <FormattedMessage
+                id='Apis.Listing.components.TopMenu.apiproducts'
+                defaultMessage='API Products'
             />
         );
     } else {
-        return (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.api(s)' defaultMessage='API(s)' />
+        return isSingular ? (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.api.singular' defaultMessage='API' />
+        ) : (
+            <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
         );
     }
 }
@@ -132,18 +146,25 @@ function TopMenu(props) {
                                     <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
                                 )}
                             </Typography>
-                            <Typography variant='caption' gutterBottom align='left' component='div'>
+                            <Box
+                                fontFamily='fontFamily'
+                                fontSize='body1.fontSize'
+                                display='flex'
+                            >
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.displaying'
-                                    defaultMessage='Total of'
+                                    defaultMessage='Total:'
                                 />
-                                {' '}
-                                {' '}
-                                {count}
-                                {' '}
-                                {' '}
-                                {getTitleForArtifactType(props)}
-                            </Typography>
+                                <Box
+                                    id='itest-apis-listing-total'
+                                    fontWeight='fontWeightBold'
+                                    px={0.5}
+                                    mb={0.5}
+                                >
+                                    {count}
+                                </Box>
+                                {getTitleForArtifactType(props, count)}
+                            </Box>
                         </>
                     )}
                 </div>

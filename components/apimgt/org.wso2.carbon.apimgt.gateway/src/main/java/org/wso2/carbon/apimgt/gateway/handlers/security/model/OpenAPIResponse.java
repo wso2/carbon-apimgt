@@ -52,11 +52,10 @@ public class OpenAPIResponse implements Response {
      * @param messageContext Synapse message context.
      * @return OAI Response.
      */
-    public static OpenAPIResponse from(MessageContext messageContext) {
+    public OpenAPIResponse(MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
-        OpenAPIResponse openAPIResponse = new OpenAPIResponse();
 
         Object statusCodeObject = axis2MessageContext.getProperty(APIMgtGatewayConstants.HTTP_SC);
 
@@ -68,16 +67,16 @@ public class OpenAPIResponse implements Response {
             statusCode = (Integer) statusCodeObject;
         }
         //Setting HTTP status, method and path
-        openAPIResponse.status = statusCode;
-        openAPIResponse.method = Request.Method.valueOf((String)
+        status = statusCode;
+        method = Request.Method.valueOf((String)
                 messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
-        openAPIResponse.path = SchemaValidationUtils.getRestSubRequestPath(
+        path = SchemaValidationUtils.getRestSubRequestPath(
                 messageContext.getProperty(REST_SUB_REQUEST_PATH).toString());
         Map<String, String> transportHeaders = (Map<String, String>)
                 (axis2MessageContext.getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS));
 
         //Setting response body
-        openAPIResponse.responseBody = SchemaValidationUtils.getMessageContent(messageContext);
+        responseBody = SchemaValidationUtils.getMessageContent(messageContext);
 
         Map<String, Collection<String>> headerMap = transportHeaders.entrySet()
                 .stream().collect(Collectors
@@ -85,11 +84,8 @@ public class OpenAPIResponse implements Response {
 
         //Setting response headers
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
-            openAPIResponse.headers.put(header.getKey(), header.getValue().iterator().next());
+            headers.put(header.getKey(), header.getValue().iterator().next());
         }
-
-        return openAPIResponse;
-
     }
 
     @Override

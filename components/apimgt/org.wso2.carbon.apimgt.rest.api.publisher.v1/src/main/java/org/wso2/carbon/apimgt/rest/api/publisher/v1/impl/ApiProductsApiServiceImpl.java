@@ -341,6 +341,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             newDocumentation.setFilePath(oldDocument.getFilePath());
+            newDocumentation.setId(oldDocument.getId());
             apiProvider.updateDocumentation(apiProductId, newDocumentation, tenantDomain);
 
             //retrieve the updated documentation
@@ -831,6 +832,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiRevisionDeployment.setRevisionUUID(revisionId);
             apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
+            if (StringUtils.isEmpty(apiRevisionDeploymentDTO.getVhost())) {
+                // vhost is only required when deploying an revision, not required when un-deploying a revision
+                // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
+                RestApiUtil.handleBadRequest(
+                        "Required field 'vhost' not found in deployment", log
+                );
+            }
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }

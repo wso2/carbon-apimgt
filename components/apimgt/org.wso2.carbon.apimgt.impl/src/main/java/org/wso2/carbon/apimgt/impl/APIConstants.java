@@ -337,6 +337,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_FAULTSEQUENCE = "overview_faultSequence";
     public static final String API_OVERVIEW_AUTHORIZATION_HEADER = "overview_authorizationHeader";
     public static final String API_OVERVIEW_API_SECURITY = "overview_apiSecurity";
+    public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
     public static final String AUTHORIZATION_HEADER_BASIC = "Basic";
     public static final String DEFAULT_API_SECURITY_OAUTH2 = "oauth2";
     public static final String API_SECURITY_MUTUAL_SSL = "mutualssl";
@@ -626,6 +627,10 @@ public final class APIConstants {
 
     public enum OAuthAppMode {
         CREATED, MAPPED
+    }
+
+    public enum CommentEntryPoint {
+        PUBLISHER, DEVPORTAL
     }
 
     public static class SubscriptionCreatedStatus {
@@ -927,6 +932,8 @@ public final class APIConstants {
     public static final String API_USAGE_ENABLED = API_ANALYTICS + "Enabled";
     public static final String API_ANALYTICS_REPORTER_CLASS = API_ANALYTICS + "ReporterClass";
     public static final String API_ANALYTICS_PROPERTIES = API_ANALYTICS + "Properties";
+    public static final String API_ANALYTICS_RESPONSE_SCHEMA_NAME = API_ANALYTICS + "ResponseSchemaName";
+    public static final String API_ANALYTICS_FAULT_SCHEMA_NAME = API_ANALYTICS + "FaultSchemaName";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_ANALYTICS + "StreamProcessorServerURL";
     public static final String API_USAGE_BAM_SERVER_AUTH_URL_GROUPS = API_ANALYTICS + "StreamProcessorAuthServerURL";
     public static final String API_USAGE_BUILD_MSG = API_ANALYTICS + "PublishResponseMessageSize";
@@ -1266,6 +1273,8 @@ public final class APIConstants {
     public static final Set<String> WS_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
 
+    public static final String HTTP_VERB_PUBLISH = "PUBLISH";
+    public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";

@@ -298,7 +298,7 @@ return null;
   @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
   @JsonProperty("name")
   @NotNull
- @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)") @Size(min=1,max=50)  public String getName() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+\\[\\]/]*$)") @Size(min=1,max=50)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -351,7 +351,7 @@ return null;
   @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("version")
   @NotNull
- @Pattern(regexp="^[^~!@#;:%^*()+={}|\\\\<>\"',&/$]+$") @Size(min=1,max=30)  public String getVersion() {
+ @Pattern(regexp="^[^~!@#;:%^*()+={}|\\\\<>\"',&/$\\[\\]\\s+/]+$") @Size(min=1,max=30)  public String getVersion() {
     return version;
   }
   public void setVersion(String version) {
@@ -715,7 +715,7 @@ return null;
   
   @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
-  public String getAuthorizationHeader() {
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)")  public String getAuthorizationHeader() {
     return authorizationHeader;
   }
   public void setAuthorizationHeader(String authorizationHeader) {

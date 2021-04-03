@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
-import io.apicurio.datamodels.asyncapi.models.AaiServer;
+import io.apicurio.datamodels.asyncapi.models.AaiOperation;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ChannelItem;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20ImplicitOAuthFlow;
@@ -23,10 +23,22 @@ import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SwaggerData;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class AsyncApiParser extends APIDefinition {
 
@@ -1402,18 +1414,101 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public Map<String, Object> generateExample(String apiDefinition) {
+    public Map<String, Object> generateExample(String apiDefinition) throws APIManagementException{
         return null;
     }
 
     @Override
     public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
-        return null;
+        return getURITemplates(resourceConfigsJSON, true);
+    }
+
+    public Set<URITemplate> getURITemplates(String apiDefinition, boolean includePublish)
+            throws APIManagementException {
+        Set<URITemplate> uriTemplates = new HashSet<>();
+        Set<Scope> scopes = getScopes(apiDefinition);
+        Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
+        if (document.channels != null && document.channels.size() > 0) {
+            for (Map.Entry<String, AaiChannelItem> entry : document.channels.entrySet()) {
+                Aai20ChannelItem channel = (Aai20ChannelItem) entry.getValue();
+                if (includePublish && channel.publish != null) {
+                    uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_PUBLISH,
+                            (Aai20Operation) channel.publish, scopes));
+                }
+                if (channel.subscribe != null) {
+                    uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_SUBSCRIBE,
+                            (Aai20Operation) channel.subscribe, scopes));
+                }
+            }
+        }
+        return uriTemplates;
+    }
+
+    private URITemplate buildURITemplate(String target, String verb, Aai20Operation operation, Set<Scope> scopes)
+            throws APIManagementException {
+        URITemplate template = new URITemplate();
+        template.setHTTPVerb(verb);
+        template.setHttpVerbs(verb);
+        template.setUriTemplate(target);
+
+        List<String> opScopes = getScopeOfOperations(operation);
+        if (!opScopes.isEmpty()) {
+            if (opScopes.size() == 1) {
+                String firstScope = opScopes.get(0);
+                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                if (scope == null) {
+                    throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                }
+                template.setScope(scope);
+                template.setScopes(scope);
+            } else {
+                for (String scopeName : opScopes) {
+                    Scope scope = APIUtil.findScopeByKey(scopes, scopeName);
+                    if (scope == null) {
+                        throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
+                    }
+                    template.setScopes(scope);
+                }
+            }
+        }
+        return template;
+    }
+
+    private List<String> getScopeOfOperations(Aai20Operation operation) {
+        return getScopeOfOperationsFromExtensions(operation);
+    }
+
+    private List<String> getScopeOfOperationsFromExtensions(Aai20Operation operation) {
+        List<String> scopes = new ArrayList<>();
+        Extension scopeBindings = operation.getExtension("x-scopes");
+        if (scopeBindings != null) {
+            Map<String, String> scopesMap = (Map<String, String>) scopeBindings.value;
+            for (Map.Entry<String, String> entry : scopesMap.entrySet()) {
+                scopes.add(entry.getValue());
+            }
+        }
+        return scopes;
     }
 
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
-        return null;
+        Set<Scope> scopeSet = new LinkedHashSet<>();
+        Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(resourceConfigsJSON);
+        Aai20SecurityScheme oauth2 = (Aai20SecurityScheme) document.components.securitySchemes.get("oauth2");
+        Map<String, String> scopes = oauth2.flows.implicit.scopes;
+        Map<String, String> scopeBindings = (Map<String, String>) oauth2.flows.implicit.getExtension("x-scopes-bindings").value;
+
+        for (Map.Entry<String, String> entry : scopes.entrySet()) {
+            Scope scope = new Scope();
+            scope.setKey(entry.getKey());
+            scope.setName(entry.getKey());
+            scope.setDescription(entry.getValue());
+            if (scopeBindings.get(scope.getKey()) != null) {
+                scope.setRoles(scopeBindings.get(scope.getKey()));
+            }
+            scopeSet.add(scope);
+        }
+        return scopeSet;
     }
 
     @Override
@@ -1741,5 +1836,28 @@ public class AsyncApiParser extends APIDefinition {
         document.components.securitySchemes.put(APIConstants.DEFAULT_API_SECURITY_OAUTH2, oauth2SecurityScheme);
 
         return Library.writeDocumentToJSONString(document);
+    }
+
+    public Map<String,String> buildWSUriMapping(String apiDefinition) {
+        Map<String,String> wsUriMapping = new HashMap<>();
+        Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
+        for (Map.Entry<String, AaiChannelItem> entry : document.channels.entrySet()) {
+            AaiOperation publishOperation = entry.getValue().publish;
+            if (publishOperation != null) {
+                Extension xUriMapping = publishOperation.getExtension("x-uri-mapping");
+                if (xUriMapping != null) {
+                    wsUriMapping.put(entry.getKey() + "_publish", xUriMapping.value.toString());
+                }
+            }
+
+            AaiOperation subscribeOperation = entry.getValue().subscribe;
+            if (subscribeOperation != null)  {
+                Extension xUriMapping = subscribeOperation.getExtension("x-uri-mapping");
+                if (xUriMapping != null) {
+                    wsUriMapping.put(entry.getKey() + "_subscribe", xUriMapping.value.toString());
+                }
+            }
+        }
+        return wsUriMapping;
     }
 }

@@ -135,7 +135,7 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory()
             .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
-        const promisedServices = serviceCatalog.then((client) => {
+        return serviceCatalog.then((client) => {
             return client.apis.Services.searchServices(
                 {
                     key,
@@ -143,7 +143,6 @@ class ServiceCatalog {
                 this._requestMetaData(),
             );
         });
-        return promisedServices.then((response) => response.body);
     }
 
     /**

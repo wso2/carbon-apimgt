@@ -127,7 +127,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -4180,7 +4179,7 @@ public class ApiMgtDAO {
      * @return
      * @throws APIManagementException
      */
-    public Application[] getApplicationsByOwner(String userId) throws APIManagementException {
+    public Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -4193,6 +4192,8 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, userId);
+            prepStmt.setInt(2, offset);
+            prepStmt.setInt(3, limit);
             rs = prepStmt.executeQuery();
 
             ArrayList<Application> applicationsList = new ArrayList<Application>();
@@ -4522,21 +4523,20 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns applications within a tenant domain with pagination
-     *
-     * @param tenantId          The tenantId.
-     * @param start             The start index.
-     * @param offset            The offset.
-     * @param searchOwner       The search string.
-     * @param searchApplication The search string.
-     * @param sortOrder         The sort order.
-     * @param sortColumn        The sort column.
-     * @return Application[] The array of applications.
+     * Retrieve the applications by user/application name
+     * @param user
+     * @param owner
+     * @param tenantId
+     * @param limit
+     * @param offset
+     * @param sortBy
+     * @param sortOrder
+     * @param appName
+     * @return
      * @throws APIManagementException
      */
-    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start, int offset,
-                                                                     String searchOwner, String searchApplication,
-                                                                     String sortColumn, String sortOrder)
+    public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit ,
+                                                       int offset, String sortBy, String sortOrder, String appName)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -4544,19 +4544,21 @@ public class ApiMgtDAO {
         String sqlQuery = null;
         List<Application> applicationList = new ArrayList<>();
         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
+        Application[] applications = null;
         try {
             connection = APIMgtDBUtil.getConnection();
-            if (connection.getMetaData().getDriverName().contains("Oracle")) {
-                offset = start + offset;
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName.contains("Oracle")) {
+                limit = offset + limit;
             }
-            sqlQuery = sqlQuery.replace("$1", sortColumn);
+            sqlQuery = sqlQuery.replace("$1", sortBy);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, "%" + searchOwner + "%");
-            prepStmt.setString(3, "%" + searchApplication + "%");
-            prepStmt.setInt(4, start);
-            prepStmt.setInt(5, offset);
+            prepStmt.setString(2, "%" + owner + "%");
+            prepStmt.setString(3, "%" + appName + "%");
+            prepStmt.setInt(4, offset);
+            prepStmt.setInt(5, limit);
             rs = prepStmt.executeQuery();
             Application application;
             while (rs.next()) {
@@ -4574,12 +4576,13 @@ public class ApiMgtDAO {
                 application.setOwner(subscriberName);
                 applicationList.add(application);
             }
+            applications = applicationList.toArray(new Application[applicationList.size()]);
         } catch (SQLException e) {
             handleException("Error while obtaining details of the Application for tenant id : " + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-        return applicationList;
+        return applications;
     }
 
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
@@ -15475,7 +15478,7 @@ public class ApiMgtDAO {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    revisionId = rs.getInt(1);
+                    revisionId = rs.getInt("REVISIONS_CREATED");
                 }
             }
         } catch (SQLException e) {
@@ -15707,7 +15710,7 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16650,7 +16653,7 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16935,6 +16938,16 @@ public class ApiMgtDAO {
             statement.setString(2, md5);
             statement.setInt(3, apiId);
             statement.executeUpdate();
+        }
+    }
+
+    private void updateLatestRevisionNumber(Connection connection, String apiUUID, int revisionId) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.UPDATE_REVISION_CREATED_BY_API_SQL)) {
+            preparedStatement.setInt(1, revisionId);
+            preparedStatement.setString(2, apiUUID);
+            preparedStatement.executeUpdate();
         }
     }
 }

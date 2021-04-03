@@ -702,6 +702,8 @@ public class ExportUtils {
             JsonArray deploymentsArray = new JsonArray();
             for (APIRevisionDeployment deployment : deploymentsList) {
                 JsonObject deploymentObject = new JsonObject();
+                // Do not set vhost in deployment environment file when export API (or API Project)
+                // So when importing the exported API, the default vhost of the new environment is selected.
                 deploymentObject.addProperty(ImportExportConstants.DEPLOYMENT_NAME, deployment.getDeployment());
                 deploymentObject.addProperty(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION,
                         deployment.isDisplayOnDevportal());

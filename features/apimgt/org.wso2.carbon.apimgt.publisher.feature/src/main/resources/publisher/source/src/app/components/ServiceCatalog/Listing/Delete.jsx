@@ -38,7 +38,7 @@ function Delete(props) {
         setOpen(!open);
     };
     const {
-        serviceDisplayName, serviceId, onDelete, isIconButton,
+        serviceDisplayName, serviceId, onDelete, isIconButton, id,
     } = props;
 
     const runAction = (confirm) => {
@@ -52,6 +52,7 @@ function Delete(props) {
         <>
             {isIconButton ? (
                 <IconButton
+                    id={id}
                     disableRipple
                     disableFocusRipple
                     aria-label={`Delete ${serviceDisplayName}`}
@@ -60,7 +61,7 @@ function Delete(props) {
                     <DeleteIcon />
                 </IconButton>
             ) : (
-                <Button onClick={toggleOpen}>
+                <Button id={id} onClick={toggleOpen}>
                     <Icon>delete_forever</Icon>
                 </Button>
             )}
@@ -91,6 +92,7 @@ function Delete(props) {
                         defaultMessage='Yes'
                     />
                 )}
+                idOk='itest-service-card-delete-confirm'
                 callback={runAction}
                 open={open}
             />
