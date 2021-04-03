@@ -312,6 +312,12 @@ function CreateApi(props) {
         }
     }
 
+    useEffect(() => {
+        validate('name', name);
+        validate('context', context);
+        validate('version', version);
+    }, []);
+
     const runAction = () => {
         const promisedCreateApi = API.createApiFromService(serviceKey, { ...state, policies }, type);
         promisedCreateApi.then((data) => {
