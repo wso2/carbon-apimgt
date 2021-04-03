@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1479,34 +1480,36 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     private List<String> getScopeOfOperationsFromExtensions(Aai20Operation operation) {
-        List<String> scopes = new ArrayList<>();
         Extension scopeBindings = operation.getExtension("x-scopes");
         if (scopeBindings != null) {
-            Map<String, String> scopesMap = (Map<String, String>) scopeBindings.value;
-            for (Map.Entry<String, String> entry : scopesMap.entrySet()) {
-                scopes.add(entry.getValue());
-            }
+            return (List<String>) scopeBindings.value;
         }
-        return scopes;
+        return Collections.emptyList();
     }
 
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         Set<Scope> scopeSet = new LinkedHashSet<>();
         Aai20Document document = (Aai20Document) Library.readDocumentFromJSONString(resourceConfigsJSON);
-        Aai20SecurityScheme oauth2 = (Aai20SecurityScheme) document.components.securitySchemes.get("oauth2");
-        Map<String, String> scopes = oauth2.flows.implicit.scopes;
-        Map<String, String> scopeBindings = (Map<String, String>) oauth2.flows.implicit.getExtension("x-scopes-bindings").value;
-
-        for (Map.Entry<String, String> entry : scopes.entrySet()) {
-            Scope scope = new Scope();
-            scope.setKey(entry.getKey());
-            scope.setName(entry.getKey());
-            scope.setDescription(entry.getValue());
-            if (scopeBindings.get(scope.getKey()) != null) {
-                scope.setRoles(scopeBindings.get(scope.getKey()));
+        if (document.components != null && document.components.securitySchemes != null) {
+            Aai20SecurityScheme oauth2 = (Aai20SecurityScheme) document.components.securitySchemes.get("oauth2");
+            if (oauth2 != null && oauth2.flows != null && oauth2.flows.implicit != null) {
+                Map<String, String> scopes = oauth2.flows.implicit.scopes;
+                Map<String, String> scopeBindings = (Map<String, String>) oauth2.flows.implicit.getExtension(
+                        APIConstants.SWAGGER_X_SCOPES_BINDINGS).value;
+                if (scopes != null && scopeBindings != null) {
+                    for (Map.Entry<String, String> entry : scopes.entrySet()) {
+                        Scope scope = new Scope();
+                        scope.setKey(entry.getKey());
+                        scope.setName(entry.getKey());
+                        scope.setDescription(entry.getValue());
+                        if (scopeBindings.get(scope.getKey()) != null) {
+                            scope.setRoles(scopeBindings.get(scope.getKey()));
+                        }
+                        scopeSet.add(scope);
+                    }
+                }
             }
-            scopeSet.add(scope);
         }
         return scopeSet;
     }
