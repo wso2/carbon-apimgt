@@ -1001,7 +1001,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void addAPI(API api, int tenantId) throws APIManagementException {
         int apiId = apiMgtDAO.addAPI(api, tenantId);
-        addLocalScopes(api.getId(), tenantId, api.getUriTemplates());
+        addLocalScopes(api.getId(), tenantId, api.getUriTemplates(), api.getOrganizationId());
         addURITemplates(apiId, api, tenantId);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
@@ -1021,13 +1021,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param tenantId      Tenant Id
      * @throws APIManagementException if fails to add local scopes for the API
      */
-    private void addLocalScopes(APIIdentifier apiIdentifier, int tenantId, Set<URITemplate> uriTemplates)
+    private void addLocalScopes(APIIdentifier apiIdentifier, int tenantId, Set<URITemplate> uriTemplates, String organizationId)
             throws APIManagementException {
 
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         Map<String, KeyManagerDto> tenantKeyManagers = KeyManagerHolder.getTenantKeyManagers(tenantDomain);
         //Get the local scopes set to register for the API from URI templates
-        Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(apiIdentifier, tenantId, uriTemplates);
+        Set<Scope> scopesToRegister = getScopesToRegisterFromURITemplates(apiIdentifier, organizationId, uriTemplates);
         //Register scopes
         for (Scope scope : scopesToRegister) {
             for (Map.Entry<String, KeyManagerDto> keyManagerDtoEntry : tenantKeyManagers.entrySet()) {
@@ -1066,7 +1066,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return Local Scopes set to register
      * @throws APIManagementException if fails to extract Scopes from URI templates
      */
-    private Set<Scope> getScopesToRegisterFromURITemplates(APIIdentifier apiIdentifier, int tenantId,
+    private Set<Scope> getScopesToRegisterFromURITemplates(APIIdentifier apiIdentifier, String organizationId,
                                                            Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
@@ -1091,7 +1091,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!isSharedScopeNameExists(scopeKey, tenantDomain)) {
                 // Check if scope key is already assigned locally to a different API (Other than different versions of
                 // the same API).
-                if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), tenantId)) {
+                if (!isScopeKeyAssignedLocally(apiIdentifier, scope.getKey(), organizationId)) {
                     scopesToRegister.add(scope);
                 } else {
                     throw new APIManagementException("Error while adding local scopes for API " + apiIdentifier
@@ -1836,7 +1836,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the existing URI templates for the API
         Set<URITemplate> oldURITemplates = apiMgtDAO.getURITemplatesOfAPI(apiIdentifier, api.getOrganizationId());
         // Get the new local scope keys from URI templates
-        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(apiIdentifier, tenantId, uriTemplates);
+        Set<Scope> newLocalScopes = getScopesToRegisterFromURITemplates(apiIdentifier, api.getOrganizationId(), uriTemplates);
         Set<String> newLocalScopeKeys = newLocalScopes.stream().map(Scope::getKey).collect(Collectors.toSet());
         // Get the existing versioned local scope keys attached for the API
         Set<String> oldVersionedLocalScopeKeys = apiMgtDAO.getVersionedLocalScopeKeysForAPI(apiIdentifier, tenantId);

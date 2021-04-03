@@ -301,7 +301,8 @@ public final class APIImportUtil {
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
                         if (scope != null && !(APIUtil.isAllowedScope(scope.getKey())) &&
-                                apiProvider.isScopeKeyAssignedLocally(importedApi.getId(), scope.getKey(), tenantId)) {
+                                apiProvider.isScopeKeyAssignedLocally(importedApi.getId(), scope.getKey(),
+                                        importedApi.getOrganizationId())) {
                             String errorMessage =
                                     "Error in adding API. Scope " + scope.getKey() +
                                             " is already assigned by another API.";
@@ -496,8 +497,6 @@ public final class APIImportUtil {
     /**
      * This method adds the sequence files to the registry. This updates the API specific sequences if already exists.
      *
-     * @param isAPISpecific        whether the adding sequence is API specific
-     * @param registry             the registry instance
      * @param sequenceFileLocation location of the sequence file
      * @throws APIManagementException
      */
