@@ -30,13 +30,13 @@ const ColorlibConnector = withStyles({
     active: {
         '& $line': {
             backgroundImage:
-                'linear-gradient(to left, #50BCEC 50%, #B1D31E 50%)',
+                'linear-gradient(to left, #50BCEC 50%, #095677 50%)',
         },
     },
     completed: {
         '& $line': {
             backgroundImage:
-                'linear-gradient( #B1D31E, #B1D31E)',
+                'linear-gradient( #095677, #095677)',
         },
     },
     line: {
@@ -52,8 +52,8 @@ const useColorlibStepIconStyles = makeStyles({
         backgroundColor: '#ccc',
         zIndex: 1,
         color: '#fff',
-        width: 56,
-        height: 56,
+        width: 40,
+        height: 40,
         display: 'flex',
         borderRadius: '50%',
         justifyContent: 'center',
@@ -65,7 +65,7 @@ const useColorlibStepIconStyles = makeStyles({
         border: '6px solid #E2E2E2',
     },
     completed: {
-        backgroundColor: '#B1D31E',
+        backgroundColor: '#095677',
         border: '6px solid #E2E2E2',
     },
 });
@@ -105,7 +105,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'block',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: '#B1D31E',
+        backgroundColor: '#095677',
         zIndex: 1,
         color: '#fff',
         width: 15,
