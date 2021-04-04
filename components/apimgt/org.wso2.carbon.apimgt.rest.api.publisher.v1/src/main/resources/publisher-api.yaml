@@ -8126,7 +8126,8 @@ components:
           items:
             type: string
         businessInformation:
-          $ref: '#/components/schemas/APIBusinessInformation'
+          allOf:
+            - $ref: '#/components/schemas/APIBusinessInformation'
           x-otherScopes:
             - apim:api_publish
         corsConfiguration:
