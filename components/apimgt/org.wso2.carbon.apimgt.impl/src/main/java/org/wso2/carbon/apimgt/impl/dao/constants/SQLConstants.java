@@ -2805,6 +2805,8 @@ public class SQLConstants {
             "? AND REVISION_UUID = ?";
     public static final String GET_REVISIONED_API_TIER_SQL = "SELECT API_TIER FROM AM_API_REVISION_METADATA WHERE " +
             "API_UUID = ? AND REVISION_UUID = ?";
+    public static final String RESTORE_API_REVISION_METADATA = "UPDATE AM_API SET API_TIER = (SELECT API_TIER FROM " +
+            "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
 
     /** Throttle related constants**/
 

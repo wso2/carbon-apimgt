@@ -16408,7 +16408,8 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                restoreAPIRevisionMetaDataToWorkingCopy(connection, apiRevision.getApiUUID(),
+                        apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16988,6 +16989,16 @@ public class ApiMgtDAO {
                      connection.prepareStatement(SQLConstants.DELETE_API_REVISION_METADATA)) {
             preparedStatement.setString(1, apiUUID);
             preparedStatement.setString(2, revisionUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+    private void restoreAPIRevisionMetaDataToWorkingCopy(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.RESTORE_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.setString(3, apiUUID);
             preparedStatement.executeUpdate();
         }
     }
