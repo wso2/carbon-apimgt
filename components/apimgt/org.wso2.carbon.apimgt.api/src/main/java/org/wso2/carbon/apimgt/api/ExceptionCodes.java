@@ -440,6 +440,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot find the yaml/json file with the project definition."),
     NO_API_ARTIFACT_FOUND(900910, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
+    ERROR_UPLOADING_THUMBNAIL(900914,
+            "Error while updating thumbnail of API/API Product", 500,
+            "Error while updating thumbnail of API/API Product: %s-%s"),
 
     //AsyncApi related error codes
     ASYNCAPI_URL_MALFORMED(900756, "AsyncAPI specification retrieval from URL failed", 400, "Exception occurred while retrieving the AsyncAPI Specification from URL"),
