@@ -23,7 +23,9 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
 
 /**
  * Set endpoint config in context.
@@ -56,7 +58,12 @@ public class EndpointConfigContext extends ConfigContextDecorator {
         if (configJson != null && !"".equals(configJson)) {
             try {
                 Object config = parser.parse(configJson);
-                this.endpointConfig = (JSONObject) config;
+                JSONObject epConfig = (JSONObject) config;
+                if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA.
+                        equals(epConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    processLambdaConfig(api, epConfig);
+                }
+                this.endpointConfig = epConfig;
             } catch (ParseException e) {
                 this.handleException("Unable to pass the endpoint JSON config");
             }
@@ -100,6 +107,18 @@ public class EndpointConfigContext extends ConfigContextDecorator {
      */
     private String getEndpointKey(String name, String version) {
         return name + "--v" + version;
+    }
+
+    /**
+     * @param api       API to which the endpoint belongs
+     * @param awsConfig Endpoint config of AWS Lambda API
+     * @return Updated endpoint config
+     */
+    private JSONObject processLambdaConfig(API api, JSONObject awsConfig) {
+        String awsAlias = GatewayUtils.retrieveAWSCredAlias(api.getId().getApiName(),
+                api.getId().getVersion(), APIConstants.ENDPOINT_TYPE_AWSLAMBDA);
+        awsConfig.put("awsAlias", awsAlias);
+        return awsConfig;
     }
 
 }
