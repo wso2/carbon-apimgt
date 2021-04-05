@@ -86,9 +86,9 @@ public class InMemoryAPIDeployer {
         try {
             GatewayAPIDTO gatewayAPIDTO = retrieveArtifact(apiId, gatewayLabels);
             if (gatewayAPIDTO != null) {
-                unDeployAPI(gatewayEvent);
                 APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
                 MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+                unDeployAPI(apiGatewayAdmin, gatewayEvent);
                 apiGatewayAdmin.deployAPI(gatewayAPIDTO);
                 addDeployedCertificatesToAPIAssociation(gatewayAPIDTO);
                 if (debugEnabled) {
@@ -198,12 +198,9 @@ public class InMemoryAPIDeployer {
         return result;
     }
 
-    public void unDeployAPI(DeployAPIInGatewayEvent gatewayEvent) throws ArtifactSynchronizerException {
-
-        try {
+    private void unDeployAPI(APIGatewayAdmin apiGatewayAdmin, DeployAPIInGatewayEvent gatewayEvent)
+            throws AxisFault {
             if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
-                APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
-                MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
                 GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
                 gatewayAPIDTO.setName(gatewayEvent.getName());
                 gatewayAPIDTO.setVersion(gatewayEvent.getVersion());
@@ -246,6 +243,14 @@ public class InMemoryAPIDeployer {
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
             }
+    }
+
+    public void unDeployAPI(DeployAPIInGatewayEvent gatewayEvent) throws ArtifactSynchronizerException {
+
+        try {
+            APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdmin();
+            MessageContext.setCurrentMessageContext(org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.createAxis2MessageContext());
+            unDeployAPI(apiGatewayAdmin, gatewayEvent);
         } catch (AxisFault axisFault) {
             throw new ArtifactSynchronizerException("Error while unDeploying api ", axisFault);
         } finally {
