@@ -211,7 +211,7 @@ class APICardView extends React.Component {
                 name: 'isSubscriptionAvailable',
                 label: intl.formatMessage({
                     id: 'Apis.Listing.APIList.isSubscriptionAvailable',
-                    defaultMessage: 'isSubscriptionAvailable',
+                    defaultMessage: 'IS Subscription Available',
                 }),
                 options: {
                     display: 'excluded',
