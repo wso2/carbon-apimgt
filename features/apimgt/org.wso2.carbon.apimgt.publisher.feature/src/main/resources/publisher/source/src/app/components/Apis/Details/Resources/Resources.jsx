@@ -261,15 +261,13 @@ export default function Resources(props) {
     // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
     // localized to inject local apiThrottlingPolicy data
     const localAPI = useMemo(
-        () => {
-            return {
-                id: api.id,
-                apiThrottlingPolicy,
-                scopes: api.scopes,
-                operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
-                endpointConfig: api.endpointConfig,
-            };
-        },
+        () => ({
+            id: api.id,
+            apiThrottlingPolicy,
+            scopes: api.scopes,
+            operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
+            endpointConfig: api.endpointConfig,
+        }),
         [api, apiThrottlingPolicy],
     );
 
