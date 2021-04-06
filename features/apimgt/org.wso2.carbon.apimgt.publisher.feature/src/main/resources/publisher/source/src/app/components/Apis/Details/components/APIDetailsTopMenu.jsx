@@ -38,6 +38,7 @@ import Grid from '@material-ui/core/Grid';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
+import MUIAlert from 'AppComponents/Shared/MuiAlert';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
@@ -225,12 +226,16 @@ const APIDetailsTopMenu = (props) => {
 
             <div className={classes.dateWrapper} />
             {api.isRevision && (
-                <Typography variant='subtitle2' className={classes.readOnlyStyle}>
+                <MUIAlert
+                    variant='outlined'
+                    severity='warning'
+                    icon={false}
+                >
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.read.only.label'
                         defaultMessage='Read only'
                     />
-                </Typography>
+                </MUIAlert>
             )}
             <div className={classes.topRevisionStyle}>
                 <TextField

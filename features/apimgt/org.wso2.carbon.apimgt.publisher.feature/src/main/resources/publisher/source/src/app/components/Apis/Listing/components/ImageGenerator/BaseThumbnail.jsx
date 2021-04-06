@@ -18,6 +18,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import { Link } from 'react-router-dom';
@@ -27,6 +28,7 @@ import PropTypes from 'prop-types';
 import Api from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import ImageGenerator from './ImageGenerator';
+import LetterGenerator from './LetterGenerator';
 
 const useStyles = makeStyles((theme) => ({
     suppressLinkStyles: {
@@ -96,7 +98,8 @@ const BaseThumbnail = (props) => {
     } = iconJson;
     const [thumbnail, setThumbnail] = useState(null);
     const [imageLoaded, setImageLoaded] = useState(false);
-
+    const theme = useTheme();
+    const { variant } = theme.custom.thumbnailTemplates;
     useEffect(() => {
         setIconJson({
             selectedIcon: selectedIconProp,
@@ -158,9 +161,15 @@ const BaseThumbnail = (props) => {
     } else {
         overviewPath = `/apis/${api.apiUUID}/documents/${api.id}/details`;
     }
-    const view = thumbnail
-        ? <img height={height} width={width} src={thumbnail} alt='API Thumbnail' className={classes.media} />
-        : (
+    let view = (
+        <LetterGenerator
+            width={width}
+            height={height}
+            api={api}
+        />
+    );
+    if (variant === 'image') {
+        view = (
             <ImageGenerator
                 width={width}
                 height={height}
@@ -174,6 +183,8 @@ const BaseThumbnail = (props) => {
                 }}
             />
         );
+    }
+
     return (
         <>
             {isEditable ? (
@@ -182,7 +193,17 @@ const BaseThumbnail = (props) => {
                     className={classes.thumb}
                     onClick={onClick}
                 >
-                    {view}
+                    {thumbnail
+                        ? (
+                            <img
+                                height={height}
+                                width={width}
+                                src={thumbnail}
+                                alt='API Thumbnail'
+                                className={classes.media}
+                            />
+                        )
+                        : view}
                     <span className={classes.thumbBackdrop} />
                     <span className={classes.thumbButton}>
                         <Typography component='span' variant='subtitle1' color='inherit'>
@@ -192,7 +213,17 @@ const BaseThumbnail = (props) => {
                 </ButtonBase>
             ) : (
                 <Link className={classes.suppressLinkStyles} to={overviewPath}>
-                    {view}
+                    {thumbnail
+                        ? (
+                            <img
+                                height={height}
+                                width={width}
+                                src={thumbnail}
+                                alt='API Thumbnail'
+                                className={classes.media}
+                            />
+                        )
+                        : view}
                 </Link>
             )}
         </>

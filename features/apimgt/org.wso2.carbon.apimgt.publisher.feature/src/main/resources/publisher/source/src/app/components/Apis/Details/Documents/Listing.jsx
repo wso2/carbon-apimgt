@@ -427,7 +427,7 @@ class Listing extends React.Component {
                     <DeleteMultiple getDocumentsList={this.getDocumentsList} docsToDelete={docsToDelete} docs={docs} />
                 )}
                 <div className={classes.titleWrapper}>
-                    <Typography variant='h4' className={classes.mainTitle}>
+                    <Typography id='itest-api-details-documents-head' variant='h4' className={classes.mainTitle}>
                         <FormattedMessage
                             id='Apis.Details.Documents.Listing.documents.listing.title'
                             defaultMessage='Documents'

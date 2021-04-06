@@ -160,7 +160,7 @@ const TryOutConsole = () => {
     const isAPIRetired = api.lifeCycleStatus === 'RETIRED';
     return (
         <>
-            <Typography variant='h4' component='h1'>
+            <Typography id='itest-api-details-try-out-head' variant='h4' component='h1'>
                 <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
             </Typography>
             <Paper elevation={0}>

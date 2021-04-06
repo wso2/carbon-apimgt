@@ -1210,7 +1210,7 @@
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Business Information of the API"
+      "value": "Business Information of the API Product"
     }
   ],
   "Apis.Details.BusinessInformation.BusinessInformation.business.info": [
@@ -5048,7 +5048,7 @@
   "Apis.Details.Properties.Properties.api.product.properties": [
     {
       "type": 0,
-      "value": "API Properties"
+      "value": "API Product Properties"
     }
   ],
   "Apis.Details.Properties.Properties.api.properties": [

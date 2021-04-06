@@ -511,7 +511,7 @@
     "defaultMessage": "Generate Key"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": {
-    "defaultMessage": "Business Information of the API"
+    "defaultMessage": "Business Information of the API Product"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.business.info": {
     "defaultMessage": "Business Information"
@@ -2398,7 +2398,7 @@
     "defaultMessage": "Visibility"
   },
   "Apis.Details.Properties.Properties.api.product.properties": {
-    "defaultMessage": "API Properties"
+    "defaultMessage": "API Product Properties"
   },
   "Apis.Details.Properties.Properties.api.properties": {
     "defaultMessage": "API Properties"

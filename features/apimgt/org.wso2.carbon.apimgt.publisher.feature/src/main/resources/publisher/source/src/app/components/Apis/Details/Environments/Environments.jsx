@@ -1271,7 +1271,7 @@ export default function Environments() {
             )}
             {allRevisions && allRevisions.length !== 0 && (
                 <Grid md={12}>
-                    <Typography variant='h5' gutterBottom>
+                    <Typography id='itest-api-details-deployments-head' variant='h5' gutterBottom>
                         <FormattedMessage
                             id='Apis.Details.Environments.Environments.deployments.heading'
                             defaultMessage='Deployments'

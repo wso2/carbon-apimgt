@@ -348,7 +348,7 @@ export default function CustomizedStepper() {
     }
 
     return (
-        <div className={classes.root}>
+        <div id='itest-overview-api-flow' className={classes.root}>
             <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
                 {steps.map((label) => (
                     <Step key={label}>

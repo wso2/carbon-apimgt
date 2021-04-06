@@ -444,15 +444,25 @@ function Properties(props) {
             <div className={classes.titleWrapper}>
                 {api.apiType === API.CONSTS.APIProduct
                     ? (
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <Typography
+                            id='itest-api-details-api-products-properties-head'
+                            variant='h4'
+                            align='left'
+                            className={classes.mainTitle}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.Properties.Properties.api.product.properties'
-                                defaultMessage='API Properties'
+                                defaultMessage='API Product Properties'
                             />
                         </Typography>
                     )
                     : (
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <Typography
+                            id='itest-api-details-api-properties-head'
+                            variant='h4'
+                            align='left'
+                            className={classes.mainTitle}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.Properties.Properties.api.properties'
                                 defaultMessage='API Properties'

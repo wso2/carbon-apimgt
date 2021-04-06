@@ -238,7 +238,7 @@ class Comments extends Component {
         return (
             <div className={classes.contentWrapper}>
                 <div className={classes.root}>
-                    <Typography variant='h4' className={classes.titleSub}>
+                    <Typography id='itest-api-details-comments-head' variant='h4' className={classes.titleSub}>
                         {totalComments + (' ')}
                         <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                     </Typography>
