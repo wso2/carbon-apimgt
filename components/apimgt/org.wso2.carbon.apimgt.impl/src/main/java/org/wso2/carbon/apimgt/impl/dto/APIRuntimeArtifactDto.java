@@ -9,6 +9,7 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String revision;
     private String label;
     private String type;
+    private String organizationId;
 
     public String getType() {
 
@@ -23,6 +24,16 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     public String getName() {
 
         return name;
+    }
+
+    public void setOrganizationId(String organizationId) {
+
+        this.organizationId = organizationId;
+    }
+
+    public String getOrganizationId() {
+
+        return organizationId;
     }
 
     public void setName(String name) {
