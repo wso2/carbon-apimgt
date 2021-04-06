@@ -161,8 +161,8 @@ export default {
         thumbnail: {
             width: 240,
             height: 140,
-            offset: 0.5,
-            colorMap: {
+            offset: 0.5, // Ratio between dark and light gradient, don't want a gradient make it 0
+            colorMap: { // Any hashed color code or if you remove a mapping will fallback to default
                 a: '#CC5262',
                 b: '#605F42',
                 c: '#474675',

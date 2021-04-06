@@ -18,9 +18,25 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
-import { deepOrange } from '@material-ui/core/colors';
 import { capitalizeFirstLetter } from 'AppData/stringFormatter';
 import Utils from 'AppData/Utils';
+
+const getColorFromLetter = (letter, colorMap, offset) => {
+    let charLightColor = colorMap[letter.toLowerCase()];
+
+    if (!charLightColor) {
+        const charNumber = parseInt(letter, 10);
+        if (charNumber) {
+            charLightColor = colorMap[String.fromCharCode(111 + charNumber)];
+        } else {
+            return [null, null];
+        }
+    }
+    const { r, g, b } = Utils.hexToRGBHash(charLightColor);
+    const dark = Utils.rgbToHex(r - Math.ceil(r * offset), g - Math.ceil(offset * g),
+        b - Math.ceil(offset * b));
+    return [charLightColor, dark];
+};
 
 const useStyles = makeStyles((theme) => {
     return {
@@ -29,22 +45,20 @@ const useStyles = makeStyles((theme) => {
         },
         square: ({ char, width, height }) => {
             const { colorMap, offset, width: defaultWidth } = theme.custom.thumbnail;
-            let charColor = colorMap[char.toLowerCase()];
-            if (!charColor) {
-                const charNumber = parseInt(char, 10);
-                if (charNumber) {
-                    charColor = colorMap[String.fromCharCode(111 + charNumber)];
-                } else {
-                    charColor = colorMap.x;
-                }
-            }
-            const { r, g, b } = Utils.hexToRGBHash(charColor);
-            const darkHex = Utils.rgbToHex(r - Math.ceil(r * offset), g - Math.ceil(offset * g),
-                b - Math.ceil(offset * b));
+            const [light, dark] = getColorFromLetter(char, colorMap, offset);
             const fontSize = Math.ceil((width * 70) / defaultWidth);
+            /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+            const background = light && `linear-gradient(to right, ${light}, ${dark})`;
             return {
-                color: theme.palette.getContrastText(deepOrange[500]),
-                background: `linear-gradient(to right, ${charColor}, ${darkHex})`,
+                color: light && theme.palette.getContrastText(dark),
+                background,
+                fallbacks: [
+                    { background: light }, /* fallback for old browsers */
+                    {
+                        background:
+                        `-webkit-linear-gradient(to right, ${light}, ${dark})`, /* Chrome 10-25, Safari 5.1-6 */
+                    },
+                ],
                 height,
                 width,
                 fontSize: `${fontSize}px`,

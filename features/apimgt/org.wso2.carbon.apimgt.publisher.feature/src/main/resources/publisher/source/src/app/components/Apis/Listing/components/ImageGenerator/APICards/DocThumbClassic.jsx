@@ -31,7 +31,7 @@ import BaseThumbnail from '../BaseThumbnail';
 const styles = (theme) => ({
     card: {
         margin: theme.spacing(3 / 2),
-        maxWidth: theme.spacing(32),
+        maxWidth: theme.custom.thumbnail.width,
         transition: 'box-shadow 0.3s ease-in-out',
     },
     providerText: {

@@ -61,10 +61,6 @@ const useStyles = makeStyles((theme) => ({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    button: {
-        marginLeft: theme.spacing(2),
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-    },
     FormControl: {
         padding: 0,
         width: '100%',
@@ -471,19 +467,22 @@ function Properties(props) {
                     )}
 
                 {(!isEmpty(additionalProperties) || showAddProperty) && (
-                    <Button
-                        size='small'
-                        className={classes.button}
-                        onClick={toggleAddProperty}
-                        disabled={showAddProperty
+                    <Box ml={1}>
+                        <Button
+                            variant='outlined'
+                            color='primary'
+                            size='small'
+                            onClick={toggleAddProperty}
+                            disabled={showAddProperty
                             || isRestricted(['apim:api_create', 'apim:api_publish'], api) || api.isRevision}
-                    >
-                        <AddCircle className={classes.buttonIcon} />
-                        <FormattedMessage
-                            id='Apis.Details.Properties.Properties.add.new.property'
-                            defaultMessage='Add New Property'
-                        />
-                    </Button>
+                        >
+                            <AddCircle className={classes.buttonIcon} />
+                            <FormattedMessage
+                                id='Apis.Details.Properties.Properties.add.new.property'
+                                defaultMessage='Add New Property'
+                            />
+                        </Button>
+                    </Box>
                 )}
             </div>
             <Typography variant='caption' component='div' className={classes.helpText}>
@@ -530,9 +529,8 @@ function Properties(props) {
                                 )}
                             <div className={classes.actions}>
                                 <Button
-                                    variant='contained'
+                                    variant='outlined'
                                     color='primary'
-                                    className={classes.button}
                                     onClick={toggleAddProperty}
                                     disabled={isRestricted(['apim:api_create', 'apim:api_publish'], api)
                                         || api.isRevision}

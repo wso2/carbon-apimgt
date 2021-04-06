@@ -344,7 +344,7 @@ class Scopes extends React.Component {
                     </Tooltip>
                     <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                         <Button
-                            variant='contained'
+                            variant='outlined'
                             color='primary'
                             size='small'
                             disabled={isRestricted(['apim:api_create'], api) || api.isRevision}

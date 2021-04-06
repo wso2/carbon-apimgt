@@ -114,10 +114,8 @@ const BaseThumbnail = (props) => {
     }, [thumbnailPop]);
     /**
      * Load the image from the backend and keeps in the component state
-     *
-     * @memberof ThumbnailView
      */
-    const loadImageData = () => {
+    useEffect(() => {
         if (type !== 'DOC') {
             const promisedThumbnail = apiType === Api.CONSTS.APIProduct
                 ? new APIProduct().getAPIProductThumbnail(id)
@@ -127,11 +125,14 @@ const BaseThumbnail = (props) => {
                 if (response && response.data) {
                     if (response.headers['content-type'] === 'application/json') {
                         setThumbnail(null);
-                        setIconJson(JSON.parse(response.data));
+                        setIconJson(response.body);
                     } else if (response && response.data.size > 0) {
                         const url = windowURL.createObjectURL(response.data);
                         setThumbnail(url);
                     }
+                } else if (response && response.data === '') {
+                    setThumbnail(null);
+                    setIconJson({ key: null });
                 }
             }).finally(() => {
                 setImageLoaded(true);
@@ -139,12 +140,6 @@ const BaseThumbnail = (props) => {
         } else {
             setImageLoaded(true);
         }
-    };
-    useEffect(() => {
-        loadImageData();
-    }, []);
-    useEffect(() => {
-        loadImageData();
     }, [imageUpdate]);
     if (!imageLoaded) {
         return (
@@ -168,7 +163,8 @@ const BaseThumbnail = (props) => {
             api={api}
         />
     );
-    if (variant === 'image') {
+    // If configured the thumbnail variant as `image` or migrated from old thumbnail
+    if (variant === 'image' || key) {
         view = (
             <ImageGenerator
                 width={width}
