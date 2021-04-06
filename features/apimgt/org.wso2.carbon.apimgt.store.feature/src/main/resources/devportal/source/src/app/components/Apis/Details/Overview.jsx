@@ -387,7 +387,7 @@ function Overview() {
                                     </Typography>
                                     {' '}
                                     <Typography variant='body2' gutterBottom align='left' className={classes.textValue}>
-                                        {getProvider(api)}
+                                        {getProvider()}
                                     </Typography>
                                 </Box>
                             </Box>
