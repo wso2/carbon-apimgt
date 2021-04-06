@@ -60,12 +60,12 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
@@ -81,6 +81,7 @@ import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -984,11 +985,22 @@ public class PublisherCommonUtils {
         //this will fall if user does not have access to the API or the API does not exist
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
         String apiDefinition = response.getJsonContent();
+
+        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        // Set uri templates
+        Set<URITemplate> uriTemplates = asyncApiParser.getURITemplates(
+                apiDefinition, APIConstants.API_TYPE_WS.equals(existingAPI.getType()));
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
+            throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
+        }
+        existingAPI.setUriTemplates(uriTemplates);
+
+        // Update ws uri mapping
+        existingAPI.setWsUriMapping(asyncApiParser.buildWSUriMapping(apiDefinition));
+
         //updating APi with the new AsyncAPI definition
         apiProvider.saveAsyncApiDefinition(existingAPI, apiDefinition);
         apiProvider.updateAPI(existingAPI);
-        //load new topics
-        apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(existingAPI, apiDefinition));
         //retrieves the updated AsyncAPI definition
         return apiProvider.getAsyncAPIDefinition(existingAPI.getId());
     }
@@ -1174,6 +1186,22 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * Update thumbnail of an API/API Product
+     *
+     * @param fileInputStream Input stream
+     * @param fileContentType The content type of the image
+     * @param apiProvider     API Provider
+     * @param apiId           API/API Product UUID
+     * @param tenantDomain    Tenant domain of the API
+     * @throws APIManagementException If an error occurs while updating the thumbnail
+     */
+    public static void updateThumbnail(InputStream fileInputStream, String fileContentType, APIProvider apiProvider,
+            String apiId, String tenantDomain) throws APIManagementException {
+        ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
+        apiProvider.setThumbnailToAPI(apiId, apiImage, tenantDomain);
+    }
+
+    /**
      * Add document DTO.
      *
      * @param documentDto Document DTO
@@ -1213,6 +1241,48 @@ public class PublisherCommonUtils {
         documentation = apiProvider.addDocumentation(apiId, documentation, tenantDomain);
 
         return documentation;
+    }
+
+    /**
+     * Add documentation content of inline and markdown documents.
+     *
+     * @param documentation Documentation
+     * @param apiProvider   API Provider
+     * @param apiId         API/API Product UUID
+     * @param documentId    Document ID
+     * @param tenantDomain  Tenant domain of the API/API Product
+     * @param inlineContent Inline content string
+     * @throws APIManagementException If an error occurs while adding the documentation content
+     */
+    public static void addDocumentationContent(Documentation documentation, APIProvider apiProvider, String apiId,
+            String documentId, String tenantDomain, String inlineContent) throws APIManagementException {
+        DocumentationContent content = new DocumentationContent();
+        content.setSourceType(DocumentationContent.ContentSourceType.valueOf(documentation.getSourceType().toString()));
+        content.setTextContent(inlineContent);
+        apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
+    }
+
+    /**
+     * Add documentation content of files.
+     *
+     * @param inputStream  Input Stream
+     * @param mediaType    Media type of the document
+     * @param filename     File name
+     * @param apiProvider  API Provider
+     * @param apiId        API/API Product UUID
+     * @param documentId   Document ID
+     * @param tenantDomain Tenant domain of the API/API Product
+     * @throws APIManagementException If an error occurs while adding the documentation file
+     */
+    public static void addDocumentationContentForFile(InputStream inputStream, String mediaType, String filename,
+            APIProvider apiProvider, String apiId, String documentId, String tenantDomain)
+            throws APIManagementException {
+        DocumentationContent content = new DocumentationContent();
+        ResourceFile resourceFile = new ResourceFile(inputStream, mediaType);
+        resourceFile.setName(filename);
+        content.setResourceFile(resourceFile);
+        content.setSourceType(DocumentationContent.ContentSourceType.FILE);
+        apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
     }
 
     /**
@@ -1398,5 +1468,47 @@ public class PublisherCommonUtils {
 
         return APIDTO.TypeEnum.WS.equals(apidto.getType()) || APIDTO.TypeEnum.SSE.equals(apidto.getType()) ||
                 APIDTO.TypeEnum.WEBSUB.equals(apidto.getType());
+    }
+
+    /**
+     * Add WSDL file of an API.
+     *
+     * @param fileContentType Content type of the file
+     * @param fileInputStream Input Stream
+     * @param api             API to which the WSDL belongs to
+     * @param apiProvider     API Provider
+     * @param tenantDomain    Tenant domain of the API
+     * @throws APIManagementException If an error occurs while adding the WSDL resource
+     */
+    public static void addWsdl(String fileContentType, InputStream fileInputStream, API api, APIProvider apiProvider,
+            String tenantDomain) throws APIManagementException {
+        ResourceFile wsdlResource;
+        if (APIConstants.APPLICATION_ZIP.equals(fileContentType) || APIConstants.APPLICATION_X_ZIP_COMPRESSED
+                .equals(fileContentType)) {
+            wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
+        } else {
+            wsdlResource = new ResourceFile(fileInputStream, fileContentType);
+        }
+        api.setWsdlResource(wsdlResource);
+        apiProvider.addWSDLResource(api.getUuid(), wsdlResource, null, tenantDomain);
+    }
+
+    /**
+     * Set the generated SOAP to REST sequences from the swagger file to the API and update it.
+     *
+     * @param swaggerContent Swagger content
+     * @param api            API to update
+     * @param apiProvider    API Provider
+     * @param tenantDomain   Tenant domain of the API
+     * @return Updated API Object
+     * @throws APIManagementException If an error occurs while generating the sequences or updating the API
+     * @throws FaultGatewaysException If an error occurs while updating the API
+     */
+    public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
+            APIProvider apiProvider, String tenantDomain) throws APIManagementException, FaultGatewaysException {
+        List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent, api.getId());
+        API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
+        updatedAPI.setSoapToRestSequences(list);
+        return apiProvider.updateAPI(updatedAPI, api);
     }
 }
