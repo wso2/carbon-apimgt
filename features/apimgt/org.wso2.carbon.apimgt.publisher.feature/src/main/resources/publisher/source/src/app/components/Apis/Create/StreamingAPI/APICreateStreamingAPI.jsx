@@ -46,7 +46,6 @@ const APICreateStreamingAPI = (props) => {
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
     const classes = useStyles();
-    const [hideEndpoint, setHideEndpoint] = useState(true);
 
     const protocols = [
         {
@@ -67,6 +66,18 @@ const APICreateStreamingAPI = (props) => {
         SSE: 'SSE',
         WebSub: 'WEBSUB',
     };
+    const protocolDisplayNames = {
+        WS: 'WebSocket',
+        SSE: 'SSE',
+        WEBSUB: 'WebSub',
+    };
+
+    const { match: { params } } = props;
+    let apiType = null;
+    if (params && params.apiType) {
+        apiType = params.apiType.toUpperCase();
+    }
+    const [hideEndpoint, setHideEndpoint] = useState(!apiType || apiType === protocolKeys.WebSub);
 
     /**
      *
@@ -127,7 +138,7 @@ const APICreateStreamingAPI = (props) => {
             version,
             context,
             endpoint,
-            type: protocol.toUpperCase(),
+            type: apiType || protocol.toUpperCase(),
             policies,
         };
 
@@ -225,7 +236,8 @@ const APICreateStreamingAPI = (props) => {
                                     <sup className={classes.mandatoryStar}>*</sup>
                                 </>
                             )}
-                            value={apiInputs.protocol}
+                            value={apiType ? protocolDisplayNames[apiType] : apiInputs.protocol}
+                            disabled={apiType}
                             name='protocol'
                             SelectProps={{
                                 multiple: false,
