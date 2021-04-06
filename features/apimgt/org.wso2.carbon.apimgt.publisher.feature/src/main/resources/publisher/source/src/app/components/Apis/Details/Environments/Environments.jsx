@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
@@ -64,6 +64,7 @@ import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
 import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
 import CONSTS from 'AppData/Constants';
+import { parse } from '@asyncapi/parser';
 import DisplayDevportal from './DisplayDevportal';
 
 const useStyles = makeStyles((theme) => ({
@@ -323,6 +324,8 @@ export default function Environments() {
     const [revisionToRestore, setRevisionToRestore] = useState([]);
     const [currentLength, setCurrentLength] = useState(0);
     const [openDeployPopup, setOpenDeployPopup] = useState(history.location.state === 'deploy');
+    const [thirdPartyEnvEndpoints, setThirdPartyEnvEndpoints] = useState(null);
+    const triggerEffect = true;
 
     // allEnvDeployments represents all deployments of the API with mapping
     // environment -> {revision deployed to env, vhost deployed to env with revision}
@@ -351,7 +354,51 @@ export default function Environments() {
         allThirdPartyEnvironmentsMap[env.name] = { revision, disPlayDevportal };
         allThirdPartyEnvironments.push(env);
     });
-    console.log(allThirdPartyEnvironmentsMap);
+
+    const thirdPartyEnvWithEndpoints = [];
+    useEffect(() => {
+        console.log('effect on');
+        const promise = restApi.getAsyncAPIDefinition(api.id);
+        promise.then(async (response) => {
+            const doc = await parse(response.data);
+            const protocolBindings = [];
+            // eslint-disable-next-line array-callback-return
+            doc.channelNames().map((channelName) => {
+                if (doc.channel(channelName).hasPublish()) {
+                    // eslint-disable-next-line array-callback-return
+                    doc.channel(channelName).publish().bindingProtocols().map((protocol) => {
+                        if (!protocolBindings.includes(protocol)) {
+                            protocolBindings.push(protocol);
+                        }
+                    });
+                }
+                if (doc.channel(channelName).hasSubscribe()) {
+                    // eslint-disable-next-line array-callback-return
+                    doc.channel(channelName).subscribe().bindingProtocols().map((protocol) => {
+                        if (!protocolBindings.includes(protocol)) {
+                            protocolBindings.push(protocol);
+                        }
+                    });
+                }
+            });
+            // eslint-disable-next-line array-callback-return
+            allThirdPartyEnvironments.map((env) => {
+                const endpoints = [];
+                // eslint-disable-next-line array-callback-return
+                env.endpointURIs.map((endpoint) => {
+                    // eslint-disable-next-line array-callback-return
+                    protocolBindings.map((protocol) => {
+                        if (protocol === endpoint.protocol) {
+                            const uri = endpoint.endpointURI;
+                            endpoints.push({ protocol, uri });
+                        }
+                    });
+                });
+                thirdPartyEnvWithEndpoints[env.name] = endpoints;
+            });
+            setThirdPartyEnvEndpoints(thirdPartyEnvWithEndpoints);
+        });
+    }, [triggerEffect]);
 
     const toggleOpenConfirmDelete = (revisionName, revisionId) => {
         setRevisionToDelete([revisionName, revisionId]);
@@ -1578,88 +1625,93 @@ export default function Environments() {
                                 ))}
                             </Grid>
                         </Box>
-                        <Box mt={2}>
-                            <Typography variant='h6' align='left' className={classes.sectionTitle}>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.third.party.environments.heading'
-                                    defaultMessage='Third-Party Environments'
-                                />
-                            </Typography>
-                            <Grid
-                                container
-                                spacing={3}
-                            >
-                                {settings.thirdPartyEnvironments.map((row) => (
-                                    <Grid item xs={4}>
-                                        <Card
-                                            className={clsx(SelectedEnvironment
-                                            && SelectedEnvironment.includes(row.name)
-                                                ? (classes.changeCard) : (classes.noChangeCard), classes.cardHeight)}
-                                            variant='outlined'
-                                        >
-                                            <Box height='100%'>
-                                                <CardHeader
-                                                    title={(
-                                                        <Typography variant='subtitle2'>
-                                                            {row.displayName}
-                                                        </Typography>
-                                                    )}
-                                                    subheader={(
-                                                        <Typography
-                                                            variant='body2'
-                                                            color='textSecondary'
-                                                            gutterBottom
-                                                        >
-                                                            {row.provider}
-                                                        </Typography>
-                                                    )}
-                                                    action={(
-                                                        <Checkbox
-                                                            id={row.name.split(' ').join('')}
-                                                            value={row.name}
-                                                            checked={SelectedEnvironment.includes(row.name)}
-                                                            onChange={handleChange}
-                                                            color='primary'
-                                                            icon={<RadioButtonUncheckedIcon />}
-                                                            checkedIcon={<CheckCircleIcon color='primary' />}
-                                                            inputProps={{ 'aria-label': 'secondary checkbox' }}
-                                                        />
-                                                    )}
-                                                />
-                                                <CardContent>
-                                                    <Grid
-                                                        container
-                                                        direction='column'
-                                                        spacing={2}
-                                                    >
-                                                        <Grid item xs={12}>
-                                                            <TextField
-                                                                id='Api.Details.Third.party,environment.name'
-                                                                label='Environment'
-                                                                variant='outlined'
-                                                                disabled
-                                                                fullWidth
-                                                                margin='dense'
+                        {(api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE')
+                        && (allThirdPartyEnvironments.length > 0) && (
+                            <Box mt={2}>
+                                <Typography variant='h6' align='left' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Environments.Environments.third.party.environments.heading'
+                                        defaultMessage='Third-Party Environments'
+                                    />
+                                </Typography>
+                                <Grid
+                                    container
+                                    spacing={3}
+                                >
+                                    {settings.thirdPartyEnvironments.map((row) => (
+                                        <Grid item xs={4}>
+                                            <Card
+                                                className={clsx(SelectedEnvironment
+                                                && SelectedEnvironment.includes(row.name)
+                                                    ? (classes.changeCard)
+                                                    : (classes.noChangeCard), classes.cardHeight)}
+                                                variant='outlined'
+                                            >
+                                                <Box height='100%'>
+                                                    <CardHeader
+                                                        title={(
+                                                            <Typography variant='subtitle2'>
+                                                                {row.displayName}
+                                                            </Typography>
+                                                        )}
+                                                        subheader={(
+                                                            <Typography
+                                                                variant='body2'
+                                                                color='textSecondary'
+                                                                gutterBottom
+                                                            >
+                                                                {row.provider}
+                                                            </Typography>
+                                                        )}
+                                                        action={(
+                                                            <Checkbox
+                                                                id={row.name.split(' ').join('')}
                                                                 value={row.name}
+                                                                checked={SelectedEnvironment.includes(row.name)}
+                                                                onChange={handleChange}
+                                                                color='primary'
+                                                                icon={<RadioButtonUncheckedIcon />}
+                                                                checkedIcon={<CheckCircleIcon color='primary' />}
+                                                                inputProps={{ 'aria-label': 'secondary checkbox' }}
                                                             />
-                                                            <TextField
-                                                                id='Api.Details.Third.party,environment.organization'
-                                                                label='Organization'
-                                                                variant='outlined'
-                                                                disabled
-                                                                fullWidth
-                                                                margin='dense'
-                                                                value={row.organization}
-                                                            />
+                                                        )}
+                                                    />
+                                                    <CardContent>
+                                                        <Grid
+                                                            container
+                                                            direction='column'
+                                                            spacing={2}
+                                                        >
+                                                            <Grid item xs={12}>
+                                                                <TextField
+                                                                    id='Api.Details.Third.party,environment.name'
+                                                                    label='Environment'
+                                                                    variant='outlined'
+                                                                    disabled
+                                                                    fullWidth
+                                                                    margin='dense'
+                                                                    value={row.name}
+                                                                />
+                                                                <TextField
+                                                                    id='Api.Details.
+                                                                        Third.party,environment.organization'
+                                                                    label='Organization'
+                                                                    variant='outlined'
+                                                                    disabled
+                                                                    fullWidth
+                                                                    margin='dense'
+                                                                    value={row.organization}
+                                                                />
+                                                            </Grid>
                                                         </Grid>
-                                                    </Grid>
-                                                </CardContent>
-                                            </Box>
-                                        </Card>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </Box>
+                                                    </CardContent>
+                                                </Box>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Box>
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleCloseDeployPopup}>
@@ -2101,6 +2153,14 @@ export default function Environments() {
                                             defaultMessage='Name'
                                         />
                                     </TableCell>
+                                    {thirdPartyEnvEndpoints && (
+                                        <TableCell align='left'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Third.Party.Brokers.broker.endpoints'
+                                                defaultMessage='Access Endpoints'
+                                            />
+                                        </TableCell>
+                                    )}
                                     <TableCell align='left'>
                                         <FormattedMessage
                                             id='Apis.Details.Third.Party.Brokers.broker.environment'
@@ -2151,6 +2211,34 @@ export default function Environments() {
                                         <TableCell component='th' scope='row'>
                                             {row.displayName}
                                         </TableCell>
+                                        {thirdPartyEnvEndpoints && (
+                                            <TableCell align='left'>
+                                                {thirdPartyEnvEndpoints[row.name].map((e) => {
+                                                    return (
+                                                        <Grid container spacing={2}>
+                                                            <Grid item>
+                                                                <Chip
+                                                                    label={e.protocol}
+                                                                    size='small'
+                                                                    color='primary'
+                                                                    variant='outlined'
+                                                                />
+                                                            </Grid>
+                                                            <Grid
+                                                                item
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center',
+                                                                }}
+                                                            >
+                                                                {e.uri}
+                                                            </Grid>
+                                                        </Grid>
+                                                    );
+                                                })}
+                                            </TableCell>
+                                        )}
                                         <TableCell align='left'>
                                             {row.name}
                                         </TableCell>

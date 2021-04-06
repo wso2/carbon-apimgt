@@ -80,13 +80,13 @@ public class SolaceAdminApis {
 
     // create API product in Solace
     public HttpResponse createAPIProduct(String organization, String environment,
-                                         Aai20Document aai20Document, String apiProductName) {
+                                         Aai20Document aai20Document, String apiProductName, String apiNameForRegistration) {
         HttpClient httpClient = HttpClients.createDefault();
         HttpPost request = new HttpPost(baseUrl + "/" + organization + "/apiProducts");
         request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         //setRequestBody
-        org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName);
+        org.json.JSONObject requestBody = buildAPIProductRequestBody(aai20Document, environment, apiProductName, apiNameForRegistration);
         try {
             StringEntity params2;
             params2 = new StringEntity(requestBody.toString());
@@ -273,20 +273,20 @@ public class SolaceAdminApis {
     }
 
     private org.json.JSONObject buildAPIProductRequestBody(Aai20Document aai20Document,
-                                                           String environment, String apiNameWithContext) {
+                                                       String environment, String apiNameWithContext, String registeredApiName) {
         org.json.JSONObject requestBody = new org.json.JSONObject();
 
         org.json.JSONArray apiName = new org.json.JSONArray();
-        apiName.put(aai20Document.info.title);
+        apiName.put(registeredApiName);
         requestBody.put("apis", apiName);
 
         requestBody.put("approvalType", "auto");
         if (aai20Document.info.description != null) {
             requestBody.put("description", aai20Document.info.description);
         } else {
-            requestBody.put("description", aai20Document.info.title);
+            requestBody.put("description", apiNameWithContext);
         }
-        requestBody.put("displayName", aai20Document.info.title);
+        requestBody.put("displayName", apiNameWithContext);
         requestBody.put("pubResources", new org.json.JSONArray());
         requestBody.put("subResources", new org.json.JSONArray());
         requestBody.put("name", apiNameWithContext);

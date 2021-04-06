@@ -1,8 +1,8 @@
-package org.wso2.carbon.apimgt.impl.dto;
+package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
 
-public class ThirdPartyEnvironment extends org.wso2.carbon.apimgt.api.model.Environment implements Serializable {
+public class ThirdPartyEnvironment extends Environment implements Serializable {
 
     private String organization;
     private String provider;

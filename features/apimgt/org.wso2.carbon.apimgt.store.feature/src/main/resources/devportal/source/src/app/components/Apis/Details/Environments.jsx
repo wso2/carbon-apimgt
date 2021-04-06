@@ -107,50 +107,54 @@ function Environments(props) {
     };
 
     const getDefaultVersionUrl = () => {
-        const { defaultVersionURLs } = selectedEndpoint;
-        if (defaultVersionURLs
-            && (defaultVersionURLs.https
-                || defaultVersionURLs.http
-                || defaultVersionURLs.ws
-                || defaultVersionURLs.wss)) {
-            return (
-                <>
-                    {`
+        if (selectedEndpoint !== null) {
+            const { defaultVersionURLs } = selectedEndpoint;
+            if (defaultVersionURLs
+                && (defaultVersionURLs.https
+                    || defaultVersionURLs.http
+                    || defaultVersionURLs.ws
+                    || defaultVersionURLs.wss)) {
+                return (
+                    <>
+                        {`
             ${intl.formatMessage({
-                    id: 'Apis.Details.Environments.default.url',
-                    defaultMessage: '( Default Version ) ',
-                })}
+                        id: 'Apis.Details.Environments.default.url',
+                        defaultMessage: '( Default Version ) ',
+                    })}
             ${(defaultVersionURLs.https || defaultVersionURLs.http || defaultVersionURLs.ws || defaultVersionURLs.wss)}`}
-                    <Tooltip
-                        title={
-                            urlCopied
-                                ? intl.formatMessage({
-                                    defaultMessage: 'Copied',
-                                    id: 'Apis.Details.Environments.copied',
-                                })
-                                : intl.formatMessage({
-                                    defaultMessage: 'Copy to clipboard',
-                                    id: 'Apis.Details.Environments.copy.to.clipboard',
-                                })
-                        }
-                        placement='right'
-                        className={classes.iconStyle}
-                    >
-                        <CopyToClipboard
-                            text={defaultVersionURLs.https
+                        <Tooltip
+                            title={
+                                urlCopied
+                                    ? intl.formatMessage({
+                                        defaultMessage: 'Copied',
+                                        id: 'Apis.Details.Environments.copied',
+                                    })
+                                    : intl.formatMessage({
+                                        defaultMessage: 'Copy to clipboard',
+                                        id: 'Apis.Details.Environments.copy.to.clipboard',
+                                    })
+                            }
+                            placement='right'
+                            className={classes.iconStyle}
+                        >
+                            <CopyToClipboard
+                                text={defaultVersionURLs.https
                                 || defaultVersionURLs.http
                                 || defaultVersionURLs.ws
                                 || defaultVersionURLs.wss}
-                            // text={endpoint.URLs.http}
-                            onCopy={() => onCopy('urlCopied')}
-                        >
-                            <IconButton aria-label='Copy to clipboard'>
-                                <Icon color='secondary'>file_copy</Icon>
-                            </IconButton>
-                        </CopyToClipboard>
-                    </Tooltip>
-                </>
-            );
+                                // text={endpoint.URLs.http}
+                                onCopy={() => onCopy('urlCopied')}
+                            >
+                                <IconButton aria-label='Copy to clipboard'>
+                                    <Icon color='secondary'>file_copy</Icon>
+                                </IconButton>
+                            </CopyToClipboard>
+                        </Tooltip>
+                    </>
+                );
+            } else {
+                return null;
+            }
         } else {
             return null;
         }

@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -92,7 +93,6 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ThirdPartyEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -3004,39 +3004,19 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 boolean solaceDeploymentFromRevision = false;
                 ThirdPartyEnvironment deployedEnvironment = null;
 
-                /*List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
-                for (APIRevisionDeployment deployment : deployments) {
-                    if (deployment.isDisplayOnDevportal()) {
-                        String environmentName = deployment.getDeployment();
-                        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
-                        if (thirdPartyEnvironments.containsKey(environmentName)) {
-                            deployedEnvironment = thirdPartyEnvironments.get(environmentName);
-                            if ("solace".equalsIgnoreCase(thirdPartyEnvironments.get(environmentName).getProvider())) {
-                                solaceDeploymentFromRevision = true;
-                            }
-                        }
-                    }
-                }*/
                 solaceDeploymentFromRevision = checkWhetherAPIDeployedToSolaceUsingRevision(api);
 
                 ArrayList<String> solaceApiProducts = new ArrayList<>();
 
-                /*for (SubscribedAPI subscribedAPI : subscribedAPIList) {
-                    APIIdentifier identifier1 = subscribedAPI.getApiId();
-                    API subAPI = getAPI(identifier1);
-                    if (checkWhetherAPIDeployedToSolaceUsingRevision(subAPI)) {
-                        solaceApiProducts.add(generateApiProductNameForSolaceBroker(subAPI));
-                    }
-                }*/
-
                 String thirdPartyOrganizationName = getThirdPartySolaceBrokerOrganizationNameOfAPIDeployment(api);
+                String thirdPartyEnvironmentName = getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(api);
 
                 if (solaceDeploymentFromRevision) {
                     // check whether new subscribing API already registered and exists as an API product
                     try {
                         boolean doesApiProductDeployedInSolace = false;
                         doesApiProductDeployedInSolace = checkApiProductAlreadyDeployedInSolace(api, thirdPartyOrganizationName);
-                        solaceApiProducts.add(generateApiProductNameForSolaceBroker(api));
+                        solaceApiProducts.add(generateApiProductNameForSolaceBroker(api, thirdPartyEnvironmentName));
                         if (doesApiProductDeployedInSolace) {
                             deployApplicationToSolaceBroker(application, solaceApiProducts, thirdPartyOrganizationName);
                         }
@@ -3529,7 +3509,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 unSubscribeAPIProductInSolaceApplication(
                         api,
                         application,
-                        generateApiProductNameForSolaceBroker(api)
+                        generateApiProductNameForSolaceBroker(api, getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(api))
                 );
             }
 
@@ -6491,12 +6471,12 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return hostsWithSchemes;
     }
 
-    private String generateApiProductNameForSolaceBroker(API api) {
+    private String generateApiProductNameForSolaceBroker(API api, String environmentName) {
         String[] apiContextParts = api.getContext().split("/");
-        return api.getId().getName() + "-" + apiContextParts[1] + "-" + apiContextParts[2];
+        return environmentName + "-" + api.getId().getName() + "-" + apiContextParts[1] + "-" + apiContextParts[2];
     }
 
-    private boolean checkApiProductAlreadyDeployedInSolace(API api, String organization) throws IOException {
+    private boolean checkApiProductAlreadyDeployedInSolace(API api, String organization) throws IOException, APIManagementException {
         /*Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(api.getAsyncApiDefinition());
         String organization = "WSO2";
         String environment = "devEnv";
@@ -6537,7 +6517,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //}
         return false;*/
 
-        String apiNameWithContext = generateApiProductNameForSolaceBroker(api);
+        String apiNameWithContext = generateApiProductNameForSolaceBroker(api, getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(api));
         SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
         HttpResponse response = solaceAdminApis.apiProductGet(organization, apiNameWithContext);
 
@@ -6735,6 +6715,21 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return null;
     }
 
+    private String getThirdPartySolaceBrokerEnvironmentNameOfAPIDeployment(API api) throws APIManagementException {
+        Map<String, ThirdPartyEnvironment> thirdPartyEnvironments = APIUtil.getReadOnlyThirdPartyEnvironments();
+        List<APIRevisionDeployment> deployments = getAPIRevisionDeploymentListOfAPI(api.getUuid());
+        for (APIRevisionDeployment deployment : deployments) {
+            String environmentName = deployment.getDeployment();
+            if (thirdPartyEnvironments.containsKey(environmentName)) {
+                ThirdPartyEnvironment deployedEnvironment = thirdPartyEnvironments.get(environmentName);
+                if ("solace".equalsIgnoreCase(deployedEnvironment.getProvider())) {
+                    return environmentName;
+                }
+            }
+        }
+        return null;
+    }
+
     private void unSubscribeAPIProductInSolaceApplication(API api, Application application, String apiProductName) throws APIManagementException {
         SolaceAdminApis solaceAdminApis = new SolaceAdminApis();
         HttpResponse response = solaceAdminApis.applicationPatchRemoveSubscription(
@@ -6743,9 +6738,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 apiProductName
         );
         if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-            log.info("API product '" +generateApiProductNameForSolaceBroker(api)+ "' unsubscribed from Solace application '" +application.getName()+ "'");
+            log.info("API product '" +apiProductName+ "' unsubscribed from Solace application '" +application.getName()+ "'");
         } else {
-            log.error("Error while unsubscribing API product '" +generateApiProductNameForSolaceBroker(api)+ "' from Solace Application '" +application.getName()+ "'");
+            log.error("Error while unsubscribing API product '" +apiProductName+ "' from Solace Application '" +application.getName()+ "'");
             throw new APIManagementException(response.getStatusLine().getStatusCode() +"-"+ response.getStatusLine().getReasonPhrase());
         }
     }
