@@ -355,6 +355,7 @@ export default function Environments() {
     };
 
     const handleCloseDeployPopup = () => {
+        history.replace();
         setOpenDeployPopup(false);
         setExtraRevisionToDelete(null);
     };
