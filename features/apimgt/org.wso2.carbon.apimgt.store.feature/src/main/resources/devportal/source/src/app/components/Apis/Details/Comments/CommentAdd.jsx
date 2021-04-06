@@ -131,15 +131,12 @@ class CommentAdd extends React.Component {
             Api.addComment(apiId, comment, replyTo)
                 .then((newComment) => {
                     this.setState({ content: '' });
-                    // const addedComment = newComment.body;
                     if (replyTo === null) {
                         if (addComment) {
                             addComment(newComment.body);
                         }
                     } else if (addReply) {
                         addReply(newComment.body);
-                        // const index = allComments.findIndex(this.filterCommentToAddReply)
-                        // allComments[index].replies.list.push(addedComment);
                     }
                 })
                 .catch((error) => {
