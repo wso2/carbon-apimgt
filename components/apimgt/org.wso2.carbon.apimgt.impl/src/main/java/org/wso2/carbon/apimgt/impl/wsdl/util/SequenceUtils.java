@@ -307,7 +307,7 @@ public class SequenceUtils {
                 resourceMap.put(SOAPToRESTConstants.RESOURCE_ID, sequence.getUuid());
                 resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
                 resourceMap.put(SOAPToRESTConstants.CONTENT, content);
-                resultJson.put(resourceName, resourceMap);
+                resultJson.put(resourceName + "_" + httpMethod, resourceMap);
             }
         }
         if (log.isDebugEnabled()) {

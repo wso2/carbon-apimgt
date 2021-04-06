@@ -3581,17 +3581,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 Resource regResource;
                 if (!registry.resourceExists(resourcePath)) {
                     regResource = registry.newResource();
-                } else {
-                    regResource = registry.get(resourcePath);
+                    regResource.setContent(soapToRestSequence.getContent());
+                    regResource.addProperty("method", soapToRestSequence.getMethod());
+                    if (regResource.getProperty("resourcePath") != null) {
+                        regResource.removeProperty("resourcePath");
+                    }
+                    regResource.addProperty("resourcePath", apiResourceName);
+                    regResource.setMediaType("text/xml");
+                    registry.put(resourcePath, regResource);
                 }
-                regResource.setContent(soapToRestSequence.getContent());
-                regResource.addProperty("method", soapToRestSequence.getMethod());
-                if (regResource.getProperty("resourcePath") != null) {
-                    regResource.removeProperty("resourcePath");
-                }
-                regResource.addProperty("resourcePath", apiResourceName);
-                regResource.setMediaType("text/xml");
-                registry.put(resourcePath, regResource);
             }
 
         }
