@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.impl;
 
@@ -109,7 +109,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
         KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
         ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class, APIPersistence.class})
-@SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
+@SuppressStaticInitializationFor({"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
@@ -166,7 +166,7 @@ public class APIConsumerImplTest {
         Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authorizationManager);
         Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(keyManagerConfigurationDTO);
-        Mockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString(),Mockito.anyString()))
+        Mockito.when(KeyManagerHolder.getKeyManagerInstance(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(keyManager);
         PowerMockito.when(APIUtil.replaceSystemProperty(anyString())).thenAnswer((Answer<String>) invocation -> {
             Object[] args = invocation.getArguments();
@@ -251,7 +251,7 @@ public class APIConsumerImplTest {
         List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         governanceArtifacts.add(artifact);
-        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(),(UserRegistry)Mockito.anyObject(),
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(), (UserRegistry) Mockito.anyObject(),
                 Mockito.anyString())).thenReturn(governanceArtifacts);
         APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
         API api = new API(apiId1);
@@ -282,13 +282,13 @@ public class APIConsumerImplTest {
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
         //artifact manager null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
         //generic artifact null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedPublishedAPIs(MultitenantConstants
@@ -317,13 +317,13 @@ public class APIConsumerImplTest {
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
         //artifact manager null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
         //generic artifact null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedPublishedLightWeightAPIs(MultitenantConstants
@@ -342,7 +342,7 @@ public class APIConsumerImplTest {
                 thenReturn(userRegistry1);
         Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry1);
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
@@ -356,13 +356,13 @@ public class APIConsumerImplTest {
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
         //artifact manager null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedAPIs(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10));
 
         //generic artifact null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedAPIs(MultitenantConstants
@@ -387,7 +387,7 @@ public class APIConsumerImplTest {
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
         PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
@@ -407,13 +407,13 @@ public class APIConsumerImplTest {
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10, "testStatus", true));
 
         //artifact manager null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10, "testStatus", true));
 
         //generic artifact null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
@@ -435,12 +435,12 @@ public class APIConsumerImplTest {
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
         PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(false, true);
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         governanceArtifacts.add(artifact);
-        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(),(UserRegistry)Mockito.anyObject(),
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(), (UserRegistry) Mockito.anyObject(),
                 Mockito.anyString())).thenReturn(governanceArtifacts);
         APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
         API api = new API(apiId1);
@@ -457,15 +457,15 @@ public class APIConsumerImplTest {
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, true));
 
         //artifact manager null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, true));
 
         //generic artifact null path
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
-        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(),(UserRegistry)Mockito.anyObject(),
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(), (UserRegistry) Mockito.anyObject(),
                 Mockito.anyString())).thenReturn(null);
         assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, true));
@@ -509,7 +509,7 @@ public class APIConsumerImplTest {
                 thenReturn(userRegistry1);
         Mockito.when(registryService.getGovernanceSystemRegistry(Mockito.anyInt())).thenReturn(userRegistry1);
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
@@ -529,7 +529,7 @@ public class APIConsumerImplTest {
         Registry userRegistry = Mockito.mock(Registry.class);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(userRegistry, apiMgtDAO);
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
@@ -537,7 +537,7 @@ public class APIConsumerImplTest {
         Mockito.when(artifact.getAttribute(Mockito.anyString())).thenReturn("PUBLISHED");
         Mockito.when(artifact.getPath()).thenReturn("testPath");
 
-        Mockito.when(userRegistry.getAverageRating("testPath")).thenReturn((float)20.0);
+        Mockito.when(userRegistry.getAverageRating("testPath")).thenReturn((float) 20.0);
         APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
         API api = new API(apiId1);
         Mockito.when(APIUtil.getAPI(artifact, userRegistry)).thenReturn(api);
@@ -562,7 +562,7 @@ public class APIConsumerImplTest {
         PowerMockito.when(APIUtil.isAllowDisplayMultipleVersions()).thenReturn(true, false);
         PowerMockito.when(APIUtil.isAllowDisplayAPIsWithMultipleStatus()).thenReturn(true, false);
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
-        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry) (Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         Association association = Mockito.mock(Association.class);
         Association[] associations = new Association[]{association};
@@ -589,7 +589,6 @@ public class APIConsumerImplTest {
         apiConsumer.apiMgtDAO = apiMgtDAO;
         assertEquals(2, apiConsumer.getUserRating(apiIdentifier, "admin"));
     }
-
 
 
     @Test
@@ -702,7 +701,7 @@ public class APIConsumerImplTest {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
-        assertNotNull(apiConsumer.getSubscribedIdentifiers(subscriber, apiId1,"testID"));
+        assertNotNull(apiConsumer.getSubscribedIdentifiers(subscriber, apiId1, "testID"));
     }
 
     @Test
@@ -772,7 +771,7 @@ public class APIConsumerImplTest {
         PowerMockito.when(MultitenantUtils.getTenantDomain("userID")).thenReturn("carbon.super");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
                 thenReturn(false);
-        Mockito.when(apiMgtDAO.addApplication(application, "userID","testorg")).thenReturn(1);
+        Mockito.when(apiMgtDAO.addApplication(application, "userID", "testorg")).thenReturn(1);
         assertEquals(1, apiConsumer.addApplication(application, "userID", "testorg"));
     }
 
@@ -799,7 +798,6 @@ public class APIConsumerImplTest {
     }
 
 
-
     @Test
     public void testAddComment() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
@@ -818,14 +816,12 @@ public class APIConsumerImplTest {
         originalSubscribedAPIs.add(subscribedAPI);
         Subscriber subscriber = new Subscriber("Subscriber");
         Tier tier = Mockito.mock(Tier.class);
-        when(apiMgtDAO.getSubscribedAPIs(subscriber, "testApplication","testID")).
+        when(apiMgtDAO.getSubscribedAPIs(subscriber, "testApplication", "testID")).
                 thenReturn(originalSubscribedAPIs);
         when(subscribedAPI.getTier()).thenReturn(tier);
         when(tier.getName()).thenReturn("tier");
-        assertNotNull(apiConsumer.getSubscribedAPIs(subscriber, "testApplication","testID"));
+        assertNotNull(apiConsumer.getSubscribedAPIs(subscriber, "testApplication", "testID"));
     }
-
-
 
 
     @Test
@@ -850,9 +846,6 @@ public class APIConsumerImplTest {
     }
 
 
-
-
-
     @Test
     public void testUpdateAuthClient() throws APIManagementException {
         String consumerKey = "aNTf-EFga";
@@ -865,7 +858,7 @@ public class APIConsumerImplTest {
                         Mockito.anyString()))
                 .thenReturn(oAuthAppRequest);
         Mockito.when(apiMgtDAO
-                .getConsumerKeyByApplicationIdKeyTypeKeyManager(Mockito.anyInt(),Mockito.anyString(),
+                .getConsumerKeyByApplicationIdKeyTypeKeyManager(Mockito.anyInt(), Mockito.anyString(),
                         Mockito.anyString())).thenReturn(consumerKey);
         OAuthApplicationInfo updatedAppInfo = new OAuthApplicationInfo();
         String clientName = "sample client";
@@ -873,7 +866,7 @@ public class APIConsumerImplTest {
         Mockito.when(keyManager.updateApplication((OAuthAppRequest) Mockito.any())).thenReturn(updatedAppInfo);
         KeyManagerConfigurationDTO keyManagerConfiguration = new KeyManagerConfigurationDTO();
         keyManagerConfiguration.setEnabled(true);
-        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(),Mockito.anyString())).thenReturn(keyManagerConfiguration);
+        Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName(Mockito.anyString(), Mockito.anyString())).thenReturn(keyManagerConfiguration);
         System.setProperty(CARBON_HOME, "");
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         APIManagerConfigurationService apiManagerConfigurationService = Mockito.
@@ -902,7 +895,7 @@ public class APIConsumerImplTest {
 
     @Test
     public void testGetApplicationsWithPagination() throws APIManagementException {
-        Application[] applications = new Application[] { new Application(1), new Application(2) };
+        Application[] applications = new Application[]{new Application(1), new Application(2)};
         Mockito.when(apiMgtDAO
                 .getApplicationsWithPagination((Subscriber) Mockito.any(), Mockito.anyString(), Mockito.anyInt(),
                         Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
@@ -939,14 +932,14 @@ public class APIConsumerImplTest {
         Mockito.when(userRegistry.getUserRealm()).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
-                thenReturn(new String[] { "role1", "role2" });
+                thenReturn(new String[]{"role1", "role2"});
         Assert.assertFalse(apiConsumer.isTierDeneid("tier1"));
         TierPermissionDTO tierPermissionDTO = new TierPermissionDTO();
-        tierPermissionDTO.setRoles(new String[] { "role1" });
+        tierPermissionDTO.setRoles(new String[]{"role1"});
         Mockito.when(apiMgtDAO.getThrottleTierPermission(Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn(tierPermissionDTO);
         Assert.assertTrue(apiConsumer.isTierDeneid("tier1"));
-        tierPermissionDTO.setRoles(new String[] { "role3" });
+        tierPermissionDTO.setRoles(new String[]{"role3"});
         Assert.assertFalse(apiConsumer.isTierDeneid("tier1"));
         Assert.assertFalse(apiConsumer.isTierDeneid("tier1"));
         tierPermissionDTO.setPermissionType(APIConstants.TIER_PERMISSION_ALLOW);
@@ -973,23 +966,23 @@ public class APIConsumerImplTest {
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 0);
         TierPermissionDTO tierPermissionDTO = new TierPermissionDTO();
         TierPermissionDTO tierPermissionDTO1 = new TierPermissionDTO();
-        tierPermissionDTO.setRoles(new String[] { "role1" });
+        tierPermissionDTO.setRoles(new String[]{"role1"});
         Set<TierPermissionDTO> tierPermissionDTOs = new HashSet<TierPermissionDTO>();
         tierPermissionDTOs.add(tierPermissionDTO);
         Mockito.when(apiMgtDAO.getThrottleTierPermissions(Mockito.anyInt())).thenReturn(tierPermissionDTOs);
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 1);
-        tierPermissionDTO.setRoles(new String[] { "role3" });
+        tierPermissionDTO.setRoles(new String[]{"role3"});
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 0);
         Mockito.when(apiMgtDAO.getTierPermissions(Mockito.anyInt())).thenReturn(tierPermissionDTOs);
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 0);
         tierPermissionDTO.setPermissionType(APIConstants.TIER_PERMISSION_ALLOW);
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenReturn(new String[0]);
         tierPermissionDTOs.add(tierPermissionDTO1);
-        tierPermissionDTO1.setRoles(new String[] { "role4" });
+        tierPermissionDTO1.setRoles(new String[]{"role4"});
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 1);
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString()))
-                .thenReturn(new String[] { "role1", "role2" });
-        tierPermissionDTO1.setRoles(new String[] { "role2" });
+                .thenReturn(new String[]{"role1", "role2"});
+        tierPermissionDTO1.setRoles(new String[]{"role2"});
         tierPermissionDTO1.setTierName("Silver");
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 2);
     }
@@ -1021,7 +1014,7 @@ public class APIConsumerImplTest {
             Assert.assertTrue(e.getMessage().contains("Unable to retrieve the tenant information of the current user"));
         }
         Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
-                thenReturn(new String[] { "role1", "role2" });
+                thenReturn(new String[]{"role1", "role2"});
 
         Application application = Mockito.mock(Application.class);
         Subscriber subscriber = Mockito.mock(Subscriber.class);
@@ -1055,7 +1048,7 @@ public class APIConsumerImplTest {
         Map<String, Object> result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
                         "identity.com/auth", null, "3600", "api_view", "2", null, "default", null);
-        Assert.assertEquals(result.size(),10);
+        Assert.assertEquals(result.size(), 10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
@@ -1085,7 +1078,7 @@ public class APIConsumerImplTest {
     @Test
     public void testGetComments() throws APIManagementException {
         Comment comment = new Comment();
-        Comment[] comments = new Comment[] { comment };
+        Comment[] comments = new Comment[]{comment};
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         Mockito.when(apiMgtDAO.getComments(identifier, null)).thenReturn(comments);
         Assert.assertEquals(new APIConsumerImplWrapper(apiMgtDAO).getComments(identifier, null).length, 1);
@@ -1167,7 +1160,7 @@ public class APIConsumerImplTest {
     @Test
     public void testAddSubscription() throws APIManagementException {
         ApiTypeWrapper apiTypeWrapper = Mockito.mock(ApiTypeWrapper.class);
-        API api  = Mockito.mock(API.class);
+        API api = Mockito.mock(API.class);
         Mockito.when(apiTypeWrapper.getApi()).thenReturn(api);
         Mockito.when(api.getStatus()).thenReturn(APIConstants.PUBLISHED);
         Mockito.when(api.getId()).thenReturn(new APIIdentifier(API_PROVIDER, "published_api",
@@ -1180,7 +1173,7 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
         Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, "sub1", 1).getSubscriptionUUID()
-                ,"api1");
+                , "api1");
         try {
             Mockito.when(api.getStatus()).thenReturn(APIConstants.CREATED);
             apiConsumer.addSubscription(apiTypeWrapper, "sub1", 1);
@@ -1233,7 +1226,7 @@ public class APIConsumerImplTest {
                 .createOauthAppRequest(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString(), Mockito.anyString())).thenReturn(oAuthAppRequest);
-        Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString(),Mockito.anyString())).thenReturn(true, false);
+        Mockito.when(apiMgtDAO.isMappingExistsforConsumerKey(Mockito.anyString(), Mockito.anyString())).thenReturn(true, false);
         Mockito.when(keyManager.mapOAuthApplication((OAuthAppRequest) Mockito.any())).thenReturn(oAuthApplicationInfo);
         Mockito.doNothing().when(apiMgtDAO).createApplicationKeyTypeMappingForManualClients(Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
@@ -1241,14 +1234,14 @@ public class APIConsumerImplTest {
         KeyManagerConfigurationDTO keyManagerConfigurationsDto = new KeyManagerConfigurationDTO();
         keyManagerConfigurationsDto.setUuid(UUID.randomUUID().toString());
         keyManagerConfigurationsDto.setEnabled(true);
-        Mockito.when(apiMgtDAO.isKeyManagerConfigurationExistByName( "default","carbon.super"))
+        Mockito.when(apiMgtDAO.isKeyManagerConfigurationExistByName("default", "carbon.super"))
                 .thenReturn(true);
         Mockito.when(apiMgtDAO.getKeyManagerConfigurationByName("carbon.super", "default")).thenReturn(keyManagerConfigurationsDto);
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
         Mockito.when(keyManager.getKeyManagerConfiguration()).thenReturn(keyManagerConfiguration);
-        BDDMockito.when(ApplicationUtils.createAccessTokenRequest(keyManager,oAuthApplicationInfo, null)).thenReturn
+        BDDMockito.when(ApplicationUtils.createAccessTokenRequest(keyManager, oAuthApplicationInfo, null)).thenReturn
                 (accessTokenRequest);
         Mockito.when(keyManager.getNewApplicationAccessToken(accessTokenRequest)).thenReturn(accessTokenInfo);
         try {
@@ -1270,7 +1263,7 @@ public class APIConsumerImplTest {
         new APIConsumerImplWrapper(apiMgtDAO).cleanUpApplicationRegistration("app1", "access",
                 "2", API_PROVIDER);
         Mockito.verify(apiMgtDAO, Mockito.times(1))
-                .deleteApplicationRegistration(Mockito.anyInt(), Mockito.anyString(),Mockito.anyString());
+                .deleteApplicationRegistration(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -1291,7 +1284,7 @@ public class APIConsumerImplTest {
                 .thenReturn(APIConstants.PUBLISHED);
         GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
         GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
-        GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{genericArtifact1, genericArtifact2};
         Mockito.when(genericArtifactManager.findGenericArtifacts((Map<String, List<String>>) Mockito.any()))
                 .thenThrow(GovernanceException.class).thenReturn(genericArtifacts);
         PowerMockito.mockStatic(GovernanceUtils.class);
@@ -1342,7 +1335,7 @@ public class APIConsumerImplTest {
                 .thenReturn(APIConstants.PUBLISHED);
         GenericArtifact genericArtifact1 = new GenericArtifactImpl(new QName("local"), "artifact1");
         GenericArtifact genericArtifact2 = new GenericArtifactImpl(new QName("local"), "artifact2");
-        GenericArtifact[] genericArtifacts = new GenericArtifact[] { genericArtifact1, genericArtifact2 };
+        GenericArtifact[] genericArtifacts = new GenericArtifact[]{genericArtifact1, genericArtifact2};
         Mockito.when(genericArtifactManager.findGenericArtifacts((Map<String, List<String>>) Mockito.any()))
                 .thenReturn(genericArtifacts);
         PowerMockito.mockStatic(GovernanceUtils.class);
@@ -1352,7 +1345,7 @@ public class APIConsumerImplTest {
         association.setDestinationPath("/destPath1");
         Association association2 = new Association();
         association2.setDestinationPath("/destPath2");
-        Association[] associations = new Association[] { association, association2 };
+        Association[] associations = new Association[]{association, association2};
         Mockito.when(userRegistry.getAssociations(Mockito.anyString(), Mockito.anyString()))
                 .thenThrow(RegistryException.class).thenReturn(associations);
         try {
@@ -1433,21 +1426,21 @@ public class APIConsumerImplTest {
         apiKey2.setType(APIConstants.API_KEY_TYPE_SANDBOX);
         apiKey2.setState(UUID.randomUUID().toString());
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
-        Map<String,String> consumerKeyMap = new HashMap<>();
-        consumerKeyMap.put("default",apiKey1.getConsumerKey());
+        Map<String, String> consumerKeyMap = new HashMap<>();
+        consumerKeyMap.put("default", apiKey1.getConsumerKey());
         Set<APIKey> apiKeys = new HashSet<>();
         apiKeys.add(apiKey1);
         apiKeys.add(apiKey2);
         Mockito.when(apiMgtDAO.getKeyMappingsFromApplicationId(Mockito.anyInt())).thenReturn(apiKeys);
         Mockito.when(apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(Mockito.anyInt(), Mockito.anyString()))
-                .thenReturn(consumerKeyMap,consumerKeyMap);
+                .thenReturn(consumerKeyMap, consumerKeyMap);
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setAccessToken(UUID.randomUUID().toString());
         Mockito.when(keyManager.getAccessTokenByConsumerKey(Mockito.anyString())).thenReturn(accessTokenInfo);
 
         Mockito.when(keyManagerConfigurationDTO.isEnabled()).thenReturn(true);
         assertNotNull(apiConsumer.getApplicationKeys(1));
-        assertEquals(apiConsumer.getApplicationKeys(1).size(),2);
+        assertEquals(apiConsumer.getApplicationKeys(1).size(), 2);
         assertNotNull(apiConsumer.getApplicationKeys(1).iterator().next().getAccessToken());
     }
 }
