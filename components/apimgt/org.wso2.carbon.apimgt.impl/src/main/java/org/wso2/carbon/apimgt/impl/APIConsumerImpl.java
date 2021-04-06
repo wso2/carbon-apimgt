@@ -3209,7 +3209,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void removeSubscription(Identifier identifier, String userId, int applicationId)
+    public void removeSubscription(Identifier identifier, String userId, int applicationId, String organizationId)
             throws APIManagementException {
 
         boolean isTenantFlowStarted = false;
@@ -3221,20 +3221,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (identifier instanceof APIProductIdentifier) {
             apiProdIdentifier = (APIProductIdentifier) identifier;
         }
-        String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
-                replaceEmailDomainBack(identifier.getProviderName()));
-
         String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
         try {
-            if (providerTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                    .equals(providerTenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(providerTenantDomain, true);
-                isTenantFlowStarted = true;
-            }
-
-
             SubscriptionWorkflowDTO workflowDTO;
             WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
@@ -3257,11 +3246,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String context = null;
             ApiTypeWrapper wrapper;
             if (apiIdentifier != null) {
-                wrapper = getAPIorAPIProductByUUID(apiIdentifier.getUUID(), providerTenantDomain);
+                wrapper = getAPIorAPIProductByUUID(apiIdentifier.getUUID(), organizationId);
                 api = wrapper.getApi();
                 context = api.getContext();
             } else if (apiProdIdentifier != null) {
-                wrapper = getAPIorAPIProductByUUID(apiProdIdentifier.getUUID(), providerTenantDomain);
+                wrapper = getAPIorAPIProductByUUID(apiProdIdentifier.getUUID(), organizationId);
                 product = wrapper.getApiProduct();
                 context = product.getContext();
             }
@@ -3343,10 +3332,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION
                     + " for resource " + identifier.toString();
             handleException(errorMsg, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
         }
 
 
@@ -3358,7 +3343,8 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId) throws
+    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
+                                   String organizationId) throws
             APIManagementException {
         //check application is viewable to logged user
         boolean isValid = validateApplication(userId, applicationId, groupId);
@@ -3366,7 +3352,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.error("Application " + applicationId + " is not accessible to user " + userId);
             throw new APIManagementException("Application is not accessible to user " + userId);
         }
-        removeSubscription(identifier, userId, applicationId);
+        removeSubscription(identifier, userId, applicationId, organizationId);
     }
 
     /**
@@ -3376,7 +3362,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     @Override
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
+    public void removeSubscription(SubscribedAPI subscription, String organizationId) throws APIManagementException {
         String uuid = subscription.getUUID();
         SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionByUUID(uuid);
         if (subscribedAPI != null) {
@@ -3384,7 +3370,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Identifier identifier = subscribedAPI.getApiId() != null ? subscribedAPI.getApiId()
                     : subscribedAPI.getProductId();
             String userId = application.getSubscriber().getName();
-            removeSubscription(identifier, userId, application.getId());
+            removeSubscription(identifier, userId, application.getId(), organizationId);
             if (log.isDebugEnabled()) {
                 String appName = application.getName();
                 String logMessage = "Identifier:  " + identifier.toString() + " subscription (uuid : " + uuid

@@ -264,7 +264,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
      * @return newly added subscription as a SubscriptionDTO if successful
      */
     @Override
-    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body,  String organizationId,
+    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String organizationId,
                                                    String xWSO2Tenant, MessageContext messageContext) {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer;
@@ -512,7 +512,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
 
-            apiConsumer.removeSubscription(subscribedAPI);
+            apiConsumer.removeSubscription(subscribedAPI, organizationId);
             return Response.ok().build();
         } catch (APIManagementException e) {
             RestApiUtil
