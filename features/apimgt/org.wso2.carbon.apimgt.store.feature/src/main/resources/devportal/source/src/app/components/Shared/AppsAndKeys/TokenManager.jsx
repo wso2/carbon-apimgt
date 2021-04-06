@@ -192,6 +192,7 @@ class TokenManager extends React.Component {
             keys: null,
             isKeyJWT: false,
             hasError: false,
+            initialToken: '',
             keyRequest: {
                 keyType,
                 selectedGrantTypes: null,
@@ -406,7 +407,8 @@ class TokenManager extends React.Component {
                 // This is to mimic the behavior of JWT tokens (by showing the token in a dialog)
                 const isKeyJWT = (tokenType === 'JWT') || hashEnabled;
                 newKeys.set(selectedTab, response);
-                this.setState({ keys: newKeys, isKeyJWT });
+                const initialToken = response.token ? response.token.accessToken : '';
+                this.setState({ keys: newKeys, isKeyJWT, initialToken });
                 if (response.keyState === this.keyStates.CREATED || response.keyState === this.keyStates.REJECTED) {
                     Alert.info(intl.formatMessage({
                         id: 'Shared.AppsAndKeys.TokenManager.key.generate.success.blocked',
@@ -620,7 +622,7 @@ class TokenManager extends React.Component {
         } = this.props;
         const {
             keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
-            providedConsumerSecret, selectedTab, keyManagers, validating, hasError,
+            providedConsumerSecret, selectedTab, keyManagers, validating, hasError, initialToken,
         } = this.state;
         if (keyManagers && keyManagers.length === 0) {
             return (
@@ -759,6 +761,7 @@ class TokenManager extends React.Component {
                             </Box>
                             <Box m={2}>
                                 <ViewKeys
+                                    initialToken={initialToken}
                                     selectedApp={selectedApp}
                                     selectedTab={selectedTab}
                                     keyType={keyType}
