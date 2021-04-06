@@ -176,6 +176,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add an API Comment", notes = "", response = CommentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "Comments",  })
@@ -204,8 +205,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response apisApiIdAsyncapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.apisApiIdAsyncapiGet(apiId, ifNoneMatch, securityContext);
+    public Response apisApiIdAsyncapiGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.apisApiIdAsyncapiGet(apiId, organizationId, ifNoneMatch, securityContext);
     }
 
     @PUT
@@ -223,8 +224,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response apisApiIdAsyncapiPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "apiDefinition", required = false)  String apiDefinition, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
-        return delegate.apisApiIdAsyncapiPut(apiId, ifMatch, apiDefinition, url, fileInputStream, fileDetail, securityContext);
+    public Response apisApiIdAsyncapiPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "The Organization which the API belongs to. ")  @QueryParam("organizationId") String organizationId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "apiDefinition", required = false)  String apiDefinition, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
+        return delegate.apisApiIdAsyncapiPut(apiId, organizationId, ifMatch, apiDefinition, url, fileInputStream, fileDetail, securityContext);
     }
 
     @POST
@@ -1176,7 +1177,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Import an API", notes = "This operation can be used to import an API. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations"),
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations")
         })
     }, tags={ "Import Export",  })
     @ApiResponses(value = { 

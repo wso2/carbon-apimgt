@@ -65,6 +65,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String webSocketInboundEp = "WebSocketInboundEndpoint";
     private String securedWebSocketInboundEp = "SecureWebSocketInboundEndpoint";
     private String webHookServerHTTP = "WebhookServer";
+    private String webHookServerHTTPS = "SecureWebhookServer";
     private String webHookFaultSequenceName = "webhooksFaultSequence";
     private String webSocketOutDispatchSeq = "outDispatchSeq";
     private String webSocketDispatchSeq = "dispatchSeq";
@@ -276,6 +277,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 copyArtifact(webSocketInboundEp, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
                 copyArtifact(securedWebSocketInboundEp, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
                 copyArtifact(webHookServerHTTP, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
+                copyArtifact(webHookServerHTTPS, MultiXMLConfigurationBuilder.INBOUND_ENDPOINT_DIR);
             } catch (IOException e) {
                 log.error("Error while copying API manager specific synapse sequences" + e);
             }

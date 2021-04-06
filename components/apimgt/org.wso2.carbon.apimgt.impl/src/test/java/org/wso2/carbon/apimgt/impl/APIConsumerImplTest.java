@@ -64,6 +64,10 @@ import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
+import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -109,6 +113,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
@@ -118,7 +123,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
         KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
-        ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class})
+        ServiceReferenceHolder.class, MultitenantUtils.class, RegistryUtils.class, Caching.class, APIPersistence.class})
 @SuppressStaticInitializationFor( {"org.wso2.carbon.apimgt.impl.utils.ApplicationUtils"})
 public class APIConsumerImplTest {
 
@@ -140,6 +145,7 @@ public class APIConsumerImplTest {
     private static final String SAMPLE_API_VERSION = "1.0.0";
     private RegistryService registryService;
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
+    private APIPersistence apiPersistenceInstance;
 
     @Before
     public void init() throws UserStoreException, RegistryException, APIManagementException {
@@ -157,6 +163,7 @@ public class APIConsumerImplTest {
         authorizationManager = Mockito.mock(AuthorizationManager.class);
         authorizationManager = Mockito.mock(AuthorizationManager.class);
         keyManagerConfigurationDTO = Mockito.mock(KeyManagerConfigurationDTO.class);
+        apiPersistenceInstance = Mockito.mock(APIPersistence.class);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(ApplicationUtils.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
@@ -974,8 +981,9 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new UserAwareAPIConsumerWrapper(userRegistry, apiMgtDAO);
         Mockito.when(userRegistry.getUserRealm()).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
-        Mockito.when(userStoreManager.getRoleListOfUser(Mockito.anyString())).thenThrow(UserStoreException.class).
-                thenReturn(new String[] { "role1", "role2" });
+        String[] currentUserRoles = {"role1", "role2"};
+        PowerMockito.when(APIUtil.getListOfRoles(Mockito.anyString())).thenReturn(currentUserRoles);
+
         Assert.assertEquals(apiConsumer.getDeniedTiers().size(), 0);
         TierPermissionDTO tierPermissionDTO = new TierPermissionDTO();
         TierPermissionDTO tierPermissionDTO1 = new TierPermissionDTO();
@@ -1061,13 +1069,13 @@ public class APIConsumerImplTest {
         Map<String, Object> result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_PRODUCTION,
                         "identity.com/auth", null, "3600", "api_view", "2", null, "default", null);
-        Assert.assertEquals(result.size(), 9);
+        Assert.assertEquals(result.size(),10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
         result = apiConsumer
                 .requestApprovalForApplicationRegistration("1", "app1", APIConstants.API_KEY_TYPE_SANDBOX, "", null,
                         "3600", "api_view", "2", null, "default", null);
-        Assert.assertEquals(result.size(), 9);
+        Assert.assertEquals(result.size(), 10);
         Assert.assertEquals(result.get("keyState"), "APPROVED");
 
     }
@@ -1120,19 +1128,24 @@ public class APIConsumerImplTest {
     }
 
     @Test
-    public void testRemoveSubscription() throws APIManagementException, WorkflowException {
+    public void testRemoveSubscription() throws APIManagementException, WorkflowException, APIPersistenceException {
         String uuid = UUID.randomUUID().toString();
+        String apiUUID = UUID.randomUUID().toString();
         Subscriber subscriber = new Subscriber("sub1");
         Application application = new Application("app1", subscriber);
         application.setId(1);
         APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
+        identifier.setUuid(apiUUID);
         SubscribedAPI subscribedAPIOld = new SubscribedAPI(subscriber, identifier);
         subscribedAPIOld.setApplication(application);
         Mockito.when(apiMgtDAO.getSubscriptionByUUID(uuid)).thenReturn(null, subscribedAPIOld);
         Mockito.when(apiMgtDAO.isAppAllowed(Mockito.anyInt(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(true);
+        DevPortalAPI devPortalAPI = Mockito.mock(DevPortalAPI.class);
+        Mockito.when(apiPersistenceInstance.getDevPortalAPI(any(Organization.class), any(String.class)))
+                .thenReturn(devPortalAPI);
         SubscribedAPI subscribedAPINew = new SubscribedAPI(uuid);
-        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
         try {
             apiConsumer.removeSubscription(subscribedAPINew);
             Assert.fail("API manager exception not thrown when subscription does not exist with UUID");
@@ -1263,7 +1276,7 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
-        Assert.assertEquals(7, apiConsumer.mapExistingOAuthClient("", "admin", "1",
+        Assert.assertEquals(8, apiConsumer.mapExistingOAuthClient("", "admin", "1",
                 "app1", "refresh", "DEFAULT", "default", "carbon.super").size());
     }
 

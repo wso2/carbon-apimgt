@@ -170,6 +170,8 @@
         <!-- Enable Analytics for API Manager -->
         <Enabled>false</Enabled>
 
+        <AuthToken></AuthToken>
+
         <!-- Event publisher implementation -->
         <!-- <ReporterClass></ReporterClass> -->
 

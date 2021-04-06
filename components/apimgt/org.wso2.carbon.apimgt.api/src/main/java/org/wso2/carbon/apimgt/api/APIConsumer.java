@@ -590,7 +590,7 @@ public interface APIConsumer extends APIManager {
      * @return
      * @throws APIManagementException
      */
-    Application[] getApplicationsByOwner(String userId) throws APIManagementException;
+    Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException;
 
     /**
      * Updates the application owner of a given application

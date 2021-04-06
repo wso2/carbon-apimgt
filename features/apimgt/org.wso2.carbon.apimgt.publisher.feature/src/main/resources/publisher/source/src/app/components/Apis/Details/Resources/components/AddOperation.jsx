@@ -99,7 +99,13 @@ function VerbElement(props) {
     }
 }
 
-const SUPPORTED_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+const SUPPORTED_VERBS = {
+    REST: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+    WEBSUB: ['SUB'],
+    SSE: ['SUB'],
+    WS: ['PUB', 'SUB'],
+};
+
 /**
  *
  *
@@ -108,10 +114,14 @@ const SUPPORTED_VERBS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIO
  * @returns
  */
 function AddOperation(props) {
-    const { operationsDispatcher } = props;
+    const { operationsDispatcher, isAsyncAPI, api } = props;
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
     const intl = useIntl();
+
+    function getSupporteVerbs() {
+        return isAsyncAPI ? SUPPORTED_VERBS[api.type] : SUPPORTED_VERBS.REST;
+    }
 
     /**
      *
@@ -156,6 +166,13 @@ function AddOperation(props) {
             APIValidation.operationTarget.validate(newOperations.target).error !== null
             || APIValidation.operationVerbs.validate(newOperations.verbs).error !== null
         ) {
+            if (isAsyncAPI) {
+                Alert.warning(intl.formatMessage({
+                    id: 'Apis.Details.Topics.components.AddOperation.operation.topic.or.type.cannot.be.empty.warning',
+                    defaultMessage: "Topic name or topic type(s) can't be empty",
+                }));
+                return;
+            }
             Alert.warning(intl.formatMessage({
                 id: 'Apis.Details.Resources.components.AddOperation.operation.target.or.verb.cannot.be.empty.warning',
                 defaultMessage: "Operation target or operation verb(s) can't be empty",
@@ -171,10 +188,18 @@ function AddOperation(props) {
                 <Grid item md={5} xs={12}>
                     <FormControl margin='dense' variant='outlined' className={classes.formControl}>
                         <InputLabel ref={inputLabel} htmlFor='outlined-age-simple'>
-                            <FormattedMessage
-                                id='Apis.Details.Resources.components.AddOperation.http.verb'
-                                defaultMessage='HTTP Verb'
-                            />
+                            {isAsyncAPI && (
+                                <FormattedMessage
+                                    id='Apis.Details.Topics.components.AddOperation.op.type'
+                                    defaultMessage='Type'
+                                />
+                            )}
+                            {!isAsyncAPI && (
+                                <FormattedMessage
+                                    id='Apis.Details.Resources.components.AddOperation.http.verb'
+                                    defaultMessage='HTTP Verb'
+                                />
+                            )}
                         </InputLabel>
 
                         <Select
@@ -188,7 +213,7 @@ function AddOperation(props) {
                                     remaining.push(verb.toUpperCase());
                                     return null;
                                 });
-                                const allSelected = verbs.length === SUPPORTED_VERBS.length;
+                                const allSelected = getSupporteVerbs().length;
                                 return (
                                     <>
                                         {verbElements}
@@ -217,7 +242,7 @@ function AddOperation(props) {
                                 },
                             }}
                         >
-                            {SUPPORTED_VERBS.map((verb) => (
+                            {getSupporteVerbs().map((verb) => (
                                 <VerbElement
                                     checked={newOperations.verbs.includes(verb.toLowerCase())}
                                     value={verb.toLowerCase()}
@@ -251,7 +276,7 @@ function AddOperation(props) {
                 <Grid item md={5} xs={8}>
                     <TextField
                         id='operation-target'
-                        label='URI Pattern'
+                        label={isAsyncAPI ? 'Topic Name' : 'URI Pattern'}
                         error={Boolean(newOperations.error)}
                         autoFocus
                         name='target'
@@ -259,8 +284,8 @@ function AddOperation(props) {
                         onChange={({ target: { name, value } }) => newOperationsDispatcher(
                             { type: name, value: value.startsWith('/') ? value : `/${value}` },
                         )}
-                        placeholder='Enter URI pattern'
-                        helperText={newOperations.error || 'Enter URI pattern'}
+                        placeholder={isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern'}
+                        helperText={newOperations.error || (isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern')}
                         fullWidth
                         margin='dense'
                         variant='outlined'

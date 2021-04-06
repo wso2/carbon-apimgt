@@ -31,20 +31,20 @@ import Application from 'AppData/Application';
 import { Link } from 'react-router-dom';
 import AuthManager from 'AppData/AuthManager';
 import Progress from 'AppComponents/Shared/Progress';
-import ApplicationCreateBase from './Create/ApplicationCreateBase';
 import { withStyles } from '@material-ui/core/styles';
+import ApplicationCreateBase from './Create/ApplicationCreateBase';
 
 /**
  * Main style object
  *
  * @param {*} theme
  */
-const styles = theme => ({
+const styles = (theme) => ({
     button: {
         '& span': {
             color: theme.palette.getContrastText(theme.palette.primary.main),
-        }
-    }
+        },
+    },
 });
 
 /**
@@ -54,8 +54,6 @@ const styles = theme => ({
  * @param {any} value @inheritDoc
  */
 class ApplicationFormHandler extends React.Component {
-    static contextType = Settings;
-
     /**
      * @param {*} props properties
      */
@@ -71,7 +69,6 @@ class ApplicationFormHandler extends React.Component {
                 attributes: {},
             },
             isNameValid: true,
-            isDescriptionValid: true,
             throttlingPolicyList: [],
             allAppAttributes: null,
             isApplicationSharingEnabled: true,
@@ -81,7 +78,7 @@ class ApplicationFormHandler extends React.Component {
         this.handleDeleteChip = this.handleDeleteChip.bind(this);
         const { match: { params } } = this.props;
 
-        this.backLink = props.location.pathname.indexOf('/fromView') === -1 ? '/applications/' : `/applications/${params.application_id}/`
+        this.backLink = props.location.pathname.indexOf('/fromView') === -1 ? '/applications/' : `/applications/${params.application_id}/`;
     }
 
     /**
@@ -353,13 +350,11 @@ class ApplicationFormHandler extends React.Component {
     validateDescription = (value) => {
         const { intl } = this.props;
         if (value && value.length !== '' && value.length > 512) {
-            this.setState({ isDescriptionValid: false });
             return Promise.reject(new Error(intl.formatMessage({
                 id: 'Applications.Create.ApplicationFormHandler.app.desc.long',
                 defaultMessage: 'Exceeds maximum length limit of 512 characters',
             })));
         }
-        this.setState({ isDescriptionValid: true });
         return Promise.resolve(true);
     };
 
@@ -409,14 +404,14 @@ class ApplicationFormHandler extends React.Component {
      */
     render() {
         const {
-            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled, isDescriptionValid,
+            throttlingPolicyList, applicationRequest, isNameValid, allAppAttributes, isApplicationSharingEnabled,
             isEdit, applicationOwner,
         } = this.state;
         const { match: { params }, classes } = this.props;
 
         const CreatePageTitle = (
             <>
-                <Typography variant='h5'>
+                <Typography variant='h5' component='h1'>
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.create.application.heading'
                         defaultMessage='Create an application'
@@ -434,16 +429,14 @@ class ApplicationFormHandler extends React.Component {
                 <Typography variant='caption' component='div'>
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.create.application.sub.heading.required'
-                        defaultMessage={
-                            'Required fields are marked with an asterisk ( * )'
-                        }
+                        defaultMessage='Required fields are marked with an asterisk ( * )'
                     />
                 </Typography>
             </>
         );
         const EditPageTitle = (
             <>
-                <Typography variant='h5'>
+                <Typography variant='h5' component='h1'>
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.edit.application.heading'
                         defaultMessage='Edit application'
@@ -461,9 +454,7 @@ class ApplicationFormHandler extends React.Component {
                 <Typography variant='caption' Component='div'>
                     <FormattedMessage
                         id='Applications.Create.ApplicationFormHandler.create.application.sub.heading.required'
-                        defaultMessage={
-                            'Required fields are marked with an asterisk ( * )'
-                        }
+                        defaultMessage='Required fields are marked with an asterisk ( * )'
                     />
                 </Typography>
             </>
@@ -525,6 +516,7 @@ class ApplicationFormHandler extends React.Component {
         );
     }
 }
+ApplicationFormHandler.contextType = Settings;
 ApplicationFormHandler.defaultProps = {
     match: {
         params: {
@@ -543,7 +535,7 @@ ApplicationFormHandler.propTypes = {
         params: PropTypes.shape({
             application_id: PropTypes.string,
         }).isRequired,
-    }).isRequired,
+    }),
 };
 
 export default injectIntl(withStyles(styles)(ApplicationFormHandler));

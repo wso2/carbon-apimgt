@@ -126,6 +126,7 @@ function GenericResource(props) {
                                     variant='contained'
                                     color='primary'
                                     onClick={() => {
+                                        setShowReset(false);
                                         setMockValueDetails({ resourcePath, resourceMethod });
                                         onChange(originalScript, resourcePath, resourceMethod);
                                     }}

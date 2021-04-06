@@ -49,8 +49,8 @@ public class SQLConstants {
 
     public static final String ADD_APPLICATION_KEY_MAPPING_SQL =
             " INSERT INTO " +
-            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE,KEY_MANAGER,UUID) " +
-            " VALUES(?,?,?,?,?)";
+            "   AM_APPLICATION_KEY_MAPPING (APPLICATION_ID,KEY_TYPE,STATE,KEY_MANAGER,UUID,CREATE_MODE) " +
+            " VALUES(?,?,?,?,?,?)";
 
     public static final String GET_SUBSCRIBED_APIS_OF_USER_SQL =
             " SELECT " +
@@ -1059,7 +1059,7 @@ public class SQLConstants {
             "   SUB.TENANT_ID=?" +
             " And "+
             "    ( SUB.CREATED_BY like ?" +
-            " OR APP.NAME like ? )";
+            " AND APP.NAME like ? )";
 
     public static final String GET_APPLICATION_BY_SUBSCRIBERID_AND_NAME_SQL =
             " SELECT " +
@@ -1108,7 +1108,8 @@ public class SQLConstants {
             " FROM" +
             "   AM_APPLICATION " +
             " WHERE " +
-            "   CREATED_BY = ? ";
+            "   CREATED_BY = ?" +
+            "   LIMIT ?, ? ";
 
     public static final String UPDATE_APPLICATION_OWNER =
             "UPDATE AM_APPLICATION " +
@@ -2726,7 +2727,7 @@ public class SQLConstants {
             "SELECT CONSUMER_KEY FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ? AND KEY_TYPE = ? AND " +
                     "KEY_MANAGER = ?";
     public static final String GET_KEY_MAPPING_INFO_FROM_APP_ID = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE," +
-            "STATE,APP_INFO FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
+            "STATE,APP_INFO,CREATE_MODE FROM AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID = ?";
 
     public static final String ADD_GW_PUBLISHED_API_DETAILS = "INSERT INTO AM_GW_PUBLISHED_API_DETAILS (API_ID, " +
             "API_NAME, API_VERSION, TENANT_DOMAIN,API_TYPE) VALUES (?,?,?,?,?)";
@@ -2761,7 +2762,7 @@ public class SQLConstants {
     public static final String CHECK_ARTIFACT_EXISTS = "SELECT 1 FROM AM_GW_API_ARTIFACTS" +
             " WHERE API_ID = ? AND REVISION_ID = ?";
     public static final String ADD_GW_PUBLISHED_LABELS = "INSERT INTO AM_GW_API_DEPLOYMENTS (API_ID,REVISION_ID," +
-            "LABEL) VALUES (?,?,?)";
+            "LABEL,VHOST) VALUES (?,?,?,?)";
     public static final String DELETE_GW_PUBLISHED_LABELS = "DELETE FROM AM_GW_API_DEPLOYMENTS WHERE API_ID = ? AND " +
             "REVISION_ID = ?";
     public static final String DELETE_GW_PUBLISHED_LABELS_BY_API_ID_REVISION_ID_DEPLOYMENT = "DELETE FROM " +
@@ -2781,7 +2782,7 @@ public class SQLConstants {
                     ".API_PROVIDER AS API_PROVIDER," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
-                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL,AM_GW_API_DEPLOYMENTS.VHOST AS VHOST " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_API_DEPLOYMENTS.API_ID= ? AND AM_GW_API_DEPLOYMENTS.LABEL IN (_GATEWAY_LABELS_) AND " +
@@ -2796,7 +2797,7 @@ public class SQLConstants {
                     ".API_PROVIDER AS API_PROVIDER," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS API_VERSION," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
-                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL,AM_GW_API_DEPLOYMENTS.VHOST AS VHOST " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_API_DEPLOYMENTS.LABEL IN (_GATEWAY_LABELS_) AND AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN " +
@@ -2810,7 +2811,7 @@ public class SQLConstants {
                     "API_PROVIDER,AM_GW_PUBLISHED_API_DETAILS.API_NAME AS API_NAME,AM_GW_PUBLISHED_API_DETAILS.API_VERSION AS " +
                     "API_VERSION," +
                     "AM_GW_PUBLISHED_API_DETAILS.API_TYPE AS API_TYPE,AM_GW_API_ARTIFACTS.ARTIFACT AS ARTIFACT," +
-                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL " +
+                    "AM_GW_API_DEPLOYMENTS.LABEL AS LABEL,AM_GW_API_DEPLOYMENTS.VHOST AS VHOST " +
                     "FROM " +
                     "AM_GW_PUBLISHED_API_DETAILS,AM_GW_API_ARTIFACTS,AM_GW_API_DEPLOYMENTS WHERE " +
                     "AM_GW_PUBLISHED_API_DETAILS.API_ID=AM_GW_API_DEPLOYMENTS.API_ID AND " +
@@ -2821,6 +2822,16 @@ public class SQLConstants {
     public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
             "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
+    public static final String UPDATE_REVISION_CREATED_BY_API_SQL = "UPDATE AM_API SET REVISIONS_CREATED = ? WHERE " +
+            "API_UUID = ?";
+    public static final String ADD_API_REVISION_METADATA = "INSERT INTO AM_API_REVISION_METADATA (API_UUID," +
+            "REVISION_UUID,API_TIER) VALUES(?,?,(SELECT API_TIER FROM AM_API WHERE API_UUID = ? ))";
+    public static final String DELETE_API_REVISION_METADATA = "DELETE FROM AM_API_REVISION_METADATA WHERE API_UUID = " +
+            "? AND REVISION_UUID = ?";
+    public static final String GET_REVISIONED_API_TIER_SQL = "SELECT API_TIER FROM AM_API_REVISION_METADATA WHERE " +
+            "API_UUID = ? AND REVISION_UUID = ?";
+    public static final String RESTORE_API_REVISION_METADATA = "UPDATE AM_API SET API_TIER = (SELECT API_TIER FROM " +
+            "AM_API_REVISION_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?) WHERE API_UUID = ?";
 
     /** Throttle related constants**/
 
@@ -3367,7 +3378,8 @@ public class SQLConstants {
         public static final String DELETE_API_REVISION =
                 "DELETE FROM AM_REVISION WHERE REVISION_UUID = ?";
         public static final String GET_REVISION_COUNT_BY_API_UUID = "SELECT COUNT(ID) FROM AM_REVISION WHERE API_UUID = ?";
-        public static final String GET_MOST_RECENT_REVISION_ID = "SELECT MAX(ID) FROM AM_REVISION WHERE API_UUID = ?";
+        public static final String GET_MOST_RECENT_REVISION_ID = "SELECT REVISIONS_CREATED FROM AM_API WHERE API_UUID" +
+                " = ?";
         public static final String GET_REVISION_BY_REVISION_UUID = "SELECT * FROM AM_REVISION WHERE REVISION_UUID = ?";
         public static final String GET_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
                 "AND ID = ?";

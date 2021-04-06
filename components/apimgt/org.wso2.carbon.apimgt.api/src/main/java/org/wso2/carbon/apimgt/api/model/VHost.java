@@ -107,11 +107,11 @@ public class VHost {
     }
 
     public String getWsUrl() {
-        return getUrl("ws", wsPort == DEFAULT_WS_PORT ? "" : ":" + wsPort, "");
+        return getUrl("ws", wsPort == DEFAULT_HTTP_PORT ? ""  : ":" + wsPort, "");
     }
 
     public String getWssUrl() {
-        return getUrl("wss", wssPort == DEFAULT_WSS_PORT ? "" : ":" + wssPort, "");
+        return getUrl("wss", wssPort == DEFAULT_HTTPS_PORT ? "" : ":" + wssPort, "");
     }
 
     private String getUrl(String protocol, String port, String context) {

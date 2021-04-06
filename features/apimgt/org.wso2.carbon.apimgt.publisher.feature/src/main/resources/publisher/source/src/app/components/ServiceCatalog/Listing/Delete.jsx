@@ -22,6 +22,8 @@ import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
+import DeleteIcon from '@material-ui/icons/Delete';
+import IconButton from '@material-ui/core/IconButton';
 
 /**
 * Service Catalog service delete
@@ -30,10 +32,14 @@ import ConfirmDialog from 'AppComponents/Shared/ConfirmDialog';
 */
 function Delete(props) {
     const [open, setOpen] = useState(false);
-    const toggleOpen = () => {
+    const toggleOpen = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         setOpen(!open);
     };
-    const { serviceDisplayName, serviceId, onDelete } = props;
+    const {
+        serviceDisplayName, serviceId, onDelete, isIconButton, id,
+    } = props;
 
     const runAction = (confirm) => {
         if (confirm) {
@@ -44,9 +50,21 @@ function Delete(props) {
 
     return (
         <>
-            <Button onClick={toggleOpen}>
-                <Icon>delete_forever</Icon>
-            </Button>
+            {isIconButton ? (
+                <IconButton
+                    id={id}
+                    disableRipple
+                    disableFocusRipple
+                    aria-label={`Delete ${serviceDisplayName}`}
+                    onClick={toggleOpen}
+                >
+                    <DeleteIcon />
+                </IconButton>
+            ) : (
+                <Button id={id} onClick={toggleOpen}>
+                    <Icon>delete_forever</Icon>
+                </Button>
+            )}
             <ConfirmDialog
                 key='key-dialog'
                 labelCancel={(
@@ -74,6 +92,7 @@ function Delete(props) {
                         defaultMessage='Yes'
                     />
                 )}
+                idOk='itest-service-card-delete-confirm'
                 callback={runAction}
                 open={open}
             />

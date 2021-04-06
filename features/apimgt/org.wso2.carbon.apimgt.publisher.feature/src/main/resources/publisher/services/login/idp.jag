@@ -44,7 +44,7 @@
     var serviceCatalogSettingsResponse = get(serviceCatalogSettingsAPIUrl, {}, "json");
 
     var responseFailed = false;
-    var erroLogin = serverUrl + app.context +"/error-pages?code="
+    var errorLogin = serverUrl + app.context +"/error-pages?code="
 
     var dcrUrl = appUtils.getLoopbackOrigin() + DCR_URL_SUFFIX;
     var loginCallbackUrl = appUtils.getTenantBasedLoginCallBack();
@@ -65,7 +65,7 @@
          var catalogScopes = "service_catalog:service_view service_catalog:service_write";
          scopes = scopes + " " + catalogScopes;
     } else {
-        response.sendRedirect(erroLogin + "500");
+        response.sendRedirect(errorLogin + "500");
         responseFailed = true;
     }
 

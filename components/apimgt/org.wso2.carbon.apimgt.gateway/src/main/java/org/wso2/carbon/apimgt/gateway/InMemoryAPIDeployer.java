@@ -26,12 +26,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.transport.dynamicconfigurations.DynamicProfileReloaderHolder;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
@@ -154,7 +154,9 @@ public class InMemoryAPIDeployer {
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
                         }
                     }
-
+                    // reload dynamic profiles to avoid delays in loading certs in mutual ssl enabled APIs upon
+                    // server restart
+                    DynamicProfileReloaderHolder.getInstance().reloadAllHandlers();
                     if (debugEnabled) {
                         log.debug("APIs deployed in gateway with the labels of " + labelString);
                     }
@@ -283,8 +285,14 @@ public class InMemoryAPIDeployer {
                                         .addStringToList(gatewayEvent.getUuid().concat(
                                                 "_graphQL"), gatewayAPIDTO.getLocalEntriesToBeRemove()));
                     }
-                    GatewayUtils.setEndpointsToBeRemoved(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion(),
-                            gatewayAPIDTO);
+                    if (APIConstants.APITransportType.WS.toString().equalsIgnoreCase(gatewayEvent.getApiType())) {
+                        org.wso2.carbon.apimgt.gateway.utils.GatewayUtils.setWebsocketEndpointsToBeRemoved(
+                                gatewayAPIDTO, gatewayEvent.getTenantDomain());
+                    } else {
+                        GatewayUtils.setEndpointsToBeRemoved(gatewayAPIDTO.getName(), gatewayAPIDTO.getVersion(),
+                                gatewayAPIDTO);
+                    }
+
                     GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
                 }
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
@@ -299,6 +307,7 @@ public class InMemoryAPIDeployer {
             MessageContext.destroyCurrentMessageContext();
         }
     }
+
 
     public void cleanDeployment(String artifactRepositoryPath) {
 

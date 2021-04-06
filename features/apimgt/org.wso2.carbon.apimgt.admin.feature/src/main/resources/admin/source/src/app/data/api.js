@@ -411,10 +411,10 @@ class API extends Resource {
     /**
      * Get a list of applications from all users
      */
-    getApplicationList() {
+    getApplicationList(params) {
         return this.client.then((client) => {
             return client.apis['Application (Collection)'].get_applications(
-                this._requestMetaData(),
+                params, this._requestMetaData(),
             );
         });
     }
