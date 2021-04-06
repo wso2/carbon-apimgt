@@ -17,20 +17,21 @@
  */
 
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import Grid from '@material-ui/core/Grid';
 import Configurations from 'Config';
-
+import ReactSafeHtml from 'react-safe-html';
 import FeedbackForm from './FeedbackForm';
 
 const useStyles = makeStyles((theme) => ({
     footer: {
-        backgroundColor: theme.palette.grey.A100,
+        backgroundColor: theme.custom.footer.background || '#f5f5f5',
+        color: theme.custom.footer.color || '#444',
         paddingLeft: theme.spacing(3),
-        height: 50,
+        height: theme.custom.footer.height || 50,
         alignItems: 'center',
         display: 'flex',
     },
@@ -44,17 +45,27 @@ const useStyles = makeStyles((theme) => ({
  */
 function Footer() {
     const classes = useStyles();
-
+    const theme = useTheme();
+    const {
+        active, footerHTML, text,
+    } = theme.custom.footer;
+    if (!active) {
+        return (<span />);
+    }
     return (
         <footer className={classes.footer}>
             <Grid container direction='row' justify='space-between' alignItems='center'>
                 <Grid item>
-                    <Typography noWrap>
-                        <FormattedMessage
-                            id='Base.Footer.Footer.product_details'
-                            defaultMessage='WSO2 API-M v3.2.0 | © 2020 WSO2 Inc'
-                        />
-                    </Typography>
+                    {(text && text !== '') && (<Typography noWrap>{text}</Typography>)}
+                    {(footerHTML && footerHTML !== '') && (<ReactSafeHtml html={footerHTML} />)}
+                    {(footerHTML === '' && text === '') && (
+                        <Typography noWrap>
+                            <FormattedMessage
+                                id='Base.Footer.Footer.product_details'
+                                defaultMessage='WSO2 API-M v3.2.0 | © 2020 WSO2 Inc'
+                            />
+                        </Typography>
+                    )}
                 </Grid>
                 {Configurations.app.feedback.enable && (
                     <Grid item>

@@ -18,7 +18,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, useTheme } from '@material-ui/core/styles';
 import Footer from './Footer/Footer';
 
 const styles = (theme) => ({
@@ -42,7 +42,7 @@ const styles = (theme) => ({
     },
     wrapper: {
         minHeight: '100%',
-        marginBottom: -50,
+        marginBottom: -1 * (theme.custom.footer.height || 50),
         background: theme.custom.wrapperBackground,
     },
     contentWrapper: {
@@ -52,14 +52,7 @@ const styles = (theme) => ({
         minHeight: 'calc(100vh - 114px)',
     },
     push: {
-        height: 50,
-    },
-    footer: {
-        backgroundColor: theme.palette.grey.A100,
-        paddingLeft: theme.spacing(3),
-        height: 50,
-        alignItems: 'center',
-        display: 'flex',
+        height: theme.custom.footer.height || 50,
     },
     toolbar: {
         minHeight: 56,
@@ -81,13 +74,15 @@ const styles = (theme) => ({
  * @extends {React.Component}
  */
 const Base = ({ classes, children, header }) => {
+    const theme = useTheme();
+    const { active: footerActive } = theme.custom.footer;
     return (
         <>
             <div className={classes.wrapper}>
                 {header}
                 <div className={classes.contentWrapper}>{children}</div>
 
-                <div className={classes.push} />
+                {footerActive && (<div className={classes.push} />)}
             </div>
             <Footer />
         </>
