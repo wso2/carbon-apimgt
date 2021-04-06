@@ -38,10 +38,13 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import WarningIcon from '@material-ui/icons/Warning';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Progress from '../../../Shared/Progress';
 import Api from '../../../../data/api';
 import Application from '../../../../data/Application';
 import SelectAppPanel from './SelectAppPanel';
+
 
 /**
  * @inheritdoc
@@ -117,6 +120,7 @@ function TryOutController(props) {
 
     const classes = styles();
     const [showToken, setShowToken] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [subscriptions, setSubscriptions] = useState([]);
@@ -626,10 +630,22 @@ function TryOutController(props) {
                                                     )}
                                                     name='password'
                                                     onChange={handleChanges}
+                                                    type={showPassword ? 'text' : 'password'}
                                                     value={password || ''}
                                                     fullWidth
                                                     InputProps={{
                                                         autoComplete: 'new-password',
+                                                        endAdornment: (
+                                                            <InputAdornment position='end'>
+                                                                <IconButton
+                                                                    edge='end'
+                                                                    aria-label='toggle password visibility'
+                                                                    onClick={() => setShowPassword(!showPassword)}
+                                                                >
+                                                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                                                </IconButton>
+                                                            </InputAdornment>
+                                                        ),
                                                     }}
                                                 />
                                             </Grid>

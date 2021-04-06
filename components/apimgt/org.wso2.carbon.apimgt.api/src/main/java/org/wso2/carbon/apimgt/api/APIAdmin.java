@@ -85,20 +85,20 @@ public interface APIAdmin  {
     Application[] getAllApplicationsOfTenantForMigration(String appTenantDomain) throws APIManagementException;
 
     /**
-     * Get the applications of the given tenantId with pagination.
-     *
-     * @param tenantId             tenant Id
-     * @param start                content to start
-     * @param offset               content to limit number of pages
-     * @param searchOwner          content to search applications based on owners
-     * @param searchApplication    content to search applications based on application
-     * @param sortColumn           content to sort column
-     * @param sortOrder            content to sort in a order
-     * @throws APIManagementException if failed to get applications
+     * Returns List of Applications
+     * @param user              Logged-in user
+     * @param owner             Owner of the application
+     * @param tenantId          Logged-in user tenant-id
+     * @param limit             The limit
+     * @param offset            The offset
+     * @param applicationName   The application name
+     * @param sortBy            The sortBy column
+     * @param sortOrder         The sort order
+     * @return          List of applications match to the search conditions
+     * @throws APIManagementException
      */
-    List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start , int offset, String searchOwner,
-                                                              String searchApplication, String sortColumn,
-                                                              String sortOrder)
+    Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit , int offset,
+                                                String applicationName, String sortBy, String sortOrder)
             throws APIManagementException;
 
     /**

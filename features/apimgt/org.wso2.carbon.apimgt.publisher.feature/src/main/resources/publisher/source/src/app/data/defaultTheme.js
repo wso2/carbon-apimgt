@@ -179,9 +179,9 @@ export default {
         },
         // lifeCycleImage: '/site/public/images/logo.svg',
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
-        adminRole: 'admin@carbon.super',
+        adminRole: 'admin',
         commentsLimit: 5,
-        maxCommentLength: 256,
+        maxCommentLength: 512,
         productSampleProgess: {
             backgroundMain: '#15b8cf',
             backgroundChip: '#5aebf9',
@@ -212,6 +212,11 @@ export default {
                 asyncapi: '/site/public/images/service_catalog/icons/async.svg',
                 oas3: '/site/public/images/service_catalog/icons/oas3.png',
                 swagger: '/site/public/images/service_catalog/icons/swagger.svg',
+            },
+        },
+        revision: {
+            activeRevision: {
+                background: 'radial-gradient(#29bb89, #f7ea00)',
             },
         },
     },

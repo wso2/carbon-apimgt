@@ -53,6 +53,12 @@ const styles = (theme) => ({
     heading: {
         flexGrow: 1,
         marginTop: 10,
+        '& table td:nth-child(2)': {
+            'word-break': 'break-word',
+        },
+        '& table td button span, & table th': {
+            'white-space': 'nowrap',
+        },
     },
     titleWrapper: {
         display: 'flex',
@@ -62,11 +68,6 @@ const styles = (theme) => ({
     },
     mainTitle: {
         paddingLeft: 0,
-    },
-    button: {
-        textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-        marginLeft: theme.spacing(1),
     },
     buttonIcon: {
         marginRight: theme.spacing(1),
@@ -338,8 +339,9 @@ class Scopes extends React.Component {
                     </Tooltip>
                     <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                         <Button
+                            variant='contained'
+                            color='primary'
                             size='small'
-                            className={classes.button}
                             disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                         >
                             <AddCircle className={classes.buttonIcon} />

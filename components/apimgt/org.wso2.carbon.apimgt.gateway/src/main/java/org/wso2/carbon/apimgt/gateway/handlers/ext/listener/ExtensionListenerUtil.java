@@ -297,6 +297,7 @@ public class ExtensionListenerUtil {
                     axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE,
                             APIConstants.APPLICATION_XML_SOAP_MEDIA_TYPE);
                 }
+                axis2MC.removeProperty(APIConstants.NO_ENTITY_BODY);
             } catch (IOException | XMLStreamException e) {
                 log.error("Error while setting payload " + axis2MC.getLogIDString(), e);
             }

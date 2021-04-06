@@ -63,6 +63,7 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
 import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
+import CONSTS from 'AppData/Constants';
 import DisplayDevportal from './DisplayDevportal';
 
 const useStyles = makeStyles((theme) => ({
@@ -324,7 +325,7 @@ export default function Environments() {
     const [openDeployPopup, setOpenDeployPopup] = useState(history.location.state === 'deploy');
 
     // allEnvDeployments represents all deployments of the API with mapping
-    // environment -> {revision deployed to env, vhost deployed to env with revisino}
+    // environment -> {revision deployed to env, vhost deployed to env with revision}
     const allEnvDeployments = [];
     settings.environment.forEach((env) => {
         const revision = allEnvRevision && allEnvRevision.find(
@@ -332,7 +333,10 @@ export default function Environments() {
         );
         const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
         const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
-        const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+        let vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+        if (!vhost) { // if vhost is deleted after deploying the revision, there is no matching vhost
+            vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails && envDetails.vhost };
+        }
         allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
 

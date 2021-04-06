@@ -27,7 +27,7 @@ const useStyles = makeStyles({
 
 const LandingMenu = (props) => {
     const {
-        title, icon, children,
+        title, icon, children, id,
     } = props;
     const [isHover, setIsHover] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -49,6 +49,7 @@ const LandingMenu = (props) => {
             lg={2}
         >
             <Box
+                id={id}
                 className={boxTransition}
                 onMouseOver={onMouseOver}
                 onMouseOut={onMouseOut}

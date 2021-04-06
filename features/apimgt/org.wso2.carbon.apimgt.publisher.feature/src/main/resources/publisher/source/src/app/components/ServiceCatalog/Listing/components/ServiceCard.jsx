@@ -197,6 +197,7 @@ export default function ServiceCard(props) {
                                 serviceUrl={service.serviceUrl}
                             />
                             <DeleteServiceButton
+                                id='itest-service-card-delete'
                                 serviceDisplayName={service.name}
                                 serviceId={service.id}
                                 onDelete={onDelete}

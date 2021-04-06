@@ -40,6 +40,7 @@ import { usePublisherSettings } from 'AppComponents/Shared/AppContext';
 import Alert from 'AppComponents/Shared/MuiAlert';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import CONSTS from 'AppData/Constants';
 import SwaggerUI from './SwaggerUI';
 
 dayjs.extend(relativeTime);
@@ -82,9 +83,14 @@ const TryOutConsole = () => {
         api.getDeployedRevisions().then((deploymentsResponse) => {
             tasksStatusDispatcher({ name: 'getDeployments', status: { inProgress: false, completed: true } });
             const currentDeployments = deploymentsResponse.body;
-            setDeployments(currentDeployments);
-            if (currentDeployments && currentDeployments.length > 0) {
-                const [initialDeploymentSelection] = currentDeployments;
+            const currentDeploymentsWithDisplayName = currentDeployments.map((deploy) => {
+                const gwEnvironment = publisherSettings.environment.find((e) => e.name === deploy.name);
+                const displayName = (gwEnvironment ? gwEnvironment.displayName : deploy.name);
+                return { ...deploy, displayName };
+            });
+            setDeployments(currentDeploymentsWithDisplayName);
+            if (currentDeploymentsWithDisplayName && currentDeploymentsWithDisplayName.length > 0) {
+                const [initialDeploymentSelection] = currentDeploymentsWithDisplayName;
                 setSelectedDeployment(initialDeploymentSelection);
             }
         }).catch((error) => tasksStatusDispatcher({ name: 'getDeployments', status: { inProgress: false, error } }));
@@ -96,8 +102,11 @@ const TryOutConsole = () => {
         if (selectedDeployment && oasDefinition) {
             const selectedGWEnvironment = publisherSettings.environment
                 .find((env) => env.name === selectedDeployment.name);
-            const selectedDeploymentVhost = selectedGWEnvironment.vhosts
+            let selectedDeploymentVhost = selectedGWEnvironment.vhosts
                 .find((vhost) => vhost.host === selectedDeployment.vhost);
+            if (!selectedDeploymentVhost) {
+                selectedDeploymentVhost = { ...CONSTS.DEFAULT_VHOST, host: selectedDeployment.vhost };
+            }
             let pathSeparator = '';
             if (selectedDeploymentVhost.httpContext && !selectedDeploymentVhost.httpContext.startsWith('/')) {
                 pathSeparator = '/';
@@ -281,7 +290,7 @@ const TryOutConsole = () => {
                                                 value={deployment.name}
                                                 key={deployment.name}
                                             >
-                                                {deployment.name}
+                                                {deployment.displayName}
                                             </MenuItem>
                                         ))}
                                     </TextField>

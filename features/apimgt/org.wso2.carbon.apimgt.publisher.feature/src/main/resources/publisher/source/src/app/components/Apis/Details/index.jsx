@@ -44,11 +44,13 @@ import {
 import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import AuthorizedError from 'AppComponents/Base/Errors/AuthorizedError';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
 import { doRedirectToLogin } from 'AppComponents/Shared/RedirectToLogin';
@@ -99,6 +101,7 @@ const styles = (theme) => ({
         left: 0,
         top: 0,
         overflowY: 'auto',
+        overflowX: 'hidden',
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
@@ -252,6 +255,7 @@ class Details extends Component {
             imageUpdate: 0,
             allRevisions: null,
             allEnvRevision: null,
+            authorizedAPI: false,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
@@ -346,6 +350,8 @@ class Details extends Component {
                     const { status } = error;
                     if (status === 404) {
                         this.setState({ apiNotFound: true });
+                    } else if (status === 403) {
+                        this.setState({ authorizedAPI: true });
                     } else if (status === 401) {
                         doRedirectToLogin();
                     }
@@ -377,6 +383,8 @@ class Details extends Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ apiNotFound: true });
+                } else if (status === 403) {
+                    this.setState({ authorizedAPI: true });
                 }
             });
     }
@@ -555,7 +563,8 @@ class Details extends Component {
         if (!isAPIProduct) {
             promisedUpdate = restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id);
         } else if (isAPIProduct) {
-            promisedUpdate = restApiProduct.getProductRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id);
+            promisedUpdate = restApiProduct.getProductRevisionsWithEnv(api.isRevision
+                ? api.revisionedApiProductId : api.id);
         }
         return promisedUpdate
             .then((result) => {
@@ -630,7 +639,7 @@ class Details extends Component {
      */
     render() {
         const {
-            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision,
+            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision, authorizedAPI,
         } = this.state;
         const {
             classes,
@@ -670,6 +679,13 @@ class Details extends Component {
                 body: intl.formatMessage(resourceNotFoundMessageText.bodyMessage, { apiUUID: `${apiUUID}` }),
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
+        }
+        if (authorizedAPI) {
+            return (
+                <>
+                    <AuthorizedError />
+                </>
+            );
         }
 
         if (!api) {
@@ -791,9 +807,15 @@ class Details extends Component {
                                     <AccordianSummary
                                         expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
                                     >
-                                        <Typography className={classes.leftLInkText}>
-                                            API Configurations
-                                        </Typography>
+                                        <Tooltip
+                                            title={'Changes made to API Configuration section requires a '
+                                                + 'new deployment, in order to affect in the Gateway'}
+                                            placement='bottom'
+                                        >
+                                            <Typography className={classes.leftLInkText}>
+                                                API Configurations
+                                            </Typography>
+                                        </Tooltip>
                                     </AccordianSummary>
                                     <AccordionDetails>
                                         <div>
@@ -831,7 +853,7 @@ class Details extends Component {
                                                     Icon={<EndpointIcon />}
                                                 />
                                             )}
-                                            {!api.isWebSocket() && !isAPIProduct && (
+                                            {!isAPIProduct && (
                                                 <LeftMenuItem
                                                     text={intl.formatMessage({
                                                         id: 'Apis.Details.index.left.menu.scope',
@@ -878,21 +900,21 @@ class Details extends Component {
                                 Icon={<PersonPinCircleOutlinedIcon />}
                             />
                             {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                                && api.lifeCycleStatus !== 'RETIRED' && (
-                                <div>
-                                    <Divider />
-                                    <Typography className={classes.headingText}>Test</Typography>
-                                    <LeftMenuItem
-                                        route='test-console'
-                                        text={intl.formatMessage({
-                                            id: 'Apis.Details.index.Tryout.menu.name',
-                                            defaultMessage: 'Try Out',
-                                        })}
-                                        to={pathPrefix + 'test-console'}
-                                        iconText='test'
-                                    />
-                                </div>
-                            )}
+                                && (
+                                    <div>
+                                        <Divider />
+                                        <Typography className={classes.headingText}>Test</Typography>
+                                        <LeftMenuItem
+                                            route='test-console'
+                                            text={intl.formatMessage({
+                                                id: 'Apis.Details.index.Tryout.menu.name',
+                                                defaultMessage: 'Try Out',
+                                            })}
+                                            to={pathPrefix + 'test-console'}
+                                            iconText='test'
+                                        />
+                                    </div>
+                                )}
                             {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
                                 <div>
                                     <Divider />

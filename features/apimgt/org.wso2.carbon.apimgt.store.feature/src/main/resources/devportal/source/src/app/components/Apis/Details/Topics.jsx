@@ -18,24 +18,19 @@
 
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import {withStyles, withTheme} from '@material-ui/core/styles';
-import {FormattedMessage} from 'react-intl';
-import {injectIntl} from 'react-intl';
+import { withStyles } from '@material-ui/core/styles';
+import { injectIntl } from 'react-intl';
 import Table from '@material-ui/core/Table';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Box from '@material-ui/core/Box';
-
+import Alert from 'AppComponents/Shared/Alert';
+import Progress from 'AppComponents/Shared/Progress';
 import PropTypes from 'prop-types';
 import Api from 'AppData/api';
-import {ApiContext} from "./ApiContext";
+import { ApiContext } from './ApiContext';
 
-/**
- *
- *
- * @param {*} theme
- */
-const styles = theme => ({
+const styles = (theme) => ({
     root: {
         display: 'flex',
         flexDirection: 'row',
@@ -45,13 +40,16 @@ const styles = theme => ({
     heading: {
         marginRight: 20,
         color: theme.palette.getContrastText(theme.custom.infoBar.sliderBackground),
-    }
+    },
 });
 
+/**
+ * Render topics component
+ */
 class Topics extends React.Component {
     /**
      *Creates an instance of Topics.
-     * @param {*} props
+     * @param {JSON} props props passed from it's parent
      * @memberof Topics
      */
     constructor(props) {
@@ -63,57 +61,53 @@ class Topics extends React.Component {
     }
 
     /**
-     *
-     *
      * @memberof Topics
      */
     componentDidMount() {
-        const {api} = this.props;
+        const { api, intl } = this.props;
         const apiClient = new Api();
-        let promisedApi = apiClient.getAllTopics(api.id);
+        const promisedApi = apiClient.getAllTopics(api.id);
 
         promisedApi
             .then((response) => {
                 if (response.obj.list !== undefined) {
-                    this.setState({topics: response.obj.list});
+                    this.setState({ topics: response.obj.list });
                 }
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
+                const { status } = error;
                 if (status === 404) {
-                    this.setState({notFound: true});
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Topics.error.404',
+                        defaultMessage: 'Resource not found',
+                    }));
+                    console.log(error);
                 } else if (status === 401) {
-                    this.setState({isAuthorize: false});
-                    const params = qs.stringify({reference: this.props.location.pathname});
-                    this.props.history.push({pathname: '/login', search: params});
+                    Alert.error(error);
+                    console.log(error);
                 }
             });
     }
 
     /**
-     *
-     *
-     * @returns
-     * @memberof Resources
+     * @returns {JSX} rendered output
+     * @memberof Topics
      */
     render() {
-
         const { topics } = this.state;
-        if (this.state.notFound) {
-            return <div>resource not found...</div>;
-        }
         if (!topics) {
-            return <div>loading...</div>;
+            return <Progress />;
         }
         return (
             <Box display='flex' flexDirection='row'>
                 <Table>
-                    {topics && topics.length !== 0 && topics.map(topic => (
-                        <TableRow style={{borderStyle: 'hidden', padding:'0px'}} key={topic.name}>
-                            <TableCell style={{padding:'0px'}}>
+                    {topics && topics.length !== 0 && topics.map((topic) => (
+                        <TableRow style={{ borderStyle: 'hidden', padding: '0px' }} key={topic.name}>
+                            <TableCell style={{ padding: '0px' }}>
                                 <Typography component='p' variant='body2'>
-                                    <b>{topic.name}</b> - {topic.type.toLowerCase()}
+                                    <b>{topic.name}</b>
+                                    {' -'}
+                                    {topic.type.toLowerCase()}
                                 </Typography>
                             </TableCell>
                         </TableRow>
@@ -127,7 +121,6 @@ class Topics extends React.Component {
 Topics.contextType = ApiContext;
 
 Topics.propTypes = {
-    classes: PropTypes.object.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,

@@ -21,10 +21,13 @@ import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import { Typography } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid/Grid';
+import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import classNames from 'classnames';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import Comment from './Comment';
 import CommentAdd from './CommentAdd';
 import API from '../../../../data/api';
@@ -49,9 +52,6 @@ const styles = theme => ({
     contentWrapper: {
         paddingLeft: theme.spacing(3),
         marginTop: theme.spacing(1),
-        '& span, & h5, & label, & td, & li, & div, & input': {
-            color: theme.palette.getContrastText(theme.palette.background.paper),
-        },
     },
     contentWrapperOverview: {
         padding: 0,
@@ -81,6 +81,9 @@ const styles = theme => ({
         padding: theme.spacing(3),
         marginTop: theme.spacing(2),
     },
+    button: {
+        textTransform: 'capitalize',
+    },
 });
 
 /**
@@ -104,11 +107,13 @@ class Comments extends Component {
             comments: [],
             totalComments: 0,
             startCommentsToDisplay: 0,
-            apiId:null,
+            apiId: null,
+            showCommentAdd: false,
         };
         this.updateCommentList = this.updateCommentList.bind(this);
         this.handleExpandClick = this.handleExpandClick.bind(this);
         this.handleLoadMoreComments = this.handleLoadMoreComments.bind(this);
+        this.toggleCommentAdd = this.toggleCommentAdd.bind(this);
     }
 
     /**
@@ -120,7 +125,7 @@ class Comments extends Component {
             apiId, theme, match, intl, isOverview, setCount,
         } = this.props;
         if (match) apiId = match.params.apiUuid;
-        this.setState({ apiId: apiId});
+        this.setState({ apiId: apiId });
 
         const restApi = new API();
         const limit = theme.custom.commentsLimit;
@@ -136,7 +141,7 @@ class Comments extends Component {
                         commentList = commentList.slice(commentList.length - 3, commentList.length);
                     }
                 }
-                this.setState({ allComments: commentList, totalComments: result.body.pagination.total});
+                this.setState({ allComments: commentList, totalComments: result.body.pagination.total });
                 if (result.body.pagination.total < theme.custom.commentsLimit) {
                     this.setState({
                         startCommentsToDisplay: 0,
@@ -145,7 +150,7 @@ class Comments extends Component {
                 } else {
                     this.setState({
                         startCommentsToDisplay: result.body.pagination.total - theme.custom.commentsLimit,
-                        comments: commentList, 
+                        comments: commentList,
                     });
                 }
             })
@@ -165,7 +170,7 @@ class Comments extends Component {
         const { theme } = this.props;
         const restApi = new API();
         const limit = theme.custom.commentsLimit;
-        const offset = totalComments-startCommentsToDisplay;
+        const offset = totalComments - startCommentsToDisplay;
 
         restApi
             .getAllComments(this.state.apiId, limit, offset)
@@ -268,6 +273,9 @@ class Comments extends Component {
         }
     }
 
+    toggleCommentAdd() {
+        this.setState((prevState) => ({ showCommentAdd: !prevState.showCommentAdd }));
+    }
     /**
      * Render method of the component
      * @returns {React.Component} Comment html component
@@ -276,7 +284,7 @@ class Comments extends Component {
     render() {
         const { classes, showLatest, isOverview } = this.props;
         const {
-            comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate,
+            comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate, showCommentAdd,
         } = this.state;
         return (
             <ApiContext.Consumer>
@@ -287,40 +295,54 @@ class Comments extends Component {
                             { [classes.contentWrapperOverview]: isOverview },
                         )}
                     >
-                        {!showLatest && (
-                            <div className={classes.root}>
-                                <Typography variant='h4' className={classes.titleSub}>
-                                    {totalComments + (' ')}
-                                    <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
-                                </Typography>
-                            </div>
-                        )}
-                        {!showLatest && AuthManager.getUser() &&
-                        !this.isCrossTenant(api.provider, AuthManager.getUser()) && (
-                            <div className={classes.paper}>
-                                <CommentAdd
-                                    apiId={api.id}
-                                    commentsUpdate={this.updateCommentList}
-                                    allComments={allComments}
-                                    replyTo={null}
-                                    cancelButton
-                                />
-                            </div>
-                        )}
+                        {!isOverview && (<div className={classes.root}>
+                            <Typography variant='h4' className={classes.titleSub}>
+                                {totalComments + (' ')}
+                                <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
+                            </Typography>
+                        </div>)}
+
+                        {AuthManager.getUser() &&
+                            !this.isCrossTenant(api.provider, AuthManager.getUser()) && (
+                                <Box mt={2} ml={1}>
+                                    {!showCommentAdd && (<Button
+                                        color="primary"
+                                        size="small"
+                                        className={classes.button}
+                                        startIcon={<AddCircleOutlineIcon />}
+                                        onClick={this.toggleCommentAdd}
+                                    >
+                                        <FormattedMessage
+                                            id='Apis.Details.Comments.write.a.new.comment'
+                                            defaultMessage='Write a New Comment'
+                                        />
+                                    </Button>)}
+                                    {showCommentAdd && (<CommentAdd
+                                        apiId={api.id}
+                                        commentsUpdate={this.updateCommentList}
+                                        allComments={allComments}
+                                        replyTo={null}
+                                        cancelCallback={this.toggleCommentAdd}
+                                        cancelButton
+                                    />)}
+                                </Box>
+                            )}
                         {!allComments && (
                             <Paper className={classes.paperProgress}>
                                 <CircularProgress size={24} />
                             </Paper>
                         )}
-                        {allComments && totalComments === 0 && !isOverview &&
-                            <div className={classes.genericMessageWrapper}>
-                                <InlineMessage type='info' className={classes.dialogContainer}>
-                                    <Typography variant='h5' component='h3'>
+                        {allComments && totalComments === 0 &&
+                            <Box mt={2} mb={2} ml={1}>
+                                <InlineMessage 
+                                    type='info'
+                                    title={
                                         <FormattedMessage
                                             id='Apis.Details.Comments.no.comments'
                                             defaultMessage='No Comments Yet'
                                         />
-                                    </Typography>
+                                    }
+                                    >
                                     <Typography component='p'>
                                         <FormattedMessage
                                             id='Apis.Details.Comments.no.comments.content'
@@ -328,14 +350,14 @@ class Comments extends Component {
                                         />
                                     </Typography>
                                 </InlineMessage>
-                            </div>
+                            </Box>
                         }
                         <Comment
                             comments={comments}
+                            crossTenentUser={this.isCrossTenant(api.provider, AuthManager.getUser())}
                             apiId={api.id}
                             commentsUpdate={this.updateCommentList}
                             allComments={allComments}
-                            isOverview={isOverview}
                         />
                         {startCommentsToDisplay !== 0 && (
                             <div className={classes.contentWrapper}>
@@ -355,7 +377,7 @@ class Comments extends Component {
                                     </Grid>
                                     <Grid item>
                                         <Typography className={classes.verticalSpace} variant='body1'>
-                                            { '(' + (totalComments - startCommentsToDisplay) + ' of ' + totalComments + ')'}
+                                            {'(' + (totalComments - startCommentsToDisplay) + ' of ' + totalComments + ')'}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -368,8 +390,12 @@ class Comments extends Component {
     }
 }
 
+Comments.defaultProps = {
+    setCount: () => {},
+};
 Comments.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
+    setCount: PropTypes.func,
 };
 
 export default injectIntl(withStyles(styles, { withTheme: true })(Comments));

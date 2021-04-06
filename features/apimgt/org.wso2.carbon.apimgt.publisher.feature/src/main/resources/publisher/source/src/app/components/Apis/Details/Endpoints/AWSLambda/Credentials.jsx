@@ -37,6 +37,7 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 import API from 'AppData/api';
+import Configurations from 'Config';
 import Banner from 'AppComponents/Shared/Banner';
 
 const useStyles = makeStyles((theme) => ({
@@ -87,84 +88,7 @@ export default function Credentials(props) {
         endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
         setPageError(null);
     };
-    const regionsList = [
-        {
-            key: 'us-east-1',
-            value: 'us-east-1: US East (N. Virginia)',
-        },
-        {
-            key: 'us-east-2',
-            value: 'us-east-2: US East (Ohio)',
-        },
-        {
-            key: 'us-west-1',
-            value: 'us-west-1: US West (N. California)',
-        },
-        {
-            key: 'us-west-2',
-            value: 'us-west-2: US West (Oregon)',
-        },
-        {
-            key: 'ap-east-1',
-            value: 'ap-east-1: Asia Pacific (Hong Kong)',
-        },
-        {
-            key: 'ap-south-1',
-            value: 'ap-south-1: Asia Pacific (Mumbai)',
-        },
-        {
-            key: 'ap-northeast-1',
-            value: 'ap-northeast-1: Asia Pacific (Tokyo)',
-        },
-        {
-            key: 'ap-northeast-2',
-            value: 'ap-northeast-2: Asia Pacific (Seoul)',
-        },
-        {
-            key: 'ap-northeast-3',
-            value: 'ap-northeast-3: Asia Pacific (Osaka-Local)',
-        },
-        {
-            key: 'ap-southeast-1',
-            value: 'ap-southeast-1: Asia Pacific (Singapore)',
-        },
-        {
-            key: 'ap-southeast-2',
-            value: 'ap-southeast-2: Asia Pacific (Sydney)',
-        },
-        {
-            key: 'ca-central-1',
-            value: 'ca-central-1: Canada (Central)',
-        },
-        {
-            key: 'eu-central-1',
-            value: 'eu-central-1: Europe (Frankfurt)',
-        },
-        {
-            key: 'eu-west-1',
-            value: 'eu-west-1: Europe (Ireland)',
-        },
-        {
-            key: 'eu-west-2',
-            value: 'eu-west-2: Europe (London)',
-        },
-        {
-            key: 'eu-west-3',
-            value: 'eu-west-3: Europe (Paris)',
-        },
-        {
-            key: 'eu-north-1',
-            value: 'eu-north-1: Europe (Stockholm)',
-        },
-        {
-            key: 'me-south-1',
-            value: 'me-south-1: Middle East (Bahrain)',
-        },
-        {
-            key: 'sa-east-1',
-            value: 'sa-east-1: South America (São Paulo)',
-        },
-    ];
+    const { regions } = Configurations.apis.endpoint.aws;
     useEffect(() => {
         API.getAmznResourceNames(apiId)
             .catch((error) => {
@@ -285,7 +209,7 @@ export default function Credentials(props) {
                     variant='outlined'
                     disabled={endpointConfig.access_method === 'role-supplied'}
                 >
-                    <InputLabel ref={inputLabel} id='region-label'>
+                    <InputLabel ref={inputLabel}>
                         <FormattedMessage
                             id={'Apis.Details.Endpoints.EndpointOverview.awslambda'
                             + '.endpoint.region'}
@@ -302,10 +226,23 @@ export default function Credentials(props) {
                             endpointsDispatcher({ action: 'set_awsCredentials', value: newEndpointConfig });
                         }}
                         value={endpointConfig.amznRegion}
+                        MenuProps={{
+                            anchorOrigin: {
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            },
+                            getContentAnchorEl: null,
+                            keepMounted: true,
+                            PaperProps: {
+                                style: {
+                                    maxHeight: 300,
+                                },
+                            },
+                        }}
                     >
-                        {regionsList.map((region) => ((
-                            <MenuItem key={region.key} value={region.key}>
-                                {region.value}
+                        {Object.entries(regions).map(([key, value]) => ((
+                            <MenuItem key={key} value={key}>
+                                {value}
                             </MenuItem>
                         )))}
                     </Select>

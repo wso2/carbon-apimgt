@@ -11,6 +11,7 @@ const ServiceCatalogMenu = (props) => {
     const dense = isCreateMenu;
     return (
         <Component
+            id='itest-rest-api-create-menu'
             openList={dense}
             title={(
                 <FormattedMessage

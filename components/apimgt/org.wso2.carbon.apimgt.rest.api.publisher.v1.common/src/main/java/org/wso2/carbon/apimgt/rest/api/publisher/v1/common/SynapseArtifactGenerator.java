@@ -32,15 +32,12 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
-import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
@@ -48,11 +45,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.stream.XMLStreamException;
 
 /**
  * This class used to generate Synapse Artifact.
@@ -93,10 +88,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                 APIDefinitionValidationResponse apiDefinitionValidationResponse =
                                         ImportUtils.retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
                                 apiProduct.setDefinition(apiDefinitionValidationResponse.getContent());
-                                gatewayAPIDTO = TemplateBuilderUtil
-                                        .retrieveGatewayAPIDto(apiProduct, environment, tenantDomain,
-                                                extractedFolderPath
-                                        );
+                                gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(apiProduct, environment,
+                                        tenantDomain, extractedFolderPath);
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
@@ -114,9 +107,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     graphqlSchema = graphQLSchemaDefinition
                                             .buildSchemaWithAdditionalInfo(api, graphqlComplexityInfo);
                                     api.setGraphQLSchema(graphqlSchema);
-                                    gatewayAPIDTO = TemplateBuilderUtil
-                                            .retrieveGatewayAPIDto(api, environment, tenantDomain, apidto,
-                                                    extractedFolderPath);
+                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
+                                            tenantDomain, apidto, extractedFolderPath);
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
                                                 || APIConstants.API_TYPE_SOAP.equals(api.getType())
@@ -124,9 +116,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     APIDefinitionValidationResponse apiDefinitionValidationResponse = ImportUtils
                                             .retrieveValidatedSwaggerDefinitionFromArchive(extractedFolderPath);
                                     api.setSwaggerDefinition(apiDefinitionValidationResponse.getContent());
-                                    gatewayAPIDTO = TemplateBuilderUtil
-                                            .retrieveGatewayAPIDto(api, environment, tenantDomain, apidto,
-                                                    extractedFolderPath, apiDefinitionValidationResponse);
+                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
+                                            tenantDomain, apidto, extractedFolderPath, apiDefinitionValidationResponse);
                                 } else if (api.getType() != null &&
                                         (APIConstants.APITransportType.WS.toString().equals(api.getType()) ||
                                                 APIConstants.APITransportType.SSE.toString().equals(api.getType()) ||
@@ -136,9 +127,8 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                             ImportUtils.retrieveValidatedAsyncApiDefinitionFromArchive(
                                                     extractedFolderPath);
                                     api.setAsyncApiDefinition(asyncApiDefinition.getContent());
-                                    gatewayAPIDTO = TemplateBuilderUtil
-                                            .retrieveGatewayAPIDtoForStreamingAPI(api, environment, tenantDomain,
-                                                    apidto, extractedFolderPath);
+                                    gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDtoForStreamingAPI(api,
+                                            environment, tenantDomain, apidto, extractedFolderPath);
                                 }
                             }
                             if (gatewayAPIDTO != null) {
@@ -148,8 +138,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                         } finally {
                             FileUtils.deleteQuietly(baseDirectory);
                         }
-                    } catch (APIImportExportException | IOException |
-                            XMLStreamException | APITemplateException | CertificateManagementException e) {
+                    } catch (Exception e) {
                         // only do error since we need to continue for other apis
 
                         log.error("Error while creating Synapse configurations", e);

@@ -105,4 +105,9 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     public List<API> getServiceUsage(String serviceId, int tenantId) throws APIManagementException {
         return catalogDAO.getServiceUsage(serviceId, tenantId);
     }
+
+    @Override
+    public int getServicesCount(int tenantId, ServiceFilterParams filterParams) throws APIManagementException {
+        return catalogDAO.getServicesCount(tenantId, filterParams);
+    }
 }

@@ -33,6 +33,9 @@ public class DevPortalAPIInfo {
     private String businessOwner;
     private String status;
     private Set<String> availableTierNames;
+    private String subscriptionAvailability; 
+    private String subscriptionAvailableOrgs; 
+
     
     //monetizationCategory which is returned to UI as 'monetizationLabel' is not required. it is derived from the
     // attached tiers.
@@ -90,17 +93,31 @@ public class DevPortalAPIInfo {
     public void setStatus(String status) {
         this.status = status;
     }
-    @Override
-    public String toString() {
-        return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
-                + providerName + ", context=" + context + ", type=" + type + ", thumbnail=" + thumbnail
-                + ", businessOwner=" + businessOwner + ", status=" + status + "]";
-    }
     public Set<String> getAvailableTierNames() {
         return availableTierNames;
     }
     public void setAvailableTierNames(Set<String> availableTierNames) {
         this.availableTierNames = availableTierNames;
+    }
+    public String getSubscriptionAvailableOrgs() {
+        return subscriptionAvailableOrgs;
+    }
+    public void setSubscriptionAvailableOrgs(String subscriptionAvailableOrgs) {
+        this.subscriptionAvailableOrgs = subscriptionAvailableOrgs;
+    }
+    public String getSubscriptionAvailability() {
+        return subscriptionAvailability;
+    }
+    public void setSubscriptionAvailability(String subscriptionAvailability) {
+        this.subscriptionAvailability = subscriptionAvailability;
+    }
+    @Override
+    public String toString() {
+        return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
+                + providerName + ", context=" + context + ", type=" + type + ", thumbnail=" + thumbnail
+                + ", businessOwner=" + businessOwner + ", status=" + status + ", availableTierNames="
+                + availableTierNames + ", subscriptionAvailability=" + subscriptionAvailability
+                + ", subscriptionAvailableOrgs=" + subscriptionAvailableOrgs + "]";
     }
 
 }

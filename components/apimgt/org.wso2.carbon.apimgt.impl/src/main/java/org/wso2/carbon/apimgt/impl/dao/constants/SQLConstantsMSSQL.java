@@ -220,7 +220,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
-            "select distinct x.* from (" +
+            "(" +
                     "SELECT * FROM (" +
                     "   SELECT " +
                     "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
@@ -241,9 +241,9 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "    SUB.TENANT_ID = ?"+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " OR APP.NAME like ?"+
+                    " AND APP.NAME like ?"+
                     " )) a " +
-                    " )x" +
+                    " )" +
                     " ORDER BY $1 $2 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_REPLIES_SQL =

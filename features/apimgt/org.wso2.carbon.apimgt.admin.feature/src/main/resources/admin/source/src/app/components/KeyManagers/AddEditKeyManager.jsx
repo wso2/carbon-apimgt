@@ -50,7 +50,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import Cetificates from 'AppComponents/KeyManagers/Cetificates';
+import Certificates from 'AppComponents/KeyManagers/Certificates';
 import BlockingProgress from 'AppComponents/Shared/BlockingProgress';
 
 
@@ -982,20 +982,20 @@ function AddEditKeyManager(props) {
                     <Grid item xs={12} md={12} lg={3}>
                         <Typography color='inherit' variant='subtitle2' component='div'>
                             <FormattedMessage
-                                id='KeyManagers.AddEditKeyManager.cetificate'
+                                id='KeyManagers.AddEditKeyManager.certificate'
                                 defaultMessage='Certificates'
                             />
                         </Typography>
                         <Typography color='inherit' variant='caption' component='p'>
                             <FormattedMessage
-                                id='KeyManagers.AddEditKeyManager.cetificate.description'
+                                id='KeyManagers.AddEditKeyManager.certificate.description'
                                 defaultMessage='Upload or provide the certificate inline.'
                             />
                         </Typography>
                     </Grid>
                     <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
-                            <Cetificates certificates={certificates} dispatch={dispatch} />
+                            <Certificates certificates={certificates} dispatch={dispatch} />
                         </Box>
                     </Grid>
                     <Grid item xs={12}>
