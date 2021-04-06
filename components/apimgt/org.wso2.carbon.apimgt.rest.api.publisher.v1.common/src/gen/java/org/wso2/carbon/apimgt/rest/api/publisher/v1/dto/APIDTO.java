@@ -220,6 +220,7 @@ return null;
     }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
+    @Scope(name = "apim:api_publish", description="", value ="")
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;

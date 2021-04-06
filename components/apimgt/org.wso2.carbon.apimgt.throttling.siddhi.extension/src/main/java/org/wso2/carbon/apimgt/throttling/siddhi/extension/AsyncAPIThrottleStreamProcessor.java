@@ -158,7 +158,7 @@ public class AsyncAPIThrottleStreamProcessor extends StreamProcessor implements 
                     throttleKey = streamEvent.getOutputData()[0].toString();
                     if (throttledStateMap.containsKey(throttleKey)) {
                         eventCount = throttledStateMap.get(throttleKey).incrementAndGet();
-                        if (eventCount >= maxEventCount) {
+                        if (eventCount > maxEventCount) {
                             complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime, true});
                         } else {
                             complexEventPopulater.populateComplexEvent(streamEvent, new Object[]{expireEventTime, false});

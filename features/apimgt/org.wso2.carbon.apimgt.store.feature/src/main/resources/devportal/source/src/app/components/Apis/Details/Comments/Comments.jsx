@@ -354,6 +354,7 @@ class Comments extends Component {
                         }
                         <Comment
                             comments={comments}
+                            crossTenentUser={this.isCrossTenant(api.provider, AuthManager.getUser())}
                             apiId={api.id}
                             commentsUpdate={this.updateCommentList}
                             allComments={allComments}

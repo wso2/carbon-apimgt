@@ -224,7 +224,7 @@ export default class API extends Resource {
      */
     getAllApplications(callback = null, limit = 25) {
         const promiseGet = this.client.then((client) => {
-            return client.apis.Applications.get_applications({limit}, this._requestMetaData());
+            return client.apis.Applications.get_applications({ limit }, this._requestMetaData());
         });
         if (callback) {
             return promiseGet.then(callback);
@@ -305,7 +305,7 @@ export default class API extends Resource {
      */
     addComment(apiId, comment, replyTo) {
         return this.client.then((client) => {
-            const payload = { apiId ,replyTo};
+            const payload = { apiId, replyTo };
             return client.apis.Comments.addCommentToAPI(
                 payload,
                 { requestBody: comment },
@@ -320,10 +320,10 @@ export default class API extends Resource {
      */
     getAllComments(apiId, limit, offset) {
         return this.client.then((client) => {
-            return client.apis.Comments.getAllCommentsOfAPI({ apiId ,limit: limit, offset: offset}, this._requestMetaData());
+            return client.apis.Comments.getAllCommentsOfAPI({ apiId, limit: limit, offset: offset }, this._requestMetaData());
         });
     }
-    
+
     /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to
@@ -355,6 +355,22 @@ export default class API extends Resource {
         } else {
             return promise;
         }
+    }
+
+    /**
+     * Get all replies for a particular comment
+     * @param {string} apiId api id of the api for which the comment is added
+     * @param {string} commentId id of the comment
+     * @param {string} limit number of replies to retrieve
+     * @param {string} offset the starting point of replies
+     * @returns {promise} promise
+     */
+    getAllCommentReplies(apiId, commentId, limit, offset) {
+        return this.client.then((client) => {
+            return client.apis.Comments.getRepliesOfComment({
+                commentId, apiId, limit, offset,
+            }, this._requestMetaData());
+        });
     }
 
     /**
@@ -498,7 +514,7 @@ export default class API extends Resource {
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSubscriptions(apiId, applicationId, limit=25, callback = null) {
+    getSubscriptions(apiId, applicationId, limit = 25, callback = null) {
         const payload = { apiId };
         if (applicationId) {
             payload[applicationId] = applicationId;
@@ -522,9 +538,9 @@ export default class API extends Resource {
      */
     getWebhookubScriptions(apiId, applicationId) {
         var promisedTopicSubscriptionGet = this.client.then((client) => {
-                return client.apis["Webhooks"].get_webhooks_subscriptions(
-                    { apiId: apiId, applicationId: applicationId });
-            }
+            return client.apis["Webhooks"].get_webhooks_subscriptions(
+                { apiId: apiId, applicationId: applicationId });
+        }
         );
         return promisedTopicSubscriptionGet;
     }
@@ -537,7 +553,7 @@ export default class API extends Resource {
     getAllTopics(apiId) {
         const payload = { apiId };
         const promisedTopicGet = this.client.then((client) => {
-             return client.apis.Topics.get_apis__apiId__topics(payload);
+            return client.apis.Topics.get_apis__apiId__topics(payload);
         });
         return promisedTopicGet;
     }
