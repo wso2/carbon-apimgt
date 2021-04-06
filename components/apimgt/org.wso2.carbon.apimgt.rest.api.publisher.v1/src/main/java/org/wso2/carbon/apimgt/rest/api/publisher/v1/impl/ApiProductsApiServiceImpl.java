@@ -205,10 +205,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                     RestApiUtil.handleBadRequest(
                             "Source type of product document " + documentId + " is not INLINE " + "or MARKDOWN", log);
                 }
-                DocumentationContent content = new DocumentationContent();
-                content.setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
-                content.setTextContent(inlineContent);
-                apiProvider.addDocumentationContent(apiProductId, documentId, tenantDomain, content);
+                PublisherCommonUtils
+                        .addDocumentationContent(documentation, apiProvider, apiProductId, documentId, tenantDomain,
+                                inlineContent);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
@@ -341,6 +340,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIProductIdentifier apiIdentifier = APIMappingUtil.getAPIProductIdentifierFromUUID(apiProductId, tenantDomain);
             newDocumentation.setFilePath(oldDocument.getFilePath());
+            newDocumentation.setId(oldDocument.getId());
             apiProvider.updateDocumentation(apiProductId, newDocumentation, tenantDomain);
 
             //retrieve the updated documentation
@@ -491,7 +491,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (retrievedProduct == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API_PRODUCT, apiProductId, log);
             }
-            APIProduct updatedProduct = PublisherCommonUtils.updateApiProduct(retrievedProduct, body, apiProvider, username);
+            APIProduct updatedProduct = PublisherCommonUtils.updateApiProduct(retrievedProduct, body, apiProvider, username, tenantDomain);
             APIProductDTO updatedProductDTO = getAPIProductByID(apiProductId, apiProvider);
             return Response.ok().entity(updatedProductDTO).build();
         } catch (APIManagementException | FaultGatewaysException e) {
@@ -749,9 +749,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override public Response createAPIProduct(APIProductDTO body, MessageContext messageContext) {
-        String provider = null;
+        String provider = body.getProvider();
         try {
-            APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body, provider,
+            APIProduct createdProduct = PublisherCommonUtils.addAPIProductWithGeneratedSwaggerDefinition(body,
                     RestApiCommonUtil.getLoggedInUsername());
             APIProductDTO createdApiProductDTO = APIMappingUtil.fromAPIProducttoDTO(createdProduct);
             URI createdApiProductUri = new URI(
@@ -832,6 +832,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             apiRevisionDeployment.setRevisionUUID(revisionId);
             apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
+            if (StringUtils.isEmpty(apiRevisionDeploymentDTO.getVhost())) {
+                // vhost is only required when deploying an revision, not required when un-deploying a revision
+                // since the same scheme 'APIRevisionDeployment' is used for deploy and undeploy, handle it here.
+                RestApiUtil.handleBadRequest(
+                        "Required field 'vhost' not found in deployment", log
+                );
+            }
             apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
             apiRevisionDeployments.add(apiRevisionDeployment);
         }

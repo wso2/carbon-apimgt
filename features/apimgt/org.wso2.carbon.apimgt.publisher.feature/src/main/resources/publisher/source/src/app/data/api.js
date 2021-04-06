@@ -482,24 +482,6 @@ class API extends Resource {
     }
 
     /**
-     * Get the swagger of an API
-     * @param id {String} UUID of the API in which the swagger is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
-     */
-    getSwagger(id = this.id, callback = null) {
-        const promise_get = this.client.then(client => {
-            return client.apis['APIs'].getAPISwagger(
-                {
-                    apiId: id,
-                },
-                this._requestMetaData(),
-            );
-        });
-        return promise_get;
-    }
-
-    /**
      * Mock sample responses for Inline Prototyping
      * of a swagger OAS defintion
      *
@@ -767,7 +749,6 @@ class API extends Resource {
      * @deprecated
      */
     updateSwagger(id, swagger) {
-        alert('update swagger() invoked!');
         const promised_update = this.client.then(client => {
             const payload = {
                 apiId: id,
@@ -1861,8 +1842,8 @@ class API extends Resource {
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getSwagger(environmentName = '') {
-        const payload = { apiId: this.id };
+    getSwagger(id = this.id, environmentName = '') {
+        const payload = { apiId: id };
         if(environmentName) {
             payload[environmentName] = environmentName;
         }
@@ -2151,7 +2132,7 @@ class API extends Resource {
                 {
                     serviceKey: serviceKey,
                 },
-                { requestBody: apiMetaData },
+                { requestBody: apiMetaData},
                 this._requestMetaData()
             );
         });
@@ -2663,121 +2644,6 @@ class API extends Resource {
                     externalStoreIds: externalStoreIds,
                 },
                 this._requestMetaData,
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Get the supported alert types by the publisher.
-     * @return {Promise}
-     * */
-    static getSupportedAlertTypes() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        return apiClient.then(client => {
-            return client.apis['Alerts'].getPublisherAlertTypes(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the subscribed alert types by the current user.
-     * @returns {Promise}
-     * */
-    static getSubscribedAlertTypesByUser() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        return apiClient.then(client => {
-            return client.apis['Alert Subscriptions'].getSubscribedAlertTypes(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Subscribe to the provided set of alerts.
-     * @return {Promise}
-     * */
-    static subscribeAlerts(alerts) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        return apiClient.then(client => {
-            return client.apis['Alert Subscriptions'].subscribeToAlerts(
-                {},
-                {
-                    requestBody: alerts
-                },
-                this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Unsubscribe from all the alerts.
-     * @return {Promise}
-     * */
-    static unsubscribeAlerts() {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        return apiClient.then(client => {
-            return client.apis['Alert Subscriptions'].unsubscribeAllAlerts(this._requestMetaData());
-        });
-    }
-
-    /**
-     * @static
-     * Get the configuration for the given alert type.
-     * @param {string} alertType The alert type name.
-     * @return {Promise}
-     * */
-    static getAlertConfigurations(alertType) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        return apiClient.then(client => {
-            return client.apis['Alert Configuration'].getAllAlertConfigs(
-                {
-                    alertType: alertType,
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Add configuration for the given alert type.
-     * @param {string} alertType The alert type name.
-     * @param {object} alertConfig Alert configurations.
-     * @param {string} configId The alert configuration id.
-     * @return {Promise}
-     * */
-    static putAlertConfiguration(alertType, alertConfig, configId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        return apiClient.then(client => {
-            return client.apis['Alert Configuration'].addAlertConfig(
-                {
-                    alertType: alertType,
-                    configurationId: configId,
-                },
-                {
-                    requestBody: alertConfig,
-                },
-                this._requestMetaData(),
-            );
-        });
-    }
-
-    /**
-     * @static
-     * Delete configuration.
-     * @param {string} alertType The alert type name.
-     * @param {string} configId The alert configuration id.
-     * @return {Promise}
-     * */
-    static deleteAlertConfiguration(alertType, configId) {
-        const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
-        return apiClient.then(client => {
-            return client.apis['Alert Configuration'].deleteAlertConfig(
-                {
-                    alertType: alertType,
-                    configurationId: configId,
-                },
-                this._requestMetaData(),
             );
         });
     }

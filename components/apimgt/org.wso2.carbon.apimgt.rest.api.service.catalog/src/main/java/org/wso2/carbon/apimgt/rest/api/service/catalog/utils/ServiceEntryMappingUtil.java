@@ -335,10 +335,11 @@ public class ServiceEntryMappingUtil {
     }
 
     private static String getServicesPaginatedUrl(Integer offset, Integer limit, ServiceFilterParams filterParams) {
-        return  "/service-entries?name=" + filterParams.getName() + "&version=" + filterParams.getVersion()
+        String sortBy = "SERVICE_NAME".equals(filterParams.getSortBy()) ? "name" : "definitionType";
+        return  "/services?name=" + filterParams.getName() + "&version=" + filterParams.getVersion()
                 + "&definitionType=" + filterParams.getDefinitionType() + "&displayName="
                 + filterParams.getDisplayName() + "&key=" + filterParams.getKey() + "&sortBy="
-                + filterParams.getSortBy() + "&sortOrder=" + filterParams.getSortOrder() + "&limit=" + limit
+                + sortBy + "&sortOrder=" + filterParams.getSortOrder() + "&limit=" + limit
                 + "&offset=" + offset;
     }
 

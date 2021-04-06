@@ -19,9 +19,10 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 
 public class VHostUtils {
 
@@ -51,5 +52,38 @@ public class VHostUtils {
                 .filter(v -> StringUtils.equals(v.getHost(), host))
                 .findAny()
                 .orElse(defaultVhost);
+    }
+
+    /**
+     * Resolve vhost to default vhost if the given vhost is null
+     *
+     * @param environmentName Environment name
+     * @param vhost Host of the vhost
+     * @return Resolved vhost
+     * @throws APIManagementException if failed to find the read only environment
+     */
+    public static String resolveIfNullToDefaultVhost(String environmentName, String vhost) throws APIManagementException {
+        if (StringUtils.isEmpty(vhost)) {
+            return APIUtil.getDefaultVhostOfReadOnlyEnvironment(environmentName).getHost();
+        }
+        return vhost;
+    }
+
+    /**
+     * Resolve vhost to null if the given vhost is the default (first) vhost of read only environment
+     *
+     * @param environmentName Environment name
+     * @param vhost Host of the vhost
+     * @return Resolved vhost
+     * @throws APIManagementException if failed to find the read only environment
+     */
+    public static String resolveIfDefaultVhostToNull(String environmentName, String vhost) throws APIManagementException {
+        // set VHost as null, if it is the default vhost of the read only environment
+        if (APIUtil.getReadOnlyEnvironments().get(environmentName) != null
+                && StringUtils.equalsIgnoreCase(vhost,
+                APIUtil.getDefaultVhostOfReadOnlyEnvironment(environmentName).getHost())) {
+            return null;
+        }
+        return vhost;
     }
 }

@@ -52,15 +52,14 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Pagination;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Pagination;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
@@ -70,9 +69,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.Workflow;
-import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
-import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
-import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -80,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.HeaderCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
@@ -91,6 +88,8 @@ import org.wso2.carbon.apimgt.api.model.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
+import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
@@ -112,6 +111,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
 import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
@@ -127,7 +127,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -277,6 +276,7 @@ public class ApiMgtDAO {
             ps.setString(3, dto.getStatus().toString());
             ps.setString(4, dto.getKeyManager());
             ps.setString(5, UUID.randomUUID().toString());
+            ps.setString(6, APIConstants.OAuthAppMode.CREATED.name());
             ps.execute();
 
             conn.commit();
@@ -1127,6 +1127,7 @@ public class ApiMgtDAO {
                             APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
                     apiProductIdentifier.setProductId(resultSet.getInt("API_ID"));
+                    apiProductIdentifier.setUUID(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiProductIdentifier);
                 } else {
                     APIIdentifier apiIdentifier = new APIIdentifier(
@@ -1134,6 +1135,7 @@ public class ApiMgtDAO {
                             resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"),
                             resultSet.getString("API_UUID"));
                     apiIdentifier.setId(resultSet.getInt("API_ID"));
+                    apiIdentifier.setUuid(resultSet.getString("API_UUID"));
                     subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 }
 
@@ -4184,7 +4186,7 @@ public class ApiMgtDAO {
      * @return
      * @throws APIManagementException
      */
-    public Application[] getApplicationsByOwner(String userId) throws APIManagementException {
+    public Application[] getApplicationsByOwner(String userId, int limit, int offset) throws APIManagementException {
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -4197,6 +4199,8 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, userId);
+            prepStmt.setInt(2, offset);
+            prepStmt.setInt(3, limit);
             rs = prepStmt.executeQuery();
 
             ArrayList<Application> applicationsList = new ArrayList<Application>();
@@ -4531,21 +4535,20 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Returns applications within a tenant domain with pagination
-     *
-     * @param tenantId          The tenantId.
-     * @param start             The start index.
-     * @param offset            The offset.
-     * @param searchOwner       The search string.
-     * @param searchApplication The search string.
-     * @param sortOrder         The sort order.
-     * @param sortColumn        The sort column.
-     * @return Application[] The array of applications.
+     * Retrieve the applications by user/application name
+     * @param user
+     * @param owner
+     * @param tenantId
+     * @param limit
+     * @param offset
+     * @param sortBy
+     * @param sortOrder
+     * @param appName
+     * @return
      * @throws APIManagementException
      */
-    public List<Application> getApplicationsByTenantIdWithPagination(int tenantId, int start, int offset,
-                                                                     String searchOwner, String searchApplication,
-                                                                     String sortColumn, String sortOrder)
+    public Application[] getApplicationsWithPagination(String user, String owner, int tenantId, int limit ,
+                                                       int offset, String sortBy, String sortOrder, String appName)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -4553,19 +4556,21 @@ public class ApiMgtDAO {
         String sqlQuery = null;
         List<Application> applicationList = new ArrayList<>();
         sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_BY_TENANT_ID");
+        Application[] applications = null;
         try {
             connection = APIMgtDBUtil.getConnection();
-            if (connection.getMetaData().getDriverName().contains("Oracle")) {
-                offset = start + offset;
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName.contains("Oracle")) {
+                limit = offset + limit;
             }
-            sqlQuery = sqlQuery.replace("$1", sortColumn);
+            sqlQuery = sqlQuery.replace("$1", sortBy);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setInt(1, tenantId);
-            prepStmt.setString(2, "%" + searchOwner + "%");
-            prepStmt.setString(3, "%" + searchApplication + "%");
-            prepStmt.setInt(4, start);
-            prepStmt.setInt(5, offset);
+            prepStmt.setString(2, "%" + owner + "%");
+            prepStmt.setString(3, "%" + appName + "%");
+            prepStmt.setInt(4, offset);
+            prepStmt.setInt(5, limit);
             rs = prepStmt.executeQuery();
             Application application;
             while (rs.next()) {
@@ -4583,12 +4588,13 @@ public class ApiMgtDAO {
                 application.setOwner(subscriberName);
                 applicationList.add(application);
             }
+            applications = applicationList.toArray(new Application[applicationList.size()]);
         } catch (SQLException e) {
             handleException("Error while obtaining details of the Application for tenant id : " + tenantId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-        return applicationList;
+        return applications;
     }
 
     public int getApplicationsCount(int tenantId, String searchOwner, String searchApplication) throws
@@ -9052,6 +9058,11 @@ public class ApiMgtDAO {
                     apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
                     apiKey.setType(resultSet.getString("KEY_TYPE"));
                     apiKey.setState(resultSet.getString("STATE"));
+                    String createMode = resultSet.getString("CREATE_MODE");
+                    if (StringUtils.isEmpty(createMode)) {
+                        createMode = APIConstants.OAuthAppMode.CREATED.name();
+                    }
+                    apiKey.setCreateMode(createMode);
                     try (InputStream appInfo = resultSet.getBinaryStream("APP_INFO")) {
                         if (appInfo != null) {
                             apiKey.setAppMetaData(IOUtils.toString(appInfo));
@@ -9071,8 +9082,8 @@ public class ApiMgtDAO {
     public APIKey getKeyMappingFromApplicationIdAndKeyMappingId(int applicationId, String keyMappingId)
             throws APIManagementException {
 
-        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE FROM AM_APPLICATION_KEY_MAPPING " +
-                "WHERE APPLICATION_ID=? AND UUID = ?";
+        final String query = "SELECT UUID,CONSUMER_KEY,KEY_MANAGER,KEY_TYPE,STATE,CREATE_MODE FROM " +
+                "AM_APPLICATION_KEY_MAPPING WHERE APPLICATION_ID=? AND UUID = ?";
         Set<APIKey> apiKeyList = new HashSet<>();
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -9086,6 +9097,11 @@ public class ApiMgtDAO {
                     apiKey.setKeyManager(resultSet.getString("KEY_MANAGER"));
                     apiKey.setType(resultSet.getString("KEY_TYPE"));
                     apiKey.setState(resultSet.getString("STATE"));
+                    String createMode = resultSet.getString("CREATE_MODE");
+                    if (StringUtils.isEmpty(createMode)) {
+                        createMode = APIConstants.OAuthAppMode.CREATED.name();
+                    }
+                    apiKey.setCreateMode(createMode);
                     return apiKey;
                 }
             }
@@ -9252,7 +9268,7 @@ public class ApiMgtDAO {
                         api.setUuid(resultSet.getString("API_UUID"));
                         api.setContext(resultSet.getString("CONTEXT"));
                         api.setType(resultSet.getString("API_TYPE"));
-                        api.setStatus(resultSet.getNString("STATUS"));
+                        api.setStatus(resultSet.getString("STATUS"));
                         return api;
                     }
                 }
@@ -13072,6 +13088,25 @@ public class ApiMgtDAO {
         return apiLevelTier;
     }
 
+    public String getAPILevelTier(String apiUUID, String revisionUUID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.GET_REVISIONED_API_TIER_SQL)) {
+                preparedStatement.setString(1, apiUUID);
+                preparedStatement.setString(2, revisionUUID);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getString("API_TIER");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Connection", e);
+        }
+        return null;
+    }
+
     private boolean isBlockConditionExist(String conditionType, String conditionValue, String tenantDomain, Connection
             connection) throws APIManagementException {
         PreparedStatement checkIsExistPreparedStatement = null;
@@ -13520,8 +13555,9 @@ public class ApiMgtDAO {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
+            String dbProductName = conn.getMetaData().getDatabaseProductName();
             try (PreparedStatement prepStmt = conn.prepareStatement(SQLConstants.INSERT_ENVIRONMENT_SQL,
-                    new String[]{"ID"})) {
+                    new String[]{DBUtils.getConvertedAutoGeneratedColumnName(dbProductName, "ID")})) {
                 prepStmt.setString(1, uuid);
                 prepStmt.setString(2, environment.getName());
                 prepStmt.setString(3, tenantDomain);
@@ -14037,19 +14073,24 @@ public class ApiMgtDAO {
                 try (ResultSet rs = getURLMappingsStatement.executeQuery()) {
                     while (rs.next()) {
                         URITemplate uriTemplate = new URITemplate();
-                        uriTemplate.setHTTPVerb(rs.getString(1));
-                        uriTemplate.setAuthType(rs.getString(2));
-                        uriTemplate.setUriTemplate(rs.getString(3));
-                        uriTemplate.setThrottlingTier(rs.getString(4));
-                        uriTemplate.setMediationScript(rs.getString(5));
-                        if (!StringUtils.isEmpty(rs.getString(6))) {
+                        uriTemplate.setHTTPVerb(rs.getString("HTTP_METHOD"));
+                        uriTemplate.setAuthType(rs.getString("AUTH_SCHEME"));
+                        uriTemplate.setUriTemplate(rs.getString("URL_PATTERN"));
+                        uriTemplate.setThrottlingTier(rs.getString("THROTTLING_TIER"));
+                        String script = null;
+                        InputStream mediationScriptBlob = rs.getBinaryStream("MEDIATION_SCRIPT");
+                        if (mediationScriptBlob != null) {
+                            script = APIMgtDBUtil.getStringFromInputStream(mediationScriptBlob);
+                        }
+                        uriTemplate.setMediationScript(script);
+                        if (!StringUtils.isEmpty(rs.getString("SCOPE_NAME"))) {
                             Scope scope = new Scope();
-                            scope.setKey(rs.getString(6));
+                            scope.setKey(rs.getString("SCOPE_NAME"));
                             uriTemplate.setScope(scope);
                         }
-                        if (rs.getInt(7) != 0) {
+                        if (rs.getInt("API_ID") != 0) {
                             // Adding api id to uri template id just to store value
-                            uriTemplate.setId(rs.getInt(7));
+                            uriTemplate.setId(rs.getInt("API_ID"));
                         }
                         urlMappingList.add(uriTemplate);
                     }
@@ -15178,13 +15219,10 @@ public class ApiMgtDAO {
                     workflow.setTenantId(rs.getInt("TENANT_ID"));
                     workflow.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                     workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                    Blob metadataBlob = rs.getBlob("WF_METADATA");
-                    Blob propertiesBlob = rs.getBlob("WF_PROPERTIES");
+                    InputStream targetStream = rs.getBinaryStream("WF_METADATA");
+                    InputStream propertiesTargetStream = rs.getBinaryStream("WF_PROPERTIES");
 
-                    byte[] metadataByte;
-                    if (metadataBlob != null) {
-                        metadataByte = metadataBlob.getBytes(1L, (int) metadataBlob.length());
-                        InputStream targetStream = new ByteArrayInputStream(metadataByte);
+                    if (targetStream != null) {
                         String metadata = APIMgtDBUtil.getStringFromInputStream(targetStream);
                         Gson metadataGson = new Gson();
                         JSONObject metadataJson = metadataGson.fromJson(metadata, JSONObject.class);
@@ -15194,10 +15232,7 @@ public class ApiMgtDAO {
                         workflow.setMetadata(metadataJson);
                     }
 
-                    byte[] propertiesByte;
-                    if (propertiesBlob != null) {
-                        propertiesByte = propertiesBlob.getBytes(1L, (int) propertiesBlob.length());
-                        InputStream propertiesTargetStream = new ByteArrayInputStream(propertiesByte);
+                    if (propertiesTargetStream != null) {
                         String properties = APIMgtDBUtil.getStringFromInputStream(propertiesTargetStream);
                         Gson propertiesGson = new Gson();
                         JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
@@ -15654,7 +15689,7 @@ public class ApiMgtDAO {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    revisionId = rs.getInt(1);
+                    revisionId = rs.getInt("REVISIONS_CREATED");
                 }
             }
         } catch (SQLException e) {
@@ -15886,7 +15921,8 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
+                addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16031,7 +16067,7 @@ public class ApiMgtDAO {
                     if (!StringUtils.isEmpty(environmentName)) {
                         apiRevisionDeployment.setDeployment(environmentName);
                         String vhost = rs.getString("VHOST");
-                        apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                        apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                         //apiRevisionDeployment.setRevisionUUID(rs.getString(8));
                         apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                         apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16082,7 +16118,6 @@ public class ApiMgtDAO {
      */
     public void addAPIRevisionDeployment(String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
-        Map<String, org.wso2.carbon.apimgt.impl.dto.Environment> readOnlyEnvs = APIUtil.getReadOnlyEnvironments();
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
@@ -16093,13 +16128,8 @@ public class ApiMgtDAO {
                     String envName = apiRevisionDeployment.getDeployment();
                     String vhost = apiRevisionDeployment.getVhost();
                     // set VHost as null, if it is the default vhost of the read only environment
-                    if (readOnlyEnvs.get(envName) != null
-                            && StringUtils.equalsIgnoreCase(vhost,
-                            APIUtil.getDefaultVhostOfReadOnlyEnvironment(envName).getHost())) {
-                        vhost = null;
-                    }
                     statement.setString(1, apiRevisionDeployment.getDeployment());
-                    statement.setString(2, vhost);
+                    statement.setString(2, VHostUtils.resolveIfDefaultVhostToNull(envName, vhost));
                     statement.setString(3, apiRevisionId);
                     statement.setBoolean(4, apiRevisionDeployment.isDisplayOnDevportal());
                     statement.addBatch();
@@ -16136,7 +16166,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16167,7 +16197,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16200,7 +16230,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16256,7 +16286,7 @@ public class ApiMgtDAO {
                     String environmentName = rs.getString("NAME");
                     String vhost = rs.getString("VHOST");
                     apiRevisionDeployment.setDeployment(environmentName);
-                    apiRevisionDeployment.setVhost(getResolvedVhost(environmentName, vhost));
+                    apiRevisionDeployment.setVhost(VHostUtils.resolveIfNullToDefaultVhost(environmentName, vhost));
                     apiRevisionDeployment.setRevisionUUID(rs.getString("REVISION_UUID"));
                     apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                     apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOYED_TIME"));
@@ -16570,7 +16600,8 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                restoreAPIRevisionMetaDataToWorkingCopy(connection, apiRevision.getApiUUID(),
+                        apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16626,7 +16657,7 @@ public class ApiMgtDAO {
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
                 removeGraphQLComplexityStatement.executeUpdate();
-
+                deleteAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16835,7 +16866,7 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -17123,17 +17154,44 @@ public class ApiMgtDAO {
         }
     }
 
-    /**
-     *
-     * @param environmentName Environment name
-     * @param vhost Host of the vhost
-     * @return Resolved vhost
-     * @throws APIManagementException if failed to find the read only environment
-     */
-    private String getResolvedVhost(String environmentName, String vhost) throws APIManagementException {
-        if (StringUtils.isEmpty(vhost)) {
-            return APIUtil.getDefaultVhostOfReadOnlyEnvironment(environmentName).getHost();
+    private void updateLatestRevisionNumber(Connection connection, String apiUUID, int revisionId) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.UPDATE_REVISION_CREATED_BY_API_SQL)) {
+            preparedStatement.setInt(1, revisionId);
+            preparedStatement.setString(2, apiUUID);
+            preparedStatement.executeUpdate();
         }
-        return vhost;
+    }
+
+    private void addAPIRevisionMetaData(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.ADD_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.setString(3, apiUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void deleteAPIRevisionMetaData(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.DELETE_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+    private void restoreAPIRevisionMetaDataToWorkingCopy(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.RESTORE_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.setString(3, apiUUID);
+            preparedStatement.executeUpdate();
+        }
     }
 }

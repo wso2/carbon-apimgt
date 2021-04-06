@@ -91,7 +91,7 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
         RoleAliasListDTO roleAliasListDTO = new RoleAliasListDTO();
         if (roleMapping != null) {
             roleAliasListDTO = SystemScopesMappingUtil.fromRoleAliasListToRoleAliasListDTO(
-                    SystemScopesMappingUtil.createMapOfRoleMapping((roleMapping)));
+                    SystemScopesMappingUtil.createMapOfRoleMapping(roleMapping));
         }
         return Response.ok().entity(roleAliasListDTO).build();
     }

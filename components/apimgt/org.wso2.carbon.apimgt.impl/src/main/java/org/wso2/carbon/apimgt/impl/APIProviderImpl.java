@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -32,11 +31,11 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -82,7 +81,6 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -112,8 +110,8 @@ import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -255,13 +253,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -277,7 +272,6 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMu
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
-    private static Map<String,List<Integer>> revisionIDList = new HashMap<>();
     private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
 
     private final String userNameWithoutChange;
@@ -5388,26 +5382,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void addAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException {
+    public void addAPIProductSwagger(String productId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
+                APIProduct apiProduct, String orgId) throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
         apiProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping, apiProductSwagger);
-        saveSwagger20Definition(apiProduct.getId(), apiProductSwagger);
+        saveSwaggerDefinition(productId, apiProductSwagger, orgId);
         apiProduct.setDefinition(apiProductSwagger);
     }
 
     @Override
-    public void updateAPIProductSwagger(Map<API, List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct)
-            throws APIManagementException, FaultGatewaysException {
+    public void updateAPIProductSwagger(String productId, Map<API,
+            List<APIProductResource>> apiToProductResourceMapping, APIProduct apiProduct, String orgId)
+            throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData updatedData = new SwaggerData(apiProduct);
         String existingProductSwagger = getAPIDefinitionOfAPIProduct(apiProduct);
         String updatedProductSwagger = parser.generateAPIDefinition(updatedData, existingProductSwagger);
         updatedProductSwagger = OASParserUtil.updateAPIProductSwaggerOperations(apiToProductResourceMapping,
                 updatedProductSwagger);
-        saveSwagger20Definition(apiProduct.getId(), updatedProductSwagger);
+        saveSwaggerDefinition(productId, updatedProductSwagger, orgId);
         apiProduct.setDefinition(updatedProductSwagger);
     }
 
@@ -6283,44 +6278,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void configureMonetizationInAPIArtifact(API api) throws APIManagementException {
 
-        boolean transactionCommitted = false;
+        Organization org = new Organization(tenantDomain);
         try {
-            registry.beginTransaction();
-            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            if (artifactManager == null) {
-                handleException("Artifact manager is null when updating monetization data for API ID " + api.getId());
-            }
-            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-            //set monetization status (i.e - enabled or disabled)
-            artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_STATUS,
-                    Boolean.toString(api.getMonetizationStatus()));
-            //clear existing monetization properties
-            artifact.removeAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES);
-            //set new additional monetization data
-            if (api.getMonetizationProperties() != null) {
-                artifact.setAttribute(APIConstants.Monetization.API_MONETIZATION_PROPERTIES,
-                        api.getMonetizationProperties().toJSONString());
-            }
-            artifactManager.updateGenericArtifact(artifact);
-            registry.commitTransaction();
-            transactionCommitted = true;
-        } catch (Exception e) {
-            try {
-                registry.rollbackTransaction();
-            } catch (RegistryException re) {
-                handleException("Error while rolling back the transaction (monetization status update) for API: " +
-                        api.getId().getApiName(), re);
-            }
-            handleException("Error while performing registry transaction (monetization status update) operation", e);
-        } finally {
-            try {
-                if (!transactionCommitted) {
-                    registry.rollbackTransaction();
-                }
-            } catch (RegistryException e) {
-                handleException("Error occurred while rolling back the transaction (monetization status update).", e);
-            }
+            apiPersistenceInstance.updateAPI(org, APIMapper.INSTANCE.toPublisherApi(api));
+        } catch (APIPersistenceException e) {
+            throw new APIManagementException("Error while updating API details", e);
         }
     }
 
@@ -6867,8 +6829,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param blockConditionsDTO Blockcondition Dto event
      */
     private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
+        String conditionType = blockConditionsDTO.getConditionType();
+        String conditionValue = blockConditionsDTO.getConditionValue();
+        if (APIConstants.BLOCKING_CONDITIONS_IP.equals(conditionType) ||
+                APIConstants.BLOCK_CONDITION_IP_RANGE.equals(conditionType)) {
+            conditionValue = StringEscapeUtils.escapeJava(conditionValue);
+        }
         Object[] objects = new Object[]{blockConditionsDTO.getConditionId(), blockConditionsDTO.getConditionType(),
-                blockConditionsDTO.getConditionValue(),state, tenantDomain};
+                conditionValue, state, tenantDomain};
         Event blockingMessage = new Event(APIConstants.BLOCKING_CONDITIONS_STREAM_ID, System.currentTimeMillis(),
                 null, null, objects);
         ThrottleProperties throttleProperties = getAPIManagerConfiguration().getThrottleProperties();
@@ -7526,17 +7494,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         try {
+            Registry sysRegistry = getRegistryService().getGovernanceSystemRegistry();
             // Need user name with tenant domain to get correct domain name from
             // MultitenantUtils.getTenantDomain(username)
             String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-            if (!registry.resourceExists(resourcePath)) {
+            if (!sysRegistry.resourceExists(resourcePath)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Resource does not exist in the path : " + resourcePath + " this can happen if this is in the "
                             + "middle of the new " + identifierType + " creation, hence not checking the access control");
                 }
                 return;
             }
-            Resource resource = registry.get(resourcePath);
+            Resource resource = sysRegistry.get(resourcePath);
             if (resource == null) {
                 return;
             }
@@ -8589,6 +8558,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    private API getAPIbyUUID(String apiId, APIRevision apiRevision)
+            throws APIManagementException {
+
+        API api = getAPIbyUUID(apiRevision.getApiUUID(), tenantDomain);
+        api.setRevisionedApiId(apiRevision.getRevisionUUID());
+        api.setRevisionId(apiRevision.getId());
+        api.setUuid(apiId);
+        api.getId().setUuid(apiId);
+        return api;
+    }
+
     @Override
     public API getAPIbyUUID(String uuid, String organizationId) throws APIManagementException {
         Organization org = new Organization(organizationId);
@@ -8604,6 +8584,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIInformation(uuid, APIConstants.SUPER_TENANT_DOMAIN, org, api);
                 loadMediationPoliciesToAPI(api, organizationId);
                 populateRevisionInformation(api, uuid);
+                populateAPITier(api);
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
                 return api;
@@ -8617,6 +8598,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e);
+        }
+    }
+
+    private void populateAPITier(API api) throws APIManagementException {
+
+        if (api.isRevision()) {
+            String apiLevelTier = apiMgtDAO.getAPILevelTier(api.getRevisionedApiId(), api.getUuid());
+            api.setApiLevelPolicy(apiLevelTier);
         }
     }
 
@@ -8866,7 +8855,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String userame = userNameWithoutChange;
         Organization org = new Organization(tenantDomain);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
-        String[] roles = APIUtil.getFilteredUserRoles(userame);;
+        String[] roles = APIUtil.getFilteredUserRoles(userame);
         UserContext ctx = new UserContext(userame, org, properties, roles);
 
 
@@ -9193,24 +9182,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED,
                     apiRevision.getApiUUID()));
         }
-        List<Integer> idList = revisionIDList.get(apiRevision.getApiUUID());
-        if (idList == null) {
-            idList = new ArrayList<>();
-        }
-        int maxId = 0;
-        for (int id : idList) {
-            if (maxId < id) {
-                maxId = id;
-            }
-        }
 
-        int revisionId;
-        int revisionIdStored = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID());
-        if (maxId < revisionIdStored) {
-            revisionId = revisionIdStored + 1;
-        } else {
-            revisionId = maxId + 1;
-        }
+        int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
         apiRevision.setId(revisionId);
         APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
         if (apiId == null) {
@@ -9235,8 +9208,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIRevision(apiRevision);
-        idList.add(revisionId);
-        revisionIDList.put(apiRevision.getApiUUID(), idList);
         if (importExportAPI != null) {
             try {
                 File artifact = importExportAPI
@@ -9345,6 +9316,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         API api = getAPIbyUUID(apiId, apiRevision, organizationId);
         Set<String> environmentsToAdd = new HashSet<>();
+        Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
@@ -9354,13 +9326,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
+            gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
             removeFromGateway(api, environmentsToRemove, environmentsToAdd);
         }
         GatewayArtifactsMgtDAO.getInstance()
-                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
+                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, gatewayVhosts,
+                        environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
             gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
@@ -9554,24 +9528,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED,
                     apiRevision.getApiUUID()));
         }
-        List<Integer> idList = revisionIDList.get(apiRevision.getApiUUID());
-        if (idList == null) {
-            idList = new ArrayList<>();
-        }
-        int maxId = 0;
-        for (int id : idList) {
-            if (maxId < id) {
-                maxId = id;
-            }
-        }
-
-        int revisionId;
-        int revisionIdStored = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID());
-        if (maxId < revisionIdStored) {
-            revisionId = revisionIdStored + 1;
-        } else {
-            revisionId = maxId +1 ;
-        }
+        int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
         apiRevision.setId(revisionId);
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
         if (apiProductIdentifier == null) {
@@ -9585,8 +9542,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiProductIdentifier.getUUID(), revisionId);
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
         }
         if (StringUtils.isEmpty(revisionUUID)) {
             String errorMessage = "Failed to retrieve revision uuid";
@@ -9594,8 +9551,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIProductRevision(apiRevision);
-        idList.add(revisionId);
-        revisionIDList.put(apiRevision.getApiUUID(),idList);
         try {
             File artifact = importExportAPI
                     .exportAPIProduct(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON,
@@ -9608,7 +9563,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
                         apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, artifact);
             }
-        } catch (APIImportExportException|ArtifactSynchronizerException e) {
+        } catch (APIImportExportException | ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while Store the Revision Artifact",
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
@@ -9635,6 +9590,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiProductId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         Set<String> environmentsToAdd = new HashSet<>();
+        Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
@@ -9644,13 +9600,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
+            gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
         if (environmentsToRemove.size() > 0) {
             apiMgtDAO.removeAPIRevisionDeployment(apiProductId,environmentsToRemove);
             removeFromGateway(product, tenantDomain, environmentsToRemove, environmentsToAdd);
         }
         GatewayArtifactsMgtDAO.getInstance()
-                .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, environmentsToRemove);
+                .addAndRemovePublishedGatewayLabels(apiProductId, apiRevisionId, environmentsToAdd, gatewayVhosts,
+                        environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
             gatewayManager.deployToGateway(product, tenantDomain, environmentsToAdd);
@@ -9768,8 +9726,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIRevisionDeployment> currentApiRevisionDeploymentList =
                 apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        API api = getAPIbyUUID(apiId, organizationId);
+        API api = getAPIbyUUID(apiId, apiRevision);
         Set<String> environmentsToAdd = new HashSet<>();
+        Map<String, String> gatewayVhosts = new HashMap<>();
         Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
             for (APIRevisionDeployment currentapiRevisionDeployment : currentApiRevisionDeploymentList) {
@@ -9779,16 +9738,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             environmentsToAdd.add(apiRevisionDeployment.getDeployment());
+            gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
         if (environmentsToRemove.size() > 0) {
-            apiMgtDAO.removeAPIRevisionDeployment(apiId,environmentsToRemove);
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
             removeFromGateway(api, environmentsToRemove, environmentsToAdd);
         }
         GatewayArtifactsMgtDAO.getInstance()
-                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, environmentsToRemove);
+                .addAndRemovePublishedGatewayLabels(apiId, apiRevisionId, environmentsToAdd, gatewayVhosts,
+                        environmentsToRemove);
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToAdd.size() > 0) {
             gatewayManager.deployToGateway(api, tenantDomain, environmentsToAdd);
+        }
+        String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
+        String defaultVersion = getDefaultVersion(apiIdentifier);
+        apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
+        if (publishedDefaultVersion != null) {
+            if (apiIdentifier.getVersion().equals(defaultVersion)) {
+                api.setAsPublishedDefaultVersion(true);
+            }
+            if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
+                APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
+                        api.getId().getApiName(), publishedDefaultVersion);
+                sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier);
+            }
         }
     }
 

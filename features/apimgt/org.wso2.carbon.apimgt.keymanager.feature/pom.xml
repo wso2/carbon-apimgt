@@ -54,6 +54,10 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
         </dependency>
         <dependency>
@@ -121,6 +125,7 @@
                                 </bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>commons-codec:commons-codec</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>

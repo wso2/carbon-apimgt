@@ -57,6 +57,10 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO
                 .setConsumerSecret((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_SECRET));
         applicationKeyDTO.setKeyState((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_STATE));
+        Object mode = keyDetails.get(APIConstants.FrontEndParameterNames.MODE);
+        if (mode != null) {
+            applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf((String) mode));
+        }
         try {
             String appDetailsString = (String) keyDetails.get(ApplicationConstants.OAUTH_APP_DETAILS);
             if (appDetailsString != null) {
@@ -73,16 +77,16 @@ public class ApplicationKeyMappingUtil {
 
                     Object additionalPropertiesObj = appDetailsJsonObj.get(APIConstants.JSON_ADDITIONAL_PROPERTIES);
                     if (additionalPropertiesObj != null) {
-                        if (additionalPropertiesObj instanceof JSONObject){
+                        if (additionalPropertiesObj instanceof JSONObject) {
                             Map additionalPropertiesMap = new HashMap();
                             additionalPropertiesMap.putAll((Map) additionalPropertiesObj);
                             applicationKeyDTO.setAdditionalProperties(additionalPropertiesMap);
-                        }else if (additionalPropertiesObj instanceof String){
+                        } else if (additionalPropertiesObj instanceof String) {
                             applicationKeyDTO.setAdditionalProperties(additionalPropertiesObj);
                         }
 
                     }
-                    
+
                 }
             }
 
@@ -115,6 +119,7 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
         applicationKeyDTO.setKeyState(apiKey.getState());
+        applicationKeyDTO.setMode(ApplicationKeyDTO.ModeEnum.valueOf(apiKey.getCreateMode()));
         applicationKeyDTO.setKeyManager(apiKey.getKeyManager());
         applicationKeyDTO.setKeyMappingId(apiKey.getMappingId());
         if (apiKey.getGrantTypes() != null) {

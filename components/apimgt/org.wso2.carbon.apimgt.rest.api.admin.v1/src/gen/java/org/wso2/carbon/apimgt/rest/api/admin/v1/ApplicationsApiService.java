@@ -24,5 +24,5 @@ import javax.ws.rs.core.SecurityContext;
 public interface ApplicationsApiService {
       public Response applicationsApplicationIdChangeOwnerPost(String owner, String applicationId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdDelete(String applicationId, MessageContext messageContext) throws APIManagementException;
-      public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String name, String tenantDomain, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsGet(String user, Integer limit, Integer offset, String accept, String name, String tenantDomain, String sortBy, String sortOrder, MessageContext messageContext) throws APIManagementException;
 }

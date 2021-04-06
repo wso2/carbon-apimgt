@@ -46,7 +46,7 @@ import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
@@ -439,7 +439,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
-                if (Arrays.asList(tokenScopes).contains("apim:app_import_export") || comment.getUser().equals(username)) {
+                if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
                     if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);

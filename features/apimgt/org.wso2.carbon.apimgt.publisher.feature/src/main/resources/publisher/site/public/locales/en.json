@@ -153,28 +153,10 @@
       "value": "Context"
     }
   ],
-  "Apis.Create.Components.DefaultAPIForm.callbackUrl": [
-    {
-      "type": 0,
-      "value": "Callback URL"
-    }
-  ],
-  "Apis.Create.Components.DefaultAPIForm.description": [
-    {
-      "type": 0,
-      "value": "Description"
-    }
-  ],
   "Apis.Create.Components.DefaultAPIForm.name": [
     {
       "type": 0,
       "value": "Name"
-    }
-  ],
-  "Apis.Create.Components.DefaultAPIForm.urlmapping": [
-    {
-      "type": 0,
-      "value": "URL Mapping"
     }
   ],
   "Apis.Create.Components.DefaultAPIForm.version": [
@@ -204,7 +186,7 @@
   "Apis.Create.Default.APICreateDefault.api.sub.heading": [
     {
       "type": 0,
-      "value": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+      "value": "Create an API by providing a Name, a Version, a Context and Backend Endpoint (optional)"
     }
   ],
   "Apis.Create.Default.APICreateDefault.apiProduct.heading": [
@@ -270,7 +252,7 @@
   "Apis.Create.Default.APICreateDefault.webSocket.sub.heading": [
     {
       "type": 0,
-      "value": "Create a WebSocket API by providing a Name, a Context, and Business Plans (optional)."
+      "value": "Create a WebSocket API by providing a Name, and a Context."
     }
   ],
   "Apis.Create.GraphQL.ApiCreateGraphQL.back": [
@@ -619,12 +601,6 @@
     {
       "type": 0,
       "value": "Show Diff"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.yes": [
-    {
-      "type": 0,
-      "value": "SAVE"
     }
   ],
   "Apis.Details.APIDefinition.APIDefinition.convert.to": [
@@ -1533,6 +1509,12 @@
       "value": "* You are not authorized to update particular fields of the API due to insufficient permissions"
     }
   ],
+  "Apis.Details.Configuration.Resources.save": [
+    {
+      "type": 0,
+      "value": "Save"
+    }
+  ],
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
     {
       "type": 0,
@@ -1939,12 +1921,6 @@
     {
       "type": 0,
       "value": "Signing Algortithm"
-    }
-  ],
-  "Apis.Details.Configuration.components.Subscription.subscription": [
-    {
-      "type": 0,
-      "value": "Subscription"
     }
   ],
   "Apis.Details.Configuration.components.Tags.helper": [
@@ -3071,12 +3047,6 @@
       "value": "Endpoint Security User Name/ Password should not be empty"
     }
   ],
-  "Apis.Details.Endpoints.Endpoints.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.Endpoints.Endpoints.update.not.allowed": [
     {
       "type": 0,
@@ -3443,10 +3413,28 @@
       "value": "*You are not authorized to view certificates due to insufficient permissions"
     }
   ],
+  "Apis.Details.Endpoints.GenericEndpoint.check.endpoint": [
+    {
+      "type": 0,
+      "value": "Check endpoint status"
+    }
+  ],
+  "Apis.Details.Endpoints.GenericEndpoint.config.endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint configurations"
+    }
+  ],
   "Apis.Details.Endpoints.GenericEndpoint.no.ep.error": [
     {
       "type": 0,
       "value": "Endpoint URL should not be empty"
+    }
+  ],
+  "Apis.Details.Endpoints.GenericEndpoint.security.endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint security"
     }
   ],
   "Apis.Details.Endpoints.GenericEndpoint.service.url.input": [
@@ -3737,22 +3725,10 @@
       "value": "Deployed Revision"
     }
   ],
-  "Apis.Details.Environments.Environments.new.revision.name.heading1": [
-    {
-      "type": 0,
-      "value": "Revision Name:"
-    }
-  ],
-  "Apis.Details.Environments.Environments.new.revision.name.heading2": [
-    {
-      "type": 0,
-      "value": "Revision Name:"
-    }
-  ],
   "Apis.Details.Environments.Environments.revision.create.heading": [
     {
       "type": 0,
-      "value": "Create Revision"
+      "value": "Create New Revision (From Current API)"
     }
   ],
   "Apis.Details.Environments.Environments.revision.delete": [
@@ -3840,7 +3816,7 @@
     },
     {
       "type": 0,
-      "value": " ?"
+      "value": " (To Current API)?"
     }
   ],
   "Apis.Details.Environments.Environments.revision.restore.confirm.ok": [
@@ -4783,12 +4759,6 @@
       "value": "Deploy"
     }
   ],
-  "Apis.Details.Overview.CustomizedStepper.Deployments": [
-    {
-      "type": 0,
-      "value": "Deployments"
-    }
-  ],
   "Apis.Details.Overview.CustomizedStepper.Develop": [
     {
       "type": 0,
@@ -4819,24 +4789,6 @@
       "value": "Blocked"
     }
   ],
-  "Apis.Details.Overview.CustomizedStepper.business.plan.businessPlans": [
-    {
-      "type": 0,
-      "value": "Business plans"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.business.plan.endpoint": [
-    {
-      "type": 0,
-      "value": "Endpoint"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.create": [
-    {
-      "type": 0,
-      "value": "Created"
-    }
-  ],
   "Apis.Details.Overview.CustomizedStepper.deprecated": [
     {
       "type": 0,
@@ -4861,22 +4813,16 @@
       "value": "Published (Current API)"
     }
   ],
-  "Apis.Details.Overview.CustomizedStepper.published": [
-    {
-      "type": 0,
-      "value": "Published"
-    }
-  ],
   "Apis.Details.Overview.CustomizedStepper.retired": [
     {
       "type": 0,
       "value": "Retired"
     }
   ],
-  "Apis.Details.Overview.Overview.topic.createtopics": [
+  "Apis.Details.Overview.CustomizedStepper.view.devportal": [
     {
       "type": 0,
-      "value": "Create Topics"
+      "value": "View in devportal"
     }
   ],
   "Apis.Details.Overview.Overview.topic.header": [
@@ -4891,12 +4837,6 @@
       "value": "Resources"
     }
   ],
-  "Apis.Details.Overview.async.topic.header": [
-    {
-      "type": 0,
-      "value": "Topics"
-    }
-  ],
   "Apis.Details.ProductResources.ProductResourcesEdit.api.resources": [
     {
       "type": 0,
@@ -4909,22 +4849,10 @@
       "value": "Cancel"
     }
   ],
-  "Apis.Details.ProductResources.ProductResourcesEdit.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.ProductResources.ProductResourcesEdit.title": [
     {
       "type": 0,
       "value": "Manage Resources"
-    }
-  ],
-  "Apis.Details.ProductResources.ProductResourcesEdit.updating": [
-    {
-      "type": 0,
-      "value": "Updating ..."
     }
   ],
   "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                                    empty.title": [
@@ -5137,22 +5065,10 @@
       "value": "Value"
     }
   ],
-  "Apis.Details.Properties.Properties.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.Properties.Properties.update.not.allowed": [
     {
       "type": 0,
       "value": "*You are not authorized to update properties of the API due to insufficient permissions"
-    }
-  ],
-  "Apis.Details.Properties.Properties.updating": [
-    {
-      "type": 0,
-      "value": "Updating ..."
     }
   ],
   "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity": [
@@ -5385,6 +5301,24 @@
       "value": "Use DONE button in the page to persist changes"
     }
   ],
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.close": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.done": [
+    {
+      "type": 0,
+      "value": "Done"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.EditPayloadProperty.title": [
+    {
+      "type": 0,
+      "value": "Edit"
+    }
+  ],
   "Apis.Details.Resources.components.operationComponents.ListParameter.actions": [
     {
       "type": 0,
@@ -5449,6 +5383,18 @@
     {
       "type": 0,
       "value": "Yes"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProperties.edit": [
+    {
+      "type": 0,
+      "value": "Edit"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.ListPayloadProps.delete": [
+    {
+      "type": 0,
+      "value": "Delete"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.OperationGovernance.Security.tooltip": [
@@ -6123,6 +6069,102 @@
       "value": "Error while retrieving the subscriptions"
     }
   ],
+  "Apis.Details.Topics.components.AddOperation.op.type": [
+    {
+      "type": 0,
+      "value": "Type"
+    }
+  ],
+  "Apis.Details.Topics.components.AddOperation.operation.topic.or.type.cannot.be.empty.warning": [
+    {
+      "type": 0,
+      "value": "Topic name or topic type(s) can't be empty"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditParameter.data.type": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditParameter.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditParameter.select.data.type": [
+    {
+      "type": 0,
+      "value": "Select the Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.data.type": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.EditPayloadProperty.select.data.type": [
+    {
+      "type": 0,
+      "value": "Select the Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.actions": [
+    {
+      "type": 0,
+      "value": "Actions"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.datatype": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListParameter.param.name": [
+    {
+      "type": 0,
+      "value": "Name"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.actions": [
+    {
+      "type": 0,
+      "value": "Actions"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.data.type": [
+    {
+      "type": 0,
+      "value": "Data Type"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.description": [
+    {
+      "type": 0,
+      "value": "Description"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.ListPayloadProps.name": [
+    {
+      "type": 0,
+      "value": "Name"
+    }
+  ],
   "Apis.Details.TryOutConsole.token.label": [
     {
       "type": 0,
@@ -6388,7 +6430,7 @@
   "Apis.Details.index.topics": [
     {
       "type": 0,
-      "value": "Topics"
+      "value": "topics"
     }
   ],
   "Apis.Details.index.wsdl.definition": [
@@ -6619,10 +6661,10 @@
       "value": "Webhook API"
     }
   ],
-  "Apis.Listing.SampleAPI.SampleAPIProduct.create.new.api.product": [
+  "Apis.Listing.SampleAPI.SampleAPIProduct.title": [
     {
       "type": 0,
-      "value": "Create New API Product"
+      "value": "Let’s get started !"
     }
   ],
   "Apis.Listing.SampleAPI.continue.on.close": [
@@ -6697,16 +6739,16 @@
       "value": "Updating sample API ..."
     }
   ],
+  "Apis.Listing.SampleAPIProduct.creator.error": [
+    {
+      "type": 0,
+      "value": "API is not deployed yet! Please deploy the API before trying out"
+    }
+  ],
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
       "value": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
-    }
-  ],
-  "Apis.Listing.SampleAPIProduct.manager": [
-    {
-      "type": 0,
-      "value": "Welcome to WSO2 API Manager"
     }
   ],
   "Apis.Listing.TableView.TableView.doc.flag": [
@@ -6829,16 +6871,28 @@
       "value": "Uploading"
     }
   ],
-  "Apis.Listing.components.TopMenu.api(s)": [
+  "Apis.Listing.components.TopMenu.api": [
     {
       "type": 0,
       "value": "API(s)"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.api.singular": [
+    {
+      "type": 0,
+      "value": "API"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproduct(s)": [
     {
       "type": 0,
       "value": "API Product(s)"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.apiproduct.singular": [
+    {
+      "type": 0,
+      "value": "API Product"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproducts": [
@@ -6868,13 +6922,19 @@
   "Apis.Listing.components.TopMenu.displaying": [
     {
       "type": 0,
-      "value": "Total of"
+      "value": "Total:"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
       "value": "Search Result(s)"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.search.results.singular": [
+    {
+      "type": 0,
+      "value": "Search Result"
     }
   ],
   "Apis.Listing.import.from.service.catalog.title": [
@@ -6970,145 +7030,13 @@
   "Apis.Settings.Alerts.AlertConfiguration.select.version.helper": [
     {
       "type": 0,
-      "value": "Select API Version"
+      "value": "Search Result"
     }
   ],
-  "Apis.Settings.Alerts.AlertConfiguration.threshold.value.helper": [
+  "Apis.Listing.import.from.service.catalog.title": [
     {
       "type": 0,
-      "value": "Enter threshold value."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.backend.time": [
-    {
-      "type": 0,
-      "value": "Abnormal Backend Time"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.backend.time.description": [
-    {
-      "type": 0,
-      "value": "This alert gets triggered if the response time of a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow WSO2 API Manager runtime or a slow backend."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.request.time.description": [
-    {
-      "type": 0,
-      "value": "This alert gets triggered if the backend time corresponding to a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow backend. In technical terms, if the backend time of a particular API of a tenant lies outside the predefined value, an alert will be sent out."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.response.time": [
-    {
-      "type": 0,
-      "value": "Abnormal Response Time"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.api.health.monitor": [
-    {
-      "type": 0,
-      "value": "API Health Monitor"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.api.health.monitor.description": [
-    {
-      "type": 0,
-      "value": "This alert gets triggered if at least one of the two cases below are satisfied; Response time of an API > Threshold response time value defined for that particular API or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.cancel.btn": [
-    {
-      "type": 0,
-      "value": "Cancel"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.close.btn": [
-    {
-      "type": 0,
-      "value": "Close"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.confirm.btn": [
-    {
-      "type": 0,
-      "value": "Unsubscribe All"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.enable.analytics.message": [
-    {
-      "type": 0,
-      "value": "Enable Analytics to Configure Alerts"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.loading.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while loading alerts"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while subscribing to alerts."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.success.msg": [
-    {
-      "type": 0,
-      "value": "Subscribed to Alerts Successfully."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.heading": [
-    {
-      "type": 0,
-      "value": "Manage Alert Subscriptions"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading": [
-    {
-      "type": 0,
-      "value": "Select the Alert types to subscribe/ unsubscribe and click Save."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading": [
-    {
-      "type": 0,
-      "value": "Confirm unsubscription from All Alerts"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.message": [
-    {
-      "type": 0,
-      "value": "This will remove all the existing alert subscriptions and emails. This action cannot be undone."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while unsubscribing."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.success.msg": [
-    {
-      "type": 0,
-      "value": "Unsubscribed from all alerts successfully."
-    }
-  ],
-  "Apis.Settings.Alerts.connection.error": [
-    {
-      "type": 0,
-      "value": "Could not connect to analytics server. Please check the connectivity."
-    }
-  ],
-  "Apis.Settings.SettingsBase.header": [
-    {
-      "type": 0,
-      "value": "Settings"
-    }
-  ],
-  "Apis.Settings.SettingsBase.sub.header": [
-    {
-      "type": 0,
-      "value": "View and Configure API Publisher Settings"
+      "value": "Import From Service Catalog"
     }
   ],
   "Apis.Shared.AppErrorBoundary.something.went.wrong": [
@@ -7173,24 +7101,6 @@
     {
       "type": 1,
       "value": "page"
-    }
-  ],
-  "Apis.Topic.Edit.Description": [
-    {
-      "type": 0,
-      "value": "Description"
-    }
-  ],
-  "Apis.Topic.Edit.Type": [
-    {
-      "type": 0,
-      "value": "Type"
-    }
-  ],
-  "Apis.Topic.Edit.name": [
-    {
-      "type": 0,
-      "value": "Name"
     }
   ],
   "Applications.Details.Invoice.view.btn": [
@@ -7337,12 +7247,6 @@
       "value": "Service Catalog"
     }
   ],
-  "Base.Header.navbar.GlobalNavBar.Settings": [
-    {
-      "type": 0,
-      "value": "Settings"
-    }
-  ],
   "Base.Header.navbar.GlobalNavBar.api.products": [
     {
       "type": 0,
@@ -7353,12 +7257,6 @@
     {
       "type": 0,
       "value": "APIs"
-    }
-  ],
-  "Base.Header.navbar.GlobalNavBar.manage.alerts": [
-    {
-      "type": 0,
-      "value": "Manage Alerts"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.scopes": [
@@ -7591,12 +7489,6 @@
       "value": "Update Scope"
     }
   ],
-  "Scopes.Listing.Listing.create.scopes.button": [
-    {
-      "type": 0,
-      "value": "Create a new scope"
-    }
-  ],
   "Scopes.Listing.Listing.heading.scope.add_new": [
     {
       "type": 0,
@@ -7661,12 +7553,6 @@
     {
       "type": 0,
       "value": "*You are not authorized to update scopes of the API due to insufficient permissions"
-    }
-  ],
-  "Scopes.Listing.sample.scope.manager": [
-    {
-      "type": 0,
-      "value": "Welcome to WSO2 API Manager"
     }
   ],
   "Scopes.Usage.Usage.api.context": [
@@ -7867,42 +7753,6 @@
       "value": "Service deleted successfully!"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.description": [
-    {
-      "type": 0,
-      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.description2": [
-    {
-      "type": 0,
-      "value": "Create and Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading1.subHeading": [
-    {
-      "type": 0,
-      "value": "Integration Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.Heading2.subHeading": [
-    {
-      "type": 0,
-      "value": "Integration Service"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.add.sample": [
-    {
-      "type": 0,
-      "value": "Add a sample"
-    }
-  ],
-  "ServiceCatalog.Listing.Onboarding.add.sample.service": [
-    {
-      "type": 0,
-      "value": "Add Sample Service"
-    }
-  ],
   "ServiceCatalog.Listing.Onboarding.add.sample.success": [
     {
       "type": 0,
@@ -7915,16 +7765,52 @@
       "value": "Error while creating Sample Service"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.get.started": [
+  "ServiceCatalog.Listing.Onboarding.learn.heading": [
+    {
+      "type": 0,
+      "value": "Learn to write your first"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.heading.sub": [
+    {
+      "type": 0,
+      "value": "Integration Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
+    {
+      "type": 0,
+      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.link": [
     {
       "type": 0,
       "value": "Get Started"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.write.first.intg": [
+  "ServiceCatalog.Listing.Onboarding.sample.add": [
     {
       "type": 0,
-      "value": "Write your first"
+      "value": "Add Sample Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading": [
+    {
+      "type": 0,
+      "value": "Add a sample"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading.sub": [
+    {
+      "type": 0,
+      "value": "Integration Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.sample.heading.text": [
+    {
+      "type": 0,
+      "value": "Deploy the Sample Integration Service already available with WSO2 API Manager and get started in one click"
     }
   ],
   "ServiceCatalog.Listing.Overview.back.btn": [
@@ -8137,18 +8023,6 @@
       "value": "Version"
     }
   ],
-  "ServiceCatalog.Listing.onboarding.create.new": [
-    {
-      "type": 0,
-      "value": "Service Catalog"
-    }
-  ],
-  "ServiceCatalog.Listing.onboarding.description": [
-    {
-      "type": 0,
-      "value": "Enabling API-first Integration"
-    }
-  ],
   "ServiceCatalog.ServicesTableView.ServicesTableView.created.time": [
     {
       "type": 0,
@@ -8183,12 +8057,6 @@
     {
       "type": 0,
       "value": "Version"
-    }
-  ],
-  "Settings.Alerts.Alerts.configure.alert": [
-    {
-      "type": 0,
-      "value": "Configurations"
     }
   ],
   "UnexpectedError.logout": [
@@ -8339,6 +8207,12 @@
     {
       "type": 0,
       "value": "Maximum file size limit to 1MB"
+    }
+  ],
+  "Apis.Details.Configuration.AuthHeader.helper.text": [
+    {
+      "type": 0,
+      "value": "Authorization header name cannot contain spaces or special characters"
     }
   ]
 }

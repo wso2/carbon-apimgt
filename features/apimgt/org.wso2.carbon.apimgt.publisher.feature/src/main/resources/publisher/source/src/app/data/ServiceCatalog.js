@@ -80,13 +80,18 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory()
             .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
+        const definitionFile = new File([JSON.stringify(inlineContent)],
+            'definitionFile.json', { type: 'application/json', lastModified: new Date().getTime() });
+        const serviceMetadataFile = new File([JSON.stringify(serviceMetadata)],
+            'serviceMetadata.json', { type: 'application/json', lastModified: new Date().getTime() });
+        const requestBody = {
+            serviceMetadata: serviceMetadataFile,
+            definitionFile,
+        };
         const promisedCatalogSampleService = serviceCatalog.then((client) => {
             return client.apis.Services
                 .addService({}, {
-                    requestBody: {
-                        serviceMetadata: `${JSON.stringify(serviceMetadata)};type=application/json`,
-                        inlineContent: JSON.stringify(inlineContent),
-                    },
+                    requestBody,
                 }, this._requestMetaData({
                     'Content-Type': 'multipart/form-data',
                 }));
@@ -130,7 +135,7 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory()
             .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
-        const promisedServices = serviceCatalog.then((client) => {
+        return serviceCatalog.then((client) => {
             return client.apis.Services.searchServices(
                 {
                     key,
@@ -138,7 +143,6 @@ class ServiceCatalog {
                 this._requestMetaData(),
             );
         });
-        return promisedServices.then((response) => response.body);
     }
 
     /**

@@ -54,6 +54,8 @@ public class APIManagerAnalyticsConfiguration {
     private String botDataStreamName;
     private String botDataStreamVersion;
     private String reporterClass;
+    private String responseSchemaName;
+    private String faultSchemaName;
     private Map<String, String> reporterProperties;
 
     private APIManagerAnalyticsConfiguration() {
@@ -72,10 +74,9 @@ public class APIManagerAnalyticsConfiguration {
         this.analyticsEnabled = JavaUtils.isTrueExplicitly(usageEnabled);
         if (this.analyticsEnabled) {
             this.reporterClass = config.getFirstProperty(APIConstants.API_ANALYTICS_REPORTER_CLASS);
-            this.reporterClass = config.getFirstProperty(APIConstants.API_ANALYTICS_PROPERTIES);
+            this.responseSchemaName = config.getFirstProperty(APIConstants.API_ANALYTICS_RESPONSE_SCHEMA_NAME);
+            this.faultSchemaName = config.getFirstProperty(APIConstants.API_ANALYTICS_FAULT_SCHEMA_NAME);
             this.reporterProperties = config.getAnalyticsProperties();
-
-
         }
     }
 
@@ -237,5 +238,13 @@ public class APIManagerAnalyticsConfiguration {
 
     public void setReporterProperties(Map<String, String> reporterProperties) {
         this.reporterProperties = reporterProperties;
+    }
+
+    public String getResponseSchemaName() {
+        return responseSchemaName;
+    }
+
+    public String getFaultSchemaName() {
+        return faultSchemaName;
     }
 }

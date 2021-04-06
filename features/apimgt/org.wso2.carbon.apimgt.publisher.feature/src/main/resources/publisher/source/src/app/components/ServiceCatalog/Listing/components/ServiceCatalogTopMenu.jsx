@@ -33,7 +33,9 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
  * @returns {any} ServiceCatalogTopMenu Page for Services
  */
 function ServiceCatalogTopMenu(props) {
-    const { isGridView, setIsGridView } = props;
+    const {
+        isGridView, setIsGridView, showServiceToggle, totalServices,
+    } = props;
     return (
         <Box
             borderBottom={1}
@@ -57,16 +59,51 @@ function ServiceCatalogTopMenu(props) {
                             defaultMessage='Service Catalog'
                         />
                     </Typography>
+                    {totalServices > 0 && (
+                        <Box
+                            fontFamily='fontFamily'
+                            fontSize='body1.fontSize'
+                            display='flex'
+                            color='text.secondary'
+                        >
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Listing.heading.displaying.total'
+                                defaultMessage='Total:'
+                            />
+                            <Box
+                                id='itest-services-listing-total'
+                                fontWeight='fontWeightBold'
+                                px={0.5}
+                                mb={0.5}
+                                color='text.primary'
+                            >
+                                {totalServices}
+                            </Box>
+                            {totalServices === 1 ? (
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Listing.heading.displaying.service'
+                                    defaultMessage='Service'
+                                />
+                            ) : (
+                                <FormattedMessage
+                                    id='ServiceCatalog.Listing.Listing.heading.displaying.services'
+                                    defaultMessage='Services'
+                                />
+                            )}
+                        </Box>
+                    )}
                 </Grid>
                 <Grid item>
-                    <ButtonGroup color='primary' aria-label='outlined primary button group'>
-                        <IconButton onClick={() => setIsGridView(true)} aria-label='delete'>
-                            <GridOn color={isGridView ? 'primary' : 'disabled'} />
-                        </IconButton>
-                        <IconButton onClick={() => setIsGridView(false)} aria-label='delete'>
-                            <List color={!isGridView ? 'primary' : 'disabled'} />
-                        </IconButton>
-                    </ButtonGroup>
+                    {showServiceToggle && (
+                        <ButtonGroup color='primary' aria-label='outlined primary button group'>
+                            <IconButton onClick={() => setIsGridView(true)} aria-label='delete'>
+                                <GridOn color={isGridView ? 'primary' : 'disabled'} />
+                            </IconButton>
+                            <IconButton onClick={() => setIsGridView(false)} aria-label='delete'>
+                                <List color={!isGridView ? 'primary' : 'disabled'} />
+                            </IconButton>
+                        </ButtonGroup>
+                    )}
                 </Grid>
             </Grid>
         </Box>

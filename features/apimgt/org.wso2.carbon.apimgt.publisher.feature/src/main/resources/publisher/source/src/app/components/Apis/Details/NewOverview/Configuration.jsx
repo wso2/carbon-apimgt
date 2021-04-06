@@ -63,6 +63,7 @@ function Configuration(props) {
                                 defaultMessage='Transports'
                             />
                             <Tooltip
+                                interactive
                                 placement='top'
                                 tabIndex='-1'
                                 classes={{
@@ -118,6 +119,7 @@ function Configuration(props) {
                                 defaultMessage='API Security'
                             />
                             <Tooltip
+                                interactive
                                 placement='top'
                                 tabIndex='-1'
                                 classes={{
@@ -168,6 +170,7 @@ function Configuration(props) {
                                 defaultMessage='Access Control'
                             />
                             <Tooltip
+                                interactive
                                 placement='top'
                                 tabIndex='-1'
                                 classes={{
@@ -245,6 +248,7 @@ function Configuration(props) {
                             />
                             <Tooltip
                                 placement='top'
+                                interactive
                                 tabIndex='-1'
                                 classes={{
                                     tooltip: parentClasses.htmlTooltip,

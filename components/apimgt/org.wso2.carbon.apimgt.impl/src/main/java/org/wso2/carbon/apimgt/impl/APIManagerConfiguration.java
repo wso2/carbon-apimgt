@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -331,6 +331,9 @@ public class APIManagerConfiguration {
                     String value = propertyElem.getText();
                     analyticsProps.put(name, value);
                 }
+                OMElement authTokenElement = element.getFirstChildWithName(new QName("AuthToken"));
+                String resolvedAuthToken = MiscellaneousUtil.resolve(authTokenElement, secretResolver);
+                analyticsProps.put("auth.api.token", resolvedAuthToken);
                 analyticsProperties = analyticsProps;
             } else if ("RedisConfig".equals(localName)) {
                 OMElement redisHost = element.getFirstChildWithName(new QName("RedisHost"));

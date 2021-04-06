@@ -51,7 +51,7 @@ const APILanding = () => {
                     <Box pt={isXsOrBelow ? 2 : 7} />
                 </Grid>
                 <Grid item md={12}>
-                    <Typography display='block' gutterBottom align='center' variant='h4'>
+                    <Typography id='itest-apis-welcome-msg' display='block' gutterBottom align='center' variant='h4'>
                         <FormattedMessage
                             id='Apis.Listing.SampleAPI.SampleAPI.create.new'
                             defaultMessage='Let’s get started !'

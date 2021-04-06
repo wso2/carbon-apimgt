@@ -34,7 +34,7 @@ import Loading from 'AppComponents/Base/Loading/Loading';
 import Alert from 'AppComponents/Shared/Alert';
 import Icon from '@material-ui/core/Icon';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
-import DefaultConfigurations from '../../../../defaultTheme';
+import DefaultConfigurations from 'AppData/defaultTheme';
 import ImageGenerator from './APICards/ImageGenerator';
 import ApiThumb from './ApiThumb';
 import DocThumb from './APICards/DocThumb';

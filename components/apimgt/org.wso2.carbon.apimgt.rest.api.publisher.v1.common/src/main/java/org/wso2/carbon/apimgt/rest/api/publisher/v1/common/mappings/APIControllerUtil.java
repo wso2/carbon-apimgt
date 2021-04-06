@@ -26,8 +26,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
@@ -36,10 +34,10 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
-import org.wso2.carbon.apimgt.impl.importexport.utils.APIAndAPIProductCommonUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
@@ -59,8 +57,6 @@ import java.util.Map;
  * This Class Used for API Controller related operations.
  */
 public class APIControllerUtil {
-
-    private static final Log log = LogFactory.getLog(APIAndAPIProductCommonUtil.class);
 
     /**
      * Method will check the archive and extract environment related params.
@@ -143,6 +139,12 @@ public class APIControllerUtil {
 
         //Handle multiple end points
         JsonObject jsonObject = setupMultipleEndpoints(envParams, endpointType);
+
+        // Handle endpoint security configs
+        if (envParams.get(ImportExportConstants.ENDPOINT_SECURITY_FIELD) != null) {
+            handleEndpointSecurityConfigs(envParams, jsonObject);
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         HashMap<String, Object> endpointConfig;
         try {
@@ -175,12 +177,6 @@ public class APIControllerUtil {
                 String errorMessage = "Error while generating meta information of client certificates from path.";
                 throw new APIManagementException(errorMessage, e, ExceptionCodes.ERROR_READING_PARAMS_FILE);
             }
-        }
-
-        //handle security configs
-        JsonElement securityConfigs = envParams.get(ImportExportConstants.ENDPOINT_SECURITY_FIELD);
-        if (securityConfigs != null) {
-            handleEndpointSecurityConfigs(envParams, importedApiDto);
         }
 
         // handle available subscription policies
@@ -288,11 +284,11 @@ public class APIControllerUtil {
     /**
      * This method will be used to add Endpoint security related environment parameters to imported Api object.
      *
-     * @param importedApiDto APIDTO object to be updated
      * @param envParams      Env params object with required parameters
+     * @param endpointConfig Endpoint config object to be updated
      * @throws APIManagementException If an error occurs when setting security env parameters
      */
-    private static void handleEndpointSecurityConfigs(JsonObject envParams, APIDTO importedApiDto)
+    private static void handleEndpointSecurityConfigs(JsonObject envParams, JsonObject endpointConfig)
             throws APIManagementException {
         // If the user has set (either true or false) the enabled field under security in the params file,
         // the following code should be executed.
@@ -300,48 +296,68 @@ public class APIControllerUtil {
         if (security == null) {
             return;
         }
-        String securityEnabled = security.get(ImportExportConstants.ENDPOINT_SECURITY_ENABLED).getAsString();
-        boolean isSecurityEnabled = Boolean.parseBoolean(securityEnabled);
-        //set endpoint security details to API
-        APIEndpointSecurityDTO apiEndpointSecurityDTO = new APIEndpointSecurityDTO();
 
-        // If endpoint security is enabled
-        if (isSecurityEnabled) {
-            // Check whether the username, password and type fields have set in the params file
-            JsonElement username = security.get(ImportExportConstants.ENDPOINT_UT_USERNAME);
-            JsonElement password = security.get(ImportExportConstants.ENDPOINT_UT_PASSWORD);
-            JsonElement type = security.get(ImportExportConstants.ENDPOINT_SECURITY_TYPE);
+        String[] endpointTypes = { APIConstants.ENDPOINT_SECURITY_PRODUCTION, APIConstants.ENDPOINT_SECURITY_SANDBOX };
+        for (String endpointType : endpointTypes) {
+            if (security.has(endpointType)) {
+                JsonObject endpointSecurityDetails = security.get(endpointType).getAsJsonObject();
+                if (endpointSecurityDetails.has(APIConstants.ENDPOINT_SECURITY_ENABLED)) {
+                    String securityEnabled = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_ENABLED)
+                            .getAsString();
 
-            if (username == null) {
-                throw new APIManagementException("You have enabled endpoint security but the username is not found "
-                        + "in the params file. Please specify username field for and continue...",
-                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            } else if (password == null) {
-                throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the params file. Please specify password field for and continue...",
-                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            } else if (type == null) {
-                throw new APIManagementException("You have enabled endpoint security but the password is not found "
-                        + "in the params file. Please specify password field for and continue...",
-                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
-            } else {
-                apiEndpointSecurityDTO.setPassword(password.toString());
-                apiEndpointSecurityDTO.setUsername(username.getAsString());
-                //setup security type (basic or digest)
-                if (StringUtils.equals(type.getAsString(), ImportExportConstants.ENDPOINT_DIGEST_SECURITY_TYPE)) {
-                    apiEndpointSecurityDTO.setType(APIEndpointSecurityDTO.TypeEnum.DIGEST);
-                } else if (StringUtils.equals(type.getAsString(), ImportExportConstants.ENDPOINT_BASIC_SECURITY_TYPE)) {
-                    apiEndpointSecurityDTO.setType(APIEndpointSecurityDTO.TypeEnum.BASIC);
-                } else {
-                    // If the type is not either basic or digest, return an error
-                    throw new APIManagementException("Invalid endpoint security type found in the params file. "
-                            + "Should be either basic or digest"
-                            + "Please specify correct security types field for and continue...",
-                            ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                    // Set endpoint security details to API
+                    if (Boolean.parseBoolean(securityEnabled)) {
+                        // Check whether the username, password and type fields have set in the params file
+                        JsonElement type = endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_TYPE);
+                        if (endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_USERNAME) == null) {
+                            throw new APIManagementException(
+                                    "You have enabled endpoint security but the username is not found "
+                                            + "in the params file. Please specify username field for and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                        } else if (endpointSecurityDetails.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) == null) {
+                            throw new APIManagementException(
+                                    "You have enabled endpoint security but the password is not found "
+                                            + "in the params file. Please specify password field for and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                        } else if (type == null) {
+                            throw new APIManagementException(
+                                    "You have enabled endpoint security but the password is not found "
+                                            + "in the params file. Please specify password field for and continue...",
+                                    ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                        } else {
+                            // Setup security type (basic or digest)
+                            endpointSecurityDetails.remove(APIConstants.ENDPOINT_SECURITY_TYPE);
+                            if (StringUtils.equals(type.getAsString().toLowerCase(),
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST)) {
+                                endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                        APIEndpointSecurityDTO.TypeEnum.DIGEST.toString());
+                            } else if (StringUtils.equals(type.getAsString().toLowerCase(),
+                                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC)) {
+                                endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                                        APIEndpointSecurityDTO.TypeEnum.BASIC.toString());
+                            } else {
+                                // If the type is not either basic or digest, return an error
+                                throw new APIManagementException(
+                                        "Invalid endpoint security type found in the params file. "
+                                                + "Should be either basic or digest"
+                                                + "Please specify correct security types field for and continue...",
+                                        ExceptionCodes.ERROR_READING_PARAMS_FILE);
+                            }
+                        }
+                    }
                 }
+            } else {
+                // Even though the security field is defined, if either production/sandbox is not defined under that,
+                // set endpoint security to none. Otherwise the security will be blank if you check from the UI.
+                JsonObject endpointSecurityForNotDefinedEndpointType = new JsonObject();
+                endpointSecurityForNotDefinedEndpointType.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        ImportExportConstants.ENDPOINT_NONE_SECURITY_TYPE);
+                endpointSecurityForNotDefinedEndpointType
+                        .addProperty(APIConstants.ENDPOINT_SECURITY_ENABLED, Boolean.FALSE);
+                security.add(endpointType, endpointSecurityForNotDefinedEndpointType);
             }
-            importedApiDto.setEndpointSecurity(apiEndpointSecurityDTO);
         }
+        endpointConfig.add(APIConstants.ENDPOINT_SECURITY, security);
     }
 
     /**

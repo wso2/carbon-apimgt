@@ -138,8 +138,8 @@ export default {
             head: '#9012fe',
             trace: '#785446',
             disabled: '#ebebeb',
-            subscribe: '#61affe',
-            publish: '#49cc90',
+            sub: '#38a169',
+            pub: '#4299e1',
         },
         operationChipColor: {
             query: '#b3e6fe',
@@ -162,12 +162,12 @@ export default {
             width: 240,
             height: 140,
             backgrounds: [ // These backgrounds are use to generate the thumbnails.
-                { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
-                { prime: 0xf47f16ff, sub: 0xcddc39ff },
-                { prime: 0xf44236ff, sub: 0xfec107ff },
                 { prime: 0x2196f3ff, sub: 0xaeea00ff },
-                { prime: 0xff9700ff, sub: 0xffeb3cff },
-                { prime: 0xff9700ff, sub: 0xfe5722ff },
+                // { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
+                // { prime: 0xf47f16ff, sub: 0xcddc39ff },
+                // { prime: 0xf44236ff, sub: 0xfec107ff },
+                // { prime: 0xff9700ff, sub: 0xffeb3cff },
+                // { prime: 0xff9700ff, sub: 0xfe5722ff },
             ],
             document: {
                 icon: 'library_books',
@@ -181,7 +181,7 @@ export default {
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
         adminRole: 'admin',
         commentsLimit: 5,
-        maxCommentLength: 256,
+        maxCommentLength: 512,
         productSampleProgess: {
             backgroundMain: '#15b8cf',
             backgroundChip: '#5aebf9',
@@ -212,6 +212,11 @@ export default {
                 asyncapi: '/site/public/images/service_catalog/icons/async.svg',
                 oas3: '/site/public/images/service_catalog/icons/oas3.png',
                 swagger: '/site/public/images/service_catalog/icons/swagger.svg',
+            },
+        },
+        revision: {
+            activeRevision: {
+                background: 'radial-gradient(#29bb89, #f7ea00)',
             },
         },
     },

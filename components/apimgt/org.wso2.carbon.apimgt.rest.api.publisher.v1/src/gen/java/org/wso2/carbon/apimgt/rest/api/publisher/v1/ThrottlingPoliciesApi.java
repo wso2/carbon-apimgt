@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
@@ -58,17 +59,17 @@ ThrottlingPoliciesApiService delegate = new ThrottlingPoliciesApiServiceImpl();
     @Path("/streaming/subscription")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get subscription throttling policies based on quota type", notes = "This operation can be used to list the available subscription policies for a given tenent ID based on the given quota type. Quota Type should be provide as a query parameters and supported Quota types are \"requestCount\" ,\"bandwidthVolume\" and \"eventCount\" ", response = ThrottlingPolicyListDTO.class, authorizations = {
+    @ApiOperation(value = "Get streaming throttling policies", notes = "This operation can be used to list the available streaming subscription policies ", response = SubscriptionPolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={ "Throttling Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of subscription policies returned. ", response = ThrottlingPolicyListDTO.class),
+        @ApiResponse(code = 200, message = "OK. List of subscription policies returned. ", response = SubscriptionPolicyListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getSubscriptionThrottlingPolicies( @ApiParam(value = "Filter the subscription base on tier quota type")  @QueryParam("tierQuotaType") String tierQuotaType,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.getSubscriptionThrottlingPolicies(tierQuotaType, ifNoneMatch, securityContext);
+    public Response getSubscriptionThrottlingPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.getSubscriptionThrottlingPolicies(limit, offset, ifNoneMatch, securityContext);
     }
 
     @GET

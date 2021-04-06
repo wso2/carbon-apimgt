@@ -107,6 +107,7 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
@@ -1623,11 +1624,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE " +
                             "or MARKDOWN", log);
                 }
-                DocumentationContent content = new DocumentationContent();
-                content.setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
-                content.setTextContent(inlineContent);
-                // apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
-                apiProvider.addDocumentationContent(apiId, documentId, organizationId, content);
+                PublisherCommonUtils
+                        .addDocumentationContent(documentation, apiProvider, apiId, documentId, organizationId,
+                                inlineContent);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
@@ -2956,11 +2955,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                 fileContentType = fileDetail.getContentType().toString();
             }
-
-            ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
-            apiProvider.setThumbnailToAPI(apiId, apiImage, organizationId);
-            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
-                    .replace(RestApiConstants.APIID_PARAM, apiId);
+            PublisherCommonUtils.updateThumbnail(fileInputStream, fileContentType, apiProvider, apiId, organizationId);
+            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, apiId);
             URI uri = new URI(uriString);
             FileInfoDTO infoDTO = new FileInfoDTO();
             infoDTO.setRelativePath(uriString);
@@ -3378,16 +3374,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiToAdd.setWsdlUrl(url);
                 apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, apiToAdd.getOrganizationId());
             } else if (fileDetail != null && fileInputStream != null) {
-                ResourceFile wsdlResource = new ResourceFile(fileInputStream,
-                        fileDetail.getContentType().toString());
-                if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
-                        APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
-                    wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
-                } else {
-                    wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
-                }
-                apiToAdd.setWsdlResource(wsdlResource);
-                apiProvider.addWSDLResource(apiToAdd.getUuid(), wsdlResource, null, apiToAdd.getOrganizationId());
+                PublisherCommonUtils
+                        .addWsdl(fileDetail.getContentType().toString(), fileInputStream, apiToAdd, apiProvider,
+                                organizationId);
             }
 
             //add the generated swagger definition to SOAP
@@ -3456,13 +3445,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                     throw new APIManagementException(ExceptionCodes.UNSUPPORTED_WSDL_FILE_EXTENSION);
                 }
             }
-            String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr, null);
-            List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(updatedSwagger,
-                    apiToAdd.getId());
-            API updatedAPI = apiProvider.getAPIbyUUID(createdApi.getUuid(), tenantDomain);
-            updatedAPI.setSoapToRestSequences(list);
-            apiProvider.updateAPI(updatedAPI, createdApi);
-            return updatedAPI;
+            String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
+            return PublisherCommonUtils
+                    .updateAPIBySettingGenerateSequencesFromSwagger(updatedSwagger, createdApi, apiProvider,
+                            organizationId);
         } catch (FaultGatewaysException | IOException e) {
             throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }
@@ -3687,8 +3673,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ExportFormat.YAML;
         try {
             ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-            File file = importExportAPI.exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus,
-                    exportFormat, true, true, exportLatestRevision);
+            File file = importExportAPI
+                    .exportAPI(apiId, name, version, revisionNum, providerName, preserveStatus, exportFormat,
+                            Boolean.TRUE, Boolean.TRUE, exportLatestRevision, StringUtils.EMPTY);
             return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                     "attachment; filename=\"" + file.getName() + "\"").build();
         } catch (APIManagementException | APIImportExportException e) {
@@ -4515,7 +4502,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String updatedAsyncAPIDefinition;
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //Handle URL and file based definition imports
-            if (url != null || fileInputStream != null){
+            if (url != null || fileInputStream != null) {
                 //Validate and retrieve the AsyncAPI definition
                 Map validationResponseMap = validateAsyncAPISpecification(url, fileInputStream,
                         fileDetail, true, false);
@@ -4800,15 +4787,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .getServiceUrl(), protocol));
                 }
             }
-            apiProvider.addAPI(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
 
             //load topics from AsyncAPI
-            try {
-                apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
-            } catch (FaultGatewaysException e) {
-                e.printStackTrace();
-            }
+            apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
+                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
+
+            apiProvider.addAPI(apiToAdd);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +

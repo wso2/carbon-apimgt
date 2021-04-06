@@ -19,39 +19,39 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import { withStyles, withTheme } from '@material-ui/core/styles';
-
 import PropTypes from 'prop-types';
 import Chip from '@material-ui/core/Chip';
 import { injectIntl } from 'react-intl';
 import CONSTS from 'AppData/Constants';
 import Api from 'AppData/api';
+import Alert from 'AppComponents/Shared/Alert';
+import Progress from 'AppComponents/Shared/Progress';
 import { ApiContext } from './ApiContext';
 
 /**
- *
- *
- * @param {*} props
- * @returns
+ * @param {JSON} props render the base
+ * @returns {JSX} rendered output
  */
 function RenderMethodBase(props) {
     const { theme, method } = props;
     let chipColor = theme.custom.resourceChipColors ? theme.custom.resourceChipColors[method] : null;
     let chipTextColor = '#000000';
     if (!chipColor) {
-        console.log('Check the theme settings. The resourceChipColors is not populated properly');
         chipColor = '#cccccc';
     } else {
         chipTextColor = theme.palette.getContrastText(theme.custom.resourceChipColors[method]);
     }
-    return (<Chip
-        label={method.toUpperCase()}
-        style={{ 
-            backgroundColor: chipColor,
-            color: chipTextColor,
-            height: 20,
-            margin: '5px',
-        }}
-    />);
+    return (
+        <Chip
+            label={method.toUpperCase()}
+            style={{
+                backgroundColor: chipColor,
+                color: chipTextColor,
+                height: 20,
+                margin: '5px',
+            }}
+        />
+    );
 }
 
 RenderMethodBase.propTypes = {
@@ -60,12 +60,8 @@ RenderMethodBase.propTypes = {
 };
 
 const RenderMethod = withTheme(RenderMethodBase);
-/**
- *
- *
- * @param {*} theme
- */
-const styles = theme => ({
+
+const styles = (theme) => ({
     root: {
         display: 'flex',
         flexDirection: 'row',
@@ -93,7 +89,6 @@ class Resources extends React.Component {
         super(props);
         this.state = {
             paths: null,
-            swagger: {},
         };
         this.api = new Api();
     }
@@ -117,31 +112,19 @@ class Resources extends React.Component {
                 }
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') console.log(error);
-                const status = error.status;
-                if (status === 404) {
-                    this.setState({ notFound: true });
-                } else if (status === 401) {
-                    this.setState({ isAuthorize: false });
-                    const params = qs.stringify({ reference: this.props.location.pathname });
-                    this.props.history.push({ pathname: '/login', search: params });
-                }
+                console.log(error);
+                Alert.error(error);
             });
     }
 
     /**
-     *
-     *
-     * @returns
+     * @returns {JSX} rendered output
      * @memberof Resources
      */
     render() {
         const { paths } = this.state;
-        if (this.state.notFound) {
-            return <div>resource not found...</div>;
-        }
         if (!paths) {
-            return <div>loading...</div>;
+            return <Progress />;
         }
         const { classes } = this.props;
 
@@ -170,7 +153,6 @@ class Resources extends React.Component {
 Resources.contextType = ApiContext;
 
 Resources.propTypes = {
-    classes: PropTypes.object.isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,
     }).isRequired,
