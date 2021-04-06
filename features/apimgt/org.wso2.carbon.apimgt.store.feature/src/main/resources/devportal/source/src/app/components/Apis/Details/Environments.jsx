@@ -233,7 +233,7 @@ function Environments(props) {
                 <GoToTryOut />
             </Box>
             <Box ml={8} alignItems='center' mt={1}>
-                {getDefaultVersionUrl() && (
+                {selectedEndpoint && (
                     <Typography variant='caption'>
                         {getDefaultVersionUrl()}
                     </Typography>
