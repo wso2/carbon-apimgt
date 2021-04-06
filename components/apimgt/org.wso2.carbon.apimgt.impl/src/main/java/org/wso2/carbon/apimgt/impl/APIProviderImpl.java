@@ -1055,7 +1055,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Extract the scopes set from URI templates which needs to be registered as local scopes for the API.
      *
      * @param apiIdentifier API Identifier
-     * @param tenantId      Tenant Id
      * @param uriTemplates  URI templates
      * @return Local Scopes set to register
      * @throws APIManagementException if fails to extract Scopes from URI templates

@@ -35,25 +35,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -146,6 +131,7 @@ public class APIConsumerImplTest {
     private RegistryService registryService;
     public static final String SAMPLE_TENANT_DOMAIN_1 = "abc.com";
     private APIPersistence apiPersistenceInstance;
+    private APIManagerConfiguration config;
 
     @Before
     public void init() throws UserStoreException, RegistryException, APIManagementException {
@@ -1117,18 +1103,14 @@ public class APIConsumerImplTest {
     }
 
     @Test
-    public void testRemoveSubscriber() throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
-        try {
-            new APIConsumerImplWrapper(apiMgtDAO).removeSubscriber(identifier, "1");
-            // no need of assert fail here since the method is not implemented yet.
-        } catch (UnsupportedOperationException e) {
-            Assert.assertTrue(e.getMessage().contains("Unsubscribe operation is not yet implemented"));
-        }
-    }
-
-    @Test
     public void testRemoveSubscription() throws APIManagementException, WorkflowException, APIPersistenceException {
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.
+                mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("10", "20");
+
         String uuid = UUID.randomUUID().toString();
         String apiUUID = UUID.randomUUID().toString();
         Subscriber subscriber = new Subscriber("sub1");
@@ -1147,12 +1129,12 @@ public class APIConsumerImplTest {
         SubscribedAPI subscribedAPINew = new SubscribedAPI(uuid);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO, apiPersistenceInstance);
         try {
-            apiConsumer.removeSubscription(subscribedAPINew);
+            apiConsumer.removeSubscription(subscribedAPINew, "org1");
             Assert.fail("API manager exception not thrown when subscription does not exist with UUID");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Subscription for UUID"));
         }
-        apiConsumer.removeSubscription(subscribedAPINew);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
         Mockito.verify(apiMgtDAO, Mockito.times(1)).getApplicationNameFromId(Mockito.anyInt());
         String workflowExtRef = "test_wf_ref";
         String workflowExtRef1 = "complete_wf_ref";
@@ -1168,10 +1150,10 @@ public class APIConsumerImplTest {
         Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
         Mockito.when(apiMgtDAO.getSubscriptionStatus(identifier, 1))
                 .thenReturn(APIConstants.SubscriptionStatus.ON_HOLD);
-        apiConsumer.removeSubscription(subscribedAPINew);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
         Mockito.when(apiMgtDAO.retrieveWorkflow(workflowExtRef1)).thenReturn(subscriptionWorkflowDTO);
         PowerMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn("abc.org");
-        apiConsumer.removeSubscription(subscribedAPINew);
+        apiConsumer.removeSubscription(subscribedAPINew, "org1");
         Mockito.verify(apiMgtDAO, Mockito.times(2)).retrieveWorkflow(Mockito.anyString());
 
     }

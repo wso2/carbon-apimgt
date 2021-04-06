@@ -66,13 +66,13 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     @Override
     public void removeSubscription(Identifier identifier, String userId,
-                                   int applicationId) throws APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId);
+                                   int applicationId, String organizationId) throws APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, organizationId);
     }
 
     @Override
-    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
-        super.removeSubscription(subscription);
+    public void removeSubscription(SubscribedAPI subscription, String organizationId) throws APIManagementException {
+        super.removeSubscription(subscription, organizationId);
     }
 
     @Override
@@ -89,16 +89,16 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     public void removeApplication(Application application, String username) throws APIManagementException {
         super.removeApplication(application, username);
     }
-     @Override
-    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId) throws
-             APIManagementException {
-        super.removeSubscription(identifier, userId, applicationId, groupId);
+
+    @Override
+    public void removeSubscription(APIIdentifier identifier, String userId, int applicationId, String groupId,
+                                   String organizationId) throws
+            APIManagementException {
+        super.removeSubscription(identifier, userId, applicationId, groupId, organizationId);
     }
 
     /**
-     * @deprecated
-     * This method needs to be removed once the Jaggery web apps are removed.
-     *
+     * @deprecated This method needs to be removed once the Jaggery web apps are removed.
      */
     @Override
     public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
@@ -112,7 +112,7 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     @Override
     public void deleteComment(APIIdentifier identifier, String commentId) throws APIManagementException {
-        super.deleteComment(identifier,commentId);
+        super.deleteComment(identifier, commentId);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         checkAccessControlPermission(identifier);
         return super.getAPI(identifier);
     }
-    
+
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organizationId)
             throws APIManagementException {

@@ -164,9 +164,6 @@ public class ApiMgtDAO {
     private final Object scopeMutex = new Object();
 
     private ApiMgtDAO() {
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-
         String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
         if (caseSensitiveComparison != null) {
