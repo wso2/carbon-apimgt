@@ -258,12 +258,16 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
     public int getTargetResponseCode() {
 
         Object responseCodeObject = messageContext.getProperty(Constants.BACKEND_RESPONSE_CODE);
-        if (responseCodeObject != null) {
-            return (int) responseCodeObject;
+        if (responseCodeObject == null) {
+            responseCodeObject = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                    .getProperty(SynapseConstants.HTTP_SC);
         }
-        Object responseCode = ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(SynapseConstants.HTTP_SC);
-        return (int) responseCode;
+        if (responseCodeObject instanceof Integer) {
+            return (int) responseCodeObject;
+        } else if (responseCodeObject instanceof String) {
+            return Integer.parseInt((String) responseCodeObject);
+        }
+        return 0;
     }
 
     @Override
