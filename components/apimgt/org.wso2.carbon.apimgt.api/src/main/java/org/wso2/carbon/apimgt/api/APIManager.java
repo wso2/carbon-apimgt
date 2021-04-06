@@ -523,11 +523,11 @@ public interface APIManager {
      *
      * @param apiIdentifier API Identifier
      * @param scopeKey   candidate scope key
-     * @param tenantId   tenant Id
+     * @param organizationId Identifier of an organization
      * @return true if the scope key is already attached as a local scope in any API
      * @throws APIManagementException if failed to check the local scope availability
      */
-    boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, int tenantId)
+    boolean isScopeKeyAssignedLocally(APIIdentifier apiIdentifier, String scopeKey, String organizationId)
             throws APIManagementException;
 
     /**
