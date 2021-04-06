@@ -193,6 +193,8 @@ class TokenManager extends React.Component {
             isKeyJWT: false,
             hasError: false,
             initialToken: '',
+            initialValidityTime: 0,
+            initialScopes: [],
             keyRequest: {
                 keyType,
                 selectedGrantTypes: null,
@@ -408,7 +410,9 @@ class TokenManager extends React.Component {
                 const isKeyJWT = (tokenType === 'JWT') || hashEnabled;
                 newKeys.set(selectedTab, response);
                 const initialToken = response.token ? response.token.accessToken : '';
-                this.setState({ keys: newKeys, isKeyJWT, initialToken });
+                const initialValidityTime = response.token ? response.token.validityTime : 0;
+                const initialScopes = response.token ? response.token.tokenScopes : [];
+                this.setState({ keys: newKeys, isKeyJWT, initialToken, initialValidityTime, initialScopes });
                 if (response.keyState === this.keyStates.CREATED || response.keyState === this.keyStates.REJECTED) {
                     Alert.info(intl.formatMessage({
                         id: 'Shared.AppsAndKeys.TokenManager.key.generate.success.blocked',
@@ -623,6 +627,7 @@ class TokenManager extends React.Component {
         const {
             keys, keyRequest, isLoading, isKeyJWT, providedConsumerKey,
             providedConsumerSecret, selectedTab, keyManagers, validating, hasError, initialToken,
+            initialValidityTime, initialScopes,
         } = this.state;
         if (keyManagers && keyManagers.length === 0) {
             return (
@@ -762,6 +767,8 @@ class TokenManager extends React.Component {
                             <Box m={2}>
                                 <ViewKeys
                                     initialToken={initialToken}
+                                    initialValidityTime={initialValidityTime}
+                                    initialScopes={initialScopes}
                                     selectedApp={selectedApp}
                                     selectedTab={selectedTab}
                                     keyType={keyType}
