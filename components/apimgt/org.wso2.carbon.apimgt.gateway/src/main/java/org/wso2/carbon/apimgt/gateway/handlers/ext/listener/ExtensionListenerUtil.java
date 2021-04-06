@@ -35,6 +35,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.APIRequestInfoDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseStatus;
@@ -168,6 +169,18 @@ public class ExtensionListenerUtil {
         javax.security.cert.X509Certificate[] clientCerts = null;
         if (sslCertsObject != null) {
             clientCerts = (X509Certificate[]) sslCertsObject;
+        }
+
+        // If client certificate is sent via header give it priority over the transport level cert
+        try {
+            X509Certificate clientCertificateFromHeader = Utils.getClientCertificateFromHeader(
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext());
+
+            if (clientCertificateFromHeader != null) {
+                clientCerts = new X509Certificate[]{clientCertificateFromHeader};
+            }
+        } catch (APIManagementException e) {
+            log.error("Error when getting client certificate from header", e);
         }
         requestDTO.setClientCerts(clientCerts);
         return requestDTO;
