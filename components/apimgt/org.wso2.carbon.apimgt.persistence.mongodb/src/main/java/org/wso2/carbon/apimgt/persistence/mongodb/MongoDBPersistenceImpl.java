@@ -496,6 +496,10 @@ public class MongoDBPersistenceImpl implements APIPersistence {
             fieldList.add("documentationList.textContent");
             return fieldList;
         }
+        if (!queryCriteria.isEmpty()) {
+            fieldList.add("additionalProperties" + "." + queryCriteria);
+            return fieldList;
+        }
 
         return fieldList;
     }
