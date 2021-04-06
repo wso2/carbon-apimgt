@@ -282,7 +282,7 @@ public class ImportUtils {
             // implementation
             ApiTypeWrapper apiTypeWrapperWithUpdatedApi = new ApiTypeWrapper(importedApi);
             addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
-            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
+            addDocumentation(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider, organizationId);
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
             addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
 

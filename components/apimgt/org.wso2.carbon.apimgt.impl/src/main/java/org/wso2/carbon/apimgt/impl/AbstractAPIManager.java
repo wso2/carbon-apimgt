@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.impl;
 
@@ -1207,7 +1207,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getGraphqlSchemaDefinition(String apiId, String organizationId) throws APIManagementException {
         String definition;
         try {
-                definition = apiPersistenceInstance.getGraphQLSchema(new Organization(organizationId), apiId);
+            definition = apiPersistenceInstance.getGraphQLSchema(new Organization(organizationId), apiId);
         } catch (GraphQLPersistenceException e) {
             throw new APIManagementException("Error while retrieving graphql definition from the persistance location",
                     e);
@@ -1233,7 +1233,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     organizationId);
         }
         try {
-                definition = apiPersistenceInstance.getOASDefinition(new Organization(organizationId), id);
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(organizationId), id);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1244,7 +1244,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public String getOpenAPIDefinition(String apiId, String organizationId) throws APIManagementException {
         String definition = null;
         try {
-                definition = apiPersistenceInstance.getOASDefinition(new Organization(organizationId), apiId);
+            definition = apiPersistenceInstance.getOASDefinition(new Organization(organizationId), apiId);
         } catch (OASPersistenceException e) {
             throw new APIManagementException("Error while retrieving OAS definition from the persistance location", e);
         }
@@ -1545,8 +1545,8 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Get a documentation by artifact Id
      *
-     * @param apiId                 artifact id of the api
-     * @param docId                 artifact id of the document
+     * @param apiId          artifact id of the api
+     * @param docId          artifact id of the document
      * @param organizationId tenant domain of the registry where the artifact is located
      * @return Document object which represents the artifact id
      * @throws APIManagementException

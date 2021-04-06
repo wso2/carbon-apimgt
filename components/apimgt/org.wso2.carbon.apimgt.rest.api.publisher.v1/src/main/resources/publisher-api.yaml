@@ -7653,6 +7653,7 @@ paths:
       description: |
         This operation can be used to retrieve the AsyncAPI definition of an API.
       parameters:
+        - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -7702,6 +7703,7 @@ paths:
       description: |
         This operation can be used to update the AsyncAPI definition of an existing API. AsyncAPI definition to be updated is passed as a form data parameter 'apiDefinition'.
       parameters:
+        - $ref: '#/components/parameters/organizationId'
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
