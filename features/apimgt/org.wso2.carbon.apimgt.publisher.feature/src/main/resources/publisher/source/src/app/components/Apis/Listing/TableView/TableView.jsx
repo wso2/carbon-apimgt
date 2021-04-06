@@ -87,12 +87,11 @@ class TableView extends React.Component {
         this.state = {
             apisAndApiProducts: null,
             notFound: true,
-            displayCount: 0,
             listType: defaultApiView,
             loading: true,
+            totalCount: -1,
         };
         this.page = 0;
-        this.count = 100;
         this.rowsPerPage = localStorage.getItem('publisher.rowsPerPage') || 10;
         this.setListType = this.setListType.bind(this);
         this.updateData = this.updateData.bind(this);
@@ -186,10 +185,11 @@ class TableView extends React.Component {
         const { intl } = this.props;
         this.xhrRequest().then((data) => {
             const { body } = data;
-            const { list, pagination, count } = body;
+            const { list, pagination } = body;
             const { total } = pagination;
-            this.count = total;
-            this.setState({ apisAndApiProducts: list, notFound: false, displayCount: count });
+            this.setState({
+                totalCount: total, apisAndApiProducts: list, notFound: false,
+            });
         }).catch(() => {
             Alert.error(intl.formatMessage({
                 defaultMessage: 'Error While Loading APIs',
@@ -217,11 +217,11 @@ class TableView extends React.Component {
         this.setState({ loading: true });
         this.xhrRequest().then((data) => {
             const { body } = data;
-            const { list, count } = body;
+            const { list, pagination } = body;
             this.setState({
                 apisAndApiProducts: list,
                 notFound: false,
-                displayCount: count,
+                totalCount: pagination.total,
             });
         }).catch(() => {
             Alert.error(intl.formatMessage({
@@ -274,7 +274,7 @@ class TableView extends React.Component {
         const {
             intl, isAPIProduct, classes, query,
         } = this.props;
-        const { loading } = this.state;
+        const { loading, totalCount } = this.state;
         const columns = [
             {
                 name: 'id',
@@ -365,16 +365,16 @@ class TableView extends React.Component {
                 },
             },
         ];
-        const { page, count, rowsPerPage } = this;
+        const { page, rowsPerPage } = this;
         const {
-            apisAndApiProducts, notFound, listType, displayCount,
+            apisAndApiProducts, notFound, listType,
         } = this.state;
         const options = {
             filterType: 'dropdown',
             responsive: 'stacked',
             serverSide: true,
             search: false,
-            count,
+            count: totalCount,
             page,
             onTableChange: (action, tableState) => {
                 switch (action) {
@@ -389,9 +389,9 @@ class TableView extends React.Component {
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
                 this.rowsPerPage = numberOfRows;
-                if (page * numberOfRows > count) {
+                if (page * numberOfRows > totalCount) {
                     this.page = 0;
-                } else if (count - 1 === rowsPerPage * page && page !== 0) {
+                } else if (totalCount - 1 === rowsPerPage * page && page !== 0) {
                     this.page = page - 1;
                 }
                 localStorage.setItem('publisher.rowsPerPage', numberOfRows);
@@ -430,7 +430,7 @@ class TableView extends React.Component {
             options.download = true;
             options.viewColumns = true;
         }
-        if (page === 0 && this.count <= rowsPerPage && rowsPerPage === 10) {
+        if (page === 0 && totalCount <= rowsPerPage && rowsPerPage === 10) {
             options.pagination = false;
         } else {
             options.pagination = true;
@@ -446,7 +446,7 @@ class TableView extends React.Component {
                 <>
                     <TopMenu
                         data={apisAndApiProducts}
-                        count={displayCount}
+                        count={totalCount}
                         setListType={this.setListType}
                         isAPIProduct={isAPIProduct}
                         listType={listType}
@@ -465,7 +465,7 @@ class TableView extends React.Component {
             <>
                 <TopMenu
                     data={apisAndApiProducts}
-                    count={displayCount}
+                    count={totalCount}
                     setListType={this.setListType}
                     isAPIProduct={isAPIProduct}
                     listType={listType}

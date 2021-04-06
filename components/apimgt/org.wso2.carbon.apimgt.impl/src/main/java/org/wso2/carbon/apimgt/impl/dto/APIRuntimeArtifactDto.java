@@ -8,6 +8,7 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     private String apiId;
     private String revision;
     private String label;
+    private String vhost;
     private String type;
     private String organizationId;
 
@@ -99,5 +100,13 @@ public class APIRuntimeArtifactDto extends RuntimeArtifactDto {
     public void setLabel(String label) {
 
         this.label = label;
+    }
+
+    public String getVhost() {
+        return vhost;
+    }
+
+    public void setVhost(String vhost) {
+        this.vhost = vhost;
     }
 }

@@ -101,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {any} Listing Page for Services
  */
 function ServicesTableView(props) {
-    const { serviceList } = props;
+    const { serviceList, onDelete } = props;
 
     const classes = useStyles();
 
@@ -289,7 +289,7 @@ function ServicesTableView(props) {
                                     <Delete
                                         serviceDisplayName={name}
                                         serviceId={id}
-                                        // onDelete={onDelete}
+                                        onDelete={onDelete}
                                     />
                                 </Box>
                             </>

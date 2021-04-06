@@ -111,12 +111,6 @@ public class DevPortalAPIInfo {
     public void setStatus(String status) {
         this.status = status;
     }
-    @Override
-    public String toString() {
-        return "DevPortalAPIInfo [id=" + id + ", apiName=" + apiName + ", version=" + version + ", providerName="
-                + providerName + ", context=" + context + ", type=" + type + ", thumbnail=" + thumbnail
-                + ", businessOwner=" + businessOwner + ", status=" + status + "]";
-    }
     public Set<String> getAvailableTierNames() {
         return availableTierNames;
     }

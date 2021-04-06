@@ -20,10 +20,15 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EventCountLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottleLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 
@@ -161,5 +166,35 @@ public class ThrottlingPolicyMappingUtil {
             default:
                 return null;
         }
+    }
+
+    public static SubscriptionPolicyDTO fromSubscriptionToDTO(SubscriptionPolicy subscriptionPolicy,
+                                                              int position) {
+        SubscriptionPolicyDTO dto = new SubscriptionPolicyDTO();
+        dto.setRateLimitCount(subscriptionPolicy.getRateLimitCount());
+        dto.setRateLimitTimeUnit(subscriptionPolicy.getRateLimitTimeUnit());
+        dto.setStopOnQuotaReach(subscriptionPolicy.isStopOnQuotaReach());
+        ThrottleLimitDTO limitDTO = new ThrottleLimitDTO();
+        limitDTO.setType(ThrottleLimitDTO.TypeEnum.EVENTCOUNTLIMIT);
+        EventCountLimit eventCountLimit = (EventCountLimit) subscriptionPolicy.getDefaultQuotaPolicy()
+                .getLimit();
+        EventCountLimitDTO eventCountLimitDTO = new EventCountLimitDTO();
+        eventCountLimitDTO.setEventCount(eventCountLimit.getEventCount());
+        eventCountLimitDTO.setTimeUnit(eventCountLimit.getTimeUnit());
+        eventCountLimitDTO.setUnitTime(eventCountLimit.getUnitTime());
+        limitDTO.setEventCount(eventCountLimitDTO);
+        dto.setDefaultLimit(limitDTO);
+        dto.setSubscriberCount(subscriptionPolicy.getSubscriberCount());
+        dto.setDisplayName(subscriptionPolicy.getDisplayName());
+        dto.setDescription(subscriptionPolicy.getDescription());
+        dto.setIsDeployed(subscriptionPolicy.isDeployed());
+        dto.setPolicyName(subscriptionPolicy.getPolicyName());
+        dto.setBillingPlan(subscriptionPolicy.getBillingPlan());
+        dto.setPolicyId(position);
+        dto.setUuid(subscriptionPolicy.getUUID());
+        dto.setIsDeployed(subscriptionPolicy.isDeployed());
+        dto.setTenantDomain(subscriptionPolicy.getTenantDomain());
+        dto.setTenantId(subscriptionPolicy.getTenantId());
+        return dto;
     }
 }

@@ -30,7 +30,7 @@ import Resources from './Resources';
 import Operations from './Operations';
 import ProductResources from './ProductResources';
 import Configuration from './Configuration';
-import NewCustomizedStepper from './NewCustomizedStepper';
+import CustomizedStepper from './CustomizedStepper';
 import MetaData from './MetaData';
 import Endpoints from './Endpoints';
 import Topics from './Topics';
@@ -148,7 +148,7 @@ function Overview(props) {
         switch (apiType) {
             case 'GRAPHQL':
                 return <Operations parentClasses={classes} api={api} />;
-            case 'APIProduct':
+            case 'APIPRODUCT':
                 return <ProductResources parentClasses={classes} api={api} />;
             case 'WS':
             case 'WEBSUB':
@@ -173,7 +173,7 @@ function Overview(props) {
             {api.type !== API.CONSTS.APIProduct && (
                 <Grid container spacing={12}>
                     <Grid item xs={12} s={12} md={12} lg={12}>
-                        <NewCustomizedStepper />
+                        <CustomizedStepper />
                     </Grid>
                 </Grid>
             )}

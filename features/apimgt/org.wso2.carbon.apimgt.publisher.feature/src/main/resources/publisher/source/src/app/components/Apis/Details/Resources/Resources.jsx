@@ -640,14 +640,18 @@ export default function Resources(props) {
                     justify='space-between'
                     alignItems='center'
                 >
-                    {!disableUpdate && (
-                        <SaveOperations
-                            operationsDispatcher={operationsDispatcher}
-                            updateOpenAPI={updateOpenAPI}
-                            api={api}
-                        />
-                    )}
-                    {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
+                    <Grid item>
+                        {!disableUpdate && (
+                            <SaveOperations
+                                operationsDispatcher={operationsDispatcher}
+                                updateOpenAPI={updateOpenAPI}
+                                api={api}
+                            />
+                        )}
+                    </Grid>
+                    <Grid item>
+                        {!hideAPIDefinitionLink && <GoToDefinitionLink api={api} />}
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>

@@ -29,6 +29,7 @@ public class Constants {
     public static final String USER_IP_PROPERTY = "api.analytics.user.ip";
     public static final String CACHED_RESPONSE_KEY = "CachableResponse";
     public static final String SKIP_DEFAULT_METRICS_PUBLISHING = "skip_default_metrics_publishing";
+    public static final String REQUEST_CACHE_HIT = "api.analytics.cacheHit";
 
     public static final String REGION_ID_PROP = "apim.gw.region";
     public static final String DEFAULT_REGION_ID = "default";

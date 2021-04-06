@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.VHostDTO;
 import javax.validation.constraints.*;
 
@@ -29,7 +28,6 @@ public class EnvironmentDTO   {
     private String type = null;
     private String serverUrl = null;
     private Boolean showInApiConsole = null;
-    private EnvironmentEndpointsDTO endpoints = null;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
 
   /**
@@ -123,25 +121,6 @@ public class EnvironmentDTO   {
 
   /**
    **/
-  public EnvironmentDTO endpoints(EnvironmentEndpointsDTO endpoints) {
-    this.endpoints = endpoints;
-    return this;
-  }
-
-  
-  @ApiModelProperty(required = true, value = "")
-      @Valid
-  @JsonProperty("endpoints")
-  @NotNull
-  public EnvironmentEndpointsDTO getEndpoints() {
-    return endpoints;
-  }
-  public void setEndpoints(EnvironmentEndpointsDTO endpoints) {
-    this.endpoints = endpoints;
-  }
-
-  /**
-   **/
   public EnvironmentDTO vhosts(List<VHostDTO> vhosts) {
     this.vhosts = vhosts;
     return this;
@@ -173,13 +152,12 @@ public class EnvironmentDTO   {
         Objects.equals(type, environment.type) &&
         Objects.equals(serverUrl, environment.serverUrl) &&
         Objects.equals(showInApiConsole, environment.showInApiConsole) &&
-        Objects.equals(endpoints, environment.endpoints) &&
         Objects.equals(vhosts, environment.vhosts);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, displayName, type, serverUrl, showInApiConsole, endpoints, vhosts);
+    return Objects.hash(name, displayName, type, serverUrl, showInApiConsole, vhosts);
   }
 
   @Override
@@ -192,7 +170,6 @@ public class EnvironmentDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    serverUrl: ").append(toIndentedString(serverUrl)).append("\n");
     sb.append("    showInApiConsole: ").append(toIndentedString(showInApiConsole)).append("\n");
-    sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("}");
     return sb.toString();

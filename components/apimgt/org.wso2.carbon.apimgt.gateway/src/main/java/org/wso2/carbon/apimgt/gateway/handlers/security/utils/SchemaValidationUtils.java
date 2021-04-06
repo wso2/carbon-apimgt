@@ -23,7 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Collection;
@@ -33,11 +36,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.xml.stream.XMLStreamException;
 
 public class SchemaValidationUtils {
 
     private static final Log logger = LogFactory.getLog(SchemaValidationUtils.class);
-
     /**
      * Utility function to extract collection of String from Map when the key is given.
      *
@@ -88,7 +91,7 @@ public class SchemaValidationUtils {
 
         Map<String, String> queryParams = new HashMap<>();
         if (!apiResource.equals(path) && apiResource.contains("?")) {
-            String queryString = apiResource.replace(path + "?", "");
+            String queryString = apiResource.split("\\?")[1];
             String[] query = queryString.split("&");
             for (String keyValue : query) {
                 int idx = keyValue.indexOf("=");
@@ -114,6 +117,16 @@ public class SchemaValidationUtils {
         Optional<String> payloadObject = Optional.empty();
         org.apache.axis2.context.MessageContext axis2Context = ((Axis2MessageContext) messageContext)
                 .getAxis2MessageContext();
+        boolean isMessageContextBuilt = isMessageContextBuilt(axis2Context);
+        if (!isMessageContextBuilt) {
+            // Build Axis2 Message.
+            try {
+                RelayUtils.buildMessage(axis2Context);
+            } catch (IOException | XMLStreamException e) {
+                logger.error(" Unable to build axis2 message");
+            }
+        }
+
         if (JsonUtil.hasAJsonPayload(axis2Context)) {
             payloadObject = Optional.of(JsonUtil.jsonPayloadToString(axis2Context));
         } else if (messageContext.getEnvelope().getBody() != null) {
@@ -130,4 +143,14 @@ public class SchemaValidationUtils {
         return payloadObject;
     }
 
+    public static boolean isMessageContextBuilt(org.apache.axis2.context.MessageContext axis2MC) {
+
+        boolean isMessageContextBuilt = false;
+        Object messageContextBuilt = axis2MC.getProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED);
+        if (messageContextBuilt != null) {
+            isMessageContextBuilt = (Boolean) messageContextBuilt;
+        }
+
+        return isMessageContextBuilt;
+    }
 }

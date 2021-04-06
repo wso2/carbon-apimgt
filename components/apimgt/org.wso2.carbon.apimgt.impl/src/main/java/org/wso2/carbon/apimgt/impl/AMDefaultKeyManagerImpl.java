@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.impl.dto.UserInfoDTO;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -72,7 +71,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -182,7 +185,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } else {
             clientInfo.setClientName(applicationName);
         }
-        
+
         //todo: run tests by commenting the type
         if (StringUtils.isEmpty(info.getTokenType())) {
             clientInfo.setTokenType(APIConstants.TOKEN_TYPE_JWT);
@@ -192,8 +195,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // Use a generated user as the app owner for cross tenant subscription scenarios, to avoid the tenant admin
         // being exposed in the JWT token.
-        if (APIUtil.isCrossTenantSubscriptionsEnabled()) {
-            clientInfo.setApplication_owner(APIConstants.DEFAULT_RESERVED_USERNAME);
+        if (APIUtil.isCrossTenantSubscriptionsEnabled()
+                && !tenantDomain.equals(MultitenantUtils.getTenantDomain(applicationOwner))) {
+            clientInfo.setApplication_owner(APIUtil.retrieveDefaultReservedUsername());
         } else {
             clientInfo.setApplication_owner(MultitenantUtils.getTenantAwareUsername(applicationOwner));
         }
@@ -363,6 +367,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             ClientInfo clientInfo = dcrClient.getApplication(consumerKey);
             return buildDTOFromClientInfo(clientInfo, new OAuthApplicationInfo());
         } catch (KeyManagerClientException e) {
+            if (e.getStatusCode() == 404) {
+                return null;
+            }
             handleException("Cannot retrieve service provider for the given consumer key : " + consumerKey, e);
             return null;
         }
@@ -520,7 +527,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * Builds an OAuthApplicationInfo object using the ClientInfo response
      *
-     * @param appResponse ClientInfo response object
+     * @param appResponse          ClientInfo response object
      * @param oAuthApplicationInfo original OAuthApplicationInfo object
      * @return OAuthApplicationInfo object with response information added
      */
@@ -543,14 +550,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                     getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT)).replace(",", " "));
         }
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
-        Map<String,Object> additionalProperties = new HashMap<>();
+        Map<String, Object> additionalProperties = new HashMap<>();
         additionalProperties.put(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME,
                 appResponse.getApplicationAccessTokenLifeTime());
         additionalProperties.put(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME,
                 appResponse.getUserAccessTokenLifeTime());
         additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
                 appResponse.getRefreshTokenLifeTime());
-        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME,appResponse.getIdTokenLifeTime());
+        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME, appResponse.getIdTokenLifeTime());
 
         oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
@@ -603,7 +610,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             introspectionEndpoint = keyManagerServiceUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                     .concat(getTenantAwareContext().trim()).concat("/oauth2/introspect");
         }
-        
+
         String userInfoEndpoint;
         if (configuration.getParameter(APIConstants.KeyManager.USERINFO_ENDPOINT) != null) {
             userInfoEndpoint = (String) configuration.getParameter(APIConstants.KeyManager.USERINFO_ENDPOINT);
@@ -708,6 +715,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      */
     @Override
     public AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException {
+
         return new AccessTokenInfo();
     }
 
@@ -721,7 +729,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method will be used to register a Scope in the authorization server.
      *
-     * @param scope        Scope to register
+     * @param scope Scope to register
      * @throws APIManagementException if there is an error while registering a new scope.
      */
     @Override
@@ -766,7 +774,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method will be used to retrieve details of a Scope in the authorization server.
      *
-     * @param name    Scope Name to retrieve
+     * @param name Scope Name to retrieve
      * @return Scope object
      * @throws APIManagementException if an error while retrieving scope
      */
@@ -902,7 +910,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method will be used to delete a Scope in the authorization server.
      *
-     * @param scopeName    Scope name
+     * @param scopeName Scope name
      * @throws APIManagementException if an error occurs while deleting the scope
      */
     @Override
@@ -925,7 +933,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method will be used to update a Scope in the authorization server.
      *
-     * @param scope        Scope object
+     * @param scope Scope object
      * @throws APIManagementException if an error occurs while updating the scope
      */
     @Override
@@ -950,7 +958,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * This method will be used to check whether the a Scope exists for the given scope name in the authorization
      * server.
      *
-     * @param scopeName    Scope Name
+     * @param scopeName Scope Name
      * @return whether scope exists or not
      * @throws APIManagementException if an error occurs while checking the existence of the scope
      */
@@ -1034,6 +1042,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
         return "";
     }
+
     private void addKeyManagerConfigsAsSystemProperties(String serviceUrl) {
 
         URL keyManagerURL;
@@ -1061,7 +1070,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.error("Exception While resolving KeyManager Server URL or Port " + e.getMessage(), e);
         }
     }
-    
+
     @Override
     public Map<String, String> getUserClaims(String username, Map<String, Object> properties)
             throws APIManagementException {

@@ -1,0 +1,1 @@
+{"clientId":"jb0HJdcpEwUFyy5v7fOSvyIJSPwa","clientName":"admin_webpack_dev","callBackURL":"https://localhost:8081/admin/services/auth/callback/login","clientSecret":"dUjQzcTDLAsGYZKMblWSmOtlp5Ea","isSaasApplication":true,"appOwner":null,"jsonString":"{\"grant_types\":\"authorization_code refresh_token\"}","jsonAppAttribute":"{}","tokenType":null}

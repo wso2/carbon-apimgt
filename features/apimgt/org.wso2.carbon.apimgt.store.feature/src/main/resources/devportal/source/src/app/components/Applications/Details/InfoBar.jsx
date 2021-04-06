@@ -21,9 +21,7 @@ import { withRouter, Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import Collapse from '@material-ui/core/Collapse';
 import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Loading from 'AppComponents/Base/Loading/Loading';
@@ -33,8 +31,8 @@ import Grid from '@material-ui/core/Grid';
 import API from 'AppData/api';
 import Application from 'AppData/Application';
 import Alert from 'AppComponents/Shared/Alert';
-import DeleteConfirmation from '../Listing/DeleteConfirmation';
 import AuthManager from 'AppData/AuthManager';
+import DeleteConfirmation from '../Listing/DeleteConfirmation';
 
 /**
  * @param {*} theme theme details
@@ -282,8 +280,8 @@ class InfoBar extends React.Component {
                 return Promise.all([response, promisedPolicy]);
             })
             .then((response) => {
-                const [application, tier] = response.map(data => data.obj);
-                this.setState({ application, tierDescription: tier.description });
+                const [application] = response.map((data) => data.obj);
+                this.setState({ application });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -296,26 +294,9 @@ class InfoBar extends React.Component {
             });
     }
 
-    /**
-     * Toggles the showOverview state
-     * @param {boolean} todo toggle state
-     * @memberof InfoBar
-     */
-    toggleOverview(todo) {
-        if (typeof todo === 'boolean') {
-            this.setState({ showOverview: todo });
-        } else {
-            this.setState(prevState => ({ showOverview: !prevState.showOverview }));
-        }
-    }
 
-    /**
-     * Handles delete confimation
-     * @memberof InfoBar
-     */
-    handleDeleteConfimation() {
-        const { isDeleteOpen } = this.state;
-        this.setState({ isDeleteOpen: !isDeleteOpen });
+    toggleDeleteConfirmation = () => {
+        this.setState(({ isDeleteOpen }) => ({ isDeleteOpen: !isDeleteOpen }));
     }
 
     /**
@@ -329,7 +310,7 @@ class InfoBar extends React.Component {
         let message = intl.formatMessage({
             defaultMessage: 'Application {name} deleted successfully!',
             id: 'Applications.Details.InfoBar.application.deleted.successfully',
-        }, {name: application.name});
+        }, { name: application.name });
         promisedDelete.then((ok) => {
             if (ok) {
                 Alert.info(message);
@@ -341,15 +322,32 @@ class InfoBar extends React.Component {
             message = intl.formatMessage({
                 defaultMessage: 'Error while deleting application {name}',
                 id: 'Applications.Details.InfoBar.application.deleting.error',
-            }, {name: application.name});
+            }, { name: application.name });
             Alert.error(message);
         });
     }
 
-    toggleDeleteConfirmation = () => {
-        this.setState(({ isDeleteOpen }) => ({ isDeleteOpen: !isDeleteOpen }));
+    /**
+     * Handles delete confimation
+     * @memberof InfoBar
+     */
+    handleDeleteConfimation() {
+        const { isDeleteOpen } = this.state;
+        this.setState({ isDeleteOpen: !isDeleteOpen });
     }
 
+    /**
+     * Toggles the showOverview state
+     * @param {boolean} todo toggle state
+     * @memberof InfoBar
+     */
+    toggleOverview(todo) {
+        if (typeof todo === 'boolean') {
+            this.setState({ showOverview: todo });
+        } else {
+            this.setState((prevState) => ({ showOverview: !prevState.showOverview }));
+        }
+    }
 
     /**
      * @returns {div}
@@ -360,24 +358,19 @@ class InfoBar extends React.Component {
             classes, theme, applicationId,
         } = this.props;
         const {
-            application, tierDescription, showOverview, notFound, isDeleteOpen, applicationOwner,
+            application, notFound, isDeleteOpen, applicationOwner,
         } = this.state;
-        const {
-            custom: {
-                leftMenu: { position },
-            },
-        } = theme;
 
         if (notFound) {
             return (
-              <ResourceNotFound
-                message={
-                  <FormattedMessage
-                    id="Applications.Details.InfoBar.listing.resource.not.found"
-                    defaultMessage="Resource Not Fount"
-                  />
-                }
-              />
+                <ResourceNotFound
+                    message={(
+                        <FormattedMessage
+                            id='Applications.Details.InfoBar.listing.resource.not.found'
+                            defaultMessage='Resource Not Fount'
+                        />
+                    )}
+                />
             );
         }
 
@@ -392,12 +385,13 @@ class InfoBar extends React.Component {
                     <Grid item xs={10}>
                         <div style={{ marginLeft: theme.spacing(1) }}>
                             <Link to={'/applications/' + applicationId + '/overview'} className={classes.linkTitle}>
-                                <Typography id="itest-info-bar-application-name" variant='h4'>{application.name}</Typography>
+                                <Typography id='itest-info-bar-application-name' variant='h4'>{application.name}</Typography>
                             </Link>
                         </div>
                         <div style={{ marginLeft: theme.spacing(1) }}>
                             <Typography variant='caption' gutterBottom align='left'>
-                                {application.subscriptionCount}{' '}
+                                {application.subscriptionCount}
+                                {' '}
                                 <FormattedMessage
                                     id='Applications.Details.InfoBar.subscriptions'
                                     defaultMessage='Subscriptions'
@@ -406,61 +400,61 @@ class InfoBar extends React.Component {
                         </div>
                     </Grid>
                     {isUserOwner && (
-                    <>
-                    <VerticalDivider height={70} />
-                    <Grid item xs={1} m={1} className={classes.editButton}>
-                            <Link to={`/applications/${applicationId}/edit/fromView`} className={classes.editButton}>
+                        <>
+                            <VerticalDivider height={70} />
+                            <Grid item xs={1} m={1} className={classes.editButton}>
+                                <Link to={`/applications/${applicationId}/edit/fromView`} className={classes.editButton}>
+                                    <Button
+                                        style={{ padding: '4px' }}
+                                        color='default'
+                                        classes={{ label: classes.iconButton }}
+                                        aria-label={(
+                                            <FormattedMessage
+                                                id='Applications.Details.InfoBar.edit'
+                                                defaultMessage='Edit'
+                                            />
+                                        )}
+                                    >
+                                        <Icon>edit</Icon>
+                                        <Typography variant='caption' style={{ marginTop: '2px' }}>
+                                            <FormattedMessage
+                                                id='Applications.Details.InfoBar.edit.text'
+                                                defaultMessage='Edit'
+                                            />
+                                        </Typography>
+                                    </Button>
+                                </Link>
+                            </Grid>
+                            <VerticalDivider height={70} />
+                            <Grid item xs={1} m={1} className={classes.button}>
                                 <Button
-                                    style={{ padding: '4px' }}
+                                    onClick={this.handleDeleteConfimation}
+                                    disabled={AuthManager.getUser().name !== applicationOwner}
                                     color='default'
                                     classes={{ label: classes.iconButton }}
                                     aria-label={(
                                         <FormattedMessage
-                                            id='Applications.Details.InfoBar.edit'
-                                            defaultMessage='Edit'
+                                            id='Applications.Details.InfoBar.delete'
+                                            defaultMessage='Delete'
                                         />
                                     )}
                                 >
-                                    <Icon>edit</Icon>
-                                    <Typography variant='caption' style={{ marginTop: '2px' }} >
+                                    <Icon>delete</Icon>
+                                    <Typography variant='caption' style={{ marginTop: '2px' }}>
                                         <FormattedMessage
-                                            id='Applications.Details.InfoBar.edit.text'
-                                            defaultMessage='Edit'
+                                            id='Applications.Details.InfoBar.text'
+                                            defaultMessage='Delete'
                                         />
                                     </Typography>
                                 </Button>
-                            </Link>
-                    </Grid>
-                    <VerticalDivider height={70} />
-                    <Grid item xs={1} m={1} className={classes.button}>
-                        <Button
-                            onClick={this.handleDeleteConfimation}
-                            disabled={AuthManager.getUser().name !== applicationOwner}
-                            color='default'
-                            classes={{ label: classes.iconButton }}
-                            aria-label={(
-                                <FormattedMessage
-                                    id='Applications.Details.InfoBar.delete'
-                                    defaultMessage='Delete'
+                                <DeleteConfirmation
+                                    handleAppDelete={this.handleAppDelete}
+                                    isDeleteOpen={isDeleteOpen}
+                                    toggleDeleteConfirmation={this.toggleDeleteConfirmation}
                                 />
-                            )}
-                        >
-                            <Icon>delete</Icon>
-                            <Typography variant='caption' style={{ marginTop: '2px' }} >
-                                <FormattedMessage
-                                    id='Applications.Details.InfoBar.text'
-                                    defaultMessage='Delete'
-                                />
-                            </Typography>
-                        </Button>
-                        <DeleteConfirmation
-                            handleAppDelete={this.handleAppDelete}
-                            isDeleteOpen={isDeleteOpen}
-                            toggleDeleteConfirmation={this.toggleDeleteConfirmation}
-                        />
-                    </Grid>
-                    </>
-                     )}
+                            </Grid>
+                        </>
+                    )}
                 </div>
             </div>
         );

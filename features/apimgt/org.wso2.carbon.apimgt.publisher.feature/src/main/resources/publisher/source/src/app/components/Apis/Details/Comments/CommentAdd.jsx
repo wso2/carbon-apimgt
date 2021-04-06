@@ -96,8 +96,9 @@ class CommentAdd extends React.Component {
      * @memberof CommentAdd
      */
     handleClickCancel() {
-        const { toggleShowReply } = this.props;
-        toggleShowReply();
+        this.setState({ content: '' });
+        const { handleShowReply } = this.props;
+        handleShowReply();
     }
 
     /**
@@ -115,8 +116,9 @@ class CommentAdd extends React.Component {
      * * */
     handleClickAddComment() {
         const {
-            apiId, replyTo, allComments, commentsUpdate,
+            api, replyTo, allComments, commentsUpdate, handleShowReply,
         } = this.props;
+        const apiId = api.id;
         const { content } = this.state;
         const comment = {
             content: content.trim(), category: 'general',
@@ -148,6 +150,9 @@ class CommentAdd extends React.Component {
             Alert.error('You cannot enter a blank comment');
         }
         this.setState({ currentLength: 0 });
+        if (replyTo !== null) {
+            handleShowReply();
+        }
     }
 
     /**
@@ -157,7 +162,7 @@ class CommentAdd extends React.Component {
      */
     render() {
         const {
-            classes, cancelButton, theme, intl,
+            classes, cancelButton, theme, intl, api,
         } = this.props;
         const { content, currentLength } = this.state;
         return (
@@ -174,6 +179,7 @@ class CommentAdd extends React.Component {
                             id='standard-multiline-flexible'
                             autoFocus
                             multiline
+                            disabled={api.isRevision}
                             className={classes.textField}
                             margin='normal'
                             placeholder={intl.formatMessage({
@@ -223,16 +229,16 @@ class CommentAdd extends React.Component {
 
 CommentAdd.defaultProps = {
     replyTo: null,
-    toggleShowReply: null,
+    handleShowReply: null,
     commentsUpdate: null,
 };
 
 CommentAdd.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     cancelButton: PropTypes.bool.isRequired,
-    apiId: PropTypes.string.isRequired,
+    api: PropTypes.instanceOf(Object).isRequired,
     replyTo: PropTypes.string,
-    toggleShowReply: PropTypes.func,
+    handleShowReply: PropTypes.func,
     commentsUpdate: PropTypes.func,
     allComments: PropTypes.instanceOf(Array).isRequired,
     theme: PropTypes.shape({}).isRequired,

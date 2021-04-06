@@ -31,12 +31,12 @@ import rtl from 'jss-rtl';
 
 import Utils from 'AppData/Utils';
 import Settings from 'Settings';
+import DefaultConfigurations from 'AppData/defaultTheme';
 import Logout from './app/components/Logout';
 import Progress from './app/components/Shared/Progress';
 import { SettingsProvider } from './app/components/Shared/SettingsContext';
 import API from './app/data/api';
 import BrowserRouter from './app/components/Base/CustomRouter/BrowserRouter';
-import DefaultConfigurations from './defaultTheme';
 import AuthManager from './app/data/AuthManager';
 import CONSTS from './app/data/Constants';
 

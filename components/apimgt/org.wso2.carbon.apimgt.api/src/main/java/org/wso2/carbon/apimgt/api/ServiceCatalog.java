@@ -155,4 +155,13 @@ public interface ServiceCatalog {
      * @throws APIManagementException
      */
     List<API> getServiceUsage(String serviceId, int tenantId) throws APIManagementException;
+
+    /**
+     * Retrieve the count of available services
+     * @param tenantId      Logged-in user tenant ID
+     * @param filterParams  Service Filer Params
+     * @return              Number of services that match to the given search conditions
+     * @throws APIManagementException
+     */
+    int getServicesCount(int tenantId, ServiceFilterParams filterParams) throws APIManagementException;
 }

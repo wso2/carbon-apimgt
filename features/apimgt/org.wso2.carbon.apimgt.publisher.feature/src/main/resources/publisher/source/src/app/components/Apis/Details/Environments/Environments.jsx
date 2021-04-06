@@ -16,11 +16,12 @@
  * under the License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { APIContext } from 'AppComponents/Apis/Details/components/ApiContext';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -38,6 +39,7 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
@@ -60,6 +62,8 @@ import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import API from 'AppData/api';
 import { ConfirmDialog } from 'AppComponents/Shared/index';
+import { useRevisionContext } from 'AppComponents/Shared/RevisionContext';
+import CONSTS from 'AppData/Constants';
 import DisplayDevportal from './DisplayDevportal';
 
 const useStyles = makeStyles((theme) => ({
@@ -274,6 +278,9 @@ const useStyles = makeStyles((theme) => ({
     vhostSelect: {
         marginTop: theme.spacing(3),
     },
+    textCount: {
+        marginTop: theme.spacing(-2.5),
+    },
 }));
 
 /**
@@ -283,9 +290,15 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
+    const theme = useTheme();
+    const { maxCommentLength } = theme.custom;
     const intl = useIntl();
-    const { api, updateAPI } = useContext(APIContext);
+    const { api } = useContext(APIContext);
+    const history = useHistory();
     const { settings } = useAppContext();
+    const {
+        allRevisions, getRevision, allEnvRevision, getDeployedEnv,
+    } = useRevisionContext();
     let revisionCount;
     if (Configurations.app.revisionCount) {
         revisionCount = Configurations.app.revisionCount;
@@ -294,8 +307,6 @@ export default function Environments() {
     }
     const restApi = new API();
     const restProductApi = new APIProduct();
-    const [allRevisions, setRevisions] = useState(null);
-    const [allEnvRevision, setEnvRevision] = useState(null);
     const [selectedRevision, setRevision] = useState([]);
     const defaultVhosts = settings.environment.map(
         (e) => (e.vhosts && e.vhosts.length > 0 ? { env: e.name, vhost: e.vhosts[0].host } : undefined),
@@ -310,11 +321,11 @@ export default function Environments() {
     const [revisionToDelete, setRevisionToDelete] = useState([]);
     const [confirmRestoreOpen, setConfirmRestoreOpen] = useState(false);
     const [revisionToRestore, setRevisionToRestore] = useState([]);
-    const [openDeployPopup, setOpenDeployPopup] = useState(false);
-    const [lastRevisionCount, setLastRevisionCount] = useState(0);
+    const [currentLength, setCurrentLength] = useState(0);
+    const [openDeployPopup, setOpenDeployPopup] = useState(history.location.state === 'deploy');
 
     // allEnvDeployments represents all deployments of the API with mapping
-    // environment -> {revision deployed to env, vhost deployed to env with revisino}
+    // environment -> {revision deployed to env, vhost deployed to env with revision}
     const allEnvDeployments = [];
     settings.environment.forEach((env) => {
         const revision = allEnvRevision && allEnvRevision.find(
@@ -322,43 +333,12 @@ export default function Environments() {
         );
         const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
         const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
-        const vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+        let vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+        if (!vhost) { // if vhost is deleted after deploying the revision, there is no matching vhost
+            vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails && envDetails.vhost };
+        }
         allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
-
-    const extractLastRevisionNumber = (list, lastRev) => {
-        if (lastRev !== null) {
-            setLastRevisionCount(lastRev);
-        } else if (list[list.length - 1]) {
-            const lastRevisionName = list[list.length - 1].displayName;
-            const splitList = lastRevisionName.split(' ');
-            setLastRevisionCount(splitList[1]);
-        } else {
-            setLastRevisionCount(0);
-        }
-    };
-
-    useEffect(() => {
-        if (api && api.apiType !== API.CONSTS.APIProduct) {
-            restApi.getRevisions(api.id).then((result) => {
-                setRevisions(result.body.list);
-                setLastRevisionCount(result.body.count);
-                extractLastRevisionNumber(result.body.list, null);
-            });
-            restApi.getRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                setEnvRevision(result.body.list);
-            });
-        } else {
-            restProductApi.getProductRevisions(api.id).then((result) => {
-                setRevisions(result.body.list);
-                setLastRevisionCount(result.body.count);
-                extractLastRevisionNumber(result.body.list, null);
-            });
-            restProductApi.getProductRevisionsWithEnv(api.isRevision ? api.revisionedApiId : api.id).then((result) => {
-                setEnvRevision(result.body.list);
-            });
-        }
-    }, []);
 
     const toggleOpenConfirmDelete = (revisionName, revisionId) => {
         setRevisionToDelete([revisionName, revisionId]);
@@ -415,25 +395,6 @@ export default function Environments() {
         setExtraRevisionToDelete(null);
     };
 
-    /**
-     * Handles creating and deploying a new revision
-     * @param {Object} list the environment list
-     * @param {Object} revisionName the name of the revision
-     * @returns {Object} the revision number
-     */
-    function checkIfDeletingLastRevision(list, revisionName) {
-        const splitList = revisionName.split(' ');
-        let splitList1;
-        if (list[list.length - 1]) {
-            const lastRevInList = list[list.length - 1].displayName;
-            splitList1 = lastRevInList.split(' ');
-        }
-        if (parseInt(splitList[1], 10) === parseInt(splitList1[1], 10)) {
-            return splitList[1];
-        }
-        return null;
-    }
-
     const handleChange = (event) => {
         if (event.target.checked) {
             setSelectedEnvironment([...SelectedEnvironment, event.target.value]);
@@ -444,6 +405,7 @@ export default function Environments() {
         }
         if (event.target.name === 'description') {
             setDescription(event.target.value);
+            setCurrentLength(event.target.value.length);
         }
     };
 
@@ -452,8 +414,7 @@ export default function Environments() {
      * @param {Object} revisionId the revision Id
      * @returns {Object} promised delete
      */
-    function deleteRevision(revisionId, revisionName) {
-        const lastRev = checkIfDeletingLastRevision(allRevisions, revisionName);
+    function deleteRevision(revisionId) {
         let promiseDelete;
         if (api.apiType === API.CONSTS.APIProduct) {
             promiseDelete = restProductApi.deleteProductRevision(api.id, revisionId)
@@ -473,10 +434,8 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, lastRev);
-                    });
+                    history.replace();
+                    getRevision();
                 });
         } else {
             promiseDelete = restApi.deleteRevision(api.id, revisionId)
@@ -496,10 +455,8 @@ export default function Environments() {
                         }));
                     }
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, lastRev);
-                    });
+                    history.replace();
+                    getRevision();
                 });
         }
         return promiseDelete;
@@ -524,10 +481,7 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restProductApi.getProductRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, null);
-                    });
+                    getRevision();
                 });
         } else {
             api.createRevision(api.id, body)
@@ -542,10 +496,7 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    restApi.getRevisions(api.id).then((result) => {
-                        setRevisions(result.body.list);
-                        extractLastRevisionNumber(result.body.list, null);
-                    });
+                    getRevision();
                 });
         }
     }
@@ -559,7 +510,7 @@ export default function Environments() {
             description,
         };
         if (extraRevisionToDelete) {
-            deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
+            deleteRevision(extraRevisionToDelete[0])
                 .then(() => {
                     createRevision(body);
                 }).finally(() => setExtraRevisionToDelete(null));
@@ -571,9 +522,9 @@ export default function Environments() {
         setExtraRevisionToDelete(null);
     }
 
-    const runActionDelete = (confirm, revisionId, revisionName) => {
+    const runActionDelete = (confirm, revisionId) => {
         if (confirm) {
-            deleteRevision(revisionId, revisionName);
+            deleteRevision(revisionId);
         }
         setConfirmDeleteOpen(!confirmDeleteOpen);
         setRevisionToDelete([]);
@@ -597,7 +548,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.restoreProductRevision(api.id, revisionId)
@@ -612,7 +564,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -647,7 +600,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.undeployProductRevision(api.id, revisionId, body)
@@ -662,7 +616,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -690,7 +645,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         } else {
             restProductApi.deployProductRevision(api.id, revisionId, body)
@@ -705,7 +661,8 @@ export default function Environments() {
                     }
                     console.error(error);
                 }).finally(() => {
-                    updateAPI();
+                    getRevision();
+                    getDeployedEnv();
                 });
         }
     }
@@ -741,6 +698,10 @@ export default function Environments() {
                                 Alert.error('Something went wrong while deploying the revision');
                             }
                             console.error(error);
+                        }).finally(() => {
+                            history.replace();
+                            getRevision();
+                            getDeployedEnv();
                         });
                 })
                 .catch((error) => {
@@ -750,9 +711,6 @@ export default function Environments() {
                         Alert.error('Something went wrong while creating the revision');
                     }
                     console.error(error);
-                })
-                .finally(() => {
-                    updateAPI();
                 });
             setOpenDeployPopup(false);
         } else {
@@ -763,6 +721,7 @@ export default function Environments() {
                     for (let i = 0; i < envList.length; i++) {
                         body1.push({
                             name: envList[i],
+                            vhost: vhostList.find((v) => v.env === envList[i]).vhost,
                             displayOnDevportal: true,
                         });
                     }
@@ -777,6 +736,10 @@ export default function Environments() {
                                 Alert.error('Something went wrong while deploying the revision');
                             }
                             console.error(error);
+                        }).finally(() => {
+                            history.replace();
+                            getRevision();
+                            getDeployedEnv();
                         });
                 })
                 .catch((error) => {
@@ -786,9 +749,6 @@ export default function Environments() {
                         Alert.error('Something went wrong while creating the revision');
                     }
                     console.error(error);
-                })
-                .finally(() => {
-                    updateAPI();
                 });
             setOpenDeployPopup(false);
         }
@@ -802,10 +762,12 @@ export default function Environments() {
      */
     function handleCreateAndDeployRevision(envList, vhostList) {
         if (extraRevisionToDelete) {
-            deleteRevision(extraRevisionToDelete[0], extraRevisionToDelete[1])
+            deleteRevision(extraRevisionToDelete[0])
                 .then(() => {
                     createDeployRevision(envList, vhostList);
-                }).finally(() => setExtraRevisionToDelete(null));
+                }).finally(() => {
+                    setExtraRevisionToDelete(null);
+                });
         } else {
             createDeployRevision(envList, vhostList);
         }
@@ -839,7 +801,7 @@ export default function Environments() {
                     defaultMessage='Yes'
                 />
             )}
-            callback={(e) => runActionDelete(e, revisionToDelete[1], revisionToDelete[0])}
+            callback={(e) => runActionDelete(e, revisionToDelete[1])}
             open={confirmDeleteOpen}
         />
     );
@@ -862,7 +824,7 @@ export default function Environments() {
             message={(
                 <FormattedMessage
                     id='Apis.Details.Environments.Environments.revision.restore.confirm.message'
-                    defaultMessage='Are you sure you want to restore {revision} ?'
+                    defaultMessage='Are you sure you want to restore {revision} (To Current API)?'
                     values={{ revision: revisionToRestore[0] }}
                 />
             )}
@@ -1341,18 +1303,6 @@ export default function Environments() {
                         />
                     </DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        <Typography variant='body1' className={classes.labelSpacingDown}>
-                            <b>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.new.revision.name.heading1'
-                                    defaultMessage='Revision Name:'
-                                />
-                            </b>
-                            <span className={classes.labelSpace}>
-                                {'Revision '}
-                                {parseInt(lastRevisionCount, 10) + 1}
-                            </span>
-                        </Typography>
                         { allRevisions && allRevisions.length === revisionCount && (
                             <Typography variant='body' align='left' className={classes.warningText}>
                                 <FormattedMessage
@@ -1431,6 +1381,7 @@ export default function Environments() {
                                 variant='outlined'
                                 label='Description'
                                 value={description}
+                                inputProps={{ maxLength: maxCommentLength }}
                                 helperText={(
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.revision.description.deploy'
@@ -1443,6 +1394,9 @@ export default function Environments() {
                                 rowsMax={4}
                                 onChange={handleChange}
                             />
+                            <Typography className={classes.textCount} align='right'>
+                                {currentLength + '/' + maxCommentLength}
+                            </Typography>
                         </Box>
                         <Box mt={2}>
                             <Typography variant='h6' align='left' className={classes.sectionTitle}>
@@ -1665,22 +1619,10 @@ export default function Environments() {
                     <DialogTitle id='form-dialog-title' variant='h2'>
                         <FormattedMessage
                             id='Apis.Details.Environments.Environments.revision.create.heading'
-                            defaultMessage='Create Revision'
+                            defaultMessage='Create New Revision (From Current API)'
                         />
                     </DialogTitle>
                     <DialogContent className={classes.dialogContent}>
-                        <Typography variant='body1' className={classes.labelSpacingDown}>
-                            <b>
-                                <FormattedMessage
-                                    id='Apis.Details.Environments.Environments.new.revision.name.heading2'
-                                    defaultMessage='Revision Name:'
-                                />
-                            </b>
-                            <span className={classes.labelSpace}>
-                                {'Revision '}
-                                {parseInt(lastRevisionCount, 10) + 1}
-                            </span>
-                        </Typography>
                         { allRevisions && allRevisions.length === revisionCount && (
                             <Typography variant='body' align='left' className={classes.warningText}>
                                 <FormattedMessage
@@ -1759,6 +1701,7 @@ export default function Environments() {
                                 variant='outlined'
                                 label='Description'
                                 value={description}
+                                inputProps={{ maxLength: maxCommentLength }}
                                 helperText={(
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.revision.description.create'
@@ -1771,6 +1714,9 @@ export default function Environments() {
                                 rowsMax={4}
                                 onChange={handleChange}
                             />
+                            <Typography className={classes.textCount} align='right'>
+                                {currentLength + '/' + maxCommentLength}
+                            </Typography>
                         </Box>
                     </DialogContent>
                     <DialogActions>

@@ -45,6 +45,7 @@ const LandingMenuItem = (props) => {
                 )}
                 {component.toLowerCase() === 'button' && (
                     <Button
+                        id={id}
                         size={dense ? 'small' : 'medium'}
                         onClick={onClick}
                         color='primary'

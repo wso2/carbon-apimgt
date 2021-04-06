@@ -6,12 +6,13 @@
     "scripts": {
         "test": "jest",
         "test:coverage": "jest --coverage",
-        "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack -p --display errors-only --hide-modules",
-        "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack -d --watch ",
-        "analysis": "NODE_ENV=production NODE_OPTIONS=--max_old_space_size=8172 webpack --env.analysis -p --progress",
+        "build:prod": "rm -R site/public/dist/; npm rum i18n && NODE_ENV=production NODE_OPTIONS=--max_old_space_size=4096 webpack --mode production --stats=errors-only",
+        "build:dev": "rm -R site/public/dist/; NODE_ENV=development webpack --mode development --watch ",
+        "analysis": "NODE_ENV=analysis NODE_OPTIONS=--max_old_space_size=8172 webpack --mode production --progress",
         "lint": "eslint source",
         "i18n": "extract-messages -l=en,fr -o site/public/locales/ -d en --extractFromFormatMessageCall --flat 'source/src/app/**/*.jsx'",
-        "check-unused": "webpack --mode production --env.unused true --display errors-only"
+        "check-unused": "webpack --mode production --env.unused true --display errors-only",
+        "start": "webpack serve --compress --https --port 8081 --mode development "
     },
     "repository": {
         "type": "git",
@@ -53,6 +54,7 @@
         "typeface-roboto": "0.0.35"
     },
     "devDependencies": {
+        "@apidevtools/swagger-parser": "^10.0.1",
         "@babel/core": "^7.10.2",
         "@babel/plugin-proposal-class-properties": "^7.10.1",
         "@babel/plugin-proposal-object-rest-spread": "^7.10.1",
@@ -86,12 +88,13 @@
         "mock-local-storage": "^1.1.12",
         "monaco-editor-webpack-plugin": "^1.9.0",
         "prettier": "^1.19.1",
+        "react-hot-loader": "^4.13.0",
         "style-loader": "^0.18.1",
-        "@apidevtools/swagger-parser": "^10.0.1",
         "underscore-template-loader": "^1.1.0",
         "unused-files-webpack-plugin": "^3.4.0",
-        "webpack": "v4.28.4",
+        "webpack": "^4.46.0",
         "webpack-bundle-analyzer": "^2.9.1",
-        "webpack-cli": "^3.3.11"
+        "webpack-cli": "^4.6.0",
+        "webpack-dev-server": "^3.11.2"
     }
 }

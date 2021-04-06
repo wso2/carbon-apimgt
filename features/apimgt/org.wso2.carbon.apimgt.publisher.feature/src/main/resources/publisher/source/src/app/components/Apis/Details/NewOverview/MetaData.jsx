@@ -146,7 +146,7 @@ function MetaData(props) {
                             </Grid>
                             <Grid item xs={12} md={6} lg={8}>
                                 <Typography component='p' variant='body1'>
-                                    {api.type && <>{api.type}</>}
+                                    {api.type && <>{api.type === 'WS' ? 'WebSocket' : api.type}</>}
                                     {!api.type
                                         && (
                                             <>

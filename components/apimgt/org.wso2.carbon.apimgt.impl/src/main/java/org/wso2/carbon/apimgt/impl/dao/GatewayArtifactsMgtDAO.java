@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 
 import java.io.*;
 import java.sql.Connection;
@@ -19,6 +20,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class GatewayArtifactsMgtDAO {
@@ -206,6 +208,7 @@ public class GatewayArtifactsMgtDAO {
     }
 
     public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gatewayLabelsToDeploy,
+                                                   Map<String, String> gatewayVhosts,
                                                    Set<APIRevisionDeployment> gatewayLabelsToRemove)
             throws APIManagementException {
 
@@ -218,16 +221,18 @@ public class GatewayArtifactsMgtDAO {
                         statement.setString(1, apiId);
                         statement.setString(2, apiRevisionDeployment.getRevisionUUID());
                         statement.setString(3, apiRevisionDeployment.getDeployment());
+                        // no need to set vhost when deleting API Deployment, it is unique for revision + label
                         statement.addBatch();
                     }
                     statement.executeBatch();
                 }
                 try {
                     if (gatewayLabelsToDeploy.size() > 0) {
-                        addPublishedGatewayLabels(connection, apiId, revision, gatewayLabelsToDeploy);
+                        addPublishedGatewayLabels(connection, apiId, revision, gatewayLabelsToDeploy, gatewayVhosts);
                     }
                     connection.commit();
-                } catch (SQLException e) {
+                } catch (SQLException | APIManagementException e) {
+                    // APIManagementException if failed to revolve default vhost and set null to DB
                     connection.rollback();
                     throw new APIManagementException("Failed to attach labels", e);
                 }
@@ -238,8 +243,8 @@ public class GatewayArtifactsMgtDAO {
     }
 
     private void addPublishedGatewayLabels(Connection connection, String apiUUID, String revisionId,
-                                           Set<String> gateways)
-            throws SQLException {
+                                           Set<String> gateways, Map<String, String> gatewayVhosts)
+            throws SQLException, APIManagementException {
 
         String addQuery = SQLConstants.ADD_GW_PUBLISHED_LABELS;
         try (PreparedStatement preparedStatement = connection.prepareStatement(addQuery)) {
@@ -247,6 +252,9 @@ public class GatewayArtifactsMgtDAO {
                 preparedStatement.setString(1, apiUUID);
                 preparedStatement.setString(2, revisionId);
                 preparedStatement.setString(3, gatewayLabel);
+                String resolvedVhost = VHostUtils
+                        .resolveIfDefaultVhostToNull(gatewayLabel, gatewayVhosts.get(gatewayLabel));
+                preparedStatement.setString(4, resolvedVhost);
                 preparedStatement.addBatch();
             }
             preparedStatement.executeBatch();
@@ -316,7 +324,11 @@ public class GatewayArtifactsMgtDAO {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(apiId);
-                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
+                    String label = resultSet.getString("LABEL");
+                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                            resultSet.getString("VHOST"));
+                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
@@ -362,7 +374,11 @@ public class GatewayArtifactsMgtDAO {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
-                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
+                    String label = resultSet.getString("LABEL");
+                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                            resultSet.getString("VHOST"));
+                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
@@ -401,7 +417,11 @@ public class GatewayArtifactsMgtDAO {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
-                    apiRuntimeArtifactDto.setLabel(resultSet.getString("LABEL"));
+                    String label = resultSet.getString("LABEL");
+                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                            resultSet.getString("VHOST"));
+                    apiRuntimeArtifactDto.setLabel(label);
+                    apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
                     apiRuntimeArtifactDto.setVersion(resultSet.getString("API_VERSION"));
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
@@ -454,16 +474,18 @@ public class GatewayArtifactsMgtDAO {
         }
     }
 
-    public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gateways)
+    public void addAndRemovePublishedGatewayLabels(String apiId, String revision, Set<String> gateways,
+                                                   Map<String, String> gatewayVhosts)
             throws APIManagementException {
 
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {
             try {
                 connection.setAutoCommit(false);
                 removePublishedGatewayLabels(connection, apiId, revision);
-                addPublishedGatewayLabels(connection, apiId, revision, gateways);
+                addPublishedGatewayLabels(connection, apiId, revision, gateways, gatewayVhosts);
                 connection.commit();
-            } catch (SQLException e) {
+            } catch (SQLException | APIManagementException e) {
+                // APIManagementException if failed to revolve default vhost and set null to DB
                 connection.rollback();
                 throw e;
             }

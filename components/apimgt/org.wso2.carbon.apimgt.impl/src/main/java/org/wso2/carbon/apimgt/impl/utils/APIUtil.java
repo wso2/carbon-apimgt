@@ -26,7 +26,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -115,6 +114,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -242,7 +242,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -1289,6 +1288,8 @@ public final class APIUtil {
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
                     APIUtil.getWebsubSubscriptionConfigurationJsonFromDto(api.getWebsubSubscriptionConfiguration()));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WS_URI_MAPPING, APIUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
 
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
@@ -4439,26 +4440,17 @@ public final class APIUtil {
             sequences = inSequenceDir.listFiles();
 
             if (sequences != null) {
-                //Tracks whether new sequences are there to deploy
-                boolean availableNewSequences = false;
-                //Tracks whether json_fault.xml is in the registry
-                boolean jsonFaultSeqInRegistry = false;
-
                 for (File sequenceFile : sequences) {
                     String sequenceFileName = sequenceFile.getName();
                     String regResourcePath =
                             APIConstants.API_CUSTOM_SEQUENCE_LOCATION + '/' +
                                     customSequenceType + '/' + sequenceFileName;
                     if (registry.resourceExists(regResourcePath)) {
-                        if (APIConstants.API_CUSTOM_SEQ_JSON_FAULT.equals(sequenceFileName)) {
-                            jsonFaultSeqInRegistry = true;
-                        }
                         if (log.isDebugEnabled()) {
                             log.debug("The sequence file with the name " + sequenceFileName
                                     + " already exists in the registry path " + regResourcePath);
                         }
                     } else {
-                        availableNewSequences = true;
                         if (log.isDebugEnabled()) {
                             log.debug(
                                     "Adding sequence file with the name " + sequenceFileName + " to the registry path "
@@ -4472,26 +4464,6 @@ public final class APIUtil {
 
                         registry.put(regResourcePath, inSeqResource);
                     }
-
-                }
-                //On the fly migration of json_fault.xml for 2.0.0 to 2.1.0
-                if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(customSequenceType) &&
-                        availableNewSequences && jsonFaultSeqInRegistry) {
-                    String oldFaultStatHandler = "org.wso2.carbon.apimgt.usage.publisher.APIMgtFaultHandler";
-                    String newFaultStatHandler = "org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtFaultHandler";
-                    String regResourcePath =
-                            APIConstants.API_CUSTOM_SEQUENCE_LOCATION + '/' +
-                                    customSequenceType + '/' + APIConstants.API_CUSTOM_SEQ_JSON_FAULT;
-                    Resource jsonFaultSeqResource = registry.get(regResourcePath);
-                    String oldJsonFaultSeqContent = new String((byte[]) jsonFaultSeqResource.getContent(),
-                            Charset.defaultCharset());
-                    if (oldJsonFaultSeqContent != null && oldJsonFaultSeqContent.contains(oldFaultStatHandler)) {
-                        String newJsonFaultContent =
-                                oldJsonFaultSeqContent.replace(oldFaultStatHandler, newFaultStatHandler);
-                        jsonFaultSeqResource.setContent(newJsonFaultContent);
-                        registry.put(regResourcePath, jsonFaultSeqResource);
-                    }
-
                 }
             } else {
                 log.error(
@@ -7612,6 +7584,10 @@ public final class APIUtil {
             return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
+    public static String getWsUriMappingJsonFromDto(Map<String, String> mappings) {
+        return new Gson().toJson(mappings);
+    }
+
     /**
      * Used to get access control allowed headers according to the api-manager.xml
      *
@@ -9743,7 +9719,7 @@ public final class APIUtil {
         String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         // get dynamic gateway environments read from database
         Map<String, Environment> envFromDB = ApiMgtDAO.getInstance().getAllEnvironments(tenantDomain).stream()
-                .map(Environment::newFromModel).collect(Collectors.toMap(Environment::getName, env -> env));
+                .collect(Collectors.toMap(Environment::getName, env -> env));
 
         // clone and overwrite api-manager.xml environments with environments from DB if exists with same name
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
@@ -9813,7 +9789,9 @@ public final class APIUtil {
             String productVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIProductIdentifier apiProductIdentifier = new APIProductIdentifier(providerName, productName,
                     productVersion);
+            apiProductIdentifier.setUUID(artifact.getId());
             apiProduct = new APIProduct(apiProductIdentifier);
+            apiProduct.setUuid(artifact.getId());
             apiProduct.setRating(Float.toString(getAverageRating(apiProductIdentifier)));
             ApiMgtDAO.getInstance().setAPIProductFromDB(apiProduct);
 
@@ -11645,6 +11623,15 @@ public final class APIUtil {
             return Boolean.parseBoolean(crossTenantSubscriptionProperty);
         }
         return false;
+    }
+
+    public static String retrieveDefaultReservedUsername() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String defaultReservedUsername =
+                apiManagerConfiguration.getFirstProperty(APIConstants.API_DEVPORTAL_DEFAULT_RESERVED_USERNAME);
+        return defaultReservedUsername;
     }
 
 

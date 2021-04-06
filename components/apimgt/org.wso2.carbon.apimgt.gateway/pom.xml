@@ -112,7 +112,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.jms.listener</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.common.jms</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -312,6 +312,10 @@
             <groupId>org.wso2.orbit.com.atlassian.oai</groupId>
             <artifactId>swagger-request-validator-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.common.analytics</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -455,6 +459,7 @@
                             com.nimbusds.jwt.*,
                             org.apache.commons.codec.*,
                             org.wso2.carbon.apimgt.common.gateway.*,
+                            org.wso2.carbon.apimgt.common.jms.*,
                             *;resolution:=optional
                         </Import-Package>
                     </instructions>
