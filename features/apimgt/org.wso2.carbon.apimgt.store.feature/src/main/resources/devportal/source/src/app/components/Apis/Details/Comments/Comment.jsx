@@ -260,7 +260,7 @@ class Comment extends React.Component {
      * @memberof Comments
      */
     handleLoadMoreReplies(comment) {
-        const { apiId, comments, commentsUpdate } = this.props;
+        const { apiId, comments, updateComment } = this.props;
         const { id, replies: { count, list } } = comment;
         const restApi = new API();
 
@@ -269,26 +269,22 @@ class Comment extends React.Component {
             .then((result) => {
                 if (result.body) {
                     const { list: replyList, count: replyCount } = result.body;
-                    const newComments = comments.reduce((acc, cur) => {
-                        let temp = cur;
-                        if (cur.id === id) {
-                            const newRepliesList = list.concat(replyList);
-                            const newCount = count + replyCount;
-                            const newLimit = newCount <= 3 ? 3 : newCount;
+                    const existingComment = comments.find((entry) => entry.id === id);
 
-                            temp = {
-                                ...cur,
-                                replies: {
-                                    count: newCount,
-                                    list: newRepliesList,
-                                    pagination: { ...cur.replies.pagination, limit: newLimit },
-                                },
-                            };
-                        }
-                        return [...acc, temp];
-                    }, []);
-                    if (commentsUpdate) {
-                        commentsUpdate(newComments);
+                    const newRepliesList = list.concat(replyList);
+                    const newCount = count + replyCount;
+                    const newLimit = newCount <= 3 ? 3 : newCount;
+
+                    const updatedComment = {
+                        ...existingComment,
+                        replies: {
+                            count: newCount,
+                            list: newRepliesList,
+                            pagination: { ...existingComment.replies.pagination, limit: newLimit },
+                        },
+                    };
+                    if (updateComment) {
+                        updateComment(updatedComment);
                     }
                 }
             })
@@ -568,7 +564,8 @@ Comment.propTypes = {
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
     isOverview: PropTypes.bool,
-    crossTenentUser: PropTypes.bool .isRequired,
+    crossTenentUser: PropTypes.bool.isRequired,
+    updateComment: PropTypes.func.isRequired,
 };
 
 export default injectIntl(withStyles(styles)(Comment));
