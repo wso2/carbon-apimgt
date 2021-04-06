@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import React, { useReducer, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { withRouter } from 'react-router';
@@ -71,11 +72,9 @@ const APICreateStreamingAPI = (props) => {
         SSE: 'SSE',
         WEBSUB: 'WebSub',
     };
-
-    const { match: { params } } = props;
-    let apiType = null;
-    if (params && params.apiType) {
-        apiType = params.apiType.toUpperCase();
+    let { apiType } = useParams();
+    if (apiType) {
+        apiType = apiType.toUpperCase();
     }
     const [hideEndpoint, setHideEndpoint] = useState(!apiType || apiType === protocolKeys.WebSub);
 
