@@ -261,18 +261,22 @@ export default function Resources(props) {
     // memoized (https://reactjs.org/docs/hooks-reference.html#usememo) to improve pref,
     // localized to inject local apiThrottlingPolicy data
     const localAPI = useMemo(
-        () => ({
-            id: api.id,
-            apiThrottlingPolicy,
-            scopes: api.scopes,
-            operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
-            endpointConfig: api.endpointConfig,
-        }),
+        () => {
+            // eslint-disable-next-line no-debugger
+            debugger;
+            return {
+                id: api.id,
+                apiThrottlingPolicy,
+                scopes: api.scopes,
+                operations: api.isAPIProduct() ? {} : mapAPIOperations(api.operations),
+                endpointConfig: api.endpointConfig,
+            };
+        },
         [api, apiThrottlingPolicy],
     );
 
     /**
-     * This method sets the securityDefinitionScopes from the spec
+     * This method sets the securityDefinitionScopes from the spe
      * @param {Object} spec The original swagger content.
      */
     function setSecurityDefScopesFromSpec(spec) {
@@ -459,6 +463,11 @@ export default function Resources(props) {
                 }
             });
     }, []);
+
+    useEffect(() => {
+        setApiThrottlingPolicy(api.apiThrottlingPolicy);
+    }, [api.apiThrottlingPolicy]);
+
 
     useEffect(() => {
         if (api.apitype !== 'APIProduct') {
