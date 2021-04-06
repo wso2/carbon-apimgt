@@ -31,6 +31,7 @@
   "Apis.Details.AsyncApiConsole.Webhooks.curl": "cURL",
   "Apis.Details.AsyncApiConsole.Webhooks.lease": "Lease Seconds",
   "Apis.Details.AsyncApiConsole.Webhooks.secret": "Secret",
+  "Apis.Details.Comments.Comment.load.more.replies": "Show More Replies",
   "Apis.Details.Comments.Comment.something.went.wrong": "Something went wrong while deleting comment",
   "Apis.Details.Comments.CommentAdd.btn.add.comment": "Comment",
   "Apis.Details.Comments.CommentAdd.btn.cancel": "Cancel",
