@@ -262,8 +262,6 @@ export default function Resources(props) {
     // localized to inject local apiThrottlingPolicy data
     const localAPI = useMemo(
         () => {
-            // eslint-disable-next-line no-debugger
-            debugger;
             return {
                 id: api.id,
                 apiThrottlingPolicy,
@@ -276,7 +274,7 @@ export default function Resources(props) {
     );
 
     /**
-     * This method sets the securityDefinitionScopes from the spe
+     * This method sets the securityDefinitionScopes from the spec
      * @param {Object} spec The original swagger content.
      */
     function setSecurityDefScopesFromSpec(spec) {
@@ -467,7 +465,6 @@ export default function Resources(props) {
     useEffect(() => {
         setApiThrottlingPolicy(api.apiThrottlingPolicy);
     }, [api.apiThrottlingPolicy]);
-
 
     useEffect(() => {
         if (api.apitype !== 'APIProduct') {
