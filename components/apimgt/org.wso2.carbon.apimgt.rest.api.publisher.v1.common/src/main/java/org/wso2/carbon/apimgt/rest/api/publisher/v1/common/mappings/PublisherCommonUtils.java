@@ -1027,6 +1027,11 @@ public class PublisherCommonUtils {
         } else {
             apiDefinition = OASParserUtil.preProcess(apiDefinition);
         }
+        if (APIConstants.API_TYPE_SOAPTOREST.equals(existingAPI.getType())) {
+            List<SOAPToRestSequence> sequenceList = SequenceGenerator.generateSequencesFromSwagger(apiDefinition,
+                    existingAPI.getId());
+            existingAPI.setSoapToRestSequences(sequenceList);
+        }
         Set<URITemplate> uriTemplates = null;
         uriTemplates = oasParser.getURITemplates(apiDefinition);
 

@@ -291,12 +291,11 @@ class ViewKeys extends React.Component {
                 if (status === 404) {
                     this.setState({ notFound: true });
                 } else if (status === 400) {
-                     Alert1.error(error.description ||
-                         intl.formatMessage({
+                    Alert1.error(error.description
+                         || intl.formatMessage({
                              id: 'Shared.AppsAndKeys.TokenManager.key.generate.bad.request.error',
-                              defaultMessage: 'Error occurred when generating Access Token',
-                         })
-                     );
+                             defaultMessage: 'Error occurred when generating Access Token',
+                         }));
                 }
                 this.setState({ isUpdating: false });
                 const { response } = error;
@@ -307,7 +306,9 @@ class ViewKeys extends React.Component {
     };
 
     viewKeyAndSecret = (consumerKey, consumerSecret, keyMappingId, selectedTab, isUserOwner) => {
-        const { classes, intl, selectedApp: { hashEnabled }, keyType } = this.props;
+        const {
+            classes, intl, selectedApp: { hashEnabled }, keyType,
+        } = this.props;
         const { keyCopied, secretCopied, showCS } = this.state;
         return (
             <>
@@ -415,19 +416,19 @@ class ViewKeys extends React.Component {
                                 }}
                             />
                         ) : (
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    className={classes.button}
-                                    onClick={() => this.handleSecretRegenerate(consumerKey, keyType, keyMappingId, selectedTab)}
-                                    disabled={!isUserOwner}
-                                >
-                                    <FormattedMessage
-                                        defaultMessage='Regenerate Consumer Secret'
-                                        id='Shared.AppsAndKeys.ViewKeys.consumer.secret.button.regenerate'
-                                    />
-                                </Button>
-                            )}
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                className={classes.button}
+                                onClick={() => this.handleSecretRegenerate(consumerKey, keyType, keyMappingId, selectedTab)}
+                                disabled={!isUserOwner}
+                            >
+                                <FormattedMessage
+                                    defaultMessage='Regenerate Consumer Secret'
+                                    id='Shared.AppsAndKeys.ViewKeys.consumer.secret.button.regenerate'
+                                />
+                            </Button>
+                        )}
                     </div>
                     {!hashEnabled && (
                         <FormControl>
@@ -455,7 +456,7 @@ class ViewKeys extends React.Component {
         } = this.state;
         const {
             intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType }, selectedGrantTypes, isUserOwner, summary,
-            selectedTab, hashEnabled, keyManagerConfig
+            selectedTab, hashEnabled, keyManagerConfig, initialToken, initialValidityTime, initialScopes,
         } = this.props;
 
         if (notFound) {
@@ -484,6 +485,11 @@ class ViewKeys extends React.Component {
             accessTokenScopes = keys.get(selectedTab).token.tokenScopes;
             validityPeriod = keys.get(selectedTab).token.validityTime;
             tokenDetails = keys.get(selectedTab).token;
+            if (tokenDetails && !tokenDetails.accessToken) {
+                tokenDetails.accessToken = initialToken;
+                tokenDetails.validityTime = initialValidityTime;
+                tokenDetails.tokenScopes = initialScopes;
+            }
         }
 
         let dialogHead = 'Undefined';
@@ -542,10 +548,10 @@ class ViewKeys extends React.Component {
                                 )}
                                 {showCurl && (
                                     <DialogContentText>
-                                        <ViewCurl 
-                                            keys={{ consumerKey, consumerSecret }} 
-                                            keyType={keyType} 
-                                            keyManagerConfig={keyManagerConfig} 
+                                        <ViewCurl
+                                            keys={{ consumerKey, consumerSecret }}
+                                            keyType={keyType}
+                                            keyManagerConfig={keyManagerConfig}
                                         />
                                     </DialogContentText>
                                 )}
@@ -585,21 +591,23 @@ class ViewKeys extends React.Component {
                         </Dialog>
                         {!hashEnabled && (
                             <div className={classes.tokenSection}>
-                                {keyManagerConfig.enableTokenGeneration &&
-                                    selectedGrantTypes.find(a => a.includes('client_credentials')) &&
-                                    (<Button
-                                        variant='outlined'
-                                        size='small'
-                                        color='primary'
-                                        className={classes.margin}
-                                        onClick={this.handleClickOpen}
-                                        disabled={!selectedGrantTypes.includes('client_credentials')}
-                                    >
-                                        <FormattedMessage
-                                            id='Shared.AppsAndKeys.ViewKeys.generate.access.token'
-                                            defaultMessage='Generate Access Token'
-                                        />
-                                    </Button>)}
+                                {keyManagerConfig.enableTokenGeneration
+                                    && selectedGrantTypes.find((a) => a.includes('client_credentials'))
+                                    && (
+                                        <Button
+                                            variant='outlined'
+                                            size='small'
+                                            color='primary'
+                                            className={classes.margin}
+                                            onClick={this.handleClickOpen}
+                                            disabled={!selectedGrantTypes.includes('client_credentials')}
+                                        >
+                                            <FormattedMessage
+                                                id='Shared.AppsAndKeys.ViewKeys.generate.access.token'
+                                                defaultMessage='Generate Access Token'
+                                            />
+                                        </Button>
+                                    )}
                                 <Button
                                     variant='outlined'
                                     size='small'
@@ -626,7 +634,7 @@ class ViewKeys extends React.Component {
                     </Grid>
                 </Grid>
             </div>
-        )
+        );
     }
 }
 ViewKeys.defaultProps = {
