@@ -334,7 +334,6 @@ public class GatewayArtifactsMgtDAO {
                     apiRuntimeArtifactDto.setProvider(resultSet.getString("API_PROVIDER"));
                     apiRuntimeArtifactDto.setRevision(resultSet.getString("REVISION_ID"));
                     apiRuntimeArtifactDto.setType(resultSet.getString("API_TYPE"));
-                    apiRuntimeArtifactDto.setOrganizationId(resultSet.getString("ORGANIZATION_ID"));
                     InputStream artifact = resultSet.getBinaryStream("ARTIFACT");
                     if (artifact != null) {
                         byte[] artifactByte = APIMgtDBUtil.getBytesFromInputStream(artifact);

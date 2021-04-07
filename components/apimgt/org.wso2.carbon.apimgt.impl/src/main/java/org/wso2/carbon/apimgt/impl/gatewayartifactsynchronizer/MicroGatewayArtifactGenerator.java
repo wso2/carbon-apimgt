@@ -18,9 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer;
 
+import com.google.gson.Gson;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
@@ -31,9 +34,8 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -60,13 +62,11 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             File tempDirectory = CommonUtil.createTempDirectory(null);
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
                 if (apiRuntimeArtifactDto.isFile()) {
-                    List<String> apiDetails=  (List<String>) apiRuntimeArtifactDto.getArtifact();
                     InputStream artifact = (InputStream) apiRuntimeArtifactDto.getArtifact();
                     String fileName = apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision())
                             .concat(APIConstants.ZIP_FILE_EXTENSION);
                     Path path = Paths.get(tempDirectory.getAbsolutePath(), fileName);
                     FileUtils.copyInputStreamToFile(artifact, path.toFile());
-
                     ApiProjectDto apiProjectDto = deploymentsMap.get(fileName);
                     if (apiProjectDto == null) {
                         apiProjectDto = new ApiProjectDto();

@@ -8027,6 +8027,9 @@ components:
         isDefaultVersion:
           type: boolean
           example: false
+        organizationId:
+          type: string
+          example: lamda
         isRevision:
           type: boolean
           example: false
