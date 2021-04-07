@@ -455,11 +455,11 @@ public class GatewayArtifactsMgtDAO {
             preparedStatement.setString(1, uuid);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    organizationId= resultSet.getString("ORGANIZATION_ID");
+                    organizationId = resultSet.getString("ORGANIZATION_ID");
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to retrieve Gateway Artifact", e);
+            handleException("Failed to retrieve organizationId", e);
         }
 
         return organizationId;
