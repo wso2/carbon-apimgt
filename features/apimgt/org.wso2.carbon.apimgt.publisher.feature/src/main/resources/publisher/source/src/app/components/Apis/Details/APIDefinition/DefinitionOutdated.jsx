@@ -90,26 +90,27 @@ export default function DefinitionOutdated(props) {
      */
     function showdiff() {
         setIsRendering(true);
-        const promisedServices = ServiceCatalog.searchServiceByKey(api.serviceInfo.key);
-        promisedServices.then((data) => {
-            return ServiceCatalog.getServiceDefinition(data.body.list[0].id).then((file) => {
-                api.getSwagger(api.id).then((resp) => {
-                    setOldDefinition(JSON.stringify(resp.obj, null, 2));
+        const promisedNewServiceDef = ServiceCatalog.searchServiceByKey(api.serviceInfo.key);
+        const promisedOldServiceDef = api.getSwagger(api.id);
+        Promise.all([promisedNewServiceDef, promisedOldServiceDef])
+            .then((response) => {
+                const newServiceDef = response[0];
+                const oldServiceDef = response[1];
+                return ServiceCatalog.getServiceDefinition(newServiceDef.body.list[0].id).then((file) => {
                     setNewDefinition(JSON.stringify(file, null, 2));
+                    setOldDefinition(JSON.stringify(oldServiceDef.obj, null, 2));
                 }).catch((error) => {
                     if (error.response) {
                         Alert.error(error.response.body.description);
                     } else {
                         Alert.error(
                             <FormattedMessage
-                                id='Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition.error'
-                                defaultMessage='Something went wrong while getting the outdated API definition.'
+                                id='Apis.Details.APIDefinition.DefinitionOutdated.new.api.definition.error'
+                                defaultMessage='Something went wrong while retrieving new API definition.'
                             />,
                         );
                     }
-                }).finally(() => {
-                    setShowDiff(true);
-                    setIsRendering(false);
+                    console.error(error);
                 });
             }).catch((error) => {
                 if (error.response) {
@@ -117,24 +118,16 @@ export default function DefinitionOutdated(props) {
                 } else {
                     Alert.error(
                         <FormattedMessage
-                            id='Apis.Details.APIDefinition.DefinitionOutdated.new.api.definition.error'
-                            defaultMessage='Something went wrong while getting the new API definition.'
+                            id='Apis.Details.APIDefinition.DefinitionOutdated.service.retrieve.error'
+                            defaultMessage='Something went wrong while rendering diff for API Definition'
                         />,
                     );
                 }
+                console.error(error);
+            }).finally(() => {
+                setShowDiff(true);
+                setIsRendering(false);
             });
-        }).catch((error) => {
-            if (error.response) {
-                Alert.error(error.response.body.description);
-            } else {
-                Alert.error(
-                    <FormattedMessage
-                        id='Apis.Details.APIDefinition.DefinitionOutdated.service.retrieve.error'
-                        defaultMessage='Something went wrong while retrieving service information'
-                    />,
-                );
-            }
-        });
     }
 
     const hideDiff = () => {
