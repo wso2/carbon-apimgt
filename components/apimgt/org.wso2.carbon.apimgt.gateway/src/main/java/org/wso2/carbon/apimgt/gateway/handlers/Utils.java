@@ -423,37 +423,47 @@ public class Utils {
 
     public static X509Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
-
-        Map headers =
-                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
-        X509Certificate certificateFromMessageContext = null;
-        if (sslCertObject != null) {
-            X509Certificate[] certs = (X509Certificate[]) sslCertObject;
-            certificateFromMessageContext = certs[0];
-        }
-        if (headers.containsKey(Utils.getClientCertificateHeader())) {
-            try {
-                if (!isClientCertificateValidationEnabled() || APIUtil
-                        .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
-                    X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
-                    if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
-                        return x509Certificate;
-                    } else {
-                        log.debug("Certificate in Header didn't exist in truststore");
-                        return null;
-                    }
-                }
-            } catch (APIManagementException e) {
-                String msg = "Error while validating into Certificate Existence";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e);
+        X509Certificate validatedCert = (X509Certificate) axis2MessageContext.
+                                                getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
+        if (validatedCert != null) {
+            return validatedCert;
+        } else {
+            Map headers =
+                    (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+            X509Certificate certificateFromMessageContext = null;
+            if (sslCertObject != null) {
+                X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+                certificateFromMessageContext = certs[0];
             }
+            if (headers.containsKey(Utils.getClientCertificateHeader())) {
+                try {
+                    if (!isClientCertificateValidationEnabled() || APIUtil
+                            .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
+                        X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
+                        if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
+                            axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
+                            return x509Certificate;
+                        } else {
+                            log.debug("Certificate in Header didn't exist in truststore");
+                            return null;
+                        }
+                    }
+                } catch (APIManagementException e) {
+                    String msg = "Error while validating into Certificate Existence";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, e);
+                }
+            }
+
+            if (certificateFromMessageContext != null) {
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificateFromMessageContext);
+            }
+            return certificateFromMessageContext;
         }
-        return certificateFromMessageContext;
     }
 
-    public static X509Certificate getClientCertificateFromHeader(org.apache.axis2.context.MessageContext axis2MessageContext)
+    private static X509Certificate getClientCertificateFromHeader(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
         Map headers =
                 (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
