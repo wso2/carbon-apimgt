@@ -60,6 +60,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
             File tempDirectory = CommonUtil.createTempDirectory(null);
             for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
                 if (apiRuntimeArtifactDto.isFile()) {
+                    List<String> apiDetails=  (List<String>) apiRuntimeArtifactDto.getArtifact();
                     InputStream artifact = (InputStream) apiRuntimeArtifactDto.getArtifact();
                     String fileName = apiRuntimeArtifactDto.getApiId().concat("-").concat(apiRuntimeArtifactDto.getRevision())
                             .concat(APIConstants.ZIP_FILE_EXTENSION);
@@ -72,6 +73,7 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                         deploymentsMap.put(fileName, apiProjectDto);
                         apiProjectDto.setApiFile(fileName);
                         apiProjectDto.setEnvironments(new HashSet<>());
+                        apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganizationId());
                     }
                     // environment is unique for a revision in a deployment
                     // create new environment

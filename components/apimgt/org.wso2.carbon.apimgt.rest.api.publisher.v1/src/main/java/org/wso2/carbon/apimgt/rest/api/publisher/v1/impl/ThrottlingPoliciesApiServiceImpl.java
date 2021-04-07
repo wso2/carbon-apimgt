@@ -95,8 +95,8 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        SubscriptionPolicy[] subscriptionPolicies = (SubscriptionPolicy[]) apiProvider.getPolicies(userName,
-                PolicyConstants.POLICY_LEVEL_SUB);
+        SubscriptionPolicy[] subscriptionPolicies = Arrays.asList(apiProvider.getPolicies(userName,
+                PolicyConstants.POLICY_LEVEL_SUB)).toArray(new SubscriptionPolicy[0]);
         List<SubscriptionPolicy> streamingPolicies = new ArrayList<>();
         for (SubscriptionPolicy subscriptionPolicy:subscriptionPolicies) {
             if (subscriptionPolicy.getDefaultQuotaPolicy().getType().equals(EVENT_COUNT_TYPE))
