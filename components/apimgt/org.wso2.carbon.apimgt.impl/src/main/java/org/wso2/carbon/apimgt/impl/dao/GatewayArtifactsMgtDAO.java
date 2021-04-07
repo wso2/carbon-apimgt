@@ -446,6 +446,25 @@ public class GatewayArtifactsMgtDAO {
         return apiRuntimeArtifactDtoList;
     }
 
+    public String retrieveOrganizationId(String uuid) throws APIManagementException {
+
+        String query = SQLConstants.RETRIEVE_ORGANIZATION_ID;
+        String organizationId = null;
+        try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    organizationId = resultSet.getString("ORGANIZATION_ID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve organizationId", e);
+        }
+
+        return organizationId;
+    }
+
     public void removePublishedGatewayLabels(String apiId, String apiRevisionId) throws APIManagementException {
 
         try (Connection connection = GatewayArtifactsMgtDBUtil.getArtifactSynchronizerConnection()) {

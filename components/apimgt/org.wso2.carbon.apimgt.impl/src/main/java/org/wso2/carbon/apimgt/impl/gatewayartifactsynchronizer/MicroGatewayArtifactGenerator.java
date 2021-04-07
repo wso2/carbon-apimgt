@@ -31,9 +31,9 @@ import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 
+import java.io.InputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -65,13 +65,13 @@ public class MicroGatewayArtifactGenerator implements GatewayArtifactGenerator {
                             .concat(APIConstants.ZIP_FILE_EXTENSION);
                     Path path = Paths.get(tempDirectory.getAbsolutePath(), fileName);
                     FileUtils.copyInputStreamToFile(artifact, path.toFile());
-
                     ApiProjectDto apiProjectDto = deploymentsMap.get(fileName);
                     if (apiProjectDto == null) {
                         apiProjectDto = new ApiProjectDto();
                         deploymentsMap.put(fileName, apiProjectDto);
                         apiProjectDto.setApiFile(fileName);
                         apiProjectDto.setEnvironments(new HashSet<>());
+                        apiProjectDto.setOrganizationId(apiRuntimeArtifactDto.getOrganizationId());
                     }
                     // environment is unique for a revision in a deployment
                     // create new environment

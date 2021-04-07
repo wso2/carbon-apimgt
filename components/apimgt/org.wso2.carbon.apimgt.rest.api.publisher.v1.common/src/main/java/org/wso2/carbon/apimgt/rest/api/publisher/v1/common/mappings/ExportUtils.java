@@ -797,6 +797,7 @@ public class ExportUtils {
                 API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
                 String organizationId = ApiMgtDAO.getInstance().getOrganizationIDByAPIUUID(apiIdentifier.getUUID());
                 api.setOrganizationId(organizationId);
+                apiDtoToReturn.setOrganizationId(organizationId);
                 // For GraphQL APIs, swagger export is not needed
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(api, apiProvider);
