@@ -1066,19 +1066,13 @@
   "Apis.Details.APIDefinition.DefinitionOutdated.new.api.definition.error": [
     {
       "type": 0,
-      "value": "Something went wrong while getting the new API definition."
+      "value": "Something went wrong while retrieving new API definition."
     }
   ],
   "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition": [
     {
       "type": 0,
       "value": "Outdated Definition"
-    }
-  ],
-  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition.error": [
-    {
-      "type": 0,
-      "value": "Something went wrong while getting the outdated API definition."
     }
   ],
   "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition.heading": [
@@ -1090,7 +1084,7 @@
   "Apis.Details.APIDefinition.DefinitionOutdated.service.retrieve.error": [
     {
       "type": 0,
-      "value": "Something went wrong while retrieving service information"
+      "value": "Something went wrong while rendering diff for API Definition"
     }
   ],
   "Apis.Details.APIDefinition.ImportDefinition.WSDL.updated.successfully": [
