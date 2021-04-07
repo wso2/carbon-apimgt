@@ -603,6 +603,12 @@
       "value": "Show Diff"
     }
   ],
+  "Apis.Details.APIDefinition.APIDefinition.btn.yes": [
+    {
+      "type": 0,
+      "value": "SAVE"
+    }
+  ],
   "Apis.Details.APIDefinition.APIDefinition.convert.to": [
     {
       "type": 0,
@@ -1507,12 +1513,6 @@
     {
       "type": 0,
       "value": "* You are not authorized to update particular fields of the API due to insufficient permissions"
-    }
-  ],
-  "Apis.Details.Configuration.Resources.save": [
-    {
-      "type": 0,
-      "value": "Save"
     }
   ],
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
@@ -3045,6 +3045,12 @@
     {
       "type": 0,
       "value": "Endpoint Security User Name/ Password should not be empty"
+    }
+  ],
+  "Apis.Details.Endpoints.Endpoints.save": [
+    {
+      "type": 0,
+      "value": "Save"
     }
   ],
   "Apis.Details.Endpoints.Endpoints.update.not.allowed": [
@@ -4849,10 +4855,22 @@
       "value": "Cancel"
     }
   ],
+  "Apis.Details.ProductResources.ProductResourcesEdit.save": [
+    {
+      "type": 0,
+      "value": "Save"
+    }
+  ],
   "Apis.Details.ProductResources.ProductResourcesEdit.title": [
     {
       "type": 0,
       "value": "Manage Resources"
+    }
+  ],
+  "Apis.Details.ProductResources.ProductResourcesEdit.updating": [
+    {
+      "type": 0,
+      "value": "Updating ..."
     }
   ],
   "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                                    empty.title": [
@@ -5065,10 +5083,22 @@
       "value": "Value"
     }
   ],
+  "Apis.Details.Properties.Properties.save": [
+    {
+      "type": 0,
+      "value": "Save"
+    }
+  ],
   "Apis.Details.Properties.Properties.update.not.allowed": [
     {
       "type": 0,
       "value": "*You are not authorized to update properties of the API due to insufficient permissions"
+    }
+  ],
+  "Apis.Details.Properties.Properties.updating": [
+    {
+      "type": 0,
+      "value": "Updating ..."
     }
   ],
   "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity": [
@@ -6871,28 +6901,16 @@
       "value": "Uploading"
     }
   ],
-  "Apis.Listing.components.TopMenu.api": [
+  "Apis.Listing.components.TopMenu.api(s)": [
     {
       "type": 0,
       "value": "API(s)"
-    }
-  ],
-  "Apis.Listing.components.TopMenu.api.singular": [
-    {
-      "type": 0,
-      "value": "API"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproduct(s)": [
     {
       "type": 0,
       "value": "API Product(s)"
-    }
-  ],
-  "Apis.Listing.components.TopMenu.apiproduct.singular": [
-    {
-      "type": 0,
-      "value": "API Product"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproducts": [
@@ -6922,7 +6940,7 @@
   "Apis.Listing.components.TopMenu.displaying": [
     {
       "type": 0,
-      "value": "Total:"
+      "value": "Total of"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results": [
@@ -6931,16 +6949,238 @@
       "value": "Search Result(s)"
     }
   ],
-  "Apis.Listing.components.TopMenu.search.results.singular": [
-    {
-      "type": 0,
-      "value": "Search Result"
-    }
-  ],
   "Apis.Listing.import.from.service.catalog.title": [
     {
       "type": 0,
       "value": "Import From Service Catalog"
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.add": [
+    {
+      "type": 0,
+      "value": "New Configuration"
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.error.msg": [
+    {
+      "type": 0,
+      "value": "Error occurred while adding alert configuration"
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg": [
+    {
+      "type": 0,
+      "value": "Alert Configuration added successfully"
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.error.msg": [
+    {
+      "type": 0,
+      "value": "Error occurred while deleting the configuration."
+    }
+  ],
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.success.msg": [
+    {
+      "type": 0,
+      "value": "Alert Configuration deleted successfully"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.name": [
+    {
+      "type": 0,
+      "value": "API Name"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.name.label": [
+    {
+      "type": 0,
+      "value": "API Name"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.version": [
+    {
+      "type": 0,
+      "value": "API Version"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.api.version.label": [
+    {
+      "type": 0,
+      "value": "API Version"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.configuration": [
+    {
+      "type": 1,
+      "value": "name"
+    },
+    {
+      "type": 0,
+      "value": " Configurations"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.no.config.message": [
+    {
+      "type": 0,
+      "value": "You do not have any configurations. Click on "
+    },
+    {
+      "type": 1,
+      "value": "newConfig"
+    },
+    {
+      "type": 0,
+      "value": " button to add a configuration."
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.select.api.helper": [
+    {
+      "type": 0,
+      "value": "Select the API Name"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.select.version.helper": [
+    {
+      "type": 0,
+      "value": "Select API Version"
+    }
+  ],
+  "Apis.Settings.Alerts.AlertConfiguration.threshold.value.helper": [
+    {
+      "type": 0,
+      "value": "Enter threshold value."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.abnormal.backend.time": [
+    {
+      "type": 0,
+      "value": "Abnormal Backend Time"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.abnormal.backend.time.description": [
+    {
+      "type": 0,
+      "value": "This alert gets triggered if the response time of a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow WSO2 API Manager runtime or a slow backend."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.abnormal.request.time.description": [
+    {
+      "type": 0,
+      "value": "This alert gets triggered if the backend time corresponding to a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow backend. In technical terms, if the backend time of a particular API of a tenant lies outside the predefined value, an alert will be sent out."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.abnormal.response.time": [
+    {
+      "type": 0,
+      "value": "Abnormal Response Time"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.api.health.monitor": [
+    {
+      "type": 0,
+      "value": "API Health Monitor"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.api.health.monitor.description": [
+    {
+      "type": 0,
+      "value": "This alert gets triggered if at least one of the two cases below are satisfied; Response time of an API > Threshold response time value defined for that particular API or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.cancel.btn": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.close.btn": [
+    {
+      "type": 0,
+      "value": "Close"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.confirm.btn": [
+    {
+      "type": 0,
+      "value": "Unsubscribe All"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.enable.analytics.message": [
+    {
+      "type": 0,
+      "value": "Enable Analytics to Configure Alerts"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.loading.error.msg": [
+    {
+      "type": 0,
+      "value": "Error occurred while loading alerts"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.subscribe.error.msg": [
+    {
+      "type": 0,
+      "value": "Error occurred while subscribing to alerts."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.subscribe.success.msg": [
+    {
+      "type": 0,
+      "value": "Subscribed to Alerts Successfully."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.heading": [
+    {
+      "type": 0,
+      "value": "Manage Alert Subscriptions"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading": [
+    {
+      "type": 0,
+      "value": "Select the Alert types to subscribe/ unsubscribe and click Save."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading": [
+    {
+      "type": 0,
+      "value": "Confirm unsubscription from All Alerts"
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.message": [
+    {
+      "type": 0,
+      "value": "This will remove all the existing alert subscriptions and emails. This action cannot be undone."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.unsubscribe.error.msg": [
+    {
+      "type": 0,
+      "value": "Error occurred while unsubscribing."
+    }
+  ],
+  "Apis.Settings.Alerts.Alerts.unsubscribe.success.msg": [
+    {
+      "type": 0,
+      "value": "Unsubscribed from all alerts successfully."
+    }
+  ],
+  "Apis.Settings.Alerts.connection.error": [
+    {
+      "type": 0,
+      "value": "Could not connect to analytics server. Please check the connectivity."
+    }
+  ],
+  "Apis.Settings.SettingsBase.header": [
+    {
+      "type": 0,
+      "value": "Settings"
+    }
+  ],
+  "Apis.Settings.SettingsBase.sub.header": [
+    {
+      "type": 0,
+      "value": "View and Configure API Publisher Settings"
     }
   ],
   "Apis.Shared.AppErrorBoundary.something.went.wrong": [
@@ -7151,6 +7391,12 @@
       "value": "Service Catalog"
     }
   ],
+  "Base.Header.navbar.GlobalNavBar.Settings": [
+    {
+      "type": 0,
+      "value": "Settings"
+    }
+  ],
   "Base.Header.navbar.GlobalNavBar.api.products": [
     {
       "type": 0,
@@ -7161,6 +7407,12 @@
     {
       "type": 0,
       "value": "APIs"
+    }
+  ],
+  "Base.Header.navbar.GlobalNavBar.manage.alerts": [
+    {
+      "type": 0,
+      "value": "Manage Alerts"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.scopes": [
@@ -7961,6 +8213,12 @@
     {
       "type": 0,
       "value": "Version"
+    }
+  ],
+  "Settings.Alerts.Alerts.configure.alert": [
+    {
+      "type": 0,
+      "value": "Configurations"
     }
   ],
   "UnexpectedError.logout": [

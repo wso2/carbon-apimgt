@@ -269,6 +269,9 @@
   "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": {
     "defaultMessage": "Show Diff"
   },
+  "Apis.Details.APIDefinition.APIDefinition.btn.yes": {
+    "defaultMessage": "SAVE"
+  },
   "Apis.Details.APIDefinition.APIDefinition.convert.to": {
     "defaultMessage": "Convert to"
   },
@@ -668,9 +671,6 @@
   },
   "Apis.Details.Configuration.Configuration.update.not.allowed": {
     "defaultMessage": "* You are not authorized to update particular fields of the API due to insufficient permissions"
-  },
-  "Apis.Details.Configuration.Resources.save": {
-    "defaultMessage": "Save"
   },
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": {
     "defaultMessage": "Please refer respective APIs for endpoint information"
@@ -1433,6 +1433,9 @@
   },
   "Apis.Details.Endpoints.Endpoints.missing.security.username.error": {
     "defaultMessage": "Endpoint Security User Name/ Password should not be empty"
+  },
+  "Apis.Details.Endpoints.Endpoints.save": {
+    "defaultMessage": "Save"
   },
   "Apis.Details.Endpoints.Endpoints.update.not.allowed": {
     "defaultMessage": "*You are not authorized to update endpoints of the API due to insufficient permissions"
@@ -2307,8 +2310,14 @@
   "Apis.Details.ProductResources.ProductResourcesEdit.cancel": {
     "defaultMessage": "Cancel"
   },
+  "Apis.Details.ProductResources.ProductResourcesEdit.save": {
+    "defaultMessage": "Save"
+  },
   "Apis.Details.ProductResources.ProductResourcesEdit.title": {
     "defaultMessage": "Manage Resources"
+  },
+  "Apis.Details.ProductResources.ProductResourcesEdit.updating": {
+    "defaultMessage": "Updating ..."
   },
   "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                                    empty.title": {
     "defaultMessage": "Use the left side panel to add resources"
@@ -2415,8 +2424,14 @@
   "Apis.Details.Properties.Properties.property.value": {
     "defaultMessage": "Value"
   },
+  "Apis.Details.Properties.Properties.save": {
+    "defaultMessage": "Save"
+  },
   "Apis.Details.Properties.Properties.update.not.allowed": {
     "defaultMessage": "*You are not authorized to update properties of the API due to insufficient permissions"
+  },
+  "Apis.Details.Properties.Properties.updating": {
+    "defaultMessage": "Updating ..."
   },
   "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity": {
     "defaultMessage": "Fields"
@@ -3279,17 +3294,11 @@
   "Apis.Listing.components.ImageGenerator.ThumbnailView.uploading.btn": {
     "defaultMessage": "Uploading"
   },
-  "Apis.Listing.components.TopMenu.api": {
+  "Apis.Listing.components.TopMenu.api(s)": {
     "defaultMessage": "API(s)"
-  },
-  "Apis.Listing.components.TopMenu.api.singular": {
-    "defaultMessage": "API"
   },
   "Apis.Listing.components.TopMenu.apiproduct(s)": {
     "defaultMessage": "API Product(s)"
-  },
-  "Apis.Listing.components.TopMenu.apiproduct.singular": {
-    "defaultMessage": "API Product"
   },
   "Apis.Listing.components.TopMenu.apiproducts": {
     "defaultMessage": "API Products"
@@ -3304,16 +3313,121 @@
     "defaultMessage": "Create API"
   },
   "Apis.Listing.components.TopMenu.displaying": {
-    "defaultMessage": "Total:"
+    "defaultMessage": "Total of"
   },
   "Apis.Listing.components.TopMenu.search.results": {
     "defaultMessage": "Search Result(s)"
   },
-  "Apis.Listing.components.TopMenu.search.results.singular": {
-    "defaultMessage": "Search Result"
-  },
   "Apis.Listing.import.from.service.catalog.title": {
     "defaultMessage": "Import From Service Catalog"
+  },
+  "Apis.Settings.Alert.AlertConfiguration.add": {
+    "defaultMessage": "New Configuration"
+  },
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.error.msg": {
+    "defaultMessage": "Error occurred while adding alert configuration"
+  },
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg": {
+    "defaultMessage": "Alert Configuration added successfully"
+  },
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.error.msg": {
+    "defaultMessage": "Error occurred while deleting the configuration."
+  },
+  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.success.msg": {
+    "defaultMessage": "Alert Configuration deleted successfully"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.api.name": {
+    "defaultMessage": "API Name"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.api.name.label": {
+    "defaultMessage": "API Name"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.api.version": {
+    "defaultMessage": "API Version"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.api.version.label": {
+    "defaultMessage": "API Version"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.configuration": {
+    "defaultMessage": "{name} Configurations"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.no.config.message": {
+    "defaultMessage": "You do not have any configurations. Click on {newConfig} button to add a configuration."
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.select.api.helper": {
+    "defaultMessage": "Select the API Name"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.select.version.helper": {
+    "defaultMessage": "Select API Version"
+  },
+  "Apis.Settings.Alerts.AlertConfiguration.threshold.value.helper": {
+    "defaultMessage": "Enter threshold value."
+  },
+  "Apis.Settings.Alerts.Alerts.abnormal.backend.time": {
+    "defaultMessage": "Abnormal Backend Time"
+  },
+  "Apis.Settings.Alerts.Alerts.abnormal.backend.time.description": {
+    "defaultMessage": "This alert gets triggered if the response time of a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow WSO2 API Manager runtime or a slow backend."
+  },
+  "Apis.Settings.Alerts.Alerts.abnormal.request.time.description": {
+    "defaultMessage": "This alert gets triggered if the backend time corresponding to a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow backend. In technical terms, if the backend time of a particular API of a tenant lies outside the predefined value, an alert will be sent out."
+  },
+  "Apis.Settings.Alerts.Alerts.abnormal.response.time": {
+    "defaultMessage": "Abnormal Response Time"
+  },
+  "Apis.Settings.Alerts.Alerts.api.health.monitor": {
+    "defaultMessage": "API Health Monitor"
+  },
+  "Apis.Settings.Alerts.Alerts.api.health.monitor.description": {
+    "defaultMessage": "This alert gets triggered if at least one of the two cases below are satisfied; Response time of an API > Threshold response time value defined for that particular API or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)"
+  },
+  "Apis.Settings.Alerts.Alerts.cancel.btn": {
+    "defaultMessage": "Cancel"
+  },
+  "Apis.Settings.Alerts.Alerts.close.btn": {
+    "defaultMessage": "Close"
+  },
+  "Apis.Settings.Alerts.Alerts.confirm.btn": {
+    "defaultMessage": "Unsubscribe All"
+  },
+  "Apis.Settings.Alerts.Alerts.enable.analytics.message": {
+    "defaultMessage": "Enable Analytics to Configure Alerts"
+  },
+  "Apis.Settings.Alerts.Alerts.loading.error.msg": {
+    "defaultMessage": "Error occurred while loading alerts"
+  },
+  "Apis.Settings.Alerts.Alerts.subscribe.error.msg": {
+    "defaultMessage": "Error occurred while subscribing to alerts."
+  },
+  "Apis.Settings.Alerts.Alerts.subscribe.success.msg": {
+    "defaultMessage": "Subscribed to Alerts Successfully."
+  },
+  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.heading": {
+    "defaultMessage": "Manage Alert Subscriptions"
+  },
+  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading": {
+    "defaultMessage": "Select the Alert types to subscribe/ unsubscribe and click Save."
+  },
+  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading": {
+    "defaultMessage": "Confirm unsubscription from All Alerts"
+  },
+  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.message": {
+    "defaultMessage": "This will remove all the existing alert subscriptions and emails. This action cannot be undone."
+  },
+  "Apis.Settings.Alerts.Alerts.unsubscribe.error.msg": {
+    "defaultMessage": "Error occurred while unsubscribing."
+  },
+  "Apis.Settings.Alerts.Alerts.unsubscribe.success.msg": {
+    "defaultMessage": "Unsubscribed from all alerts successfully."
+  },
+  "Apis.Settings.Alerts.connection.error": {
+    "defaultMessage": "Could not connect to analytics server. Please check the connectivity."
+  },
+  "Apis.Settings.SettingsBase.header": {
+    "defaultMessage": "Settings"
+  },
+  "Apis.Settings.SettingsBase.sub.header": {
+    "defaultMessage": "View and Configure API Publisher Settings"
   },
   "Apis.Shared.AppErrorBoundary.something.went.wrong": {
     "defaultMessage": "Something went wrong"
@@ -3417,11 +3531,17 @@
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": {
     "defaultMessage": "Service Catalog"
   },
+  "Base.Header.navbar.GlobalNavBar.Settings": {
+    "defaultMessage": "Settings"
+  },
   "Base.Header.navbar.GlobalNavBar.api.products": {
     "defaultMessage": "API Products"
   },
   "Base.Header.navbar.GlobalNavBar.apis": {
     "defaultMessage": "APIs"
+  },
+  "Base.Header.navbar.GlobalNavBar.manage.alerts": {
+    "defaultMessage": "Manage Alerts"
   },
   "Base.Header.navbar.GlobalNavBar.scopes": {
     "defaultMessage": "Scopes"
@@ -3806,6 +3926,9 @@
   },
   "ServiceCatalog.ServicesTableView.ServicesTableView.version": {
     "defaultMessage": "Version"
+  },
+  "Settings.Alerts.Alerts.configure.alert": {
+    "defaultMessage": "Configurations"
   },
   "UnexpectedError.logout": {
     "defaultMessage": "Logout"
