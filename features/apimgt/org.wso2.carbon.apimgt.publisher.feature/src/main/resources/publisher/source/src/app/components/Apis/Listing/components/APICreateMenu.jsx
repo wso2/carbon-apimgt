@@ -72,6 +72,7 @@ const APICreateMenu = () => {
         !AuthManager.isNotCreator() && (
             <MenuButton
                 buttonProps={{
+                    id: 'itest-create-api-menu-button',
                     color: 'primary',
                     variant: 'contained',
                 }}

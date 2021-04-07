@@ -70,15 +70,21 @@ const useColorlibStepIconStyles = makeStyles({
     },
 });
 
+/**
+ *
+ * @param {*} props
+ * @returns
+ */
 function ColorlibStepIcon(props) {
     const classes = useColorlibStepIconStyles();
-    const { active, completed } = props;
-
+    const {
+        active, completed, forceComplete, icon: step,
+    } = props;
     return (
         <div
             className={clsx(classes.root, {
                 [classes.active]: active,
-                [classes.completed]: completed,
+                [classes.completed]: completed || forceComplete.includes(step),
             })}
         />
     );
@@ -119,7 +125,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
+/**
+ *
+ * @returns
+ */
 export default function CustomizedStepper() {
     const classes = useStyles();
     const [api, updateAPI] = useAPI();
@@ -129,6 +138,7 @@ export default function CustomizedStepper() {
     && api.endpointConfig.implementation_status === 'prototyped';
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
+    const isPublished = api.lifeCycleStatus === 'PUBLISHED';
     const { tenantList } = useContext(ApiContext);
     const { settings, user } = useAppContext();
     const userNameSplit = user.name.split('@');
@@ -137,17 +147,21 @@ export default function CustomizedStepper() {
     if (tenantList && tenantList.length > 0) {
         devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
     }
-    const steps = ['Develop', 'Deploy', 'Test', 'Publish'];
-
+    const steps = (api.isWebSocket() || api.isAPIProduct() || api.isGraphql() || api.isAsyncAPI())
+        ? ['Develop', 'Deploy', 'Publish'] : ['Develop', 'Deploy', 'Test', 'Publish'];
+    const forceComplete = [];
+    if (isPublished) {
+        forceComplete.push(steps.indexOf('Publish') + 1);
+    }
     let activeStep = 0;
     if (api && (api.type === 'WEBSUB' || isEndpointAvailable) && isTierAvailable && !deploymentsAvailable) {
         activeStep = 1;
     } else if ((api && !isEndpointAvailable && api.type !== 'WEBSUB') || (api && !isTierAvailable)) {
         activeStep = 0;
     } else if (api && (isEndpointAvailable || api.type === 'WEBSUB') && isTierAvailable
-        && deploymentsAvailable && (api.lifeCycleStatus !== 'PUBLISHED' && api.lifeCycleStatus !== 'PROTOTYPED')) {
+        && deploymentsAvailable && (!isPublished && api.lifeCycleStatus !== 'PROTOTYPED')) {
         activeStep = 3;
-    } else if ((api.lifeCycleStatus === 'PUBLISHED' || api.lifeCycleStatus === 'PROTOTYPED') && api
+    } else if ((isPublished || api.lifeCycleStatus === 'PROTOTYPED') && api
         && (isEndpointAvailable || api.type === 'WEBSUB' || isPrototypedAvailable)
         && isTierAvailable && deploymentsAvailable) {
         activeStep = 4;
@@ -338,7 +352,13 @@ export default function CustomizedStepper() {
             <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
                 {steps.map((label) => (
                     <Step key={label}>
-                        <StepLabel StepIconComponent={ColorlibStepIcon}>
+                        <StepLabel StepIconComponent={(props) => (
+                            <ColorlibStepIcon
+                                {...props}
+                                forceComplete={forceComplete}
+                            />
+                        )}
+                        >
                             {label === 'Develop' && (
                                 <div>
                                     <Grid

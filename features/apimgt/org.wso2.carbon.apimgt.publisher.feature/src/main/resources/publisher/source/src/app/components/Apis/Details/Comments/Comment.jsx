@@ -222,8 +222,9 @@ class Comment extends React.Component {
 
         const { deleteComment } = this.state;
         const {
-            apiId, allComments, commentsUpdate, intl,
+            api, allComments, commentsUpdate, intl,
         } = this.props;
+        const apiId = api.id;
         const commentIdOfCommentToDelete = deleteComment.id;
         const parentCommentIdOfCommentToDelete = deleteComment.parentCommentId;
         this.handleClose();
@@ -267,7 +268,7 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, apiId, allComments, commentsUpdate, isOverview,
+            classes, comments, api, allComments, commentsUpdate, isOverview,
         } = this.props;
 
         const { editIndex, openDialog, replyId } = this.state;
@@ -303,19 +304,21 @@ class Comment extends React.Component {
 
                                             <Typography className={classes.commentText}>{comment.content}</Typography>
 
-                                            <CommentOptions
-                                                comment={comment}
-                                                editIndex={editIndex}
-                                                index={index}
-                                                showAddComment={this.showAddComment}
-                                                handleClickOpen={this.handleClickOpen}
-                                                showEditComment={this.showEditComment}
-                                            />
+                                            {!api.isRevision && (
+                                                <CommentOptions
+                                                    comment={comment}
+                                                    editIndex={editIndex}
+                                                    index={index}
+                                                    showAddComment={this.showAddComment}
+                                                    handleClickOpen={this.handleClickOpen}
+                                                    showEditComment={this.showEditComment}
+                                                />
+                                            )}
 
                                             {comment.id === replyId && (
                                                 <Box ml={6} mb={2}>
                                                     <CommentAdd
-                                                        apiId={apiId}
+                                                        api={api}
                                                         replyTo={comment.id}
                                                         allComments={allComments}
                                                         commentsUpdate={commentsUpdate}
@@ -364,7 +367,7 @@ class Comment extends React.Component {
 
                                                                 {commentIndex === editIndex && (
                                                                     <CommentEdit
-                                                                        apiId={apiId}
+                                                                        api={api}
                                                                         allComments={reply}
                                                                         commentsUpdate={commentsUpdate}
                                                                         comment={reply}
@@ -372,14 +375,16 @@ class Comment extends React.Component {
                                                                     />
                                                                 )}
 
-                                                                <CommentOptions
-                                                                    comment={reply}
-                                                                    editIndex={editIndex}
-                                                                    index={commentIndex}
-                                                                    showAddComment={this.showAddComment}
-                                                                    handleClickOpen={this.handleClickOpen}
-                                                                    showEditComment={this.showEditComment}
-                                                                />
+                                                                {!api.isRevision && (
+                                                                    <CommentOptions
+                                                                        comment={reply}
+                                                                        editIndex={editIndex}
+                                                                        index={commentIndex}
+                                                                        showAddComment={this.showAddComment}
+                                                                        handleClickOpen={this.handleClickOpen}
+                                                                        showEditComment={this.showEditComment}
+                                                                    />
+                                                                )}
                                                             </Grid>
                                                         </Grid>
                                                     </Box>
@@ -410,7 +415,7 @@ Comment.defaultProps = {
 
 Comment.propTypes = {
     classes: PropTypes.shape({}).isRequired,
-    apiId: PropTypes.string.isRequired,
+    api: PropTypes.instanceOf(Object).isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
     commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,

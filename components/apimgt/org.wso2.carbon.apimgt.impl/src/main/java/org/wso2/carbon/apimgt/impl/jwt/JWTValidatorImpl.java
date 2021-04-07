@@ -154,7 +154,10 @@ public class JWTValidatorImpl implements JWTValidator {
                             return JWTUtil.verifyTokenSignature(signedJWT, rsaPublicKey);
                         }
                     } else {
-                        throw new APIManagementException("Key Algorithm not supported");
+                        if (log.isDebugEnabled()) {
+                            log.debug("Key Algorithm not supported");
+                        }
+                        return false; // return false to produce 401 unauthenticated response
                     }
                 } else if (tokenIssuer.getCertificate() != null) {
                     log.debug("Retrieve certificate from Token issuer and validating");

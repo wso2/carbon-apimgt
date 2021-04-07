@@ -374,7 +374,7 @@ class TableView extends React.Component {
             responsive: 'stacked',
             serverSide: true,
             search: false,
-            totalCount,
+            count: totalCount,
             page,
             onTableChange: (action, tableState) => {
                 switch (action) {

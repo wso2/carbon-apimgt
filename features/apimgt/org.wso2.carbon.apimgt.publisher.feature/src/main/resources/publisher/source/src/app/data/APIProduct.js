@@ -212,9 +212,6 @@ class APIProduct extends Resource {
                     },
                     this._requestMetaData(),
                 );
-            })
-            .catch(error => {
-                console.error(error);
             });
         return promisedAPIProduct.then(response => {
             return new APIProduct(response.body);

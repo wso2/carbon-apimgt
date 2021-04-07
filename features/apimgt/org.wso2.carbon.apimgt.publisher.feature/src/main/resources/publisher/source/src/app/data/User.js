@@ -180,6 +180,13 @@ export default class User {
             sessionState: Utils.getCookieWithoutEnvironment(User.CONST.PUBLISHER_SESSION_STATE),
         };
     }
+
+    /**
+     * Check whether the current user has admin role or not
+     */
+    isAdmin() {
+        return this.scopes.includes('apim:admin');
+    }
 }
 
 User.CONST = {

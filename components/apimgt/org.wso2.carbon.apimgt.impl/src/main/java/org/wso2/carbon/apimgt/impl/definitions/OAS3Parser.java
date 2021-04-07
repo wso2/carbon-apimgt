@@ -113,7 +113,7 @@ public class OAS3Parser extends APIDefinition {
      * @return swagger Json
      */
     @Override
-    public Map<String, Object> generateExample(String apiDefinition) {
+    public Map<String, Object> generateExample(String apiDefinition) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
@@ -128,15 +128,16 @@ public class OAS3Parser extends APIDefinition {
             int minResponseCode = 0;
             int responseCode = 0;
             String path = entry.getKey();
-            //initializing apiResourceMediationPolicyObject
-            APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
-            //setting path for apiResourceMediationPolicyObject
-            apiResourceMediationPolicyObject.setPath(path);
             Map<String, Schema> definitions = swagger.getComponents().getSchemas();
             //operation map to get verb
             Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
-            for (Operation op : operations) {
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                Operation op = operations.get(i);
+                //initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                //setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 //for each HTTP method get the verb
                 StringBuilder genCode = new StringBuilder();
@@ -144,9 +145,14 @@ public class OAS3Parser extends APIDefinition {
                 boolean hasXmlPayload = false;
                 //for setting only one initializing if condition per response code
                 boolean respCodeInitialized = false;
-                for (Map.Entry<PathItem.HttpMethod, Operation> HTTPMethodMap : operationMap.entrySet()) {
-                    //add verb to apiResourceMediationPolicyObject
-                    apiResourceMediationPolicyObject.setVerb(String.valueOf(HTTPMethodMap.getKey()));
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<PathItem.HttpMethod, Operation> operationEntry =
+                            (Map.Entry<PathItem.HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {

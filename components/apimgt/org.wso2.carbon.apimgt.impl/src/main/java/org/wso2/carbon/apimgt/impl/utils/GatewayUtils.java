@@ -133,6 +133,7 @@ public class GatewayUtils {
                 .concat(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH).concat("--")
                 .concat(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET).concat("--").concat(type);
     }
+
     public static String retrieveOAuthPasswordAlias(String name, String version, String type) {
 
         return name.concat("--v").concat(version).concat("--")
@@ -144,6 +145,12 @@ public class GatewayUtils {
 
         return name.concat("--v").concat(version).concat("--").concat(type);
     }
+
+    public static String retrieveAWSCredAlias(String name, String version, String type) {
+
+        return name.concat("--v").concat(version).concat("--").concat(type);
+    }
+
     public static String retrieveUniqueIdentifier(String apiId, String type) {
 
         return apiId.concat("--").concat(type);

@@ -1953,7 +1953,7 @@ public class APIMappingUtil {
                 Map<String, String> wsUriMappings = api.getWsUriMapping();
                 if (wsUriMappings != null) {
                     String wsUriMapping = wsUriMappings
-                            .get(operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
+                            .get(operationsDTO.getTarget() + "_" + operationsDTO.getVerb().toLowerCase());
                     if (wsUriMapping != null) {
                         operationsDTO.setUriMapping(wsUriMapping);
                     }

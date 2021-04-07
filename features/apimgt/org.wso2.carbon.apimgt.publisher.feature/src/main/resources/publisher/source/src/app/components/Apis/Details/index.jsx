@@ -44,6 +44,7 @@ import {
 import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
+import AuthorizedError from 'AppComponents/Base/Errors/AuthorizedError';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import API from 'AppData/api';
@@ -100,6 +101,7 @@ const styles = (theme) => ({
         left: 0,
         top: 0,
         overflowY: 'auto',
+        overflowX: 'hidden',
     },
     leftLInkMain: {
         borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
@@ -253,6 +255,7 @@ class Details extends Component {
             imageUpdate: 0,
             allRevisions: null,
             allEnvRevision: null,
+            authorizedAPI: false,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
@@ -347,6 +350,8 @@ class Details extends Component {
                     const { status } = error;
                     if (status === 404) {
                         this.setState({ apiNotFound: true });
+                    } else if (status === 403) {
+                        this.setState({ authorizedAPI: true });
                     } else if (status === 401) {
                         doRedirectToLogin();
                     }
@@ -378,6 +383,8 @@ class Details extends Component {
                 const { status } = error;
                 if (status === 404) {
                     this.setState({ apiNotFound: true });
+                } else if (status === 403) {
+                    this.setState({ authorizedAPI: true });
                 }
             });
     }
@@ -632,7 +639,7 @@ class Details extends Component {
      */
     render() {
         const {
-            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision,
+            api, apiNotFound, isAPIProduct, imageUpdate, tenantList, allRevisions, allEnvRevision, authorizedAPI,
         } = this.state;
         const {
             classes,
@@ -672,6 +679,13 @@ class Details extends Component {
                 body: intl.formatMessage(resourceNotFoundMessageText.bodyMessage, { apiUUID: `${apiUUID}` }),
             };
             return <ResourceNotFound message={resourceNotFountMessage} />;
+        }
+        if (authorizedAPI) {
+            return (
+                <>
+                    <AuthorizedError />
+                </>
+            );
         }
 
         if (!api) {
@@ -830,10 +844,10 @@ class Details extends Component {
                                                 />
                                             )}
                                             {!api.advertiseInfo.advertised
-                                            && this.getLeftMenuItemForResourcesByType(api.type)}
+                                                && this.getLeftMenuItemForResourcesByType(api.type)}
                                             {this.getLeftMenuItemForDefinitionByType(api.type)}
                                             {!api.advertiseInfo.advertised && !isAPIProduct
-                                            && api.type !== 'WEBSUB' && (
+                                                && api.type !== 'WEBSUB' && (
                                                 <LeftMenuItem
                                                     text={intl.formatMessage({
                                                         id: 'Apis.Details.index.endpoints',
@@ -843,7 +857,7 @@ class Details extends Component {
                                                     Icon={<EndpointIcon />}
                                                 />
                                             )}
-                                            {!api.advertiseInfo.advertised && !api.isWebSocket() && !isAPIProduct && (
+                                            {!api.advertiseInfo.advertised && !isAPIProduct && (
                                                 <LeftMenuItem
                                                     text={intl.formatMessage({
                                                         id: 'Apis.Details.index.left.menu.scope',
@@ -898,7 +912,7 @@ class Details extends Component {
                                 </>
                             )}
                             {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                                && !api.advertiseInfo.advertised && api.lifeCycleStatus !== 'RETIRED' && (
+                                && !api.advertiseInfo.advertised && (
                                 <div>
                                     <Divider />
                                     <Typography className={classes.headingText}>Test</Typography>

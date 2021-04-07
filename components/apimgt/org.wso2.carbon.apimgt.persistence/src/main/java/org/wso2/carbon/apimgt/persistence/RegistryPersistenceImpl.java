@@ -1326,11 +1326,12 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherContentSearchResult result = null;
         try {
-            RegistryHolder holder = getRegistry(ctx.getUserame(), org.getName());
+            RegistryHolder holder = getRegistry(org.getName());
             Registry registry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
-            String tenantAwareUsername = getTenantAwareUsername(ctx.getUserame());
 
+            String requestedTenantDomain = org.getName();
+            String tenantAwareUsername = getTenantAwareUsername(RegistryPersistenceUtil.getTenantAdminUserName(requestedTenantDomain));
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
             
             GenericArtifactManager apiArtifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
@@ -1457,7 +1458,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 result.setResults(contentData);
             } 
 
-        } catch (RegistryException | IndexerException | DocumentationPersistenceException e) {
+        } catch (RegistryException | IndexerException | DocumentationPersistenceException | APIManagementException e) {
             throw new APIPersistenceException("Error while searching for content ", e);
         } finally {
             if (isTenantFlowStarted) {
@@ -3580,17 +3581,15 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 Resource regResource;
                 if (!registry.resourceExists(resourcePath)) {
                     regResource = registry.newResource();
-                } else {
-                    regResource = registry.get(resourcePath);
+                    regResource.setContent(soapToRestSequence.getContent());
+                    regResource.addProperty("method", soapToRestSequence.getMethod());
+                    if (regResource.getProperty("resourcePath") != null) {
+                        regResource.removeProperty("resourcePath");
+                    }
+                    regResource.addProperty("resourcePath", apiResourceName);
+                    regResource.setMediaType("text/xml");
+                    registry.put(resourcePath, regResource);
                 }
-                regResource.setContent(soapToRestSequence.getContent());
-                regResource.addProperty("method", soapToRestSequence.getMethod());
-                if (regResource.getProperty("resourcePath") != null) {
-                    regResource.removeProperty("resourcePath");
-                }
-                regResource.addProperty("resourcePath", apiResourceName);
-                regResource.setMediaType("text/xml");
-                registry.put(resourcePath, regResource);
             }
 
         }

@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
@@ -43,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.subscription.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SubscriptionValidationSQLConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -61,6 +61,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * This Class used to handle DAO access for
+ */
 public class SubscriptionValidationDAO {
 
     private static Log log = LogFactory.getLog(SubscriptionValidationDAO.class);
@@ -383,7 +386,7 @@ public class SubscriptionValidationDAO {
     public List<API> getAllApis(String organization) {
 
         String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
+                ".API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
                 "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
                 "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
                 "AM_DEPLOYMENT_REVISION_MAPPING " +
@@ -402,20 +405,21 @@ public class SubscriptionValidationDAO {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
                         String apiType = resultSet.getString("API_TYPE");
+                        String apiUuid = resultSet.getString("API_UUID");
                         API api = new API();
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
                         String version = resultSet.getString("API_VERSION");
-                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiUUID(apiUuid);
                         api.setApiId(resultSet.getInt("API_ID"));
                         api.setVersion(version);
                         api.setProvider(provider);
                         api.setName(name);
                         api.setApiType(apiType);
-                        api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
                         api.setStatus(resultSet.getString("STATUS"));
                         String revision = resultSet.getString("REVISION_UUID");
+                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
                         if (APIConstants.API_PRODUCT.equals(apiType)) {
                             attachURlMappingDetailsOfApiProduct(connection, api);
@@ -923,7 +927,7 @@ public class SubscriptionValidationDAO {
                 quotaPolicy.setLimit(bandLimit);
             } else if (PolicyConstants.EVENT_COUNT_TYPE.equals(quotaPolicy.getType())) {
                 EventCountLimit eventCountLimit = new EventCountLimit();
-                eventCountLimit.setEventCount(resultSet.getInt(prefix+ThrottlePolicyConstants.COLUMN_QUOTA));
+                eventCountLimit.setEventCount(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_QUOTA));
                 eventCountLimit.setTimeUnit(resultSet.getString(prefix + ThrottlePolicyConstants.COLUMN_TIME_UNIT));
                 eventCountLimit.setUnitTime(resultSet.getInt(prefix + ThrottlePolicyConstants.COLUMN_UNIT_TIME));
                 quotaPolicy.setLimit(eventCountLimit);
@@ -1009,7 +1013,8 @@ public class SubscriptionValidationDAO {
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
                         String version = resultSet.getString("API_VERSION");
-                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        String apiUuid = resultSet.getString("API_UUID");
+                        api.setApiUUID(apiUuid);
                         api.setApiId(resultSet.getInt("API_ID"));
                         api.setVersion(version);
                         api.setProvider(provider);
@@ -1020,6 +1025,7 @@ public class SubscriptionValidationDAO {
                         api.setContext(resultSet.getString("CONTEXT"));
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                         if (APIConstants.API_PRODUCT.equals(apiType)) {
                             attachURlMappingDetailsOfApiProduct(connection, api);
                         } else {
@@ -1075,8 +1081,8 @@ public class SubscriptionValidationDAO {
     public API getAPIByContextAndVersion(String context, String version, String deployment) {
 
         String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
-                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS " +
+                "REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
                 "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
                 "AM_DEPLOYMENT_REVISION_MAPPING " +
                 "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.CONTEXT = ? " +
@@ -1088,11 +1094,12 @@ public class SubscriptionValidationDAO {
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
+                        String apiUuid = resultSet.getString("API_UUID");
                         String apiType = resultSet.getString("API_TYPE");
                         API api = new API();
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
-                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiUUID(apiUuid);
                         api.setApiId(resultSet.getInt("API_ID"));
                         api.setVersion(version);
                         api.setProvider(provider);
@@ -1103,6 +1110,7 @@ public class SubscriptionValidationDAO {
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                         if (APIConstants.API_PRODUCT.equals(apiType)) {
                             attachURlMappingDetailsOfApiProduct(connection, api);
                             return api;
@@ -1175,12 +1183,10 @@ public class SubscriptionValidationDAO {
 
     public API getApiByUUID(String apiId, String deployment, String organization) {
 
-
         String sql = "SELECT AM_API.API_PROVIDER,AM_API.API_NAME,AM_API.CONTEXT,AM_API.API_UUID,AM_API.API_ID,AM_API" +
-                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS REVISION_UUID," +
-                "AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME " +
-                "FROM AM_API LEFT JOIN AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN " +
-                "AM_DEPLOYMENT_REVISION_MAPPING " +
+                ".API_TIER,AM_API.API_VERSION,AM_API.API_TYPE,AM_API.STATUS,AM_REVISION.REVISION_UUID AS " +
+                "REVISION_UUID,AM_DEPLOYMENT_REVISION_MAPPING.NAME AS DEPLOYMENT_NAME FROM AM_API LEFT JOIN " +
+                "AM_REVISION ON AM_API.API_UUID=AM_REVISION.API_UUID LEFT JOIN AM_DEPLOYMENT_REVISION_MAPPING " +
                 "ON AM_REVISION.REVISION_UUID=AM_DEPLOYMENT_REVISION_MAPPING.REVISION_UUID WHERE AM_API.API_UUID = ? ";
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(organization)) {
             sql = sql.concat("AND AM_API.CONTEXT NOT LIKE /t/%");
@@ -1202,10 +1208,11 @@ public class SubscriptionValidationDAO {
                         String deploymentName = resultSet.getString("DEPLOYMENT_NAME");
                         String apiType = resultSet.getString("API_TYPE");
                         String version = resultSet.getString("API_VERSION");
+                        String apiUuid = resultSet.getString("API_UUID");
                         API api = new API();
                         String provider = resultSet.getString("API_PROVIDER");
                         String name = resultSet.getString("API_NAME");
-                        api.setApiUUID(resultSet.getString("API_UUID"));
+                        api.setApiUUID(apiUuid);
                         api.setApiId(resultSet.getInt("API_ID"));
                         api.setVersion(version);
                         api.setProvider(provider);
@@ -1216,6 +1223,7 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
+                        api.setPolicy(getAPILevelTier(connection, apiUuid, revision));
                         if (APIConstants.API_PRODUCT.equals(apiType)) {
                             attachURlMappingDetailsOfApiProduct(connection, api);
                             return api;
@@ -1230,6 +1238,21 @@ public class SubscriptionValidationDAO {
             }
         } catch (SQLException e) {
             log.error("Error in loading API for api : " + apiId + " : " + deployment, e);
+        }
+        return null;
+    }
+
+    private String getAPILevelTier(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.GET_REVISIONED_API_TIER_SQL)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("API_TIER");
+                }
+            }
         }
         return null;
     }

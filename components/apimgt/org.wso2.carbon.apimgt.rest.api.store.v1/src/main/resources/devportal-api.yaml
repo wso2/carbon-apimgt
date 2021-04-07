@@ -68,11 +68,11 @@ info:
     ```
     curl -k -d "grant_type=password&username=<admin_username>&password=<admin_password>&scope=<scopes separated by space>"
     \ -H "Authorization: Basic base64(cliet_id:client_secret)"
-    \ https://<host>:<gateway_port>/token
+    \ https://<host>:<servlet_port>/oauth2/token
     ```
     **Sample request**
     ```
-    curl https://localhost:8243/token -k \
+    curl https://localhost:9443/oauth2/token -k \
     -H "Authorization: Basic Zk9DaTR2Tko1OVBwSHVjQzJDQVlmWXVBRGRNYTphNEZ3SGxxMGlDSUtWczJNUElJRG5lcFpuWU1h" \
     -d "grant_type=password&username=admin&password=admin&scope=apim:subscribe apim:api_key"
     ```
@@ -1101,6 +1101,7 @@ paths:
       security:
         - OAuth2Security:
             - apim:subscribe
+            - apim:admin
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"

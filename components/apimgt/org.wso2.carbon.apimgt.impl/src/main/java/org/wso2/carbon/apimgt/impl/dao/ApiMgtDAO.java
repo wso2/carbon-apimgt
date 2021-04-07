@@ -127,7 +127,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12897,6 +12896,25 @@ public class ApiMgtDAO {
         return apiLevelTier;
     }
 
+    public String getAPILevelTier(String apiUUID, String revisionUUID) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement =
+                         connection.prepareStatement(SQLConstants.GET_REVISIONED_API_TIER_SQL)) {
+                preparedStatement.setString(1, apiUUID);
+                preparedStatement.setString(2, revisionUUID);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        return resultSet.getString("API_TIER");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to retrieve Connection", e);
+        }
+        return null;
+    }
+
     private boolean isBlockConditionExist(String conditionType, String conditionValue, String tenantDomain, Connection
             connection) throws APIManagementException {
         PreparedStatement checkIsExistPreparedStatement = null;
@@ -15479,7 +15497,7 @@ public class ApiMgtDAO {
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    revisionId = rs.getInt(1);
+                    revisionId = rs.getInt("REVISIONS_CREATED");
                 }
             }
         } catch (SQLException e) {
@@ -15711,7 +15729,8 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
+                addAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16389,7 +16408,8 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                restoreAPIRevisionMetaDataToWorkingCopy(connection, apiRevision.getApiUUID(),
+                        apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16445,7 +16465,7 @@ public class ApiMgtDAO {
                 removeGraphQLComplexityStatement.setInt(1, apiId);
                 removeGraphQLComplexityStatement.setString(2, apiRevision.getRevisionUUID());
                 removeGraphQLComplexityStatement.executeUpdate();
-
+                deleteAPIRevisionMetaData(connection, apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16654,7 +16674,7 @@ public class ApiMgtDAO {
                     insertGraphQLComplexityStatement.addBatch();
                 }
                 insertGraphQLComplexityStatement.executeBatch();
-
+                updateLatestRevisionNumber(connection, apiRevision.getApiUUID(), apiRevision.getId());
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -16939,6 +16959,47 @@ public class ApiMgtDAO {
             statement.setString(2, md5);
             statement.setInt(3, apiId);
             statement.executeUpdate();
+        }
+    }
+
+    private void updateLatestRevisionNumber(Connection connection, String apiUUID, int revisionId) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.UPDATE_REVISION_CREATED_BY_API_SQL)) {
+            preparedStatement.setInt(1, revisionId);
+            preparedStatement.setString(2, apiUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void addAPIRevisionMetaData(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.ADD_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.setString(3, apiUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void deleteAPIRevisionMetaData(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.DELETE_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+    private void restoreAPIRevisionMetaDataToWorkingCopy(Connection connection, String apiUUID, String revisionUUID) throws SQLException {
+
+        try (PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.RESTORE_API_REVISION_METADATA)) {
+            preparedStatement.setString(1, apiUUID);
+            preparedStatement.setString(2, revisionUUID);
+            preparedStatement.setString(3, apiUUID);
+            preparedStatement.executeUpdate();
         }
     }
 }

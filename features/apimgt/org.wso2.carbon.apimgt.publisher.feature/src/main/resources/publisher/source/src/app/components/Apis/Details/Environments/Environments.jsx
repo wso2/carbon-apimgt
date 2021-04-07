@@ -335,7 +335,7 @@ export default function Environments() {
         const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
         let vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
         if (!vhost) { // if vhost is deleted after deploying the revision, there is no matching vhost
-            vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails.vhost };
+            vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails && envDetails.vhost };
         }
         allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
     });
@@ -355,6 +355,7 @@ export default function Environments() {
     };
 
     const handleCloseDeployPopup = () => {
+        history.replace();
         setOpenDeployPopup(false);
         setExtraRevisionToDelete(null);
     };
@@ -1380,7 +1381,6 @@ export default function Environments() {
                                 margin='dense'
                                 variant='outlined'
                                 label='Description'
-                                value={description}
                                 inputProps={{ maxLength: maxCommentLength }}
                                 helperText={(
                                     <FormattedMessage
@@ -1392,7 +1392,8 @@ export default function Environments() {
                                 multiline
                                 rows={3}
                                 rowsMax={4}
-                                onChange={handleChange}
+                                defaultValue={description}
+                                onBlur={handleChange}
                             />
                             <Typography className={classes.textCount} align='right'>
                                 {currentLength + '/' + maxCommentLength}
@@ -1700,7 +1701,6 @@ export default function Environments() {
                                 margin='dense'
                                 variant='outlined'
                                 label='Description'
-                                value={description}
                                 inputProps={{ maxLength: maxCommentLength }}
                                 helperText={(
                                     <FormattedMessage
@@ -1712,7 +1712,8 @@ export default function Environments() {
                                 multiline
                                 rows={3}
                                 rowsMax={4}
-                                onChange={handleChange}
+                                defaultValue={description}
+                                onBlur={handleChange}
                             />
                             <Typography className={classes.textCount} align='right'>
                                 {currentLength + '/' + maxCommentLength}

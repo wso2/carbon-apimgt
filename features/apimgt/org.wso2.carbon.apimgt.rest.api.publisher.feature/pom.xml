@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.0.107-SNAPSHOT</version>
+        <version>9.0.125-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -126,6 +126,10 @@
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-inflector-oas3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.damnhandy.wso2</groupId>
+            <artifactId>handy-uri-templates</artifactId>
         </dependency>
     </dependencies>
     <reporting>
@@ -291,6 +295,7 @@
                                 <bundleDef>
                                     org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
                                 </bundleDef>
+                                <bundleDef>com.damnhandy.wso2:handy-uri-templates</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

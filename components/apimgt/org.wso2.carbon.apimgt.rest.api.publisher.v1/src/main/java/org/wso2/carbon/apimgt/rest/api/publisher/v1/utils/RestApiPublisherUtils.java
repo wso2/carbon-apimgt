@@ -27,12 +27,10 @@ import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -89,14 +87,9 @@ public class RestApiPublisherUtils {
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            DocumentationContent content = new DocumentationContent();
-            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
-            resourceFile.setName(filename);
-            content.setResourceFile(resourceFile);
-            content.setSourceType(ContentSourceType.FILE);
-            //apiProvider.addFileToDocumentation(apiIdentifier, documentation, filename, docInputStream, mediaType);
-            //apiProvider.updateDocumentation(apiIdentifier, documentation);
-            apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
+            PublisherCommonUtils
+                    .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, apiId,
+                            documentId, tenantDomain);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
@@ -181,14 +174,9 @@ public class RestApiPublisherUtils {
             docInputStream = new FileInputStream(docFile.getAbsolutePath() + File.separator + filename);
             String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
             mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            DocumentationContent content = new DocumentationContent();
-            ResourceFile resourceFile = new ResourceFile(docInputStream, mediaType);
-            resourceFile.setName(filename);
-            content.setResourceFile(resourceFile);
-            content.setSourceType(ContentSourceType.FILE);
-            //apiProvider.addFileToProductDocumentation(productIdentifier, documentation, filename, docInputStream, mediaType);
-            //apiProvider.updateDocumentation(productIdentifier, documentation);
-            apiProvider.addDocumentationContent(productId, documentId, tenantDomain, content);
+            PublisherCommonUtils
+                    .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, productId,
+                            documentId, tenantDomain);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);

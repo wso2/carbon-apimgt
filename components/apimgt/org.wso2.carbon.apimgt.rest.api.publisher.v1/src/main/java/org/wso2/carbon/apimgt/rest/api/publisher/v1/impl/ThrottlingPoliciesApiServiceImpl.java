@@ -25,15 +25,17 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ThrottlingPoliciesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ThrottlingPolicyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriptionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -45,6 +47,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
+
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
 
 /**
  * This is the service implementation class for Publisher throttling policies related operations
@@ -77,34 +81,43 @@ public class ThrottlingPoliciesApiServiceImpl implements ThrottlingPoliciesApiSe
         return Response.ok().entity(policyListDTO).build();
     }
 
+    /**
+     * Retrieves all the Tiers
+     *
+     * @param limit       max number of objects returns
+     * @param offset      starting index
+     * @param ifNoneMatch If-None-Match header value
+     * @return Response object containing resulted tiers
+     */
+
     @Override
-    public Response getSubscriptionThrottlingPolicies(String tierQuotaTypes, String ifNoneMatch,
+    public Response getSubscriptionThrottlingPolicies(Integer limit, Integer offset, String ifNoneMatch,
                                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
         String userName = RestApiCommonUtil.getLoggedInUsername();
-        SubscriptionPolicy[] subscriptionPolicies = Arrays.asList(apiProvider.getPolicies(userName,
-                PolicyConstants.POLICY_LEVEL_SUB)).toArray(new SubscriptionPolicy[0]);
-        List<SubscriptionPolicy> subscriptionPolicyList = new ArrayList<>();
-        if (Objects.nonNull(tierQuotaTypes) && !tierQuotaTypes.isEmpty()) {
-            if (tierQuotaTypes.contains(",")) {
-                String[] tierQuotaTypeArray = tierQuotaTypes.split(",");
-                for (String tierQuotaType : tierQuotaTypeArray) {
-                    for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
-                        if (tierQuotaType.equals(subscriptionPolicy.getDefaultQuotaPolicy().getType())) {
-                            subscriptionPolicyList.add(subscriptionPolicy);
-                        }
-                    }
-                }
-            } else {
-                for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies) {
-                    if (tierQuotaTypes.equals(subscriptionPolicy.getDefaultQuotaPolicy().getType())) {
-                        subscriptionPolicyList.add(subscriptionPolicy);
-                    }
-                }
+        Policy[] policies = apiProvider.getPolicies(userName, PolicyConstants.POLICY_LEVEL_SUB);
+        List<SubscriptionPolicy> streamingPolicies = new ArrayList<>();
+        for (Policy policy : policies) {
+            if (EVENT_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+                streamingPolicies.add((SubscriptionPolicy) policy);
             }
-            return Response.ok().entity(subscriptionPolicyList).build();
         }
-        return Response.ok().entity(Arrays.asList(subscriptionPolicies)).build();
+        SubscriptionPolicyListDTO subscriptionPolicyListDTO = new SubscriptionPolicyListDTO();
+        List<SubscriptionPolicyDTO> subscriptionPolicyDTOs = subscriptionPolicyListDTO.getList();
+        if (subscriptionPolicyDTOs == null) {
+            subscriptionPolicyDTOs = new ArrayList<>();
+            subscriptionPolicyListDTO.setList(subscriptionPolicyDTOs);
+        }
+        int size = streamingPolicies.size();
+        int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = Math.min(offset + limit - 1, size - 1);
+
+        for (int i = start; i <= end; i++) {
+            subscriptionPolicyDTOs.add(ThrottlingPolicyMappingUtil.fromSubscriptionToDTO(streamingPolicies.get(i), i));
+        }
+        subscriptionPolicyListDTO.setCount(subscriptionPolicyDTOs.size());
+        return Response.ok().entity(subscriptionPolicyListDTO).build();
     }
 
     /**

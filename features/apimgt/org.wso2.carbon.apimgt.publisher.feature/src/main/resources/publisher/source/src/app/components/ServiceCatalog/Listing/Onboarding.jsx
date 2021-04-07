@@ -73,7 +73,7 @@ function Onboarding() {
         return <Redirect to={url} />;
     }
     return (
-        <Box pt={10}>
+        <Box id='itest-service-catalog-onboarding' pt={10}>
             <Grid
                 container
                 direction='row'
@@ -149,6 +149,7 @@ function Onboarding() {
                     <Button
                         className={classes.actionStyle}
                         size='large'
+                        id='itest-services-landing-deploy-sample'
                         variant='outlined'
                         color='primary'
                         onClick={handleOnClick}

@@ -38,7 +38,7 @@ import Box from '@material-ui/core/Box';
  * @returns {any} Listing Page for Services
  */
 function Listing() {
-    const [serviceList, setServiceList] = useState([]);
+    const [servicesData, setServicesData] = useState([]);
     const [notFound, setNotFound] = useState(true);
     const [loading, setLoading] = useState(true);
     const [isGridView, setIsGridView] = useState(true);
@@ -49,8 +49,7 @@ function Listing() {
         const promisedServices = ServiceCatalog.searchServices();
         promisedServices.then((data) => {
             const { body } = data;
-            const { list } = body;
-            setServiceList(list);
+            setServicesData(body);
             setNotFound(false);
         }).catch((error) => {
             console.error(error);
@@ -89,13 +88,13 @@ function Listing() {
         });
     };
 
-    if (loading || !serviceList) {
+    if (loading || !servicesData) {
         return <Progress per={90} message='Loading Services ...' />;
     }
     if (notFound) {
         return <ResourceNotFound />;
     }
-    const haveServices = serviceList.length !== 0;
+    const haveServices = servicesData.list.length !== 0;
     return (
         <Box flexGrow={1}>
             <Grid
@@ -108,6 +107,7 @@ function Listing() {
                     <ServiceCatalogTopMenu
                         showServiceToggle={haveServices}
                         isGridView={isGridView}
+                        totalServices={servicesData.pagination.total}
                         setIsGridView={setIsGridView}
                     />
                 </Grid>
@@ -115,8 +115,14 @@ function Listing() {
                     <Grid xs={12}>
                         {!haveServices && <Onboarding />}
                         {haveServices && (isGridView
-                            ? <ServicesCardView serviceList={serviceList} onDelete={onDelete} />
-                            : <ServicesTableView serviceList={serviceList} onDelete={onDelete} />)}
+                            ? (
+                                <ServicesCardView
+                                    serviceList={servicesData.list}
+                                    pagination={servicesData.pagination}
+                                    onDelete={onDelete}
+                                />
+                            )
+                            : <ServicesTableView serviceList={servicesData.list} onDelete={onDelete} />)}
                     </Grid>
                 </Box>
             </Grid>

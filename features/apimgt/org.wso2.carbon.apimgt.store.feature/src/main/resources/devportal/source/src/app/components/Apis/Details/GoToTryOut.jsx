@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useReducer, useContext, useState } from 'react';
+import React, {
+    useReducer, useContext, useState,
+} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Link as RouterLink, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Modal from '@material-ui/core/Modal';
@@ -82,7 +84,9 @@ const tasksReducer = (state, action) => {
  */
 export default function GoToTryOut() {
     const user = AuthManager.getUser();
-    const { api, subscribedApplications, applicationsAvailable } = useContext(ApiContext);
+    const {
+        api, subscribedApplications, applicationsAvailable, updateSubscriptionData,
+    } = useContext(ApiContext);
     const defaultApplications = applicationsAvailable.filter((x) => x.label === 'DefaultApplication');
     const defaultApplication = defaultApplications.length > 0 ? defaultApplications[0] : null;
     const [tasksStatus, tasksStatusDispatcher] = useReducer(tasksReducer, initialTaskStates);
@@ -141,14 +145,16 @@ export default function GoToTryOut() {
             });
     };
     const generateKeys = async (keyRequest, applicationId) => {
-        const selectedAppPromise = Application.get(applicationId);
-        selectedAppPromise.then((application) => {
-            return application.generateKeys(
-                keyRequest.keyType, keyRequest.supportedGrantTypes,
-                keyRequest.callbackUrl,
-                keyRequest.additionalProperties, keyRequest.keyManager,
-            );
-        }).then((response) => {
+        const application = await Application.get(applicationId);
+        const keys = await application.getKeys(keyRequest.keyType);
+        if (keys.size > 0) {
+            return;
+        }
+        application.generateKeys(
+            keyRequest.keyType, keyRequest.supportedGrantTypes,
+            keyRequest.callbackUrl,
+            keyRequest.additionalProperties, keyRequest.keyManager,
+        ).then((response) => {
             if (response.keyState === keyStates.CREATED || response.keyState === keyStates.REJECTED) {
                 Alert.error(intl.formatMessage({
                     id: 'Apis.Details.GoToTryOut.error.keymanager',
@@ -170,7 +176,6 @@ export default function GoToTryOut() {
                 }));
             }
         });
-        return selectedAppPromise;
     };
 
     const taskManager = async (promisedTask, name) => {
@@ -185,6 +190,16 @@ export default function GoToTryOut() {
         tasksStatusDispatcher({ name, status: { inProgress: false, completed: true } });
         return taskResult;
     };
+
+    const pushToTryout = async () => {
+        await updateSubscriptionData();
+        if (isAsyncAPI) {
+            history.push('/apis/' + api.id + '/definition');
+        } else {
+            history.push('/apis/' + api.id + '/test');
+        }
+    };
+
     /**
      *Handle onClick event for `Deploy Sample API` Button
      * @memberof GoToTryOut
@@ -197,19 +212,16 @@ export default function GoToTryOut() {
             history.push('/apis/' + api.id + '/test');
         }
         setShowStatus(true);
-
+        // Get the request for key generation using the key managers.
+        const keyRequest = await taskManager(getKeyRequest(), 'prepare');
+        // Generate consumer key and secret
+        await taskManager(generateKeys(keyRequest, defaultApplication.value), 'generate');
         // Subscribe this API to the default application
         await taskManager(restApi.subscribe(
             api.id,
             defaultApplication.value,
             throttlingPolicy,
         ), 'subscribe');
-
-        // Get the request for key generation using the key managers.
-        const keyRequest = await taskManager(getKeyRequest(), 'prepare');
-
-        // Generate consumer key and secret
-        await taskManager(generateKeys(keyRequest, defaultApplication.value), 'generate');
     };
 
     Object.values(tasksStatus)
@@ -219,12 +231,11 @@ export default function GoToTryOut() {
 
     const redirectButton = isAsyncAPI ? (
         <Button
-            component={RouterLink}
-            to={'/apis/' + api.id + '/definition'}
             variant='outlined'
             color='primary'
             size='small'
             classes={{ root: classes.asyncButton, label: classes.tryoutLabel }}
+            onClick={pushToTryout}
         >
             <FormattedMessage
                 id='Apis.Details.GoToTryOut.btn.view.definition'
@@ -233,12 +244,11 @@ export default function GoToTryOut() {
         </Button>
     ) : (
         <Button
-            component={RouterLink}
-            to={'/apis/' + api.id + '/test'}
             variant='outlined'
             color='primary'
             size='small'
             classes={{ label: classes.tryoutLabel }}
+            onClick={pushToTryout}
         >
             <FormattedMessage
                 id='Apis.Details.GoToTryOut.btn.tryout'

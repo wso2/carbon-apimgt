@@ -625,8 +625,9 @@ public class APIMappingUtil {
      *
      * @param apiSet Set of API objects
      * @return APIListDTO object
+     * @throws APIManagementException 
      */
-    public static APIListDTO fromAPISetToDTO(Set<API> apiSet) {
+    public static APIListDTO fromAPISetToDTO(Set<API> apiSet) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiInfoDTOs == null) {
@@ -722,8 +723,9 @@ public class APIMappingUtil {
      * @param limit   maximum number of APIs returns
      * @param offset  starting index
      * @return APIListDTO object containing APIDTOs
+     * @throws APIManagementException 
      */
-    public static APIListDTO fromAPIListToDTO(List<API> apiList, int offset, int limit) {
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, int offset, int limit) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiInfoDTOs == null) {
@@ -746,8 +748,9 @@ public class APIMappingUtil {
      *
      * @param apiList List of APIs
      * @return APIListDTO object containing APIDTOs
+     * @throws APIManagementException 
      */
-    public static APIListDTO fromAPIListToDTO(List<Object> apiList) {
+    public static APIListDTO fromAPIListToDTO(List<Object> apiList) throws APIManagementException {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiList != null) {
@@ -769,7 +772,7 @@ public class APIMappingUtil {
      * @param api API object
      * @return a minimal representation DTO
      */
-    static APIInfoDTO fromAPIToInfoDTO(API api) {
+    static APIInfoDTO fromAPIToInfoDTO(API api) throws APIManagementException {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
         String context = api.getContextTemplate();
@@ -787,10 +790,18 @@ public class APIMappingUtil {
         apiInfoDTO.setAvgRating(String.valueOf(api.getRating()));
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        Set<Tier> throttlingPolicies = api.getAvailableTiers();
+        
+        Set<Tier> throttlingPolicies = new HashSet<Tier>();
         List<String> throttlingPolicyNames = new ArrayList<>();
-        for (Tier tier : throttlingPolicies) {
-            throttlingPolicyNames.add(tier.getName());
+        Set<Tier> apiTiers = api.getAvailableTiers();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        Set<String> deniedTiers = apiConsumer.getDeniedTiers();
+        for (Tier currentTier : apiTiers) {
+            if (!deniedTiers.contains(currentTier.getName())) {
+                throttlingPolicies.add(currentTier);
+                throttlingPolicyNames.add(currentTier.getName());
+                
+            }
         }
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
@@ -835,8 +846,9 @@ public class APIMappingUtil {
      *
      * @param apiProduct API Product object
      * @return a minimal representation DTO
+     * @throws APIManagementException 
      */
-    static APIInfoDTO fromAPIToInfoDTO(APIProduct apiProduct) {
+    static APIInfoDTO fromAPIToInfoDTO(APIProduct apiProduct) throws APIManagementException {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(apiProduct.getDescription());
         apiInfoDTO.setContext(apiProduct.getContext());
@@ -850,10 +862,18 @@ public class APIMappingUtil {
         apiInfoDTO.setAvgRating(String.valueOf(apiProduct.getRating()));
         String providerName = apiProduct.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
-        Set<Tier> throttlingPolicies = apiProduct.getAvailableTiers();
+
+        Set<Tier> throttlingPolicies = new HashSet<Tier>();
         List<String> throttlingPolicyNames = new ArrayList<>();
-        for (Tier tier : throttlingPolicies) {
-            throttlingPolicyNames.add(tier.getName());
+        Set<Tier> apiTiers = apiProduct.getAvailableTiers();
+        APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+        Set<String> deniedTiers = apiConsumer.getDeniedTiers();
+        for (Tier currentTier : apiTiers) {
+            if (!deniedTiers.contains(currentTier.getName())) {
+                throttlingPolicies.add(currentTier);
+                throttlingPolicyNames.add(currentTier.getName());
+                
+            }
         }
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();

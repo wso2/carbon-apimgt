@@ -21,7 +21,6 @@ package org.wso2.carbon.apimgt.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -37,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -83,7 +81,6 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Monetization;
@@ -113,8 +110,8 @@ import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
+import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -256,13 +253,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
 
 /**
  * This class provides the core API provider functionality. It is implemented in a very
@@ -278,7 +272,6 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMu
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
-    private static Map<String,List<Integer>> revisionIDList = new HashMap<>();
     private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
 
     private final String userNameWithoutChange;
@@ -8566,6 +8559,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateAPIInformation(uuid, requestedTenantDomain, org, api);
                 loadMediationPoliciesToAPI(api, requestedTenantDomain);
                 populateRevisionInformation(api, uuid);
+                populateAPITier(api);
                 populateAPIStatus(api);
                 populateDefaultVersion(api);
                 return api;
@@ -8579,6 +8573,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the OAS definition", e);
         } catch (ParseException e) {
             throw new APIManagementException("Error while parsing the OAS definition", e);
+        }
+    }
+
+    private void populateAPITier(API api) throws APIManagementException {
+
+        if (api.isRevision()) {
+            String apiLevelTier = apiMgtDAO.getAPILevelTier(api.getRevisionedApiId(), api.getUuid());
+            api.setApiLevelPolicy(apiLevelTier);
         }
     }
 
@@ -8828,7 +8830,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String userame = userNameWithoutChange;
         Organization org = new Organization(tenantDomain);
         Map<String, Object> properties = APIUtil.getUserProperties(userame);
-        String[] roles = APIUtil.getFilteredUserRoles(userame);;
+        String[] roles = APIUtil.getFilteredUserRoles(userame);
         UserContext ctx = new UserContext(userame, org, properties, roles);
 
 
@@ -9155,24 +9157,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED,
                     apiRevision.getApiUUID()));
         }
-        List<Integer> idList = revisionIDList.get(apiRevision.getApiUUID());
-        if (idList == null) {
-            idList = new ArrayList<>();
-        }
-        int maxId = 0;
-        for (int id : idList) {
-            if (maxId < id) {
-                maxId = id;
-            }
-        }
 
-        int revisionId;
-        int revisionIdStored = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID());
-        if (maxId < revisionIdStored) {
-            revisionId = revisionIdStored + 1;
-        } else {
-            revisionId = maxId + 1;
-        }
+        int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
         apiRevision.setId(revisionId);
         APIIdentifier apiId = APIUtil.getAPIIdentifierFromUUID(apiRevision.getApiUUID());
         if (apiId == null) {
@@ -9197,8 +9183,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIRevision(apiRevision);
-        idList.add(revisionId);
-        revisionIDList.put(apiRevision.getApiUUID(), idList);
         if (importExportAPI != null) {
             try {
                 File artifact = importExportAPI
@@ -9519,24 +9503,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.MAXIMUM_REVISIONS_REACHED,
                     apiRevision.getApiUUID()));
         }
-        List<Integer> idList = revisionIDList.get(apiRevision.getApiUUID());
-        if (idList == null) {
-            idList = new ArrayList<>();
-        }
-        int maxId = 0;
-        for (int id : idList) {
-            if (maxId < id) {
-                maxId = id;
-            }
-        }
-
-        int revisionId;
-        int revisionIdStored = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID());
-        if (maxId < revisionIdStored) {
-            revisionId = revisionIdStored + 1;
-        } else {
-            revisionId = maxId +1 ;
-        }
+        int revisionId = apiMgtDAO.getMostRecentRevisionId(apiRevision.getApiUUID()) + 1;
         apiRevision.setId(revisionId);
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiRevision.getApiUUID());
         if (apiProductIdentifier == null) {
@@ -9550,8 +9517,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiProductIdentifier.getUUID(), revisionId);
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to add revision registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_CREATING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_CREATING_API_REVISION, apiRevision.getApiUUID()));
         }
         if (StringUtils.isEmpty(revisionUUID)) {
             String errorMessage = "Failed to retrieve revision uuid";
@@ -9559,8 +9526,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIProductRevision(apiRevision);
-        idList.add(revisionId);
-        revisionIDList.put(apiRevision.getApiUUID(),idList);
         try {
             File artifact = importExportAPI
                     .exportAPIProduct(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON,
@@ -9573,7 +9538,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
                         apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain, artifact);
             }
-        } catch (APIImportExportException|ArtifactSynchronizerException e) {
+        } catch (APIImportExportException | ArtifactSynchronizerException e) {
             throw new APIManagementException("Error while Store the Revision Artifact",
                     ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
