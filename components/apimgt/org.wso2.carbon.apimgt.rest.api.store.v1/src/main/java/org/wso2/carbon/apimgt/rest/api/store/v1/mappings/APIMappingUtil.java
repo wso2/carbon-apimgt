@@ -71,12 +71,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
@@ -443,27 +440,33 @@ public class APIMappingUtil {
             apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
         } else {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
-            JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
-            JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
-            JsonArray servers = configObject.getAsJsonArray("servers");
-            JsonObject server = servers.get(0).getAsJsonObject();
-            String url = server.get("url").getAsString();
-            JsonObject variables = server.getAsJsonObject("variables");
-            JsonObject basePath = variables.getAsJsonObject("basePath");
-            String stageName = basePath.get("default").getAsString();
-            String hostUrl = url.replace("/{basePath}", stageName);
-            if (hostUrl == null) {
-                hostUrl = " ";
-            }
-            APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
-            List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
-            APIURLsDTO apiurLsDTO = new APIURLsDTO();
-            apiurLsDTO.setHttps(hostUrl);
-            apiEndpointURLsDTO.setUrLs(apiurLsDTO);
-            endpointUrls.add(apiEndpointURLsDTO);
-            apidto.setEndpointURLs(endpointUrls);
+            setEndpointURLsForAwsAPIs(model, tenantDomain);
         }
         return apidto;
+    }
+
+    public static void setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+        APIDTO apidto;
+        apidto = fromAPItoDTO(model.getApi(), tenantDomain);
+        JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
+        JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
+        JsonArray servers = configObject.getAsJsonArray("servers");
+        JsonObject server = servers.get(0).getAsJsonObject();
+        String url = server.get("url").getAsString();
+        JsonObject variables = server.getAsJsonObject("variables");
+        JsonObject basePath = variables.getAsJsonObject("basePath");
+        String stageName = basePath.get("default").getAsString();
+        String hostUrl = url.replace("/{basePath}", stageName);
+        if (hostUrl == null) {
+            hostUrl = " ";
+        }
+        APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
+        List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
+        APIURLsDTO apiurLsDTO = new APIURLsDTO();
+        apiurLsDTO.setHttps(hostUrl);
+        apiEndpointURLsDTO.setUrLs(apiurLsDTO);
+        endpointUrls.add(apiEndpointURLsDTO);
+        apidto.setEndpointURLs(endpointUrls);
     }
 
     public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String tenantDomain)
