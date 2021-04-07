@@ -1984,8 +1984,8 @@ class API extends Resource {
     }
 
     /**
-     * Return the deployed revisions of this API 
-     * @returns 
+     * Return the deployed revisions of this API
+     * @returns
      */
     getDeployedRevisions() {
         return this.client.then(client => {
@@ -2277,13 +2277,11 @@ class API extends Resource {
         });
     }
 
-    static policiesByQuotaType(quotaType) {
+    static asyncAPIPolicies() {
         const apiClient = new APIClientFactory().getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.API_CLIENT).client;
         return apiClient.then(client => {
             return client.apis['Throttling Policies'].getSubscriptionThrottlingPolicies(
-                {
-                    tierQuotaType: quotaType,
-                },
+                null,
                 this._requestMetaData(),
             );
         });
