@@ -145,7 +145,7 @@ function Edit(props) {
                             id='Apis.Details.Documents.Edit.documents.text.editor.edit.content'
                             defaultMessage='Edit '
                         />
-                        &nbsp;"{props.docName}"
+                        ` ${props.docName}`
                     </Typography>
                     <Button className={classes.button} variant='contained' color='primary' onClick={updateDoc} disabled={saveDisabled}>
                         <FormattedMessage
