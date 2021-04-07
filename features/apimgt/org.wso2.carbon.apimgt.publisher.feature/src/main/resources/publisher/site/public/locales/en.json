@@ -5189,6 +5189,12 @@
       "value": "Operation target or operation verb(s) can't be empty"
     }
   ],
+  "Apis.Details.Resources.components.AddOperation.operation.topic.cannot.have.path.params.warning": [
+    {
+      "type": 0,
+      "value": "WebSub topic can't have path parameters"
+    }
+  ],
   "Apis.Details.Resources.components.AddOperation.option": [
     {
       "type": 0,

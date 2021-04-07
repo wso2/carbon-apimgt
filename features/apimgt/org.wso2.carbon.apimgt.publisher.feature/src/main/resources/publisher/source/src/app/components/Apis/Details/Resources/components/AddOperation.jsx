@@ -179,6 +179,14 @@ function AddOperation(props) {
             }));
             return;
         }
+        if (api && api.type && api.type.toLowerCase() === 'websub'
+            && APIValidation.websubOperationTarget.validate(newOperations.target).error !== null) {
+            Alert.warning(intl.formatMessage({
+                id: 'Apis.Details.Resources.components.AddOperation.operation.topic.cannot.have.path.params.warning',
+                defaultMessage: "WebSub topic can't have path parameters",
+            }));
+            return;
+        }
         operationsDispatcher({ action: 'add', data: newOperations });
         clearInputs();
     }
