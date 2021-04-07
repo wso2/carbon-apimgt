@@ -27,7 +27,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl } from 'react-intl';
 import FormControl from '@material-ui/core/FormControl';
 import ServiceCatalog from 'AppData/ServiceCatalog';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -134,9 +134,9 @@ class CreateNewVersion extends React.Component {
     };
 
     handleServiceVersionChange = () => (event) => {
-        const { key } = event.target;
+        const { value } = event.target;
         this.setState({
-            serviceVersion: key,
+            serviceVersion: value,
         });
     };
 
@@ -175,9 +175,9 @@ class CreateNewVersion extends React.Component {
                     redirectToReferrer: true,
                     apiId: response.obj.id,
                 });
-                Alert.error(intl.formatMessage({
+                Alert.info(intl.formatMessage({
                     id: 'Apis.Details.NewVersion.NewVersion.success',
-                    defaultMessage: 'Successfully created new version',
+                    defaultMessage: 'Successfully created new version ',
                 }) + newVersion);
             })
             .catch((error) => {
@@ -221,7 +221,7 @@ class CreateNewVersion extends React.Component {
     render() {
         const { classes, api } = this.props;
         const {
-            isDefaultVersion, newVersion, redirectToReferrer, apiId, valid,
+            isDefaultVersion, newVersion, redirectToReferrer, apiId, valid, serviceVersion, versionList,
         } = this.state;
         if (redirectToReferrer) {
             return <Redirect to={'/apis/' + apiId + '/overview'} />;
@@ -300,8 +300,8 @@ class CreateNewVersion extends React.Component {
                                             margin='dense'
                                             variant='outlined'
                                         >
-                                            {this.state.versionList && this.state.versionList.map((item) => (
-                                                <MenuItem key={item}>
+                                            {versionList && versionList.map((item) => (
+                                                <MenuItem value={item}>
                                                     {item}
                                                 </MenuItem>
                                             ))}
@@ -367,7 +367,7 @@ class CreateNewVersion extends React.Component {
                                                     color='primary'
                                                     id='createBtn'
                                                     onClick={() => this.handleSubmit(api, newVersion, isDefaultVersion,
-                                                        this.state.serviceVersion)}
+                                                        serviceVersion)}
                                                     disabled={
                                                         valid.version.empty
                                                         || valid.version.alreadyExists
@@ -414,4 +414,4 @@ CreateNewVersion.propTypes = {
     }).isRequired,
 };
 
-export default withAPI(withStyles(styles)(CreateNewVersion));
+export default injectIntl(withAPI(withStyles(styles)(CreateNewVersion)));

@@ -193,7 +193,7 @@ export default function ServiceCard(props) {
                                 serviceDisplayName={service.name}
                                 serviceKey={service.serviceKey}
                                 definitionType={service.definitionType}
-                                serviceVersion={service.serviceVersion}
+                                serviceVersion={service.version}
                                 serviceUrl={service.serviceUrl}
                             />
                             <DeleteServiceButton
