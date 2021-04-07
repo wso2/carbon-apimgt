@@ -163,17 +163,12 @@ public class ExtensionListenerUtil {
         requestDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestDTO.setMsgInfo(msgInfoDTO);
         requestDTO.setCustomProperty(getCustomPropertyMapFromMsgContext(messageContext));
-        org.apache.axis2.context.MessageContext axis2MC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Object sslCertsObject = axis2MC.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+
         javax.security.cert.X509Certificate[] clientCerts = null;
-        if (sslCertsObject != null) {
-            clientCerts = (X509Certificate[]) sslCertsObject;
-        }
 
         // If client certificate is sent via header give it priority over the transport level cert
         try {
-            X509Certificate clientCertificateFromHeader = Utils.getClientCertificateFromHeader(
+            X509Certificate clientCertificateFromHeader = Utils.getClientCertificate(
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext());
 
             if (clientCertificateFromHeader != null) {
