@@ -1163,6 +1163,18 @@
         {% endif %}
      </MutualSSL>
 
+     <GlobalCacheInvalidation>
+             <Enabled>{{apim.cache_invalidation.enabled}}</Enabled>
+             <Domain>{{apim.cache_invalidation.domain}}</Domain>
+             <Stream>{{apim.cache.invalidation.stream}}</Stream>
+             <Topic>{{apim.cache_invalidation.topic_name}}</Topic>
+             <ExcludedCaches>
+               {%- for cache in apim.cache_invalidation.excluded_caches -%}
+               <Cache>{{cache}}</Cache>
+               {% endfor %}
+              </ExcludedCaches>
+     </GlobalCacheInvalidation>
+
      <EventHubConfigurations>
         <Enable>{{apim.event_hub.enable}}</Enable>
         {% if apim.event_hub.username is defined %}
