@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 import React, { useReducer, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import { withRouter } from 'react-router';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
