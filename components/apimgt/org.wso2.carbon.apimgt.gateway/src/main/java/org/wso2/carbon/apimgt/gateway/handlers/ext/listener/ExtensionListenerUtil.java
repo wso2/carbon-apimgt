@@ -166,16 +166,15 @@ public class ExtensionListenerUtil {
 
         javax.security.cert.X509Certificate[] clientCerts = null;
 
-        // If client certificate is sent via header give it priority over the transport level cert
         try {
-            X509Certificate clientCertificateFromHeader = Utils.getClientCertificate(
+            X509Certificate clientCertificate = Utils.getClientCertificate(
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext());
 
-            if (clientCertificateFromHeader != null) {
-                clientCerts = new X509Certificate[]{clientCertificateFromHeader};
+            if (clientCertificate != null) {
+                clientCerts = new X509Certificate[]{clientCertificate};
             }
         } catch (APIManagementException e) {
-            log.error("Error when getting client certificate from header", e);
+            log.error("Error when getting client certificate", e);
         }
         requestDTO.setClientCerts(clientCerts);
         return requestDTO;

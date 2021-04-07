@@ -423,10 +423,10 @@ public class Utils {
 
     public static X509Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
-        X509Certificate validatedCert = (X509Certificate) axis2MessageContext.
-                                                getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
+        Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
+
         if (validatedCert != null) {
-            return validatedCert;
+            return (X509Certificate) validatedCert;
         } else {
             Map headers =
                     (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
@@ -435,6 +435,7 @@ public class Utils {
             if (sslCertObject != null) {
                 X509Certificate[] certs = (X509Certificate[]) sslCertObject;
                 certificateFromMessageContext = certs[0];
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificateFromMessageContext);
             }
             if (headers.containsKey(Utils.getClientCertificateHeader())) {
                 try {
@@ -442,6 +443,7 @@ public class Utils {
                             .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
                         X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
                         if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
+                            // If valid client certificate is sent via header give it priority over the transport level cert
                             axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
                             return x509Certificate;
                         } else {
@@ -456,9 +458,6 @@ public class Utils {
                 }
             }
 
-            if (certificateFromMessageContext != null) {
-                axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificateFromMessageContext);
-            }
             return certificateFromMessageContext;
         }
     }
