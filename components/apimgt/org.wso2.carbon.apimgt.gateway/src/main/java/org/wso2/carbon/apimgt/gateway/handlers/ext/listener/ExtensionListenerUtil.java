@@ -227,7 +227,7 @@ public class ExtensionListenerUtil {
         //Add a payload handler instance for the current message context to consume the payload later
         msgInfoDTO.setPayloadHandler(new SynapsePayloadHandler(messageContext));
         Object correlationId = axis2MC.getProperty(CorrelationConstants.CORRELATION_ID);
-        if (correlationId instanceof String){
+        if (correlationId instanceof String) {
             msgInfoDTO.setMessageId((String) correlationId);
         }
         msgInfoDTO.setHttpMethod((String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD));
@@ -278,6 +278,7 @@ public class ExtensionListenerUtil {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
+        String contentLength = getAxis2TransportHeaders(axis2MC).get(APIConstants.HEADER_CONTENT_LENGTH);
         String contentType = getAxis2TransportHeaders(axis2MC).get(APIConstants.HEADER_CONTENT_TYPE);
         if (extensionResponseDTO.getPayload() != null && contentType != null) {
             // if payload null, not modifying existing payload
@@ -301,6 +302,9 @@ public class ExtensionListenerUtil {
             } catch (IOException | XMLStreamException e) {
                 log.error("Error while setting payload " + axis2MC.getLogIDString(), e);
             }
+        } else if ((extensionResponseDTO.getPayload() == null && contentLength != null &&
+                Integer.parseInt(contentLength) == 0)) {
+            axis2MC.setProperty(APIConstants.NO_ENTITY_BODY, true);
         }
     }
 
