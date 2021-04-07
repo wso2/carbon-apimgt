@@ -55,6 +55,7 @@ import java.util.Map;
  * An Utility class for policy deploy operations.
  */
 public class PolicyUtil {
+
     private static final Log log = LogFactory.getLog(PolicyUtil.class);
 
     /**
@@ -64,6 +65,7 @@ public class PolicyUtil {
      * @param policyEvent policy event object which was triggered
      */
     public static void deployPolicy(Policy policy, PolicyEvent policyEvent) {
+
         EventProcessorService eventProcessorService =
                 ServiceReferenceHolder.getInstance().getEventProcessorService();
         ThrottlePolicyTemplateBuilder policyTemplateBuilder = new ThrottlePolicyTemplateBuilder();
@@ -156,15 +158,25 @@ public class PolicyUtil {
             // Deploy all the policies retrieved from the database
             SubscriptionPolicyList subscriptionPolicies = policyRetriever.getAllSubscriptionPolicies();
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
+                if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
+                        || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.
+                        equalsIgnoreCase(subscriptionPolicy.getName())
+                        || APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED.
+                        equalsIgnoreCase(subscriptionPolicy.getName()))) {
                     deployPolicy(subscriptionPolicy, null);
+                }
             }
             ApplicationPolicyList applicationPolicies = policyRetriever.getAllApplicationPolicies();
             for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {
-                deployPolicy(applicationPolicy, null);
+                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(applicationPolicy.getName())) {
+                    deployPolicy(applicationPolicy, null);
+                }
             }
             ApiPolicyList apiPolicies = policyRetriever.getAllApiPolicies();
             for (ApiPolicy apiPolicy : apiPolicies.getList()) {
-                deployPolicy(apiPolicy, null);
+                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiPolicy.getName())) {
+                    deployPolicy(apiPolicy, null);
+                }
             }
             GlobalPolicyList globalPolicies = policyRetriever.getAllGlobalPolicies();
             for (GlobalPolicy globalPolicy : globalPolicies.getList()) {
@@ -179,6 +191,7 @@ public class PolicyUtil {
      * Undeploy all the throttle policies in the Traffic Manager except the excluded ones.
      */
     private static void undeployAllPolicies() {
+
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         EventProcessorService eventProcessorService =
@@ -217,6 +230,7 @@ public class PolicyUtil {
      * @param policyEvent subscription policy event object which was triggered
      */
     public static void undeployPolicy(SubscriptionPolicyEvent policyEvent) {
+
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB + "_" +
                 policyEvent.getPolicyName();
@@ -230,6 +244,7 @@ public class PolicyUtil {
      * @param policyEvent application policy event object which was triggered
      */
     public static void undeployPolicy(ApplicationPolicyEvent policyEvent) {
+
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP + "_" +
                 policyEvent.getPolicyName();
@@ -243,6 +258,7 @@ public class PolicyUtil {
      * @param policyEvent API policy event object which was triggered
      */
     public static void undeployPolicy(APIPolicyEvent policyEvent) {
+
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = policyEvent.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_RESOURCE + "_" +
                 policyEvent.getPolicyName();
@@ -259,6 +275,7 @@ public class PolicyUtil {
      * @param policyEvent global policy event object which was triggered
      */
     public static void undeployPolicy(GlobalPolicyEvent policyEvent) {
+
         List<String> policyFileNames = new ArrayList<>();
         String policyFile = PolicyConstants.POLICY_LEVEL_GLOBAL + "_" +
                 policyEvent.getPolicyName();
@@ -272,6 +289,7 @@ public class PolicyUtil {
      * @param policyFileNames list of policy file names
      */
     private static void undeployPolicies(List<String> policyFileNames) {
+
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().
