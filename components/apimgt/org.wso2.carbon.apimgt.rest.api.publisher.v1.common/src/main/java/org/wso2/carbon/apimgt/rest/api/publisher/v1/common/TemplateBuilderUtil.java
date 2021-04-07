@@ -217,6 +217,8 @@ public class TemplateBuilderUtil {
                     APIConstants.WebHookProperties.DEFAULT_TOPIC_QUERY_PARAM_NAME);
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook.WebhookApiHandler",
                     authProperties);
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook." +
+                    "WebhooksExtensionHandler", Collections.emptyMap());
         } else if (APIConstants.APITransportType.SSE.toString().equals(api.getType())) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiHandler",
                     authProperties);
