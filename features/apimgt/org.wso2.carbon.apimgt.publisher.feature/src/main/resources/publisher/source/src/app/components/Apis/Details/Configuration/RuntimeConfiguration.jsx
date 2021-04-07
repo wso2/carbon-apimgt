@@ -293,6 +293,7 @@ export default function RuntimeConfiguration() {
     const { api, updateAPI } = useContext(APIContext);
     const history = useHistory();
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
+    const isNonWebSubAsyncAPI = api.type === 'WS' || api.type === 'SSE';
     const isWebSub = api.type === 'WEBSUB';
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
@@ -514,29 +515,52 @@ export default function RuntimeConfiguration() {
                                 </Paper>
                                 <ArrowForwardIcon className={classes.arrowForwardIcon} />
                             </Grid>
-                            { !isAsyncAPI && (
+                            { !isNonWebSubAsyncAPI && (
                                 <>
                                     <Typography className={classes.heading} variant='h6'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.section.response'
-                                            defaultMessage='Response'
-                                        />
+                                        {api.type !== 'WEBSUB' ? (
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.Configuration.section.response'
+                                                defaultMessage='Response'
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.Configuration.section.events'
+                                                defaultMessage='Events'
+                                            />
+                                        )}
+
                                     </Typography>
                                     <Grid item xs={12} style={{ position: 'relative' }}>
                                         <Box mb={3}>
                                             <Paper className={classes.paper} elevation={0}>
                                                 {!api.isAPIProduct() && (
                                                     <Box mb={3}>
-                                                        <Flow
-                                                            api={apiConfig}
-                                                            type='OUT'
-                                                            updateMediationPolicy={updateOutMediationPolicy}
-                                                            selectedMediationPolicy={outPolicy}
-                                                            isRestricted={isRestricted(['apim:api_create'], api)}
-                                                        />
+                                                        {api.type === 'WEBSUB' ? (
+                                                            <Flow
+                                                                api={apiConfig}
+                                                                type='IN'
+                                                                updateMediationPolicy={updateInMediationPolicy}
+                                                                selectedMediationPolicy={inPolicy}
+                                                                isRestricted={isRestricted(['apim:api_create'], api)}
+                                                            />
+                                                        ) : (
+                                                            <Flow
+                                                                api={apiConfig}
+                                                                type='OUT'
+                                                                updateMediationPolicy={updateOutMediationPolicy}
+                                                                selectedMediationPolicy={outPolicy}
+                                                                isRestricted={isRestricted(['apim:api_create'], api)}
+                                                            />
+                                                        )}
                                                     </Box>
                                                 )}
-                                                <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
+                                                {!isAsyncAPI && (
+                                                    <ResponseCaching
+                                                        api={apiConfig}
+                                                        configDispatcher={configDispatcher}
+                                                    />
+                                                )}
                                             </Paper>
                                             <ArrowBackIcon className={classes.arrowBackIcon} />
                                         </Box>
