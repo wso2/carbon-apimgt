@@ -54,6 +54,9 @@ class AsyncApiDefinitionUI extends Component {
 
     render() {
         const { classes } = this.props;
+        // Avoid rendering the 'servers' portion from the AsyncAPI definition.
+        const asyncApiDefinition = JSON.parse(this.context.api.apiDefinition);
+        delete asyncApiDefinition.servers;
         return (
             <>
                 <Typography variant='h4' className={classes.titleSub}>
@@ -64,7 +67,7 @@ class AsyncApiDefinitionUI extends Component {
                 </Typography>
                 <Grid container spacing={1} className={classes.editorRoot}>
                     <Grid item className={classes.editorPane}>
-                        <AsyncApiComponent schema={this.context.api.apiDefinition} />
+                        <AsyncApiComponent schema={JSON.stringify(asyncApiDefinition)} />
                     </Grid>
                 </Grid>
             </>

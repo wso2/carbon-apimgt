@@ -113,6 +113,8 @@ const DefaultConfigurations = {
             options: '#5f7c8a',
             patch: '#785446',
             head: '#785446',
+            sub: '#38a169',
+            pub: '#4299e1',
         },
         operationChipColor: {
             query: '#b3e6fe',
