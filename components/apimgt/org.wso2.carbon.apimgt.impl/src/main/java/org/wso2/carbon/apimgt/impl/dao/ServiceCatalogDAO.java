@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +35,10 @@ import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -331,8 +336,6 @@ public class ServiceCatalogDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ServiceEntry serviceEntry = getServiceParams(rs, false);
-                    serviceEntry.setEndpointDef(rs.getBinaryStream(APIConstants.ServiceCatalogConstants
-                            .SERVICE_DEFINITION));
                     return serviceEntry;
                 }
             }
@@ -461,8 +464,10 @@ public class ServiceCatalogDAO {
         String[] keyArray = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
-            if (driverName.contains("Oracle")) {
+            if (driverName.contains("Oracle") || driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
                 querySb.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+            } else if (driverName.contains("PostgreSQL")) {
+                querySb.append(" OFFSET ? LIMIT ? ");
             } else {
                 querySb.append(" LIMIT ?, ?");
             }
@@ -733,12 +738,18 @@ public class ServiceCatalogDAO {
                         .LAST_UPDATED_TIME));
                 service.setCreatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.CREATED_BY));
                 service.setUpdatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.UPDATED_BY));
-                service.setEndpointDef(resultSet.getBinaryStream(APIConstants.ServiceCatalogConstants
-                        .SERVICE_DEFINITION));
+                InputStream serviceDefinition = resultSet.getBinaryStream(APIConstants.ServiceCatalogConstants
+                        .SERVICE_DEFINITION);
+                ByteArrayOutputStream serviceDefinitionByteArray = new ByteArrayOutputStream();
+                IOUtils.copy(serviceDefinition, serviceDefinitionByteArray);
+                service.setEndpointDef(new ByteArrayInputStream(serviceDefinitionByteArray.toByteArray()));
             }
             return service;
         } catch (SQLException e) {
             handleException("Error while setting service parameters", e);
+            return null;
+        } catch (IOException e) {
+            handleException("Error when reading the file content", e);
             return null;
         }
     }
