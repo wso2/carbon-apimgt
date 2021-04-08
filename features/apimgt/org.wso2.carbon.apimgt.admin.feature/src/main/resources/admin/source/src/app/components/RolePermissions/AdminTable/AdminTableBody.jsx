@@ -24,6 +24,16 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import { useTableContext } from './AdminTableContext';
 
+/**
+ *
+ * @param {*} role
+ * @returns
+ */
+function extractRoleName(role) {
+    return typeof role[0] === 'string'
+        ? role[0].toUpperCase()
+        : role[0].props.children[0].toUpperCase();
+}
 
 /**
  *
@@ -34,11 +44,16 @@ import { useTableContext } from './AdminTableContext';
  * @returns
  */
 function descendingComparator(a, b, orderBy) {
-    if (b[orderBy] < a[orderBy]) {
-        return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-        return 1;
+    if (orderBy === 'role') {
+        const roleA = extractRoleName(a, orderBy);
+        const roleB = extractRoleName(b, orderBy);
+        if (roleB < roleA) {
+            return -1;
+        }
+        if (roleB > roleA) {
+            return 1;
+        }
+        return 0;
     }
     return 0;
 }
@@ -106,7 +121,6 @@ function AdminTableBody(props) {
         setSelected(newSelected);
     };
     const isSelected = (name) => selected.indexOf(name) !== -1;
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
     return (
         <TableBody>
@@ -148,11 +162,6 @@ function AdminTableBody(props) {
                         </TableRow>
                     );
                 })}
-            {emptyRows > 0 && (
-                <TableRow style={{ height: 60 * emptyRows }}>
-                    <TableCell colSpan={6} />
-                </TableRow>
-            )}
         </TableBody>
     );
 }
