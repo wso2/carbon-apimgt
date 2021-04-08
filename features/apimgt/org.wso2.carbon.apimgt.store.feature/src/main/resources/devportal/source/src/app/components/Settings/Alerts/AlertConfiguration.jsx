@@ -440,7 +440,7 @@ const AlertConfiguration = (props) => {
                                             <TableCell>{configuration.configuration.apiName}</TableCell>
                                             <TableCell>{configuration.configuration.apiVersion}</TableCell>
                                             <TableCell>{configuration.configuration.applicationName.includes('deleted')?
-                                            'deleted':configuration.configuration.applicationName}</TableCell>
+                                            'Deleted':configuration.configuration.applicationName}</TableCell>
                                             <TableCell>
                                                 {configuration.configuration[alertPropertyMap[alertType]]}
                                             </TableCell>
