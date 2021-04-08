@@ -147,11 +147,11 @@ public class SQLConstantsMSSQL extends SQLConstants{
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND (" +
                     "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
-                    " IN ($params) AND TENANT = ? ))" +
+                    " COLLATE Latin1_General_CS_AS IN ($params) AND TENANT = ? ))" +
                     "           OR " +
                     "    (LOWER (SUB.USER_ID) = LOWER(?))" +
                     "           OR " +
-                    "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ?))" +
+                    "    (APP.APPLICATION_ID IN (SELECT APPLICATION_ID FROM AM_APPLICATION WHERE GROUP_ID = ? COLLATE Latin1_General_CS_AS))" +
                     " )" +
                     " And " +
                     "    NAME like ?"+
