@@ -439,7 +439,8 @@ const AlertConfiguration = (props) => {
                                         <TableRow id={configuration.configurationId} key={configuration.configurationId}>
                                             <TableCell>{configuration.configuration.apiName}</TableCell>
                                             <TableCell>{configuration.configuration.apiVersion}</TableCell>
-                                            <TableCell>{configuration.configuration.applicationName}</TableCell>
+                                            <TableCell>{configuration.configuration.applicationName.includes('deleted')?
+                                            'Deleted':configuration.configuration.applicationName}</TableCell>
                                             <TableCell>
                                                 {configuration.configuration[alertPropertyMap[alertType]]}
                                             </TableCell>
