@@ -164,14 +164,14 @@ function Environments(props) {
     return (
         <Box display='flex' flexDirection='column' width='100%'>
             <Box mr={5} display='flex' alignItems='center' width='100%' flexDirection='row'>
-                <Typography variant='subtitle2' gutterBottom align='left' className={classes.sectionTitle}>
-                    <FormattedMessage
-                        id='Apis.Details.Environments.label.url'
-                        defaultMessage='URL'
-                    />
-                </Typography>
                 {selectedEndpoint && (
                     <>
+                        <Typography variant='subtitle2' gutterBottom align='left' className={classes.sectionTitle}>
+                            <FormattedMessage
+                                id='Apis.Details.Environments.label.url'
+                                defaultMessage='URL'
+                            />
+                        </Typography>
                         <Paper component='form' className={classes.root}>
                             {api.endpointURLs.length > 1 && (
                                 <>
@@ -230,10 +230,18 @@ function Environments(props) {
                         </Paper>
                     </>
                 )}
+                {!selectedEndpoint && (api.lifeCycleStatus !== 'PROTOTYPED') && (
+                    <Typography variant='subtitle2' gutterBottom align='left' className={classes.sectionTitle}>
+                        <FormattedMessage
+                            id='Apis.Details.Environments.label.noendpoint'
+                            defaultMessage='No endpoints yet.'
+                        />
+                    </Typography>
+                )}
                 <GoToTryOut />
             </Box>
             <Box ml={8} alignItems='center' mt={1}>
-                {getDefaultVersionUrl() && (
+                {selectedEndpoint && (
                     <Typography variant='caption'>
                         {getDefaultVersionUrl()}
                     </Typography>

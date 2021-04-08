@@ -139,7 +139,7 @@ export default class User {
      * Check whether the current user has admin role or not
      */
      isAdmin() {
-        return this.scopes.includes('apim:app_import_export');
+        return this.scopes.includes('apim:admin');
     }
 }
 
