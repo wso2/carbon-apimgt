@@ -10981,6 +10981,23 @@ components:
         displayName:
           type: string
           example: default
+        endpointURIs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThirdPartyEnvironmentProtocolURI'
+    ThirdPartyEnvironmentProtocolURI:
+      title: ThirdParty Environment protocols and URIs
+      required:
+        - protocol
+        - endpointURI
+      type: object
+      properties:
+        protocol:
+          type: string
+          example: default
+        endpointURI:
+          type: string
+          example: default
     ThirdPartyEnvironmentList:
       title: ThirdParty EnvironmentList
       type: object

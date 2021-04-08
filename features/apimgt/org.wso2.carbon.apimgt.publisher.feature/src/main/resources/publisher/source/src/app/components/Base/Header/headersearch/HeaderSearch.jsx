@@ -337,12 +337,6 @@ class HeaderSearch extends React.Component {
                                 </li>
                                 <li style={{ marginTop: '5px' }}>
                                     <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option9'
-                                        defaultMessage='Microgateway Label [ Syntax - label:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option10'
                                         defaultMessage='Properties [Syntax - property_name:property_value]'
                                     />

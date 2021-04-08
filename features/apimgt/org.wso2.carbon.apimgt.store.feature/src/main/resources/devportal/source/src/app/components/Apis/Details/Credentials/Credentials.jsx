@@ -342,8 +342,8 @@ class Credentials extends React.Component {
         && !api.securityScheme.includes('api_key') && !api.securityScheme.includes('basic_auth');
         const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2')
          && !api.securityScheme.includes('api_key');
+        const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
         const renderCredentialInfo = () => {
-            const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
             if (isPrototypedAPI) {
                 return (
                     <>
@@ -571,7 +571,7 @@ class Credentials extends React.Component {
                                 />
                                 {applicationsAvailable.length > 0 && (
                                     <Link
-                                        to={(isOnlyMutualSSL || isOnlyBasicAuth) ? null
+                                        to={(isOnlyMutualSSL || isOnlyBasicAuth || isPrototypedAPI) ? null
                                             : `/apis/${api.id}/credentials/wizard`}
                                         style={!api.isSubscriptionAvailable
                                             ? { pointerEvents: 'none' } : null}
@@ -580,7 +580,7 @@ class Credentials extends React.Component {
                                         <Button
                                             color='secondary'
                                             disabled={!api.isSubscriptionAvailable || isOnlyMutualSSL
-                                                 || isOnlyBasicAuth}
+                                                 || isOnlyBasicAuth || isPrototypedAPI}
                                             size='small'
                                         >
                                             <Icon>add_circle_outline</Icon>
