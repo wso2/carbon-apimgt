@@ -640,6 +640,7 @@ public class ServiceCatalogDAO {
             String serviceKey = getServiceKeyByUUID(serviceId, tenantId, connection);
             if (StringUtils.isNotEmpty(serviceKey)) {
                 ps.setString(1, serviceKey);
+                ps.setInt(2, tenantId);
                 try (ResultSet resultSet = ps.executeQuery()) {
                     while (resultSet.next()) {
                         String provider = resultSet.getString(APIConstants.FIELD_API_PUBLISHER);

@@ -3516,7 +3516,7 @@ public class SQLConstants {
                 "   AM_API.API_PROVIDER " +
                 "   FROM AM_API INNER JOIN AM_API_SERVICE_MAPPING ON " +
                 "   AM_API_SERVICE_MAPPING.API_ID = AM_API.API_ID " +
-                "   WHERE SERVICE_KEY = ?";
+                "   WHERE SERVICE_KEY = ? AND TENANT_ID = ?";
 
         public static final String GET_SERVICE_KEY_BY_SERVICE_UUID = "SELECT SERVICE_KEY FROM AM_SERVICE_CATALOG WHERE" +
                 "   UUID = ? AND TENANT_ID = ?";
