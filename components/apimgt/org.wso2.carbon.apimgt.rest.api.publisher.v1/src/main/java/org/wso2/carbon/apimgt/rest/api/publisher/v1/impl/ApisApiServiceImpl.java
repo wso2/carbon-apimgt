@@ -3707,9 +3707,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                             existingAPI.getId().getApiName()));
             }
             if (StringUtils.isNotEmpty(serviceVersion)) {
+                String serviceName = existingAPI.getServiceInfo("name");
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                String serviceKey = apiProvider.retrieveServiceKeyByApiId(existingAPI.getId().getId(), tenantId);
-                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+                ServiceEntry service = serviceCatalog.getServiceByNameAndVersion(serviceName, serviceVersion, tenantId);
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
