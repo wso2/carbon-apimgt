@@ -148,7 +148,8 @@ export default function Topics(props) {
 
         switch (action) {
             case 'init':
-                return data;
+                setSelectedOperation({});
+                return data || asyncAPISpec.channels;
             case 'description':
                 updatedOperation[action] = value;
                 return {
