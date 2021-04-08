@@ -71,6 +71,9 @@
             </list>
         </property>
         <property name="allowCredentials" value="true" />
+        <property name="allowOrigins"
+                  value="#{systemProperties['rest.api.publisher.allowed.origins'] != null ?
+                      systemProperties['rest.api.publisher.allowed.origins'].split(',') : {}}"/>
     </bean>
 
     <!-- Out interceptors -->
