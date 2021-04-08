@@ -26,13 +26,18 @@ import java.util.Objects;
  */
 public class SubscriptionEvent extends Event {
     private int subscriptionId;
+    private String subscriptionUUID;
     private int apiId;
+    private String apiUUID;
     private int applicationId;
+    private String applicationUUID;
     private String policyId;
     private String subscriptionState;
 
     public SubscriptionEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
-            int subscriptionId, int apiId, int applicationId, String policyId, String subscriptionState) {
+                             int subscriptionId, int apiId, String apiUUID, int applicationId, String applicationUUID,
+                             String policyId, String subscriptionState) {
+
         this.eventId = eventId;
         this.timeStamp = timestamp;
         this.type = type;
@@ -43,6 +48,8 @@ public class SubscriptionEvent extends Event {
         this.policyId = policyId;
         this.subscriptionState = subscriptionState;
         this.tenantDomain = tenantDomain;
+        this.applicationUUID = applicationUUID;
+        this.apiUUID = apiUUID;
     }
 
     @Override
@@ -116,5 +123,40 @@ public class SubscriptionEvent extends Event {
 
     public void setSubscriptionState(String subscriptionState) {
         this.subscriptionState = subscriptionState;
+    }
+
+    public String getSubscriptionUUID() {
+
+        return subscriptionUUID;
+    }
+
+    public void setSubscriptionUUID(String subscriptionUUID) {
+
+        this.subscriptionUUID = subscriptionUUID;
+    }
+
+    public void setApiId(int apiId) {
+
+        this.apiId = apiId;
+    }
+
+    public String getApiUUID() {
+
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+
+        this.apiUUID = apiUUID;
+    }
+
+    public String getApplicationUUID() {
+
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+
+        this.applicationUUID = applicationUUID;
     }
 }

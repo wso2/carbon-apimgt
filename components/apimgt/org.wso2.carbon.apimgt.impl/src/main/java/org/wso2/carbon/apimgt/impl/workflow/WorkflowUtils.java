@@ -111,8 +111,8 @@ public class WorkflowUtils {
                     UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), appRegWFDto.getTenantId(),
                     appRegWFDto.getTenantDomain(), appRegWFDto.getApplication().getId(),
-                    appRegWFDto.getApplicationInfo().getClientId(), appRegWFDto.getApplication().getTokenType(),
-                    appRegWFDto.getKeyManager());
+                    appRegWFDto.getApplication().getUUID(), appRegWFDto.getApplicationInfo().getClientId(),
+                    appRegWFDto.getApplication().getTokenType(), appRegWFDto.getKeyManager());
             APIUtil.sendNotification(applicationRegistrationEvent,
                     APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equalsIgnoreCase(wfType)) {
@@ -121,8 +121,8 @@ public class WorkflowUtils {
                     UUID.randomUUID().toString(), System.currentTimeMillis(),
                     APIConstants.EventType.APPLICATION_REGISTRATION_CREATE.name(), appRegWFDto.getTenantId(),
                     appRegWFDto.getTenantDomain(), appRegWFDto.getApplication().getId(),
-                    appRegWFDto.getApplicationInfo().getClientId(), appRegWFDto.getApplication().getTokenType(),
-                    appRegWFDto.getKeyManager());
+                    appRegWFDto.getApplication().getUUID(), appRegWFDto.getApplicationInfo().getClientId(),
+                    appRegWFDto.getApplication().getTokenType(), appRegWFDto.getKeyManager());
             APIUtil.sendNotification(applicationRegistrationEvent,
                     APIConstants.NotifierType.APPLICATION_REGISTRATION.name());
         }

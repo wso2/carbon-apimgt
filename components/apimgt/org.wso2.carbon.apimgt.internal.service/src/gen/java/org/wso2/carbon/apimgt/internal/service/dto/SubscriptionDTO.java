@@ -16,11 +16,31 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 public class SubscriptionDTO   {
   
+    private String subscriptionUUID = null;
     private Integer subscriptionId = null;
     private String policyId = null;
+    private String apiUUID = null;
     private Integer apiId = null;
+    private String applicationUUID = null;
     private Integer appId = null;
     private String subscriptionState = null;
+
+  /**
+   **/
+  public SubscriptionDTO subscriptionUUID(String subscriptionUUID) {
+    this.subscriptionUUID = subscriptionUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscriptionUUID")
+  public String getSubscriptionUUID() {
+    return subscriptionUUID;
+  }
+  public void setSubscriptionUUID(String subscriptionUUID) {
+    this.subscriptionUUID = subscriptionUUID;
+  }
 
   /**
    **/
@@ -58,6 +78,23 @@ public class SubscriptionDTO   {
 
   /**
    **/
+  public SubscriptionDTO apiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("apiUUID")
+  public String getApiUUID() {
+    return apiUUID;
+  }
+  public void setApiUUID(String apiUUID) {
+    this.apiUUID = apiUUID;
+  }
+
+  /**
+   **/
   public SubscriptionDTO apiId(Integer apiId) {
     this.apiId = apiId;
     return this;
@@ -71,6 +108,23 @@ public class SubscriptionDTO   {
   }
   public void setApiId(Integer apiId) {
     this.apiId = apiId;
+  }
+
+  /**
+   **/
+  public SubscriptionDTO applicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("applicationUUID")
+  public String getApplicationUUID() {
+    return applicationUUID;
+  }
+  public void setApplicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
   }
 
   /**
@@ -117,16 +171,19 @@ public class SubscriptionDTO   {
       return false;
     }
     SubscriptionDTO subscription = (SubscriptionDTO) o;
-    return Objects.equals(subscriptionId, subscription.subscriptionId) &&
+    return Objects.equals(subscriptionUUID, subscription.subscriptionUUID) &&
+        Objects.equals(subscriptionId, subscription.subscriptionId) &&
         Objects.equals(policyId, subscription.policyId) &&
+        Objects.equals(apiUUID, subscription.apiUUID) &&
         Objects.equals(apiId, subscription.apiId) &&
+        Objects.equals(applicationUUID, subscription.applicationUUID) &&
         Objects.equals(appId, subscription.appId) &&
         Objects.equals(subscriptionState, subscription.subscriptionState);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(subscriptionId, policyId, apiId, appId, subscriptionState);
+    return Objects.hash(subscriptionUUID, subscriptionId, policyId, apiUUID, apiId, applicationUUID, appId, subscriptionState);
   }
 
   @Override
@@ -134,9 +191,12 @@ public class SubscriptionDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class SubscriptionDTO {\n");
     
+    sb.append("    subscriptionUUID: ").append(toIndentedString(subscriptionUUID)).append("\n");
     sb.append("    subscriptionId: ").append(toIndentedString(subscriptionId)).append("\n");
     sb.append("    policyId: ").append(toIndentedString(policyId)).append("\n");
+    sb.append("    apiUUID: ").append(toIndentedString(apiUUID)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
+    sb.append("    applicationUUID: ").append(toIndentedString(applicationUUID)).append("\n");
     sb.append("    appId: ").append(toIndentedString(appId)).append("\n");
     sb.append("    subscriptionState: ").append(toIndentedString(subscriptionState)).append("\n");
     sb.append("}");
