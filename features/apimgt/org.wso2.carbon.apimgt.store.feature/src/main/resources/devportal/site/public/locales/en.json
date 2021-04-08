@@ -357,7 +357,6 @@
   "Base.Header.headersearch.HeaderSearch.tooltip.option5": "By Description [ Syntax - description:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.option6": "By Tags [ Syntax - tags:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.option8": "By Documentation Content [ Syntax - doc:xxxx ]",
-  "Base.Header.headersearch.HeaderSearch.tooltip.option9": "By Gateway Label [ Syntax - label:xxxx ]",
   "Base.Header.headersearch.HeaderSearch.tooltip.title": "Search Options",
   "Base.Header.headersearch.SearchUtils.lcState.all": "All",
   "Base.Header.headersearch.SearchUtils.lcState.prototyped": "Prototyped",
