@@ -43,6 +43,9 @@ public class AlertsMappingUtil {
         AlertConfigDTO alertConfigDTO = new AlertConfigDTO();
         String applicationId = configProperties.get("applicationId");
         String applicationName = SubscriberAlertsAPIUtils.getApplicationNameById(Integer.parseInt(applicationId));
+        if (applicationName == null) {
+            applicationName = "deleted: " + applicationId;
+        }
         configProperties.remove("applicationId");
         configProperties.put("applicationName", applicationName);
         alertConfigDTO.setConfiguration(configProperties);
@@ -81,7 +84,14 @@ public class AlertsMappingUtil {
         Map<String, String> configMap = new HashMap<>();
         configMap.put("apiName", parameters[0]);
         configMap.put("apiVersion", parameters[1]);
-        configMap.put("applicationId", String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(parameters[2])));
+        String applicationName = parameters[2];
+        String appId = null;
+        if (applicationName.contains("deleted: ")) {
+            appId = applicationName.substring(9);
+        } else {
+            appId = String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(applicationName));
+        }
+        configMap.put("applicationId", appId);
         return configMap;
     }
 
@@ -109,8 +119,13 @@ public class AlertsMappingUtil {
             throws APIManagementException {
         Map<String, String> configMap = new HashMap<>(alertConfigDTO.getConfiguration());
         String applicationName = configMap.get("applicationName");
-        configMap.put("applicationId",
-                String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(applicationName)));
+        String appId = null;
+        if (applicationName.contains("deleted: ")) {
+            appId = applicationName.substring(9);
+        } else {
+            appId = String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(applicationName));
+        }
+        configMap.put("applicationId", appId);
         configMap.remove("applicationName");
         return configMap;
     }
@@ -125,8 +140,13 @@ public class AlertsMappingUtil {
             throws APIManagementException {
         Map<String, String> configMap = new HashMap<>(alertConfigInfoDTO);
         String applicationName = configMap.get("applicationName");
-        configMap.put("applicationId",
-                String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(applicationName)));
+        String appId = null;
+        if (applicationName.contains("deleted: ")) {
+            appId = applicationName.substring(9);
+        } else {
+            appId = String.valueOf(SubscriberAlertsAPIUtils.getApplicationIdByName(applicationName));
+        }
+        configMap.put("applicationId", appId);
         configMap.remove("applicationName");
         return configMap;
     }

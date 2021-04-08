@@ -70,7 +70,7 @@ public class AdminAlertConfigurator extends AlertConfigurator {
                         + "ApimAlertStakeholderInfo.isPublisher = isPublisher, "
                         + "ApimAlertStakeholderInfo.isAdmin = isAdmin on "
                         + "ApimAlertStakeholderInfo.userId == userId and "
-                        + "ApimAlertStakeholderInfo.isPublisher == isPublisher";
+                        + "ApimAlertStakeholderInfo.isAdmin == isAdmin";
         APIUtil.executeQueryOnStreamProcessor(AlertMgtConstants.APIM_STAKEHOLDER_ALERT_APP, query);
         //Persist the alert subscription in database
         apiMgtDAO.addAlertTypesConfigInfo(userName, emails, alertTypesMap.get("ids"),

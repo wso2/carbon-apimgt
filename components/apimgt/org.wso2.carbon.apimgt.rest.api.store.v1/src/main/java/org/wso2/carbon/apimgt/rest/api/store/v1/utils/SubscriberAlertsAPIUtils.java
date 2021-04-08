@@ -73,19 +73,6 @@ public class SubscriberAlertsAPIUtils {
                     "The configuration id validation failed. Should be {apiName}#{apiVersion}#{applicationName}",
                     log);
         }
-
-        try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
-            if (!apiConsumer.isApiNameExist(parameters[0])) {
-                RestApiUtil.handleBadRequest("Invalid API Name", log);
-            }
-            Application application = apiConsumer.getApplicationsByName(userName, parameters[2], null);
-            if (application == null) {
-                RestApiUtil.handleBadRequest("Invalid Application Name", log);
-            }
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while validating payload", e, log);
-        }
         return true;
     }
 

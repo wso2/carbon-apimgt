@@ -120,18 +120,6 @@ public class AlertSubscriptionsApiServiceImpl implements AlertSubscriptionsApiSe
             alertTypeDTO.setName(alertDTO.getName());
             alertTypeDTO.setId(alertDTO.getId());
             alertTypesToSubscribe.add(alertTypeDTO);
-            if (alertDTO.getConfiguration().size() > 0) {
-                for (AlertConfigDTO alertConfigDTO : alertDTO.getConfiguration()) {
-                    try {
-                        storeAlertConfigurator
-                                .addAlertConfiguration(userName, alertDTO.getName(),
-                                        AlertsMappingUtil.alertInfoDTOToMap(alertConfigDTO));
-                    } catch (APIManagementException e) {
-                        failedConfigList.add(alertConfigDTO);
-                        log.error("Error while adding alert configuration " + alertConfigDTO.toString());
-                    }
-                }
-            }
         }
         alertsInfoResponseDTO.setFailedConfigurations(failedConfigList);
         try {
