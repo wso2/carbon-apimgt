@@ -484,7 +484,7 @@ export default function Topics(props) {
             <Grid item md={12}>
                 <Paper>
                     {
-                        Object.entries(operations).map(([target, operation]) => (
+                        operations && Object.entries(operations).map(([target, operation]) => (
                             <Grid key={target} item md={12}>
                                 <GroupOfOperations tag={target} operation={operation}>
                                     <Grid
