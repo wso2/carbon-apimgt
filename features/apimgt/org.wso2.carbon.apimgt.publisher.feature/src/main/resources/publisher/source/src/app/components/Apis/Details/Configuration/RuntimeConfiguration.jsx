@@ -513,12 +513,14 @@ export default function RuntimeConfiguration() {
                                         </Box>
                                     )}
                                 </Paper>
-                                <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                                {!isWebSub && (
+                                    <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                                )}
                             </Grid>
                             { !isNonWebSubAsyncAPI && (
                                 <>
                                     <Typography className={classes.heading} variant='h6'>
-                                        {api.type !== 'WEBSUB' ? (
+                                        {!isWebSub ? (
                                             <FormattedMessage
                                                 id='Apis.Details.Configuration.Configuration.section.response'
                                                 defaultMessage='Response'
@@ -536,7 +538,7 @@ export default function RuntimeConfiguration() {
                                             <Paper className={classes.paper} elevation={0}>
                                                 {!api.isAPIProduct() && (
                                                     <Box mb={3}>
-                                                        {api.type === 'WEBSUB' ? (
+                                                        {isWebSub ? (
                                                             <Flow
                                                                 api={apiConfig}
                                                                 type='IN'
@@ -562,7 +564,9 @@ export default function RuntimeConfiguration() {
                                                     />
                                                 )}
                                             </Paper>
-                                            <ArrowBackIcon className={classes.arrowBackIcon} />
+                                            {!isWebSub && (
+                                                <ArrowBackIcon className={classes.arrowBackIcon} />
+                                            )}
                                         </Box>
                                     </Grid>
                                 </>
@@ -591,36 +595,40 @@ export default function RuntimeConfiguration() {
                         </Grid>
                     </Grid>
                     <Grid item xs={12} md={5}>
-                        <Typography className={classes.heading} variant='h6'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.section.backend'
-                                defaultMessage='Backend'
-                            />
-                        </Typography>
-                        <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
-                            {!api.isAPIProduct() && (
-                                <>
-                                    {!isAsyncAPI && (
-                                        <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                        {!isWebSub && (
+                            <>
+                                <Typography className={classes.heading} variant='h6'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.section.backend'
+                                        defaultMessage='Backend'
+                                    />
+                                </Typography>
+                                <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
+                                    {!api.isAPIProduct() && (
+                                        <>
+                                            {!isAsyncAPI && (
+                                                <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                            )}
+                                            { !isWebSub && (
+                                                <Endpoints api={api} />
+                                            )}
+                                        </>
                                     )}
-                                    { !isWebSub && (
-                                        <Endpoints api={api} />
-                                    )}
-                                </>
-                            )}
 
-                            {api.isAPIProduct() && (
-                                <Box alignItems='center' justifyContent='center' className={classes.info}>
-                                    <Typography variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.
-                                            endpoint'
-                                            defaultMessage='Please refer respective APIs for endpoint information'
-                                        />
-                                    </Typography>
-                                </Box>
-                            )}
-                        </Paper>
+                                    {api.isAPIProduct() && (
+                                        <Box alignItems='center' justifyContent='center' className={classes.info}>
+                                            <Typography variant='body1'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.
+                                                    endpoint'
+                                                    defaultMessage='Please refer respective APIs for endpoint information'
+                                                />
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </>
+                        )}
                     </Grid>
                 </Grid>
                 <Grid container>
