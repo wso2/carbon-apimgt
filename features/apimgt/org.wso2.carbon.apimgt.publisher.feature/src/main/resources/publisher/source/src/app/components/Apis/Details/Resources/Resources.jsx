@@ -461,6 +461,10 @@ export default function Resources(props) {
     }, []);
 
     useEffect(() => {
+        setApiThrottlingPolicy(api.apiThrottlingPolicy);
+    }, [api.apiThrottlingPolicy]);
+
+    useEffect(() => {
         if (api.apitype !== 'APIProduct') {
             API.getAllScopes()
                 .then((response) => {

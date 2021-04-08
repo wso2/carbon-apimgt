@@ -423,59 +423,78 @@ public class Utils {
 
     public static X509Certificate getClientCertificate(org.apache.axis2.context.MessageContext axis2MessageContext)
             throws APIManagementException {
+        Object validatedCert = axis2MessageContext.getProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT);
 
-        Map headers =
-                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
-        X509Certificate certificateFromMessageContext = null;
-        if (sslCertObject != null) {
-            X509Certificate[] certs = (X509Certificate[]) sslCertObject;
-            certificateFromMessageContext = certs[0];
-        }
-        if (headers.containsKey(Utils.getClientCertificateHeader())) {
-            try {
-                if (!isClientCertificateValidationEnabled() || APIUtil
-                        .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
-                    String certificate = (String) headers.get(Utils.getClientCertificateHeader());
-                    byte[] bytes;
-                    if (certificate != null) {
-                        if (!isClientCertificateEncoded()) {
-                            certificate = certificate
-                                    .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                                    .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING_SPACE, "")
-                                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
-                            certificate = certificate.replaceAll(" ", "\n");
-                            certificate = APIConstants.BEGIN_CERTIFICATE_STRING + certificate
-                                    + APIConstants.END_CERTIFICATE_STRING;
-                            bytes = certificate.getBytes();
+        if (validatedCert != null) {
+            return (X509Certificate) validatedCert;
+        } else {
+            Map headers =
+                    (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            Object sslCertObject = axis2MessageContext.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+            X509Certificate certificateFromMessageContext = null;
+            if (sslCertObject != null) {
+                X509Certificate[] certs = (X509Certificate[]) sslCertObject;
+                certificateFromMessageContext = certs[0];
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, certificateFromMessageContext);
+            }
+            if (headers.containsKey(Utils.getClientCertificateHeader())) {
+                try {
+                    if (!isClientCertificateValidationEnabled() || APIUtil
+                            .isCertificateExistsInTrustStore(certificateFromMessageContext)) {
+                        X509Certificate x509Certificate = getClientCertificateFromHeader(axis2MessageContext);
+                        if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
+                            // If valid client certificate is sent via header give it priority over the transport level cert
+                            axis2MessageContext.setProperty(APIMgtGatewayConstants.VALIDATED_X509_CERT, x509Certificate);
+                            return x509Certificate;
                         } else {
-                            certificate = URLDecoder.decode(certificate)
-                                    .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
-                                    .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
-                            bytes = Base64.decodeBase64(certificate);
-                        }
-                        try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
-                            X509Certificate x509Certificate = X509Certificate.getInstance(inputStream);
-                            if (APIUtil.isCertificateExistsInTrustStore(x509Certificate)) {
-                                return x509Certificate;
-                            } else {
-                                log.debug("Certificate in Header didn't exist in truststore");
-                                return null;
-                            }
-                        } catch (IOException | CertificateException | APIManagementException e) {
-                            String msg = "Error while converting into X509Certificate";
-                            log.error(msg, e);
-                            throw new APIManagementException(msg, e);
+                            log.debug("Certificate in Header didn't exist in truststore");
+                            return null;
                         }
                     }
+                } catch (APIManagementException e) {
+                    String msg = "Error while validating into Certificate Existence";
+                    log.error(msg, e);
+                    throw new APIManagementException(msg, e);
                 }
-            } catch (APIManagementException e) {
-                String msg = "Error while validating into Certificate Existence";
-                log.error(msg, e);
+            }
+
+            return certificateFromMessageContext;
+        }
+    }
+
+    private static X509Certificate getClientCertificateFromHeader(org.apache.axis2.context.MessageContext axis2MessageContext)
+            throws APIManagementException {
+        Map headers =
+                (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+        String certificate = (String) headers.get(Utils.getClientCertificateHeader());
+        byte[] bytes;
+        if (certificate != null) {
+            if (!isClientCertificateEncoded()) {
+                certificate = certificate
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING_SPACE, "")
+                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                certificate = certificate.replaceAll(" ", "\n");
+                certificate = APIConstants.BEGIN_CERTIFICATE_STRING + certificate
+                        + APIConstants.END_CERTIFICATE_STRING;
+                bytes = certificate.getBytes();
+            } else {
+                certificate = URLDecoder.decode(certificate)
+                        .replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
+                        .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
+                bytes = Base64.decodeBase64(certificate);
+            }
+
+            try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
+                return X509Certificate.getInstance(inputStream);
+            } catch (IOException | CertificateException e) {
+                String msg = "Error while converting into X509Certificate";
                 throw new APIManagementException(msg, e);
             }
         }
-        return certificateFromMessageContext;
+
+        return null;
     }
 
     private static boolean isClientCertificateValidationEnabled() {

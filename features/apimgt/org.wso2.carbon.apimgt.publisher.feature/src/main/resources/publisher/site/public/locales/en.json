@@ -1,10 +1,4 @@
 {
-  "8+ZR29": [
-    {
-      "type": 0,
-      "value": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
-    }
-  ],
   "Api.category.dropdown.tooltip": [
     {
       "type": 0,
@@ -1981,6 +1975,12 @@
       "value": "Tags"
     }
   ],
+  "Apis.Details.Configuration.components.Tags.validation.error": [
+    {
+      "type": 0,
+      "value": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
+    }
+  ],
   "Apis.Details.Configuration.components.Transports.tooltip": [
     {
       "type": 0,
@@ -3499,6 +3499,12 @@
     {
       "type": 0,
       "value": "Class Name for Algorithm"
+    }
+  ],
+  "Apis.Details.Endpoints.LoadBalanceConfig.failover": [
+    {
+      "type": 0,
+      "value": "Enable Failover"
     }
   ],
   "Apis.Details.Endpoints.LoadBalanceConfig.session.management": [
@@ -7177,12 +7183,6 @@
     {
       "type": 0,
       "value": "Documentation Content [ Syntax - doc:xxxx ]"
-    }
-  ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option9": [
-    {
-      "type": 0,
-      "value": "Microgateway Label [ Syntax - label:xxxx ]"
     }
   ],
   "Base.Header.headersearch.HeaderSearch.tooltip.title": [

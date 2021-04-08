@@ -33,68 +33,78 @@ import Radio from '@material-ui/core/Radio';
 import { RadioGroup } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { FormattedMessage, injectIntl } from 'react-intl';
-
-const useStyles = makeStyles((theme) => (
-    {
-        bootstrapRoot: {
-            padding: 0,
-            'label + &': {
-                marginTop: theme.spacing(1),
-            },
-        },
-        bootstrapInput: {
-            borderRadius: 4,
-            backgroundColor: theme.palette.common.white,
-            border: '1px solid #ced4da',
-            padding: '5px 12px',
-            marginTop: '11px',
-            marginBottom: '11px',
-            width: '100%',
-            transition: theme.transitions.create(['border-color', 'box-shadow']),
-            '&:focus': {
-                borderColor: '#80bdff',
-                boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-            },
-            fontSize: 12,
-        },
-        bootstrapCurl: {
-            borderRadius: 4,
-            backgroundColor: theme.custom.curlGenerator.backgroundColor,
-            color: theme.custom.curlGenerator.color,
-            border: '1px solid #ced4da',
-            padding: '5px 12px',
-            marginTop: '11px',
-            marginBottom: '11px',
-            width: '100%',
-            transition: theme.transitions.create(['border-color', 'box-shadow']),
-            '&:focus': {
-                borderColor: '#80bdff',
-                boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-            },
-            fontSize: 12,
-            fontFamily: 'monospace',
-            fontWeight: 600,
-        },
-        subscriptionSummary: {
-            backgroundColor: theme.custom.AsyncTryOut.backgroundColor,
-            maxHeight: '40px',
-            borderColor: '#80bdff',
-            '&$expanded': {
-                maxHeight: '40px',
-            },
-        },
-        subscription: {
-            paddingBottom: '10px',
-        },
-    }
-));
+import Utils from 'AppData/Utils';
+import Badge from '@material-ui/core/Badge';
 
 function reducer(state, { field, value }) {
     return { ...state, [field]: value };
 }
 
 function WebhookSubscriptionUI(props) {
-    const classes = useStyles();
+    const verb = props.topic.type.toLowerCase();
+    const trimmedVerb = verb === 'publish' || verb === 'subscribe' ? verb.substr(0, 3) : verb;
+    const useStyles = makeStyles((theme) => {
+        const backgroundColor = theme.custom.resourceChipColors[trimmedVerb];
+        return {
+            bootstrapRoot: {
+                padding: 0,
+                'label + &': {
+                    marginTop: theme.spacing(1),
+                },
+            },
+            bootstrapInput: {
+                borderRadius: 4,
+                backgroundColor: theme.palette.common.white,
+                border: '1px solid #ced4da',
+                padding: '5px 12px',
+                marginTop: '11px',
+                marginBottom: '11px',
+                width: '100%',
+                transition: theme.transitions.create(['border-color', 'box-shadow']),
+                '&:focus': {
+                    borderColor: '#80bdff',
+                    boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
+                },
+                fontSize: 12,
+            },
+            bootstrapCurl: {
+                borderRadius: 4,
+                backgroundColor: theme.custom.curlGenerator.backgroundColor,
+                color: theme.custom.curlGenerator.color,
+                border: '1px solid #ced4da',
+                padding: '5px 12px',
+                marginTop: '11px',
+                marginBottom: '11px',
+                width: '100%',
+                transition: theme.transitions.create(['border-color', 'box-shadow']),
+                '&:focus': {
+                    borderColor: '#80bdff',
+                    boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
+                },
+                fontSize: 12,
+                fontFamily: 'monospace',
+                fontWeight: 600,
+            },
+            subscriptionSummary: {
+                backgroundColor: Utils.hexToRGBA(backgroundColor, 0.1),
+                maxHeight: '40px',
+                borderColor: '#80bdff',
+                '&$expanded': {
+                    maxHeight: '40px',
+                },
+            },
+            customButton: {
+                backgroundColor: '#ffffff',
+                borderColor: backgroundColor,
+                color: backgroundColor,
+                width: theme.spacing(2),
+            },
+            subscription: {
+                marginBottom: '10px',
+                border: `1px solid ${backgroundColor}`,
+            },
+        };
+    });
     const { generateGenericWHSubscriptionCurl, topic, intl } = props;
     const initialSubscriptionState = {
         topic: topic.name,
@@ -120,6 +130,8 @@ function WebhookSubscriptionUI(props) {
         dispatch({ field: e.target.name, value: e.target.value });
     };
 
+    const classes = useStyles();
+
     return (
         <Accordion className={classes.subscription}>
             <AccordionSummary
@@ -128,7 +140,23 @@ function WebhookSubscriptionUI(props) {
                 id='wh-subscription-header'
                 className={classes.subscriptionSummary}
             >
-                <Typography>{topic.name}</Typography>
+                <Grid container direction='row' justify='space-between' alignItems='center' spacing={0}>
+                    <Grid item md={11}>
+                        <Badge invisible='false' color='error' variant='dot'>
+                            <Button
+                                disableFocusRipple
+                                variant='outlined'
+                                size='small'
+                                className={classes.customButton}
+                            >
+                                {trimmedVerb.toUpperCase()}
+                            </Button>
+                        </Badge>
+                        <Typography display='inline' style={{ margin: '0px 30px' }} gutterBottom>
+                            {topic.name}
+                        </Typography>
+                    </Grid>
+                </Grid>
             </AccordionSummary>
             <AccordionDetails>
                 <Grid container direction='column' wrap='nowrap'>
