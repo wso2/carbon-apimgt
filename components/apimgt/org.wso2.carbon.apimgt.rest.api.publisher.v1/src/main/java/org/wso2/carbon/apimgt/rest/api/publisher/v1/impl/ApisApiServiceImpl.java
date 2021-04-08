@@ -1144,9 +1144,30 @@ public class ApisApiServiceImpl implements ApisApiService {
             auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
             ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
         } else {
-            throw new APIManagementException(
+            if (httpConn.getErrorStream() != null) {
+                BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(httpConn.getErrorStream(), StandardCharsets.UTF_8));
+                String inputLine;
+                StringBuilder responseString = new StringBuilder();
+
+                while ((inputLine = reader.readLine()) != null) {
+                    responseString.append(inputLine);
+                }
+                reader.close();
+                httpConn.disconnect();
+                JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+                String errorMessage = httpConn.getResponseMessage();
+                if (responseJson.containsKey("message")) {
+                    errorMessage = (String) responseJson.get("message");
+                }
+                throw new APIManagementException(
                     "Error while retrieving data for the API Security Audit Report. Found http status: " +
-                            httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
+                        httpConn.getResponseCode() + " - " + errorMessage);
+            } else {
+                throw new APIManagementException(
+                    "Error while retrieving data for the API Security Audit Report. Found http status: " +
+                        httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
+            }
         }
         return auditUuid;
     }
