@@ -115,7 +115,7 @@ export default {
     custom: {
         wrapperBackground: '#f9f9f9',
         disableColor: '#D3D3D3',
-        leftMenuWidth: 210,
+        leftMenuWidth: 230,
         contentAreaWidth: 1240,
         drawerWidth: 250,
         logo: '/site/public/images/logo.svg',
