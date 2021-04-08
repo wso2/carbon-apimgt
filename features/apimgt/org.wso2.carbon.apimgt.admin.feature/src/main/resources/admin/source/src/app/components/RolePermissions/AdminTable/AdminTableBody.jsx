@@ -45,8 +45,8 @@ function extractRoleName(role) {
  */
 function descendingComparator(a, b, orderBy) {
     if (orderBy === 'role') {
-        const roleA = extractRoleName(a, orderBy);
-        const roleB = extractRoleName(b, orderBy);
+        const roleA = extractRoleName(a);
+        const roleB = extractRoleName(b);
         if (roleB < roleA) {
             return -1;
         }
