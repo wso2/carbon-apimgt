@@ -148,7 +148,8 @@ export default function Topics(props) {
 
         switch (action) {
             case 'init':
-                return data;
+                setSelectedOperation({});
+                return data || asyncAPISpec.channels;
             case 'description':
                 updatedOperation[action] = value;
                 return {
@@ -484,7 +485,7 @@ export default function Topics(props) {
             <Grid item md={12}>
                 <Paper>
                     {
-                        Object.entries(operations).map(([target, operation]) => (
+                        operations && Object.entries(operations).map(([target, operation]) => (
                             <Grid key={target} item md={12}>
                                 <GroupOfOperations tag={target} operation={operation}>
                                     <Grid
