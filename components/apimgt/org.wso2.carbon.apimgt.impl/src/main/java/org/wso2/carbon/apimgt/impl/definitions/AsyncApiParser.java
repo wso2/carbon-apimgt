@@ -1863,4 +1863,15 @@ public class AsyncApiParser extends APIDefinition {
         }
         return wsUriMapping;
     }
+
+    public boolean isSolaceAPI(String definition) {
+        Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(definition);
+        String providerName = String.valueOf(aai20Document.info.getExtension("x-provider").value);
+        if (providerName != null) {
+            if ("solace".equalsIgnoreCase(providerName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

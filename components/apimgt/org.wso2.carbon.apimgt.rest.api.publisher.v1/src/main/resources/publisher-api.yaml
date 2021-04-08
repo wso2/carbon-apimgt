@@ -8307,6 +8307,11 @@ components:
               example: false
         advertiseInfo:
           $ref: '#/components/schemas/AdvertiseInfo'
+        solaceAPI:
+          title: field to identify API as Solace API
+          type: boolean
+          example:
+            true
       x-scopes:
         - apim:api_create
         - apim:api_import_export
@@ -10952,6 +10957,9 @@ components:
               items:
                 type: string
                 example: "https://localhost:9443/am/sample/pizzashack/v1/api/"
+            isSolaceAPI:
+              type: boolean
+              example: true
           description:
             API definition information
         errors:

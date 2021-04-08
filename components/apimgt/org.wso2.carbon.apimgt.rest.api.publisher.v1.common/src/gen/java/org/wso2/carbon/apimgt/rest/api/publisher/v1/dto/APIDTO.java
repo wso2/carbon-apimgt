@@ -269,6 +269,7 @@ return null;
     private Object keyManagers = null;
     private APIServiceInfoDTO serviceInfo = null;
     private AdvertiseInfoDTO advertiseInfo = null;
+    private Boolean solaceAPI = null;
 
   /**
    * UUID of the api registry artifact 
@@ -1241,6 +1242,23 @@ return null;
     this.advertiseInfo = advertiseInfo;
   }
 
+  /**
+   **/
+  public APIDTO solaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("solaceAPI")
+  public Boolean isSolaceAPI() {
+    return solaceAPI;
+  }
+  public void setSolaceAPI(Boolean solaceAPI) {
+    this.solaceAPI = solaceAPI;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1305,12 +1323,13 @@ return null;
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(serviceInfo, API.serviceInfo) &&
-        Objects.equals(advertiseInfo, API.advertiseInfo);
+        Objects.equals(advertiseInfo, API.advertiseInfo) &&
+        Objects.equals(solaceAPI, API.solaceAPI);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, testKey, responseCachingEnabled, cacheTimeout, destinationStatsEnabled, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableStore, type, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, endpointSecurity, gatewayEnvironments, mediationPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTime, endpointConfig, endpointImplementationType, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, solaceAPI);
   }
 
   @Override
@@ -1373,6 +1392,7 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
+    sb.append("    solaceAPI: ").append(toIndentedString(solaceAPI)).append("\n");
     sb.append("}");
     return sb.toString();
   }

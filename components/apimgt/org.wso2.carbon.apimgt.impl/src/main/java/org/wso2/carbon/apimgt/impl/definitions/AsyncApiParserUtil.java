@@ -200,4 +200,9 @@ public class AsyncApiParserUtil {
         }
         return apiDocContent;
     }
+
+    public static boolean isSolaceAPIFromAsyncAPIDefinition(String definitionJSON) {
+        AsyncApiParser asyncApiParser = new AsyncApiParser();
+        return asyncApiParser.isSolaceAPI(definitionJSON);
+    }
 }

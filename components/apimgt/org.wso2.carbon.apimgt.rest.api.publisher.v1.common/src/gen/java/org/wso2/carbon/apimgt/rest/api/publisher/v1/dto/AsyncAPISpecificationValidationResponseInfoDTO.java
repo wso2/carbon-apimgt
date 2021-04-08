@@ -32,6 +32,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     private String asyncAPIVersion = null;
     private String protocol = null;
     private List<String> endpoints = new ArrayList<String>();
+    private Boolean isSolaceAPI = null;
 
   /**
    **/
@@ -153,6 +154,23 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     this.endpoints = endpoints;
   }
 
+  /**
+   **/
+  public AsyncAPISpecificationValidationResponseInfoDTO isSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "")
+  @JsonProperty("isSolaceAPI")
+  public Boolean isIsSolaceAPI() {
+    return isSolaceAPI;
+  }
+  public void setIsSolaceAPI(Boolean isSolaceAPI) {
+    this.isSolaceAPI = isSolaceAPI;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -169,12 +187,13 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
         Objects.equals(description, asyncAPISpecificationValidationResponseInfo.description) &&
         Objects.equals(asyncAPIVersion, asyncAPISpecificationValidationResponseInfo.asyncAPIVersion) &&
         Objects.equals(protocol, asyncAPISpecificationValidationResponseInfo.protocol) &&
-        Objects.equals(endpoints, asyncAPISpecificationValidationResponseInfo.endpoints);
+        Objects.equals(endpoints, asyncAPISpecificationValidationResponseInfo.endpoints) &&
+        Objects.equals(isSolaceAPI, asyncAPISpecificationValidationResponseInfo.isSolaceAPI);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints);
+    return Objects.hash(name, version, context, description, asyncAPIVersion, protocol, endpoints, isSolaceAPI);
   }
 
   @Override
@@ -189,6 +208,7 @@ public class AsyncAPISpecificationValidationResponseInfoDTO   {
     sb.append("    asyncAPIVersion: ").append(toIndentedString(asyncAPIVersion)).append("\n");
     sb.append("    protocol: ").append(toIndentedString(protocol)).append("\n");
     sb.append("    endpoints: ").append(toIndentedString(endpoints)).append("\n");
+    sb.append("    isSolaceAPI: ").append(toIndentedString(isSolaceAPI)).append("\n");
     sb.append("}");
     return sb.toString();
   }
