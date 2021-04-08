@@ -472,8 +472,11 @@ public class ImportUtils {
                         apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
                         apiRevisionDeployments.add(apiRevisionDeployment);
                     } else {
-                        log.error("Label " + deploymentName + " is not a defined gateway environment. Hence " +
-                                "skipped without deployment");
+                        throw new APIManagementException(
+                                "Label " + deploymentName + " is not a defined gateway environment. Hence "
+                                        + "skipped without deployment", ExceptionCodes
+                                .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
+                                        String.format("label '%s'", deploymentName)));
                     }
                 }
 
