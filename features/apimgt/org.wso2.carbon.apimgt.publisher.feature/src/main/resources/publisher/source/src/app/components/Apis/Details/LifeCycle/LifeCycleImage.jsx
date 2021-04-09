@@ -299,7 +299,9 @@ class LifeCycleImage extends React.Component {
                             stroke='#fff'
                         />
                     </g>
-                    <g id='prototyped_to_published' style={this.highLightMe('prototyped_to_published')}>
+                    {/* Prototyped to Publish transition is now not permitted. Hence specifically set the opacity to
+                     disable the transition image */}
+                    <g id='prototyped_to_published' style={{ opacity: 0.2 }}>
                         <path
                             id='path6874'
                             d='m 181.42383,-4.0683594 5.18392,15.3553234 -15.14681,3.480614 c 26.97521,14.497097 48.38501,37.525806 60.88086,65.484375 l 16.41911,5.795641 4.09261,-14.231188 C 238.22018,39.231643 213.06477,12.507292 181.42383,-4.0683594 Z'
