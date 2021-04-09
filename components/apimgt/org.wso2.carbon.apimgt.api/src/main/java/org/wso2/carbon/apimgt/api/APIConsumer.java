@@ -325,14 +325,6 @@ public interface APIConsumer extends APIManager {
                                             String requestedThrottlingPolicy) throws APIManagementException;
 
     /**
-     *
-     * @param subscriptionId id of the subscription
-     * @return
-     * @throws APIManagementException if failed to get subscription detail from database
-     */
-    String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
-
-    /**
      * Unsubscribe the specified user from the specified API in the given application
      *
      * @param identifier    Identifier

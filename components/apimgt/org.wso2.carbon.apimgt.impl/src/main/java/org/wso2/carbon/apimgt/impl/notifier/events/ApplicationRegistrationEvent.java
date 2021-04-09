@@ -48,15 +48,13 @@ public class ApplicationRegistrationEvent extends Event {
 
     @Override
     public String toString() {
+
         return "ApplicationRegistrationEvent{" +
-                "applicationId=" + applicationId +
+                "applicationUUID='" + applicationUUID + '\'' +
+                ", applicationId=" + applicationId +
                 ", consumerKey='" + consumerKey + '\'' +
                 ", keyType='" + keyType + '\'' +
-                ", eventId='" + eventId + '\'' +
-                ", timeStamp=" + timeStamp +
-                ", type='" + type + '\'' +
-                ", tenantId=" + tenantId + '\'' +
-                ", tenantDomain=" + tenantDomain +
+                ", keyManager='" + keyManager + '\'' +
                 '}';
     }
 

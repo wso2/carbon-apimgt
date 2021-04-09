@@ -3272,11 +3272,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     @Override
-    public String getSubscriptionStatusById(int subscriptionId) throws APIManagementException {
-        return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
-    }
-
-    @Override
     public void removeSubscription(Identifier identifier, String userId, int applicationId)
             throws APIManagementException {
 

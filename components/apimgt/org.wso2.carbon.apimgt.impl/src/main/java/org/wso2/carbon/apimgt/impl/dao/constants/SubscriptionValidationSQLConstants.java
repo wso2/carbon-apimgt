@@ -88,7 +88,7 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_SUBSCRIPTION_SQL =
             "SELECT " +
-                    "   SUBS.UUID AS SUBSCRIPTION_UUID," +
+                    "   AM_SUBSCRIPTION.UUID AS SUBSCRIPTION_UUID," +
                     "   AM_SUBSCRIPTION.SUBSCRIPTION_ID AS SUB_ID," +
                     "   AM_SUBSCRIPTION.TIER_ID AS TIER," +
                     "   AM_SUBSCRIPTION.API_ID AS API_ID," +
@@ -107,7 +107,7 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String GET_SUBSCRIPTION_APP_UUID_API_UUID_SQL =
             "SELECT " +
-                    "   SUBS.UUID AS SUBSCRIPTION_UUID," +
+                    "   AM_SUBSCRIPTION.UUID AS SUBSCRIPTION_UUID," +
                     "   AM_SUBSCRIPTION.SUBSCRIPTION_ID AS SUB_ID," +
                     "   AM_SUBSCRIPTION.TIER_ID AS TIER," +
                     "   AM_SUBSCRIPTION.API_ID AS API_ID," +

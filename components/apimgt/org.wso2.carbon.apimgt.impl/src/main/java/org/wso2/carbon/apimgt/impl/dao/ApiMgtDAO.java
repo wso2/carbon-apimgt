@@ -688,11 +688,12 @@ public class ApiMgtDAO {
 
     public int addSubscription(ApiTypeWrapper apiTypeWrapper, Application application, String status, String subscriber)
             throws APIManagementException {
+        int subscriptionId = -1;
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try {
                 conn.setAutoCommit(false);
-                addSubscription(conn, apiTypeWrapper, application, status, subscriber);
+                subscriptionId = addSubscription(conn, apiTypeWrapper, application, status, subscriber);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -701,7 +702,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to add subscriber data ", e);
         }
-        return -1;
+        return subscriptionId;
     }
 
     public int updateSubscription(ApiTypeWrapper apiTypeWrapper, String inputSubscriptionUUId, String status,
@@ -5173,14 +5174,14 @@ public class ApiMgtDAO {
                     prepStmt.setString(3, oldVersion);
                     try (ResultSet rs = prepStmt.executeQuery()) {
                         List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
-                        Set<Integer> subscribedApplications = new HashSet<Integer>();
                         while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS"
                         )))) {
-                            SubscriptionInfo info = new SubscriptionInfo();
-                            info.subscriptionId = rs.getInt("SUBSCRIPTION_ID");
-                            info.tierId = rs.getString("TIER_ID");
-                            info.applicationId = rs.getInt("APPLICATION_ID");
-                            info.subscriptionStatus = rs.getString("SUB_STATUS");
+                            int subscriptionId = rs.getInt("SUBSCRIPTION_ID");
+                            String tierId = rs.getString("TIER_ID");
+                            int applicationId = rs.getInt("APPLICATION_ID");
+                            String subscriptionStatus = rs.getString("SUB_STATUS");
+                            SubscriptionInfo info = new SubscriptionInfo(subscriptionId, tierId, applicationId,
+                                    subscriptionStatus);
                             subscriptionData.add(info);
                         }
 
@@ -5209,7 +5210,7 @@ public class ApiMgtDAO {
                                     if (subscriptionId == -1) {
                                         String msg =
                                                 "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
-                                                ":v" + apiIdentifier.getVersion();
+                                                        ":v" + apiIdentifier.getVersion();
                                         log.error(msg);
                                         throw new APIManagementException(msg);
                                     }
@@ -5226,6 +5227,10 @@ public class ApiMgtDAO {
                             }
                         }
                     }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw e;
                 }
             }
         } catch (SQLException e) {
@@ -5242,6 +5247,7 @@ public class ApiMgtDAO {
         int id = -1;
         String apiUUID;
         Identifier identifier;
+        String tier;
 
         //Query to check if this subscription already exists
         String checkDuplicateQuery = SQLConstants.CHECK_EXISTING_SUBSCRIPTION_API_SQL;
@@ -5300,41 +5306,40 @@ public class ApiMgtDAO {
 
         //Adding data to the AM_SUBSCRIPTION table
         //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
-        PreparedStatement preparedStForInsert = null;
+        String subscriptionIDColumn = "SUBSCRIPTION_ID";
 
-        try {
-            if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
-                preparedStForInsert = connection.prepareStatement(sqlQuery, new String[]{"subscription_id"});
-            } else {
-                preparedStForInsert = connection.prepareStatement(sqlQuery, new String[]{"SUBSCRIPTION_ID"});
-            }
-            String tier;
-            if (!isProduct) {
-                tier = apiTypeWrapper.getApi().getId().getTier();
-                preparedStForInsert.setString(1, tier);
-                preparedStForInsert.setString(10, tier);
-            } else {
-                tier = apiTypeWrapper.getApiProduct().getId().getTier();
-                preparedStForInsert.setString(1, tier);
-                preparedStForInsert.setString(10, tier);
-            }
-            preparedStForInsert.setInt(2, id);
-            preparedStForInsert.setInt(3, application.getId());
-            preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
-                    APIConstants.SubscriptionStatus.UNBLOCKED);
-            preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
-            preparedStForInsert.setString(6, subscriber);
+        if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+            subscriptionIDColumn = "subscription_id";
+        }
+            try (PreparedStatement preparedStForInsert = connection.prepareStatement(sqlQuery,
+                    new String[]{subscriptionIDColumn})) {
+                if (!isProduct) {
+                    tier = apiTypeWrapper.getApi().getId().getTier();
+                    preparedStForInsert.setString(1, tier);
+                    preparedStForInsert.setString(10, tier);
+                } else {
+                    tier = apiTypeWrapper.getApiProduct().getId().getTier();
+                    preparedStForInsert.setString(1, tier);
+                    preparedStForInsert.setString(10, tier);
+                }
+                preparedStForInsert.setInt(2, id);
+                preparedStForInsert.setInt(3, application.getId());
+                preparedStForInsert.setString(4, subscriptionStatus != null ? subscriptionStatus :
+                        APIConstants.SubscriptionStatus.UNBLOCKED);
+                preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
+                preparedStForInsert.setString(6, subscriber);
 
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            preparedStForInsert.setTimestamp(7, timestamp);
-            preparedStForInsert.setTimestamp(8, timestamp);
-            preparedStForInsert.setString(9, UUID.randomUUID().toString());
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                preparedStForInsert.setTimestamp(7, timestamp);
+                preparedStForInsert.setTimestamp(8, timestamp);
+                preparedStForInsert.setString(9, UUID.randomUUID().toString());
 
-            preparedStForInsert.executeUpdate();
-            try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
-                while (rs.next()) {
-                    //subscriptionId = rs.getInt(1);
-                    subscriptionId = Integer.parseInt(rs.getString(1));
+                preparedStForInsert.executeUpdate();
+                try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
+                    while (rs.next()) {
+                        //subscriptionId = rs.getInt(1);
+                        subscriptionId = Integer.parseInt(rs.getString(1));
+                    }
                 }
             }
 
@@ -5346,9 +5351,7 @@ public class ApiMgtDAO {
                     application.getUUID(), tier,
                     (subscriptionStatus != null ? subscriptionStatus : APIConstants.SubscriptionStatus.UNBLOCKED));
             APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
-        } finally {
-            APIMgtDBUtil.closeStatement(preparedStForInsert);
-        }
+
         return subscriptionId;
     }
 
@@ -17192,5 +17195,53 @@ public class ApiMgtDAO {
         private String tierId;
         private int applicationId;
         private String subscriptionStatus;
+
+        public SubscriptionInfo(int subscriptionId, String tierId, int applicationId, String subscriptionStatus) {
+
+            this.subscriptionId = subscriptionId;
+            this.tierId = tierId;
+            this.applicationId = applicationId;
+            this.subscriptionStatus = subscriptionStatus;
+        }
+
+        public int getSubscriptionId() {
+
+            return subscriptionId;
+        }
+
+        public void setSubscriptionId(int subscriptionId) {
+
+            this.subscriptionId = subscriptionId;
+        }
+
+        public String getTierId() {
+
+            return tierId;
+        }
+
+        public void setTierId(String tierId) {
+
+            this.tierId = tierId;
+        }
+
+        public int getApplicationId() {
+
+            return applicationId;
+        }
+
+        public void setApplicationId(int applicationId) {
+
+            this.applicationId = applicationId;
+        }
+
+        public String getSubscriptionStatus() {
+
+            return subscriptionStatus;
+        }
+
+        public void setSubscriptionStatus(String subscriptionStatus) {
+
+            this.subscriptionStatus = subscriptionStatus;
+        }
     }
 }

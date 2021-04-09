@@ -54,17 +54,16 @@ public class SubscriptionEvent extends Event {
 
     @Override
     public String toString() {
+
         return "SubscriptionEvent{" +
                 "subscriptionId=" + subscriptionId +
-                ", apiId='" + apiId + '\'' +
+                ", subscriptionUUID='" + subscriptionUUID + '\'' +
+                ", apiId=" + apiId +
+                ", apiUUID='" + apiUUID + '\'' +
                 ", applicationId=" + applicationId +
+                ", applicationUUID='" + applicationUUID + '\'' +
                 ", policyId='" + policyId + '\'' +
                 ", subscriptionState='" + subscriptionState + '\'' +
-                ", eventId='" + eventId + '\'' +
-                ", timeStamp=" + timeStamp +
-                ", type='" + type + '\'' +
-                ", tenantId=" + tenantId + '\'' +
-                ", tenantDomain=" + tenantDomain +
                 '}';
     }
 
