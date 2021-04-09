@@ -3124,7 +3124,7 @@
     "defaultMessage": "Let’s get started !"
   },
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": {
-    "defaultMessage": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
+    "defaultMessage": "Choose your option to create an API"
   },
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": {
     "defaultMessage": "GraphQL"
@@ -3238,7 +3238,7 @@
     "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
   },
   "Apis.Listing.SampleAPIProduct.description": {
-    "defaultMessage": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
+    "defaultMessage": "Combine multiple API resources in to a single API"
   },
   "Apis.Listing.TableView.TableView.doc.flag": {
     "defaultMessage": "[Doc]"

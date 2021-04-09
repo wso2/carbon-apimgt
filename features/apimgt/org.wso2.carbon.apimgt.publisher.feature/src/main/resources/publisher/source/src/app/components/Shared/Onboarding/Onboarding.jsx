@@ -39,7 +39,7 @@ const Onboarding = (props) => {
                     <Box pt={isXsOrBelow ? 2 : 7} />
                 </Grid>
                 <Grid item md={12}>
-                    <Typography display='block' gutterBottom align='center' variant='h4'>
+                    <Typography display='block' gutterBottom align='center' variant='h4' component='h1'>
                         {title}
                         <Box color='text.secondary' pt={2}>
                             <Typography display='block' gutterBottom align='center' variant='body1'>
