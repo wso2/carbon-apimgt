@@ -448,7 +448,7 @@ public class APIMappingUtil {
         return apidto;
     }
 
-    public static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+    private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
         APIDTO apidto;
         apidto = fromAPItoDTO(model.getApi(), tenantDomain);
         JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
