@@ -423,9 +423,6 @@ class ApiConsole extends React.Component {
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
         return (
             <>
-                <Typography variant='h4' component='h1' className={classes.titleSub}>
-                    <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
-                </Typography>
                 <Paper className={classes.paper}>
                     <Grid container className={classes.grid}>
                         {!isPrototypedAPI && !user && (
