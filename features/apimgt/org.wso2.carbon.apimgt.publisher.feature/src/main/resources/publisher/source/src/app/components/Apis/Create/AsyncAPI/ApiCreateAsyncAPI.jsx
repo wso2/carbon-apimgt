@@ -38,6 +38,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
 
+import CheckCircleSharpIcon from '@material-ui/icons/CheckCircleSharp';
+import Chip from '@material-ui/core/Chip';
 import ProvideAsyncAPI from './Steps/ProvideAsyncAPI';
 
 /**
@@ -64,12 +66,14 @@ export default function ApiCreateAsyncAPI(props) {
      */
     function apiInputsReducer(currentState, inputAction) {
         const { action, value } = inputAction;
+        console.log(inputAction);
         switch (action) {
             case 'type':
             case 'inputValue':
             case 'name':
             case 'version':
             case 'endpoint':
+            case 'isSolaceAPI':
             case 'protocol':
             case 'context':
             case 'policies':
@@ -84,6 +88,7 @@ export default function ApiCreateAsyncAPI(props) {
                     version: value.version,
                     context: value.context,
                     endpoint: value.endpoints && value.endpoints[0],
+                    isSolaceAPI: value.isSolaceAPI,
                 };
             default:
                 return currentState;
@@ -271,6 +276,14 @@ export default function ApiCreateAsyncAPI(props) {
                             endpointPlaceholderText='Streaming Provider'
                             appendChildrenBeforeEndpoint
                         >
+                            {apiInputs.isSolaceAPI === true && (
+                                <Chip
+                                    label='Identified as Solace Event Portal API'
+                                    icon={<CheckCircleSharpIcon style={{ color: 'green' }} />}
+                                    variant='outlined'
+                                    style={{ color: 'green' }}
+                                />
+                            )}
                             <TextField
                                 fullWidth
                                 select
