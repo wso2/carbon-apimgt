@@ -325,8 +325,15 @@ public class GatewayArtifactsMgtDAO {
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
                     apiRuntimeArtifactDto.setApiId(apiId);
                     String label = resultSet.getString("LABEL");
-                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
-                            resultSet.getString("VHOST"));
+                    String resolvedVhost = "";
+                    try {
+                        resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSet.getString("VHOST"));
+                    } catch (APIManagementException e) {
+                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s,"
+                                + "gateway environment %s. Skipping runtime artifact for the API.", apiId, label), e);
+                        continue;
+                    }
                     apiRuntimeArtifactDto.setLabel(label);
                     apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
@@ -372,10 +379,18 @@ public class GatewayArtifactsMgtDAO {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-                    apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
+                    String apiId = resultSet.getString("API_ID");
+                    apiRuntimeArtifactDto.setApiId(apiId);
                     String label = resultSet.getString("LABEL");
-                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
-                            resultSet.getString("VHOST"));
+                    String resolvedVhost = "";
+                    try {
+                        resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSet.getString("VHOST"));
+                    } catch (APIManagementException e) {
+                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s,"
+                                + "gateway environment %s. Skipping runtime artifact for the API.", apiId, label), e);
+                        continue;
+                    }
                     apiRuntimeArtifactDto.setLabel(label);
                     apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
@@ -415,10 +430,18 @@ public class GatewayArtifactsMgtDAO {
                 while (resultSet.next()) {
                     APIRuntimeArtifactDto apiRuntimeArtifactDto = new APIRuntimeArtifactDto();
                     apiRuntimeArtifactDto.setTenantDomain(resultSet.getString("TENANT_DOMAIN"));
-                    apiRuntimeArtifactDto.setApiId(resultSet.getString("API_ID"));
+                    String apiId = resultSet.getString("API_ID");
+                    apiRuntimeArtifactDto.setApiId(apiId);
                     String label = resultSet.getString("LABEL");
-                    String resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
-                            resultSet.getString("VHOST"));
+                    String resolvedVhost = "";
+                    try {
+                        resolvedVhost = VHostUtils.resolveIfNullToDefaultVhost(label,
+                                resultSet.getString("VHOST"));
+                    } catch (APIManagementException e) {
+                        log.error(String.format("Error resolving vhost while retrieving runtime artifact for API %s,"
+                                + "gateway environment %s. Skipping runtime artifact for the API.", apiId, label), e);
+                        continue;
+                    }
                     apiRuntimeArtifactDto.setLabel(label);
                     apiRuntimeArtifactDto.setVhost(resolvedVhost);
                     apiRuntimeArtifactDto.setName(resultSet.getString("API_NAME"));
