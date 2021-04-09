@@ -443,12 +443,12 @@ public class APIMappingUtil {
             apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
         } else {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
-            setEndpointURLsForAwsAPIs(model, tenantDomain);
+            apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, tenantDomain));
         }
         return apidto;
     }
 
-    public static void setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+    public static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
         APIDTO apidto;
         apidto = fromAPItoDTO(model.getApi(), tenantDomain);
         JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
@@ -459,17 +459,17 @@ public class APIMappingUtil {
         JsonObject variables = server.getAsJsonObject("variables");
         JsonObject basePath = variables.getAsJsonObject("basePath");
         String stageName = basePath.get("default").getAsString();
-        String hostUrl = url.replace("/{basePath}", stageName);
-        if (hostUrl == null) {
-            hostUrl = " ";
+        String serverUrl = url.replace("/{basePath}", stageName);
+        if (serverUrl == null) {
+            serverUrl = "Could not find server URL";
         }
         APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
         List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
         APIURLsDTO apiurLsDTO = new APIURLsDTO();
-        apiurLsDTO.setHttps(hostUrl);
+        apiurLsDTO.setHttps(serverUrl);
         apiEndpointURLsDTO.setUrLs(apiurLsDTO);
         endpointUrls.add(apiEndpointURLsDTO);
-        apidto.setEndpointURLs(endpointUrls);
+        return endpointUrls;
     }
 
     public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String tenantDomain)
