@@ -11577,6 +11577,20 @@ public class ApiMgtDAO {
                     byte[] customAttrib = APIUtil.toByteArray(binary);
                     policy.setCustomAttributes(customAttrib);
                 }
+                if (APIConstants.COMMERCIAL_TIER_PLAN.equals(resultSet.getString(
+                        ThrottlePolicyConstants.COLUMN_BILLING_PLAN))) {
+                    policy.setMonetizationPlan(resultSet.getString(ThrottlePolicyConstants.COLUMN_MONETIZATION_PLAN));
+                    Map<String, String> monetizationPlanProperties = new HashMap<String, String>();
+                    monetizationPlanProperties.put(APIConstants.Monetization.FIXED_PRICE,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_FIXED_RATE));
+                    monetizationPlanProperties.put(APIConstants.Monetization.BILLING_CYCLE,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_BILLING_CYCLE));
+                    monetizationPlanProperties.put(APIConstants.Monetization.PRICE_PER_REQUEST,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_PRICE_PER_REQUEST));
+                    monetizationPlanProperties.put(APIConstants.Monetization.CURRENCY,
+                            resultSet.getString(ThrottlePolicyConstants.COLUMN_CURRENCY));
+                    policy.setMonetizationPlanProperties(monetizationPlanProperties);
+                }
             }
         } catch (SQLException e) {
             handleException("Failed to get subscription policy: " + uuid, e);
