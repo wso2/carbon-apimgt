@@ -991,7 +991,7 @@
     "defaultMessage": "Public Forum"
   },
   "Apis.Details.Documents.CreateEditForm.document.create.type.sample": {
-    "defaultMessage": "Sample &amp; SDK"
+    "defaultMessage": "Sample & SDK"
   },
   "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": {
     "defaultMessage": "Support Forum"

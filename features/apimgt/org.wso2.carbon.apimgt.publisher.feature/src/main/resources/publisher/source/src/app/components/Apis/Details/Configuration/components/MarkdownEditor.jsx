@@ -146,7 +146,7 @@ export default function MarkdownEditor(props) {
                                     defaultMessage='Edit Overview of '
                                 />
                             )}
-                        {api.name}
+                        {` ${api.name}`}
                     </Typography>
                     <Button
                         className={classes.button}
