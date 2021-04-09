@@ -121,6 +121,7 @@ function AdminTableBody(props) {
         setSelected(newSelected);
     };
     const isSelected = (name) => selected.indexOf(name) !== -1;
+    const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
     return (
         <TableBody>
@@ -162,6 +163,11 @@ function AdminTableBody(props) {
                         </TableRow>
                     );
                 })}
+            {emptyRows > 0 && (
+                <TableRow style={{ height: 60 * emptyRows }}>
+                    <TableCell colSpan={6} />
+                </TableRow>
+            )}
         </TableBody>
     );
 }
