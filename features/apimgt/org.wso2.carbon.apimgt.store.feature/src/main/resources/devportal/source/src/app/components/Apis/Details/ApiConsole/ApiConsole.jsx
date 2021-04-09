@@ -479,8 +479,8 @@ class ApiConsole extends React.Component {
                     />
 
                     <Grid container>
-                        <Grid xs={10} item />
-                        <Grid xs={1} item>
+                        <Grid xs={8} item />
+                        <Grid xs={2} item>
                             <Button size='small' onClick={() => this.convertToPostman(downloadSwagger)}>
                                 <Icons icon={postmanIcon} width={30} height={30} />
                                 <FormattedMessage
@@ -490,7 +490,7 @@ class ApiConsole extends React.Component {
                             </Button>
 
                         </Grid>
-                        <Grid xs={1} item>
+                        <Grid xs={2} item>
                             <a href={downloadLink} download={fileName}>
                                 <Button size='small'>
                                     <Icons icon={openapiinitiativeIcon} width={30} height={30} className={classes.buttonIcon} />
