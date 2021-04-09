@@ -590,8 +590,7 @@ public class ExportUtils {
     private static void addMultipleAPISpecificSequencesToArchive(String archivePath, API api, APIProvider apiProvider)
             throws APIManagementException, APIImportExportException {
         String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomain(api.getId().getProviderName()));
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         if (!CommonUtil.checkFileExistence(seqArchivePath)) {
             CommonUtil.createDirectory(seqArchivePath);
         }

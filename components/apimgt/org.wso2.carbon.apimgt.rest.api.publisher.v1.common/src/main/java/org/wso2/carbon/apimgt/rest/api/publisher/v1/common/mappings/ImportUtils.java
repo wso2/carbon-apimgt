@@ -72,7 +72,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycleTransition;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -92,7 +91,6 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
@@ -276,8 +274,6 @@ public class ImportUtils {
             }
 
             tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
 
             // Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in
             // implementation
@@ -375,8 +371,6 @@ public class ImportUtils {
                     ExceptionCodes.ERROR_READING_META_DATA);
         } catch (FaultGatewaysException e) {
             throw new APIManagementException("Error while updating API: " + importedApi.getId().getApiName(), e);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         } catch (APIMgtAuthorizationFailedException e) {
             throw new APIManagementException("Please enable preserveProvider property for cross tenant API Import.", e,
                     ExceptionCodes.TENANT_MISMATCH);
@@ -1318,7 +1312,7 @@ public class ImportUtils {
      */
     private static void addAPISequences(String pathToArchive, API importedApi, APIProvider apiProvider)
             throws APIManagementException {
-        String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         List<Mediation> existingMediationsList = apiProvider.getAllGlobalMediationPolicies();
 
         try {
@@ -1406,7 +1400,7 @@ public class ImportUtils {
     private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider)
             throws APIManagementException {
         String sequencesDirectoryPath = pathToArchive + File.separator + ImportExportConstants.SEQUENCES_RESOURCE;
-        String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         List<Mediation> existingAPISpecificMediationsList =
                 apiProvider.getAllApiSpecificMediationPolicies(importedApi.getUuid(), tenantDomain);
 
@@ -1477,7 +1471,7 @@ public class ImportUtils {
 
         if (CommonUtil.checkFileExistence(wsdlPath)) {
             try (FileInputStream inputStream = new FileInputStream(wsdlPath)) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                 String fileExtension = FilenameUtils.getExtension(wsdlPath);
                 PublisherCommonUtils.addWsdl(fileExtension, inputStream, importedApi, apiProvider, tenantDomain);
             } catch (FileNotFoundException e) {
@@ -1704,7 +1698,7 @@ public class ImportUtils {
     private static void addSOAPToREST(API importedApi, String swaggerContent, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
         if (StringUtils.equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-            String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             PublisherCommonUtils
                     .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider,
                             tenantDomain);
