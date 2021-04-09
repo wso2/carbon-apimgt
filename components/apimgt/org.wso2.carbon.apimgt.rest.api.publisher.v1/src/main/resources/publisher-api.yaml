@@ -8065,7 +8065,7 @@ components:
           description: |
             List of gateway environments the API is available
           example:
-            - Production and Sandbox
+            - Default
           items:
             type: string
           x-otherScopes:
@@ -8607,7 +8607,7 @@ components:
           description: |
             List of gateway environments the API Product is available
           example:
-            - Production and Sandbox
+            - Default
           items:
             type: string
         apiType:
