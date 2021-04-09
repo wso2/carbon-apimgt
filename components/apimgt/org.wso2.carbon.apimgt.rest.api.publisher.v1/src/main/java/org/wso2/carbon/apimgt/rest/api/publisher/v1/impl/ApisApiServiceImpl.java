@@ -214,7 +214,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -225,8 +224,6 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
     private static final String API_PRODUCT_TYPE = "APIPRODUCT";
-    private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<String>(
-            Arrays.asList("jpg", "png", "jpeg", "gif"));
 
     @Override
     public Response getAllAPIs(Integer limit, Integer offset, String xWSO2Tenant, String query,
@@ -3039,7 +3036,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
             String extension = FilenameUtils.getExtension(fileName);
-            if (!ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
+            if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
                         "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg and .gif",
                         log);
