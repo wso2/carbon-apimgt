@@ -145,7 +145,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         }
 
         try {
-            serviceEntry = serviceCatalog.getEndPointResourcesByNameAndVersion(name, version, tenantId);
+            serviceEntry = serviceCatalog.getServiceByNameAndVersion(name, version, tenantId);
             if (serviceEntry != null) {
                 FileBasedServicesImportExportManager importExportManager =
                         new FileBasedServicesImportExportManager(pathToExportDir);

@@ -1,7 +1,4 @@
 {
-  "8+ZR29": {
-    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
-  },
   "Api.category.dropdown.tooltip": {
     "defaultMessage": "Allow to group APIs that have similar attributes. There has to be pre-defined API categories in the environment in order to be attached to an API."
   },
@@ -896,6 +893,9 @@
   },
   "Apis.Details.Configuration.components.Tags.title": {
     "defaultMessage": "Tags"
+  },
+  "Apis.Details.Configuration.components.Tags.validation.error": {
+    "defaultMessage": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
   },
   "Apis.Details.Configuration.components.Transports.tooltip": {
     "defaultMessage": "API will be exposed in selected transport(s) in the gateway(s) If Mutual SSL option is selected, a trusted client certificate should be presented to access the API"
@@ -3425,9 +3425,6 @@
   },
   "Base.Header.headersearch.HeaderSearch.tooltip.option8": {
     "defaultMessage": "Documentation Content [ Syntax - doc:xxxx ]"
-  },
-  "Base.Header.headersearch.HeaderSearch.tooltip.option9": {
-    "defaultMessage": "Microgateway Label [ Syntax - label:xxxx ]"
   },
   "Base.Header.headersearch.HeaderSearch.tooltip.title": {
     "defaultMessage": "Search Options for APIs and APIProducts"

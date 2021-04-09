@@ -24,6 +24,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.notification.DefaultKeyManagerEventHandlerImpl;
@@ -98,5 +99,19 @@ public class ApimgtNotificationServiceComponent {
     protected void unsetEventStreamService(EventStreamService eventStreamService) {
 
         ServiceReferenceHolder.getInstance().setEventStreamService(null);
+    }
+
+    @Reference(name = "api.manager.config.service",
+            service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIManagerConfigurationService")
+    protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(amcService);
+    }
+
+    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
     }
 }

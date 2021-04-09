@@ -100,6 +100,7 @@ export default function GoToTryOut() {
         && (api.type === CONSTANTS.API_TYPES.WS
             || api.type === CONSTANTS.API_TYPES.WEBSUB
             || api.type === CONSTANTS.API_TYPES.SSE));
+    const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
     const getKeyRequest = async () => {
         const promisedKeyManagers = restApi.getKeyManagers();
         return promisedKeyManagers
@@ -260,7 +261,8 @@ export default function GoToTryOut() {
         || subscribedApplications.length > 0
         || api.advertiseInfo.advertised
         || !user
-        || isAsyncAPI) {
+        || isAsyncAPI
+        || isPrototypedAPI) {
         return (
             <>{redirectButton}</>
 
