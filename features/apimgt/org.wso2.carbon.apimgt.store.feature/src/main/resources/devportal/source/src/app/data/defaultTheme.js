@@ -43,7 +43,7 @@ const DefaultConfigurations = {
         page: {
             style: 'fluid', // Set the page style ( Other values available 'fixed', 'fluid')
             width: 1240, // This value is effected only when the page.style = 'fixed'
-            emptyAreadBackground: '#1e2129', // This value is effected only when the page.style = 'fixed' and window size is greater than page.width
+            emptyAreadBackground: '#ffffff', // This value is effected only when the page.style = 'fixed' and window size is greater than page.width
             border: 'none', // It can be something like 'solid 1px #cccccc' for fixed layouts
         },
         appBar: {

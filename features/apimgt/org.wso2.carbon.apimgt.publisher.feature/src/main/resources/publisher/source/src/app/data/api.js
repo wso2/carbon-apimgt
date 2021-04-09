@@ -1241,11 +1241,12 @@ class API extends Resource {
         return promised_getDocContent;
     }
 
-    getDocuments(api_id, callback) {
+    getDocuments(api_id, callback, limit=1000) {
         const promise_get_all = this.client.then(client => {
             return client.apis['API Documents'].getAPIDocuments(
                 {
                     apiId: api_id,
+                    limit,
                 },
                 this._requestMetaData(),
             );

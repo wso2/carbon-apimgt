@@ -578,7 +578,11 @@ class CreateEditForm extends React.Component {
                                     <div>
                                         <FormattedMessage
                                             id='Apis.Details.Documents.CreateEditForm.document.create.type.sample'
+<<<<<<< HEAD
                                             defaultMessage='Sample & SDK'
+=======
+                                            defaultMessage='Sample and SDK'
+>>>>>>> Fixing UI issues
                                         />
                                     </div>
                                 </div>

@@ -87,6 +87,9 @@ const styles = theme => ({
     leftCell: {
         width: 150,
     },
+    summaryView: {
+        'word-break': 'break-word',
+    },
 });
 /**
  *
@@ -195,7 +198,7 @@ function View(props) {
                                             />
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className={classes.summaryView}>
                                         <Typography variant="body1">{doc.summary}</Typography>
                                     </TableCell>
                                 </TableRow>

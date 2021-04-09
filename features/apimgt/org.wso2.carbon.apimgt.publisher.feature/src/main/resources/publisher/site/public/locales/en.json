@@ -2182,7 +2182,7 @@
   "Apis.Details.Documents.CreateEditForm.document.create.type.sample": [
     {
       "type": 0,
-      "value": "Sample & SDK"
+      "value": "Sample and SDK"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": [
