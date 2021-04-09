@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -590,6 +591,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
+            String extension = FilenameUtils.getExtension(fileName);
+            if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
+                RestApiUtil.handleBadRequest(
+                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg and .gif",
+                        log);
+            }
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                 fileContentType = fileDetail.getContentType().toString();
