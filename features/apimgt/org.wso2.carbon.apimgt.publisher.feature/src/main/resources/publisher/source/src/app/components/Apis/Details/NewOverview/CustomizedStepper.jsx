@@ -316,7 +316,7 @@ export default function CustomizedStepper() {
                                     || AuthManager.isNotPublisher()
                                     || !deploymentsAvailable}
                             >
-                                Deploy as a prototype
+                                Prototype
                                 {isUpdating && <CircularProgress size={20} />}
                             </Button>
                         ) : (
