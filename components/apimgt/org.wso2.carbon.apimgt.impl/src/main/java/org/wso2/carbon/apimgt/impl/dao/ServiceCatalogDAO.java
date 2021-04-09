@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -30,10 +30,13 @@ import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -331,8 +334,6 @@ public class ServiceCatalogDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ServiceEntry serviceEntry = getServiceParams(rs, false);
-                    serviceEntry.setEndpointDef(rs.getBinaryStream(APIConstants.ServiceCatalogConstants
-                            .SERVICE_DEFINITION));
                     return serviceEntry;
                 }
             }
@@ -355,7 +356,8 @@ public class ServiceCatalogDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION)) {
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants
+                             .GET_SERVICE_BY_NAME_AND_VERSION)) {
             ps.setString(1, name);
             ps.setString(2, version);
             ps.setInt(3, tenantId);
@@ -461,8 +463,10 @@ public class ServiceCatalogDAO {
         String[] keyArray = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             String driverName = connection.getMetaData().getDriverName();
-            if (driverName.contains("Oracle")) {
+            if (driverName.contains("Oracle") || driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
                 querySb.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+            } else if (driverName.contains("PostgreSQL")) {
+                querySb.append(" OFFSET ? LIMIT ? ");
             } else {
                 querySb.append(" LIMIT ?, ?");
             }
@@ -635,6 +639,7 @@ public class ServiceCatalogDAO {
             String serviceKey = getServiceKeyByUUID(serviceId, tenantId, connection);
             if (StringUtils.isNotEmpty(serviceKey)) {
                 ps.setString(1, serviceKey);
+                ps.setInt(2, tenantId);
                 try (ResultSet resultSet = ps.executeQuery()) {
                     while (resultSet.next()) {
                         String provider = resultSet.getString(APIConstants.FIELD_API_PUBLISHER);
@@ -733,12 +738,18 @@ public class ServiceCatalogDAO {
                         .LAST_UPDATED_TIME));
                 service.setCreatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.CREATED_BY));
                 service.setUpdatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.UPDATED_BY));
-                service.setEndpointDef(resultSet.getBinaryStream(APIConstants.ServiceCatalogConstants
-                        .SERVICE_DEFINITION));
+                InputStream serviceDefinition = resultSet.getBinaryStream(APIConstants.ServiceCatalogConstants
+                        .SERVICE_DEFINITION);
+                ByteArrayOutputStream serviceDefinitionByteArray = new ByteArrayOutputStream();
+                IOUtils.copy(serviceDefinition, serviceDefinitionByteArray);
+                service.setEndpointDef(new ByteArrayInputStream(serviceDefinitionByteArray.toByteArray()));
             }
             return service;
         } catch (SQLException e) {
             handleException("Error while setting service parameters", e);
+            return null;
+        } catch (IOException e) {
+            handleException("Error when retrieving the service definition", e);
             return null;
         }
     }

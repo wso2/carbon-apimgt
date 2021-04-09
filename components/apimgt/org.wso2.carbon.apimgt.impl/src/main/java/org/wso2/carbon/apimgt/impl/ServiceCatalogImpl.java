@@ -90,7 +90,7 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     }
 
     @Override
-    public ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId)
+    public ServiceEntry getServiceByNameAndVersion(String name, String version, int tenantId)
             throws APIManagementException {
         return catalogDAO.getServiceByNameAndVersion(name, version, tenantId);
     }

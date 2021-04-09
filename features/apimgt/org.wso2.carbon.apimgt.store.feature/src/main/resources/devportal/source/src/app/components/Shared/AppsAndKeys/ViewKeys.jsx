@@ -456,7 +456,7 @@ class ViewKeys extends React.Component {
         } = this.state;
         const {
             intl, keyType, classes, fullScreen, keys, selectedApp: { tokenType }, selectedGrantTypes, isUserOwner, summary,
-            selectedTab, hashEnabled, keyManagerConfig, initialToken,
+            selectedTab, hashEnabled, keyManagerConfig, initialToken, initialValidityTime, initialScopes,
         } = this.props;
 
         if (notFound) {
@@ -487,6 +487,8 @@ class ViewKeys extends React.Component {
             tokenDetails = keys.get(selectedTab).token;
             if (tokenDetails && !tokenDetails.accessToken) {
                 tokenDetails.accessToken = initialToken;
+                tokenDetails.validityTime = initialValidityTime;
+                tokenDetails.tokenScopes = initialScopes;
             }
         }
 

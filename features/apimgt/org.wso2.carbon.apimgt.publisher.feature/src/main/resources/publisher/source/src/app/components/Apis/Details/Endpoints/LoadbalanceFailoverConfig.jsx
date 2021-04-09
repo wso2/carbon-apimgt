@@ -376,6 +376,7 @@ function LoadbalanceFailoverConfig(props) {
                         algoCombo={epConfig.algoCombo}
                         algoClassName={epConfig.algoClassName}
                         sessionTimeOut={epConfig.sessionTimeOut}
+                        failOver={epConfig.failOver}
                         sessionManagement={epConfig.sessionManagement}
                     />
                 </DialogContent>

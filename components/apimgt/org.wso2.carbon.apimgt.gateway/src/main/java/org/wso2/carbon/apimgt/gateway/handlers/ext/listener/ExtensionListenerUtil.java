@@ -35,6 +35,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.APIRequestInfoDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionResponseStatus;
@@ -162,12 +163,18 @@ public class ExtensionListenerUtil {
         requestDTO.setApiRequestInfo(apiRequestInfoDTO);
         requestDTO.setMsgInfo(msgInfoDTO);
         requestDTO.setCustomProperty(getCustomPropertyMapFromMsgContext(messageContext));
-        org.apache.axis2.context.MessageContext axis2MC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        Object sslCertsObject = axis2MC.getProperty(NhttpConstants.SSL_CLIENT_AUTH_CERT_X509);
+
         javax.security.cert.X509Certificate[] clientCerts = null;
-        if (sslCertsObject != null) {
-            clientCerts = (X509Certificate[]) sslCertsObject;
+
+        try {
+            X509Certificate clientCertificate = Utils.getClientCertificate(
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext());
+
+            if (clientCertificate != null) {
+                clientCerts = new X509Certificate[]{clientCertificate};
+            }
+        } catch (APIManagementException e) {
+            log.error("Error when getting client certificate", e);
         }
         requestDTO.setClientCerts(clientCerts);
         return requestDTO;
