@@ -22,7 +22,6 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.util.AXIOMUtil;
-import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -47,12 +46,10 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
-import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -721,6 +718,9 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
 
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
+        if (!StringUtils.isEmpty(nextAccessTimeString)) {
+            errorDescription = errorDescription + " .You can access API after " + nextAccessTimeString;
+        }
         messageContext.setProperty(SynapseConstants.ERROR_DETAIL, errorDescription);
         messageContext.setProperty(APIMgtGatewayConstants.HTTP_RESPONSE_STATUS_CODE, httpErrorCode);
 
@@ -733,37 +733,11 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             // logic from getting executed
             return;
         }
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        // This property need to be set to avoid sending the content in pass-through pipe (request message)
-        // as the response.
-        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
-        try {
-            RelayUtils.consumeAndDiscardMessage(axis2MC);
-        } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message
-            // in the payload.
-            log.error("Error occurred while consuming and discarding the message", axisFault);
-        }
-
-        if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription, nextAccessTimeString));
-        } else {
-            if (!StringUtils.isEmpty(nextAccessTimeString)) {
-                errorDescription += errorDescription + " .You can access API after " + nextAccessTimeString;
-            }
-            setSOAPFault(messageContext, errorMessage, errorDescription);
-        }
-
         sendFault(messageContext, httpErrorCode);
     }
 
     protected void sendFault(MessageContext messageContext, int httpErrorCode) {
         Utils.sendFault(messageContext, httpErrorCode);
-    }
-
-    protected void setSOAPFault(MessageContext messageContext, String errorMessage, String errorDescription) {
-        Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
     }
 
     public void setId(String id) {
