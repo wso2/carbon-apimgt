@@ -157,6 +157,8 @@
   "Apis.Details.Overview.documents.no.content": "No Documents Available",
   "Apis.Details.Overview.documents.title": "Documents",
   "Apis.Details.Overview.error.occurred": "Error occurred",
+  "Apis.Details.Overview.error.occurred.docs": "Error occurred when fetching documents",
+  "Apis.Details.Overview.error.occurred.subs": "Error occurred when fetching subscription policies",
   "Apis.Details.Overview.key.manager": "Key Managers",
   "Apis.Details.Overview.list.provider": "By ",
   "Apis.Details.Overview.list.tags.not": "Not Tagged",

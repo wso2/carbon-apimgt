@@ -178,12 +178,12 @@ function Overview() {
         }
     };
 
-    const getSubscriptionPolicies = async () => {
+    const getSubscriptionPolicies = () => {
         const restApi = new API();
         return restApi.getAllTiers('subscription')
             .then((response) => {
                 try {
-                // Filter policies base on async or not.
+                    // Filter policies base on async or not.
                     const filteredList = response.body.list.filter((str) => isApiPolicy(str.name));
                     setAllPolicies(filteredList);
                 } catch (e) {
@@ -194,45 +194,43 @@ function Overview() {
                     }));
                 }
             }).catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
                 const { status } = error;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Overview.error.occurred.subs',
+                    defaultMessage: 'Error occurred when fetching subscription policies',
+                }));
                 if (status === 404) {
-                    Alert.error(intl.formatMessage({
-                        id: 'Apis.Details.Overview.error.occurred',
-                        defaultMessage: 'Error occurred',
-                    }));
                     setNotFound(true);
                 }
                 setAllDocuments([]);
+                setIsLoading(false);
             });
     };
 
-    const getDocuments = async () => {
+    const getDocuments = () => {
         const restApi = new API();
         return restApi.getDocumentsByAPIId(api.id)
             .then((response) => {
                 const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
                 if (overviewDoc.length > 0) {
-                // We can override the UI with this content
+                    // We can override the UI with this content
                     setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
                 }
                 setAllDocuments(response.body.list);
             })
             .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
+                console.log(error);
                 const { status } = error;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Overview.error.occurred.docs',
+                    defaultMessage: 'Error occurred when fetching documents',
+                }));
                 if (status === 404) {
-                    Alert.error(intl.formatMessage({
-                        id: 'Apis.Details.Overview.error.occurred',
-                        defaultMessage: 'Error occurred',
-                    }));
                     setNotFound(true);
                 }
                 setAllDocuments([]);
+                setIsLoading(false);
             });
     };
     useEffect(() => {
@@ -244,13 +242,10 @@ function Overview() {
         Promise.all([getDocuments(), getSubscriptionPolicies()])
             .then(() => {
                 setIsLoading(false);
-            }).catch(() => {
-                setIsLoading(false);
             });
     }, [api]);
     useEffect(() => {
         const restApi = new API();
-
         if (showSwaggerDescriptionOnOverview) {
             restApi.getSwaggerByAPIIdAndEnvironment(api.id, selectedEndpoint.environmentName)
                 .then((swaggerResponse) => {
@@ -269,8 +264,6 @@ function Overview() {
             setIsLoading(true);
             Promise.all([getDocuments(), getSubscriptionPolicies()])
                 .then(() => {
-                    setIsLoading(false);
-                }).catch(() => {
                     setIsLoading(false);
                 });
         }
