@@ -195,7 +195,10 @@ public class ExportUtils {
 
         if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
-            addSequencesToArchive(archivePath, api);
+            addRuntimeSequencesToArchive(archivePath, api);
+            if (preserveDocs) {
+                addMultipleAPISpecificSequencesToArchive(archivePath, api, apiProvider);
+            }
             // Export mTLS authentication related certificates
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Exporting client certificates.");
@@ -507,7 +510,7 @@ public class ExportUtils {
      * @param archivePath File path to export the sequences
      * @throws APIImportExportException If an error occurs while exporting sequences
      */
-    public static void addSequencesToArchive(String archivePath, API api)
+    public static void addRuntimeSequencesToArchive(String archivePath, API api)
             throws APIImportExportException, APIManagementException {
 
         String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
@@ -575,6 +578,44 @@ public class ExportUtils {
     }
 
     /**
+     * Retrieve multiple API specific sequences for API export, and store it in the archive
+     * directory.
+     *
+     * @param archivePath File path to export the sequences
+     * @param api         API
+     * @param apiProvider API Provider
+     * @throws APIManagementException   If an error occurs while retrieving sequences and writing those
+     * @throws APIImportExportException If an error occurs while creating the directory to export sequences
+     */
+    private static void addMultipleAPISpecificSequencesToArchive(String archivePath, API api, APIProvider apiProvider)
+            throws APIManagementException, APIImportExportException {
+        String seqArchivePath = archivePath.concat(File.separator + ImportExportConstants.SEQUENCES_RESOURCE);
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomain(api.getId().getProviderName()));
+        if (!CommonUtil.checkFileExistence(seqArchivePath)) {
+            CommonUtil.createDirectory(seqArchivePath);
+        }
+        // Getting list of API specific custom mediation policies
+        List<Mediation> apiSpecificMediationList = apiProvider
+                .getAllApiSpecificMediationPolicies(api.getUuid(), tenantDomain);
+        if (!apiSpecificMediationList.isEmpty()) {
+            for (Mediation mediation : apiSpecificMediationList) {
+                Mediation mediationResource = apiProvider
+                        .getApiSpecificMediationPolicyByPolicyId(api.getUuid(), mediation.getUuid(), tenantDomain);
+                String individualSequenceExportPath =
+                        seqArchivePath + File.separator + mediation.getType().toLowerCase()
+                                + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX + File.separator
+                                + ImportExportConstants.CUSTOM_TYPE;
+                if (!CommonUtil.checkFileExistence(individualSequenceExportPath)) {
+                    CommonUtil.createDirectory(individualSequenceExportPath);
+                }
+                writeSequenceToArchive(mediationResource.getConfig(), individualSequenceExportPath,
+                        mediation.getName());
+            }
+        }
+    }
+
+    /**
      * Write the sequence to API archive.
      *
      * @param mediation                    Mediation content
@@ -583,14 +624,12 @@ public class ExportUtils {
      * @throws APIManagementException If an error occurs while writing the mediation policy to file
      */
     private static void writeSequenceToArchive(String mediation, String individualSequenceExportPath,
-                                               String mediationName)
-            throws APIManagementException {
-
-        if (mediation != null) {
-            try (OutputStream outputStream = new FileOutputStream(
-                    individualSequenceExportPath + File.separator + mediationName + APIConstants.DOT
-                            + APIConstants.XML_DOC_EXTENSION);
-                 InputStream fileInputStream = new ByteArrayInputStream(mediation.getBytes())) {
+            String mediationName) throws APIManagementException {
+        String mediationFilePath = individualSequenceExportPath + File.separator + mediationName + APIConstants.DOT
+                + APIConstants.XML_DOC_EXTENSION;
+        if (StringUtils.isNotBlank(mediation) && !CommonUtil.checkFileExistence(mediationFilePath)) {
+            try (OutputStream outputStream = new FileOutputStream(mediationFilePath);
+                    InputStream fileInputStream = new ByteArrayInputStream(mediation.getBytes())) {
                 IOUtils.copy(fileInputStream, outputStream);
             } catch (IOException e) {
                 throw new APIManagementException(
