@@ -193,6 +193,9 @@ export default {
                 restApiIcon: '/site/public/images/landing-icons/restapi.svg',
                 soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
                 streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+                serviceCatalogApiIcon: '/site/public/images/landing-icons/servicecatalogapi.svg',
+                scopesAddIcon: '/site/public/images/landing-icons/scopes.svg',
+                apiproductAddIcon: '/site/public/images/landing-icons/apiproduct.svg',
             },
             menu: {
                 primary: '#34679D',

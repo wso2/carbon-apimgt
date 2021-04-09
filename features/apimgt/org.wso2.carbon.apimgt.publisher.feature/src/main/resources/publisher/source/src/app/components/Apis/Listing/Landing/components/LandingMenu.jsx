@@ -76,22 +76,24 @@ const LandingMenu = (props) => {
                     justify='center'
                     alignItems='center'
                 >
-                    {title}
                     <Grid item xs={12}>
                         <Box
                             alignItems='center'
                             mt={2}
+                            mb={4}
                             justifyContent='center'
                             display={{ xs: 'none', sm: 'flex' }}
                         >
                             <img
-                                width='90px'
+                                width='190px'
                                 src={Configurations.app.context
                                     + icon}
                                 alt={title}
+                                aria-hidden='true'
                             />
                         </Box>
                     </Grid>
+                    {title}
                 </Grid>
                 <Box
                     position='absolute'
