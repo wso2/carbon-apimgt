@@ -132,6 +132,7 @@ function Overview() {
     const intl = useIntl();
     const { api, subscribedApplications } = useContext(ApiContext);
     const [descriptionHidden, setDescriptionHidden] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [allDocuments, setAllDocuments] = useState(null);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
@@ -146,7 +147,6 @@ function Overview() {
         ? api.endpointURLs[0]
         : null);
     const classes = useStyles();
-
 
     // Truncating the description
     let descriptionIsBig = false;
@@ -165,6 +165,89 @@ function Overview() {
         return filteredApiPolicies && filteredApiPolicies.length > 0;
     };
 
+    const updateSelectedEndpoint = (e) => {
+        const selectedEnvName = e.target.value;
+        const filteredEndpoints = api.endpointURLs.filter((ep) => ep.environmentName === selectedEnvName);
+        if (filteredEndpoints && filteredEndpoints.length > 0) {
+            setSelectedEndpoint(filteredEndpoints[0]);
+        } else {
+            Alert.error(intl.formatMessage({
+                id: 'Apis.Details.Overview.select.env.error',
+                defaultMessage: 'Error Selecting Environment',
+            }));
+        }
+    };
+
+    const getSubscriptionPolicies = async () => {
+        const restApi = new API();
+        return restApi.getAllTiers('subscription')
+            .then((response) => {
+                try {
+                // Filter policies base on async or not.
+                    const filteredList = response.body.list.filter((str) => isApiPolicy(str.name));
+                    setAllPolicies(filteredList);
+                } catch (e) {
+                    console.log(e);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Overview.error.occurred',
+                        defaultMessage: 'Error occurred',
+                    }));
+                }
+            }).catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Overview.error.occurred',
+                        defaultMessage: 'Error occurred',
+                    }));
+                    setNotFound(true);
+                }
+                setAllDocuments([]);
+            });
+    };
+
+    const getDocuments = async () => {
+        const restApi = new API();
+        return restApi.getDocumentsByAPIId(api.id)
+            .then((response) => {
+                const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
+                if (overviewDoc.length > 0) {
+                // We can override the UI with this content
+                    setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
+                }
+                setAllDocuments(response.body.list);
+            })
+            .catch((error) => {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log(error);
+                }
+                const { status } = error;
+                if (status === 404) {
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Overview.error.occurred',
+                        defaultMessage: 'Error occurred',
+                    }));
+                    setNotFound(true);
+                }
+                setAllDocuments([]);
+            });
+    };
+    useEffect(() => {
+        setIsLoading(true);
+        const { endpointURLs } = api;
+        if (endpointURLs && endpointURLs.length > 0) {
+            setSelectedEndpoint(endpointURLs[0]);
+        }
+        Promise.all([getDocuments(), getSubscriptionPolicies()])
+            .then(() => {
+                setIsLoading(false);
+            }).catch(() => {
+                setIsLoading(false);
+            });
+    }, [api]);
     useEffect(() => {
         const restApi = new API();
 
@@ -183,58 +266,16 @@ function Overview() {
                     setSwaggerDescription('');
                 });
         } else {
-            restApi.getDocumentsByAPIId(api.id)
-                .then((response) => {
-                    const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
-                    if (overviewDoc.length > 0) {
-                        // We can override the UI with this content
-                        setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
-                    }
-                    setAllDocuments(response.body.list);
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Details.Overview.error.occurred',
-                            defaultMessage: 'Error occurred',
-                        }));
-                        setNotFound(true);
-                    }
-                    setAllDocuments([]);
-                });
-            restApi.getAllTiers('subscription')
-                .then((response) => {
-                    try {
-                        // Filter policies base on async or not.
-                        const filteredList = response.body.list.filter((str) => isApiPolicy(str.name));
-                        setAllPolicies(filteredList);
-                    } catch (e) {
-                        console.log(e);
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Details.Overview.error.occurred',
-                            defaultMessage: 'Error occurred',
-                        }));
-                    }
-                }).catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Details.Overview.error.occurred',
-                            defaultMessage: 'Error occurred',
-                        }));
-                        setNotFound(true);
-                    }
-                    setAllDocuments([]);
+            setIsLoading(true);
+            Promise.all([getDocuments(), getSubscriptionPolicies()])
+                .then(() => {
+                    setIsLoading(false);
+                }).catch(() => {
+                    setIsLoading(false);
                 });
         }
     }, []);
+
 
     /**
      * @param {event} e click event
@@ -269,19 +310,6 @@ function Overview() {
         }
     };
 
-    const updateSelectedEndpoint = (e) => {
-        const selectedEnvName = e.target.value;
-        const filteredEndpoints = api.endpointURLs.filter((ep) => ep.environmentName === selectedEnvName);
-        if (filteredEndpoints && filteredEndpoints.length > 0) {
-            setSelectedEndpoint(filteredEndpoints[0]);
-        } else {
-            Alert.error(intl.formatMessage({
-                id: 'Apis.Details.Overview.select.env.error',
-                defaultMessage: 'Error Selecting Environment',
-            }));
-        }
-    };
-
     /**
      * @param {JSON} api api object
      * @returns {JSON} key managers
@@ -301,6 +329,9 @@ function Overview() {
     };
 
     const user = AuthManager.getUser();
+    if (isLoading) {
+        return (<Progress />);
+    }
     if (showSwaggerDescriptionOnOverview) {
         if (!swaggerDescription) {
             return (<Progress />);
