@@ -43,9 +43,20 @@ const useStyles = makeStyles((theme) => {
         root: {
             display: 'flex',
         },
-        square: ({ char, width, height }) => {
-            const { colorMap, offset, width: defaultWidth } = theme.custom.thumbnail;
-            const [light, dark] = getColorFromLetter(char, colorMap, offset);
+        thumbIcon: ({ width }) => {
+            const { width: defaultWidth } = theme.custom.thumbnail;
+            const fontSize = Math.ceil((width * 90) / defaultWidth);
+            return {
+                fontSize,
+            };
+        },
+        square: ({
+            char, width, height, bgColor,
+        }) => {
+            const {
+                colorMap, offset, width: defaultWidth, textShadow,
+            } = theme.custom.thumbnail;
+            const [light, dark] = getColorFromLetter(bgColor === false ? '' : char, colorMap, offset);
             const fontSize = Math.ceil((width * 70) / defaultWidth);
             /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
             const background = light && `linear-gradient(to right, ${light}, ${dark})`;
@@ -62,25 +73,25 @@ const useStyles = makeStyles((theme) => {
                 height,
                 width,
                 fontSize: `${fontSize}px`,
-                textShadow: '0 1px 0 #ccc, '
-                    + '0 2px 0 #c9c9c9,'
-                    + ' 0 1px 3px rgba(0,0,0,.3),'
-                    + ' 0 10px 10px rgba(0,0,0,.2),'
-                    + ' 0 20px 20px rgba(0,0,0,.15)',
+                textShadow,
             };
         },
     };
 });
 
 export default (props) => {
-    const { api, width, height } = props;
-    const name = api.name.substring(0, 2);
-    const classes = useStyles({ char: name.substring(0, 1), width, height });
+    const {
+        artifact, width, height, charLength = 2, ThumbIcon, bgColor,
+    } = props;
+    const name = artifact.name.substring(0, charLength);
+    const classes = useStyles({
+        char: name.substring(0, 1), width, height, bgColor,
+    });
 
     return (
         <div className={classes.root}>
             <Avatar variant='square' className={classes.square}>
-                {capitalizeFirstLetter(name)}
+                {ThumbIcon ? <ThumbIcon className={classes.thumbIcon} /> : capitalizeFirstLetter(name)}
             </Avatar>
         </div>
     );

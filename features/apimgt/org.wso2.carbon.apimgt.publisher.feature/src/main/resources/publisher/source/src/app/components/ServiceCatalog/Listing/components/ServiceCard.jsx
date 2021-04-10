@@ -93,7 +93,7 @@ export default function ServiceCard(props) {
                     component={LetterGenerator}
                     width={theme.spacing(25)}
                     height={theme.spacing(15)}
-                    api={{ name: service.name }}
+                    artifact={service}
                 />
                 <Box p={1} pb={0}>
                     <Tooltip placement='top-start' interactive title={service.name}>

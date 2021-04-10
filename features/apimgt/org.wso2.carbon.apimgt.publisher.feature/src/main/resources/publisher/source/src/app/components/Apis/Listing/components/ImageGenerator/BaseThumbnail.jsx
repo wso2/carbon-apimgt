@@ -160,7 +160,7 @@ const BaseThumbnail = (props) => {
         <LetterGenerator
             width={width}
             height={height}
-            api={api}
+            artifact={api}
         />
     );
     // If configured the thumbnail variant as `image` or migrated from old thumbnail

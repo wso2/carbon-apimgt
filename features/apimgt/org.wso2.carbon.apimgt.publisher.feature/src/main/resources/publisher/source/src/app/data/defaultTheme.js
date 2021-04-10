@@ -171,6 +171,7 @@ export default {
         thumbnail: {
             width: 240,
             height: 140,
+            textShadow: '0 1px 0 #ccc,0 1px 3px rgba(0,0,0,.1), 0 10px 10px rgba(0,0,0,.1), 0 20px 20px rgba(0,0,0,.1)',
             offset: 0.4, // Ratio between dark and light gradient, don't want a gradient make it 0
             colorMap: { // Any hashed color code or if you remove a mapping will fallback to default
                 a: '#CC5262',
