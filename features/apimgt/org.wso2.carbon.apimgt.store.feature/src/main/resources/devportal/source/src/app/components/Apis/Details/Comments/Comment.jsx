@@ -397,7 +397,7 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, apiId, allComments, commentsUpdate, isOverview, crossTenentUser,
+            classes, comments, apiId, allComments, isOverview, crossTenentUser,
         } = this.props;
 
         const { editIndex, openDialog, replyId } = this.state;
@@ -452,7 +452,6 @@ class Comment extends React.Component {
                                                         apiId={apiId}
                                                         replyTo={comment.id}
                                                         allComments={allComments}
-                                                        commentsUpdate={commentsUpdate}
                                                         handleShowReply={this.handleShowReply}
                                                         cancelButton
                                                         addReply={this.handleAddReply}
@@ -488,7 +487,6 @@ class Comment extends React.Component {
                                                                     <CommentEdit
                                                                         apiId={apiId}
                                                                         allComments={reply}
-                                                                        commentsUpdate={commentsUpdate}
                                                                         comment={reply}
                                                                         toggleShowEdit={this.handleShowEdit}
                                                                     />
@@ -561,7 +559,6 @@ Comment.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
-    commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
     isOverview: PropTypes.bool,
     crossTenentUser: PropTypes.bool.isRequired,

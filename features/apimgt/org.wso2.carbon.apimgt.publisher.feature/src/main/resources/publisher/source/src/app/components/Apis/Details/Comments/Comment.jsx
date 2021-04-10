@@ -405,7 +405,7 @@ class Comment extends React.Component {
      */
     render() {
         const {
-            classes, comments, api, allComments, commentsUpdate, isOverview,
+            classes, comments, api, allComments, isOverview,
         } = this.props;
 
         const { editIndex, openDialog, replyId } = this.state;
@@ -458,7 +458,6 @@ class Comment extends React.Component {
                                                         api={api}
                                                         replyTo={comment.id}
                                                         allComments={allComments}
-                                                        commentsUpdate={commentsUpdate}
                                                         handleShowReply={this.handleShowReply}
                                                         cancelButton
                                                         addReply={this.handleAddReply}
@@ -507,7 +506,6 @@ class Comment extends React.Component {
                                                                     <CommentEdit
                                                                         api={api}
                                                                         allComments={reply}
-                                                                        commentsUpdate={commentsUpdate}
                                                                         comment={reply}
                                                                         toggleShowEdit={this.handleShowEdit}
                                                                     />
@@ -594,7 +592,6 @@ Comment.propTypes = {
     classes: PropTypes.shape({}).isRequired,
     api: PropTypes.instanceOf(Object).isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
-    commentsUpdate: PropTypes.func.isRequired,
     comments: PropTypes.instanceOf(Array).isRequired,
     isOverview: PropTypes.bool,
     updateComment: PropTypes.func.isRequired,

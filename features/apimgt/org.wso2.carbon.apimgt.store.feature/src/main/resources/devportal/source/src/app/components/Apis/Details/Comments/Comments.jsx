@@ -110,14 +110,12 @@ class Comments extends Component {
             apiId: null,
             showCommentAdd: false,
         };
-        this.updateCommentList = this.updateCommentList.bind(this);
         this.handleExpandClick = this.handleExpandClick.bind(this);
         this.handleLoadMoreComments = this.handleLoadMoreComments.bind(this);
         this.toggleCommentAdd = this.toggleCommentAdd.bind(this);
         this.addComment = this.addComment.bind(this);
         this.updateComment = this.updateComment.bind(this);
         this.onDeleteComment = this.onDeleteComment.bind(this);
-        this.refreshCommentList = this.refreshCommentList.bind(this);
     }
 
     /**
@@ -245,44 +243,6 @@ class Comments extends Component {
     }
 
     /**
-     * Refresh comment list
-     * @memberof Comments
-     */
-    refreshCommentList() {
-        const {
-            theme: { custom: { commentsLimit } },
-        } = this.props;
-        const { apiId, comments } = this.state;
-        const restApi = new API();
-
-        restApi
-            .getAllComments(apiId, comments.length, 0)
-            .then((result) => {
-                const { list, pagination } = result.body;
-                if (pagination.total < commentsLimit) {
-                    this.setState({
-                        allComments: list,
-                        totalComments: pagination.total,
-                        startCommentsToDisplay: 0,
-                        comments: list,
-                    });
-                } else {
-                    this.setState({
-                        allComments: list,
-                        totalComments: pagination.total,
-                        startCommentsToDisplay: pagination.total - commentsLimit,
-                        comments: list,
-                    });
-                }
-            })
-            .catch((error) => {
-                if (process.env.NODE_ENV !== 'production') {
-                    console.log(error);
-                }
-            });
-    }
-
-    /**
      * Delete a comment
      * @param {string} commentIdOfCommentToDelete id of deleted commetn
      * @memberof Comments
@@ -321,46 +281,6 @@ class Comments extends Component {
                 totalComments: newTotal,
                 comments: remainingComments,
                 allComments: remainingComments,
-                });
-        }
-    }
-
-    /**
-     * Updates the comment list, This is passed through props to child component
-     * @param {any} comments Updated comment list
-     * @memberof Comments
-     */
-    updateCommentList(comments) {
-        const { startCommentsToDisplay, totalComments } = this.state;
-        const { theme } = this.props;
-        let newStart;
-        let difference;
-        let newTotal;
-        this.setState({ allComments: comments });
-        if (totalComments < theme.custom.commentsLimit) {
-            newTotal = comments.length;
-            this.setState({ startCommentsToDisplay: 0, totalComments: newTotal, comments });
-        } else if (totalComments <= comments.length) {
-            difference = comments.length - totalComments;
-            newStart = startCommentsToDisplay + difference;
-            newTotal = comments.length;
-            this.setState({
-                startCommentsToDisplay: newStart,
-                totalComments: newTotal,
-                comments: comments.slice(newStart, newTotal),
-            });
-        } else {
-            difference = totalComments - comments.length;
-            if (startCommentsToDisplay === 0) {
-                newStart = startCommentsToDisplay;
-            } else {
-                newStart = startCommentsToDisplay - difference;
-            }
-            newTotal = comments.length;
-            this.setState({
-                startCommentsToDisplay: newStart,
-                totalComments: newTotal,
-                comments: comments.slice(newStart, newTotal),
             });
         }
     }
@@ -406,9 +326,9 @@ class Comments extends Component {
      * @memberof Comments
      */
     render() {
-        const { classes, showLatest, isOverview, } = this.props;
+        const { classes, isOverview, } = this.props;
         const {
-            comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate, showCommentAdd,
+            comments, allComments, totalComments, showCommentAdd,
         } = this.state;
         return (
             <ApiContext.Consumer>
@@ -482,7 +402,6 @@ class Comments extends Component {
                             crossTenentUser={AuthManager.getUser() ? 
                                 this.isCrossTenant(api.provider, AuthManager.getUser()) : null}
                             apiId={api.id}
-                            commentsUpdate={this.updateCommentList}
                             allComments={allComments}
                             onDeleteComment={this.onDeleteComment}
                             updateComment={this.updateComment}
