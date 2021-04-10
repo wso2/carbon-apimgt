@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -77,14 +76,16 @@ export default function DeploymentOnboarding(props) {
     const defaultVhosts = settings.environment.map(
         (e) => (e.vhosts && e.vhosts.length > 0 ? { env: e.name, vhost: e.vhosts[0].host } : undefined),
     );
-    const [DescriptionOpen, setDescriptionOpen] = useState(false);
-    const [SelectedEnvironment, setSelectedEnvironment] = useState([]);
-    // const [currentLength, setCurrentLength] = useState(0);
+    const [descriptionOpen, setDescriptionOpen] = useState(false);
+    const [selectedEnvironment, setSelectedEnvironment] = useState([]);
     const [selectedVhostDeploy, setVhostsDeploy] = useState(defaultVhosts);
 
-    const handleDescriptionOpen = () => {
-        setDescriptionOpen(!DescriptionOpen);
-    };
+    /**
+     * Handle Description
+     */
+    function handleDescriptionOpen() {
+        setDescriptionOpen(!descriptionOpen);
+    }
 
     const handleVhostDeploySelect = (event) => {
         const vhosts = selectedVhostDeploy.filter((v) => v.env !== event.target.name);
@@ -94,15 +95,14 @@ export default function DeploymentOnboarding(props) {
 
     const handleChange = (event) => {
         if (event.target.checked) {
-            setSelectedEnvironment([...SelectedEnvironment, event.target.value]);
+            setSelectedEnvironment([...selectedEnvironment, event.target.value]);
         } else {
             setSelectedEnvironment(
-                SelectedEnvironment.filter((env) => env !== event.target.value),
+                selectedEnvironment.filter((env) => env !== event.target.value),
             );
         }
         if (event.target.name === 'description') {
             setDescription(event.target.value);
-            // setCurrentLength(event.target.value.length);
         }
     };
 
@@ -144,8 +144,8 @@ export default function DeploymentOnboarding(props) {
                                     {settings.environment.map((row) => (
                                         <Grid item xs={3}>
                                             <Card
-                                                className={clsx(SelectedEnvironment
-                                                    && SelectedEnvironment.includes(row.name)
+                                                className={clsx(selectedEnvironment
+                                                    && selectedEnvironment.includes(row.name)
                                                     ? (classes.changeCard) : (classes.noChangeCard),
                                                 classes.cardHeight)}
                                                 variant='outlined'
@@ -156,7 +156,7 @@ export default function DeploymentOnboarding(props) {
                                                             <Checkbox
                                                                 id={row.name.split(' ').join('')}
                                                                 value={row.name}
-                                                                checked={SelectedEnvironment.includes(row.name)}
+                                                                checked={selectedEnvironment.includes(row.name)}
                                                                 onChange={handleChange}
                                                                 color='primary'
                                                                 icon={<RadioButtonUncheckedIcon />}
@@ -253,7 +253,7 @@ export default function DeploymentOnboarding(props) {
                                     (optional)
                                 </Typography>
                                 <br />
-                                {DescriptionOpen && (
+                                {descriptionOpen && (
                                     <>
                                         <TextField
                                             className={classes1.descriptionWidth}
@@ -274,9 +274,6 @@ export default function DeploymentOnboarding(props) {
                                             defaultValue={description === true ? '' : description}
                                             onBlur={handleChange}
                                         />
-                                        {/* <Typography className={classes.textCount} align='right'>
-                                            {currentLength + '/' + maxCommentLength}
-                                        </Typography> */}
                                     </>
                                 )}
                             </Box>
@@ -285,10 +282,10 @@ export default function DeploymentOnboarding(props) {
                                     type='submit'
                                     variant='contained'
                                     onClick={
-                                        () => createDeployRevision(SelectedEnvironment, selectedVhostDeploy)
+                                        () => createDeployRevision(selectedEnvironment, selectedVhostDeploy)
                                     }
                                     color='primary'
-                                    disabled={SelectedEnvironment.length === 0}
+                                    disabled={selectedEnvironment.length === 0}
                                 >
                                     <FormattedMessage
                                         id='Apis.Details.Environments.Environments.deploy.deploy'
