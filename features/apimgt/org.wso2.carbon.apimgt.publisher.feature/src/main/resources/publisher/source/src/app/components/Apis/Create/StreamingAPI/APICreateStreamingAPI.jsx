@@ -51,7 +51,6 @@ const APICreateStreamingAPI = (props) => {
     const [isDeploying, setIsDeploying] = useState(false);
     const [isPublishButtonClicked, setIsPublishButtonClicked] = useState(false);
     const classes = useStyles();
-    const [hideEndpoint, setHideEndpoint] = useState(true);
     const [policies, setPolicies] = useState([]);
 
     useEffect(() => {
