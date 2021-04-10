@@ -1512,6 +1512,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
                         usedProductResources.toString() + " are used by one or more API Products", log);
             }
+
+            // check user has publisher role and API is in published or deprecated state
+            if (!APIUtil.isRoleExistForUser(username, "Internal/publisher") && (
+                    APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus()) || APIConstants.DEPRECATED
+                            .equalsIgnoreCase(api.getStatus()))) {
+                RestApiUtil.handleConflict(username + " cannot remove the API", log);
+            }
             //deletes the API
             apiProvider.deleteAPI(api);
             return Response.ok().build();
