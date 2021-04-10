@@ -1734,6 +1734,18 @@
   "Apis.Details.Endpoints.Prototype.InlineEndpoints.script": {
     "defaultMessage": "Script"
   },
+  "Apis.Details.Environments\n                                                                                .deploy.vhost": {
+    "defaultMessage": "VHost"
+  },
+  "Apis.Details.Environments.Environments\n                                                                    .select.table": {
+    "defaultMessage": "Select Revision"
+  },
+  "Apis.Details.Environments.Environments\n                                                                    .select.vhost": {
+    "defaultMessage": "Select Access URL"
+  },
+  "Apis.Details.Environments.Environments\n                                                                .deploy.button": {
+    "defaultMessage": "Deploy"
+  },
   "Apis.Details.Environments.Environments.APIGateways": {
     "defaultMessage": "API Gateways"
   },
@@ -1755,9 +1767,6 @@
   "Apis.Details.Environments.Environments.create.create": {
     "defaultMessage": "Create"
   },
-  "Apis.Details.Environments.Environments.deploy.button": {
-    "defaultMessage": "Deploy"
-  },
   "Apis.Details.Environments.Environments.deploy.cancel": {
     "defaultMessage": "Cancel"
   },
@@ -1776,8 +1785,11 @@
   "Apis.Details.Environments.Environments.deployments.sub.heading": {
     "defaultMessage": "Create revisions and deploy in Gateway Environments"
   },
-  "Apis.Details.Environments.Environments.display.in.devportal": {
-    "defaultMessage": "Display in Developer Portal"
+  "Apis.Details.Environments.Environments.display.devportal": {
+    "defaultMessage": "Display Gateway Access URLs in developer portal."
+  },
+  "Apis.Details.Environments.Environments.gateway\n                                                    .deployed.revision": {
+    "defaultMessage": "Deployed Revision"
   },
   "Apis.Details.Environments.Environments.gateway.accessUrl": {
     "defaultMessage": "Gateway Access URL"
@@ -1785,8 +1797,8 @@
   "Apis.Details.Environments.Environments.gateway.action": {
     "defaultMessage": "Action"
   },
-  "Apis.Details.Environments.Environments.gateway.deployed.revision": {
-    "defaultMessage": "Deployed Revision"
+  "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": {
+    "defaultMessage": "Brief description of the new revision"
   },
   "Apis.Details.Environments.Environments.revision.create.heading": {
     "defaultMessage": "Create New Revision (From Current API)"
@@ -1845,14 +1857,11 @@
   "Apis.Details.Environments.Environments.select.rev.warning": {
     "defaultMessage": "Please delete a revision as the number of revisions have reached a maximum of {count}"
   },
-  "Apis.Details.Environments.Environments.select.table": {
-    "defaultMessage": "Select Revision"
-  },
-  "Apis.Details.Environments.Environments.select.vhost": {
-    "defaultMessage": "Select Access URL"
-  },
   "Apis.Details.Environments.Environments.undeploy.btn": {
     "defaultMessage": "Undeploy"
+  },
+  "Apis.Details.Environments.Environments.visibility.in.devportal": {
+    "defaultMessage": "Gateway URL Visibility"
   },
   "Apis.Details.Environments.deploy.vhost": {
     "defaultMessage": "VHost"

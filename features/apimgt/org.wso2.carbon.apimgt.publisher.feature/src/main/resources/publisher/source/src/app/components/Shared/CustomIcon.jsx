@@ -320,7 +320,7 @@ CustomIcon.defaultProps = {
     strokeColor: '#ffffff',
     width: 32,
     height: 32,
-    icon: 'api',
+    icon: 'apis',
     className: '',
 };
 
