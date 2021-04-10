@@ -454,7 +454,7 @@ export default function RuntimeConfiguration() {
     return (
         <>
             <Box pb={3}>
-                <Typography variant='h5'>
+                <Typography id='itest-api-details-runtime-config-head' variant='h5'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.RuntimeConfiguration.topic.header'
                         defaultMessage='Runtime Configurations'

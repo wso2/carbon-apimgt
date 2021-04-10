@@ -1844,7 +1844,7 @@ class API extends Resource {
      */
     getSwagger(id = this.id, environmentName = '') {
         const payload = { apiId: id };
-        if(environmentName) {
+        if (environmentName) {
             payload[environmentName] = environmentName;
         }
         return this.client.then((client) => {
@@ -1988,6 +1988,16 @@ class API extends Resource {
      * @returns
      */
     getDeployedRevisions() {
+        if (this.isRevision) {
+            return this.client.then(client => {
+                return client.apis['API Revisions'].getAPIRevisionDeployments({
+                    apiId: this.revisionedApiId,
+                },
+                ).then(res => {
+                    return { body: res.body.filter(a => a.revisionUuid === this.id) }
+                });
+            });
+        }
         return this.client.then(client => {
             return client.apis['API Revisions'].getAPIRevisionDeployments({
                 apiId: this.id,
@@ -2112,7 +2122,7 @@ class API extends Resource {
                         apiId: apiId,
                         deploymentId: deploymentId
                     },
-                    { requestBody: body},
+                    { requestBody: body },
                     this._requestMetaData(),
                 );
             });
@@ -2132,7 +2142,7 @@ class API extends Resource {
                 {
                     serviceKey: serviceKey,
                 },
-                { requestBody: apiMetaData},
+                { requestBody: apiMetaData },
                 this._requestMetaData()
             );
         });

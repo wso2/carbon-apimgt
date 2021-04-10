@@ -160,7 +160,7 @@ const TryOutConsole = () => {
     const isAPIRetired = api.lifeCycleStatus === 'RETIRED';
     return (
         <>
-            <Typography variant='h4' component='h1'>
+            <Typography id='itest-api-details-try-out-head' variant='h4' component='h1'>
                 <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
             </Typography>
             <Paper elevation={0}>
@@ -225,7 +225,9 @@ const TryOutConsole = () => {
                             <Alert variant='outlined' severity='error'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.deployments.no'
-                                    defaultMessage='API is not deployed yet! Please deploy the API before trying out'
+                                    defaultMessage={'{artifactType} is not deployed yet! Please deploy '
+                                    + 'the {artifactType} before trying out'}
+                                    values={{ artifactType: api.isRevision ? 'Revision' : 'API' }}
                                 />
                                 <Link to={'/apis/' + api.id + '/deployments'}>
                                     <LaunchIcon
@@ -267,12 +269,6 @@ const TryOutConsole = () => {
                                         value={(selectedDeployment && selectedDeployment.name) || ''}
                                         name='selectedEnvironment'
                                         onChange={deploymentSelectionHandler}
-                                        helperText={(
-                                            <FormattedMessage
-                                                defaultMessage='Please select an environment'
-                                                id='Apis.Details.ApiConsole.SelectAppPanel.environment'
-                                            />
-                                        )}
                                         margin='normal'
                                         variant='outlined'
                                         SelectProps={{

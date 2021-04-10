@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     footer: {
         backgroundColor: theme.palette.grey.A100,
         paddingLeft: theme.spacing(3),
-        height: 50,
+        height: theme.custom.footer.height,
         alignItems: 'center',
         display: 'flex',
     },
