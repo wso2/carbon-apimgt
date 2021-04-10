@@ -316,13 +316,12 @@ class Comment extends React.Component {
             restApi
                 .getAllCommentReplies(apiId, parentCommentId, 1, newLimit - 1)
                 .then((result) => {
-                    const data = JSON.parse(result.data);
-                    if (data) {
+                    if (result.body) {
                         const updatedComment = {
                             ...existingComment,
                             replies: {
                                 ...replies,
-                                list: [...updatedRepliesList, ...data.list],
+                                list: [...updatedRepliesList, ...result.body.list],
                                 pagination: {
                                     ...replies.pagination,
                                     total: newTotal,

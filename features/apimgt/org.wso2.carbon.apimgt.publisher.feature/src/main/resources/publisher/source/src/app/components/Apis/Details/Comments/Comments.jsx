@@ -158,12 +158,11 @@ class Comments extends Component {
             CommentsAPI
                 .all(apiId, 1, remainingComments.length)
                 .then((result) => {
-                    const data = JSON.parse(result.data);
-                    if (data) {
+                    if (result.body) {
                         this.setState({
                             totalComments: newTotal,
-                            comments: [...remainingComments, ...data.list],
-                            allComments: [...remainingComments, ...data.list],
+                            comments: [...remainingComments, ...result.body.list],
+                            allComments: [...remainingComments, ...result.body.list],
                         });
                     }
                 })

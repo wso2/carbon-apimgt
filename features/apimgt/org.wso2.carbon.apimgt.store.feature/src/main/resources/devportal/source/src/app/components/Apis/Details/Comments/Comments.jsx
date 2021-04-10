@@ -261,11 +261,11 @@ class Comments extends Component {
             restApi
                 .getAllComments(apiId, 1, remainingComments.length)
                 .then((result) => {
-                    if (result.data) {
+                    if (result.body) {
                         this.setState({
                             totalComments: newTotal,
-                            comments: [...remainingComments, ...result.data.list],
-                            allComments: [...remainingComments, ...result.data.list],
+                            comments: [...remainingComments, ...result.body.list],
+                            allComments: [...remainingComments, ...result.body.list],
                         });
                     }
                 })
