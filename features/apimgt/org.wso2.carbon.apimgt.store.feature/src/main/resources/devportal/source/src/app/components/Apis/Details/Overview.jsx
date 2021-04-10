@@ -664,7 +664,31 @@ function Overview() {
                             </Box>
                         </>
                     )}
-
+                    {api.additionalProperties && Object.keys(api.additionalProperties).length > 0 && (
+                        <>
+                            <Box mt={6}>
+                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.additional.properties'
+                                        defaultMessage='Additonal properties'
+                                    />
+                                </Typography>
+                            </Box>
+                            <Box mt={1} ml={1}>
+                                {Object.keys(api.additionalProperties).map((property) => {
+                                    return (
+                                        <Typography variant='body2'>
+                                            {property}
+                                            {' '}
+                                            :
+                                            {' '}
+                                            {api.additionalProperties[property]}
+                                        </Typography>
+                                    );
+                                })}
+                            </Box>
+                        </>
+                    )}
                 </Grid>
             </Grid>
         </Paper>
