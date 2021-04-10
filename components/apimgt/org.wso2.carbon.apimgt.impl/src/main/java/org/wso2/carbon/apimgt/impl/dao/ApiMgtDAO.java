@@ -8916,8 +8916,8 @@ public class ApiMgtDAO {
      * @param applicationId
      * @param keyType
      * @param keyManagerName
+     * @param keymanagerUUID
      * @param updatedAppInfo
-     * @param
      * @throws APIManagementException
      */
     public void updateApplicationKeyTypeMetaData(int applicationId, String keyType, String keyManagerName,
