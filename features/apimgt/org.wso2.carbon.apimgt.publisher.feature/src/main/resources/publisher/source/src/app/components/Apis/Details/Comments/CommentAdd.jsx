@@ -53,8 +53,8 @@ const styles = (theme) => ({
         },
     },
     commentAddButton: {
-        '& span.MuiButton-label': {
-            color: theme.palette.getContrastText(theme.palette.primary.main),
+        '& > span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main) + '! important',
         },
     },
 });
