@@ -2170,7 +2170,7 @@
   "Apis.Details.Documents.CreateEditForm.document.create.type.sample": [
     {
       "type": 0,
-      "value": "Sample &amp; SDK"
+      "value": "Sample & SDK"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": [
@@ -6578,7 +6578,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": [
     {
       "type": 0,
-      "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
+      "value": "Choose your option to create an API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
@@ -6806,7 +6806,7 @@
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
-      "value": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
+      "value": "Combine multiple API resources in to a single API"
     }
   ],
   "Apis.Listing.TableView.TableView.doc.flag": [

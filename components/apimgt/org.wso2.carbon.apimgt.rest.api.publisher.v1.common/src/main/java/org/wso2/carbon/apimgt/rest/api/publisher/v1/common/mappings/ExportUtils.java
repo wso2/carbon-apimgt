@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -66,6 +67,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
+import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -88,6 +90,9 @@ import java.util.Set;
 public class ExportUtils {
 
     private static final Log log = LogFactory.getLog(ExportUtils.class);
+    private static final String IN = "in";
+    private static final String OUT = "out";
+    private static final String SOAPTOREST = "SoapToRest";
 
     /**
      * Validate name, version and provider before exporting an API/API Product.
@@ -170,13 +175,15 @@ public class ExportUtils {
             if (preserveDocs) {
                 addThumbnailToArchive(archivePath, apiIdentifier, apiProvider);
             }
+            addSOAPToRESTMediationToArchive(archivePath, apiIdentifier, registry);
             if (preserveDocs) {
                 addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
                         APIConstants.API_IDENTIFIER_TYPE);
             }
 
-            if (StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
-                    APIConstants.API_TYPE_SOAP.toLowerCase()) && preserveDocs) {
+            if (StringUtils
+                    .equals(apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_SOAP.toLowerCase())
+                    && preserveDocs) {
                 addWSDLtoArchive(archivePath, apiIdentifier, apiProvider);
             } else if (log.isDebugEnabled()) {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
@@ -320,6 +327,61 @@ public class ExportUtils {
             //Exception is ignored by logging due to the reason that Thumbnail is not essential for
             //an API to be recreated.
             log.error("I/O error while writing API/API Product Thumbnail to file", e);
+        }
+    }
+
+    /**
+     * Retrieve SOAP to REST mediation logic for the exporting API and store it in the archive directory.
+     *
+     * @param archivePath   File path to export the SOAPToREST mediation logic
+     * @param apiIdentifier ID of the requesting API
+     * @param registry      Current tenant registry
+     * @throws APIImportExportException If an error occurs while retrieving image from the registry or
+     *                                  storing in the archive directory
+     */
+    public static void addSOAPToRESTMediationToArchive(String archivePath, APIIdentifier apiIdentifier,
+                                                       UserRegistry registry) throws APIImportExportException {
+
+        String soapToRestBaseUrl =
+                "/apimgt/applicationdata/provider" + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getProviderName()
+                        + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getApiName()
+                        + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion()
+                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
+        try {
+            if (registry.resourceExists(soapToRestBaseUrl)) {
+                Collection inFlow = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(soapToRestBaseUrl + RegistryConstants.PATH_SEPARATOR + IN);
+                Collection outFlow = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(soapToRestBaseUrl + RegistryConstants.PATH_SEPARATOR + OUT);
+
+                CommonUtil.createDirectory(archivePath + File.separator + SOAPTOREST + File.separator + IN);
+                CommonUtil.createDirectory(archivePath + File.separator + SOAPTOREST + File.separator + OUT);
+                if (inFlow != null) {
+                    for (String inFlowPath : inFlow.getChildren()) {
+                        try (InputStream inputStream = registry.get(inFlowPath).getContentStream();
+                             OutputStream outputStream = new FileOutputStream(
+                                     archivePath + File.separator + SOAPTOREST + File.separator + IN + inFlowPath
+                                             .substring(
+                                                     inFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)));) {
+                            IOUtils.copy(inputStream, outputStream);
+                        }
+                    }
+                }
+                if (outFlow != null) {
+                    for (String outFlowPath : outFlow.getChildren()) {
+                        try (InputStream inputStream = registry.get(outFlowPath).getContentStream();
+                             OutputStream outputStream = new FileOutputStream(
+                                     archivePath + File.separator + SOAPTOREST + File.separator + OUT + outFlowPath.
+                                             substring(outFlowPath.lastIndexOf(RegistryConstants.PATH_SEPARATOR)))) {
+                            IOUtils.copy(inputStream, outputStream);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new APIImportExportException("I/O error while writing API SOAP to REST logic to file", e);
+        } catch (RegistryException e) {
+            throw new APIImportExportException("Error while retrieving SOAP to REST logic", e);
         }
     }
 

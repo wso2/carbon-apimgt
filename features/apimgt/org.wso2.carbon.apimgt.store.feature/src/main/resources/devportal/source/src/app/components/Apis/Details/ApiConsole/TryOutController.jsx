@@ -73,6 +73,7 @@ const styles = makeStyles((theme) => ({
     },
     tryoutHeading: {
         fontWeight: 400,
+        display: 'block',
     },
     genKeyButton: {
         width: theme.spacing(20),
@@ -487,13 +488,19 @@ function TryOutController(props) {
                     )}
                     {((isApiKeyEnabled || isBasicAuthEnabled || isOAuthEnabled) && showSecurityType) && (
                         <>
-                            <Typography variant='h5' color='textPrimary' className={classes.categoryHeading}>
+                            <Typography variant='h5' component='h2' color='textPrimary' className={classes.categoryHeading}>
                                 <FormattedMessage
                                     id='api.console.security.heading'
                                     defaultMessage='Security'
                                 />
                             </Typography>
-                            <Typography variant='h6' color='textSecondary' className={classes.tryoutHeading}>
+                            <Typography
+                                variant='h6'
+                                component='label'
+                                id='security-type'
+                                color='textSecondary'
+                                className={classes.tryoutHeading}
+                            >
                                 <FormattedMessage
                                     id='api.console.security.type.heading'
                                     defaultMessage='Security Type'
@@ -504,6 +511,7 @@ function TryOutController(props) {
                                     name='securityScheme'
                                     value={securitySchemeType}
                                     onChange={handleChanges}
+                                    aria-labelledby='security-type'
                                     row
                                 >
                                     <FormControlLabel

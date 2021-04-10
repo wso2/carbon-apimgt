@@ -115,7 +115,7 @@ export default {
     custom: {
         wrapperBackground: '#f9f9f9',
         disableColor: '#D3D3D3',
-        leftMenuWidth: 210,
+        leftMenuWidth: 230,
         contentAreaWidth: 1240,
         drawerWidth: 250,
         logo: '/site/public/images/logo.svg',
@@ -193,6 +193,9 @@ export default {
                 restApiIcon: '/site/public/images/landing-icons/restapi.svg',
                 soapApiIcon: '/site/public/images/landing-icons/soapapi.svg',
                 streamingApiIcon: '/site/public/images/landing-icons/streamingapi.svg',
+                serviceCatalogApiIcon: '/site/public/images/landing-icons/servicecatalogapi.svg',
+                scopesAddIcon: '/site/public/images/landing-icons/scopes.svg',
+                apiproductAddIcon: '/site/public/images/landing-icons/apiproduct.svg',
             },
             menu: {
                 primary: '#34679D',
