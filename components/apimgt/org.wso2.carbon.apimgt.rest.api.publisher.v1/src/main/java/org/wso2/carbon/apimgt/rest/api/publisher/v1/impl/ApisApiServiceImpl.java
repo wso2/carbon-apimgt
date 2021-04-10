@@ -71,34 +71,8 @@ import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.ServiceEntry;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -299,7 +273,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         URI createdApiUri;
         APIDTO createdApiDTO;
         try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API createdApi = PublisherCommonUtils
                     .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername());
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
@@ -622,21 +595,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
 
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                        apiId));
-            }
+            //validate if api exists
+            APIInfo apiInfo = validateAPIExistence(apiId);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            String schema = apiProvider.getGraphqlSchema(apiIdentifier);
+            API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            String schema = apiProvider.getGraphqlSchema(apiInfo.toAPIIdentifier());
 
             GraphqlComplexityInfo graphqlComplexityInfo =
                     GraphqlQueryAnalysisMappingUtil.fromDTOtoValidatedGraphqlComplexityInfo(body, schema);
-            if (APIConstants.GRAPHQL_API.equals(api.getType())) {
-                apiProvider.addOrUpdateComplexityDetails(apiIdentifier, graphqlComplexityInfo);
+            if (APIConstants.GRAPHQL_API.equals(existingAPI.getType())) {
+                apiProvider.addOrUpdateComplexityDetails(apiInfo.toAPIIdentifier(), graphqlComplexityInfo);
                 return Response.ok().build();
             } else {
                 throw new APIManagementException(ExceptionCodes.API_NOT_GRAPHQL);
@@ -662,7 +634,12 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        //validate if api exists
+       validateAPIExistence(apiId);
+
         API existingAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(existingAPI.getStatus());
 
         Set<URITemplate> uriTemplates = existingAPI.getUriTemplates();
         uriTemplates.clear();
@@ -683,7 +660,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             apiProvider.updateAPI(existingAPI);
         } catch (FaultGatewaysException e) {
-            e.printStackTrace();
+            String errorMessage = "Error while updating API : " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return Response.ok().build();
     }
@@ -745,6 +723,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateAPIGraphQLSchema(String apiId, String schemaDefinition, String ifMatch,
                                            MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -755,7 +736,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                         apiId));
             }
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            originalAPI = PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(originalAPI.getStatus(), tokenScopes);
+            PublisherCommonUtils.addGraphQLSchema(originalAPI, schemaDefinition, apiProvider);
             APIDTO modifiedAPI = APIMappingUtil.fromAPItoDTO(originalAPI);
             return Response.ok().entity(modifiedAPI.getOperations()).build();
         } catch (APIManagementException | FaultGatewaysException e) {
@@ -778,7 +761,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateAPI(String apiId, APIDTO body, String ifMatch, MessageContext messageContext) {
         String[] tokenScopes =
-                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange().get(RestApiConstants.USER_REST_API_SCOPES);
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         String username = RestApiCommonUtil.getLoggedInUsername();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -790,6 +774,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, tenantDomain);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(originalAPI.getStatus(), tokenScopes);
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
@@ -814,6 +800,46 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * When the API is Published or Deprecated, only the users with scope "apim:api_import_export", "apim:api_publish", "apim:admin" will be allowed for
+     * updating/deleting APIs or its sub-resources.
+     *
+     * @param status Status of the API which is currently created (current state)
+     * @throws APIManagementException if update is not allowed
+     */
+    private void validateAPIOperationsPerLC(String status) throws APIManagementException {
+        boolean updatePermittedForPublishedDeprecated = false;
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+
+        for (String scope : tokenScopes) {
+            if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
+                    || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
+                    || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
+                updatePermittedForPublishedDeprecated = true;
+                break;
+            }
+        }
+        if (!updatePermittedForPublishedDeprecated && (
+                APIConstants.PUBLISHED.equals(status)
+                || APIConstants.DEPRECATED.equals(status))) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_LC, status));
+        }
+    }
+
+    private APIInfo validateAPIExistence(String apiId) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+        if (apiInfo == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
+        }
+        return apiInfo;
     }
 
     /**
@@ -1181,6 +1207,9 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteAPIClientCertificateByAlias(String alias, String apiId,
                                                            MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
@@ -1192,6 +1221,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(api.getStatus(), tokenScopes);
+
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
                     api.getId());
             int responseCode = apiProvider
@@ -1266,6 +1298,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                                                       InputStream certificateInputStream,
                                                       Attachment certificateDetail, String tier,
                                                       MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
 
         try {
             APIIdentifier apiIdentifierFromTable = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -1279,6 +1314,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String base64EncodedCert = null;
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(api.getStatus(), tokenScopes);
+
             String userName = RestApiCommonUtil.getLoggedInUsername();
             int tenantId = APIUtil.getTenantId(userName);
             ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(alias,
@@ -1386,6 +1424,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream,
                                                 Attachment certificateDetail, String alias, String tier,
                                                 MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIIdentifier apiIdentifierFromTable = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -1404,6 +1446,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                         "Certificate addition failed. Proper Certificate file should be provided", log);
             }
             API api = apiProvider.getAPIbyUUID(apiId, RestApiCommonUtil.getLoggedInUserTenantDomain());
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(api.getStatus(), tokenScopes);
+
             String userName = RestApiCommonUtil.getLoggedInUsername();
             String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
             int responseCode = apiProvider.addClientCertificate(userName, api.getId(), base64EncodedCert, alias, tier);
@@ -1601,16 +1646,20 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response addAPIDocumentContent(String apiId, String documentId, String ifMatch,
                 InputStream inputStream, Attachment fileDetail, String inlineContent,
                                                             MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            //API api = APIMappingUtil.getAPIInfoFromUUID(apiId, tenantDomain);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
             if (inputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
             }
@@ -1681,16 +1730,22 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deleteAPIDocument(String apiId, String documentId, String ifMatch,
                                                        MessageContext messageContext) {
         Documentation documentation;
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
+
             //this will fail if user does not have access to the API or the API does not exist
             //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, tenantDomain);
             documentation = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
@@ -1756,16 +1811,22 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateAPIDocument(String apiId, String documentId, DocumentDTO body,
                                                     String ifMatch, MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
+
             String sourceUrl = body.getSourceUrl();
             Documentation oldDocument = apiProvider.getDocumentation(apiId, documentId, tenantDomain);
 
@@ -1867,12 +1928,19 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response addAPIDocument(String apiId, DocumentDTO body, String ifMatch, MessageContext messageContext) {
         try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
+            String[] tokenScopes =
+                    (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                            .get(RestApiConstants.USER_REST_API_SCOPES);
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
+
             Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(body, apiId);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
@@ -2149,6 +2217,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             String ifMatch, MessageContext messageContext) {
         APIIdentifier apiIdentifier;
         try {
+            String[] tokenScopes =
+                    (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                            .get(RestApiConstants.USER_REST_API_SCOPES);
             APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifierFromTable == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -2159,6 +2230,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId,
                     tenantDomain);
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(api.getStatus(), tokenScopes);
+
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
             //Getting the api base path out apiResourcePath
@@ -2258,6 +2332,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 String type, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
                                                           String inlineContent, MessageContext messageContext) {
         try {
+            String[] tokenScopes =
+                    (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                            .get(RestApiConstants.USER_REST_API_SCOPES);
             APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             if (apiIdentifierFromTable == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
@@ -2267,6 +2344,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
 
             Mediation mediationResource = apiProvider
                     .getApiSpecificMediationPolicyByPolicyId(apiId, mediationPolicyId, tenantDomain);
@@ -2398,15 +2483,21 @@ public class ApisApiServiceImpl implements ApisApiService {
             throws APIManagementException {
 
         String fileName = "";
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         try {
-            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifierFromTable == null) {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
+
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             if (fileInputStream != null && inlineContent != null) {
                 RestApiUtil.handleBadRequest("Only one of 'file' and 'inlineContent' should be specified", log);
             }
@@ -2764,6 +2855,10 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPIResourcePoliciesByPolicyId(String apiId, String resourcePolicyId,
             ResourcePolicyInfoDTO body, String ifMatch, MessageContext messageContext) {
         try {
+            String[] tokenScopes =
+                    (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                            .get(RestApiConstants.USER_REST_API_SCOPES);
+
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider provider = RestApiCommonUtil.getLoggedInUserProvider();
             API api = provider.getLightweightAPIByUUID(apiId, tenantDomain);
@@ -2772,6 +2867,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(api.getStatus(), tokenScopes);
 
             if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
                 if (StringUtils.isEmpty(resourcePolicyId)) {
@@ -2896,16 +2993,21 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateAPISwagger(String apiId, String ifMatch, String apiDefinition, String url,
                                 InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
+            String[] tokenScopes =
+                    (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                            .get(RestApiConstants.USER_REST_API_SCOPES);
+
             String updatedSwagger;
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
-            boolean isSoapToRestConvertedAPI = SOAPOperationBindingUtils.isSOAPToRESTApi(apiIdentifier.getApiName(),
-                    apiIdentifier.getVersion(), apiIdentifier.getProviderName());
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().getStatus(), tokenScopes);
+
             //Handle URL and file based definition imports
             if(url != null || fileInputStream != null) {
                 // Validate and retrieve the OpenAPI definition
@@ -3003,14 +3105,20 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateAPIThumbnail(String apiId, InputStream fileInputStream, Attachment fileDetail,
             String ifMatch, MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                         + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                         apiId));
             }
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
+
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
@@ -3568,19 +3676,21 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response updateWSDLOfAPI(String apiId, String ifMatch, InputStream fileInputStream, Attachment fileDetail,
                                     String url, MessageContext messageContext) throws APIManagementException {
 
-        validateWSDLAndReset(fileInputStream, fileDetail, url);
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-        if (apiIdentifier == null) {
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+        if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
                     apiId));
         }
-        API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-        if (api == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, log);
-        }
+        //validate API update operation permitted based on the LC state
+        validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
+
+        validateWSDLAndReset(fileInputStream, fileDetail, url);
         if (StringUtils.isNotBlank(url)) {
             apiProvider.addWSDLResource(apiId, null, url, tenantDomain);
         } else {
@@ -4224,8 +4334,20 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) {
+        String[] tokenScopes =
+                (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiId);
+            if (apiInfo == null) {
+                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        apiId));
+            }
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString(), tokenScopes);
+
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());

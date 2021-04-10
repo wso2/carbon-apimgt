@@ -36,39 +36,7 @@ import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APICategory;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Pagination;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.VHost;
-import org.wso2.carbon.apimgt.api.model.Workflow;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -8998,20 +8966,35 @@ public class ApiMgtDAO {
         }
     }
 
-    public SubscribedApiDTO getAPIInfoByUUID(String apiId) throws APIManagementException {
-
+    /**
+     * Retrieve basic information about the given API by the UUID quering only from AM_API
+     *
+     * @param apiId UUID of the API
+     * @return basic information about the API
+     * @throws APIManagementException error while getting the API information from AM_API
+     */
+    public APIInfo getAPIInfoByUUID(String apiId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
-            String sql = "SELECT API_PROVIDER,API_NAME,API_VERSION,CONTEXT FROM AM_API WHERE API_UUID = ?";
+            String sql = SQLConstants.RETRIEVE_API_INFO_FROM_UUID;
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setString(1, apiId);
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        SubscribedApiDTO subscribedApiDTO = new SubscribedApiDTO();
-                        subscribedApiDTO.setName(resultSet.getString("API_NAME"));
-                        subscribedApiDTO.setVersion(resultSet.getString("API_VERSION"));
-                        subscribedApiDTO.setPublisher(resultSet.getString("API_PROVIDER"));
-                        subscribedApiDTO.setContext(resultSet.getString("CONTEXT"));
-                        return subscribedApiDTO;
+                        APIInfo.Builder apiInfoBuilder = new APIInfo.Builder();
+                        return apiInfoBuilder
+                                .name(resultSet.getString("API_NAME"))
+                                .version(resultSet.getString("API_VERSION"))
+                                .provider(resultSet.getString("API_PROVIDER"))
+                                .context(resultSet.getString("CONTEXT"))
+                                .contextTemplate(resultSet.getString("CONTEXT_TEMPLATE"))
+                                .apiTier(resultSet.getString("API_TIER"))
+                                .apiType(resultSet.getString("API_TYPE"))
+                                .createdBy(resultSet.getString("CREATED_BY"))
+                                .createdTime(resultSet.getString("CREATED_TIME"))
+                                .updatedBy(resultSet.getString("UPDATED_BY"))
+                                .updatedTime(resultSet.getString("UPDATED_TIME"))
+                                .revisionsCreated(resultSet.getInt("REVISIONS_CREATED"))
+                                .build();
                     }
                 }
             }
