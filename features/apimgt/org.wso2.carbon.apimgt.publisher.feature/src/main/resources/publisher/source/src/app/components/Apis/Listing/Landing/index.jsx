@@ -37,6 +37,7 @@ const APILanding = () => {
         restApiIcon,
         soapApiIcon,
         streamingApiIcon,
+        serviceCatalogApiIcon,
     } = theme.custom.landingPage.icons;
 
     return (
@@ -60,8 +61,7 @@ const APILanding = () => {
                             <Typography display='block' gutterBottom align='center' variant='body1'>
                                 <FormattedMessage
                                     id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
-                                    defaultMessage={'Monitor the API’s lifecycle, documentation, '
-                                            + 'security, community, and subscriptions.'}
+                                    defaultMessage='Choose your option to create an API '
                                 />
                             </Typography>
                         </Box>
@@ -84,7 +84,7 @@ const APILanding = () => {
                             <Box display={{ xs: 'none', lg: 'block' }} mx={5}>
                                 <Divider className={dividerCls} light orientation='vertical' variant='inset' />
                             </Box>
-                            <ServiceCatalogMenu icon={streamingApiIcon} />
+                            <ServiceCatalogMenu icon={serviceCatalogApiIcon} />
                         </Grid>
                     </Box>
                 </Grid>
