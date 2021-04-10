@@ -98,6 +98,7 @@ export default function CustomIcon(props) {
     } else if (icon === 'apis') {
         return (
             <svg
+                className={className}
                 width={width}
                 height={height}
                 viewBox='0 0 18 20'

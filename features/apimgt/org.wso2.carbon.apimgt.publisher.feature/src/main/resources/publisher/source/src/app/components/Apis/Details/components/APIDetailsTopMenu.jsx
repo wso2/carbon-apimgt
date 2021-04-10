@@ -44,7 +44,7 @@ import CreateNewVersionButton from './CreateNewVersionButton';
 
 const styles = (theme) => ({
     root: {
-        height: 70,
+        height: theme.custom.apis.topMenu.height,
         background: theme.palette.background.paper,
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',

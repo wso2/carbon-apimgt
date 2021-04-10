@@ -245,6 +245,9 @@ export default {
             suffix: '- WSO2 APIM',
         },
         apis: {
+            topMenu: {
+                height: 70,
+            },
             overview: {
                 stepper: {
                     active: '',

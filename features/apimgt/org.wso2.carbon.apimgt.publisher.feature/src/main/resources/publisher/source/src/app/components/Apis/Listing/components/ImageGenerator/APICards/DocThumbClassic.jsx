@@ -16,15 +16,14 @@
  * under the License.
  */
 import React, { useState } from 'react';
-// import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import Link from '@material-ui/core/Link';
 import PropTypes from 'prop-types';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-// import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-// import { FormattedMessage, injectIntl } from 'react-intl';
 import TextFieldsIcon from '@material-ui/icons/TextFields';
 import LetterGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/LetterGenerator';
 import { makeStyles } from '@material-ui/core/styles';
@@ -61,65 +60,72 @@ const DocThumb = (props) => {
         PrefixIcon = LinkIcon;
     }
     return (
-        <Card
-            onMouseOver={toggleMouseOver}
-            onFocus={toggleMouseOver}
-            onMouseOut={toggleMouseOver}
-            onBlur={toggleMouseOver}
-            elevation={isHover ? 4 : 1}
-            className={classes.card}
+        <Link
+            underline='none'
+            component={RouterLink}
+            to={'/apis/' + doc.apiUUID + '/documents/' + doc.id + '/details'}
+            aria-hidden='true'
         >
-            <CardMedia
-                width={200}
-                component={LetterGenerator}
-                height={140}
-                title='Thumbnail'
-                artifact={{ name: 'Doc' }}
-                charLength={3}
-                ThumbIcon={thumbIcon}
-                bgColor={false}
-            />
-            <CardContent>
-                <Grid
-                    container
-                    direction='column'
-                    justify='space-evenly'
-                    alignItems='flex-start'
-                >
-                    <Grid item>
-                        <Box display='flex' alignItems='center' flexDirection='row' fontFamily='fontFamily'>
-                            <Box display='flex'>
-                                <PrefixIcon color='primary' />
+            <Card
+                onMouseOver={toggleMouseOver}
+                onFocus={toggleMouseOver}
+                onMouseOut={toggleMouseOver}
+                onBlur={toggleMouseOver}
+                elevation={isHover ? 4 : 1}
+                className={classes.card}
+            >
+                <CardMedia
+                    width={200}
+                    component={LetterGenerator}
+                    height={140}
+                    title='Thumbnail'
+                    artifact={{ name: 'Doc' }}
+                    charLength={3}
+                    ThumbIcon={thumbIcon}
+                    bgColor={false}
+                />
+                <CardContent>
+                    <Grid
+                        container
+                        direction='column'
+                        justify='space-evenly'
+                        alignItems='flex-start'
+                    >
+                        <Grid item>
+                            <Box display='flex' alignItems='center' flexDirection='row' fontFamily='fontFamily'>
+                                <Box display='flex'>
+                                    <PrefixIcon color='primary' />
+                                </Box>
+                                <Box
+                                    className={classes.thumbHeader}
+                                    color='text.primary'
+                                    fontSize='h4.fontSize'
+                                    ml={1}
+                                >
+                                    {doc.name}
+                                </Box>
                             </Box>
-                            <Box
-                                className={classes.thumbHeader}
-                                color='text.primary'
-                                fontSize='h4.fontSize'
-                                ml={1}
-                            >
-                                {doc.name}
+                        </Grid>
+                        <Grid item>
+                            <Box mt={3} fontFamily='fontFamily'>
+                                <Box color='primary.main'>
+                                    {doc.associatedType}
+                                </Box>
+                                <Box color='text.primary' fontSize='h6.fontSize'>
+                                    {doc.apiName}
+                                </Box>
+                                <Box color='text.secondary' fontSize='body1.fontSize'>
+                                    Version:
+                                    {' '}
+                                    {doc.apiVersion}
+                                </Box>
                             </Box>
-                        </Box>
-                    </Grid>
-                    <Grid item>
-                        <Box mt={3} fontFamily='fontFamily'>
-                            <Box color='primary.main'>
-                                {doc.associatedType}
-                            </Box>
-                            <Box color='text.primary' fontSize='h6.fontSize'>
-                                {doc.apiName}
-                            </Box>
-                            <Box color='text.secondary' fontSize='body1.fontSize'>
-                                Version:
-                                {' '}
-                                {doc.apiVersion}
-                            </Box>
-                        </Box>
-                    </Grid>
+                        </Grid>
 
-                </Grid>
-            </CardContent>
-        </Card>
+                    </Grid>
+                </CardContent>
+            </Card>
+        </Link>
     );
 };
 
