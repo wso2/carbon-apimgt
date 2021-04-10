@@ -5307,7 +5307,7 @@ public class ApiMgtDAO {
         //Adding data to the AM_SUBSCRIPTION table
         //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
         String subscriptionIDColumn = "SUBSCRIPTION_ID";
-
+        String subscriptionUUID = UUID.randomUUID().toString();
         if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
             subscriptionIDColumn = "subscription_id";
         }
@@ -5332,7 +5332,7 @@ public class ApiMgtDAO {
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                 preparedStForInsert.setTimestamp(7, timestamp);
                 preparedStForInsert.setTimestamp(8, timestamp);
-                preparedStForInsert.setString(9, UUID.randomUUID().toString());
+                preparedStForInsert.setString(9, subscriptionUUID);
 
                 preparedStForInsert.executeUpdate();
                 try (ResultSet rs = preparedStForInsert.getGeneratedKeys()) {
@@ -5347,10 +5347,10 @@ public class ApiMgtDAO {
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(),
-                    tenantId, tenantDomain, subscriptionId, id, apiUUID, application.getId(),
-                    application.getUUID(), tier,
-                    (subscriptionStatus != null ? subscriptionStatus : APIConstants.SubscriptionStatus.UNBLOCKED));
-            APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
+                    tenantId, tenantDomain, subscriptionId, subscriptionUUID, id, apiUUID, application.getId(),
+                    application.getUUID(), tier, (subscriptionStatus != null ? subscriptionStatus :
+                    APIConstants.SubscriptionStatus.UNBLOCKED));
+        APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
 
         return subscriptionId;
     }

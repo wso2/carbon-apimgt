@@ -3000,6 +3000,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             boolean subscriptionRejected = false;
             String subscriptionStatus = null;
             String subscriptionUUID = "";
+            SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
 
             if (workflowResponse != null && workflowResponse.getJSONPayload() != null
                     && !workflowResponse.getJSONPayload().isEmpty()) {
@@ -3015,7 +3016,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (!subscriptionRejected) {
-                SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
                 subscriptionStatus = addedSubscription.getSubStatus();
                 subscriptionUUID = addedSubscription.getUUID();
 
@@ -3046,15 +3046,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
-                            tenantDomain, subscriptionId, apiId, apiUUID, application.getId(), application.getUUID(),
-                            identifier.getTier(), subscriptionStatus);
+                            tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
+                            application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_CREATE.name(), tenantId,
-                        tenantDomain, subscriptionId, apiId, apiUUID, application.getId(), application.getUUID(),
-                   identifier.getTier(), subscriptionStatus);
+                        tenantDomain, subscriptionId, addedSubscription.getUUID(), apiId, apiUUID,
+                        application.getId(), application.getUUID(), identifier.getTier(), subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
@@ -3184,6 +3184,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             boolean subscriptionRejected = false;
             String subscriptionStatus = null;
             String subscriptionUUID = "";
+            SubscribedAPI updatedSubscription = getSubscriptionById(subscriptionId);
 
             if (workflowResponse != null && workflowResponse.getJSONPayload() != null
                     && !workflowResponse.getJSONPayload().isEmpty()) {
@@ -3199,7 +3200,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             if (!subscriptionRejected) {
-                SubscribedAPI updatedSubscription = getSubscriptionById(subscriptionId);
                 subscriptionStatus = updatedSubscription.getSubStatus();
                 subscriptionUUID = updatedSubscription.getUUID();
 
@@ -3229,15 +3229,15 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                            tenantDomain, subscriptionId, apiId, apiUUId, application.getId(), application.getUUID(),
-                            requestedThrottlingPolicy, subscriptionStatus);
+                            tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId,
+                            application.getId(), application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId,
-                  tenantDomain, subscriptionId, apiId, apiUUId, application.getId(), application.getUUID(),
-                   requestedThrottlingPolicy, subscriptionStatus);
+                        tenantDomain, subscriptionId, updatedSubscription.getUUID(), apiId, apiUUId, application.getId(),
+                        application.getUUID(), requestedThrottlingPolicy, subscriptionStatus);
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
 
@@ -3466,16 +3466,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
                     SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                             System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                            tenantDomain, subscription.getSubscriptionId(), identifier.getId(),identifier.getUUID(),
-                            application.getId(), application.getUUID(), identifier.getTier(),
+                            tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
+                            identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
                             subscription.getSubStatus());
                     APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
                 }
             } else {
                 SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                         System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_DELETE.name(), tenantId,
-                        tenantDomain, subscription.getSubscriptionId(), identifier.getId(),identifier.getUUID(),
-                        application.getId(), application.getUUID(), identifier.getTier(), subscription.getSubStatus());
+                        tenantDomain, subscription.getSubscriptionId(),subscription.getUUID(), identifier.getId(),
+                        identifier.getUUID(), application.getId(), application.getUUID(), identifier.getTier(),
+                        subscription.getSubStatus());
                 APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
             }
         } else {

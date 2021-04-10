@@ -35,7 +35,8 @@ public class SubscriptionEvent extends Event {
     private String subscriptionState;
 
     public SubscriptionEvent(String eventId, long timestamp, String type, int tenantId, String tenantDomain,
-                             int subscriptionId, int apiId, String apiUUID, int applicationId, String applicationUUID,
+                             int subscriptionId, String subscriptionUUID, int apiId, String apiUUID, int applicationId,
+                             String applicationUUID,
                              String policyId, String subscriptionState) {
 
         this.eventId = eventId;
@@ -43,6 +44,7 @@ public class SubscriptionEvent extends Event {
         this.type = type;
         this.tenantId = tenantId;
         this.subscriptionId = subscriptionId;
+        this.subscriptionUUID = subscriptionUUID;
         this.apiId = apiId;
         this.applicationId = applicationId;
         this.policyId = policyId;

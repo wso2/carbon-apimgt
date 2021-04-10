@@ -1177,30 +1177,25 @@ public class APIConsumerImplTest {
 
     @Test
     public void testAddSubscription() throws APIManagementException {
-        ApiTypeWrapper apiTypeWrapper = Mockito.mock(ApiTypeWrapper.class);
-        API api  = Mockito.mock(API.class);
-        Application application = Mockito.mock(Application.class);
-        Mockito.when(apiTypeWrapper.getApi()).thenReturn(api);
-        Mockito.when(api.getStatus()).thenReturn(APIConstants.PUBLISHED);
-        Mockito.when(api.getId()).thenReturn(new APIIdentifier(API_PROVIDER, "published_api",
-                SAMPLE_API_VERSION));
-        Mockito.when(apiMgtDAO.addSubscription(apiTypeWrapper, application, Mockito.anyString(),
-                Mockito.anyString())).thenReturn(Mockito.any());
-        SubscribedAPI subscribedAPI = Mockito.mock(SubscribedAPI.class);
-        Mockito.when(subscribedAPI.getUUID()).thenReturn("api1");
-        Mockito.when(apiMgtDAO.getSubscriptionById(Mockito.anyInt())).thenReturn(subscribedAPI);
+        API api  = new API(new APIIdentifier(API_PROVIDER, "published_api", SAMPLE_API_VERSION));
+        Application application = new Application(1);
+        api.setStatus(APIConstants.PUBLISHED);
+        ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
+        Mockito.when(apiMgtDAO.addSubscription(Mockito.eq(apiTypeWrapper), Mockito.eq(application), Mockito.anyString(),
+                Mockito.anyString())).thenReturn(1);
+        SubscribedAPI subscribedAPI = new SubscribedAPI(UUID.randomUUID().toString());
+        Mockito.when(apiMgtDAO.getSubscriptionById(1)).thenReturn(subscribedAPI);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         apiConsumer.tenantDomain = SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, Mockito.anyString(), application).getSubscriptionUUID()
-                ,"api1");
+        Assert.assertEquals(apiConsumer.addSubscription(apiTypeWrapper, "user1",application).getSubscriptionUUID(),
+                subscribedAPI.getUUID());
         try {
-            Mockito.when(api.getStatus()).thenReturn(APIConstants.CREATED);
+            api.setStatus(APIConstants.CREATED);
             apiConsumer.addSubscription(apiTypeWrapper, "sub1", application);
-            Assert.fail("Resource not found exception not thrown for worng api state");
+            Assert.fail("Resource not found exception not thrown for wrong api state");
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Subscriptions not allowed on APIs/API Products in the state"));
         }
-
     }
 
     @Test
