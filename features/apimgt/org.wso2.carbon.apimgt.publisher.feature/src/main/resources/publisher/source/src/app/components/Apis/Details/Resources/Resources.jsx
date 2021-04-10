@@ -101,7 +101,7 @@ export default function Resources(props) {
 
     /**
      *
-     * **** NOTE: This reducer function needs to be a pure JS function, Mean you cant refer to external states, or
+     * **** NOTE: This reducer function needs to be a pure JS function, Mean we cant refer to external states, or
      * variables within the `operationsReducer` function. Please avoid making external references.
      * We need to remove already used `openAPISpec`,`setSecurityDefScopes` etc.
      * Source : https://github.com/facebook/react/issues/16295#issuecomment-610098654

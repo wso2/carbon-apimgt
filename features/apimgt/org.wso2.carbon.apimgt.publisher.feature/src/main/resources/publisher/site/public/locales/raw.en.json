@@ -492,9 +492,6 @@
   "Apis.Details.ApiConsole.ApiConsole.title": {
     "defaultMessage": "Try Out"
   },
-  "Apis.Details.ApiConsole.SelectAppPanel.environment": {
-    "defaultMessage": "Please select an environment"
-  },
   "Apis.Details.ApiConsole.deployments.api.gateways": {
     "defaultMessage": "API Gateways"
   },
@@ -502,7 +499,7 @@
     "defaultMessage": "Can not Try Out retired APIs!"
   },
   "Apis.Details.ApiConsole.deployments.no": {
-    "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
+    "defaultMessage": "{artifactType} is not deployed yet! Please deploy the {artifactType} before trying out"
   },
   "Apis.Details.ApiConsole.environment": {
     "defaultMessage": "Environment"
@@ -3264,6 +3261,12 @@
   "Apis.Listing.components.ImageGenerator.ThumbnailView.design": {
     "defaultMessage": "Design"
   },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": {
+    "defaultMessage": "Remove"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn": {
+    "defaultMessage": "Remove"
+  },
   "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": {
     "defaultMessage": "Save"
   },
@@ -3428,9 +3431,6 @@
   },
   "Base.Header.headersearch.HeaderSearch.tooltip.title": {
     "defaultMessage": "Search Options for APIs and APIProducts"
-  },
-  "Base.Header.navbar.GlobalNavBar.APIs": {
-    "defaultMessage": "APIs"
   },
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": {
     "defaultMessage": "Service Catalog"

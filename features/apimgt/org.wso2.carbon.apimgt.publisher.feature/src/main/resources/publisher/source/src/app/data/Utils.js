@@ -477,7 +477,6 @@ Utils.CONST = {
     PROTOCOL: 'https://',
     API_CLIENT: 'apiClient',
     SERVICE_CATALOG_CLIENT: 'serviceCatalogClient',
-    ENABLE_SERVICE_CATALOG: true,
 };
 
 /**

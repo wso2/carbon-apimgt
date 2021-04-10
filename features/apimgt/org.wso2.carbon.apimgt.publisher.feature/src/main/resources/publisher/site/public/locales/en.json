@@ -1171,12 +1171,6 @@
       "value": "Try Out"
     }
   ],
-  "Apis.Details.ApiConsole.SelectAppPanel.environment": [
-    {
-      "type": 0,
-      "value": "Please select an environment"
-    }
-  ],
   "Apis.Details.ApiConsole.deployments.api.gateways": [
     {
       "type": 0,
@@ -1191,8 +1185,20 @@
   ],
   "Apis.Details.ApiConsole.deployments.no": [
     {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
       "type": 0,
-      "value": "API is not deployed yet! Please deploy the API before trying out"
+      "value": " is not deployed yet! Please deploy the "
+    },
+    {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
+      "type": 0,
+      "value": " before trying out"
     }
   ],
   "Apis.Details.ApiConsole.environment": [
@@ -6857,6 +6863,18 @@
       "value": "Design"
     }
   ],
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": [
+    {
+      "type": 0,
+      "value": "Remove"
+    }
+  ],
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn": [
+    {
+      "type": 0,
+      "value": "Remove"
+    }
+  ],
   "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": [
     {
       "type": 0,
@@ -7189,12 +7207,6 @@
     {
       "type": 0,
       "value": "Search Options for APIs and APIProducts"
-    }
-  ],
-  "Base.Header.navbar.GlobalNavBar.APIs": [
-    {
-      "type": 0,
-      "value": "APIs"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": [

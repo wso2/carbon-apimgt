@@ -86,7 +86,7 @@ export default {
         background: {
             default: '#f6f6f6',
             paper: '#ffffff',
-            appBar: '#1d344f',
+            appBar: '#215088',
             appBarSelected: '#1d344f',
             leftMenu: '#1a1f2f',
             leftMenuActive: '#254061',
@@ -117,7 +117,6 @@ export default {
         disableColor: '#D3D3D3',
         leftMenuWidth: 230,
         contentAreaWidth: 1240,
-        drawerWidth: 250,
         logo: '/site/public/images/logo.svg',
         logoHeight: 40,
         logoWidth: 222,
@@ -157,6 +156,17 @@ export default {
         thumbnailTemplates: {
             active: false,
             variant: 'letter', // Default template is `letter`, available templates are 'letter','image'.
+        },
+        footer: {
+            height: 50, // In pixels
+        },
+        globalNavBar: {
+            active: '#46a3ca',
+            opened: {
+                drawerWidth: 180,
+            },
+            collapsed: {
+            },
         },
         thumbnail: {
             width: 240,
@@ -208,7 +218,6 @@ export default {
         },
         // lifeCycleImage: '/site/public/images/logo.svg',
         // Uncomment above if you want to add a custom image to the lifecycle diagram.
-        adminRole: 'admin',
         commentsLimit: 5,
         maxCommentLength: 512,
         productSampleProgess: {

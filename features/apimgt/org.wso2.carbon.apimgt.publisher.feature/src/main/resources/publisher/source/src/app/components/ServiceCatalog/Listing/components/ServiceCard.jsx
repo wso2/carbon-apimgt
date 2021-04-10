@@ -16,6 +16,8 @@ import Chip from '@material-ui/core/Chip';
 
 import CreateAPIButton from 'AppComponents/ServiceCatalog/CreateApi';
 import DeleteServiceButton from 'AppComponents/ServiceCatalog/Listing/Delete';
+import LetterGenerator from 'AppComponents/Apis/Listing/components/ImageGenerator/LetterGenerator';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -88,9 +90,10 @@ export default function ServiceCard(props) {
             >
                 <CardMedia
                     className={classes.media}
-                    image={`${Configurations.app.context}/site/public/images/service_catalog/`
-                        + 'wso2micro-integrator-active_bright.png'}
-                    title={service.name}
+                    component={LetterGenerator}
+                    width={theme.spacing(25)}
+                    height={theme.spacing(15)}
+                    api={{ name: service.name }}
                 />
                 <Box p={1} pb={0}>
                     <Tooltip placement='top-start' interactive title={service.name}>
