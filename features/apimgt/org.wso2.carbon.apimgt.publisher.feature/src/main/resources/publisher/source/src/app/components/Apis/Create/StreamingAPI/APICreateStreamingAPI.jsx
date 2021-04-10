@@ -77,6 +77,7 @@ const APICreateStreamingAPI = (props) => {
     }
     const [hideEndpoint, setHideEndpoint] = useState(!apiType || apiType === protocolKeys.WebSub);
 
+    const isWebSub = apiType === 'WEBSUB';
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -183,13 +184,18 @@ const APICreateStreamingAPI = (props) => {
                 />
             </Typography>
             <Typography variant='caption'>
-                <FormattedMessage
-                    id='Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading'
-                    defaultMessage={
-                        'Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), '
-                        + 'and Business Plans (optional).'
-                    }
-                />
+                {isWebSub ? (
+                    <FormattedMessage
+                        id='Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading'
+                        defaultMessage='Create an API by providing a Name, a Version and a Context'
+                    />
+                ) : (
+                    <FormattedMessage
+                        id='Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading'
+                        defaultMessage='Create an API by providing a Name, a Version, a Context and the Endpoint'
+                    />
+                )}
+
             </Typography>
         </>
     );
