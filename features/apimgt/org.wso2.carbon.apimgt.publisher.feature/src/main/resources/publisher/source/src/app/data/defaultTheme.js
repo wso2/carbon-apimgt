@@ -244,6 +244,14 @@ export default {
             prefix: '[Publisher]',
             suffix: '- WSO2 APIM',
         },
+        apis: {
+            overview: {
+                stepper: {
+                    active: '',
+                    completed: '',
+                },
+            },
+        },
         serviceCatalog: {
             onboarding: {
                 buttonText: '#FF7300',

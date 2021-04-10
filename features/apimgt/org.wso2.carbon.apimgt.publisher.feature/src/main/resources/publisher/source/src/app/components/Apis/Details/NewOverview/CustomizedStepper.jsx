@@ -23,31 +23,35 @@ import Box from '@material-ui/core/Box';
 import AuthManager from 'AppData/AuthManager';
 import Typography from '@material-ui/core/Typography';
 
-const ColorlibConnector = withStyles({
-    alternativeLabel: {
-        top: 22,
-    },
-    active: {
-        '& $line': {
-            backgroundImage:
-                'linear-gradient(to left, #50BCEC 50%, #B1D31E 50%)',
+const ColorlibConnector = withStyles((theme) => {
+    const completedColor = theme.custom.apis.overview.stepper.completed || theme.palette.success.main;
+    const activeColor = theme.custom.apis.overview.stepper.active || theme.palette.info.main;
+    return {
+        alternativeLabel: {
+            top: 22,
         },
-    },
-    completed: {
-        '& $line': {
-            backgroundImage:
-                'linear-gradient( #B1D31E, #B1D31E)',
+        active: {
+            '& $line': {
+                backgroundImage:
+                    `linear-gradient(to left, ${activeColor} 50%, ${completedColor} 50%)`,
+            },
         },
-    },
-    line: {
-        height: 3,
-        border: 0,
-        backgroundColor: '#eaeaf0',
-        borderRadius: 1,
-    },
+        completed: {
+            '& $line': {
+                backgroundImage:
+                    `linear-gradient( ${completedColor}, ${completedColor})`,
+            },
+        },
+        line: {
+            height: 3,
+            border: 0,
+            backgroundColor: '#eaeaf0',
+            borderRadius: 1,
+        },
+    };
 })(StepConnector);
 
-const useColorlibStepIconStyles = makeStyles({
+const useColorlibStepIconStyles = makeStyles((theme) => ({
     root: {
         backgroundColor: '#ccc',
         zIndex: 1,
@@ -61,14 +65,14 @@ const useColorlibStepIconStyles = makeStyles({
         border: '6px solid #E2E2E2',
     },
     active: {
-        backgroundColor: '#50BCEC',
+        backgroundColor: theme.custom.apis.overview.stepper.active || theme.palette.info.main,
         border: '6px solid #E2E2E2',
     },
     completed: {
-        backgroundColor: '#B1D31E',
+        backgroundColor: theme.custom.apis.overview.stepper.completed || theme.palette.success.main,
         border: '6px solid #E2E2E2',
     },
-});
+}));
 
 /**
  *
@@ -105,7 +109,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'block',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: '#B1D31E',
+        backgroundColor: theme.custom.apis.overview.stepper.completed || theme.palette.success.main,
         zIndex: 1,
         color: '#fff',
         width: 15,
