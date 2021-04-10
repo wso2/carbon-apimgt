@@ -97,7 +97,7 @@ const RestAPIMenu = (props) => {
                                 <Icon
                                     style={{ fontSize: 90 }}
                                     classes={{ root: centerIcon }} // TODO: This is not getting applied ~tmkb
-                                    color='primary'
+                                    color={disabled ? 'disabled' : 'primary'}
                                 >
                                     {iconName}
                                 </Icon>
@@ -109,7 +109,7 @@ const RestAPIMenu = (props) => {
                                 alignItems='center'
                                 pt={15}
                                 justifyContent='center'
-                                color='primary.main'
+                                color={disabled ? 'disabled' : 'primary.main'}
                             >
                                 {name}
                             </Box>

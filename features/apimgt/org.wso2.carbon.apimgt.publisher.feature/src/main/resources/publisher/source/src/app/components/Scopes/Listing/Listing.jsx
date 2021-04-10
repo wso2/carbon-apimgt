@@ -411,7 +411,11 @@ class Listing extends React.Component {
                         />
                     )}
                 >
-                    <OnboardingMenuCard to='/scopes/create' name='Scopes' />
+                    <OnboardingMenuCard
+                        to='/scopes/create'
+                        name='Scopes'
+                        disabled={isRestricted(['apim:shared_scope_manage'])}
+                    />
                 </Onboarding>
             );
         }
