@@ -230,33 +230,38 @@ export default function CustomizedStepper() {
                                 </Grid>
                             </Box>
                         </Grid>
-                        <Grid
-                            container
-                            direction='row'
-                            alignItems='center'
-                            justify='center'
+                        <a
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            href={devportalUrl}
                         >
                             <Box mt={1}>
-                                <Typography variant='h7' color='primary'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.CustomizedStepper.view.devportal'
-                                        defaultMessage='View in devportal'
-                                    />
-                                </Typography>
-                            </Box>
-                            <Box ml={1} mt={1}>
-                                <a
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    href={devportalUrl}
+                                <Grid
+                                    container
+                                    direction='row'
+                                    alignItems='center'
+                                    justify='center'
                                 >
-                                    <LaunchIcon
-                                        color='primary'
-                                        fontSize='small'
-                                    />
-                                </a>
+                                    <Grid item>
+                                        <Typography display='inline' variant='h7' color='primary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.CustomizedStepper.view.devportal'
+                                                defaultMessage='View in devportal'
+                                            />
+                                        </Typography>
+                                    </Grid>
+                                    <Box ml={1}>
+                                        <Grid item>
+                                            <LaunchIcon
+                                                display='inline'
+                                                color='primary'
+                                                fontSize='small'
+                                            />
+                                        </Grid>
+                                    </Box>
+                                </Grid>
                             </Box>
-                        </Grid>
+                        </a>
                     </>
                 );
             case 'PROTOTYPED':
