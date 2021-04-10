@@ -12,7 +12,7 @@ const styles = (theme) => ({
         margin: 'auto',
     },
     tryoutHeading: {
-        marginTop: theme.spacing(1),
+        display: 'block',
         fontWeight: 400,
     },
     menuItem: {
