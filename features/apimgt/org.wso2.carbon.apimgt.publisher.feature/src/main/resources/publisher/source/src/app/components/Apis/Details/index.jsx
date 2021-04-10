@@ -44,7 +44,7 @@ import {
 import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import IconButton from '@material-ui/core/IconButton';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import AuthorizedError from 'AppComponents/Base/Errors/AuthorizedError';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -818,7 +818,7 @@ class Details extends Component {
                                             placement='bottom'
                                         >
                                             <IconButton color='primary' size='small' aria-label='delete'>
-                                                <HelpOutlineIcon fontSize='small' />
+                                                <InfoOutlinedIcon fontSize='small' />
                                             </IconButton>
                                         </Tooltip>
                                     </AccordianSummary>

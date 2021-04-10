@@ -111,7 +111,7 @@ function Listing() {
                         setIsGridView={setIsGridView}
                     />
                 </Grid>
-                <Box px={3} pt={4}>
+                <Box px={4} pt={4}>
                     <Grid xs={12}>
                         {!haveServices && <Onboarding />}
                         {haveServices && (isGridView

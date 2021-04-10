@@ -163,7 +163,7 @@ function TopMenu(props) {
                 <div className={classes.APICreateMenu}>
                     {isAPIProduct ? (
                         <Link to='/api-products/create'>
-                            <Button variant='contained' className={classes.createButton}>
+                            <Button variant='contained' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.create.an.api.product'
                                     defaultMessage='Create an API Product'

@@ -48,8 +48,8 @@ const styles = (theme) => ({
         color: '#18202c',
     },
     listHover: {
-        paddingBottom: theme.spacing(1),
-        paddingTop: theme.spacing(1),
+        paddingBottom: theme.spacing(2),
+        paddingTop: theme.spacing(2),
         '&:hover': {
             backgroundColor: '#b3b3b373',
         },

@@ -89,7 +89,6 @@ function GlobalNavLinks(props) {
             >
                 <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
             </GlobalNavLink>
-
         </Box>
     );
 }
