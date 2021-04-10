@@ -257,7 +257,6 @@ public final class APIConstants {
     // For HTTP requests
     public static final String HEADER_ACCEPT = "Accept";
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
-    public static final String HEADER_CONTENT_LENGTH = "Content-Length";
     public static final String HEADER_API_TOKEN = "X-API-KEY";
     public static final String HEADER_USER_AGENT = "User-Agent";
     public static final String MULTIPART_FORM_BOUNDARY = "X-WSO2-BOUNDARY";

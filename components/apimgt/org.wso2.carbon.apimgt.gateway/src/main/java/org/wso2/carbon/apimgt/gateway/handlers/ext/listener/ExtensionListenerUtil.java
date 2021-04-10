@@ -285,7 +285,6 @@ public class ExtensionListenerUtil {
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-        String contentLength = getAxis2TransportHeaders(axis2MC).get(APIConstants.HEADER_CONTENT_LENGTH);
         String contentType = getAxis2TransportHeaders(axis2MC).get(APIConstants.HEADER_CONTENT_TYPE);
         if (extensionResponseDTO.getPayload() != null && contentType != null) {
             // if payload null, not modifying existing payload
@@ -309,8 +308,7 @@ public class ExtensionListenerUtil {
             } catch (IOException | XMLStreamException e) {
                 log.error("Error while setting payload " + axis2MC.getLogIDString(), e);
             }
-        } else if ((extensionResponseDTO.getPayload() == null && contentLength != null &&
-                Integer.parseInt(contentLength) == 0)) {
+        } else if ((extensionResponseDTO.getPayload() == null)) {
             axis2MC.setProperty(APIConstants.NO_ENTITY_BODY, true);
         }
     }
