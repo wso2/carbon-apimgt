@@ -8917,14 +8917,15 @@ public class ApiMgtDAO {
      * @param keyType
      * @param keyManagerName
      * @param updatedAppInfo
+     * @param
      * @throws APIManagementException
      */
     public void updateApplicationKeyTypeMetaData(int applicationId, String keyType, String keyManagerName,
-                                                 OAuthApplicationInfo updatedAppInfo) throws APIManagementException {
+                                                 String keymanagerUUID, OAuthApplicationInfo updatedAppInfo)
+            throws APIManagementException {
 
         if (applicationId > 0 && updatedAppInfo != null) {
             String addApplicationKeyMapping = SQLConstants.UPDATE_APPLICATION_KEY_TYPE_MAPPINGS_METADATA_SQL;
-
             try (Connection connection = APIMgtDBUtil.getConnection()) {
                 connection.setAutoCommit(false);
                 try {
@@ -8934,7 +8935,14 @@ public class ApiMgtDAO {
                         ps.setInt(2, applicationId);
                         ps.setString(3, keyType);
                         ps.setString(4, keyManagerName);
-                        ps.executeUpdate();
+                        int res = ps.executeUpdate();
+                        if (res == 0) {
+                            ps.setBinaryStream(1, new ByteArrayInputStream(content.getBytes()));
+                            ps.setInt(2, applicationId);
+                            ps.setString(3, keyType);
+                            ps.setString(4, keymanagerUUID);
+                            ps.executeUpdate();
+                        }
                     }
                     connection.commit();
                 } catch (SQLException e) {
