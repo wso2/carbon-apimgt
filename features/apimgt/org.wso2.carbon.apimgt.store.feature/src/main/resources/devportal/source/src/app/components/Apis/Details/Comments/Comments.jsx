@@ -301,11 +301,11 @@ class Comments extends Component {
             restApi
                 .getAllComments(apiId, 1, remainingComments.length)
                 .then((result) => {
-                    const data = JSON.parse(result.data);
-                    if (data) {
+                    if (result.data) {
                         this.setState({
                             totalComments: newTotal,
-                            comments: [...remainingComments, ...data.list],
+                            comments: [...remainingComments, ...result.data.list],
+                            allComments: [...remainingComments, ...result.data.list],
                         });
                     }
                 })
@@ -316,7 +316,12 @@ class Comments extends Component {
                 });
         } else {
             const newStart = startCommentsToDisplay <= 0 ? 0 : startCommentsToDisplay - 1;
-            this.setState({ startCommentsToDisplay: newStart, totalComments: newTotal, comments: remainingComments });
+            this.setState({
+                startCommentsToDisplay: newStart,
+                totalComments: newTotal,
+                comments: remainingComments,
+                allComments: remainingComments,
+                });
         }
     }
 
@@ -401,7 +406,7 @@ class Comments extends Component {
      * @memberof Comments
      */
     render() {
-        const { classes, showLatest, isOverview, theme: { custom: { commentsLimit } }, } = this.props;
+        const { classes, showLatest, isOverview, } = this.props;
         const {
             comments, expanded, allComments, startCommentsToDisplay, totalComments, commentsUpdate, showCommentAdd,
         } = this.state;
@@ -482,7 +487,7 @@ class Comments extends Component {
                             onDeleteComment={this.onDeleteComment}
                             updateComment={this.updateComment}
                         />
-                        {totalComments > commentsLimit && (
+                        {totalComments > comments.length && (
                             <div className={classes.contentWrapper}>
                                 <Grid container spacing={4} className={classes.root}>
                                     <Grid item>
