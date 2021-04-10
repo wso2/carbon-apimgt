@@ -43,6 +43,8 @@ import {
 } from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
+import IconButton from '@material-ui/core/IconButton';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import AuthorizedError from 'AppComponents/Base/Errors/AuthorizedError';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -807,14 +809,17 @@ class Details extends Component {
                                     <AccordianSummary
                                         expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
                                     >
+                                        <Typography className={classes.leftLInkText}>
+                                            API Configurations
+                                        </Typography>
                                         <Tooltip
                                             title={'Changes made to API Configuration section requires a '
                                                 + 'new deployment, in order to affect in the Gateway'}
                                             placement='bottom'
                                         >
-                                            <Typography className={classes.leftLInkText}>
-                                                API Configurations
-                                            </Typography>
+                                            <IconButton color='primary' size='small' aria-label='delete'>
+                                                <HelpOutlineIcon fontSize='small' />
+                                            </IconButton>
                                         </Tooltip>
                                     </AccordianSummary>
                                     <AccordionDetails>

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -157,6 +157,13 @@ const APIDetailsTopMenu = (props) => {
     const handleChange = (event) => {
         setRevisionId(event.target.value);
     };
+
+    /**
+     * Update the state when new props are available
+     */
+    useEffect(() => {
+        setRevisionId(api.id);
+    }, [api.id]);
 
     const isDownloadable = [API.CONSTS.API, API.CONSTS.APIProduct].includes(api.apiType);
     const { settings, user } = useAppContext();
