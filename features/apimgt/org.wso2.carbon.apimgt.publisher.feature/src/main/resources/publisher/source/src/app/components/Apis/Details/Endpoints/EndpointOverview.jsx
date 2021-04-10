@@ -242,7 +242,6 @@ function EndpointOverview(props) {
             ];
         } else if (type === 'SOAP' || type === 'SOAPTOREST') {
             supportedEndpointTypes = [
-                { key: 'http', value: 'HTTP/REST Endpoint' },
                 { key: 'address', value: 'HTTP/SOAP Endpoint' },
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototype Endpoint' },
