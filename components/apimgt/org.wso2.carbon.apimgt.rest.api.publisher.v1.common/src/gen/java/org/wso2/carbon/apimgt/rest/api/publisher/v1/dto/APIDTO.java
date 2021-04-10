@@ -839,7 +839,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"Production and Sandbox\"]", value = "List of gateway environments the API is available ")
+  @ApiModelProperty(example = "[\"Default\"]", value = "List of gateway environments the API is available ")
   @JsonProperty("gatewayEnvironments")
   public List<String> getGatewayEnvironments() {
     return gatewayEnvironments;

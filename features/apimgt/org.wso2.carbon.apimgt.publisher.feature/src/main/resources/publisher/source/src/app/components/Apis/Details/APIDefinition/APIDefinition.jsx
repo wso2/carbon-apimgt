@@ -778,7 +778,7 @@ class APIDefinition extends React.Component {
                         </a>
 
                         {(securityAuditProperties.apiToken && securityAuditProperties.collectionId
-                        && api.type !== 'GRAPHQL')
+                        && api.type !== 'GRAPHQL' && !asyncAPI)
                             && (
                                 <Button size='small' className={classes.button} onClick={this.onAuditApiClick}>
                                     <LockRounded className={classes.buttonIcon} />

@@ -260,6 +260,8 @@ class Listing extends React.Component {
      */
     render() {
         const { scopes } = this.state;
+        const { theme } = this.props;
+        const { scopesAddIcon } = theme.custom.landingPage.icons;
         const {
             intl, classes,
         } = this.props;
@@ -411,7 +413,7 @@ class Listing extends React.Component {
                         />
                     )}
                 >
-                    <OnboardingMenuCard to='/scopes/create' name='Scopes' />
+                    <OnboardingMenuCard to='/scopes/create' name='Scopes' iconName={scopesAddIcon} />
                 </Onboarding>
             );
         }
@@ -482,4 +484,4 @@ Listing.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withAPI(withStyles(styles)(Listing)));
+export default injectIntl(withAPI(withStyles(styles, { withTheme: true })(Listing)));

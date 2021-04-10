@@ -1547,6 +1547,7 @@ paths:
           enum:
             - name
             - owner
+          default: name
       - name: sortOrder
         in: query
         schema:
@@ -1554,6 +1555,7 @@ paths:
           enum:
             - asc
             - desc
+          default: asc
       responses:
         200:
           description: |

@@ -36,7 +36,7 @@ public class APIEndpointURLsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Production and Sandbox", value = "")
+  @ApiModelProperty(example = "Default", value = "")
   @JsonProperty("environmentName")
   public String getEnvironmentName() {
     return environmentName;
@@ -53,7 +53,7 @@ public class APIEndpointURLsDTO   {
   }
 
   
-  @ApiModelProperty(example = "Production and Sandbox", value = "")
+  @ApiModelProperty(example = "Default", value = "")
   @JsonProperty("environmentDisplayName")
   public String getEnvironmentDisplayName() {
     return environmentDisplayName;

@@ -247,7 +247,7 @@ class Monetization extends Component {
                                     (monetizationAttributes.length > 0) ? (
                                         (monetizationAttributes.map((monetizationAttribute, i) => (
                                             <TextField
-                                                disabled={isRestricted(['apim:api_publish'], api)}
+                                                disabled={!monStatus || isRestricted(['apim:api_publish'], api)}
                                                 fullWidth
                                                 id={'attribute' + i}
                                                 label={monetizationAttribute.displayName}

@@ -3622,10 +3622,10 @@ components:
             properties:
               environmentName:
                 type: string
-                example: Production and Sandbox
+                example: Default
               environmentDisplayName:
                 type: string
-                example: Production and Sandbox
+                example: Default
               environmentType:
                 type: string
                 example: hybrid
@@ -5596,3 +5596,4 @@ components:
             apim:store_settings: Retrieve Developer Portal settings
             apim:sub_alert_manage: Retrieve, subscribe and configure Developer Portal alert types
             apim:app_import_export: Import and export applications related operations
+            apim:admin: Manage all admin operations

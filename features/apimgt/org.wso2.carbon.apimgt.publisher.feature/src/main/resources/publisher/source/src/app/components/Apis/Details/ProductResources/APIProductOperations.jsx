@@ -51,6 +51,10 @@ export default function APIProductOperations() {
         // TODO: need to handle the error cases through catch ~tmkb
     }, []);
 
+    useEffect(() => {
+        setApiThrottlingPolicy(api.apiThrottlingPolicy);
+    }, [api.apiThrottlingPolicy]);
+
     /**
      *
      *

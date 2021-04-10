@@ -41,7 +41,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -49,7 +48,7 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 
 /**
- * Throttle policy JMS event listener class
+ * Throttle policy JMS event listener class.
  */
 public class ThrottlePolicyJMSMessageListener implements MessageListener {
 
@@ -69,7 +68,7 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                 Topic jmsDestination = (Topic) message.getJMSDestination();
                 if (message instanceof TextMessage) {
                     String textMessage = ((TextMessage) message).getText();
-                    JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                    JsonNode payloadData = new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
                             path(APIConstants.EVENT_PAYLOAD_DATA);
 
                     if (APIConstants.TopicNames.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
@@ -116,9 +115,12 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
             if (event.getPolicyType() == APIConstants.PolicyType.SUBSCRIPTION) {
                 // handle subscription policies
                 SubscriptionPolicyEvent policyEvent = new Gson().fromJson(eventJson, SubscriptionPolicyEvent.class);
-                task = new Runnable() {
-                    @Override
-                    public void run() {
+                if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policyEvent.getPolicyName())
+                        || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.
+                        equalsIgnoreCase(policyEvent.getPolicyName())
+                        || APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED.
+                        equalsIgnoreCase(policyEvent.getPolicyName()))) {
+                    task = () -> {
                         try {
                             if (updatePolicy) {
                                 SubscriptionPolicy subscriptionPolicy = policyRetriever.getSubscriptionPolicy(
@@ -130,15 +132,14 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                         } catch (ThrottlePolicyDeployerException e) {
                             log.error("Error in retrieving subscription policy metadata from the database", e);
                         }
-                    }
-                };
+                    };
+                }
 
             } else if (event.getPolicyType() == APIConstants.PolicyType.APPLICATION) {
                 // handle application policies
                 ApplicationPolicyEvent policyEvent = new Gson().fromJson(eventJson, ApplicationPolicyEvent.class);
-                task = new Runnable() {
-                    @Override
-                    public void run() {
+                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policyEvent.getPolicyName())) {
+                    task = () -> {
                         try {
                             if (updatePolicy) {
                                 ApplicationPolicy applicationPolicy = policyRetriever.getApplicationPolicy(
@@ -150,14 +151,14 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                         } catch (ThrottlePolicyDeployerException e) {
                             log.error("Error in retrieving application policy metadata from the database", e);
                         }
-                    }
-                };
+                    };
+                }
             } else if (event.getPolicyType() == APIConstants.PolicyType.API) {
                 // handle API policies
                 APIPolicyEvent policyEvent = new Gson().fromJson(eventJson, APIPolicyEvent.class);
-                task = new Runnable() {
-                    @Override
-                    public void run() {
+                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(policyEvent.getPolicyName())) {
+
+                    task = () -> {
                         try {
                             if (updatePolicy) {
                                 ApiPolicy apiPolicy = policyRetriever.getApiPolicy(
@@ -169,25 +170,23 @@ public class ThrottlePolicyJMSMessageListener implements MessageListener {
                         } catch (ThrottlePolicyDeployerException e) {
                             log.error("Error in retrieving API policy metadata from the database", e);
                         }
-                    }
-                };
+                    };
+                }
             } else if (event.getPolicyType() == APIConstants.PolicyType.GLOBAL) {
                 // handle global policies
                 GlobalPolicyEvent policyEvent = new Gson().fromJson(eventJson, GlobalPolicyEvent.class);
-                task = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (updatePolicy) {
-                                GlobalPolicy globalPolicy = policyRetriever.getGlobalPolicy(
-                                        policyEvent.getPolicyName(), policyEvent.getTenantDomain());
-                                PolicyUtil.deployPolicy(globalPolicy, policyEvent);
-                            } else if (deletePolicy) {
-                                PolicyUtil.undeployPolicy(policyEvent);
-                            }
-                        } catch (ThrottlePolicyDeployerException e) {
-                            log.error("Error in retrieving Global policy metadata from the database", e);
+                task = () -> {
+
+                    try {
+                        if (updatePolicy) {
+                            GlobalPolicy globalPolicy = policyRetriever.getGlobalPolicy(
+                                    policyEvent.getPolicyName(), policyEvent.getTenantDomain());
+                            PolicyUtil.deployPolicy(globalPolicy, policyEvent);
+                        } else if (deletePolicy) {
+                            PolicyUtil.undeployPolicy(policyEvent);
                         }
+                    } catch (ThrottlePolicyDeployerException e) {
+                        log.error("Error in retrieving Global policy metadata from the database", e);
                     }
                 };
             }
