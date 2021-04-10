@@ -5335,6 +5335,12 @@
       "value": "Select the Format of Data Type"
     }
   ],
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type.none.option": [
+    {
+      "type": 0,
+      "value": "No Data Type"
+    }
+  ],
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.schema.data.type": [
     {
       "type": 0,
