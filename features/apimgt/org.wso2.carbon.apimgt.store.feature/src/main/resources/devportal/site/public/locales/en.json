@@ -411,6 +411,7 @@
   "Shared.AppsAndKeys.ImportExternalApp.consumer.secret": "Consumer Secret",
   "Shared.AppsAndKeys.ImportExternalApp.consumer.secret.of.application": "Consumer Secret of the OAuth application",
   "Shared.AppsAndKeys.ImportExternalApp.key.provide.user.owner": "Only owner can provide keys",
+  "Shared.AppsAndKeys.ImportExternalApp.provide.\n                                                    oauth.button.update": "Update",
   "Shared.AppsAndKeys.ImportExternalApp.provide.oauth": "Provide Existing OAuth Keys",
   "Shared.AppsAndKeys.ImportExternalApp.provide.oauth.button.provide": "Provide",
   "Shared.AppsAndKeys.ImportExternalApp.provide.oauth.button.update": "Update",
