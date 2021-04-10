@@ -57,6 +57,9 @@ const useStyles = makeStyles((theme) => ({
     formControlLabel: {
         marginTop: theme.spacing(1),
     },
+    subtleText: {
+        color: theme.palette.grey[400],
+    },
 }));
 
 /**
@@ -85,11 +88,23 @@ export default function EditParameter(props) {
                 nextParameter[action] = value;
                 break;
             case 'type':
-            case 'format':
                 if (nextParameter.schema) {
                     nextParameter.schema[action] = value;
                 } else {
                     nextParameter[action] = value;
+                }
+                break;
+            case 'format':
+                if (nextParameter.schema) {
+                    if (value) {
+                        nextParameter.schema[action] = value;
+                    } else {
+                        delete nextParameter.schema[action];
+                    }
+                } else if (value) {
+                    nextParameter[action] = value;
+                } else {
+                    delete nextParameter[action];
                 }
                 break;
             default:
@@ -226,7 +241,7 @@ export default function EditParameter(props) {
                             <FormHelperText>
                                 <FormattedMessage
                                     id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
-                                    + 'select.schema.data.type'}
+                                        + 'select.schema.data.type'}
                                     defaultMessage='Select the Schema Type'
                                 />
                             </FormHelperText>
@@ -253,7 +268,7 @@ export default function EditParameter(props) {
                             <InputLabel id='edit-parameter-format'>
                                 <FormattedMessage
                                     id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
-                                    + 'data.format'}
+                                        + 'data.format'}
                                     defaultMessage='Data Format'
                                 />
                             </InputLabel>
@@ -274,6 +289,13 @@ export default function EditParameter(props) {
                                     },
                                 }}
                             >
+                                <MenuItem value='' dense className={classes.subtleText}>
+                                    <FormattedMessage
+                                        id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
+                                            + 'select.format.of.data.type.none.option'}
+                                        defaultMessage='No Data Type'
+                                    />
+                                </MenuItem>
                                 {getDataFormats(
                                     parameter.schema ? parameter.schema.type : parameter.type,
                                 ).map((dataType) => (
@@ -285,7 +307,7 @@ export default function EditParameter(props) {
                             <FormHelperText>
                                 <FormattedMessage
                                     id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
-                                    + 'select.format.of.data.type'}
+                                        + 'select.format.of.data.type'}
                                     defaultMessage='Select the Format of Data Type'
                                 />
                             </FormHelperText>
@@ -309,7 +331,7 @@ export default function EditParameter(props) {
                                 label={(
                                     <FormattedMessage
                                         id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
-                                        + 'required'}
+                                            + 'required'}
                                         defaultMessage='Required'
                                     />
                                 )}
@@ -320,7 +342,7 @@ export default function EditParameter(props) {
                         <DialogContentText>
                             <FormattedMessage
                                 id={'Apis.Details.Resources.components.operationComponents.EditParameter.'
-                                + 'use.done.button.to.persist.changes'}
+                                    + 'use.done.button.to.persist.changes'}
                                 defaultMessage='Use DONE button in the page to persist changes'
                             />
                         </DialogContentText>
