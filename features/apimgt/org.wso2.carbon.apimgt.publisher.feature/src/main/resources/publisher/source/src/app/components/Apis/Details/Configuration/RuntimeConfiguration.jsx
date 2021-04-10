@@ -619,9 +619,10 @@ export default function RuntimeConfiguration() {
                                         <Box alignItems='center' justifyContent='center' className={classes.info}>
                                             <Typography variant='body1'>
                                                 <FormattedMessage
-                                                    id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.
-                                                    endpoint'
-                                                    defaultMessage='Please refer respective APIs for endpoint information'
+                                                    id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.
+                                                    product.endpoint'
+                                                    defaultMessage='Please refer respective APIs for endpoint
+                                                    information'
                                                 />
                                             </Typography>
                                         </Box>

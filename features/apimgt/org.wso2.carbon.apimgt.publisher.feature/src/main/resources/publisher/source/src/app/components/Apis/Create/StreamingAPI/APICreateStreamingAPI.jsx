@@ -15,7 +15,7 @@
  */
 import React, { useReducer, useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { withRouter } from 'react-router';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -42,7 +42,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const APICreateStreamingAPI = (props) => {
-    const { history, intl } = props;
+    const { history } = props;
+    const intl = useIntl();
     const { settings } = useAppContext();
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
@@ -469,4 +470,4 @@ APICreateStreamingAPI.WORKFLOW_STATUS = {
     CREATED: 'CREATED',
 };
 
-export default withRouter(injectIntl(APICreateStreamingAPI));
+export default withRouter(APICreateStreamingAPI);
