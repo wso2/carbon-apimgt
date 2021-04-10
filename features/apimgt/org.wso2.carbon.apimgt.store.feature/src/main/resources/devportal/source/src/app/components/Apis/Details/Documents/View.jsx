@@ -190,7 +190,7 @@ function View(props) {
 
             {doc.sourceType === 'MARKDOWN'
             && (
-                <ReactMarkdown plugins={[gfm]} escapeHtml={false}>
+                <ReactMarkdown plugins={[gfm]} escapeHtml>
                     {code}
                 </ReactMarkdown>
             )}
