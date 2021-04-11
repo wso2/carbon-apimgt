@@ -377,21 +377,19 @@ function Overview() {
                                     </Box>
                                 </Box>
                             )}
-                            <Box ml={1} mr={2}>
-                                <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
-                                    <Typography variant='h4' component='div'>{api.name}</Typography>
-                                </Link>
+                            <Box ml={3} mr={2}>
+                                <Typography variant='h4' component='h2'>{api.name}</Typography>
                                 {api.description && (
                                     <Typography variant='body2' gutterBottom align='left' className={classes.description}>
                                         {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
                                         {descriptionIsBig && (
-                                            <a onClick={collapseAllDescription} href='#'>
-                                                {descriptionHidden ? 'more' : 'less'}
+                                            <a aria-label='Show more/less description' onClick={collapseAllDescription} href='#'>
+                                                {descriptionHidden ? ' more' : ' less'}
                                             </a>
                                         )}
                                     </Typography>
                                 )}
-                                <Box display='flex' flexDirection='row'>
+                                <Box display='flex' area-lable='API version and owner details' flexDirection='row'>
                                     <Typography variant='body2' gutterBottom align='left' className={classes.textLabel}>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.list.version'
@@ -420,7 +418,7 @@ function Overview() {
                             <Environments updateSelectedEndpoint={updateSelectedEndpoint} selectedEndpoint={selectedEndpoint} />
                         </Box>
                         <Box mt={6}>
-                            <Typography variant='subtitle2' className={classes.sectionTitle}>
+                            <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.business.plans.title'
                                     defaultMessage='Business Plans'
@@ -453,7 +451,7 @@ function Overview() {
                         {(showCredentials && subscribedApplications.length > 0) && (
                             <>
                                 <Box mt={6}>
-                                    <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                    <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.subscriptions.title'
                                             defaultMessage='Subscriptions'
@@ -509,7 +507,7 @@ function Overview() {
                         <Box mt={6}>
                             {(!api.advertiseInfo.advertised && showComments) && (
                                 <>
-                                    <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                    <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.comments.title'
                                             defaultMessage='Comments'
@@ -563,7 +561,7 @@ function Overview() {
                         </>
                     )}
                     <Box mt={6} mb={1}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
+                        <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                             <FormattedMessage
                                 id='Apis.Details.Overview.tags.title'
                                 defaultMessage='Tags'
@@ -577,6 +575,7 @@ function Overview() {
                                 label={tag}
                                 key={tag}
                                 component={Link}
+                                clickable
                                 to={`/apis?offset=0&query=tag:${tag}`}
                                 classes={{ root: classes.chipRoot }}
                                 variant='outlined'
@@ -595,7 +594,7 @@ function Overview() {
                     {(showDocuments && allDocuments && allDocuments.length > 0) && (
                         <>
                             <Box mt={6}>
-                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.documents.title'
                                         defaultMessage='Documents'
@@ -621,7 +620,7 @@ function Overview() {
                     {api.businessInformation.businessOwnerEmail && (
                         <>
                             <Box mt={6}>
-                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.business.info'
                                         defaultMessage='Business Info'
@@ -636,7 +635,7 @@ function Overview() {
                         </>
                     )}
                     <Box mt={6}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
+                        <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                             <FormattedMessage
                                 id='Apis.Details.Overview.source'
                                 defaultMessage='Source'
@@ -652,7 +651,7 @@ function Overview() {
                     {getKeyManagers() && (
                         <>
                             <Box mt={6}>
-                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.key.manager'
                                         defaultMessage='Key Managers'

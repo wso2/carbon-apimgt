@@ -164,7 +164,7 @@ function OverviewDocuments(props) {
         docs.length > 0 && (
             <List
                 component='nav'
-                aria-labelledby='nested-list-subheader'
+                aria-label='Available document list'
                 className={classes.listWrapper}
             >
                 {docs.map((doc, index) => (
