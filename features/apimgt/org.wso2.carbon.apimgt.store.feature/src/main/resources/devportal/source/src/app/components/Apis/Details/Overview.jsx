@@ -675,14 +675,14 @@ function Overview() {
                                 </Typography>
                             </Box>
                             <Box mt={1} ml={1}>
-                                {Object.keys(api.additionalProperties).map((property) => {
+                                {Object.entries(api.additionalProperties).map(([key, value]) => {
                                     return (
                                         <Typography variant='body2'>
-                                            {property}
+                                            {key}
                                             {' '}
                                             :
                                             {' '}
-                                            {api.additionalProperties[property]}
+                                            {value}
                                         </Typography>
                                     );
                                 })}
