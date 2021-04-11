@@ -18,7 +18,6 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
-import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**

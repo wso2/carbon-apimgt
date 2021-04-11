@@ -16,7 +16,6 @@
 
 import cloneDeep from 'lodash.clonedeep';
 import Utils from './Utils';
-import MockResponses from './MockResponses';
 import APIClientFactory from './APIClientFactory';
 
 /**
@@ -107,9 +106,8 @@ class ServiceCatalog {
         const serviceCatalog = new APIClientFactory()
             .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
             .client;
-        const promisedServiceCatalogSettings = serviceCatalog.then(() => {
-            // return client.apis['Services'].getSettings();
-            return MockResponses.getSettings();
+        const promisedServiceCatalogSettings = serviceCatalog.then((client) => {
+            return client.apis.Services.getSettings();
         });
         return promisedServiceCatalogSettings.then((response) => response.body);
     }
@@ -146,46 +144,6 @@ class ServiceCatalog {
     }
 
     /**
-     * Check Existence of a Service
-     * @param id {string} UUID of the service.
-     * @returns {promise} Promise.
-     */
-    static checkServiceExistence() {
-        const serviceCatalog = new APIClientFactory()
-            .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedService = serviceCatalog.then(() => {
-            // return client.apis['Services'].checkServiceExistence(
-            //     {
-            //         serviceId: id,
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.checkServiceExistence();
-        });
-        return promisedService.then((response) => response.body);
-    }
-
-    /**
-     * Create a Service
-     * @param body {Object} Service body.
-     * @returns {promise} Promise.
-     */
-    static createService() {
-        const serviceCatalog = new APIClientFactory()
-            .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedService = serviceCatalog.then(() => {
-            // return client.apis['Services'].createService(
-            //     body,
-            //     this._requestMetaData()
-            // );
-            return MockResponses.createService();
-        });
-        return promisedService.then((response) => response.body);
-    }
-
-    /**
      * Delete a Service
      * @param id {string} UUID of the service.
      * @returns {promise} Promise.
@@ -197,51 +155,6 @@ class ServiceCatalog {
         return serviceCatalog.then((client) => {
             return client.apis.Services.deleteService({ serviceId: id });
         }).then((response) => response.body);
-    }
-
-    /**
-     * Export a Service
-     *
-     * @param name {string} Name of the service.
-     * @param version {string} Version of the service.
-     * @returns {promise} Service Entry promise.
-     */
-    static exportService() {
-        const serviceCatalog = new APIClientFactory()
-            .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedServices = serviceCatalog.then(() => {
-            // return client.apis['Services'].exportService(
-            //     {
-            //         name: id,
-            //         version: version
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.exportService();
-        });
-        return promisedServices.then((response) => response.body);
-    }
-
-    /**
-     * Import a Service
-     * @param id {string} UUID of the service.
-     * @returns {promise} Service Entry promise.
-     */
-    static importService() {
-        const serviceCatalog = new APIClientFactory()
-            .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedServices = serviceCatalog.then(() => {
-            // return client.apis['Services'].importService(
-            //     {
-            //         serviceId: id,
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.importService();
-        });
-        return promisedServices.then((response) => response.body);
     }
 
     /**
@@ -322,28 +235,6 @@ class ServiceCatalog {
             );
         });
         return promisedServices.then((response) => response.body);
-    }
-
-    /**
-     * Update a Service
-     * @param body {Object} Service body.
-     * @returns {promise} Promise.
-     */
-    static updateService() {
-        const serviceCatalog = new APIClientFactory()
-            .getAPIClient(Utils.getCurrentEnvironment(), Utils.CONST.SERVICE_CATALOG_CLIENT)
-            .client;
-        const promisedService = serviceCatalog.then(() => {
-            // return client.apis['Services'].updateService(
-            //     {
-            //         serviceId: id,
-            //         body
-            //     },
-            //     this._requestMetaData()
-            // );
-            return MockResponses.updateService();
-        });
-        return promisedService.then((response) => response.body);
     }
 }
 
