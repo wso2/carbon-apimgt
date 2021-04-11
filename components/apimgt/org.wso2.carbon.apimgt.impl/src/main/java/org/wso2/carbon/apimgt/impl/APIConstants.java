@@ -675,6 +675,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_PASSWORD = "Password";
     public static final String API_GATEWAY_ENDPOINT = "GatewayEndpoint";
     public static final String API_WEBSOCKET_GATEWAY_ENDPOINT = "GatewayWSEndpoint";
+    public static final String API_WEBSUB_GATEWAY_ENDPOINT = "GatewayWebSubEndpoint";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
     public static final String API_GATEWAY_VIRTUAL_HOSTS = "VirtualHosts";
@@ -683,6 +684,8 @@ public final class APIConstants {
     public static final String API_GATEWAY_VIRTUAL_HOST_HTTPS_ENDPOINT = "HttpsEndpoint";
     public static final String API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT = "WsEndpoint";
     public static final String API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT = "WssEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT = "WebSubHttpEndpoint";
+    public static final String API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT = "WebSubHttpsEndpoint";
     public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 

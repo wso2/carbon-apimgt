@@ -96,6 +96,7 @@ public class APIManagerConfiguration {
     public static final String JMS_PORT = "jms.port";
     public static final String CARBON_CONFIG_PORT_OFFSET_NODE = "Ports.Offset";
     public static final String WEBSOCKET_DEFAULT_GATEWAY_URL = "ws://localhost:9099";
+    public static final String WEBSUB_DEFAULT_GATEWAY_URL = "http://localhost:9021";
     private Map<String, Map<String, String>> loginConfiguration = new ConcurrentHashMap<String, Map<String, String>>();
     private JSONArray applicationAttributes = new JSONArray();
     private JSONArray monetizationAttributes = new JSONArray();
@@ -410,6 +411,14 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setWebsocketGatewayEndpoint(WEBSOCKET_DEFAULT_GATEWAY_URL);
                     }
+                    OMElement webSubGatewayEndpoint = environmentElem
+                            .getFirstChildWithName(new QName(APIConstants.API_WEBSUB_GATEWAY_ENDPOINT));
+                    if (webSubGatewayEndpoint != null) {
+                        environment.setWebSubGatewayEndpoint(
+                                APIUtil.replaceSystemProperty(webSubGatewayEndpoint.getText()));
+                    } else {
+                        environment.setWebSubGatewayEndpoint(WEBSUB_DEFAULT_GATEWAY_URL);
+                    }
                     OMElement description =
                             environmentElem.getFirstChildWithName(new QName("Description"));
                     if (description != null) {
@@ -434,8 +443,20 @@ public class APIManagerConfiguration {
                                 APIConstants.API_GATEWAY_VIRTUAL_HOST_WS_ENDPOINT)).getText());
                         String wssEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
                                 APIConstants.API_GATEWAY_VIRTUAL_HOST_WSS_ENDPOINT)).getText());
+                        String webSubHttpEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTP_ENDPOINT)).getText());
+                        String webSubHttpsEp = APIUtil.replaceSystemProperty(vhostElem.getFirstChildWithName(new QName(
+                                APIConstants.API_GATEWAY_VIRTUAL_HOST_WEBSUB_HTTPS_ENDPOINT)).getText());
 
-                        VHost vhost = VHost.fromEndpointUrls(new String[]{httpEp, httpsEp, wsEp, wssEp});
+                        /*
+                         Prefix websub endpoints with 'websub_' so that the endpoint URL
+                         would begin with: 'websub_http://', since API type is identified by the URL protocol below.
+                         */
+                        webSubHttpEp = "websub_" + webSubHttpEp;
+                        webSubHttpsEp = "websub_" + webSubHttpsEp;
+
+                        VHost vhost = VHost.fromEndpointUrls(new String[]{
+                                httpEp, httpsEp, wsEp, wssEp, webSubHttpEp, webSubHttpsEp});
                         vhosts.add(vhost);
                     }
 

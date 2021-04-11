@@ -9646,6 +9646,12 @@ components:
         wssPort:
           type: integer
           example: 8099
+        websubHttpPort:
+          type: integer
+          example: 9021
+        websubHttpsPort:
+          type: integer
+          example: 8021
     FileInfo:
       title: File Information including meta data
       type: object

@@ -16,6 +16,8 @@
  * under the License.
  */
 
+import CONSTS from 'AppData/Constants';
+
 /**
  * Utility class for Publisher application
  */
@@ -425,6 +427,25 @@ class Utils {
         }
 
         return username;
+    }
+
+    static getAllEnvironmentDeployments(environments, allEnvRevision) {
+        // allEnvDeployments represents all deployments of the API with mapping
+        // environment -> {revision deployed to env, vhost deployed to env with revision}
+        const allEnvDeployments = [];
+        environments.forEach((env) => {
+            const revision = allEnvRevision && allEnvRevision.find(
+                (r) => r.deploymentInfo.some((e) => e.name === env.name),
+            );
+            const envDetails = revision && revision.deploymentInfo.find((e) => e.name === env.name);
+            const disPlayDevportal = envDetails && envDetails.displayOnDevportal;
+            let vhost = envDetails && env.vhosts && env.vhosts.find((e) => e.host === envDetails.vhost);
+            if (!vhost) { // if vhost is deleted after deploying the revision, there is no matching vhost
+                vhost = { ...CONSTS.DEFAULT_VHOST, host: envDetails && envDetails.vhost };
+            }
+            allEnvDeployments[env.name] = { revision, vhost, disPlayDevportal };
+        });
+        return allEnvDeployments;
     }
 }
 
