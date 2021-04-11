@@ -9719,6 +9719,10 @@ components:
     WebsubSubscriptionConfiguration:
       type: object
       properties:
+        enable:
+          type: boolean
+          default: false
+          description: Toggle enable WebSub subscription configuration
         secret:
           type: string
           description: Secret key to be used for subscription

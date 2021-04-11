@@ -354,6 +354,7 @@ public class APIMappingUtil {
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
             if (websubSubscriptionConfigurationDTO != null) {
                 websubSubscriptionConfiguration = new WebsubSubscriptionConfiguration(
+                        websubSubscriptionConfigurationDTO.isEnable(),
                         websubSubscriptionConfigurationDTO.getSecret(),
                         websubSubscriptionConfigurationDTO.getSigningAlgorithm(),
                         websubSubscriptionConfigurationDTO.getSignatureHeader());
