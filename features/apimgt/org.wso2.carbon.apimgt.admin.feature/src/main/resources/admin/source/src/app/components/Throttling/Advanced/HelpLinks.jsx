@@ -40,9 +40,7 @@ export default function HelpLinks() {
                     </ListItemIcon>
                     <Link
                         target='_blank'
-                        href={Configurations.app.docUrl
-                + 'learn/rate-limiting/'
-                + 'introducing-throttling-use-cases/'}
+                        href={Configurations.app.docUrl + 'design/rate-limiting/introducing-throttling-use-cases/'}
                     >
                         <ListItemText primary={(
                             <FormattedMessage
@@ -61,8 +59,7 @@ export default function HelpLinks() {
                     <Link
                         target='_blank'
                         href={Configurations.app.docUrl
-                + 'learn/rate-limiting/adding-new-throttling-policies/'
-                + '#adding-a-new-advanced-throttling-policy'}
+                + 'design/rate-limiting/adding-new-throttling-policies/#adding-a-new-advanced-throttling-policy'}
                     >
                         <ListItemText primary={(
                             <FormattedMessage
