@@ -118,7 +118,6 @@ const BaseThumbnail = (props) => {
     useEffect(() => {
         if (type !== 'DOC') {
             if (api.hasThumbnail !== null || api.hasThumbnail) {
-
                 const promisedThumbnail = apiType === Api.CONSTS.APIProduct
                     ? new APIProduct().getAPIProductThumbnail(id)
                     : new Api().getAPIThumbnail(id);
@@ -129,7 +128,7 @@ const BaseThumbnail = (props) => {
                             setThumbnail(null);
                             setIconJson(response.body);
                         } else if (response.headers['content-type'] === 'image/svg+xml') {
-                            const blob = new Blob([response.data], {type: 'image/svg+xml'});
+                            const blob = new Blob([response.data], { type: 'image/svg+xml' });
                             const url = windowURL.createObjectURL(blob);
                             setThumbnail(url);
                         } else if (response && response.data.size > 0) {
@@ -138,14 +137,14 @@ const BaseThumbnail = (props) => {
                         }
                     } else if (response && response.data === '') {
                         setThumbnail(null);
-                        setIconJson({key: null});
+                        setIconJson({ key: null });
                     }
                 }).finally(() => {
                     setImageLoaded(true);
                 });
             } else {
                 setThumbnail(null);
-                setIconJson({key: null});
+                setIconJson({ key: null });
                 setImageLoaded(true);
             }
         } else {
