@@ -358,7 +358,7 @@ class Details extends Component {
                         text={(
                             <FormattedMessage
                                 id='Applications.Details.menu.api.key'
-                                defaultMessage='Api Key'
+                                defaultMessage='API Key'
                             />
                         )}
                         route='productionkeys/apikey'
@@ -396,7 +396,7 @@ class Details extends Component {
                         text={(
                             <FormattedMessage
                                 id='Applications.Details.menu.api.key'
-                                defaultMessage='Api Key'
+                                defaultMessage='API Key'
                             />
                         )}
                         route='sandboxkeys/apikey'

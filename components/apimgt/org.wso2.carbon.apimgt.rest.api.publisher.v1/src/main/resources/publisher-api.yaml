@@ -1663,6 +1663,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -1716,6 +1718,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -1844,7 +1848,8 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:comment_view
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments"
@@ -1913,8 +1918,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_publish
+            - apim:comment_write
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -1967,7 +1971,8 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:comment_view
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4"
@@ -2037,7 +2042,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_publish
+            - apim:comment_write
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2075,7 +2080,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_publish
+            - apim:comment_write
+            - apim:admin
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2128,7 +2134,8 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-        - OAuth2Security: []
+        - OAuth2Security:
+            - apim:comment_view
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/publisher/v1/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"
@@ -6710,6 +6717,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -6763,6 +6772,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -8065,7 +8076,7 @@ components:
           description: |
             List of gateway environments the API is available
           example:
-            - Production and Sandbox
+            - Default
           items:
             type: string
           x-otherScopes:
@@ -8607,7 +8618,7 @@ components:
           description: |
             List of gateway environments the API Product is available
           example:
-            - Production and Sandbox
+            - Default
           items:
             type: string
         apiType:
@@ -11485,3 +11496,5 @@ components:
             apim:api_product_import_export: Import and export API Products related operations
             apim:api_generate_key: Generate Internal Key
             apim:admin: Manage all admin operations
+            apim:comment_view: Read permission to comments
+            apim:comment_write: Write permission to comments

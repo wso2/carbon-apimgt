@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import Icon from '@material-ui/core/Icon';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
+import Configurations from 'Config';
 import { Link as RouterLink } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
 
@@ -26,9 +26,6 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: theme.spacing(4),
         paddingRight: theme.spacing(4),
     },
-    centerIcon: {
-        fontSize: theme.spacing(12),
-    },
 }));
 
 
@@ -36,7 +33,7 @@ const RestAPIMenu = (props) => {
     const {
         to, iconName, name, disabled, id,
     } = props;
-    const { boxTransition, centerIcon } = useStyles();
+    const { boxTransition } = useStyles();
     const [isHover, setIsHover] = useState(false);
     const onMouseOver = () => {
         setIsHover(true && !disabled);
@@ -88,19 +85,19 @@ const RestAPIMenu = (props) => {
                         justify='space-between'
                         alignItems='center'
                     >
-                        <Grid item xs={6}>
+                        <Grid item xs={12}>
                             <Box
                                 alignItems='center'
-                                mt={12}
                                 justifyContent='center'
+                                display={{ xs: 'none', sm: 'flex' }}
                             >
-                                <Icon
-                                    style={{ fontSize: 90 }}
-                                    classes={{ root: centerIcon }} // TODO: This is not getting applied ~tmkb
-                                    color='primary'
-                                >
-                                    {iconName}
-                                </Icon>
+                                <img
+                                    width='190px'
+                                    src={Configurations.app.context
+                                        + iconName}
+                                    alt={name}
+                                    aria-hidden='true'
+                                />
                             </Box>
                         </Grid>
                         <Grid item xs={12} />

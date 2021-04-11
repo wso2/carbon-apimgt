@@ -103,6 +103,7 @@ const styles = theme => ({
     dropZoneWrapper: {
         height: '100%',
         display: 'flex',
+        cursor: 'pointer',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
@@ -577,7 +578,7 @@ class CreateEditForm extends React.Component {
                                     <div>
                                         <FormattedMessage
                                             id='Apis.Details.Documents.CreateEditForm.document.create.type.sample'
-                                            defaultMessage='Sample &amp; SDK'
+                                            defaultMessage='Sample and SDK'
                                         />
                                     </div>
                                 </div>

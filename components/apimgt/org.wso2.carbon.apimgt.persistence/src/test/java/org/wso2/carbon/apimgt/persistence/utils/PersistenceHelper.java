@@ -41,7 +41,7 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_apiSecurity","oauth2,oauth_basic_auth_api_key_mandatory");
         artifact.setAttribute("URITemplate_authType0","Application & Application User");
         artifact.setAttribute("overview_keyManagers","[\"all\"]");
-        artifact.setAttribute("overview_environments","Production and Sandbox");
+        artifact.setAttribute("overview_environments","Default");
         artifact.setAttribute("overview_context","/pizzashack/1.0.0");
         artifact.setAttribute("overview_visibility","restricted");
         artifact.setAttribute("overview_isLatest","true");
@@ -132,7 +132,7 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_apiSecurity","oauth2,oauth_basic_auth_api_key_mandatory");
         artifact.setAttribute("URITemplate_authType0","Application & Application User");
         artifact.setAttribute("overview_keyManagers","[\"all\"]");
-        artifact.setAttribute("overview_environments","Production and Sandbox");
+        artifact.setAttribute("overview_environments","Default");
         artifact.setAttribute("overview_context","/t/wso2.com/pizzashack/1.0.0");
         artifact.setAttribute("overview_visibility","restricted");
         artifact.setAttribute("overview_isLatest","true");
@@ -215,7 +215,7 @@ public class PersistenceHelper {
         artifact.setAttribute("overview_visibleTenants",null);
         artifact.setAttribute("overview_name","APIProductTest");
         artifact.setAttribute("overview_apiSecurity","oauth2,oauth_basic_auth_api_key_mandatory,basic_auth,api_key");
-        artifact.setAttribute("overview_environments","Production and Sandbox");
+        artifact.setAttribute("overview_environments","Default");
         artifact.setAttribute("overview_subscriptionAvailability","all_tenants");
         artifact.setAttribute("overview_context","/prodcontext");
         artifact.setAttribute("overview_visibility","restricted");

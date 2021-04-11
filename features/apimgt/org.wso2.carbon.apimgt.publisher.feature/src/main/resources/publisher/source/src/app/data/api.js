@@ -36,7 +36,7 @@ class API extends Resource {
             this.version = version;
             this.context = context;
             this.isDefaultVersion = false;
-            this.gatewayEnvironments = ['Production and Sandbox']; //todo: load the environments from settings API
+            this.gatewayEnvironments = ['Default']; //todo: load the environments from settings API
             this.transport = ['http', 'https'];
             this.visibility = 'PUBLIC';
             this.endpointConfig = {
@@ -1241,11 +1241,12 @@ class API extends Resource {
         return promised_getDocContent;
     }
 
-    getDocuments(api_id, callback) {
+    getDocuments(api_id, callback, limit=1000) {
         const promise_get_all = this.client.then(client => {
             return client.apis['API Documents'].getAPIDocuments(
                 {
                     apiId: api_id,
+                    limit,
                 },
                 this._requestMetaData(),
             );
@@ -1844,7 +1845,7 @@ class API extends Resource {
      */
     getSwagger(id = this.id, environmentName = '') {
         const payload = { apiId: id };
-        if(environmentName) {
+        if (environmentName) {
             payload[environmentName] = environmentName;
         }
         return this.client.then((client) => {
@@ -1988,6 +1989,16 @@ class API extends Resource {
      * @returns
      */
     getDeployedRevisions() {
+        if (this.isRevision) {
+            return this.client.then(client => {
+                return client.apis['API Revisions'].getAPIRevisionDeployments({
+                    apiId: this.revisionedApiId,
+                },
+                ).then(res => {
+                    return { body: res.body.filter(a => a.revisionUuid === this.id) }
+                });
+            });
+        }
         return this.client.then(client => {
             return client.apis['API Revisions'].getAPIRevisionDeployments({
                 apiId: this.id,
@@ -2112,7 +2123,7 @@ class API extends Resource {
                         apiId: apiId,
                         deploymentId: deploymentId
                     },
-                    { requestBody: body},
+                    { requestBody: body },
                     this._requestMetaData(),
                 );
             });
@@ -2132,7 +2143,7 @@ class API extends Resource {
                 {
                     serviceKey: serviceKey,
                 },
-                { requestBody: apiMetaData},
+                { requestBody: apiMetaData },
                 this._requestMetaData()
             );
         });

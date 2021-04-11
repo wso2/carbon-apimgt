@@ -24,7 +24,7 @@ import Paper from '@material-ui/core/Paper';
 
 const useStyles = makeStyles((theme) => ({
     cardIcons: {
-        width: 151,
+        width: 190,
     },
     cardContainer: {
         height: theme.spacing(63),
@@ -58,6 +58,7 @@ function OnboardingMenuCard(props) {
                                 className={classes.cardIcons}
                                 src={iconSrc}
                                 alt={heading}
+                                aria-hidden='true'
                             />
                         </Box>
                     </Grid>

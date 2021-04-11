@@ -1948,8 +1948,7 @@ public class APIMappingUtil {
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
                 Map<String, String> wsUriMappings = api.getWsUriMapping();
                 if (wsUriMappings != null) {
-                    String wsUriMapping = wsUriMappings
-                            .get(operationsDTO.getTarget() + "_" + operationsDTO.getVerb().toLowerCase());
+                    String wsUriMapping = wsUriMappings.get(operationsDTO.getVerb() + "_" + operationsDTO.getTarget());
                     if (wsUriMapping != null) {
                         operationsDTO.setUriMapping(wsUriMapping);
                     }

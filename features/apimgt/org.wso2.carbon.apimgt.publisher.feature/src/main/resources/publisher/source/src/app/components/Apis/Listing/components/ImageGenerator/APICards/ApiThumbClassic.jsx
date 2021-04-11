@@ -196,7 +196,7 @@ class APIThumb extends Component {
                 onFocus={this.toggleMouseOver}
                 onMouseOut={this.toggleMouseOver}
                 onBlur={this.toggleMouseOver}
-                raised={isHover}
+                elevation={isHover ? 4 : 1}
                 className={classes.card}
             >
                 <CardMedia

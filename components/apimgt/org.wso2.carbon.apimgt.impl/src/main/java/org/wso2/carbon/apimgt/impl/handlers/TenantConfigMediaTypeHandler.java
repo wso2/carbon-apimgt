@@ -19,11 +19,13 @@ package org.wso2.carbon.apimgt.impl.handlers;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.jdbc.handlers.Handler;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 
 import javax.cache.Cache;
+import javax.cache.Caching;
 
 public class TenantConfigMediaTypeHandler extends Handler {
 
@@ -42,6 +44,8 @@ public class TenantConfigMediaTypeHandler extends Handler {
         if (tenantConfigCache.containsKey(cacheName)) {
             tenantConfigCache.remove(cacheName);
         }
-
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                .getCache(APIConstants.REST_API_SCOPE_CACHE)
+                .put(APIUtil.getTenantDomainFromTenantId(tenantId), null);
     }
 }

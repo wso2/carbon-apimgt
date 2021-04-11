@@ -56,11 +56,11 @@ function StarRatingSummary(props) {
                 <>
                     <Icon className={classes.starRate}>star</Icon>
                     <div className={classes.ratingSummary}>
-                        <div className={classes.userRating}>
+                        <div aria-label='User rating' className={classes.userRating}>
                             <Typography variant='body1'>{avgRating}</Typography>
-                            <Typography variant='body1'>/5.0</Typography>
+                            <Typography aria-label='out of five' variant='body1'>/5.0</Typography>
                         </div>
-                        <Typography variant='body1' gutterBottom align='left'>
+                        <Typography aria-label='Number of users who has rated' variant='body1' gutterBottom align='left'>
                             {reviewCount}
                             {' '}
                             {reviewCount === 1 ? (

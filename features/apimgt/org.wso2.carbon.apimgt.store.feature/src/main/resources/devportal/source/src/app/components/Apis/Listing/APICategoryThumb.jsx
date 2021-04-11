@@ -36,6 +36,11 @@ const styles = (theme) => ({
             color: theme.custom.tagCloud.leftMenu.color,
         },
     },
+    listItemText: {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+    },
 });
 
 /**
@@ -54,7 +59,7 @@ function APICategoryThumb(props) {
                 <ListItemIcon>
                     <Icon>label</Icon>
                 </ListItemIcon>
-                <ListItemText primary={category.name} />
+                <ListItemText primary={category.name} classes={{ primary: classes.listItemText }} />
             </ListItem>
         </Link>
     );

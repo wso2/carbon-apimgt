@@ -394,10 +394,6 @@ export default function ImportDefinition(props) {
                     {btnText}
                 </Button>
             )}
-            {/* <Dialog
-                onBackdropClick={isWebSocket || isWebSub ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
-                open={isWebSocket || isWebSub ? asyncAPIDefinitionImport : openAPIDefinitionImport}
-            ></Dialog> */}
             <Dialog
                 onBackdropClick={isAsyncAPI ? setAsyncAPIDefinitionImport : setOpenAPIDefinitionImport}
                 open={isAsyncAPI ? asyncAPIDefinitionImport : openAPIDefinitionImport}
