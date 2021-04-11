@@ -683,7 +683,11 @@ class Details extends Component {
             return <Progress per={70} message='Loading API data ...' />;
         }
         const { leftMenuIconMainSize } = theme.custom;
-
+        let isPortalConfigsPage = false;
+        // let isAPIConfigsPage = false;
+        if (/^\/(apis|api-products|scopes|service-catalog)($|\/$)/g.test(pathname)) {
+            isPortalConfigsPage = true;
+        }
         return (
             <Box display='flex' alignItems='stretch' flexDirection='row'>
                 <APIProvider
@@ -722,7 +726,7 @@ class Details extends Component {
                         </Typography>
                         <div className={classes.root}>
                             <Accordion
-                                defaultExpanded={false}
+                                defaultExpanded={isPortalConfigsPage}
                                 elevation={0}
                                 classes={{ expanded: classes.expanded }}
                             >
