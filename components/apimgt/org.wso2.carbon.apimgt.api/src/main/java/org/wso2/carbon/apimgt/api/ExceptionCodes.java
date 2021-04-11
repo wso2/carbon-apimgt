@@ -300,6 +300,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot add client certificates to this server"),
     THROTTLING_POLICY_CANNOT_BE_NULL(900989,
             "Throttling Policy cannot be empty or null", 400, "Throttling Policy cannot be empty or null"),
+    POSITIVE_INTEGER_VALUE(900990, "Contain invalid values. It should be a positive Integer",
+            400, "Limiting options of %s should be an Integer greater than 1"),
 
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
@@ -366,7 +368,6 @@ public enum ExceptionCodes implements ErrorHandler {
         //External Stores related codes
     EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
             "External Store Not Found"),
-
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),

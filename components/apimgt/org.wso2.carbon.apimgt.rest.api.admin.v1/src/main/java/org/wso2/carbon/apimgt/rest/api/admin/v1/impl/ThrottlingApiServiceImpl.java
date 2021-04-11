@@ -28,12 +28,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
@@ -119,6 +114,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 }
             } catch (PolicyNotFoundException ignore) {
             }
+            validateQuotaPolicy(apiPolicy);
             //Add the policy
             apiProvider.addPolicy(apiPolicy);
 
@@ -128,14 +124,42 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(newApiPolicy);
             return Response.created(new URI(RestApiConstants.RESOURCE_PATH_THROTTLING_POLICIES_ADVANCED + "/"
                     + policyDTO.getPolicyId())).entity(policyDTO).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while adding an Advanced level policy: " + body.getPolicyName();
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving Advanced Throttle policy location : " + body.getPolicyName();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * Validate whether the limiting options are greater than 1 or not
+     * @param policy   Policy
+     */
+    public void validateQuotaPolicy(Policy policy) throws APIManagementException {
+        String apiPolicyName = policy.getPolicyName();
+        if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+            if (limit.getUnitTime() < 1 || limit.getRequestCount() < 1) {
+                throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
+                        + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
+
+            }
+
+        } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
+            if (limit.getUnitTime() < 1 || limit.getStandardDataAmount() < 1) {
+                throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
+                        + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
+
+            }
+        } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
+            EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+            if (limit.getUnitTime() < 1 || limit.getEventCount() < 1) {
+                throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
+                        + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
+
+            }
+        }
     }
 
     /**
@@ -192,6 +216,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden parameters
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
+            validateQuotaPolicy(existingPolicy);
 
             //update the policy
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
@@ -303,6 +328,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 }
             } catch (PolicyNotFoundException ignore) {
             }
+            validateQuotaPolicy(appPolicy);
             //Add the policy
             apiProvider.addPolicy(appPolicy);
 
@@ -377,7 +403,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
-
+            validateQuotaPolicy(existingPolicy);
             //update the policy
             ApplicationPolicy appPolicy =
                     ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(body);
@@ -492,6 +518,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             // validate if permission info exists and halt the execution in case of an error
             validatePolicyPermissions(body);
 
+            validateQuotaPolicy(subscriptionPolicy);
             //Add the policy
             apiProvider.addPolicy(subscriptionPolicy);
 
@@ -641,6 +668,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //update the policy
             SubscriptionPolicy subscriptionPolicy =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(body);
+            validateQuotaPolicy(subscriptionPolicy);
             apiProvider.updatePolicy(subscriptionPolicy);
 
             //update policy permissions
