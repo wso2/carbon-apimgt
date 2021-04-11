@@ -316,7 +316,8 @@ public class SQLConstants {
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
-            "   API.API_ID AS API_ID " +
+             "   API.API_ID AS API_ID," +
+             "   API.API_UUID AS API_UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
             "   AM_API API " +

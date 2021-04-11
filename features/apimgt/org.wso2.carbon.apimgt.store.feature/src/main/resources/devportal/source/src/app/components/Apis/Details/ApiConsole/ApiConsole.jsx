@@ -479,7 +479,7 @@ class ApiConsole extends React.Component {
                         <Grid xs={8} item />
                         <Grid xs={2} item>
                             <Button size='small' onClick={() => this.convertToPostman(downloadSwagger)}>
-                                <Icons icon={postmanIcon} width={30} height={30} />
+                                <Icons icon={postmanIcon} width={30} height={30} className={classes.buttonIcon} />
                                 <FormattedMessage
                                     id='Apis.Details.APIConsole.APIConsole.download.postman'
                                     defaultMessage='Postman collection'

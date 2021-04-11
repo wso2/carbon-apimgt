@@ -87,6 +87,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -3070,8 +3071,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             String extension = FilenameUtils.getExtension(fileName);
             if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
                 RestApiUtil.handleBadRequest(
-                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg and .gif",
-                        log);
+                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg .svg "
+                                + "and .gif", log);
             }
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
@@ -4377,11 +4378,16 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate API update operation permitted based on the LC state
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
+        Map<String, Environment> environments = APIUtil.getEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+            String environment = apiRevisionDeploymentDTO.getName();
+            if (environments.get(environment) == null) {
+                RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+            }
+            apiRevisionDeployment.setDeployment(environment);
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
             if (StringUtils.isEmpty(apiRevisionDeploymentDTO.getVhost())) {
                 // vhost is only required when deploying an revision, not required when un-deploying a revision
@@ -4447,6 +4453,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
+        Map<String, Environment> environments = APIUtil.getEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -4454,7 +4461,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                 apiRevisionDeployment.setRevisionUUID(revisionId);
-                apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                String environment = apiRevisionDeploymentDTO.getName();
+                if (environments.get(environment) == null) {
+                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                }
+                apiRevisionDeployment.setDeployment(environment);
                 apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
                 apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
                 apiRevisionDeployments.add(apiRevisionDeployment);

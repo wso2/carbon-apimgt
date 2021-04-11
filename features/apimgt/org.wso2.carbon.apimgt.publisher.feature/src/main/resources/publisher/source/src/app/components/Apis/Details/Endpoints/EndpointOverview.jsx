@@ -994,6 +994,7 @@ function EndpointOverview(props) {
                                 <LoadbalanceFailoverConfig
                                     handleEndpointCategorySelect={handleEndpointCategorySelect}
                                     toggleAdvanceConfig={toggleAdvanceConfig}
+                                    toggleESConfig={toggleEndpointSecurityConfig}
                                     endpointsDispatcher={endpointsDispatcher}
                                     epConfig={(cloneDeep(epConfig))}
                                     endpointSecurityInfo={endpointSecurityInfo}

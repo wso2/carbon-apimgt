@@ -102,7 +102,7 @@ class Comments extends Component {
             expanded: true,
             allComments: [],
             comments: [],
-            totalComments: 0,
+            totalComments: null,
             startCommentsToDisplay: 0,
             apiId: null,
         };
@@ -238,8 +238,8 @@ class Comments extends Component {
         return (
             <div className={classes.contentWrapper}>
                 <div className={classes.root}>
-                    <Typography variant='h4' className={classes.titleSub}>
-                        {totalComments + (' ')}
+                    <Typography id='itest-api-details-comments-head' variant='h4' className={classes.titleSub}>
+                        {totalComments ? totalComments + (' ') : ''}
                         <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                     </Typography>
                 </div>
@@ -254,7 +254,7 @@ class Comments extends Component {
                     />
                 </div>
 
-                {!allComments && (
+                {!allComments.length && (
                     <Paper className={classes.paperProgress}>
                         <CircularProgress size={24} />
                     </Paper>

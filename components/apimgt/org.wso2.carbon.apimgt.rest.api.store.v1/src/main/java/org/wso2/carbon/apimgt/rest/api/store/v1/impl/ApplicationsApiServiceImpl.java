@@ -240,7 +240,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             List<APIIdentifier> skippedAPIs = new ArrayList<>();
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = ImportUtils
-                        .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application.getId(),
+                        .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application,
                                 update, apiConsumer);
             }
             Application importedApplication = apiConsumer.getApplicationById(application.getId());

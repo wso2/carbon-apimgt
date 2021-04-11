@@ -255,6 +255,18 @@ paths:
             **Search condition**.
               Application ID  of the subscription
           type: integer
+        - name: apiUUID
+          in: query
+          description: |
+            **Search condition**.
+              Api UUID  of the subscription
+          type: string
+        - name: applicationUUID
+          in: query
+          description: |
+            **Search condition**.
+              Application UUID  of the subscription
+          type: string
       tags:
         - Subscription Validation
       responses:
@@ -509,41 +521,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /synapse-attributes:
-    get:
-      summary: Get API UUID and label associated with it
-      description: |
-        This will provide access to synapse artifacts in database.
-      parameters:
-        - name: apiName
-          in: query
-          description: |
-            **Search condition**.
-              API Name
-          type: string
-        - name: tenantDomain
-          in: query
-          description: |
-            **Search condition**.
-             tenantDomain associated with the API
-          type: string
-        - name: version
-          in: query
-          description: |
-            **Search condition**.
-            version of the API
-          type: string
-      tags:
-        - Retrieving Synapse artifacts
-      responses:
-        200:
-          description: An array of gatewayRuntimeArtifacts
-          schema:
-            $ref: '#/definitions/SynapseAttributes'
-        default:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
   /webhooks-subscriptions:
     get:
       summary: Get webhooks subscriptions
@@ -909,12 +886,18 @@ definitions:
   #-----------------------------------------------------
   Subscription:
     properties:
+      subscriptionUUID:
+        type: string
       subscriptionId:
         type: integer
       policyId:
         type: string
+      apiUUID:
+        type: string
       apiId:
         type: integer
+      applicationUUID:
+        type: string
       appId:
         type: integer
       subscriptionState:
@@ -961,6 +944,8 @@ definitions:
     properties:
       applicationId:
         type: integer
+      applicationUUID:
+        type: string
       consumerKey:
         type: string
       keyType:

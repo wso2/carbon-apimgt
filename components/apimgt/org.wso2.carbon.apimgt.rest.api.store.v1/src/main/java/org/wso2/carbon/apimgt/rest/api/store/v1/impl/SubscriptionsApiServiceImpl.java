@@ -41,13 +41,13 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.HttpWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIMonetizationUsageDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.SubscriptionMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -59,7 +59,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.ws.rs.core.Response;
 
 /**
@@ -224,7 +223,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
             SubscriptionResponse subscriptionResponse = apiConsumer
-                    .addSubscription(apiTypeWrapper, username, application.getId());
+                    .addSubscription(apiTypeWrapper, username, application);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI,
@@ -330,7 +329,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             apiTypeWrapper.setTier(body.getThrottlingPolicy());
 
             SubscriptionResponse subscriptionResponse = apiConsumer
-                    .updateSubscription(apiTypeWrapper, username, application.getId(), subscriptionId,
+                    .updateSubscription(apiTypeWrapper, username, application, subscriptionId,
                             currentThrottlingPolicy, requestedThrottlingPolicy);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
@@ -415,7 +414,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
 
                 apiTypeWrapper.setTier(subscriptionDTO.getThrottlingPolicy());
                 SubscriptionResponse subscriptionResponse = apiConsumer
-                        .addSubscription(apiTypeWrapper, username, application.getId());
+                        .addSubscription(apiTypeWrapper, username, application);
                 SubscribedAPI addedSubscribedAPI = apiConsumer
                         .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
                 SubscriptionDTO addedSubscriptionDTO =

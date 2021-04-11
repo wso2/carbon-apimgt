@@ -28,7 +28,6 @@ import GridOn from '@material-ui/icons/GridOn';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import APICreateMenu from './APICreateMenu';
 
 const styles = (theme) => ({
@@ -52,12 +51,8 @@ const styles = (theme) => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
     },
-    mainIconWrapper: {
-        paddingTop: 13,
-        paddingLeft: 35,
-        paddingRight: 20,
-    },
     mainTitleWrapper: {
+        paddingLeft: 35,
         display: 'flex',
         justifyContent: 'center',
         flexDirection: 'column',
@@ -124,15 +119,11 @@ function getTitleForArtifactType(props, count) {
  */
 function TopMenu(props) {
     const {
-        classes, data, setListType, theme, count, isAPIProduct, listType, showToggle,
+        classes, data, setListType, count, isAPIProduct, listType, showToggle,
     } = props;
-    const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
     if (count > 0) {
         return (
             <div className={classes.root}>
-                <div className={classes.mainIconWrapper}>
-                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
-                </div>
                 <div className={classes.mainTitleWrapper}>
                     {data && (
                         <>
@@ -172,7 +163,7 @@ function TopMenu(props) {
                 <div className={classes.APICreateMenu}>
                     {isAPIProduct ? (
                         <Link to='/api-products/create'>
-                            <Button variant='contained' className={classes.createButton}>
+                            <Button variant='contained' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.create.an.api.product'
                                     defaultMessage='Create an API Product'
@@ -226,4 +217,4 @@ TopMenu.propTypes = {
     showToggle: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(TopMenu);
+export default withStyles(styles)(TopMenu);

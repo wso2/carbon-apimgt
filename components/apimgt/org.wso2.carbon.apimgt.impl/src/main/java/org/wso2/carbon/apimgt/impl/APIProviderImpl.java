@@ -3979,13 +3979,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         subscribedAPI = apiMgtDAO.getSubscriptionByUUID(subscribedAPI.getUUID());
         Identifier identifier =
                 subscribedAPI.getApiId() != null ? subscribedAPI.getApiId() : subscribedAPI.getProductId();
-        int apiId = apiMgtDAO.getAPIID(identifier);
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         SubscriptionEvent subscriptionEvent = new SubscriptionEvent(UUID.randomUUID().toString(),
                 System.currentTimeMillis(), APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name(), tenantId, tenantDomain,
-                subscribedAPI.getSubscriptionId(), apiId,
-                subscribedAPI.getApplication().getId(), subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
+                subscribedAPI.getSubscriptionId(), subscribedAPI.getUUID(), identifier.getId(), identifier.getUUID(),
+                subscribedAPI.getApplication().getId(), subscribedAPI.getApplication().getUUID(),
+                subscribedAPI.getTier().getName(), subscribedAPI.getSubStatus());
         APIUtil.sendNotification(subscriptionEvent, APIConstants.NotifierType.SUBSCRIPTIONS.name());
     }
 

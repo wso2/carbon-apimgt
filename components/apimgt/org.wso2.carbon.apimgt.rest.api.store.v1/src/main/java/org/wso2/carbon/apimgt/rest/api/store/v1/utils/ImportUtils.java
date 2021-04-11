@@ -147,7 +147,9 @@ public class ImportUtils {
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-            int appId, Boolean update, APIConsumer apiConsumer) throws APIManagementException, UserStoreException {
+                                                          Application application, Boolean update,
+                                                          APIConsumer apiConsumer) throws APIManagementException,
+            UserStoreException {
         List<APIIdentifier> skippedAPIList = new ArrayList<>();
         for (ExportedSubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
@@ -192,10 +194,11 @@ public class ImportUtils {
                         // Add subscription if update flag is not specified
                         // It will throw an error if subscriber already exists
                         if (update == null || !update) {
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
+                                , application.getId())) {
                             // on update skip subscriptions that already exists
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         }
                     } else {
                         log.error("Failed to import Subscription as API/API Product " + name + "-" + version
