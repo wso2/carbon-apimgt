@@ -343,6 +343,7 @@ class Listing extends React.Component {
                                         scopeName={scopeName}
                                         scopeId={scopeId}
                                         fetchScopeData={this.fetchScopeData}
+                                        usageCount={usageCount}
                                     />
                                 </Box>
                             );
