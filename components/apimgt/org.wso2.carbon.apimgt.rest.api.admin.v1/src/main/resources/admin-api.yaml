@@ -3530,6 +3530,7 @@ components:
           enum:
           - FIXEDRATE
           - DYNAMICRATE
+          default: FIXEDRATE
         properties:
           type: object
           additionalProperties:

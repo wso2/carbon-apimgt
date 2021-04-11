@@ -108,16 +108,16 @@ public class SubscriptionThrottlePolicyMappingUtil {
                     CommonThrottleMappingUtil.fromQuotaPolicyToDTO(subscriptionPolicy.getDefaultQuotaPolicy()));
         }
         policyDTO.setType(SUBSCRIPTION_THROTTLE_POLICY_TYPE);
+        MonetizationInfoDTO monetizationInfoDTO = new MonetizationInfoDTO();
         if (APIConstants.COMMERCIAL_TIER_PLAN.equals(subscriptionPolicy.getBillingPlan())) {
-            MonetizationInfoDTO monetizationInfoDTO = new MonetizationInfoDTO();
             if (APIConstants.Monetization.FIXED_RATE.equalsIgnoreCase(subscriptionPolicy.getMonetizationPlan())) {
                 monetizationInfoDTO.setMonetizationPlan(MonetizationInfoDTO.MonetizationPlanEnum.FIXEDRATE);
             } else {
                 monetizationInfoDTO.setMonetizationPlan(MonetizationInfoDTO.MonetizationPlanEnum.DYNAMICRATE);
             }
             monetizationInfoDTO.setProperties(subscriptionPolicy.getMonetizationPlanProperties());
-            policyDTO.setMonetization(monetizationInfoDTO);
         }
+        policyDTO.setMonetization(monetizationInfoDTO);
         return policyDTO;
     }
 

@@ -54,7 +54,7 @@ public class MonetizationInfoDTO   {
 return null;
         }
     }
-    private MonetizationPlanEnum monetizationPlan = null;
+    private MonetizationPlanEnum monetizationPlan = MonetizationPlanEnum.FIXEDRATE;
     private Map<String, String> properties = new HashMap<String, String>();
 
   /**
