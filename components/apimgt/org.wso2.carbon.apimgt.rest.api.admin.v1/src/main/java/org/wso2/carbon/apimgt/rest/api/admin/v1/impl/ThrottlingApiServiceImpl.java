@@ -64,7 +64,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Retrieves all Advanced level policies
      *
-     * @param accept          Accept header value
+     * @param accept Accept header value
      * @return All matched Advanced Throttle policies to the given request
      */
     @Override
@@ -96,7 +96,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesAdvancedPost(String contentType, AdvancedThrottlePolicyDTO body,
-                                               MessageContext messageContext) throws APIManagementException {
+                                                   MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
@@ -133,7 +133,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
 
     /**
      * Validate whether the limiting options are greater than 1 or not
-     * @param policy   Policy
+     *
+     * @param policy Policy
      */
     public void validateQuotaPolicy(Policy policy) throws APIManagementException {
         String apiPolicyName = policy.getPolicyName();
@@ -165,7 +166,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Get a specific Advanced Level Policy
      *
-     * @param policyId        uuid of the policy
+     * @param policyId uuid of the policy
      * @return Required policy specified by name
      */
     @Override
@@ -195,14 +196,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Updates a given Advanced level policy specified by uuid
      *
-     * @param policyId          uuid of the policy
-     * @param body              DTO of policy to be updated
-     * @param contentType       Content-Type header
+     * @param policyId    uuid of the policy
+     * @param body        DTO of policy to be updated
+     * @param contentType Content-Type header
      * @return Updated policy
      */
     @Override
     public Response throttlingPoliciesAdvancedPolicyIdPut(String policyId, String contentType,
-              AdvancedThrottlePolicyDTO body, MessageContext messageContext) {
+                                                          AdvancedThrottlePolicyDTO body, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -241,7 +242,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Delete an Advanced level policy specified by uuid
      *
-     * @param policyId          uuid of the policy
+     * @param policyId uuid of the policy
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
@@ -277,7 +278,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Retrieves all Application Throttle Policies
      *
-     * @param accept          Accept header value
+     * @param accept Accept header value
      * @return Retrieves all Application Throttle Policies
      */
     @Override
@@ -352,7 +353,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Get a specific Application Policy by its uuid
      *
-     * @param policyId        uuid of the policy
+     * @param policyId uuid of the policy
      * @return Matched Application Throttle Policy by the given name
      */
     @Override
@@ -383,14 +384,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Updates a given Application level policy specified by uuid
      *
-     * @param policyId          uuid of the policy
-     * @param body              DTO of policy to be updated
-     * @param contentType       Content-Type header
+     * @param policyId    uuid of the policy
+     * @param body        DTO of policy to be updated
+     * @param contentType Content-Type header
      * @return Updated policy
      */
     @Override
     public Response throttlingPoliciesApplicationPolicyIdPut(String policyId, String contentType,
-         ApplicationThrottlePolicyDTO body, MessageContext messageContext) {
+                                                             ApplicationThrottlePolicyDTO body, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -428,7 +429,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Delete an Application level policy specified by uuid
      *
-     * @param policyId          uuid of the policy
+     * @param policyId uuid of the policy
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
@@ -464,7 +465,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Retrieves all Subscription level policies
      *
-     * @param accept          Accept header value
+     * @param accept Accept header value
      * @return All matched Subscription Throttle policies to the given request
      */
     @Override
@@ -496,7 +497,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesSubscriptionPost(String contentType, SubscriptionThrottlePolicyDTO body,
-                                               MessageContext messageContext) throws APIManagementException {
+                                                       MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
@@ -605,7 +606,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Get a specific Subscription Policy by its uuid
      *
-     * @param policyId        uuid of the policy
+     * @param policyId uuid of the policy
      * @return Matched Subscription Throttle Policy by the given name
      */
     @Override
@@ -640,14 +641,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Updates a given Subscription level policy specified by uuid
      *
-     * @param policyId          u
-     * @param body              DTO of policy to be updated
-     * @param contentType       Content-Type header
+     * @param policyId    u
+     * @param body        DTO of policy to be updated
+     * @param contentType Content-Type header
      * @return Updated policy
      */
     @Override
     public Response throttlingPoliciesSubscriptionPolicyIdPut(String policyId, String contentType,
-                      SubscriptionThrottlePolicyDTO body, MessageContext messageContext) throws APIManagementException{
+                                                              SubscriptionThrottlePolicyDTO body, MessageContext messageContext) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
@@ -697,7 +698,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Delete a Subscription level policy specified by uuid
      *
-     * @param policyId          uuid of the policyu
+     * @param policyId uuid of the policyu
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
@@ -734,7 +735,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Retrieves all Global level policies
      *
-     * @param accept          Accept header value
+     * @param accept Accept header value
      * @return All matched Global Throttle policies to the given request
      */
     @Override
@@ -770,7 +771,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingPoliciesCustomPost(String contentType, CustomRuleDTO body, MessageContext messageContext)
-                                                                throws APIManagementException {
+            throws APIManagementException {
 
         RestApiAdminUtils
                 .validateCustomRuleRequiredProperties(body, (String) messageContext.get(Message.HTTP_REQUEST_METHOD));
@@ -813,7 +814,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Get a specific custom rule by its name
      *
-     * @param ruleId          uuid of the policy
+     * @param ruleId uuid of the policy
      * @return Matched Global Throttle Policy by the given name
      */
     @Override
@@ -846,9 +847,9 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Updates a given Global level policy/custom rule specified by uuid
      *
-     * @param ruleId            uuid of the policy
-     * @param body              DTO of policy to be updated
-     * @param contentType       Content-Type header
+     * @param ruleId      uuid of the policy
+     * @param body        DTO of policy to be updated
+     * @param contentType Content-Type header
      * @return Updated policy
      */
     @Override
@@ -897,11 +898,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Delete a Global level policy/custom rule specified by uuid
      *
-     * @param ruleId            uuid of the policy
+     * @param ruleId uuid of the policy
      * @return 200 OK response if successfully deleted the policy
      */
     @Override
-    public Response throttlingPoliciesCustomRuleIdDelete(String ruleId,  MessageContext messageContext) {
+    public Response throttlingPoliciesCustomRuleIdDelete(String ruleId, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
@@ -931,7 +932,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Retrieves all Block Conditions
      *
-     * @param accept          Accept header value
+     * @param accept Accept header value
      * @return All matched block conditions to the given request
      */
     @Override
@@ -958,7 +959,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      */
     @Override
     public Response throttlingDenyPoliciesPost(String contentType, BlockingConditionDTO body,
-                                            MessageContext messageContext) {
+                                               MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //Add the block condition. It will throw BlockConditionAlreadyExistsException if the condition already
@@ -1012,7 +1013,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Get a specific Block condition by its id
      *
-     * @param conditionId     Id of the block condition
+     * @param conditionId Id of the block condition
      * @return Matched block condition for the given Id
      */
     @Override
@@ -1045,7 +1046,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Delete a block condition specified by the condition Id
      *
-     * @param conditionId       Id of the block condition
+     * @param conditionId Id of the block condition
      * @return 200 OK response if successfully deleted the block condition
      */
     @Override
@@ -1075,14 +1076,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Updates an existing condition status of a blocking condition
      *
-     * @param conditionId       Id of the block condition
-     * @param body              content to update
-     * @param contentType       Content-Type header
+     * @param conditionId Id of the block condition
+     * @param body        content to update
+     * @param contentType Content-Type header
      * @return 200 response if successful
      */
     @Override
     public Response throttlingDenyPolicyConditionIdPatch(String conditionId, String contentType,
-            BlockingConditionStatusDTO body, MessageContext messageContext) {
+                                                         BlockingConditionStatusDTO body, MessageContext messageContext) {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
