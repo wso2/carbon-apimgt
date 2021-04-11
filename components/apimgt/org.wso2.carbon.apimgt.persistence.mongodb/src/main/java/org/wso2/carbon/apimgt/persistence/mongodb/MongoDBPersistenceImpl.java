@@ -212,10 +212,12 @@ public class MongoDBPersistenceImpl implements APIPersistence {
         MongoCollection<Document> genericCollection = MongoDBConnectionUtil.getGenericCollection(org.getName());
         FindIterable<Document> revision = genericCollection.find(eq("_id", new ObjectId(revisionUUID)));
         MongoCursor<Document> cursor = revision.cursor();
+        String lifecycleStatus = getLifecycleStatus(org, apiUUID);
         while (cursor.hasNext()) {
             Document mongoDBAPIDocument = cursor.next();
             mongoDBAPIDocument.put("_id", new ObjectId(apiUUID));
             mongoDBAPIDocument.remove("revision");
+            mongoDBAPIDocument.put("status", lifecycleStatus);
             FindOneAndReplaceOptions options = new FindOneAndReplaceOptions();
             options.returnDocument(ReturnDocument.AFTER);
             genericCollection.findOneAndReplace(eq("_id", new ObjectId(apiUUID)), mongoDBAPIDocument, options);
@@ -1037,6 +1039,17 @@ public class MongoDBPersistenceImpl implements APIPersistence {
     @Override
     public void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException {
 
+    }
+
+    private String getLifecycleStatus(Organization org, String apiId) throws APIPersistenceException {
+        MongoCollection<MongoDBPublisherAPI> collection = MongoDBConnectionUtil.getPublisherCollection(org.getName());
+        MongoDBPublisherAPI api = collection.find(eq("_id", new ObjectId(apiId)))
+                .projection(include("status")).first();
+        if (api == null) {
+            throw new APIPersistenceException("Failed to get api status. Api " + apiId + " does not exist in " +
+                    "mongodb");
+        }
+        return api.getStatus();
     }
 
     @Override
