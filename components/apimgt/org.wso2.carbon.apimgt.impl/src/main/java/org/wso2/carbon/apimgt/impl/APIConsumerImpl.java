@@ -5884,12 +5884,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
                             devPortalApi.getApiName(), devPortalApi.getVersion()));
                     populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
-
+                    populateAPIStatus(apiProduct);
                     return new ApiTypeWrapper(apiProduct);
                 } else {
                     API api = APIMapper.INSTANCE.toApi(devPortalApi);
                     populateAPIInformation(uuid, requestedTenantDomain, org, api);
                     populateDefaultVersion(api);
+                    populateAPIStatus(api);
                     api = addTiersToAPI(api, requestedTenantDomain);
                     return new ApiTypeWrapper(api);
                 }
@@ -5901,6 +5902,14 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
+    }
+
+    private void populateAPIStatus(API api) throws APIManagementException {
+        api.setStatus(apiMgtDAO.getAPIStatusFromAPIUUID(api.getUuid()));
+    }
+
+    private void populateAPIStatus(APIProduct apiProduct) throws APIManagementException {
+        apiProduct.setState(apiMgtDAO.getAPIStatusFromAPIUUID(apiProduct.getUuid()));
     }
 
     protected void checkVisibilityPermission(String userNameWithTenantDomain, String visibility, String visibilityRoles)
