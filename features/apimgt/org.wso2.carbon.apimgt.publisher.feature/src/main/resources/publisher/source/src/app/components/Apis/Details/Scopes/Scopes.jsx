@@ -255,7 +255,12 @@ class Scopes extends React.Component {
             return (
                 <div className={classes.root}>
                     <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <Typography
+                            id='itest-api-details-scopes-onboarding-head'
+                            variant='h4'
+                            align='left'
+                            className={classes.mainTitle}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.local.Scopes.heading.scope.heading'
                                 defaultMessage='Local Scopes'
@@ -339,7 +344,7 @@ class Scopes extends React.Component {
                     </Tooltip>
                     <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                         <Button
-                            variant='contained'
+                            variant='outlined'
                             color='primary'
                             size='small'
                             disabled={isRestricted(['apim:api_create'], api) || api.isRevision}

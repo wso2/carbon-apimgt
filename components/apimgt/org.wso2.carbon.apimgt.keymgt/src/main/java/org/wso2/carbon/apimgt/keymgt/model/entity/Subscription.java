@@ -26,12 +26,46 @@ import org.wso2.carbon.apimgt.keymgt.model.util.SubscriptionDataStoreUtil;
  */
 public class Subscription implements CacheableEntity<String> {
 
+    private String subscriptionUUId;
     private String subscriptionId = null;
     private String policyId = null;
     private Integer apiId = null;
+    private String apiUUId;
     private Integer appId = null;
+    private String appUUID;
     private String subscriptionState = null;
     private long timeStamp;
+
+    public String getSubscriptionUUId() {
+
+        return subscriptionUUId;
+    }
+
+    public void setSubscriptionUUId(String subscriptionUUId) {
+
+        this.subscriptionUUId = subscriptionUUId;
+    }
+
+    public String getApiUUId() {
+
+        return apiUUId;
+    }
+
+    public void setApiUUId(String apiUUId) {
+
+        this.apiUUId = apiUUId;
+    }
+
+    public String getAppUUID() {
+
+        return appUUID;
+    }
+
+    public void setAppUUID(String appUUID) {
+
+        this.appUUID = appUUID;
+    }
+
     public String getSubscriptionId() {
 
         return subscriptionId;
@@ -102,10 +136,13 @@ public class Subscription implements CacheableEntity<String> {
     public String toString() {
 
         return "Subscription{" +
-                "subscriptionId='" + subscriptionId + '\'' +
+                "subscriptionUUId='" + subscriptionUUId + '\'' +
+                ", subscriptionId='" + subscriptionId + '\'' +
                 ", policyId='" + policyId + '\'' +
                 ", apiId=" + apiId +
+                ", apiUUId='" + apiUUId + '\'' +
                 ", appId=" + appId +
+                ", appUUID='" + appUUID + '\'' +
                 ", subscriptionState='" + subscriptionState + '\'' +
                 ", timeStamp=" + timeStamp +
                 '}';

@@ -255,11 +255,11 @@ function AddEdit(props) {
                     rateLimitTimeUnit: (result.body.rateLimitCount === 0) ? 'sec' : result.body.rateLimitTimeUnit,
                     billingPlan: result.body.billingPlan,
                     monetization: {
-                        monetizationPlan: 'FIXEDRATE',
-                        fixedPrice: '',
-                        pricePerRequest: '',
-                        currencyType: '',
-                        billingCycle: 'week',
+                        monetizationPlan: result.body.monetization.monetizationPlan,
+                        fixedPrice: result.body.monetization.properties.fixedPrice,
+                        pricePerRequest: result.body.monetization.properties.pricePerRequest,
+                        currencyType: result.body.monetization.properties.currencyType,
+                        billingCycle: result.body.monetization.properties.billingCycle,
                     },
                     customAttributes: setCustomAttributes(result.body.customAttributes),
                     stopOnQuotaReach: result.body.stopOnQuotaReach,
@@ -509,7 +509,7 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: {
+                permissions: (validRoles.length === 0) ? null : {
                     permissionType: state.permissions.permissionStatus,
                     roles: validRoles,
                 },
@@ -544,7 +544,7 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: {
+                permissions: (validRoles.length === 0) ? null : {
                     permissionType: state.permissions.permissionStatus,
                     roles: validRoles,
                 },
@@ -578,7 +578,7 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: {
+                permissions: (validRoles.length === 0) ? null : {
                     permissionType: state.permissions.permissionStatus,
                     roles: validRoles,
                 },

@@ -24,9 +24,12 @@ package org.wso2.carbon.apimgt.api.model.subscription;
 public class Subscription implements CacheableEntity<String> {
 
     private int subscriptionId;
+    private String subscriptionUUID;
     private String policyId = null;
     private int apiId;
+    private String apiUUID;
     private int appId;
+    private String applicationUUID;
     private String subscriptionState = null;
 
     public int getSubscriptionId() {
@@ -88,5 +91,35 @@ public class Subscription implements CacheableEntity<String> {
     private static String getSubscriptionCacheKey(int appId, int apiId) {
 
         return appId + DELEM_PERIOD + apiId;
+    }
+
+    public String getSubscriptionUUID() {
+
+        return subscriptionUUID;
+    }
+
+    public void setSubscriptionUUID(String subscriptionUUID) {
+
+        this.subscriptionUUID = subscriptionUUID;
+    }
+
+    public String getApiUUID() {
+
+        return apiUUID;
+    }
+
+    public void setApiUUID(String apiUUID) {
+
+        this.apiUUID = apiUUID;
+    }
+
+    public String getApplicationUUID() {
+
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+
+        this.applicationUUID = applicationUUID;
     }
 }

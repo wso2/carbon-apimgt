@@ -132,6 +132,7 @@ function Overview() {
     const intl = useIntl();
     const { api, subscribedApplications } = useContext(ApiContext);
     const [descriptionHidden, setDescriptionHidden] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
     const [allDocuments, setAllDocuments] = useState(null);
     const [overviewDocOverride, setOverviewDocOverride] = useState(null);
@@ -146,7 +147,6 @@ function Overview() {
         ? api.endpointURLs[0]
         : null);
     const classes = useStyles();
-
 
     // Truncating the description
     let descriptionIsBig = false;
@@ -165,9 +165,87 @@ function Overview() {
         return filteredApiPolicies && filteredApiPolicies.length > 0;
     };
 
+    const updateSelectedEndpoint = (e) => {
+        const selectedEnvName = e.target.value;
+        const filteredEndpoints = api.endpointURLs.filter((ep) => ep.environmentName === selectedEnvName);
+        if (filteredEndpoints && filteredEndpoints.length > 0) {
+            setSelectedEndpoint(filteredEndpoints[0]);
+        } else {
+            Alert.error(intl.formatMessage({
+                id: 'Apis.Details.Overview.select.env.error',
+                defaultMessage: 'Error Selecting Environment',
+            }));
+        }
+    };
+
+    const getSubscriptionPolicies = () => {
+        const restApi = new API();
+        return restApi.getAllTiers('subscription')
+            .then((response) => {
+                try {
+                    // Filter policies base on async or not.
+                    const filteredList = response.body.list.filter((str) => isApiPolicy(str.name));
+                    setAllPolicies(filteredList);
+                } catch (e) {
+                    console.log(e);
+                    Alert.error(intl.formatMessage({
+                        id: 'Apis.Details.Overview.error.occurred',
+                        defaultMessage: 'Error occurred',
+                    }));
+                }
+            }).catch((error) => {
+                console.log(error);
+                const { status } = error;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Overview.error.occurred.subs',
+                    defaultMessage: 'Error occurred when fetching subscription policies',
+                }));
+                if (status === 404) {
+                    setNotFound(true);
+                }
+                setAllDocuments([]);
+                setIsLoading(false);
+            });
+    };
+
+    const getDocuments = () => {
+        const restApi = new API();
+        return restApi.getDocumentsByAPIId(api.id)
+            .then((response) => {
+                const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
+                if (overviewDoc.length > 0) {
+                    // We can override the UI with this content
+                    setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
+                }
+                setAllDocuments(response.body.list);
+            })
+            .catch((error) => {
+                console.log(error);
+                const { status } = error;
+                Alert.error(intl.formatMessage({
+                    id: 'Apis.Details.Overview.error.occurred.docs',
+                    defaultMessage: 'Error occurred when fetching documents',
+                }));
+                if (status === 404) {
+                    setNotFound(true);
+                }
+                setAllDocuments([]);
+                setIsLoading(false);
+            });
+    };
+    useEffect(() => {
+        setIsLoading(true);
+        const { endpointURLs } = api;
+        if (endpointURLs && endpointURLs.length > 0) {
+            setSelectedEndpoint(endpointURLs[0]);
+        }
+        Promise.all([getDocuments(), getSubscriptionPolicies()])
+            .then(() => {
+                setIsLoading(false);
+            });
+    }, [api]);
     useEffect(() => {
         const restApi = new API();
-
         if (showSwaggerDescriptionOnOverview) {
             restApi.getSwaggerByAPIIdAndEnvironment(api.id, selectedEndpoint.environmentName)
                 .then((swaggerResponse) => {
@@ -183,58 +261,14 @@ function Overview() {
                     setSwaggerDescription('');
                 });
         } else {
-            restApi.getDocumentsByAPIId(api.id)
-                .then((response) => {
-                    const overviewDoc = response.body.list.filter((item) => item.otherTypeName === '_overview');
-                    if (overviewDoc.length > 0) {
-                        // We can override the UI with this content
-                        setOverviewDocOverride(overviewDoc[0]); // Only one doc we can render
-                    }
-                    setAllDocuments(response.body.list);
-                })
-                .catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Details.Overview.error.occurred',
-                            defaultMessage: 'Error occurred',
-                        }));
-                        setNotFound(true);
-                    }
-                    setAllDocuments([]);
-                });
-            restApi.getAllTiers('subscription')
-                .then((response) => {
-                    try {
-                        // Filter policies base on async or not.
-                        const filteredList = response.body.list.filter((str) => isApiPolicy(str.name));
-                        setAllPolicies(filteredList);
-                    } catch (e) {
-                        console.log(e);
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Details.Overview.error.occurred',
-                            defaultMessage: 'Error occurred',
-                        }));
-                    }
-                }).catch((error) => {
-                    if (process.env.NODE_ENV !== 'production') {
-                        console.log(error);
-                    }
-                    const { status } = error;
-                    if (status === 404) {
-                        Alert.error(intl.formatMessage({
-                            id: 'Apis.Details.Overview.error.occurred',
-                            defaultMessage: 'Error occurred',
-                        }));
-                        setNotFound(true);
-                    }
-                    setAllDocuments([]);
+            setIsLoading(true);
+            Promise.all([getDocuments(), getSubscriptionPolicies()])
+                .then(() => {
+                    setIsLoading(false);
                 });
         }
     }, []);
+
 
     /**
      * @param {event} e click event
@@ -269,19 +303,6 @@ function Overview() {
         }
     };
 
-    const updateSelectedEndpoint = (e) => {
-        const selectedEnvName = e.target.value;
-        const filteredEndpoints = api.endpointURLs.filter((ep) => ep.environmentName === selectedEnvName);
-        if (filteredEndpoints && filteredEndpoints.length > 0) {
-            setSelectedEndpoint(filteredEndpoints[0]);
-        } else {
-            Alert.error(intl.formatMessage({
-                id: 'Apis.Details.Overview.select.env.error',
-                defaultMessage: 'Error Selecting Environment',
-            }));
-        }
-    };
-
     /**
      * @param {JSON} api api object
      * @returns {JSON} key managers
@@ -301,6 +322,9 @@ function Overview() {
     };
 
     const user = AuthManager.getUser();
+    if (isLoading) {
+        return (<Progress />);
+    }
     if (showSwaggerDescriptionOnOverview) {
         if (!swaggerDescription) {
             return (<Progress />);
@@ -353,21 +377,19 @@ function Overview() {
                                     </Box>
                                 </Box>
                             )}
-                            <Box ml={1} mr={2}>
-                                <Link to={'/apis/' + api.id + '/overview'} className={classes.linkTitle}>
-                                    <Typography variant='h4' component='div'>{api.name}</Typography>
-                                </Link>
+                            <Box ml={3} mr={2}>
+                                <Typography variant='h4' component='h2'>{api.name}</Typography>
                                 {api.description && (
                                     <Typography variant='body2' gutterBottom align='left' className={classes.description}>
                                         {(descriptionIsBig && descriptionHidden) ? smallDescription : api.description}
                                         {descriptionIsBig && (
-                                            <a onClick={collapseAllDescription} href='#'>
-                                                {descriptionHidden ? 'more' : 'less'}
+                                            <a aria-label='Show more/less description' onClick={collapseAllDescription} href='#'>
+                                                {descriptionHidden ? ' more' : ' less'}
                                             </a>
                                         )}
                                     </Typography>
                                 )}
-                                <Box display='flex' flexDirection='row'>
+                                <Box display='flex' area-lable='API version and owner details' flexDirection='row'>
                                     <Typography variant='body2' gutterBottom align='left' className={classes.textLabel}>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.list.version'
@@ -396,7 +418,7 @@ function Overview() {
                             <Environments updateSelectedEndpoint={updateSelectedEndpoint} selectedEndpoint={selectedEndpoint} />
                         </Box>
                         <Box mt={6}>
-                            <Typography variant='subtitle2' className={classes.sectionTitle}>
+                            <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                 <FormattedMessage
                                     id='Apis.Details.Overview.business.plans.title'
                                     defaultMessage='Business Plans'
@@ -429,7 +451,7 @@ function Overview() {
                         {(showCredentials && subscribedApplications.length > 0) && (
                             <>
                                 <Box mt={6}>
-                                    <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                    <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.subscriptions.title'
                                             defaultMessage='Subscriptions'
@@ -485,7 +507,7 @@ function Overview() {
                         <Box mt={6}>
                             {(!api.advertiseInfo.advertised && showComments) && (
                                 <>
-                                    <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                    <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.comments.title'
                                             defaultMessage='Comments'
@@ -539,7 +561,7 @@ function Overview() {
                         </>
                     )}
                     <Box mt={6} mb={1}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
+                        <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                             <FormattedMessage
                                 id='Apis.Details.Overview.tags.title'
                                 defaultMessage='Tags'
@@ -553,6 +575,7 @@ function Overview() {
                                 label={tag}
                                 key={tag}
                                 component={Link}
+                                clickable
                                 to={`/apis?offset=0&query=tag:${tag}`}
                                 classes={{ root: classes.chipRoot }}
                                 variant='outlined'
@@ -571,7 +594,7 @@ function Overview() {
                     {(showDocuments && allDocuments && allDocuments.length > 0) && (
                         <>
                             <Box mt={6}>
-                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.documents.title'
                                         defaultMessage='Documents'
@@ -597,7 +620,7 @@ function Overview() {
                     {api.businessInformation.businessOwnerEmail && (
                         <>
                             <Box mt={6}>
-                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.business.info'
                                         defaultMessage='Business Info'
@@ -612,7 +635,7 @@ function Overview() {
                         </>
                     )}
                     <Box mt={6}>
-                        <Typography variant='subtitle2' className={classes.sectionTitle}>
+                        <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                             <FormattedMessage
                                 id='Apis.Details.Overview.source'
                                 defaultMessage='Source'
@@ -628,7 +651,7 @@ function Overview() {
                     {getKeyManagers() && (
                         <>
                             <Box mt={6}>
-                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                <Typography variant='subtitle2' component='h3' className={classes.sectionTitle}>
                                     <FormattedMessage
                                         id='Apis.Details.Overview.key.manager'
                                         defaultMessage='Key Managers'
@@ -640,7 +663,31 @@ function Overview() {
                             </Box>
                         </>
                     )}
-
+                    {api.additionalProperties && Object.keys(api.additionalProperties).length > 0 && (
+                        <>
+                            <Box mt={6}>
+                                <Typography variant='subtitle2' className={classes.sectionTitle}>
+                                    <FormattedMessage
+                                        id='Apis.Details.Overview.additional.properties'
+                                        defaultMessage='Additonal properties'
+                                    />
+                                </Typography>
+                            </Box>
+                            <Box mt={1} ml={1}>
+                                {Object.entries(api.additionalProperties).map(([key, value]) => {
+                                    return (
+                                        <Typography variant='body2'>
+                                            {key}
+                                            {' '}
+                                            :
+                                            {' '}
+                                            {value}
+                                        </Typography>
+                                    );
+                                })}
+                            </Box>
+                        </>
+                    )}
                 </Grid>
             </Grid>
         </Paper>

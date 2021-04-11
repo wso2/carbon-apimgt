@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -38,12 +38,13 @@ import Grid from '@material-ui/core/Grid';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
+import MUIAlert from 'AppComponents/Shared/MuiAlert';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
 const styles = (theme) => ({
     root: {
-        height: 70,
+        height: theme.custom.apis.topMenu.height,
         background: theme.palette.background.paper,
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
@@ -158,6 +159,13 @@ const APIDetailsTopMenu = (props) => {
         setRevisionId(event.target.value);
     };
 
+    /**
+     * Update the state when new props are available
+     */
+    useEffect(() => {
+        setRevisionId(api.id);
+    }, [api.id]);
+
     const isDownloadable = [API.CONSTS.API, API.CONSTS.APIProduct].includes(api.apiType);
     const { settings, user } = useAppContext();
     const { allRevisions, allEnvRevision } = useRevisionContext();
@@ -218,12 +226,16 @@ const APIDetailsTopMenu = (props) => {
 
             <div className={classes.dateWrapper} />
             {api.isRevision && (
-                <Typography variant='subtitle2' className={classes.readOnlyStyle}>
+                <MUIAlert
+                    variant='outlined'
+                    severity='warning'
+                    icon={false}
+                >
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.read.only.label'
                         defaultMessage='Read only'
                     />
-                </Typography>
+                </MUIAlert>
             )}
             <div className={classes.topRevisionStyle}>
                 <TextField

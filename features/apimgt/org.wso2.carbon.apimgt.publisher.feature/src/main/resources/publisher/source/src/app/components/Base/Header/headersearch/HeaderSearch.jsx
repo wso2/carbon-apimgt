@@ -40,9 +40,10 @@ const styles = (theme) => ({
         position: 'absolute',
     },
     suggestionsContainerOpen: {
+        marginTop: theme.spacing(1),
         display: 'block',
         position: 'absolute',
-        width: '415px',
+        width: '400px',
         zIndex: theme.zIndex.modal + 1,
     },
     suggestion: {
@@ -55,6 +56,7 @@ const styles = (theme) => ({
     },
     input: {
         width: '300px',
+        borderRadius: theme.shape.borderRadius * 5,
         background: theme.palette.getContrastText(theme.palette.background.appBar),
         '-webkit-transition': 'all .35s ease-in-out',
         transition: 'all .35s ease-in-out',
@@ -260,6 +262,7 @@ class HeaderSearch extends React.Component {
                         onKeyDown: this.onKeyDown,
                         onBlur: this.clearOnBlur,
                         isLoading,
+                        disableUnderline: true,
                     }}
                 />
                 <Tooltip
@@ -327,12 +330,6 @@ class HeaderSearch extends React.Component {
                                     <FormattedMessage
                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option12'
                                         defaultMessage='Api Category [ Syntax - api-category:xxxx ]'
-                                    />
-                                </li>
-                                <li style={{ marginTop: '5px' }}>
-                                    <FormattedMessage
-                                        id='Base.Header.headersearch.HeaderSearch.tooltip.option8'
-                                        defaultMessage='Documentation Content [ Syntax - doc:xxxx ]'
                                     />
                                 </li>
                                 <li style={{ marginTop: '5px' }}>

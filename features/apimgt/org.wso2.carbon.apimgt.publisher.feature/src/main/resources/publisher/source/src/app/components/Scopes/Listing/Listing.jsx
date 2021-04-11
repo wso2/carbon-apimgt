@@ -92,11 +92,6 @@ const styles = (theme) => ({
     mainTitle: {
         paddingLeft: 0,
     },
-    button: {
-        textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-        marginLeft: theme.spacing(1),
-    },
     buttonIcon: {
         marginRight: theme.spacing(1),
     },
@@ -260,6 +255,8 @@ class Listing extends React.Component {
      */
     render() {
         const { scopes } = this.state;
+        const { theme } = this.props;
+        const { scopesAddIcon } = theme.custom.landingPage.icons;
         const {
             intl, classes,
         } = this.props;
@@ -411,7 +408,7 @@ class Listing extends React.Component {
                         />
                     )}
                 >
-                    <OnboardingMenuCard to='/scopes/create' name='Scopes' />
+                    <OnboardingMenuCard to='/scopes/create' name='Scopes' iconName={scopesAddIcon} />
                 </Onboarding>
             );
         }
@@ -436,17 +433,20 @@ class Listing extends React.Component {
                         to={!isRestricted(['apim:shared_scope_manage']) && url}
                         className={isRestricted(['apim:shared_scope_manage']) ? classes.disableLink : ''}
                     >
-                        <Button
-                            size='small'
-                            className={classes.button}
-                            disabled={isRestricted(['apim:shared_scope_manage'])}
-                        >
-                            <AddCircle className={classes.buttonIcon} />
-                            <FormattedMessage
-                                id='Scopes.Listing.Listing.heading.scope.add_new'
-                                defaultMessage='Add New Scope'
-                            />
-                        </Button>
+                        <Box pl={1}>
+                            <Button
+                                color='primary'
+                                variant='outlined'
+                                size='small'
+                                disabled={isRestricted(['apim:shared_scope_manage'])}
+                            >
+                                <AddCircle className={classes.buttonIcon} />
+                                <FormattedMessage
+                                    id='Scopes.Listing.Listing.heading.scope.add_new'
+                                    defaultMessage='Add New Scope'
+                                />
+                            </Button>
+                        </Box>
                     </Link>
                     {isRestricted(['apim:shared_scope_manage']) && (
                         <Grid item>
@@ -482,4 +482,4 @@ Listing.defaultProps = {
     match: { params: {} },
 };
 
-export default injectIntl(withAPI(withStyles(styles)(Listing)));
+export default injectIntl(withAPI(withStyles(styles, { withTheme: true })(Listing)));

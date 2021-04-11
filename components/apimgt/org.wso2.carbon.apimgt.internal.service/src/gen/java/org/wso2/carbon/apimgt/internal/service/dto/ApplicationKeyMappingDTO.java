@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 public class ApplicationKeyMappingDTO   {
   
     private Integer applicationId = null;
+    private String applicationUUID = null;
     private String consumerKey = null;
     private String keyType = null;
     private String keyManager = null;
@@ -36,6 +37,23 @@ public class ApplicationKeyMappingDTO   {
   }
   public void setApplicationId(Integer applicationId) {
     this.applicationId = applicationId;
+  }
+
+  /**
+   **/
+  public ApplicationKeyMappingDTO applicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("applicationUUID")
+  public String getApplicationUUID() {
+    return applicationUUID;
+  }
+  public void setApplicationUUID(String applicationUUID) {
+    this.applicationUUID = applicationUUID;
   }
 
   /**
@@ -100,6 +118,7 @@ public class ApplicationKeyMappingDTO   {
     }
     ApplicationKeyMappingDTO applicationKeyMapping = (ApplicationKeyMappingDTO) o;
     return Objects.equals(applicationId, applicationKeyMapping.applicationId) &&
+        Objects.equals(applicationUUID, applicationKeyMapping.applicationUUID) &&
         Objects.equals(consumerKey, applicationKeyMapping.consumerKey) &&
         Objects.equals(keyType, applicationKeyMapping.keyType) &&
         Objects.equals(keyManager, applicationKeyMapping.keyManager);
@@ -107,7 +126,7 @@ public class ApplicationKeyMappingDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, consumerKey, keyType, keyManager);
+    return Objects.hash(applicationId, applicationUUID, consumerKey, keyType, keyManager);
   }
 
   @Override
@@ -116,6 +135,7 @@ public class ApplicationKeyMappingDTO   {
     sb.append("class ApplicationKeyMappingDTO {\n");
     
     sb.append("    applicationId: ").append(toIndentedString(applicationId)).append("\n");
+    sb.append("    applicationUUID: ").append(toIndentedString(applicationUUID)).append("\n");
     sb.append("    consumerKey: ").append(toIndentedString(consumerKey)).append("\n");
     sb.append("    keyType: ").append(toIndentedString(keyType)).append("\n");
     sb.append("    keyManager: ").append(toIndentedString(keyManager)).append("\n");

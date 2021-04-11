@@ -420,7 +420,13 @@
   "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading": [
     {
       "type": 0,
-      "value": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+      "value": "Create an API by providing a Name, a Version, a Context and the Endpoint"
+    }
+  ],
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading": [
+    {
+      "type": 0,
+      "value": "Create an API by providing a Name, a Version and a Context"
     }
   ],
   "Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available": [
@@ -1171,12 +1177,6 @@
       "value": "Try Out"
     }
   ],
-  "Apis.Details.ApiConsole.SelectAppPanel.environment": [
-    {
-      "type": 0,
-      "value": "Please select an environment"
-    }
-  ],
   "Apis.Details.ApiConsole.deployments.api.gateways": [
     {
       "type": 0,
@@ -1191,8 +1191,20 @@
   ],
   "Apis.Details.ApiConsole.deployments.no": [
     {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
       "type": 0,
-      "value": "API is not deployed yet! Please deploy the API before trying out"
+      "value": " is not deployed yet! Please deploy the "
+    },
+    {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
+      "type": 0,
+      "value": " before trying out"
     }
   ],
   "Apis.Details.ApiConsole.environment": [
@@ -1210,7 +1222,7 @@
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Business Information of the API"
+      "value": "Business Information of the API Product"
     }
   ],
   "Apis.Details.BusinessInformation.BusinessInformation.business.info": [
@@ -2170,7 +2182,7 @@
   "Apis.Details.Documents.CreateEditForm.document.create.type.sample": [
     {
       "type": 0,
-      "value": "Sample &amp; SDK"
+      "value": "Sample and SDK"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": [
@@ -3669,6 +3681,30 @@
       "value": "Script"
     }
   ],
+  "Apis.Details.Environments\n                                                                                .deploy.vhost": [
+    {
+      "type": 0,
+      "value": "VHost"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                    .select.table": [
+    {
+      "type": 0,
+      "value": "Select Revision"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                    .select.vhost": [
+    {
+      "type": 0,
+      "value": "Select Access URL"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                .deploy.button": [
+    {
+      "type": 0,
+      "value": "Deploy"
+    }
+  ],
   "Apis.Details.Environments.Environments.APIGateways": [
     {
       "type": 0,
@@ -3711,12 +3747,6 @@
       "value": "Create"
     }
   ],
-  "Apis.Details.Environments.Environments.deploy.button": [
-    {
-      "type": 0,
-      "value": "Deploy"
-    }
-  ],
   "Apis.Details.Environments.Environments.deploy.cancel": [
     {
       "type": 0,
@@ -3753,10 +3783,16 @@
       "value": "Create revisions and deploy in Gateway Environments"
     }
   ],
-  "Apis.Details.Environments.Environments.display.in.devportal": [
+  "Apis.Details.Environments.Environments.display.devportal": [
     {
       "type": 0,
-      "value": "Display in Developer Portal"
+      "value": "Display Gateway Access URLs in developer portal."
+    }
+  ],
+  "Apis.Details.Environments.Environments.gateway\n                                                    .deployed.revision": [
+    {
+      "type": 0,
+      "value": "Deployed Revision"
     }
   ],
   "Apis.Details.Environments.Environments.gateway.accessUrl": [
@@ -3771,10 +3807,10 @@
       "value": "Action"
     }
   ],
-  "Apis.Details.Environments.Environments.gateway.deployed.revision": [
+  "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": [
     {
       "type": 0,
-      "value": "Deployed Revision"
+      "value": "Brief description of the new revision"
     }
   ],
   "Apis.Details.Environments.Environments.revision.create.heading": [
@@ -3919,22 +3955,16 @@
       "value": "count"
     }
   ],
-  "Apis.Details.Environments.Environments.select.table": [
-    {
-      "type": 0,
-      "value": "Select Revision"
-    }
-  ],
-  "Apis.Details.Environments.Environments.select.vhost": [
-    {
-      "type": 0,
-      "value": "Select Access URL"
-    }
-  ],
   "Apis.Details.Environments.Environments.undeploy.btn": [
     {
       "type": 0,
       "value": "Undeploy"
+    }
+  ],
+  "Apis.Details.Environments.Environments.visibility.in.devportal": [
+    {
+      "type": 0,
+      "value": "Gateway URL Visibility"
     }
   ],
   "Apis.Details.Environments.deploy.vhost": [
@@ -5048,7 +5078,7 @@
   "Apis.Details.Properties.Properties.api.product.properties": [
     {
       "type": 0,
-      "value": "API Properties"
+      "value": "API Product Properties"
     }
   ],
   "Apis.Details.Properties.Properties.api.properties": [
@@ -5333,6 +5363,12 @@
     {
       "type": 0,
       "value": "Select the Format of Data Type"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type.none.option": [
+    {
+      "type": 0,
+      "value": "No Data Type"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.schema.data.type": [
@@ -6578,7 +6614,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": [
     {
       "type": 0,
-      "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
+      "value": "Choose your option to create an API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
@@ -6806,7 +6842,7 @@
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
-      "value": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
+      "value": "Combine multiple API resources in to a single API"
     }
   ],
   "Apis.Listing.TableView.TableView.doc.flag": [
@@ -6855,6 +6891,18 @@
     {
       "type": 0,
       "value": "Design"
+    }
+  ],
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": [
+    {
+      "type": 0,
+      "value": "Remove"
+    }
+  ],
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn": [
+    {
+      "type": 0,
+      "value": "Remove"
     }
   ],
   "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": [
@@ -7179,22 +7227,10 @@
       "value": "Description [ Syntax - description:xxxx ]"
     }
   ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option8": [
-    {
-      "type": 0,
-      "value": "Documentation Content [ Syntax - doc:xxxx ]"
-    }
-  ],
   "Base.Header.headersearch.HeaderSearch.tooltip.title": [
     {
       "type": 0,
       "value": "Search Options for APIs and APIProducts"
-    }
-  ],
-  "Base.Header.navbar.GlobalNavBar.APIs": [
-    {
-      "type": 0,
-      "value": "APIs"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": [

@@ -17,6 +17,9 @@
 package org.wso2.carbon.apimgt.rest.api.common;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class RestApiConstants {
@@ -297,5 +300,8 @@ public final class RestApiConstants {
     public static final String TENANT_DOMAIN = "LoggedInUserTenantDomain";
 
     public static final String AUTHENTICATION_ADMIN_SERVICE_ENDPOINT = "AuthenticationAdmin";
+
+    public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
+            Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
 
 }

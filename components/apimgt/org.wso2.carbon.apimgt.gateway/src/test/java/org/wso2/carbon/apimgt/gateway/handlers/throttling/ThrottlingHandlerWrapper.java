@@ -24,7 +24,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.throttle.core.AccessInformation;
 import org.apache.synapse.commons.throttle.core.ThrottleContext;
 import org.apache.synapse.commons.throttle.core.ThrottleException;
-import org.apache.synapse.core.SynapseEnvironment;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.throttling.publisher.ThrottleDataPublisher;
@@ -66,11 +65,6 @@ public class ThrottlingHandlerWrapper extends ThrottleHandler {
     @Override
     protected ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
-    }
-
-    @Override
-    protected void setSOAPFault(MessageContext messageContext, String errorMessage, String errorDescription) {
-        //Do Nothing
     }
 
     @Override

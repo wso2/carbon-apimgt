@@ -245,11 +245,12 @@ export default function GoToTryOut() {
         </Button>
     ) : (
         <Button
-            variant='outlined'
+            variant='contained'
             color='primary'
-            size='small'
+            size='medium'
             classes={{ label: classes.tryoutLabel }}
             onClick={pushToTryout}
+            aria-label='Go to Try Out page'
         >
             <FormattedMessage
                 id='Apis.Details.GoToTryOut.btn.tryout'
@@ -272,9 +273,10 @@ export default function GoToTryOut() {
         <>
             <Button
                 onClick={handleTryOutClick}
-                variant='outlined'
+                variant='contained'
                 color='primary'
-                size='small'
+                size='medium'
+                aria-label='Try Out the API'
                 classes={{ label: classes.tryoutLabel }}
             >
                 <FormattedMessage
@@ -284,8 +286,7 @@ export default function GoToTryOut() {
             </Button>
 
             <Modal
-                aria-labelledby='transition-modal-title'
-                aria-describedby='transition-modal-description'
+                aria-label='Preparing to Try Out the API'
                 className={classes.modal}
                 open={showStatus}
                 // onClose={handleClose}
@@ -294,6 +295,7 @@ export default function GoToTryOut() {
                 BackdropProps={{
                     timeout: 500,
                 }}
+                role='status'
             >
                 <Fade in={showStatus}>
                     <Box
