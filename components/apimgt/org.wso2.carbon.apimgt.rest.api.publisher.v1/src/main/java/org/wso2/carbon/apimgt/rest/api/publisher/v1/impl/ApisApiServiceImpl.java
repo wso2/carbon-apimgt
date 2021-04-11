@@ -1514,11 +1514,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             // check user has publisher role and API is in published or deprecated state
-            if (!APIUtil.isRoleExistForUser(username, "Internal/publisher") && (
+            String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                    .get(RestApiConstants.USER_REST_API_SCOPES);
+            if (!ArrayUtils.contains(tokenScopes, "apim:api_publish") && (
                     APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus()) || APIConstants.DEPRECATED
                             .equalsIgnoreCase(api.getStatus()))) {
-                RestApiUtil.handleConflict(username + " cannot remove the API", log);
+                RestApiUtil.handleAuthorizationFailure(username + " cannot remove the API", log);
             }
+
             //deletes the API
             apiProvider.deleteAPI(api);
             return Response.ok().build();
