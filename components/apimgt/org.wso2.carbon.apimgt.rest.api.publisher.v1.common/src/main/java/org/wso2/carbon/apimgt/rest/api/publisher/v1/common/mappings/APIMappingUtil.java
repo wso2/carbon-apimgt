@@ -656,11 +656,7 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
-        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-            apiInfoDTO.setHasThumbnail(true);
-        } else {
-            apiInfoDTO.setHasThumbnail(false);
-        }
+        apiInfoDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
         return apiInfoDTO;
     }
 
@@ -1008,9 +1004,7 @@ public class APIMappingUtil {
                 log.error("Error while decrypting client credentials for API: " + model.getId(), e);
             }
         }
-      /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
-            dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
-        }*/
+        dto.setHasThumbnail(!StringUtils.isBlank(model.getThumbnailUrl()));
         List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
         String inMedPolicyName = model.getInSequence();
         if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
