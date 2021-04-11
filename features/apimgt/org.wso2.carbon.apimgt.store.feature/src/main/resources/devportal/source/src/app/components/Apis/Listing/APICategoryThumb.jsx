@@ -22,6 +22,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
@@ -53,14 +54,24 @@ function APICategoryThumb(props) {
         category, path, classes,
     } = props;
     const categoryLink = path + ':' + category.name;
+    let categoryDesc = category.description;
+    if (categoryDesc.length > 50) {
+        categoryDesc = categoryDesc.substring(0, 50) + '...';
+    }
     return (
         <Link to={categoryLink} className={classes.textWrapper}>
-            <ListItem button>
-                <ListItemIcon>
-                    <Icon>label</Icon>
-                </ListItemIcon>
-                <ListItemText primary={category.name} classes={{ primary: classes.listItemText }} />
-            </ListItem>
+            <Tooltip placement='right' title={category.description.length <= 50 ? '' : category.description}>
+                <ListItem button alignItems='flex-start'>
+                    <ListItemIcon>
+                        <Icon>label</Icon>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={category.name}
+                        secondary={categoryDesc}
+                        classes={{ primary: classes.listItemText }}
+                    />
+                </ListItem>
+            </Tooltip>
         </Link>
     );
 }
