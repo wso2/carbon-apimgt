@@ -2544,6 +2544,9 @@
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type": {
     "defaultMessage": "Select the Format of Data Type"
   },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type.none.option": {
+    "defaultMessage": "No Data Type"
+  },
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.schema.data.type": {
     "defaultMessage": "Select the Schema Type"
   },
