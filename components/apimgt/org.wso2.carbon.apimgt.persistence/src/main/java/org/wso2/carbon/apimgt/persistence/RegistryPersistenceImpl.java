@@ -2194,6 +2194,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 Documentation documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
                 if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     String resource = documentation.getFilePath();
+
+                    if (resource == null) {
+                        return null;
+                    }
+
                     String[] resourceSplitPath =
                             resource.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
                     if (resourceSplitPath.length == 2) {
