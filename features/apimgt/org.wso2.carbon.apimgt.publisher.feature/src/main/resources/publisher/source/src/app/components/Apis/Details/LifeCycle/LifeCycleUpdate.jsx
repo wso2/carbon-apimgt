@@ -32,6 +32,10 @@ import { CircularProgress } from '@material-ui/core';
 import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
+import LaunchIcon from '@material-ui/icons/Launch';
+// import Box from '@material-ui/core/Box';
+import Link from '@material-ui/core/Link';
+import { Link as RouterLink } from 'react-router-dom';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -63,6 +67,10 @@ const styles = (theme) => ({
         margin: 0,
         display: 'inline-flex',
         lineHeight: '38px',
+    },
+    deployButton: {
+        fontFamily: '"Open Sans", "Helvetica", "Arial", "sans-serif"',
+        fontSize: 'smaller',
     },
 });
 
@@ -345,7 +353,7 @@ class LifeCycleUpdate extends Component {
                     <DialogTitle id='alert-dialog-title'>
                         <FormattedMessage
                             id='Apis.Details.LifeCycle.components'
-                            defaultMessage='Publish API to developer portal!'
+                            defaultMessage='Publish without deploying'
                         />
                     </DialogTitle>
                     <DialogContent>
@@ -353,11 +361,16 @@ class LifeCycleUpdate extends Component {
                             <Typography variant='subtitle1' display='block' gutterBottom>
                                 <FormattedMessage
                                     id='Apis.Details.LifeCycle.publish.content'
-                                    defaultMessage={
-                                        'Since there\'s no deployments yet, this API only '
-                                        + 'shown as advertise API from devportal'
-                                    }
+                                    defaultMessage='Publish API without deployments will affect API runtime'
                                 />
+                            </Typography>
+                            <Typography variant='subtitle2' display='block' gutterBottom>
+                                <b>
+                                    <FormattedMessage
+                                        id='Apis.Details.LifeCycle.publish.content.detail'
+                                        defaultMessage='You need to deploy the API'
+                                    />
+                                </b>
                             </Typography>
                         </DialogContentText>
                     </DialogContent>
@@ -366,17 +379,33 @@ class LifeCycleUpdate extends Component {
                             onClick={() => {
                                 this.setIsOpen(false);
                             }}
-                            color='primary'
                         >
                             Cancel
                         </Button>
                         <Button
                             color='primary'
-                            variant='contained'
                             onClick={() => this.handleClick()}
                         >
                             Publish
                         </Button>
+                        <Link
+                            className={classes.deployButton}
+                            component={RouterLink}
+                            to={'/apis/' + api.id + '/deployments'}
+                        >
+                            <Grid
+                                container
+                                direction='row'
+                                justify='center'
+                            >
+                                <Grid item>
+                                    Deploy
+                                </Grid>
+                                <Grid>
+                                    <LaunchIcon fontSize='small' />
+                                </Grid>
+                            </Grid>
+                        </Link>
                     </DialogActions>
                 </Dialog>
                 {/* Page error banner */}
