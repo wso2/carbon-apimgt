@@ -7227,12 +7227,6 @@
       "value": "Description [ Syntax - description:xxxx ]"
     }
   ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option8": [
-    {
-      "type": 0,
-      "value": "Documentation Content [ Syntax - doc:xxxx ]"
-    }
-  ],
   "Base.Header.headersearch.HeaderSearch.tooltip.title": [
     {
       "type": 0,

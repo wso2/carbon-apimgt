@@ -254,6 +254,10 @@ class Credentials extends React.Component {
                 this.setState({ isSubscribing: false });
             })
             .catch((error) => {
+                Alert.error(intl.formatMessage({
+                    id: 'Applications.Details.Subscriptions.error.occurred.during.subscription.not.201',
+                    defaultMessage: 'Error occurred during subscription',
+                }));
                 console.log('Error while creating the subscription.');
                 console.error(error);
                 this.setState({ isSubscribing: false });
