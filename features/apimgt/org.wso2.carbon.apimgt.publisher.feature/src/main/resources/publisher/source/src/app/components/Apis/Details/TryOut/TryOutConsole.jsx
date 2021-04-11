@@ -124,7 +124,7 @@ const TryOutConsole = () => {
                 + `${selectedDeploymentVhost.httpContext}${api.context}/${api.version}`;
                     return { url };
                 });
-                oasCopy.servers = servers;
+                oasCopy.servers = servers.sort((a, b) => ((a.url > b.url) ? -1 : 1));
             } else { // Assume the API definition is Swagger 2
                 let transportPort = selectedDeploymentVhost.httpsPort;
                 if (api.transport.length === 1 && !api.transport.includes('https')) {
@@ -136,7 +136,7 @@ const TryOutConsole = () => {
                 }
                 const host = `${selectedDeploymentVhost.host}:${transportPort}`;
                 const basePath = `${pathSeparator}${selectedDeploymentVhost.httpContext}${api.context}/${api.version}`;
-                oasCopy.schemes = api.transport;
+                oasCopy.schemes = api.transport.slice().sort((a, b) => ((a > b) ? -1 : 1));
                 oasCopy.basePath = basePath;
                 oasCopy.host = host;
             }
