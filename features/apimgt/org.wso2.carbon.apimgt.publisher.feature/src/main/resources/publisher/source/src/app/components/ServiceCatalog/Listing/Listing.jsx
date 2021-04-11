@@ -38,8 +38,8 @@ import Box from '@material-ui/core/Box';
  * @returns {any} Listing Page for Services
  */
 function Listing() {
-    const [servicesData, setServicesData] = useState([]);
-    const [notFound, setNotFound] = useState(true);
+    const [servicesData, setServicesData] = useState(null);
+    const [notFound, setNotFound] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isGridView, setIsGridView] = useState(true);
     const intl = useIntl();
@@ -50,13 +50,20 @@ function Listing() {
         promisedServices.then((data) => {
             const { body } = data;
             setServicesData(body);
-            setNotFound(false);
         }).catch((error) => {
             console.error(error);
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while loading services',
-                id: 'ServiceCatalog.Listing.Listing.error.loading',
-            }));
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error while loading services',
+                    id: 'ServiceCatalog.Listing.Listing.error.loading',
+                }));
+            }
+            const { status } = error;
+            if (status === 404) {
+                setNotFound(true);
+            }
         }).finally(() => {
             setLoading(false);
         });

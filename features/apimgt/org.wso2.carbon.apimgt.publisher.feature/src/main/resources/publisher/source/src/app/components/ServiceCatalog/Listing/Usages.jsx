@@ -108,7 +108,9 @@ function Usages(props) {
         }
     } else if (!isOverview) {
         usageDisplayText = (
-            <span>{usageNumber}</span>
+            <Button disabled>
+                {usageNumber !== null ? usageNumber : 0}
+            </Button>
         );
     } else {
         usageDisplayText = (
