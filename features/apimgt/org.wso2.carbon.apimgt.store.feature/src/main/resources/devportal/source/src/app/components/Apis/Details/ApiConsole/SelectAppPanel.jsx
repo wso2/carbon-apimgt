@@ -93,7 +93,7 @@ const SelectAppPanel = (props) => {
                         defaultMessage='Key Type'
                     />
                 </Typography>
-                <FormControl component='fieldKeyType'>
+                <FormControl component='fieldset'>
                     <RadioGroup
                         name='selectedKeyType'
                         value={selectedKeyType}
