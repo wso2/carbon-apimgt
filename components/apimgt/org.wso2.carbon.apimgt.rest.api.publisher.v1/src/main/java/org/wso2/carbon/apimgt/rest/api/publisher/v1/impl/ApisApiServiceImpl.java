@@ -5013,6 +5013,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIRevisionDeploymentDTO apiRevisionDeploymentDTO = APIMappingUtil.
                 fromAPIRevisionDeploymenttoDTO(apiRevisionDeploymentsResponse);
         Response.Status status = Response.Status.OK;
+
         return Response.status(status).entity(apiRevisionDeploymentDTO).build();
     }
 }
