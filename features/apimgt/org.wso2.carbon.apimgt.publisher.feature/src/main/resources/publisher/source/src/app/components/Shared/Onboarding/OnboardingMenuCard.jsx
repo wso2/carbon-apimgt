@@ -116,7 +116,11 @@ const RestAPIMenu = (props) => {
                             {disabled && (
                                 <Box>
                                     <Typography variant='body2' color='primary'>
-                                        *You are not authorized to create/update due to insufficient permissions
+                                        *You are not authorized to create or update
+                                        {' '}
+                                        {name.toLowerCase()}
+                                        {' '}
+                                        due to insufficient permissions
                                     </Typography>
                                 </Box>
                             )}
