@@ -132,7 +132,7 @@ export default function Topics(props) {
     const initialWebsubSubscriptionConfig = api.websubSubscriptionConfiguration || {
         enable: false,
         signingAlgorithm: '',
-        signatureHeader: 'x-hub-signature',
+        signatureHeader: '',
         secret: '',
     };
 

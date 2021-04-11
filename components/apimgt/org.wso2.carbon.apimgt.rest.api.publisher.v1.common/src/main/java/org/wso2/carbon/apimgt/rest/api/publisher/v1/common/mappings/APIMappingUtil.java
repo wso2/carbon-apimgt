@@ -1199,6 +1199,7 @@ public class APIMappingUtil {
         if (websubSubscriptionConfiguration == null) {
             websubSubscriptionConfiguration = APIUtil.getDefaultWebsubSubscriptionConfiguration();
         }
+        websubSubscriptionConfigurationDTO.setEnable(websubSubscriptionConfiguration.isEnable());
         websubSubscriptionConfigurationDTO.setSecret(websubSubscriptionConfiguration.getSecret());
         websubSubscriptionConfigurationDTO.setSigningAlgorithm(websubSubscriptionConfiguration.getSigningAlgorithm());
         websubSubscriptionConfigurationDTO.setSignatureHeader(websubSubscriptionConfiguration.getSignatureHeader());

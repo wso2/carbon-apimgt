@@ -169,6 +169,7 @@ function SubscriptionConfig(props) {
                         <TextField
                             autoFocus
                             fullWidth
+                            disabled={!enabled}
                             label={(
                                 <>
                                     <FormattedMessage
@@ -215,6 +216,7 @@ function SubscriptionConfig(props) {
                                 <Button
                                     variant='contained'
                                     color='primary'
+                                    disabled={!enabled}
                                     onClick={() => websubSubscriptionConfigDispatcher({
                                         action: 'secret',
                                         value: generateSecret(),
