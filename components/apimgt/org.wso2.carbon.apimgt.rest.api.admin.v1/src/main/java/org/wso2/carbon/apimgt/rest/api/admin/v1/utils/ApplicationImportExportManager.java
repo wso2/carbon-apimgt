@@ -24,28 +24,15 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ApplicationImportExportManager {
     private static final Log log = LogFactory.getLog(ApplicationImportExportManager.class);
@@ -53,26 +40,6 @@ public class ApplicationImportExportManager {
 
     ApplicationImportExportManager(APIConsumer apiConsumer) {
         this.apiConsumer = apiConsumer;
-    }
-
-    /**
-     * Retrieve all the details of an Application by name for a given user.
-     *
-     * @param appName name of the application
-     * @return {@link Application} instance
-     * @throws APIManagementException if an error occurs while retrieving Application details
-     */
-    public Application getApplicationDetails(String appName, String username) throws
-            APIManagementException {
-        Application application;
-        int appId = APIUtil.getApplicationId(appName, username);
-        String groupId = apiConsumer.getGroupId(appId);
-        application = apiConsumer.getApplicationById(appId);
-        if (application != null) {
-            application.setGroupId(groupId);
-            application.setOwner(application.getSubscriber().getName());
-        }
-        return application;
     }
 
     /**
@@ -141,128 +108,6 @@ public class ApplicationImportExportManager {
             return subscriber != null;
         }
         return false;
-    }
-
-    /**
-     * Import and add subscriptions of a particular application for the available APIs and API products
-     *
-     * @param appDetails details of the imported application
-     * @param userId     username of the subscriber
-     * @param appId      application Id
-     * @return a list of APIIdentifiers of the skipped subscriptions
-     * @throws APIManagementException if an error occurs while importing and adding subscriptions
-     */
-    public List<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId, Boolean update)
-            throws APIManagementException, UserStoreException {
-        List<APIIdentifier> skippedAPIList = new ArrayList<>();
-        Set<SubscribedAPI> subscribedAPIs = appDetails.getSubscribedAPIs();
-        for (SubscribedAPI subscribedAPI : subscribedAPIs) {
-            APIIdentifier apiIdentifier = subscribedAPI.getApiId();
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack
-                    (apiIdentifier.getProviderName()));
-            if (!StringUtils.isEmpty(tenantDomain) && APIUtil.isTenantAvailable(tenantDomain)) {
-                String name = apiIdentifier.getApiName();
-                String version = apiIdentifier.getVersion();
-                //creating a solr compatible search query, here we will execute a search query without wildcard *s
-                StringBuilder searchQuery = new StringBuilder();
-                String[] searchCriteria = {name, "version:" + version};
-                for (int i = 0; i < searchCriteria.length; i++) {
-                    if (i == 0) {
-                        searchQuery = new StringBuilder(
-                                APIUtil.getSingleSearchCriteria(searchCriteria[i]).replace("*", ""));
-                    } else {
-                        searchQuery.append(APIConstants.SEARCH_AND_TAG)
-                                .append(APIUtil.getSingleSearchCriteria(searchCriteria[i]).replace("*", ""));
-                    }
-                }
-                Map matchedAPIs;
-                matchedAPIs = apiConsumer.searchPaginatedAPIs(searchQuery.toString(), tenantDomain, 0,
-                        Integer.MAX_VALUE,
-                        false);
-                Set<Object> apiSet = (Set<Object>) matchedAPIs.get("apis");
-                if (apiSet != null && !apiSet.isEmpty()) {
-                    Object type = apiSet.iterator().next();
-                    ApiTypeWrapper apiTypeWrapper = null;
-                    //Check whether the object is ApiProduct
-                    if (isApiProduct(type)) {
-                        APIProduct apiProduct = (APIProduct) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(apiProduct);
-                    } else {
-                        API api = (API) apiSet.iterator().next();
-                        apiTypeWrapper = new ApiTypeWrapper(api);
-                    }
-                    //tier of the imported subscription
-                    Tier tier = subscribedAPI.getTier();
-                    //checking whether the target tier is available
-                    if (isTierAvailable(tier, apiTypeWrapper) && apiTypeWrapper.getStatus() != null &&
-                            APIConstants.PUBLISHED.equals(apiTypeWrapper.getStatus())) {
-                        apiTypeWrapper.setTier(tier.getName());
-                        // add subscription if update flag is not specified
-                        // it will throw an error if subscriber already exists
-                        if (update == null || !update) {
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId, appId)) {
-                            // on update skip subscriptions that already exists
-                            apiConsumer.addSubscription(apiTypeWrapper, userId, appId);
-                        }
-                    } else {
-                        log.error("Failed to import Subscription as API/API Product " + name + "-" + version +
-                                " as one or more tiers may be unavailable or the API/API Product may not have been published ");
-                        skippedAPIList.add(subscribedAPI.getApiId());
-                    }
-                } else {
-                    log.error("Failed to import Subscription as API " + name + "-" + version + " is not available");
-                    skippedAPIList.add(subscribedAPI.getApiId());
-                }
-            } else {
-                log.error("Failed to import Subscription as Tenant domain: " + tenantDomain + " is not available");
-                skippedAPIList.add(subscribedAPI.getApiId());
-            }
-        }
-        return skippedAPIList;
-    }
-
-    /**
-     * Check whether a target Tier is available to subscribe
-     *
-     * @param targetTier     Target Tier
-     * @param apiTypeWrapper - {@link ApiTypeWrapper}
-     * @return true, if the target tier is available
-     */
-    private boolean isTierAvailable(Tier targetTier, ApiTypeWrapper apiTypeWrapper) {
-        Set<Tier> availableTiers = null;
-        API api = null;
-        APIProduct apiProduct = null;
-        if (!apiTypeWrapper.isAPIProduct()) {
-            api = apiTypeWrapper.getApi();
-            availableTiers = api.getAvailableTiers();
-        } else {
-            apiProduct = apiTypeWrapper.getApiProduct();
-            availableTiers = apiProduct.getAvailableTiers();
-        }
-        if (availableTiers.contains(targetTier)) {
-            return true;
-        } else {
-            if (!apiTypeWrapper.isAPIProduct()) {
-                log.error("Tier:" + targetTier.getName() + " is not available for API " + api.getId().getApiName() + "-" +
-                        api.getId().getVersion());
-            } else {
-                log.error("Tier:" + targetTier.getName() + " is not available for API Product " + apiProduct.getId().getName() + "-" +
-                        apiProduct.getId().getVersion());
-            }
-            return false;
-        }
-    }
-
-    /**
-     * Check whether the object is a type of ApiProduct
-     *
-     * @param object        - {@link Object}
-     * @return true, if the object is an ApiProduct, otherwise false
-     */
-    private boolean isApiProduct(Object object) {
-        //Check whether the object is an instance of ApiProduct
-        return (object) instanceof APIProduct;
     }
 
     /**

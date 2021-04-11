@@ -182,25 +182,6 @@ public interface APIConsumer extends APIManager {
      */
     SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException;
 
-
-    /**
-     * Returns a set of SubscribedAPI purchased by the given Subscriber
-     *
-     * @param subscriber Subscriber
-     * @return Set<API>
-     * @throws APIManagementException if failed to get API for subscriber
-     */
-    Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException;
-
-    /**
-     * @param subscriber the subscriber to be subscribed to the API
-     * @param groupingId the groupId of the subscriber
-     * @return the subscribed API's
-     * @throws APIManagementException
-     */
-    Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber, String groupingId) throws APIManagementException;
-
-
     /**
      * Returns a set of SubscribedAPIs filtered by the given application name.
      *
@@ -323,11 +304,11 @@ public interface APIConsumer extends APIManager {
      *
      * @param apiTypeWrapper    Identifier
      * @param userId        id of the user
-     * @param applicationId Application Id
+     * @param application Application Id
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId)
+    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application application)
             throws APIManagementException;
 
     /**
@@ -339,30 +320,9 @@ public interface APIConsumer extends APIManager {
      * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId,
+    SubscriptionResponse updateSubscription(ApiTypeWrapper apiTypeWrapper, String userId, Application applicationId,
                                             String subscriptionId, String currentThrottlingPolicy,
                                             String requestedThrottlingPolicy) throws APIManagementException;
-
-    /**
-     * Add new Subscriber with GroupId
-     *
-     * @param apiTypeWrapper    APIIdentifier
-     * @param userId        id of the user
-     * @param applicationId Application Id
-     * @param groupId       GroupId of user
-     * @return SubscriptionResponse subscription response object
-     * @throws APIManagementException if failed to add subscription details to database
-     */
-    SubscriptionResponse addSubscription(ApiTypeWrapper apiTypeWrapper, String userId, int applicationId, String groupId)
-            throws APIManagementException;
-
-    /**
-     *
-     * @param subscriptionId id of the subscription
-     * @return
-     * @throws APIManagementException if failed to get subscription detail from database
-     */
-    String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
 
     /**
      * Unsubscribe the specified user from the specified API in the given application
@@ -401,16 +361,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if failed to add subscription details to database
      */
     void removeSubscriber(APIIdentifier identifier, String userId) throws APIManagementException;
-
-    /**
-     * This method is to update the subscriber.
-     *
-     * @param identifier    APIIdentifier
-     * @param userId        user id
-     * @param applicationId Application Id
-     * @throws APIManagementException if failed to update subscription
-     */
-    void updateSubscriptions(APIIdentifier identifier, String userId, int applicationId) throws APIManagementException;
 
     /**
      * @param identifier Api identifier
