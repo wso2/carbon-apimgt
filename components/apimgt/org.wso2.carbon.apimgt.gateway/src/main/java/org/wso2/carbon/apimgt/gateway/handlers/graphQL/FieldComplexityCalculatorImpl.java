@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -76,9 +77,23 @@ public class FieldComplexityCalculatorImpl implements FieldComplexityCalculator 
         int argumentValue = 0;
         if (argumentList.size() > 0) {
             for (Argument object : argumentList) {
-                BigInteger value = ((IntValue) object.getValue()).getValue();
-                int val = value.intValue();
-                argumentValue = argumentValue + val;
+                String argumentName = object.getName();
+                // The below list of keywords effect query complexity to multiply by the factor given as the
+                // value of the argument.
+                List<String> multifyingKeywords = Arrays.asList("first", "last", "limit");
+                if (multifyingKeywords.contains(argumentName.toLowerCase())) {
+                    BigInteger value = null;
+                    if (object.getValue() instanceof IntValue) {
+                        value = ((IntValue) object.getValue()).getValue();
+                    }
+                    int val = 0;
+                    if (value != null) {
+                        val = value.intValue();
+                    }
+                    argumentValue = argumentValue + val;
+                } else {
+                    argumentValue = 1;
+                }
             }
         } else {
             argumentValue = 1;
