@@ -26,25 +26,19 @@ const useStyles = makeStyles(() => ({
         minHeight: '480px',
     },
     textOptional: {
-        fontFamily: 'sans-serif',
         fontSize: 'small',
         color: '#707070',
         fontWeight: '100',
     },
     textRevision: {
-        fontFamily: 'sans-serif',
         fontSize: '16px',
         color: '#707070',
-        fontWeight: '800',
     },
     textDeploy: {
-        fontFamily: 'sans-serif',
         fontSize: '26px',
         color: '#1B3A57',
-        fontWeight: '800',
     },
     textDescription: {
-        fontFamily: 'sans-serif',
         fontSize: '16px',
         color: '#707070',
         fontWeight: '400',
@@ -72,12 +66,14 @@ export default function DeploymentOnboarding(props) {
     const classes1 = useStyles();
     const theme = useTheme();
     const { maxCommentLength } = theme.custom;
-    const { settings } = useAppContext();
-    const defaultVhosts = settings.environment.map(
+    const { settings: { environment: environments } } = useAppContext();
+    const hasOnlyOneEnvironment = environments.length === 1;
+
+    const defaultVhosts = environments.map(
         (e) => (e.vhosts && e.vhosts.length > 0 ? { env: e.name, vhost: e.vhosts[0].host } : undefined),
     );
     const [descriptionOpen, setDescriptionOpen] = useState(false);
-    const [selectedEnvironment, setSelectedEnvironment] = useState([]);
+    const [selectedEnvironment, setSelectedEnvironment] = useState(hasOnlyOneEnvironment ? [environments[0].name] : []);
     const [selectedVhostDeploy, setVhostsDeploy] = useState(defaultVhosts);
 
     /**
@@ -141,7 +137,7 @@ export default function DeploymentOnboarding(props) {
                                     container
                                     spacing={3}
                                 >
-                                    {settings.environment.map((row) => (
+                                    {environments.map((row) => (
                                         <Grid item xs={3}>
                                             <Card
                                                 className={clsx(selectedEnvironment
@@ -193,7 +189,8 @@ export default function DeploymentOnboarding(props) {
                                                                 >
                                                                     <TextField
                                                                         id='vhost-selector'
-                                                                        select
+                                                                        select={row.vhosts.length > 1}
+                                                                        disabled={row.vhosts.length === 1}
                                                                         label={(
                                                                             <FormattedMessage
                                                                                 id='Apis.Details.Environments
@@ -266,7 +263,7 @@ export default function DeploymentOnboarding(props) {
                                                 <FormattedMessage
                                                     id='Apis.Details.Environments.Environments.revision
                                                     .description.deploy'
-                                                    defaultMessage='Brief description of the new revision'
+                                                    defaultMessage='Add a description to the revision'
                                                 />
                                             )}
                                             multiline
