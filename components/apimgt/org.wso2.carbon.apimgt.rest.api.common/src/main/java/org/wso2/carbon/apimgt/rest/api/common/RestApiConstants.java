@@ -302,6 +302,6 @@ public final class RestApiConstants {
     public static final String AUTHENTICATION_ADMIN_SERVICE_ENDPOINT = "AuthenticationAdmin";
 
     public static final Set<String> ALLOWED_THUMBNAIL_EXTENSIONS = new HashSet<String>(
-            Arrays.asList("jpg", "png", "jpeg", "gif"));
+            Arrays.asList("jpg", "png", "jpeg", "gif", "svg"));
 
 }
