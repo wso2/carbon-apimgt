@@ -28,6 +28,7 @@
   "apim.jwt.signing_algorithm": "SHA256withRSA",
   "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
   "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl",
+  "apim.jwt.enable_tenant_based_signing": false,
   "apim.cache.gateway_token.enable": true,
   "apim.cache.resource.enable": true,
   "apim.cache.km_token.enable": false,
