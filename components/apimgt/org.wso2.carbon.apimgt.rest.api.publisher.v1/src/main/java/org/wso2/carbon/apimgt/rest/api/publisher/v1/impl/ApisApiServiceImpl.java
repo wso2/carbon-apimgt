@@ -4753,7 +4753,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             if (ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION.getErrorCode() == e.getErrorHandler()
                     .getErrorCode()) {
-                RestApiUtil.handleInternalServerError("Missing protocol in Async API Definition", log);
+                RestApiUtil.handleBadRequest("Missing protocol in Async API Definition", log);
+            } else if (ExceptionCodes.UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION.getErrorCode() ==
+                    e.getErrorHandler().getErrorCode()) {
+                RestApiUtil.handleBadRequest("Unsupported protocol specified in Async API Definition. Protocol " +
+                        "should be either sse or websub or ws", log);
             }
             RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
                     "associated with API with id " + apiId, log);

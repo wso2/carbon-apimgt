@@ -798,8 +798,20 @@ public class PublisherCommonUtils {
         return sb.toString();
     }
 
-    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol) {
+    public static APIDTO.TypeEnum getAPIType(ServiceEntry.DefinitionType definitionType, String protocol)
+            throws APIManagementException {
+        if (ServiceEntry.DefinitionType.ASYNC_API.equals(definitionType)) {
+            if (protocol.isEmpty()) {
+                throw new APIManagementException("A protocol should be specified in the ASync API definition",
+                        ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION);
+            } else if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase()) &&
+                    !APIConstants.API_TYPE_SSE.equals(protocol.toUpperCase()) &&
+                    !APIConstants.API_TYPE_WS.equals(protocol.toUpperCase())) {
+                throw new APIManagementException("Unsupported protocol specified in Async API Definition",
+                        ExceptionCodes.UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION);
+            }
 
+        }
         switch (definitionType) {
             case WSDL1:
             case WSDL2:
