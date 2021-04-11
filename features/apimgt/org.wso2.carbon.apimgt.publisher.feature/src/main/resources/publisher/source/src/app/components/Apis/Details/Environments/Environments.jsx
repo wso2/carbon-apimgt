@@ -195,6 +195,7 @@ const useStyles = makeStyles((theme) => ({
     shapeCircleBlack: {
         backgroundColor: '#000000',
         alignSelf: 'center',
+        paddingLeft: '15px',
         width: 15,
         height: 15,
     },
@@ -281,6 +282,18 @@ const useStyles = makeStyles((theme) => ({
     },
     textCount: {
         marginTop: theme.spacing(-2.5),
+    },
+    containerInline: {
+        display: 'inline-flex',
+    },
+    containerOverflow: {
+        display: 'grid',
+        gridGap: '16px',
+        paddingLeft: '48px',
+        gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))',
+        gridAutoFlow: 'column',
+        gridAutoColumns: 'minmax(160px,1fr)',
+        overflowX: 'auto',
     },
 }));
 
@@ -861,8 +874,7 @@ export default function Environments() {
         const openPopover = Boolean(anchorEl);
         item1 = (
             <Grid
-                container
-                direction='container'
+                className={classes.containerInline}
             >
                 <Grid item className={classes.shapeRec} />
                 <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -913,8 +925,7 @@ export default function Environments() {
     }
     const item2 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -925,8 +936,7 @@ export default function Environments() {
     );
     const item3 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -936,8 +946,7 @@ export default function Environments() {
     );
     const item4 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -954,8 +963,7 @@ export default function Environments() {
     );
     const item5 = (
         <Grid
-            container
-            direction='container'
+            className={classes.containerInline}
         >
             <Grid item className={classes.shapeRec} />
             <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -989,8 +997,7 @@ export default function Environments() {
         const openPopover = Boolean(anchorEl1);
         item6 = (
             <Grid
-                container
-                direction='container'
+                className={classes.containerInline}
             >
                 <Grid item className={classes.shapeRec} />
                 <Grid item className={clsx(classes.shapeCircaleBack, classes.shapeCircle)}>
@@ -1612,12 +1619,10 @@ export default function Environments() {
                         </Grid>
 
                     </Grid>
-                    <Box ml={6} lassName={classes.gridOverflow}>
+                    <Box className={classes.containerOverflow}>
                         <Grid
-                            container
-                            direction='row'
-                            alignItems='flex-start'
                             xs={12}
+                            className={classes.containerInline}
                         >
                             {items}
                             {confirmDeleteDialog}
