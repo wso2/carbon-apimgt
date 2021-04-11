@@ -28,15 +28,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
-import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ThrottlingApiService;
@@ -122,7 +114,16 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 }
             } catch (PolicyNotFoundException ignore) {
             }
-            validateQuotaPolicy(apiPolicy);
+            String policyName = apiPolicy.getPolicyName();
+            if (apiPolicy.getPipelines() == null) {
+                validateQuotaPolicy(apiPolicy.getDefaultQuotaPolicy(), policyName);
+            } else {
+                List<Pipeline> pipelines = apiPolicy.getPipelines();
+                for (Pipeline pipeline : pipelines) {
+                    validateQuotaPolicy(pipeline.getQuotaPolicy(), policyName);
+                }
+            }
+
             //Add the policy
             apiProvider.addPolicy(apiPolicy);
 
@@ -142,27 +143,27 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     /**
      * Validate whether the limiting options are greater than 1 or not
      *
-     * @param policy Policy
+     * @param quotaPolicy   QuotaPolicy
+     * @param apiPolicyName API Policy name
      */
-    public void validateQuotaPolicy(Policy policy) throws APIManagementException {
-        String apiPolicyName = policy.getPolicyName();
-        if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-            RequestCountLimit limit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+    public void validateQuotaPolicy(QuotaPolicy quotaPolicy, String apiPolicyName) throws APIManagementException {
+        if (PolicyConstants.REQUEST_COUNT_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+            RequestCountLimit limit = (RequestCountLimit) quotaPolicy.getLimit();
             if (limit.getUnitTime() < 1 || limit.getRequestCount() < 1) {
                 throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
                         + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
 
             }
 
-        } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-            BandwidthLimit limit = (BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit();
+        } else if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+            BandwidthLimit limit = (BandwidthLimit) quotaPolicy.getLimit();
             if (limit.getUnitTime() < 1 || limit.getStandardDataAmount() < 1) {
                 throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
                         + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
 
             }
-        } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
-            EventCountLimit limit = (EventCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+        } else if (PolicyConstants.EVENT_COUNT_TYPE.equalsIgnoreCase(quotaPolicy.getType())) {
+            EventCountLimit limit = (EventCountLimit) quotaPolicy.getLimit();
             if (limit.getUnitTime() < 1 || limit.getEventCount() < 1) {
                 throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
                         + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
@@ -225,7 +226,15 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden parameters
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
-            validateQuotaPolicy(existingPolicy);
+            String policyName = existingPolicy.getPolicyName();
+            if (existingPolicy.getPipelines() == null) {
+                validateQuotaPolicy(existingPolicy.getDefaultQuotaPolicy(), policyName);
+            } else {
+                List<Pipeline> pipelines = existingPolicy.getPipelines();
+                for (Pipeline pipeline : pipelines) {
+                    validateQuotaPolicy(pipeline.getQuotaPolicy(), policyName);
+                }
+            }
 
             //update the policy
             APIPolicy apiPolicy = AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(body);
@@ -337,7 +346,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 }
             } catch (PolicyNotFoundException ignore) {
             }
-            validateQuotaPolicy(appPolicy);
+            String policyName = appPolicy.getPolicyName();
+            validateQuotaPolicy(appPolicy.getDefaultQuotaPolicy(), policyName);
             //Add the policy
             apiProvider.addPolicy(appPolicy);
 
@@ -412,10 +422,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
-            validateQuotaPolicy(existingPolicy);
             //update the policy
             ApplicationPolicy appPolicy =
                     ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(body);
+            String policyName = existingPolicy.getPolicyName();
+            validateQuotaPolicy(existingPolicy.getDefaultQuotaPolicy(), policyName);
             apiProvider.updatePolicy(appPolicy);
 
             //retrieve the new policy and send back as the response
@@ -510,6 +521,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
 
         try {
+
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String username = RestApiCommonUtil.getLoggedInUsername();
             SubscriptionPolicy subscriptionPolicy =
@@ -527,7 +539,13 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             // validate if permission info exists and halt the execution in case of an error
             validatePolicyPermissions(body);
 
-            validateQuotaPolicy(subscriptionPolicy);
+            String apiPolicyName = subscriptionPolicy.getPolicyName();
+            validateQuotaPolicy(subscriptionPolicy.getDefaultQuotaPolicy(), subscriptionPolicy.getPolicyName());
+            if (subscriptionPolicy.getRateLimitCount() < 1) {
+                throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
+                        + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
+
+            }
             //Add the policy
             apiProvider.addPolicy(subscriptionPolicy);
 
@@ -677,7 +695,13 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //update the policy
             SubscriptionPolicy subscriptionPolicy =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(body);
-            validateQuotaPolicy(subscriptionPolicy);
+            String apiPolicyName = subscriptionPolicy.getPolicyName();
+            validateQuotaPolicy(subscriptionPolicy.getDefaultQuotaPolicy(), subscriptionPolicy.getPolicyName());
+            if (subscriptionPolicy.getRateLimitCount() < 1) {
+                throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
+                        + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
+
+            }
             apiProvider.updatePolicy(subscriptionPolicy);
 
             //update policy permissions
