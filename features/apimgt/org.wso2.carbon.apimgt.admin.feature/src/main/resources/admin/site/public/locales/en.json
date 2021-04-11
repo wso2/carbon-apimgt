@@ -429,6 +429,7 @@
   "Throttling.Advanced.AddEditConditionPolicyIP.valid.ip.address.error": "Invalid IP Addresss",
   "Throttling.Advanced.AddEditConditionPolicyIP.valid.ip.range.error": "Invalid IP Range",
   "Throttling.Advanced.AddEditExecution.default.limit.option": "Default Limit Option",
+  "Throttling.Advanced.ConditionalGroup.alert": "Publishing Query Params, Header Data and JWT token isn' t\n                                configured. If a policy configured with any of these conditions, it won' t be\n                                applied.",
   "Throttling.Advanced.ConditionalGroup.condition.policies": "Condition Policies",
   "Throttling.Advanced.ConditionalGroup.execution.policy": "Execution Policy",
   "Throttling.Advanced.ConditionalGroup.from": "From:",
