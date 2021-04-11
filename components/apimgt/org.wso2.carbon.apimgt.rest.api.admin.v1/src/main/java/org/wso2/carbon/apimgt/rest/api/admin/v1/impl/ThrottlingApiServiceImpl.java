@@ -558,6 +558,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 throw new APIManagementException(ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
             }
         } else if (policyPermissions == null && existingPolicy != null) {
+            log.info("++++++++++++++ permission updated +++++++++++++");
             TierPermissionDTO dto = (TierPermissionDTO) apiProvider.getThrottleTierPermission(body.getPolicyName());
             if (dto != null && dto.getRoles() != null) {
                 apiProvider.updateThrottleTierPermissions(body.getPolicyName(), null, null);
