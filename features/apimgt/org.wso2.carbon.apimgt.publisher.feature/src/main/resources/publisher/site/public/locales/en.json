@@ -2284,7 +2284,7 @@
   "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": [
     {
       "type": 0,
-      "value": "Document Source file name cannot contain spaces or special characters"
+      "value": "Document source file name cannot contain spaces or special characters"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.source.inline": [
