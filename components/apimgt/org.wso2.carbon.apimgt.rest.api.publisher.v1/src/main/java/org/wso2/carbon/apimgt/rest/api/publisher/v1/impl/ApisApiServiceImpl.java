@@ -531,7 +531,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
-                if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
+                if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE) || comment.getUser().equals(username)) {
                     if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
@@ -1516,7 +1516,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             // check user has publisher role and API is in published or deprecated state
             String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                     .get(RestApiConstants.USER_REST_API_SCOPES);
-            if (!ArrayUtils.contains(tokenScopes, "apim:api_publish") && (
+            if (!ArrayUtils.contains(tokenScopes, RestApiConstants.PUBLISHER_SCOPE) && (
                     APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus()) || APIConstants.DEPRECATED
                             .equalsIgnoreCase(api.getStatus()))) {
                 RestApiUtil.handleAuthorizationFailure(username + " cannot remove the API", log);

@@ -46,6 +46,7 @@ public final class RestApiConstants {
 
     public static final String API_IMPORT_EXPORT_SCOPE = "apim:api_import_export";
     public static final String ADMIN_SCOPE = "apim:admin";
+    public static final String PUBLISHER_SCOPE = "apim:api_publish";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 
