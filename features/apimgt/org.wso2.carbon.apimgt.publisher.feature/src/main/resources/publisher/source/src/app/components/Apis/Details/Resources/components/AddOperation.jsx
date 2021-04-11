@@ -299,9 +299,10 @@ function AddOperation(props) {
                         autoFocus
                         name='target'
                         value={newOperations.target}
-                        onChange={({ target: { name, value } }) => newOperationsDispatcher(
-                            { type: name, value: value.startsWith('/') ? value : `/${value}` },
-                        )}
+                        onChange={({ target: { name, value } }) => newOperationsDispatcher({
+                            type: name,
+                            value: api.type !== 'WEBSUB' && !value.startsWith('/') ? `/${value}` : value,
+                        })}
                         placeholder={isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern'}
                         helperText={newOperations.error || (isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern')}
                         fullWidth
