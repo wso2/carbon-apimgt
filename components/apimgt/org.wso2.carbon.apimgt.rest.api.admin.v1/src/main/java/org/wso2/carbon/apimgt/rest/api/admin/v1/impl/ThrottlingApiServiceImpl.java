@@ -184,6 +184,24 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     }
 
     /**
+     * Validate whether the limiting options are greater than 1 or not
+     *
+     * @param subscriptionPolicy QuotaPolicy
+     */
+    public void validateSubscriptionPolicyValues(SubscriptionPolicy subscriptionPolicy)
+            throws APIManagementException {
+        String apiPolicyName = subscriptionPolicy.getPolicyName();
+        validateQuotaPolicy(subscriptionPolicy.getDefaultQuotaPolicy(), apiPolicyName);
+        if (subscriptionPolicy.getRateLimitCount() < 1 || subscriptionPolicy.getSubscriberCount() < 1
+                || subscriptionPolicy.getGraphQLMaxDepth() < 1 || subscriptionPolicy.getGraphQLMaxComplexity() < 1) {
+            throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
+                    + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
+
+        }
+
+    }
+
+    /**
      * Get a specific Advanced Level Policy
      *
      * @param policyId uuid of the policy
@@ -549,14 +567,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
 
             // validate if permission info exists and halt the execution in case of an error
             validatePolicyPermissions(body);
-
-            String apiPolicyName = subscriptionPolicy.getPolicyName();
-            validateQuotaPolicy(subscriptionPolicy.getDefaultQuotaPolicy(), subscriptionPolicy.getPolicyName());
-            if (subscriptionPolicy.getRateLimitCount() < 1) {
-                throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
-                        + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
-
-            }
+            validateSubscriptionPolicyValues(subscriptionPolicy);
             //Add the policy
             apiProvider.addPolicy(subscriptionPolicy);
 
@@ -706,13 +717,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             //update the policy
             SubscriptionPolicy subscriptionPolicy =
                     SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyDTOToModel(body);
-            String apiPolicyName = subscriptionPolicy.getPolicyName();
-            validateQuotaPolicy(subscriptionPolicy.getDefaultQuotaPolicy(), subscriptionPolicy.getPolicyName());
-            if (subscriptionPolicy.getRateLimitCount() < 1) {
-                throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
-                        + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
-
-            }
+            validateSubscriptionPolicyValues(subscriptionPolicy);
             apiProvider.updatePolicy(subscriptionPolicy);
 
             //update policy permissions
