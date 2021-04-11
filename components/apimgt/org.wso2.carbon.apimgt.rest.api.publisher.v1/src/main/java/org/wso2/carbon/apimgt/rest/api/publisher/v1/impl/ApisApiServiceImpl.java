@@ -2955,8 +2955,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                                 InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
         try {
             String updatedSwagger;
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-
             //validate if api exists
             APIInfo apiInfo = validateAPIExistence(apiId);
             //validate API update operation permitted based on the LC state
