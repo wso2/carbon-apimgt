@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
@@ -832,11 +833,16 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                              List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO,
                                              MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        Map<String, Environment> environments = APIUtil.getEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+            String environment = apiRevisionDeploymentDTO.getName();
+            if (environments.get(environment) == null) {
+                RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+            }
+            apiRevisionDeployment.setDeployment(environment);
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
             if (StringUtils.isEmpty(apiRevisionDeploymentDTO.getVhost())) {
                 // vhost is only required when deploying an revision, not required when un-deploying a revision
@@ -939,6 +945,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 return Response.status(Response.Status.BAD_REQUEST).entity(null).build();
             }
         }
+        Map<String, Environment> environments = APIUtil.getEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -946,7 +953,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                 apiRevisionDeployment.setRevisionUUID(revisionId);
-                apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                String environment = apiRevisionDeploymentDTO.getName();
+                if (environments.get(environment) == null) {
+                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                }
+                apiRevisionDeployment.setDeployment(environment);
                 apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
                 apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
                 apiRevisionDeployments.add(apiRevisionDeployment);
