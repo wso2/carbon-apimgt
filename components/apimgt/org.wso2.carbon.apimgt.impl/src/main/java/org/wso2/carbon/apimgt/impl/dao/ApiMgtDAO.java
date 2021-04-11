@@ -9015,12 +9015,14 @@ public class ApiMgtDAO {
                     if (resultSet.next()) {
                         APIInfo.Builder apiInfoBuilder = new APIInfo.Builder();
                         return apiInfoBuilder
+                                .id(resultSet.getString("API_UUID"))
                                 .name(resultSet.getString("API_NAME"))
                                 .version(resultSet.getString("API_VERSION"))
                                 .provider(resultSet.getString("API_PROVIDER"))
                                 .context(resultSet.getString("CONTEXT"))
                                 .contextTemplate(resultSet.getString("CONTEXT_TEMPLATE"))
                                 .apiTier(resultSet.getString("API_TIER"))
+                                .status(APIUtil.getApiStatus(resultSet.getString("STATUS")))
                                 .apiType(resultSet.getString("API_TYPE"))
                                 .createdBy(resultSet.getString("CREATED_BY"))
                                 .createdTime(resultSet.getString("CREATED_TIME"))
