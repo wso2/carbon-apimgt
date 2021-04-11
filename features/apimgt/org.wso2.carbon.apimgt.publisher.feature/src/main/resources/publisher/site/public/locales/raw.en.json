@@ -177,7 +177,10 @@
     "defaultMessage": "Create a Streaming API"
   },
   "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading": {
-    "defaultMessage": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+    "defaultMessage": "Create an API by providing a Name, a Version, a Context and the Endpoint"
+  },
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading": {
+    "defaultMessage": "Create an API by providing a Name, a Version and a Context"
   },
   "Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available": {
     "defaultMessage": "Throttling policies not available. Contact your administrator"

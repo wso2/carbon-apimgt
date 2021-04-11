@@ -420,7 +420,13 @@
   "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading": [
     {
       "type": 0,
-      "value": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+      "value": "Create an API by providing a Name, a Version, a Context and the Endpoint"
+    }
+  ],
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading": [
+    {
+      "type": 0,
+      "value": "Create an API by providing a Name, a Version and a Context"
     }
   ],
   "Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available": [
