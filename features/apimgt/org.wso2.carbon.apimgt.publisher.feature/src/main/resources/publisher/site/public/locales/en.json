@@ -1,10 +1,4 @@
 {
-  "8+ZR29": [
-    {
-      "type": 0,
-      "value": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
-    }
-  ],
   "Api.category.dropdown.tooltip": [
     {
       "type": 0,
@@ -323,6 +317,22 @@
     {
       "type": 0,
       "value": " Browse files"
+    },
+    {
+      "type": 1,
+      "value": "break"
+    },
+    {
+      "type": 0,
+      "value": "("
+    },
+    {
+      "type": 1,
+      "value": "accept"
+    },
+    {
+      "type": 0,
+      "value": ")"
     }
   ],
   "Apis.Create.GraphQL.Steps.ProvideGraphQL.Input.file.upload": [
@@ -410,7 +420,13 @@
   "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading": [
     {
       "type": 0,
-      "value": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+      "value": "Create an API by providing a Name, a Version, a Context and the Endpoint"
+    }
+  ],
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading": [
+    {
+      "type": 0,
+      "value": "Create an API by providing a Name, a Version and a Context"
     }
   ],
   "Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available": [
@@ -537,12 +553,6 @@
       "value": "API Definition updated successfully"
     }
   ],
-  "Apis.Details.APIDefinition.APIDefinition.api.outdated.definition": [
-    {
-      "type": 0,
-      "value": "Current API definition outdated, You can either re-import existing resource or create new version"
-    }
-  ],
   "Apis.Details.APIDefinition.APIDefinition.async.api.definition.updated.successfully": [
     {
       "type": 0,
@@ -567,46 +577,16 @@
       "value": "Audit API"
     }
   ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.cancel": [
-    {
-      "type": 0,
-      "value": "Cancel"
-    }
-  ],
   "Apis.Details.APIDefinition.APIDefinition.btn.close": [
     {
       "type": 0,
       "value": "Close"
     }
   ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.hide.diff": [
-    {
-      "type": 0,
-      "value": "Hide Diff"
-    }
-  ],
   "Apis.Details.APIDefinition.APIDefinition.btn.no": [
     {
       "type": 0,
       "value": "CANCEL"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.reimport": [
-    {
-      "type": 0,
-      "value": "Re-import"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.show.diff": [
-    {
-      "type": 0,
-      "value": "Show Diff"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.btn.yes": [
-    {
-      "type": 0,
-      "value": "SAVE"
     }
   ],
   "Apis.Details.APIDefinition.APIDefinition.convert.to": [
@@ -721,18 +701,6 @@
     {
       "type": 0,
       "value": "Import WSDL"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.outdated.api.definition": [
-    {
-      "type": 0,
-      "value": "Outdated Definition"
-    }
-  ],
-  "Apis.Details.APIDefinition.APIDefinition.outdated.definition": [
-    {
-      "type": 0,
-      "value": "Outdated Definition"
     }
   ],
   "Apis.Details.APIDefinition.APIDefinition.save.api.definition": [
@@ -1053,6 +1021,72 @@
       "value": "Severity ranges from:"
     }
   ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.api.outdated.definition": [
+    {
+      "type": 0,
+      "value": "Current API definition is outdated. You can either re-import the new definition or create a new version of this API."
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.cancel": [
+    {
+      "type": 0,
+      "value": "Cancel"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.hide.diff": [
+    {
+      "type": 0,
+      "value": "Hide Diff"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.reimport": [
+    {
+      "type": 0,
+      "value": "Re-import"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.btn.show.diff": [
+    {
+      "type": 0,
+      "value": "Show Diff"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.import.error": [
+    {
+      "type": 0,
+      "value": "Error while re-importing API definition"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.import.success": [
+    {
+      "type": 0,
+      "value": "Re-imported API definition successfully!"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.new.api.definition.error": [
+    {
+      "type": 0,
+      "value": "Something went wrong while retrieving new API definition."
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition": [
+    {
+      "type": 0,
+      "value": "Outdated Definition"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.outdated.definition.heading": [
+    {
+      "type": 0,
+      "value": "Outdated Definition"
+    }
+  ],
+  "Apis.Details.APIDefinition.DefinitionOutdated.service.retrieve.error": [
+    {
+      "type": 0,
+      "value": "Something went wrong while rendering diff for API Definition"
+    }
+  ],
   "Apis.Details.APIDefinition.ImportDefinition.WSDL.updated.successfully": [
     {
       "type": 0,
@@ -1143,12 +1177,6 @@
       "value": "Try Out"
     }
   ],
-  "Apis.Details.ApiConsole.SelectAppPanel.environment": [
-    {
-      "type": 0,
-      "value": "Please select an environment"
-    }
-  ],
   "Apis.Details.ApiConsole.deployments.api.gateways": [
     {
       "type": 0,
@@ -1163,8 +1191,20 @@
   ],
   "Apis.Details.ApiConsole.deployments.no": [
     {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
       "type": 0,
-      "value": "API is not deployed yet! Please deploy the API before trying out"
+      "value": " is not deployed yet! Please deploy the "
+    },
+    {
+      "type": 1,
+      "value": "artifactType"
+    },
+    {
+      "type": 0,
+      "value": " before trying out"
     }
   ],
   "Apis.Details.ApiConsole.environment": [
@@ -1182,7 +1222,7 @@
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": [
     {
       "type": 0,
-      "value": "Business Information of the API"
+      "value": "Business Information of the API Product"
     }
   ],
   "Apis.Details.BusinessInformation.BusinessInformation.business.info": [
@@ -1339,6 +1379,12 @@
     {
       "type": 0,
       "value": "Edit Complexity Values"
+    }
+  ],
+  "Apis.Details.Configuration.AuthHeader.helper.text": [
+    {
+      "type": 0,
+      "value": "Authorization header name cannot contain spaces or special characters"
     }
   ],
   "Apis.Details.Configuration.Components.APISecurity.Components.\n                                    ApplicationLevel.http": [
@@ -1513,6 +1559,12 @@
     {
       "type": 0,
       "value": "* You are not authorized to update particular fields of the API due to insufficient permissions"
+    }
+  ],
+  "Apis.Details.Configuration.Resources.save": [
+    {
+      "type": 0,
+      "value": "Save"
     }
   ],
   "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
@@ -1935,6 +1987,12 @@
       "value": "Tags"
     }
   ],
+  "Apis.Details.Configuration.components.Tags.validation.error": [
+    {
+      "type": 0,
+      "value": "The tag contains one or more illegal characters ( ~ ! @ # ; % ^ & * + = } | < > , ' \" \\\\ / ) ."
+    }
+  ],
   "Apis.Details.Configuration.components.Transports.tooltip": [
     {
       "type": 0,
@@ -2124,7 +2182,7 @@
   "Apis.Details.Documents.CreateEditForm.document.create.type.sample": [
     {
       "type": 0,
-      "value": "Sample &amp; SDK"
+      "value": "Sample and SDK"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": [
@@ -3047,12 +3105,6 @@
       "value": "Endpoint Security User Name/ Password should not be empty"
     }
   ],
-  "Apis.Details.Endpoints.Endpoints.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.Endpoints.Endpoints.update.not.allowed": [
     {
       "type": 0,
@@ -3461,6 +3513,12 @@
       "value": "Class Name for Algorithm"
     }
   ],
+  "Apis.Details.Endpoints.LoadBalanceConfig.failover": [
+    {
+      "type": 0,
+      "value": "Enable Failover"
+    }
+  ],
   "Apis.Details.Endpoints.LoadBalanceConfig.session.management": [
     {
       "type": 0,
@@ -3623,6 +3681,30 @@
       "value": "Script"
     }
   ],
+  "Apis.Details.Environments\n                                                                                .deploy.vhost": [
+    {
+      "type": 0,
+      "value": "VHost"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                    .select.table": [
+    {
+      "type": 0,
+      "value": "Select Revision"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                    .select.vhost": [
+    {
+      "type": 0,
+      "value": "Select Access URL"
+    }
+  ],
+  "Apis.Details.Environments.Environments\n                                                                .deploy.button": [
+    {
+      "type": 0,
+      "value": "Deploy"
+    }
+  ],
   "Apis.Details.Environments.Environments.APIGateways": [
     {
       "type": 0,
@@ -3665,12 +3747,6 @@
       "value": "Create"
     }
   ],
-  "Apis.Details.Environments.Environments.deploy.button": [
-    {
-      "type": 0,
-      "value": "Deploy"
-    }
-  ],
   "Apis.Details.Environments.Environments.deploy.cancel": [
     {
       "type": 0,
@@ -3707,10 +3783,16 @@
       "value": "Create revisions and deploy in Gateway Environments"
     }
   ],
-  "Apis.Details.Environments.Environments.display.in.devportal": [
+  "Apis.Details.Environments.Environments.display.devportal": [
     {
       "type": 0,
-      "value": "Display in Developer Portal"
+      "value": "Display Gateway Access URLs in developer portal."
+    }
+  ],
+  "Apis.Details.Environments.Environments.gateway\n                                                    .deployed.revision": [
+    {
+      "type": 0,
+      "value": "Deployed Revision"
     }
   ],
   "Apis.Details.Environments.Environments.gateway.accessUrl": [
@@ -3725,10 +3807,10 @@
       "value": "Action"
     }
   ],
-  "Apis.Details.Environments.Environments.gateway.deployed.revision": [
+  "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": [
     {
       "type": 0,
-      "value": "Deployed Revision"
+      "value": "Brief description of the new revision"
     }
   ],
   "Apis.Details.Environments.Environments.revision.create.heading": [
@@ -3873,22 +3955,16 @@
       "value": "count"
     }
   ],
-  "Apis.Details.Environments.Environments.select.table": [
-    {
-      "type": 0,
-      "value": "Select Revision"
-    }
-  ],
-  "Apis.Details.Environments.Environments.select.vhost": [
-    {
-      "type": 0,
-      "value": "Select Access URL"
-    }
-  ],
   "Apis.Details.Environments.Environments.undeploy.btn": [
     {
       "type": 0,
       "value": "Undeploy"
+    }
+  ],
+  "Apis.Details.Environments.Environments.visibility.in.devportal": [
+    {
+      "type": 0,
+      "value": "Gateway URL Visibility"
     }
   ],
   "Apis.Details.Environments.deploy.vhost": [
@@ -4855,22 +4931,10 @@
       "value": "Cancel"
     }
   ],
-  "Apis.Details.ProductResources.ProductResourcesEdit.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.ProductResources.ProductResourcesEdit.title": [
     {
       "type": 0,
       "value": "Manage Resources"
-    }
-  ],
-  "Apis.Details.ProductResources.ProductResourcesEdit.updating": [
-    {
-      "type": 0,
-      "value": "Updating ..."
     }
   ],
   "Apis.Details.ProductResources.ProductResourcesWorkspace.\n                                                    empty.title": [
@@ -5014,7 +5078,7 @@
   "Apis.Details.Properties.Properties.api.product.properties": [
     {
       "type": 0,
-      "value": "API Properties"
+      "value": "API Product Properties"
     }
   ],
   "Apis.Details.Properties.Properties.api.properties": [
@@ -5083,22 +5147,10 @@
       "value": "Value"
     }
   ],
-  "Apis.Details.Properties.Properties.save": [
-    {
-      "type": 0,
-      "value": "Save"
-    }
-  ],
   "Apis.Details.Properties.Properties.update.not.allowed": [
     {
       "type": 0,
       "value": "*You are not authorized to update properties of the API due to insufficient permissions"
-    }
-  ],
-  "Apis.Details.Properties.Properties.updating": [
-    {
-      "type": 0,
-      "value": "Updating ..."
     }
   ],
   "Apis.Details.QueryAnalysis.UpdateComplexity.fieldcomplexity": [
@@ -5171,6 +5223,12 @@
     {
       "type": 0,
       "value": "Operation target or operation verb(s) can't be empty"
+    }
+  ],
+  "Apis.Details.Resources.components.AddOperation.operation.topic.cannot.have.path.params.warning": [
+    {
+      "type": 0,
+      "value": "WebSub topic can't have path parameters"
     }
   ],
   "Apis.Details.Resources.components.AddOperation.option": [
@@ -5305,6 +5363,12 @@
     {
       "type": 0,
       "value": "Select the Format of Data Type"
+    }
+  ],
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type.none.option": [
+    {
+      "type": 0,
+      "value": "No Data Type"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.schema.data.type": [
@@ -6550,7 +6614,7 @@
   "Apis.Listing.SampleAPI.SampleAPI.create.new.description": [
     {
       "type": 0,
-      "value": "Monitor the API’s lifecycle, documentation, security, community, and subscriptions."
+      "value": "Choose your option to create an API"
     }
   ],
   "Apis.Listing.SampleAPI.SampleAPI.graphql.api": [
@@ -6778,7 +6842,7 @@
   "Apis.Listing.SampleAPIProduct.description": [
     {
       "type": 0,
-      "value": "The API resources in an API product can come from one or more APIs, so you can mix and match resources from multiple API resources to create specialized feature sets."
+      "value": "Combine multiple API resources in to a single API"
     }
   ],
   "Apis.Listing.TableView.TableView.doc.flag": [
@@ -6827,6 +6891,18 @@
     {
       "type": 0,
       "value": "Design"
+    }
+  ],
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": [
+    {
+      "type": 0,
+      "value": "Remove"
+    }
+  ],
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn": [
+    {
+      "type": 0,
+      "value": "Remove"
     }
   ],
   "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": [
@@ -6901,16 +6977,16 @@
       "value": "Uploading"
     }
   ],
-  "Apis.Listing.components.TopMenu.api(s)": [
+  "Apis.Listing.components.TopMenu.api.singular": [
     {
       "type": 0,
-      "value": "API(s)"
+      "value": "API"
     }
   ],
-  "Apis.Listing.components.TopMenu.apiproduct(s)": [
+  "Apis.Listing.components.TopMenu.apiproduct.singular": [
     {
       "type": 0,
-      "value": "API Product(s)"
+      "value": "API Product"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproducts": [
@@ -6940,247 +7016,25 @@
   "Apis.Listing.components.TopMenu.displaying": [
     {
       "type": 0,
-      "value": "Total of"
+      "value": "Total:"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
-      "value": "Search Result(s)"
+      "value": "Search Results"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.search.results.singular": [
+    {
+      "type": 0,
+      "value": "Search Result"
     }
   ],
   "Apis.Listing.import.from.service.catalog.title": [
     {
       "type": 0,
       "value": "Import From Service Catalog"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.add": [
-    {
-      "type": 0,
-      "value": "New Configuration"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while adding alert configuration"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.add.success.msg": [
-    {
-      "type": 0,
-      "value": "Alert Configuration added successfully"
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while deleting the configuration."
-    }
-  ],
-  "Apis.Settings.Alert.AlertConfiguration.alert.config.delete.success.msg": [
-    {
-      "type": 0,
-      "value": "Alert Configuration deleted successfully"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.name": [
-    {
-      "type": 0,
-      "value": "API Name"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.name.label": [
-    {
-      "type": 0,
-      "value": "API Name"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.version": [
-    {
-      "type": 0,
-      "value": "API Version"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.api.version.label": [
-    {
-      "type": 0,
-      "value": "API Version"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.configuration": [
-    {
-      "type": 1,
-      "value": "name"
-    },
-    {
-      "type": 0,
-      "value": " Configurations"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.no.config.message": [
-    {
-      "type": 0,
-      "value": "You do not have any configurations. Click on "
-    },
-    {
-      "type": 1,
-      "value": "newConfig"
-    },
-    {
-      "type": 0,
-      "value": " button to add a configuration."
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.select.api.helper": [
-    {
-      "type": 0,
-      "value": "Select the API Name"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.select.version.helper": [
-    {
-      "type": 0,
-      "value": "Select API Version"
-    }
-  ],
-  "Apis.Settings.Alerts.AlertConfiguration.threshold.value.helper": [
-    {
-      "type": 0,
-      "value": "Enter threshold value."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.backend.time": [
-    {
-      "type": 0,
-      "value": "Abnormal Backend Time"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.backend.time.description": [
-    {
-      "type": 0,
-      "value": "This alert gets triggered if the response time of a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow WSO2 API Manager runtime or a slow backend."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.request.time.description": [
-    {
-      "type": 0,
-      "value": "This alert gets triggered if the backend time corresponding to a particular API is higher than the predefined value. These alerts could be treated as an indication of a slow backend. In technical terms, if the backend time of a particular API of a tenant lies outside the predefined value, an alert will be sent out."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.abnormal.response.time": [
-    {
-      "type": 0,
-      "value": "Abnormal Response Time"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.api.health.monitor": [
-    {
-      "type": 0,
-      "value": "API Health Monitor"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.api.health.monitor.description": [
-    {
-      "type": 0,
-      "value": "This alert gets triggered if at least one of the two cases below are satisfied; Response time of an API > Threshold response time value defined for that particular API or Response status code >= 500 (By Default) AND Response status code < 600 (By Default)"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.cancel.btn": [
-    {
-      "type": 0,
-      "value": "Cancel"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.close.btn": [
-    {
-      "type": 0,
-      "value": "Close"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.confirm.btn": [
-    {
-      "type": 0,
-      "value": "Unsubscribe All"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.enable.analytics.message": [
-    {
-      "type": 0,
-      "value": "Enable Analytics to Configure Alerts"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.loading.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while loading alerts"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while subscribing to alerts."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.success.msg": [
-    {
-      "type": 0,
-      "value": "Subscribed to Alerts Successfully."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.heading": [
-    {
-      "type": 0,
-      "value": "Manage Alert Subscriptions"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.subscribe.to.alerts.subheading": [
-    {
-      "type": 0,
-      "value": "Select the Alert types to subscribe/ unsubscribe and click Save."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.heading": [
-    {
-      "type": 0,
-      "value": "Confirm unsubscription from All Alerts"
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.confirm.dialog.message": [
-    {
-      "type": 0,
-      "value": "This will remove all the existing alert subscriptions and emails. This action cannot be undone."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.error.msg": [
-    {
-      "type": 0,
-      "value": "Error occurred while unsubscribing."
-    }
-  ],
-  "Apis.Settings.Alerts.Alerts.unsubscribe.success.msg": [
-    {
-      "type": 0,
-      "value": "Unsubscribed from all alerts successfully."
-    }
-  ],
-  "Apis.Settings.Alerts.connection.error": [
-    {
-      "type": 0,
-      "value": "Could not connect to analytics server. Please check the connectivity."
-    }
-  ],
-  "Apis.Settings.SettingsBase.header": [
-    {
-      "type": 0,
-      "value": "Settings"
-    }
-  ],
-  "Apis.Settings.SettingsBase.sub.header": [
-    {
-      "type": 0,
-      "value": "View and Configure API Publisher Settings"
     }
   ],
   "Apis.Shared.AppErrorBoundary.something.went.wrong": [
@@ -7251,6 +7105,18 @@
     {
       "type": 0,
       "value": "View Invoice"
+    }
+  ],
+  "Base.Errors.AuthorizedError.default_body": [
+    {
+      "type": 0,
+      "value": "User is not authorized to access the API"
+    }
+  ],
+  "Base.Errors.AuthorizedError.default_tittle": [
+    {
+      "type": 0,
+      "value": "Authorized Error"
     }
   ],
   "Base.Errors.ResourceNotFound.api.list": [
@@ -7361,40 +7227,16 @@
       "value": "Description [ Syntax - description:xxxx ]"
     }
   ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option8": [
-    {
-      "type": 0,
-      "value": "Documentation Content [ Syntax - doc:xxxx ]"
-    }
-  ],
-  "Base.Header.headersearch.HeaderSearch.tooltip.option9": [
-    {
-      "type": 0,
-      "value": "Microgateway Label [ Syntax - label:xxxx ]"
-    }
-  ],
   "Base.Header.headersearch.HeaderSearch.tooltip.title": [
     {
       "type": 0,
       "value": "Search Options for APIs and APIProducts"
     }
   ],
-  "Base.Header.navbar.GlobalNavBar.APIs": [
-    {
-      "type": 0,
-      "value": "APIs"
-    }
-  ],
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": [
     {
       "type": 0,
       "value": "Service Catalog"
-    }
-  ],
-  "Base.Header.navbar.GlobalNavBar.Settings": [
-    {
-      "type": 0,
-      "value": "Settings"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.api.products": [
@@ -7407,12 +7249,6 @@
     {
       "type": 0,
       "value": "APIs"
-    }
-  ],
-  "Base.Header.navbar.GlobalNavBar.manage.alerts": [
-    {
-      "type": 0,
-      "value": "Manage Alerts"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.scopes": [
@@ -7903,6 +7739,24 @@
       "value": "Service Catalog"
     }
   ],
+  "ServiceCatalog.Listing.Listing.heading.displaying.service": [
+    {
+      "type": 0,
+      "value": "Service"
+    }
+  ],
+  "ServiceCatalog.Listing.Listing.heading.displaying.services": [
+    {
+      "type": 0,
+      "value": "Services"
+    }
+  ],
+  "ServiceCatalog.Listing.Listing.heading.displaying.total": [
+    {
+      "type": 0,
+      "value": "Total:"
+    }
+  ],
   "ServiceCatalog.Listing.Listing.service.deleted.successfully": [
     {
       "type": 0,
@@ -8213,12 +8067,6 @@
     {
       "type": 0,
       "value": "Version"
-    }
-  ],
-  "Settings.Alerts.Alerts.configure.alert": [
-    {
-      "type": 0,
-      "value": "Configurations"
     }
   ],
   "UnexpectedError.logout": [

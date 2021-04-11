@@ -37,6 +37,7 @@ const APILanding = () => {
         restApiIcon,
         soapApiIcon,
         streamingApiIcon,
+        serviceCatalogApiIcon,
     } = theme.custom.landingPage.icons;
 
     return (
@@ -45,13 +46,12 @@ const APILanding = () => {
                 container
                 direction='column'
                 justify='center'
-                spacing={5}
             >
                 <Grid item xs={12}>
                     <Box pt={isXsOrBelow ? 2 : 7} />
                 </Grid>
                 <Grid item md={12}>
-                    <Typography display='block' gutterBottom align='center' variant='h4'>
+                    <Typography id='itest-apis-welcome-msg' display='block' gutterBottom align='center' variant='h4'>
                         <FormattedMessage
                             id='Apis.Listing.SampleAPI.SampleAPI.create.new'
                             defaultMessage='Let’s get started !'
@@ -60,8 +60,7 @@ const APILanding = () => {
                             <Typography display='block' gutterBottom align='center' variant='body1'>
                                 <FormattedMessage
                                     id='Apis.Listing.SampleAPI.SampleAPI.create.new.description'
-                                    defaultMessage={'Monitor the API’s lifecycle, documentation, '
-                                            + 'security, community, and subscriptions.'}
+                                    defaultMessage='Choose your option to create an API '
                                 />
                             </Typography>
                         </Box>
@@ -84,7 +83,7 @@ const APILanding = () => {
                             <Box display={{ xs: 'none', lg: 'block' }} mx={5}>
                                 <Divider className={dividerCls} light orientation='vertical' variant='inset' />
                             </Box>
-                            <ServiceCatalogMenu icon={streamingApiIcon} />
+                            <ServiceCatalogMenu icon={serviceCatalogApiIcon} />
                         </Grid>
                     </Box>
                 </Grid>

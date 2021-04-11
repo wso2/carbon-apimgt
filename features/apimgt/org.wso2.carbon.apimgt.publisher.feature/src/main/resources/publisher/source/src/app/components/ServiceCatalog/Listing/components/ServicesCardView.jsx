@@ -8,14 +8,14 @@ import ServiceCard from './ServiceCard';
  */
 export default function ServicesCardView(props) {
     const { serviceList, onDelete } = props;
-
+    const numberOfServices = serviceList.length;
     return (
         <Grid
             container
             direction='row'
-            justify='flex-start'
+            justify={numberOfServices > 5 ? 'center' : 'flex-start'}
             alignItems='flex-start'
-            spacing={3}
+            spacing={4}
         >
             {serviceList.map((service) => (
                 <Grid item>

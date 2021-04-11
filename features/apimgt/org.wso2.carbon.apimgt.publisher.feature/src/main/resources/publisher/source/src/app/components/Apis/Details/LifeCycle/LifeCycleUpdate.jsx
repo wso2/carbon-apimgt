@@ -183,19 +183,23 @@ class LifeCycleUpdate extends Component {
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
+                if (state.displayName === 'Deploy as a Prototype') {
+                    state.displayName = 'Prototype';
+                }
                 return {
                     ...state,
-                    disabled: !isPrototype || api.endpointConfig == null,
+                    disabled: !isPrototype || (api.type !== 'WEBSUB' && api.endpointConfig == null),
                 };
             }
             if (state.event === 'Publish') {
                 return {
                     ...state,
                     disabled:
-                        api.endpointConfig === null
+                        (api.type !== 'WEBSUB' && api.endpointConfig === null)
                         || (isMutualSSLEnabled && !isCertAvailable)
                         || (isAppLayerSecurityMandatory && !isBusinessPlanAvailable)
-                        || api.endpointConfig.implementation_status === 'prototyped',
+                        || (api.type !== 'WEBSUB' && api.endpointConfig != null
+                            && api.endpointConfig.implementation_status === 'prototyped'),
                 };
             }
             return {
@@ -203,6 +207,7 @@ class LifeCycleUpdate extends Component {
                 disabled: false,
             };
         });
+
         return (
             <Grid container>
                 {isWorkflowPending ? (

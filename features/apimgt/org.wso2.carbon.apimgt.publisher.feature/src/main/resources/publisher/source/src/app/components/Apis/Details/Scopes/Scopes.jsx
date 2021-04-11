@@ -53,6 +53,12 @@ const styles = (theme) => ({
     heading: {
         flexGrow: 1,
         marginTop: 10,
+        '& table td:nth-child(2)': {
+            'word-break': 'break-word',
+        },
+        '& table td button span, & table th': {
+            'white-space': 'nowrap',
+        },
     },
     titleWrapper: {
         display: 'flex',
@@ -62,11 +68,6 @@ const styles = (theme) => ({
     },
     mainTitle: {
         paddingLeft: 0,
-    },
-    button: {
-        textDecoration: 'none',
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-        marginLeft: theme.spacing(1),
     },
     buttonIcon: {
         marginRight: theme.spacing(1),
@@ -254,7 +255,12 @@ class Scopes extends React.Component {
             return (
                 <div className={classes.root}>
                     <div className={classes.titleWrapper}>
-                        <Typography variant='h4' align='left' className={classes.mainTitle}>
+                        <Typography
+                            id='itest-api-details-scopes-onboarding-head'
+                            variant='h4'
+                            align='left'
+                            className={classes.mainTitle}
+                        >
                             <FormattedMessage
                                 id='Apis.Details.local.Scopes.heading.scope.heading'
                                 defaultMessage='Local Scopes'
@@ -338,8 +344,9 @@ class Scopes extends React.Component {
                     </Tooltip>
                     <Link to={!isRestricted(['apim:api_create'], api) && !api.isRevision && url}>
                         <Button
+                            variant='outlined'
+                            color='primary'
                             size='small'
-                            className={classes.button}
                             disabled={isRestricted(['apim:api_create'], api) || api.isRevision}
                         >
                             <AddCircle className={classes.buttonIcon} />

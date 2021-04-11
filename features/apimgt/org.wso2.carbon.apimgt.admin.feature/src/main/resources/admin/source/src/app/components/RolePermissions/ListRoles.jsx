@@ -37,7 +37,7 @@ import AddRoleWizard from './Commons/AddRoleWizard';
 
 const headCells = [
     {
-        numeric: false, disablePadding: false, label: 'Roles',
+        id: 'role', numeric: false, disablePadding: false, label: 'Roles', enableSort: true,
     },
     {
         id: 'permissions', numeric: false, disablePadding: false, label: 'Scope Assignments',

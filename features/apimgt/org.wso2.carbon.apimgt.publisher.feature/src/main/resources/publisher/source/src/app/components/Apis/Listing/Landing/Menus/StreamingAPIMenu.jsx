@@ -23,7 +23,7 @@ const StreamingAPIMenu = (props) => {
             <LandingMenuItem
                 dense={dense}
                 id='itest-id-create-streaming-api-ws'
-                linkTo='/apis/create/streamingapi'
+                linkTo='/apis/create/streamingapi/ws'
                 helperText={(
                     <FormattedMessage
                         id='Apis.Listing.SampleAPI.SampleAPI.streaming.design.new.ws.content'
@@ -39,7 +39,7 @@ const StreamingAPIMenu = (props) => {
             <LandingMenuItem
                 dense={dense}
                 id='itest-id-create-streaming-api-web-hook'
-                linkTo='/apis/create/streamingapi'
+                linkTo='/apis/create/streamingapi/websub'
                 helperText={(
                     <FormattedMessage
                         id='Apis.Listing.SampleAPI.SampleAPI.streaming.websub.content'
@@ -55,7 +55,7 @@ const StreamingAPIMenu = (props) => {
             <LandingMenuItem
                 dense={dense}
                 id='itest-id-create-streaming-api-sse'
-                linkTo='/apis/create/streamingapi'
+                linkTo='/apis/create/streamingapi/sse'
                 helperText={(
                     <FormattedMessage
                         id='Apis.Listing.SampleAPI.SampleAPI.streaming.sse.content'

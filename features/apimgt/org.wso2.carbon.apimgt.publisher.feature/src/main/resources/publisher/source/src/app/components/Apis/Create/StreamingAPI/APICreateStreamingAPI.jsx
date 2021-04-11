@@ -19,7 +19,7 @@ import { FormattedMessage, injectIntl } from 'react-intl';
 import { withRouter } from 'react-router';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -46,7 +46,6 @@ const APICreateStreamingAPI = (props) => {
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
     const classes = useStyles();
-    const [hideEndpoint, setHideEndpoint] = useState(true);
 
     const protocols = [
         {
@@ -67,7 +66,18 @@ const APICreateStreamingAPI = (props) => {
         SSE: 'SSE',
         WebSub: 'WEBSUB',
     };
+    const protocolDisplayNames = {
+        WS: 'WebSocket',
+        SSE: 'SSE',
+        WEBSUB: 'WebSub',
+    };
+    let { apiType } = useParams();
+    if (apiType) {
+        apiType = apiType.toUpperCase();
+    }
+    const [hideEndpoint, setHideEndpoint] = useState(!apiType || apiType === protocolKeys.WebSub);
 
+    const isWebSub = apiType === 'WEBSUB';
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -127,7 +137,7 @@ const APICreateStreamingAPI = (props) => {
             version,
             context,
             endpoint,
-            type: protocol.toUpperCase(),
+            type: apiType || protocol.toUpperCase(),
             policies,
         };
 
@@ -174,13 +184,18 @@ const APICreateStreamingAPI = (props) => {
                 />
             </Typography>
             <Typography variant='caption'>
-                <FormattedMessage
-                    id='Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading'
-                    defaultMessage={
-                        'Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), '
-                        + 'and Business Plans (optional).'
-                    }
-                />
+                {isWebSub ? (
+                    <FormattedMessage
+                        id='Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading'
+                        defaultMessage='Create an API by providing a Name, a Version and a Context'
+                    />
+                ) : (
+                    <FormattedMessage
+                        id='Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading'
+                        defaultMessage='Create an API by providing a Name, a Version, a Context and the Endpoint'
+                    />
+                )}
+
             </Typography>
         </>
     );
@@ -225,7 +240,8 @@ const APICreateStreamingAPI = (props) => {
                                     <sup className={classes.mandatoryStar}>*</sup>
                                 </>
                             )}
-                            value={apiInputs.protocol}
+                            value={apiType ? protocolDisplayNames[apiType] : apiInputs.protocol}
+                            disabled={apiType}
                             name='protocol'
                             SelectProps={{
                                 multiple: false,

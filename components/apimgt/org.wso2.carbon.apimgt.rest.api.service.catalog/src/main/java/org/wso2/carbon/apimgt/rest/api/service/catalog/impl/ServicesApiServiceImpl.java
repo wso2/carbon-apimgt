@@ -145,7 +145,7 @@ public class ServicesApiServiceImpl implements ServicesApiService {
         }
 
         try {
-            serviceEntry = serviceCatalog.getEndPointResourcesByNameAndVersion(name, version, tenantId);
+            serviceEntry = serviceCatalog.getServiceByNameAndVersion(name, version, tenantId);
             if (serviceEntry != null) {
                 FileBasedServicesImportExportManager importExportManager =
                         new FileBasedServicesImportExportManager(pathToExportDir);
@@ -328,13 +328,14 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             ServiceFilterParams filterParams = ServiceEntryMappingUtil.getServiceFilterParams(name, version,
                     definitionType, key, sortBy, sortOrder, limit, offset);
             List<ServiceEntry> services = serviceCatalog.getServices(filterParams, tenantId, shrink);
+            int totalServices = serviceCatalog.getServicesCount(tenantId, filterParams);
             for (ServiceEntry service : services) {
                 serviceDTOList.add(ServiceEntryMappingUtil.fromServiceToDTO(service, shrink));
             }
             ServiceListDTO serviceListDTO = new ServiceListDTO();
             serviceListDTO.setList(serviceDTOList);
             ServiceEntryMappingUtil.setPaginationParams(serviceListDTO, filterParams.getOffset(), filterParams.getLimit(),
-                    serviceDTOList.size(), filterParams);
+                    totalServices, filterParams);
             return Response.ok().entity(serviceListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving Services";

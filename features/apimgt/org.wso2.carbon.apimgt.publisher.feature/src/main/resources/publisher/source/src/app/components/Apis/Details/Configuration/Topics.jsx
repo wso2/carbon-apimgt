@@ -17,7 +17,7 @@
  */
 
 import React, {
-    useReducer, useEffect, useState,
+    useReducer, useEffect, useState, useCallback,
 } from 'react';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -62,6 +62,7 @@ export default function Topics(props) {
     const [asyncAPISpec, setAsyncAPISpec] = useState({});
     const [securityDefScopes, setSecurityDefScopes] = useState({});
     const isAsyncAPI = api.type === 'WEBSUB' || api.type === 'WS' || api.type === 'SSE';
+    const [markedOperations, setSelectedOperation] = useState({});
 
     /**
      *
@@ -147,12 +148,24 @@ export default function Topics(props) {
 
         switch (action) {
             case 'init':
-                return data;
+                setSelectedOperation({});
+                return data || asyncAPISpec.channels;
             case 'description':
                 updatedOperation[action] = value;
                 return {
                     ...currentOperations,
                     [target]: { ...currentOperations[target], description: updatedOperation.description },
+                };
+            case 'uriMapping':
+                return {
+                    ...currentOperations,
+                    [target]: {
+                        ...currentOperations[target],
+                        [verb]: {
+                            ...currentOperations[target][verb],
+                            'x-uri-mapping': value,
+                        },
+                    },
                 };
             case 'authType':
                 updatedOperation['x-auth-type'] = value ? 'Any' : 'None';
@@ -161,13 +174,11 @@ export default function Topics(props) {
                     [target]: { ...currentOperations[target], 'x-auth-type': updatedOperation['x-auth-type'] },
                 };
             case 'add':
-                // eslint-disable-next-line no-case-declarations
-                const parameters = extractAsyncAPIPathParameters(data.target);
                 // If target is not there add an empty object
                 if (!addedOperations[data.target]) {
                     addedOperations[data.target] = {};
                 }
-                addedOperations[data.target].parameters = parameters;
+                addedOperations[data.target].parameters = extractAsyncAPIPathParameters(data.target);
                 // eslint-disable-next-line no-case-declarations
                 let alreadyExistCount = 0;
                 for (let currentVerb of data.verbs) {
@@ -245,6 +256,32 @@ export default function Topics(props) {
     const [operations, operationsDispatcher] = useReducer(operationsReducer, {});
 
     /**
+     *
+     *
+     * @param {*} operation
+     * @param {*} checked
+     */
+    function onOperationSelectM(operation, checked) {
+        const { target, verb } = operation;
+        setSelectedOperation((currentSelections) => {
+            const nextSelectedOperations = cloneDeep(currentSelections);
+            if (!nextSelectedOperations[target]) {
+                nextSelectedOperations[target] = {};
+            }
+            if (checked) {
+                nextSelectedOperations[target][verb] = checked;
+            } else {
+                delete nextSelectedOperations[target][verb];
+            }
+            if (isEmpty(nextSelectedOperations[target])) {
+                delete nextSelectedOperations[target];
+            }
+            return nextSelectedOperations;
+        });
+    }
+    const onMarkAsDelete = useCallback(onOperationSelectM, [setSelectedOperation]);
+
+    /**
      * This method sets the securityDefinitionScopes from the spec
      * @param {Object} spec The original swagger content.
      */
@@ -289,15 +326,6 @@ export default function Topics(props) {
      * @returns {Promise} Promise resolving to updated API object
      */
     function updateAsyncAPIDefinition(spec) {
-        // Remove unnecessary fields from the spec.
-        // eslint-disable-next-line no-unused-vars
-        Object.entries(spec.channels).forEach(([k, v]) => {
-            if (v.runtime) {
-                // eslint-disable-next-line no-param-reassign
-                delete v.runtime;
-            }
-        });
-
         return api
             .updateAsyncAPIDefinition(spec)
             .then((response) => resolveAndUpdateSpec(response.body))
@@ -361,6 +389,14 @@ export default function Topics(props) {
      */
     function updateAsyncAPI() {
         const copyOfOperations = cloneDeep(operations);
+        for (const [target, verbs] of Object.entries(markedOperations)) {
+            for (const verb of Object.keys(verbs)) {
+                delete copyOfOperations[target][verb];
+                if (!copyOfOperations[target].publish && !copyOfOperations[target].subscribe) {
+                    delete copyOfOperations[target];
+                }
+            }
+        }
 
         updateSecurityDefinition(copyOfOperations);
         setSpecScopesFromSecurityDefScopes();
@@ -449,7 +485,7 @@ export default function Topics(props) {
             <Grid item md={12}>
                 <Paper>
                     {
-                        Object.entries(operations).map(([target, operation]) => (
+                        operations && Object.entries(operations).map(([target, operation]) => (
                             <Grid key={target} item md={12}>
                                 <GroupOfOperations tag={target} operation={operation}>
                                     <Grid
@@ -470,6 +506,9 @@ export default function Topics(props) {
                                                     api={api}
                                                     operationsDispatcher={operationsDispatcher}
                                                     sharedScopes={sharedScopes}
+                                                    markAsDelete={Boolean(markedOperations[target]
+                                                        && markedOperations[target].subscribe)}
+                                                    onMarkAsDelete={onMarkAsDelete}
                                                 />
                                             </Grid>
                                         )}
@@ -484,6 +523,9 @@ export default function Topics(props) {
                                                     api={api}
                                                     operationsDispatcher={operationsDispatcher}
                                                     sharedScopes={sharedScopes}
+                                                    markAsDelete={Boolean(markedOperations[target]
+                                                        && markedOperations[target].publish)}
+                                                    onMarkAsDelete={onMarkAsDelete}
                                                 />
                                             </Grid>
                                         )}

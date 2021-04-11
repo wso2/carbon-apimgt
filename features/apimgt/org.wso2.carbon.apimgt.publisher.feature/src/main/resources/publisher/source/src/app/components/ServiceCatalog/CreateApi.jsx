@@ -189,6 +189,8 @@ function CreateApi(props) {
                     path = path.slice(0, -1); // Remove leading `/` because of context validation failure
                 }
                 return path;
+            } else {
+                return url.replace(/[^a-zA-Z ]/g, ''); // we need to remove the special chars from context.
             }
         }
         return url;
@@ -311,6 +313,12 @@ function CreateApi(props) {
             }
         }
     }
+
+    useEffect(() => {
+        validate('name', name);
+        validate('context', context);
+        validate('version', version);
+    }, []);
 
     const runAction = () => {
         const promisedCreateApi = API.createApiFromService(serviceKey, { ...state, policies }, type);

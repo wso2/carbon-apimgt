@@ -1288,6 +1288,8 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION,
                     APIUtil.getWebsubSubscriptionConfigurationJsonFromDto(api.getWebsubSubscriptionConfiguration()));
 
+            artifact.setAttribute(APIConstants.API_OVERVIEW_WS_URI_MAPPING, APIUtil.getWsUriMappingJsonFromDto(api.getWsUriMapping()));
+
             //attaching api categories to the API
             List<APICategory> attachedApiCategories = api.getApiCategories();
             artifact.removeAttribute(APIConstants.API_CATEGORIES_CATEGORY_NAME);
@@ -7581,6 +7583,10 @@ public final class APIUtil {
             return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
+    public static String getWsUriMappingJsonFromDto(Map<String, String> mappings) {
+        return new Gson().toJson(mappings);
+    }
+
     /**
      * Used to get access control allowed headers according to the api-manager.xml
      *
@@ -11390,10 +11396,6 @@ public final class APIUtil {
         if (log.isDebugEnabled()) {
             log.debug("Finalized tenant-conf.json: " + formattedTenantConf);
         }
-        // Invalidate Cache
-        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-                .getCache(APIConstants.REST_API_SCOPE_CACHE)
-                .put(tenantDomain, null);
     }
 
     /**

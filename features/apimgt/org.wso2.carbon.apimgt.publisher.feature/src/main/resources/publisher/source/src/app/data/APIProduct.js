@@ -33,7 +33,7 @@ class APIProduct extends Resource {
             this.version = '1.0.0';
             this.context = context;
             this.isDefaultVersion = false;
-            this.gatewayEnvironments = ['Production and Sandbox'];
+            this.gatewayEnvironments = ['Default'];
             this.transport = ['http', 'https'];
             this.visibility = 'PUBLIC';
             this.endpointConfig = {
@@ -212,9 +212,6 @@ class APIProduct extends Resource {
                     },
                     this._requestMetaData(),
                 );
-            })
-            .catch(error => {
-                console.error(error);
             });
         return promisedAPIProduct.then(response => {
             return new APIProduct(response.body);
@@ -376,12 +373,13 @@ class APIProduct extends Resource {
      *
      * @param {String} id API Product UUID
      */
-    getDocuments(id) {
+    getDocuments(id, limit = 1000) {
         const promisedDocuments = this.client
             .then(client => {
                 return client.apis['API Product Documents'].getAPIProductDocuments(
                     {
                         apiProductId: id,
+                        limit,
                     },
                     this._requestMetaData(),
                 );

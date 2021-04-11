@@ -166,6 +166,7 @@ function copyAPIConfig(api) {
  */
 export default function RuntimeConfiguration() {
     const [keyManagersConfigured, setKeyManagersConfigured] = useState([]);
+    const [saveButtonDisabled, setSaveButtonDisabled] = useState(false);
     /**
      *
      * Reduce the configuration UI related actions in to updated state
@@ -282,6 +283,9 @@ export default function RuntimeConfiguration() {
                     nextState.keyManagers = keyManagersConfigured;
                 }
                 return nextState;
+            case 'saveButtonDisabled':
+                setSaveButtonDisabled(value);
+                return state;
             default:
                 return state;
         }
@@ -450,7 +454,7 @@ export default function RuntimeConfiguration() {
     return (
         <>
             <Box pb={3}>
-                <Typography variant='h5'>
+                <Typography id='itest-api-details-runtime-config-head' variant='h5'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.RuntimeConfiguration.topic.header'
                         defaultMessage='Runtime Configurations'
@@ -600,7 +604,7 @@ export default function RuntimeConfiguration() {
                         <Grid item>
                             {api.isRevision
                                 || ((apiConfig.visibility === 'RESTRICTED' && apiConfig.visibleRoles.length === 0)
-                                || isRestricted(['apim:api_create'], api)) ? (
+                                || isRestricted(['apim:api_create'], api)) || saveButtonDisabled ? (
                                     <Button
                                         disabled
                                         type='submit'

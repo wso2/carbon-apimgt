@@ -411,7 +411,7 @@ function Endpoints(props) {
                 ? <NewEndpointCreate generateEndpointConfig={generateEndpointConfig} apiType={apiObject.type} />
                 : (
                     <div className={classes.root}>
-                        <Typography variant='h4' align='left' gutterBottom>
+                        <Typography id='itest-api-details-endpoints-head' variant='h4' align='left' gutterBottom>
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.Endpoints.endpoints.header'
                                 defaultMessage='Endpoints'

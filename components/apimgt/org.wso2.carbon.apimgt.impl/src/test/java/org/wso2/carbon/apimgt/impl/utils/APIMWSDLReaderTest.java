@@ -143,7 +143,7 @@ public class APIMWSDLReaderTest {
         doMockStatics();
         PowerMockito.mockStatic(APIUtil.class);
         API api = getAPIForTesting();
-        String environmentName = "Production and Sandbox";
+        String environmentName = "Default";
         String environmentType = "hybrid";
         PowerMockito.when(APIUtil.getGatewayEndpoint(api.getTransports(), environmentName, environmentType))
                 .thenReturn("http://localhost:8280");
@@ -165,7 +165,7 @@ public class APIMWSDLReaderTest {
     public void testSetServiceDefinitionWithInvalidAPIGatewayEndpoints() throws Exception {
         PowerMockito.mockStatic(APIUtil.class);
         API api = getAPIForTesting();
-        String environmentName = "Production and Sandbox";
+        String environmentName = "Default";
         String environmentType = "hybrid";
 
         APIMWSDLReader wsdlReader = new APIMWSDLReader("");

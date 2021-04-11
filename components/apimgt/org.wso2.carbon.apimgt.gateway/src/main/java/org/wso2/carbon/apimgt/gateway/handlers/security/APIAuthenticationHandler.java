@@ -545,7 +545,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (headers != null) {
                 headers.put(HttpHeaders.WWW_AUTHENTICATE, getAuthenticatorsChallengeString() +
                         ", error=\"invalid_token\"" +
-                        ", error_description=\"The access token expired\"");
+                        ", error_description=\"The provided token is invalid\"");
                 axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
             }
         }

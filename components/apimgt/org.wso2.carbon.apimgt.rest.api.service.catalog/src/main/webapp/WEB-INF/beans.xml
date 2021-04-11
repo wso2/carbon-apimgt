@@ -49,6 +49,9 @@
       </list>
     </property>
     <property name="allowCredentials" value="true" />
+    <property name="allowOrigins"
+              value="#{systemProperties['rest.api.service.catalog.allowed.origins'] != null ?
+                      systemProperties['rest.api.service.catalog.allowed.origins'].split(',') : {}}"/>
   </bean>
 
   <!-- Out interceptors -->

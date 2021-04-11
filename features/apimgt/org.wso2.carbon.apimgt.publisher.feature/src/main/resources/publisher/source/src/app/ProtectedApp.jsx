@@ -26,21 +26,17 @@ import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import Api from 'AppData/api';
 import Base from 'AppComponents/Base';
 import AuthManager from 'AppData/AuthManager';
-import Header from 'AppComponents/Base/Header';
-import Avatar from 'AppComponents/Base/Header/avatar/Avatar';
 import userThemes from 'userCustomThemes';
 import defaultTheme from 'AppData/defaultTheme';
 import AppErrorBoundary from 'AppComponents/Shared/AppErrorBoundary';
 import RedirectToLogin from 'AppComponents/Shared/RedirectToLogin';
 import { IntlProvider } from 'react-intl';
 import { AppContextProvider } from 'AppComponents/Shared/AppContext';
-import SettingsBase from 'AppComponents/Apis/Settings/SettingsBase';
 import ServiceCatalogRouting from 'AppComponents/ServiceCatalog/ServiceCatalogRouting';
 import Progress from 'AppComponents/Shared/Progress';
 import Configurations from 'Config';
 import Scopes from 'AppComponents/Scopes/Scopes';
 import merge from 'lodash/merge';
-import Utils from 'AppData/Utils';
 
 const Apis = lazy(() => import('AppComponents/Apis/Apis' /* webpackChunkName: "DeferredAPIs" */));
 const DeferredAPIs = () => (
@@ -188,10 +184,8 @@ export default class Protected extends Component {
      */
     render() {
         const { user = AuthManager.getUser(), messages } = this.state;
-        const header = <Header avatar={<Avatar user={user} />} user={user} />;
         const { settings } = this.state;
         const { theme } = this.state;
-        const enableServiceCatalog = Utils.CONST.ENABLE_SERVICE_CATALOG;
         if (!user) {
             return (
                 <IntlProvider locale={language} messages={messages}>
@@ -209,7 +203,7 @@ export default class Protected extends Component {
                 )}
                 >
                     <AppErrorBoundary>
-                        <Base header={header}>
+                        <Base user={user}>
                             {settings ? (
                                 <AppContextProvider value={{
                                     settings, user,
@@ -220,9 +214,7 @@ export default class Protected extends Component {
                                         <Route path='/apis' component={DeferredAPIs} />
                                         <Route path='/api-products' component={DeferredAPIs} />
                                         <Route path='/scopes' component={Scopes} />
-                                        <Route path='/settings' component={SettingsBase} />
-                                        {enableServiceCatalog
-                                            && <Route path='/service-catalog' component={ServiceCatalogRouting} />}
+                                        <Route path='/service-catalog' component={ServiceCatalogRouting} />
                                         <Route component={ResourceNotFound} />
                                     </Switch>
                                 </AppContextProvider>

@@ -35,7 +35,7 @@ class API extends Resource {
             this.version = version;
             this.context = context;
             this.isDefaultVersion = false;
-            this.gatewayEnvironments = ['Production and Sandbox']; //todo: load the environments from settings API
+            this.gatewayEnvironments = ['Default']; //todo: load the environments from settings API
             this.transport = ['http', 'https'];
             this.visibility = 'PUBLIC';
             this.endpointConfig = {
@@ -411,10 +411,10 @@ class API extends Resource {
     /**
      * Get a list of applications from all users
      */
-    getApplicationList() {
+    getApplicationList(params) {
         return this.client.then((client) => {
             return client.apis['Application (Collection)'].get_applications(
-                this._requestMetaData(),
+                params, this._requestMetaData(),
             );
         });
     }

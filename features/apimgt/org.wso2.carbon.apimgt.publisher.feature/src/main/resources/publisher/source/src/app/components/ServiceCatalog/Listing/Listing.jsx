@@ -38,8 +38,8 @@ import Box from '@material-ui/core/Box';
  * @returns {any} Listing Page for Services
  */
 function Listing() {
-    const [serviceList, setServiceList] = useState([]);
-    const [notFound, setNotFound] = useState(true);
+    const [servicesData, setServicesData] = useState(null);
+    const [notFound, setNotFound] = useState(false);
     const [loading, setLoading] = useState(true);
     const [isGridView, setIsGridView] = useState(true);
     const intl = useIntl();
@@ -49,15 +49,21 @@ function Listing() {
         const promisedServices = ServiceCatalog.searchServices();
         promisedServices.then((data) => {
             const { body } = data;
-            const { list } = body;
-            setServiceList(list);
-            setNotFound(false);
+            setServicesData(body);
         }).catch((error) => {
             console.error(error);
-            Alert.error(intl.formatMessage({
-                defaultMessage: 'Error while loading services',
-                id: 'ServiceCatalog.Listing.Listing.error.loading',
-            }));
+            if (error.response) {
+                Alert.error(error.response.body.description);
+            } else {
+                Alert.error(intl.formatMessage({
+                    defaultMessage: 'Error while loading services',
+                    id: 'ServiceCatalog.Listing.Listing.error.loading',
+                }));
+            }
+            const { status } = error;
+            if (status === 404) {
+                setNotFound(true);
+            }
         }).finally(() => {
             setLoading(false);
         });
@@ -89,13 +95,13 @@ function Listing() {
         });
     };
 
-    if (loading || !serviceList) {
+    if (loading || !servicesData) {
         return <Progress per={90} message='Loading Services ...' />;
     }
     if (notFound) {
         return <ResourceNotFound />;
     }
-    const haveServices = serviceList.length !== 0;
+    const haveServices = servicesData.list.length !== 0;
     return (
         <Box flexGrow={1}>
             <Grid
@@ -108,15 +114,22 @@ function Listing() {
                     <ServiceCatalogTopMenu
                         showServiceToggle={haveServices}
                         isGridView={isGridView}
+                        totalServices={servicesData.pagination.total}
                         setIsGridView={setIsGridView}
                     />
                 </Grid>
-                <Box px={8} pt={4}>
+                <Box px={4} pt={4}>
                     <Grid xs={12}>
                         {!haveServices && <Onboarding />}
                         {haveServices && (isGridView
-                            ? <ServicesCardView serviceList={serviceList} onDelete={onDelete} />
-                            : <ServicesTableView serviceList={serviceList} onDelete={onDelete} />)}
+                            ? (
+                                <ServicesCardView
+                                    serviceList={servicesData.list}
+                                    pagination={servicesData.pagination}
+                                    onDelete={onDelete}
+                                />
+                            )
+                            : <ServicesTableView serviceList={servicesData.list} onDelete={onDelete} />)}
                     </Grid>
                 </Box>
             </Grid>

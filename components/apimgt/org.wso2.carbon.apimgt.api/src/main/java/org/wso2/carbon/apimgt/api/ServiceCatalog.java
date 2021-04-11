@@ -124,7 +124,7 @@ public interface ServiceCatalog {
     ServiceEntry getServiceByKey(String key, int tenantId) throws APIManagementException;
 
     /**
-     * Get metadata and endpoint definition resources of a service endpoint
+     * Get ServiceEntry By name and version
      *
      * @param name Service name
      * @param version Version of service
@@ -132,7 +132,7 @@ public interface ServiceCatalog {
      * @return ServiceEntry Endpoint resources
      * @throws APIManagementException if failed to add ServiceCatalogInfo
      */
-    ServiceEntry getEndPointResourcesByNameAndVersion(String name, String version, int tenantId)
+    ServiceEntry getServiceByNameAndVersion(String name, String version, int tenantId)
             throws APIManagementException;
 
     /**
@@ -155,4 +155,13 @@ public interface ServiceCatalog {
      * @throws APIManagementException
      */
     List<API> getServiceUsage(String serviceId, int tenantId) throws APIManagementException;
+
+    /**
+     * Retrieve the count of available services
+     * @param tenantId      Logged-in user tenant ID
+     * @param filterParams  Service Filer Params
+     * @return              Number of services that match to the given search conditions
+     * @throws APIManagementException
+     */
+    int getServicesCount(int tenantId, ServiceFilterParams filterParams) throws APIManagementException;
 }

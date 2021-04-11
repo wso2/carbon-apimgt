@@ -37,6 +37,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -86,6 +87,7 @@ import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent.ContentSourceType;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
@@ -529,7 +531,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
-                if (Arrays.asList(tokenScopes).contains("apim:app_import_export") || comment.getUser().equals(username)) {
+                if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
                     if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
@@ -1144,9 +1146,30 @@ public class ApisApiServiceImpl implements ApisApiService {
             auditUuid = (String) ((JSONObject) responseJson.get(APIConstants.DESC)).get(APIConstants.ID);
             ApiMgtDAO.getInstance().addAuditApiMapping(apiIdentifier, auditUuid);
         } else {
-            throw new APIManagementException(
+            if (httpConn.getErrorStream() != null) {
+                BufferedReader reader =
+                        new BufferedReader(new InputStreamReader(httpConn.getErrorStream(), StandardCharsets.UTF_8));
+                String inputLine;
+                StringBuilder responseString = new StringBuilder();
+
+                while ((inputLine = reader.readLine()) != null) {
+                    responseString.append(inputLine);
+                }
+                reader.close();
+                httpConn.disconnect();
+                JSONObject responseJson = (JSONObject) new JSONParser().parse(responseString.toString());
+                String errorMessage = httpConn.getResponseMessage();
+                if (responseJson.containsKey("message")) {
+                    errorMessage = (String) responseJson.get("message");
+                }
+                throw new APIManagementException(
                     "Error while retrieving data for the API Security Audit Report. Found http status: " +
-                            httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
+                        httpConn.getResponseCode() + " - " + errorMessage);
+            } else {
+                throw new APIManagementException(
+                    "Error while retrieving data for the API Security Audit Report. Found http status: " +
+                        httpConn.getResponseCode() + " - " + httpConn.getResponseMessage());
+            }
         }
         return auditUuid;
     }
@@ -1634,11 +1657,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     RestApiUtil.handleBadRequest("Source type of document " + documentId + " is not INLINE " +
                             "or MARKDOWN", log);
                 }
-                DocumentationContent content = new DocumentationContent();
-                content.setSourceType(ContentSourceType.valueOf(documentation.getSourceType().toString()));
-                content.setTextContent(inlineContent);
-                // apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
-                apiProvider.addDocumentationContent(apiId, documentId, tenantDomain, content);
+                PublisherCommonUtils
+                        .addDocumentationContent(documentation, apiProvider, apiId, documentId, tenantDomain,
+                                inlineContent);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
@@ -3015,15 +3036,18 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String fileName = fileDetail.getDataHandler().getName();
+            String extension = FilenameUtils.getExtension(fileName);
+            if (!RestApiConstants.ALLOWED_THUMBNAIL_EXTENSIONS.contains(extension.toLowerCase())) {
+                RestApiUtil.handleBadRequest(
+                        "Unsupported Thumbnail File Extension. Supported extensions are .jpg, .png, .jpeg and .gif",
+                        log);
+            }
             String fileContentType = URLConnection.guessContentTypeFromName(fileName);
             if (org.apache.commons.lang3.StringUtils.isBlank(fileContentType)) {
                 fileContentType = fileDetail.getContentType().toString();
             }
-
-            ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
-            apiProvider.setThumbnailToAPI(apiId, apiImage, tenantDomain);
-            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
-                    .replace(RestApiConstants.APIID_PARAM, apiId);
+            PublisherCommonUtils.updateThumbnail(fileInputStream, fileContentType, apiProvider, apiId, tenantDomain);
+            String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, apiId);
             URI uri = new URI(uriString);
             FileInfoDTO infoDTO = new FileInfoDTO();
             infoDTO.setRelativePath(uriString);
@@ -3444,16 +3468,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 apiToAdd.setWsdlUrl(url);
                 apiProvider.addWSDLResource(apiToAdd.getUuid(), null, url, tenantDomain);
             } else if (fileDetail != null && fileInputStream != null) {
-                ResourceFile wsdlResource = new ResourceFile(fileInputStream,
-                        fileDetail.getContentType().toString());
-                if (APIConstants.APPLICATION_ZIP.equals(fileDetail.getContentType().toString()) ||
-                        APIConstants.APPLICATION_X_ZIP_COMPRESSED.equals(fileDetail.getContentType().toString())) {
-                    wsdlResource = new ResourceFile(fileInputStream, APIConstants.APPLICATION_ZIP);
-                } else {
-                    wsdlResource = new ResourceFile(fileInputStream, fileDetail.getContentType().toString());
-                }
-                apiToAdd.setWsdlResource(wsdlResource);
-                apiProvider.addWSDLResource(apiToAdd.getUuid(), wsdlResource, null, tenantDomain);
+                PublisherCommonUtils
+                        .addWsdl(fileDetail.getContentType().toString(), fileInputStream, apiToAdd, apiProvider,
+                                tenantDomain);
             }
 
             //add the generated swagger definition to SOAP
@@ -3523,12 +3540,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 }
             }
             String updatedSwagger = updateSwagger(createdApi.getUUID(), swaggerStr);
-            List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(updatedSwagger,
-                    apiToAdd.getId());
-            API updatedAPI = apiProvider.getAPIbyUUID(createdApi.getUuid(), tenantDomain);
-            updatedAPI.setSoapToRestSequences(list);
-            apiProvider.updateAPI(updatedAPI, createdApi);
-            return updatedAPI;
+            return PublisherCommonUtils
+                    .updateAPIBySettingGenerateSequencesFromSwagger(updatedSwagger, createdApi, apiProvider,
+                            tenantDomain);
         } catch (FaultGatewaysException | IOException e) {
             throw new APIManagementException("Error while importing WSDL to create a SOAP-to-REST API", e);
         }
@@ -3701,9 +3715,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                             existingAPI.getId().getApiName()));
             }
             if (StringUtils.isNotEmpty(serviceVersion)) {
+                String serviceName = existingAPI.getServiceInfo("name");
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
-                String serviceKey = apiProvider.retrieveServiceKeyByApiId(existingAPI.getId().getId(), tenantId);
-                ServiceEntry service = serviceCatalog.getServiceByKey(serviceKey, tenantId);
+                ServiceEntry service = serviceCatalog.getServiceByNameAndVersion(serviceName, serviceVersion, tenantId);
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
@@ -4318,11 +4332,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                                       List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                       MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        Map<String, Environment> environments = APIUtil.getEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
             apiRevisionDeployment.setRevisionUUID(revisionId);
-            apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+            String environment = apiRevisionDeploymentDTO.getName();
+            if (environments.get(environment) == null) {
+                RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+            }
+            apiRevisionDeployment.setDeployment(environment);
             apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
             if (StringUtils.isEmpty(apiRevisionDeploymentDTO.getVhost())) {
                 // vhost is only required when deploying an revision, not required when un-deploying a revision
@@ -4382,6 +4401,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         }
 
+        Map<String, Environment> environments = APIUtil.getEnvironments();
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         if (allEnvironments) {
             apiRevisionDeployments = apiProvider.getAPIRevisionDeploymentList(revisionId);
@@ -4389,7 +4409,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
                 APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();
                 apiRevisionDeployment.setRevisionUUID(revisionId);
-                apiRevisionDeployment.setDeployment(apiRevisionDeploymentDTO.getName());
+                String environment = apiRevisionDeploymentDTO.getName();
+                if (environments.get(environment) == null) {
+                    RestApiUtil.handleBadRequest("Gateway environment not found: " + environment, log);
+                }
+                apiRevisionDeployment.setDeployment(environment);
                 apiRevisionDeployment.setVhost(apiRevisionDeploymentDTO.getVhost());
                 apiRevisionDeployment.setDisplayOnDevportal(apiRevisionDeploymentDTO.isDisplayOnDevportal());
                 apiRevisionDeployments.add(apiRevisionDeployment);
@@ -4597,7 +4621,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String updatedAsyncAPIDefinition;
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             //Handle URL and file based definition imports
-            if (url != null || fileInputStream != null){
+            if (url != null || fileInputStream != null) {
                 //Validate and retrieve the AsyncAPI definition
                 Map validationResponseMap = validateAsyncAPISpecification(url, fileInputStream,
                         fileDetail, true, false);
@@ -4879,15 +4903,13 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .getServiceUrl(), protocol));
                 }
             }
-            apiProvider.addAPI(apiToAdd);
-            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
 
             //load topics from AsyncAPI
-            try {
-                apiProvider.updateAPI(AsyncApiParserUtil.loadTopicsFromAsyncAPIDefinition(apiToAdd, definitionToAdd));
-            } catch (FaultGatewaysException e) {
-                e.printStackTrace();
-            }
+            apiToAdd.setUriTemplates(new AsyncApiParser().getURITemplates(
+                    definitionToAdd, APIConstants.API_TYPE_WS.equals(apiToAdd.getType())));
+
+            apiProvider.addAPI(apiToAdd);
+            apiProvider.saveAsyncApiDefinition(apiToAdd, definitionToAdd);
             return APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiToAdd.getId()));
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + apiDTOFromProperties.getProvider() + "-" +

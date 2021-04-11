@@ -173,7 +173,7 @@ public class ExportUtils {
 
             CommonUtil.createDirectory(archivePath);
             if (preserveDocs) {
-                addThumbnailToArchive(archivePath, apiIdentifier, apiProvider, APIConstants.API_IDENTIFIER_TYPE);
+                addThumbnailToArchive(archivePath, apiIdentifier, apiProvider);
             }
             addSOAPToRESTMediationToArchive(archivePath, apiIdentifier, registry);
             if (preserveDocs) {
@@ -181,7 +181,9 @@ public class ExportUtils {
                         APIConstants.API_IDENTIFIER_TYPE);
             }
 
-            if (StringUtils.isNotEmpty(apiDtoToReturn.getWsdlUrl()) && preserveDocs) {
+            if (StringUtils
+                    .equals(apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_SOAP.toLowerCase())
+                    && preserveDocs) {
                 addWSDLtoArchive(archivePath, apiIdentifier, apiProvider);
             } else if (log.isDebugEnabled()) {
                 log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
@@ -259,8 +261,7 @@ public class ExportUtils {
         CommonUtil.createDirectory(archivePath);
 
         if (preserveDocs) {
-            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider,
-                    APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
+            addThumbnailToArchive(archivePath, apiProductIdentifier, apiProvider);
             addDocumentationToArchive(archivePath, apiProductIdentifier, exportFormat, apiProvider,
                     APIConstants.API_PRODUCT_IDENTIFIER_TYPE);
 
@@ -287,19 +288,16 @@ public class ExportUtils {
      * @param archivePath File path to export the thumbnail image
      * @param identifier  ID of the requesting API or API Product
      * @param apiProvider API Provider
-     * @param type        Type (whether an API or an API Product
      * @throws APIImportExportException If an error occurs while retrieving image from the registry or
      *                                  storing in the archive directory
      */
-    public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider,
-                                             String type) throws APIImportExportException, APIManagementException {
+    public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider)
+            throws APIImportExportException, APIManagementException {
 
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         String localImagePath = archivePath + File.separator + ImportExportConstants.IMAGE_RESOURCE;
         try {
-            ResourceFile thumbnailResource = StringUtils.equals(type, APIConstants.API_IDENTIFIER_TYPE) ?
-                    apiProvider.getIcon(identifier.getUUID(), tenantDomain) :
-                    apiProvider.getProductIcon((APIProductIdentifier) identifier);
+            ResourceFile thumbnailResource = apiProvider.getIcon(identifier.getUUID(), tenantDomain);
             if (thumbnailResource != null) {
                 String mediaType = thumbnailResource.getContentType();
                 String extension = ImportExportConstants.fileExtensionMapping.get(mediaType);
@@ -702,6 +700,8 @@ public class ExportUtils {
             JsonArray deploymentsArray = new JsonArray();
             for (APIRevisionDeployment deployment : deploymentsList) {
                 JsonObject deploymentObject = new JsonObject();
+                // Do not set vhost in deployment environment file when export API (or API Project)
+                // So when importing the exported API, the default vhost of the new environment is selected.
                 deploymentObject.addProperty(ImportExportConstants.DEPLOYMENT_NAME, deployment.getDeployment());
                 deploymentObject.addProperty(ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION,
                         deployment.isDisplayOnDevportal());

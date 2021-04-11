@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
@@ -51,11 +52,13 @@ import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
+import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -319,7 +322,7 @@ public class APIMappingUtil {
             model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
-        if (dto.getGatewayEnvironments().size() > 0) {
+        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
             List<String> gatewaysList = dto.getGatewayEnvironments();
             model.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
         } else if (dto.getGatewayEnvironments() != null) {
@@ -368,6 +371,38 @@ public class APIMappingUtil {
             model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         } else {
             throw new APIManagementException("KeyManagers value need to be an array");
+        }
+
+        APIServiceInfoDTO serviceInfoDTO = dto.getServiceInfo();
+        if (serviceInfoDTO != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            JSONParser parser = new JSONParser();
+            JSONObject serviceInfoJson;
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            try {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                                                getTenantId(tenantDomain);
+                serviceInfoJson = (JSONObject) parser.parse(mapper.writeValueAsString(serviceInfoDTO));
+
+                ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
+                ServiceEntry service = serviceCatalog.getServiceByKey(dto.getServiceInfo().getKey(), tenantId);
+                // Set the md5 of the service which is already available in the system to the API model
+                if (service == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("A service with key" + dto.getServiceInfo().getKey() + " referenced in the API "
+                                                        + "information is not available in the service catalog");
+                    }
+                } else {
+                    serviceInfoJson.put("md5", service.getMd5());
+                }
+                model.setServiceInfo(serviceInfoJson);
+            } catch (JsonProcessingException | ParseException e) {
+                String msg = "Error while getting json representation of APIServiceInfo";
+                handleException(msg, e);
+            } catch (UserStoreException e) {
+                String msg = "Error while getting tenantId from the given tenant domain " + tenantDomain;
+                handleException(msg, e);
+            }
         }
 
         return model;
@@ -829,7 +864,7 @@ public class APIMappingUtil {
         return fromAPItoDTO(model, false, null);
     }
 
-    public static APIDTO    fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model, APIProvider apiProvider) throws APIManagementException {
 
         return fromAPItoDTO(model, false, apiProvider);
     }
@@ -894,12 +929,10 @@ public class APIMappingUtil {
             try {
                 JSONParser parser = new JSONParser();
                 JSONObject endpointConfigJson = (JSONObject) parser.parse(endpointConfig);
-                // AWS Lambda: set constant secret key
-                if (endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
-                        .equals(APIConstants.ENDPOINT_TYPE_AWSLAMBDA)) {
-                    if (!StringUtils.isEmpty((String) endpointConfigJson.get(APIConstants.AMZN_SECRET_KEY))) {
-                        endpointConfigJson.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
-                    }
+                // AWS Lambda: set secret key based on preserveCredentials
+                if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
+                        .equals(endpointConfigJson.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+                    handleAWSCredentials(endpointConfigJson, preserveCredentials);
                 }
                 CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
                 if (endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
@@ -1916,7 +1949,7 @@ public class APIMappingUtil {
                 Map<String, String> wsUriMappings = api.getWsUriMapping();
                 if (wsUriMappings != null) {
                     String wsUriMapping = wsUriMappings
-                            .get(operationsDTO.getVerb().toLowerCase() + "_" + operationsDTO.getTarget());
+                            .get(operationsDTO.getTarget() + "_" + operationsDTO.getVerb().toLowerCase());
                     if (wsUriMapping != null) {
                         operationsDTO.setUriMapping(wsUriMapping);
                     }
@@ -2350,7 +2383,7 @@ public class APIMappingUtil {
         String transports = StringUtils.join(dto.getTransport(), ',');
         product.setTransports(transports);
 
-        if (dto.getGatewayEnvironments().size() > 0) {
+        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
             List<String> gatewaysList = dto.getGatewayEnvironments();
             product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
         } else if (dto.getGatewayEnvironments() != null) {
@@ -2864,6 +2897,36 @@ public class APIMappingUtil {
             }
         }
         return endpointSecurityElement;
+    }
+
+    /**
+     * Set AWS Secret Key based on preserveCredentials state
+     *
+     * @param awsEndpointConfig   Endpoint configuration of the API
+     * @param preserveCredentials Condition to preserve credentials
+     * @return Updated endpoint config
+     */
+    private static JSONObject handleAWSCredentials(JSONObject awsEndpointConfig, boolean preserveCredentials) {
+
+        if (StringUtils.isNotEmpty((String) awsEndpointConfig.get(APIConstants.AMZN_SECRET_KEY))) {
+            if (!preserveCredentials) {
+                awsEndpointConfig.put(APIConstants.AMZN_SECRET_KEY, APIConstants.AWS_SECRET_KEY);
+                return awsEndpointConfig;
+            } else {
+                String secretKey = (String) awsEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                // Decrypting the key since CTL project goes between environments which have different encryption keys.
+                try {
+                    CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                    String decryptedSecret = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
+                            APIConstants.DigestAuthConstants.CHARSET);
+                    awsEndpointConfig.put(APIConstants.AMZN_SECRET_KEY, decryptedSecret);
+                    return awsEndpointConfig;
+                } catch (CryptoException | UnsupportedEncodingException e) {
+                    log.error("Error while decrypting the Amazon key", e);
+                }
+            }
+        }
+        return awsEndpointConfig;
     }
 
     public static APIRevisionDTO fromAPIRevisiontoDTO(APIRevision model) throws APIManagementException {

@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.dao;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -30,10 +30,13 @@ import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -331,8 +334,6 @@ public class ServiceCatalogDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ServiceEntry serviceEntry = getServiceParams(rs, false);
-                    serviceEntry.setEndpointDef(rs.getBinaryStream(APIConstants.ServiceCatalogConstants
-                            .SERVICE_DEFINITION));
                     return serviceEntry;
                 }
             }
@@ -355,7 +356,8 @@ public class ServiceCatalogDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement ps =
-                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants.GET_ENDPOINT_RESOURCES_BY_NAME_AND_VERSION)) {
+                     connection.prepareStatement(SQLConstants.ServiceCatalogConstants
+                             .GET_SERVICE_BY_NAME_AND_VERSION)) {
             ps.setString(1, name);
             ps.setString(2, version);
             ps.setInt(3, tenantId);
@@ -457,51 +459,61 @@ public class ServiceCatalogDAO {
         }
         querySb.append("ORDER BY ")
                 .append(filterParams.getSortBy())
-                .append(" " + filterParams.getSortOrder())
-                .append(" LIMIT ?, ?");
-        query = querySb.toString();
+                .append(" " + filterParams.getSortOrder());
         String[] keyArray = null;
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(query)) {
-            keyArray = filterParams.getKey().split(",");
-            for (String key: keyArray) {
-                ps.setInt(1, tenantId);
-                if (exactNameSearch) {
-                    ps.setString(2, filterParams.getName());
-                } else {
-                    ps.setString(2, "%" + filterParams.getName() + "%");
-                }
-                if (exactVersionSearch) {
-                    ps.setString(3, filterParams.getVersion());
-                } else {
-                    ps.setString(3, "%" + filterParams.getVersion() + "%");
-                }
-                if (searchByKey && searchByDefinitionType) {
-                    ps.setString(4, filterParams.getDefinitionType());
-                    ps.setString(5, key);
-                    ps.setInt(6, filterParams.getOffset());
-                    ps.setInt(7, filterParams.getLimit());
-                } else if (searchByKey) {
-                    ps.setString(4, key);
-                    ps.setInt(5, filterParams.getOffset());
-                    ps.setInt(6, filterParams.getLimit());
-                } else if (searchByDefinitionType) {
-                    ps.setString(4, filterParams.getDefinitionType());
-                    ps.setInt(5, filterParams.getOffset());
-                    ps.setInt(6, filterParams.getLimit());
-                } else {
-                    ps.setInt(4, filterParams.getOffset());
-                    ps.setInt(5, filterParams.getLimit());
-                }
-                try (ResultSet resultSet = ps.executeQuery()) {
-                    while (resultSet.next()) {
-                        ServiceEntry service = getServiceParams(resultSet, shrink);
-                        List<API> usedAPIs = getServiceUsage(service.getUuid(), tenantId, connection);
-                        int usage = usedAPIs != null ? usedAPIs.size() : 0;
-                        service.setUsage(usage);
-                        serviceEntryList.add(service);
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName.contains("Oracle") || driverName.contains("MS SQL") || driverName.contains("Microsoft")) {
+                querySb.append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+            } else if (driverName.contains("PostgreSQL")) {
+                querySb.append(" OFFSET ? LIMIT ? ");
+            } else {
+                querySb.append(" LIMIT ?, ?");
+            }
+            query = querySb.toString();
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
+                keyArray = filterParams.getKey().split(",");
+                for (String key : keyArray) {
+                    ps.setInt(1, tenantId);
+                    if (exactNameSearch) {
+                        ps.setString(2, filterParams.getName());
+                    } else {
+                        ps.setString(2, "%" + filterParams.getName() + "%");
+                    }
+                    if (exactVersionSearch) {
+                        ps.setString(3, filterParams.getVersion());
+                    } else {
+                        ps.setString(3, "%" + filterParams.getVersion() + "%");
+                    }
+                    if (searchByKey && searchByDefinitionType) {
+                        ps.setString(4, filterParams.getDefinitionType());
+                        ps.setString(5, key);
+                        ps.setInt(6, filterParams.getOffset());
+                        ps.setInt(7, filterParams.getLimit());
+                    } else if (searchByKey) {
+                        ps.setString(4, key);
+                        ps.setInt(5, filterParams.getOffset());
+                        ps.setInt(6, filterParams.getLimit());
+                    } else if (searchByDefinitionType) {
+                        ps.setString(4, filterParams.getDefinitionType());
+                        ps.setInt(5, filterParams.getOffset());
+                        ps.setInt(6, filterParams.getLimit());
+                    } else {
+                        ps.setInt(4, filterParams.getOffset());
+                        ps.setInt(5, filterParams.getLimit());
+                    }
+                    try (ResultSet resultSet = ps.executeQuery()) {
+                        while (resultSet.next()) {
+                            ServiceEntry service = getServiceParams(resultSet, shrink);
+                            List<API> usedAPIs = getServiceUsage(service.getUuid(), tenantId, connection);
+                            int usage = usedAPIs != null ? usedAPIs.size() : 0;
+                            service.setUsage(usage);
+                            serviceEntryList.add(service);
+                        }
                     }
                 }
+            } catch (SQLException e) {
+                handleException("Error while retrieving the Services", e);
             }
         } catch (SQLException e) {
             handleException("Error while retrieving the Services", e);
@@ -539,6 +551,87 @@ public class ServiceCatalogDAO {
         }
     }
 
+    public int getServicesCount(int tenantId, ServiceFilterParams filterParams) throws APIManagementException {
+        int noOfServices = 0;
+        boolean searchByKey = false;
+        boolean searchByDefinitionType = false;
+        boolean exactNameSearch = false;
+        boolean exactVersionSearch = false;
+        String whereClauseForExactNameSearch = "AND SERVICE_NAME = ? ";
+        String whereClauseForNameSearch = "AND SERVICE_NAME LIKE ? ";
+        String whereClauseForExactVersionSearch = "AND SERVICE_VERSION = ? ";
+        String whereClauseForVersionSearch = " AND SERVICE_VERSION LIKE ? ";
+        String whereClauseWithDefinitionType = " AND DEFINITION_TYPE = ? ";
+        String whereClauseWithServiceKey = " AND SERVICE_KEY = ? ";
+        StringBuilder querySb = new StringBuilder();
+        querySb.append("SELECT count(*) count FROM AM_SERVICE_CATALOG WHERE TENANT_ID = ? ");
+        if (filterParams.getName().startsWith("\"") && filterParams.getName().endsWith("\"")) {
+            exactNameSearch = true;
+            filterParams.setName(filterParams.getName().replace("\"", "").trim());
+            querySb.append(whereClauseForExactNameSearch);
+        } else {
+            querySb.append(whereClauseForNameSearch);
+        }
+        if (filterParams.getVersion().startsWith("\"") && filterParams.getVersion().endsWith("\"")) {
+            exactVersionSearch = true;
+            filterParams.setVersion(filterParams.getVersion().replace("\"", "").trim());
+            querySb.append(whereClauseForExactVersionSearch);
+        } else {
+            querySb.append(whereClauseForVersionSearch);
+        }
+        if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) && StringUtils.isEmpty(filterParams.getKey())) {
+            searchByDefinitionType = true;
+            querySb.append(whereClauseWithDefinitionType);
+        } else if (StringUtils.isNotEmpty(filterParams.getKey()) &&
+                StringUtils.isEmpty(filterParams.getDefinitionType())) {
+            searchByKey = true;
+            querySb.append(whereClauseWithServiceKey);
+        } else if (StringUtils.isNotEmpty(filterParams.getDefinitionType()) &&
+                StringUtils.isNotEmpty(filterParams.getKey())) {
+            searchByKey = true;
+            searchByDefinitionType = true;
+            querySb.append(whereClauseWithDefinitionType)
+                    .append(whereClauseWithServiceKey);
+        }
+        String[] keyArray = null;
+        String query = querySb.toString();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+            keyArray = filterParams.getKey().split(",");
+            for (String key : keyArray) {
+                ps.setInt(1, tenantId);
+                if (exactNameSearch) {
+                    ps.setString(2, filterParams.getName());
+                } else {
+                    ps.setString(2, "%" + filterParams.getName() + "%");
+                }
+                if (exactVersionSearch) {
+                    ps.setString(3, filterParams.getVersion());
+                } else {
+                    ps.setString(3, "%" + filterParams.getVersion() + "%");
+                }
+                if (searchByKey && searchByDefinitionType) {
+                    ps.setString(4, filterParams.getDefinitionType());
+                    ps.setString(5, key);
+                } else if (searchByKey) {
+                    ps.setString(4, key);
+                } else if (searchByDefinitionType) {
+                    ps.setString(4, filterParams.getDefinitionType());
+                }
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet != null) {
+                        while (resultSet.next()) {
+                            noOfServices = resultSet.getInt("count");
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the services count", e);
+        }
+        return noOfServices;
+    }
+
     private List<API> getServiceUsage(String serviceId, int tenantId, Connection connection) throws SQLException {
         String query = SQLConstants.ServiceCatalogConstants.GET_USAGE_OF_SERVICES_BY_SERVICE_ID;
         List<API> apis = new ArrayList<>();
@@ -546,6 +639,7 @@ public class ServiceCatalogDAO {
             String serviceKey = getServiceKeyByUUID(serviceId, tenantId, connection);
             if (StringUtils.isNotEmpty(serviceKey)) {
                 ps.setString(1, serviceKey);
+                ps.setInt(2, tenantId);
                 try (ResultSet resultSet = ps.executeQuery()) {
                     while (resultSet.next()) {
                         String provider = resultSet.getString(APIConstants.FIELD_API_PUBLISHER);
@@ -644,12 +738,18 @@ public class ServiceCatalogDAO {
                         .LAST_UPDATED_TIME));
                 service.setCreatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.CREATED_BY));
                 service.setUpdatedBy(resultSet.getString(APIConstants.ServiceCatalogConstants.UPDATED_BY));
-                service.setEndpointDef(resultSet.getBinaryStream(APIConstants.ServiceCatalogConstants
-                        .SERVICE_DEFINITION));
+                InputStream serviceDefinition = resultSet.getBinaryStream(APIConstants.ServiceCatalogConstants
+                        .SERVICE_DEFINITION);
+                ByteArrayOutputStream serviceDefinitionByteArray = new ByteArrayOutputStream();
+                IOUtils.copy(serviceDefinition, serviceDefinitionByteArray);
+                service.setEndpointDef(new ByteArrayInputStream(serviceDefinitionByteArray.toByteArray()));
             }
             return service;
         } catch (SQLException e) {
             handleException("Error while setting service parameters", e);
+            return null;
+        } catch (IOException e) {
+            handleException("Error when retrieving the service definition", e);
             return null;
         }
     }

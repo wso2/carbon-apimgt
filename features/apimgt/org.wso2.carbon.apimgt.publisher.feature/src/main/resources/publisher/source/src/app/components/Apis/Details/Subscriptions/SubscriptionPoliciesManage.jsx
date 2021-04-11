@@ -59,11 +59,11 @@ class SubscriptionPoliciesManage extends Component {
 
     componentDidMount() {
         const { api } = this.props;
-        const quotaType = (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE')
-            ? 'eventCount' : 'requestCount';
-        API.policiesByQuotaType(quotaType)
+        const isAsyncAPI = (api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE');
+        const policyPromise = isAsyncAPI ? API.asyncAPIPolicies() : API.policies('subscription');
+        policyPromise
             .then((res) => {
-                this.setState({ subscriptionPolicies: res.body });
+                this.setState({ subscriptionPolicies: res.body.list });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -95,7 +95,7 @@ class SubscriptionPoliciesManage extends Component {
 
         return (
             <>
-                <Typography variant='h4'>
+                <Typography id='itest-api-details-bushiness-plans-head' variant='h4'>
                     <FormattedMessage
                         id='Apis.Details.Subscriptions.SubscriptionPoliciesManage.business.plans'
                         defaultMessage='Business Plans'

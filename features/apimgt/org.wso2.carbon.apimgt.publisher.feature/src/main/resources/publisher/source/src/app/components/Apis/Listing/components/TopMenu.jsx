@@ -20,6 +20,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/icons/List';
@@ -27,7 +28,6 @@ import GridOn from '@material-ui/icons/GridOn';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
-import CustomIcon from 'AppComponents/Shared/CustomIcon';
 import APICreateMenu from './APICreateMenu';
 
 const styles = (theme) => ({
@@ -51,12 +51,8 @@ const styles = (theme) => ({
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
     },
-    mainIconWrapper: {
-        paddingTop: 13,
-        paddingLeft: 35,
-        paddingRight: 20,
-    },
     mainTitleWrapper: {
+        paddingLeft: 35,
         display: 'flex',
         justifyContent: 'center',
         flexDirection: 'column',
@@ -92,7 +88,7 @@ function getTitleForArtifactType(props, count) {
                 defaultMessage='Search Result'
             />
         ) : (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Result(s)' />
+            <FormattedMessage id='Apis.Listing.components.TopMenu.search.results' defaultMessage='Search Results' />
         );
     } else if (isAPIProduct) {
         return isSingular ? (
@@ -102,15 +98,15 @@ function getTitleForArtifactType(props, count) {
             />
         ) : (
             <FormattedMessage
-                id='Apis.Listing.components.TopMenu.apiproduct(s)'
-                defaultMessage='API Product(s)'
+                id='Apis.Listing.components.TopMenu.apiproducts'
+                defaultMessage='API Products'
             />
         );
     } else {
         return isSingular ? (
             <FormattedMessage id='Apis.Listing.components.TopMenu.api.singular' defaultMessage='API' />
         ) : (
-            <FormattedMessage id='Apis.Listing.components.TopMenu.api' defaultMessage='API(s)' />
+            <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
         );
     }
 }
@@ -123,15 +119,11 @@ function getTitleForArtifactType(props, count) {
  */
 function TopMenu(props) {
     const {
-        classes, data, setListType, theme, count, isAPIProduct, listType, showToggle,
+        classes, data, setListType, count, isAPIProduct, listType, showToggle,
     } = props;
-    const strokeColorMain = theme.palette.getContrastText(theme.palette.background.paper);
     if (count > 0) {
         return (
             <div className={classes.root}>
-                <div className={classes.mainIconWrapper}>
-                    <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
-                </div>
                 <div className={classes.mainTitleWrapper}>
                     {data && (
                         <>
@@ -145,18 +137,25 @@ function TopMenu(props) {
                                     <FormattedMessage id='Apis.Listing.components.TopMenu.apis' defaultMessage='APIs' />
                                 )}
                             </Typography>
-                            <Typography variant='caption' gutterBottom align='left' component='div'>
+                            <Box
+                                fontFamily='fontFamily'
+                                fontSize='body1.fontSize'
+                                display='flex'
+                            >
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.displaying'
                                     defaultMessage='Total:'
                                 />
-                                {' '}
-                                {' '}
-                                {count}
-                                {' '}
-                                {' '}
+                                <Box
+                                    id='itest-apis-listing-total'
+                                    fontWeight='fontWeightBold'
+                                    px={0.5}
+                                    mb={0.5}
+                                >
+                                    {count}
+                                </Box>
                                 {getTitleForArtifactType(props, count)}
-                            </Typography>
+                            </Box>
                         </>
                     )}
                 </div>
@@ -164,7 +163,7 @@ function TopMenu(props) {
                 <div className={classes.APICreateMenu}>
                     {isAPIProduct ? (
                         <Link to='/api-products/create'>
-                            <Button variant='contained' className={classes.createButton}>
+                            <Button variant='contained' color='primary'>
                                 <FormattedMessage
                                     id='Apis.Listing.components.TopMenu.create.an.api.product'
                                     defaultMessage='Create an API Product'
@@ -218,4 +217,4 @@ TopMenu.propTypes = {
     showToggle: PropTypes.bool.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(TopMenu);
+export default withStyles(styles)(TopMenu);

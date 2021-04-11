@@ -202,8 +202,7 @@ public class SQLConstantPostgreSQL extends SQLConstants{
 
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
-            "select distinct x.* from (" +
-                    "SELECT " +
+                    "   SELECT " +
                     "   APP.APPLICATION_ID as APPLICATION_ID, " +
                     "   SUB.CREATED_BY AS CREATED_BY," +
                     "   APP.GROUP_ID AS GROUP_ID, " +
@@ -221,10 +220,9 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "    SUB.TENANT_ID = ? "+
                     " And "+
                     "    ( SUB.CREATED_BY like ?"+
-                    " OR APP.NAME like ?"+
+                    " AND APP.NAME like ?"+
                     " ) ORDER BY $1 $2 " +
-                    " offset ? limit  ? "+
-                    " )x ";
+                    " offset ? limit  ? ";
 
     public static final String GET_REPLIES_SQL =
             "SELECT " +

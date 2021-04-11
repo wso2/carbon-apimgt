@@ -16,9 +16,6 @@
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertTypesApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.AlertSubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SdkGenApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SearchApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.v1.SettingsApi"/>
@@ -63,6 +60,9 @@
             </list>
         </property>
         <property name="allowCredentials" value="true"/>
+        <property name="allowOrigins"
+                  value="#{systemProperties['rest.api.devportal.allowed.origins'] != null ?
+                      systemProperties['rest.api.devportal.allowed.origins'].split(',') : {}}"/>
     </bean>
 
     <!-- Out interceptors -->

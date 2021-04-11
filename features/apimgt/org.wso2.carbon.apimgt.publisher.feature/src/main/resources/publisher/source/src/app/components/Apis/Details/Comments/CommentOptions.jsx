@@ -22,6 +22,7 @@ import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
+import Utils from 'AppData/Utils';
 
 const styles = (theme) => ({
     link: {
@@ -143,11 +144,12 @@ class CommentOptions extends React.Component {
      */
     render() {
         const {
-            classes, comment, theme,
+            classes, comment,
         } = this.props;
-        const canDelete = (comment.createdBy === AuthManager.getUser().name)
-            || (AuthManager.getUser().name === theme.custom.adminRole);
-        const canModify = comment.createdBy === AuthManager.getUser().name && comment.entryPoint === 'APIPublisher';
+        const user = AuthManager.getUser();
+        const username = Utils.getUserNameWithoutDomain(user.name);
+        const canDelete = (comment.createdBy === username) || user.isAdmin();
+        // const canModify = comment.createdBy === username;
         return (
             <Grid container spacing={1} className={classes.verticalSpace} key={comment.id}>
 
@@ -181,7 +183,7 @@ class CommentOptions extends React.Component {
                 ]}
 
                 {/* only the comment owner can modify the comment from the exact entry point */}
-                {canModify && [
+                {/* {canModify && [
                     <Grid item key='key-edit'>
                         <Button
                             size='small'
@@ -192,7 +194,7 @@ class CommentOptions extends React.Component {
                             <FormattedMessage id='Apis.Details.Comments.CommentOptions.reply' defaultMessage='Reply' />
                         </Button>
                     </Grid>,
-                ]}
+                ]} */}
 
             </Grid>
         );

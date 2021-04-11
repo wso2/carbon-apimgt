@@ -15,39 +15,45 @@ import ApiContext, { useAPI } from 'AppComponents/Apis/Details/components/ApiCon
 import { useAppContext } from 'AppComponents/Shared/AppContext';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import Link from '@material-ui/core/Link';
 import grey from '@material-ui/core/colors/grey';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import AuthManager from 'AppData/AuthManager';
 import Typography from '@material-ui/core/Typography';
+import LinkIcon from '@material-ui/icons/Link';
 
-const ColorlibConnector = withStyles({
-    alternativeLabel: {
-        top: 22,
-    },
-    active: {
-        '& $line': {
-            backgroundImage:
-                'linear-gradient(to left, #50BCEC 50%, #B1D31E 50%)',
+const ColorlibConnector = withStyles((theme) => {
+    const completedColor = theme.custom.apis.overview.stepper.completed || theme.palette.success.main;
+    const activeColor = theme.custom.apis.overview.stepper.active || theme.palette.info.main;
+    return {
+        alternativeLabel: {
+            top: 22,
         },
-    },
-    completed: {
-        '& $line': {
-            backgroundImage:
-                'linear-gradient( #B1D31E, #B1D31E)',
+        active: {
+            '& $line': {
+                backgroundImage:
+                    `linear-gradient(to left, ${activeColor} 50%, ${completedColor} 50%)`,
+            },
         },
-    },
-    line: {
-        height: 3,
-        border: 0,
-        backgroundColor: '#eaeaf0',
-        borderRadius: 1,
-    },
+        completed: {
+            '& $line': {
+                backgroundImage:
+                    `linear-gradient( ${completedColor}, ${completedColor})`,
+            },
+        },
+        line: {
+            height: 3,
+            border: 0,
+            backgroundColor: '#eaeaf0',
+            borderRadius: 1,
+        },
+    };
 })(StepConnector);
 
-const useColorlibStepIconStyles = makeStyles({
+const useColorlibStepIconStyles = makeStyles((theme) => ({
     root: {
         backgroundColor: '#ccc',
         zIndex: 1,
@@ -61,24 +67,30 @@ const useColorlibStepIconStyles = makeStyles({
         border: '6px solid #E2E2E2',
     },
     active: {
-        backgroundColor: '#50BCEC',
+        backgroundColor: theme.custom.apis.overview.stepper.active || theme.palette.info.main,
         border: '6px solid #E2E2E2',
     },
     completed: {
-        backgroundColor: '#B1D31E',
+        backgroundColor: theme.custom.apis.overview.stepper.completed || theme.palette.success.main,
         border: '6px solid #E2E2E2',
     },
-});
+}));
 
+/**
+ *
+ * @param {*} props
+ * @returns
+ */
 function ColorlibStepIcon(props) {
     const classes = useColorlibStepIconStyles();
-    const { active, completed } = props;
-
+    const {
+        active, completed, forceComplete, icon: step,
+    } = props;
     return (
         <div
             className={clsx(classes.root, {
                 [classes.active]: active,
-                [classes.completed]: completed,
+                [classes.completed]: completed || forceComplete.includes(step),
             })}
         />
     );
@@ -99,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'block',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: '#B1D31E',
+        backgroundColor: theme.custom.apis.overview.stepper.completed || theme.palette.success.main,
         zIndex: 1,
         color: '#fff',
         width: 15,
@@ -119,7 +131,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-
+/**
+ *
+ * @returns
+ */
 export default function CustomizedStepper() {
     const classes = useStyles();
     const [api, updateAPI] = useAPI();
@@ -129,6 +144,7 @@ export default function CustomizedStepper() {
     && api.endpointConfig.implementation_status === 'prototyped';
     const isEndpointAvailable = api.endpointConfig !== null;
     const isTierAvailable = api.policies.length !== 0;
+    const isPublished = api.lifeCycleStatus === 'PUBLISHED';
     const { tenantList } = useContext(ApiContext);
     const { settings, user } = useAppContext();
     const userNameSplit = user.name.split('@');
@@ -137,17 +153,21 @@ export default function CustomizedStepper() {
     if (tenantList && tenantList.length > 0) {
         devportalUrl = `${settings.devportalUrl}/apis/${api.id}/overview?tenant=${tenantDomain}`;
     }
-    const steps = ['Develop', 'Deploy', 'Test', 'Publish'];
-
+    const steps = (api.isWebSocket() || api.isAPIProduct() || api.isGraphql() || api.isAsyncAPI())
+        ? ['Develop', 'Deploy', 'Publish'] : ['Develop', 'Deploy', 'Test', 'Publish'];
+    const forceComplete = [];
+    if (isPublished) {
+        forceComplete.push(steps.indexOf('Publish') + 1);
+    }
     let activeStep = 0;
     if (api && (api.type === 'WEBSUB' || isEndpointAvailable) && isTierAvailable && !deploymentsAvailable) {
         activeStep = 1;
     } else if ((api && !isEndpointAvailable && api.type !== 'WEBSUB') || (api && !isTierAvailable)) {
         activeStep = 0;
     } else if (api && (isEndpointAvailable || api.type === 'WEBSUB') && isTierAvailable
-        && deploymentsAvailable && (api.lifeCycleStatus !== 'PUBLISHED' && api.lifeCycleStatus !== 'PROTOTYPED')) {
+        && deploymentsAvailable && (!isPublished && api.lifeCycleStatus !== 'PROTOTYPED')) {
         activeStep = 3;
-    } else if ((api.lifeCycleStatus === 'PUBLISHED' || api.lifeCycleStatus === 'PROTOTYPED') && api
+    } else if ((isPublished || api.lifeCycleStatus === 'PROTOTYPED') && api
         && (isEndpointAvailable || api.type === 'WEBSUB' || isPrototypedAvailable)
         && isTierAvailable && deploymentsAvailable) {
         activeStep = 4;
@@ -222,13 +242,19 @@ export default function CustomizedStepper() {
                             alignItems='center'
                             justify='center'
                         >
-                            <Box mt={1}>
-                                <Typography variant='h7' color='primary'>
-                                    <FormattedMessage
-                                        id='Apis.Details.Overview.CustomizedStepper.view.devportal'
-                                        defaultMessage='View in devportal'
-                                    />
-                                </Typography>
+                            <Box mt={1} ml={2}>
+                                <a
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    href={devportalUrl}
+                                >
+                                    <Typography variant='h7'>
+                                        <FormattedMessage
+                                            id='Apis.Details.Overview.CustomizedStepper.view.devportal'
+                                            defaultMessage='View in devportal'
+                                        />
+                                    </Typography>
+                                </a>
                             </Box>
                             <Box ml={1} mt={1}>
                                 <a
@@ -302,7 +328,7 @@ export default function CustomizedStepper() {
                                     || AuthManager.isNotPublisher()
                                     || !deploymentsAvailable}
                             >
-                                Deploy as a prototype
+                                Prototype
                                 {isUpdating && <CircularProgress size={20} />}
                             </Button>
                         ) : (
@@ -334,11 +360,17 @@ export default function CustomizedStepper() {
     }
 
     return (
-        <div className={classes.root}>
+        <div id='itest-overview-api-flow' className={classes.root}>
             <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
                 {steps.map((label) => (
                     <Step key={label}>
-                        <StepLabel StepIconComponent={ColorlibStepIcon}>
+                        <StepLabel StepIconComponent={(props) => (
+                            <ColorlibStepIcon
+                                {...props}
+                                forceComplete={forceComplete}
+                            />
+                        )}
+                        >
                             {label === 'Develop' && (
                                 <div>
                                     <Grid
@@ -381,18 +413,25 @@ export default function CustomizedStepper() {
                                                 </Grid>
                                                 <Box ml={1} mb={1}>
                                                     <Grid item>
-                                                        <Typography variant='h7'>
-                                                            <FormattedMessage
-                                                                id='Apis.Details.Overview.CustomizedStepper.Endpoint'
-                                                                defaultMessage=' Endpoint'
-                                                            />
-                                                        </Typography>
+                                                        <Link
+                                                            underline='none'
+                                                            component={RouterLink}
+                                                            to={'/apis/' + api.id + '/endpoints'}
+                                                        >
+                                                            <Typography variant='h7'>
+                                                                <FormattedMessage
+                                                                    id='Apis.Details.Overview.
+                                                                    CustomizedStepper.Endpoint'
+                                                                    defaultMessage=' Endpoint'
+                                                                />
+                                                            </Typography>
+                                                        </Link>
                                                     </Grid>
                                                 </Box>
                                                 <Box ml={1} mb={1}>
                                                     <Grid item>
                                                         <Link to={'/apis/' + api.id + '/endpoints'}>
-                                                            <LaunchIcon
+                                                            <LinkIcon
                                                                 color='primary'
                                                                 fontSize='small'
                                                             />
@@ -418,18 +457,24 @@ export default function CustomizedStepper() {
                                             </Grid>
                                             <Box ml={1}>
                                                 <Grid item>
-                                                    <Typography variant='h7'>
-                                                        <FormattedMessage
-                                                            id='Apis.Details.Overview.CustomizedStepper.Tier'
-                                                            defaultMessage=' Business Plan'
-                                                        />
-                                                    </Typography>
+                                                    <Link
+                                                        underline='none'
+                                                        component={RouterLink}
+                                                        to={'/apis/' + api.id + '/subscriptions'}
+                                                    >
+                                                        <Typography variant='h7'>
+                                                            <FormattedMessage
+                                                                id='Apis.Details.Overview.CustomizedStepper.Tier'
+                                                                defaultMessage=' Business Plan'
+                                                            />
+                                                        </Typography>
+                                                    </Link>
                                                 </Grid>
                                             </Box>
                                             <Grid item>
                                                 <Link to={'/apis/' + api.id + '/subscriptions'}>
                                                     <Box ml={1}>
-                                                        <LaunchIcon
+                                                        <LinkIcon
                                                             color='primary'
                                                             fontSize='small'
                                                         />
@@ -462,12 +507,18 @@ export default function CustomizedStepper() {
                                         </Box>
                                         <Box ml={1} mb={1}>
                                             <Grid item>
-                                                <Typography variant='h7'>
-                                                    <FormattedMessage
-                                                        id='Apis.Details.Overview.CustomizedStepper.Deploy'
-                                                        defaultMessage=' Deploy'
-                                                    />
-                                                </Typography>
+                                                <Link
+                                                    underline='none'
+                                                    component={RouterLink}
+                                                    to={'/apis/' + api.id + '/deployments'}
+                                                >
+                                                    <Typography variant='h7'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Overview.CustomizedStepper.Deploy'
+                                                            defaultMessage=' Deploy'
+                                                        />
+                                                    </Typography>
+                                                </Link>
                                             </Grid>
                                         </Box>
                                         <Grid item>
@@ -476,7 +527,7 @@ export default function CustomizedStepper() {
                                             || api.workflowStatus === 'CREATED')
                                                 ? (
                                                     <Box ml={1}>
-                                                        <LaunchIcon
+                                                        <LinkIcon
                                                             color='default'
                                                             fontSize='small'
                                                         />
@@ -484,7 +535,7 @@ export default function CustomizedStepper() {
                                                 ) : (
                                                     <Link to={'/apis/' + api.id + '/deployments'}>
                                                         <Box ml={1}>
-                                                            <LaunchIcon
+                                                            <LinkIcon
                                                                 color='primary'
                                                                 fontSize='small'
                                                             />
@@ -507,35 +558,45 @@ export default function CustomizedStepper() {
                                         alignItems='center'
                                         justify='center'
                                     >
+                                        <Box ml={1} mb={1}>
+                                            <Grid item>
+                                                <Link
+                                                    underline='none'
+                                                    component={RouterLink}
+                                                    to={'/apis/' + api.id + '/test-console'}
+                                                >
+                                                    <Typography variant='h7'>
+                                                        <FormattedMessage
+                                                            id='Apis.Details.Overview.CustomizedStepper.Test'
+                                                            defaultMessage=' Test'
+                                                        />
+                                                    </Typography>
+                                                </Link>
+                                            </Grid>
+                                        </Box>
                                         <Grid item>
-                                            <Typography variant='h7'>
-                                                <FormattedMessage
-                                                    id='Apis.Details.Overview.CustomizedStepper.Test'
-                                                    defaultMessage=' Test'
-                                                />
-                                            </Typography>
-                                        </Grid>
-                                        {api.lifeCycleStatus === 'RETIERD' || !deploymentsAvailable
+                                            {api.lifeCycleStatus === 'RETIERD' || !deploymentsAvailable
                                             || !isEndpointAvailable
                                             || !isTierAvailable
                                             || (api.type !== 'HTTP' && api.type !== 'SOAP')
-                                            ? (
-                                                <Box ml={1}>
-                                                    <LaunchIcon
-                                                        color='default'
-                                                        fontSize='small'
-                                                    />
-                                                </Box>
-                                            ) : (
-                                                <Link to={'/apis/' + api.id + '/test-console'}>
+                                                ? (
                                                     <Box ml={1}>
-                                                        <LaunchIcon
-                                                            color='primary'
+                                                        <LinkIcon
+                                                            color='default'
                                                             fontSize='small'
                                                         />
                                                     </Box>
-                                                </Link>
-                                            )}
+                                                ) : (
+                                                    <Link to={'/apis/' + api.id + '/test-console'}>
+                                                        <Box ml={1}>
+                                                            <LinkIcon
+                                                                color='primary'
+                                                                fontSize='small'
+                                                            />
+                                                        </Box>
+                                                    </Link>
+                                                )}
+                                        </Grid>
                                     </Grid>
                                 </Tooltip>
                             )}

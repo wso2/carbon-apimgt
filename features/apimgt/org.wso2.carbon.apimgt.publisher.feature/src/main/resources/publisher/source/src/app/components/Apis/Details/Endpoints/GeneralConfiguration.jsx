@@ -207,12 +207,12 @@ function GeneralConfiguration(props) {
                     id='panel1bh-header'
                     className={classes.configHeaderContainer}
                 >
-                    {endpointType.key === 'default' || endpointType.key === 'awslambda' ? (
+                    {endpointType.key === 'awslambda' ? (
                         <div />
                     ) : (
                         <Typography
                             className={classes.secondaryHeading}
-                            hidden={endpointType.key === 'default' || endpointType.key === 'awslambda'}
+                            hidden={endpointType.key === 'awslambda'}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Endpoints.GeneralConfiguration.certificates.sub.heading'

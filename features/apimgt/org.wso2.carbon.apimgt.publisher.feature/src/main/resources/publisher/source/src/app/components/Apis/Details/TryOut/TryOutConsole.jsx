@@ -40,6 +40,7 @@ import { usePublisherSettings } from 'AppComponents/Shared/AppContext';
 import Alert from 'AppComponents/Shared/MuiAlert';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import CONSTS from 'AppData/Constants';
 import SwaggerUI from './SwaggerUI';
 
 dayjs.extend(relativeTime);
@@ -82,9 +83,14 @@ const TryOutConsole = () => {
         api.getDeployedRevisions().then((deploymentsResponse) => {
             tasksStatusDispatcher({ name: 'getDeployments', status: { inProgress: false, completed: true } });
             const currentDeployments = deploymentsResponse.body;
-            setDeployments(currentDeployments);
-            if (currentDeployments && currentDeployments.length > 0) {
-                const [initialDeploymentSelection] = currentDeployments;
+            const currentDeploymentsWithDisplayName = currentDeployments.map((deploy) => {
+                const gwEnvironment = publisherSettings.environment.find((e) => e.name === deploy.name);
+                const displayName = (gwEnvironment ? gwEnvironment.displayName : deploy.name);
+                return { ...deploy, displayName };
+            });
+            setDeployments(currentDeploymentsWithDisplayName);
+            if (currentDeploymentsWithDisplayName && currentDeploymentsWithDisplayName.length > 0) {
+                const [initialDeploymentSelection] = currentDeploymentsWithDisplayName;
                 setSelectedDeployment(initialDeploymentSelection);
             }
         }).catch((error) => tasksStatusDispatcher({ name: 'getDeployments', status: { inProgress: false, error } }));
@@ -96,8 +102,11 @@ const TryOutConsole = () => {
         if (selectedDeployment && oasDefinition) {
             const selectedGWEnvironment = publisherSettings.environment
                 .find((env) => env.name === selectedDeployment.name);
-            const selectedDeploymentVhost = selectedGWEnvironment.vhosts
+            let selectedDeploymentVhost = selectedGWEnvironment.vhosts
                 .find((vhost) => vhost.host === selectedDeployment.vhost);
+            if (!selectedDeploymentVhost) {
+                selectedDeploymentVhost = { ...CONSTS.DEFAULT_VHOST, host: selectedDeployment.vhost };
+            }
             let pathSeparator = '';
             if (selectedDeploymentVhost.httpContext && !selectedDeploymentVhost.httpContext.startsWith('/')) {
                 pathSeparator = '/';
@@ -151,7 +160,7 @@ const TryOutConsole = () => {
     const isAPIRetired = api.lifeCycleStatus === 'RETIRED';
     return (
         <>
-            <Typography variant='h4' component='h1'>
+            <Typography id='itest-api-details-try-out-head' variant='h4' component='h1'>
                 <FormattedMessage id='Apis.Details.ApiConsole.ApiConsole.title' defaultMessage='Try Out' />
             </Typography>
             <Paper elevation={0}>
@@ -216,7 +225,9 @@ const TryOutConsole = () => {
                             <Alert variant='outlined' severity='error'>
                                 <FormattedMessage
                                     id='Apis.Details.ApiConsole.deployments.no'
-                                    defaultMessage='API is not deployed yet! Please deploy the API before trying out'
+                                    defaultMessage={'{artifactType} is not deployed yet! Please deploy '
+                                    + 'the {artifactType} before trying out'}
+                                    values={{ artifactType: api.isRevision ? 'Revision' : 'API' }}
                                 />
                                 <Link to={'/apis/' + api.id + '/deployments'}>
                                     <LaunchIcon
@@ -258,12 +269,6 @@ const TryOutConsole = () => {
                                         value={(selectedDeployment && selectedDeployment.name) || ''}
                                         name='selectedEnvironment'
                                         onChange={deploymentSelectionHandler}
-                                        helperText={(
-                                            <FormattedMessage
-                                                defaultMessage='Please select an environment'
-                                                id='Apis.Details.ApiConsole.SelectAppPanel.environment'
-                                            />
-                                        )}
                                         margin='normal'
                                         variant='outlined'
                                         SelectProps={{
@@ -281,7 +286,7 @@ const TryOutConsole = () => {
                                                 value={deployment.name}
                                                 key={deployment.name}
                                             >
-                                                {deployment.name}
+                                                {deployment.displayName}
                                             </MenuItem>
                                         ))}
                                     </TextField>
