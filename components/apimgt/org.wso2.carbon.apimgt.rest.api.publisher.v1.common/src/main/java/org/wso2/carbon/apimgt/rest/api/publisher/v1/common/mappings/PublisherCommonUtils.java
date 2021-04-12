@@ -584,35 +584,6 @@ public class PublisherCommonUtils {
      * @param additionalProperties Map<String, String>  properties to validate
      * @return error message if there is an validation error with additional properties.
      */
-    public static String validateAdditionalProperties(Map<String, String> additionalProperties) {
-
-        if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                String propertyKey = entry.getKey().trim();
-                String propertyValue = entry.getValue();
-                if (propertyKey.contains(" ")) {
-                    return "Property names should not contain space character. Property '" + propertyKey + "' "
-                            + "contains space in it.";
-                }
-                if (Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(propertyKey.toLowerCase())) {
-                    return "Property '" + propertyKey + "' conflicts with the reserved keywords. Reserved keywords "
-                            + "are [" + Arrays.toString(APIConstants.API_SEARCH_PREFIXES) + "]";
-                }
-                // Maximum allowable characters of registry property name and value is 100 and 1000. Hence we are
-                // restricting them to be within 80 and 900.
-                if (propertyKey.length() > 80) {
-                    return "Property name can have maximum of 80 characters. Property '" + propertyKey + "' + contains "
-                            + propertyKey.length() + "characters";
-                }
-                if (propertyValue.length() > 900) {
-                    return "Property value can have maximum of 900 characters. Property '" + propertyKey + "' + "
-                            + "contains a value with " + propertyValue.length() + "characters";
-                }
-            }
-        }
-        return "";
-    }
-
     public static String validateAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
 
         if (additionalProperties != null) {
