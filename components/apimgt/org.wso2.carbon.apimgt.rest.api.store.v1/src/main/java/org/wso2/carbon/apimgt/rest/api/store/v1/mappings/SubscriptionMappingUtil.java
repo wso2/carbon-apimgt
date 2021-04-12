@@ -57,7 +57,7 @@ public class SubscriptionMappingUtil {
         APIIdentifier apiId = subscription.getApiId();
         APIProductIdentifier apiProdId = subscription.getProductId();
         if (apiId != null) {
-            API api = apiConsumer.getLightweightAPI(apiId);
+            API api = apiConsumer.getLightweightAPIWithoutPermissionCheck(apiId);
             subscriptionDTO.setApiId(api.getUUID());
             APIInfoDTO apiInfo = APIMappingUtil.fromAPIToInfoDTO(api);
             subscriptionDTO.setApiInfo(apiInfo);

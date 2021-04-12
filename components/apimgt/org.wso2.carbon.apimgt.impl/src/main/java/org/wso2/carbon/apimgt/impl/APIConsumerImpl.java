@@ -3328,7 +3328,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIProduct product = null;
             String context = null;
             if (apiIdentifier != null) {
-                api = getAPI(apiIdentifier);
+                api = getAPIWithoutPermissionCheck(apiIdentifier);
                 context = api.getContext();
             } else if (apiProdIdentifier != null) {
                 product = getAPIProduct(apiProdIdentifier);
