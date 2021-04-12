@@ -3822,7 +3822,7 @@
   "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": [
     {
       "type": 0,
-      "value": "Brief description of the new revision"
+      "value": "Add a description to the revision"
     }
   ],
   "Apis.Details.Environments.Environments.revision.create.heading": [

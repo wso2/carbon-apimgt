@@ -65,6 +65,7 @@ import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { RevisionContextProvider } from 'AppComponents/Shared/RevisionContext';
+import { PROPERTIES as UserProperties } from 'AppData/User';
 import Overview from './NewOverview/Overview';
 import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
@@ -197,6 +198,7 @@ const AccordionDetails = withStyles((theme) => ({
     },
 }))(MuiAccordionDetails);
 
+
 /**
  * Base component for API specific Details page,
  * What this component do is, Handle all the request coming under `/apis/:api_uuid` path, If the :api_uuid or
@@ -247,6 +249,8 @@ class Details extends Component {
             allRevisions: null,
             allEnvRevision: null,
             authorizedAPI: false,
+            portalConfigsExpanded: false,
+            apiConfigsExpanded: false,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
@@ -254,6 +258,7 @@ class Details extends Component {
         this.setImageUpdate = this.setImageUpdate.bind(this);
         this.getRevision = this.getRevision.bind(this);
         this.getDeployedEnv = this.getDeployedEnv.bind(this);
+        this.handleAccordionState = this.handleAccordionState.bind(this);
     }
 
     /**
@@ -265,6 +270,7 @@ class Details extends Component {
             location: { pathname },
             isAPIProduct,
         } = this.props;
+        const { user } = this.context;
         // Load API data iff request page is valid
         if (Details.isValidURL(pathname)) {
             if (isAPIProduct) {
@@ -281,6 +287,10 @@ class Details extends Component {
                     console.error('error when getting tenants ' + error);
                 });
         }
+        this.setState({
+            apiConfigsExpanded: user.getProperty(UserProperties.API_CONFIG_OPEN),
+            portalConfigsExpanded: user.getProperty(UserProperties.PORTAL_CONFIG_OPEN),
+        });
     }
 
     /**
@@ -309,6 +319,7 @@ class Details extends Component {
      * This method is a hack to update the image in the toolbar when a new image is uploaded
      * @memberof Details
      */
+    // eslint-disable-next-line react/sort-comp
     setImageUpdate() {
         this.setState((previousState) => ({
             imageUpdate: previousState.imageUpdate + 1,
@@ -567,6 +578,21 @@ class Details extends Component {
     }
 
     /**
+     * update ls
+     * @param {String} name event triggered
+     * @param {Boolean} isExpanded state
+     */
+    handleAccordionState(name, isExpanded) {
+        const { user } = this.context;
+        this.setState({ [name]: isExpanded });
+        if (name === 'portalConfigsExpanded') {
+            user.setProperty(UserProperties.PORTAL_CONFIG_OPEN, isExpanded);
+        } else {
+            user.setProperty(UserProperties.API_CONFIG_OPEN, isExpanded);
+        }
+    }
+
+    /**
      * This method is similar to ReactJS `setState` method, In this `updateAPI()` method, we accept partially updated
      * API object or comple API object. When updating , the provided updatedAPI object will be merged with the existing
      * API object in the state and use it as the payload in the /apis PUT operation.
@@ -683,11 +709,6 @@ class Details extends Component {
             return <Progress per={70} message='Loading API data ...' />;
         }
         const { leftMenuIconMainSize } = theme.custom;
-        let isPortalConfigsPage = false;
-        // let isAPIConfigsPage = false;
-        if (/^\/(apis|api-products|scopes|service-catalog)($|\/$)/g.test(pathname)) {
-            isPortalConfigsPage = true;
-        }
         return (
             <Box display='flex' alignItems='stretch' flexDirection='row'>
                 <APIProvider
@@ -726,8 +747,10 @@ class Details extends Component {
                         </Typography>
                         <div className={classes.root}>
                             <Accordion
-                                defaultExpanded={isPortalConfigsPage}
+                                defaultExpanded={this.state.portalConfigsExpanded}
                                 elevation={0}
+                                onChange={(e, isExpanded) => this.handleAccordionState('portalConfigsExpanded',
+                                    isExpanded)}
                                 classes={{ expanded: classes.expanded }}
                             >
                                 <AccordianSummary
@@ -788,8 +811,10 @@ class Details extends Component {
                                 </AccordionDetails>
                             </Accordion>
                             <Accordion
+                                defaultExpanded={this.state.apiConfigsExpanded}
                                 elevation={0}
-                                defaultExpanded={false}
+                                onChange={(e, isExpanded) => this.handleAccordionState('apiConfigsExpanded',
+                                    isExpanded)}
                                 classes={{ expanded: classes.expanded }}
                             >
                                 <AccordianSummary
@@ -800,7 +825,7 @@ class Details extends Component {
                                     </Typography>
                                     <Tooltip
                                         title={'Changes made to API Configuration section requires a '
-                                                + 'new deployment, in order to affect in the Gateway'}
+                                            + 'new deployment, in order to affect in the Gateway'}
                                         placement='bottom'
                                     >
                                         <IconButton color='primary' size='small' aria-label='delete'>
@@ -891,21 +916,21 @@ class Details extends Component {
                             Icon={<PersonPinCircleOutlinedIcon />}
                         />
                         {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                                && (
-                                    <div>
-                                        <Divider />
-                                        <Typography className={classes.headingText}>Test</Typography>
-                                        <LeftMenuItem
-                                            route='test-console'
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.Tryout.menu.name',
-                                                defaultMessage: 'Try Out',
-                                            })}
-                                            to={pathPrefix + 'test-console'}
-                                            iconText='test'
-                                        />
-                                    </div>
-                                )}
+                            && (
+                                <div>
+                                    <Divider />
+                                    <Typography className={classes.headingText}>Test</Typography>
+                                    <LeftMenuItem
+                                        route='test-console'
+                                        text={intl.formatMessage({
+                                            id: 'Apis.Details.index.Tryout.menu.name',
+                                            defaultMessage: 'Try Out',
+                                        })}
+                                        to={pathPrefix + 'test-console'}
+                                        iconText='test'
+                                    />
+                                </div>
+                            )}
                         {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
                             <div>
                                 <Divider />

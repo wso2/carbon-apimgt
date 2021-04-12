@@ -1807,7 +1807,7 @@
     "defaultMessage": "Action"
   },
   "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": {
-    "defaultMessage": "Brief description of the new revision"
+    "defaultMessage": "Add a description to the revision"
   },
   "Apis.Details.Environments.Environments.revision.create.heading": {
     "defaultMessage": "Create New Revision (From Current API)"

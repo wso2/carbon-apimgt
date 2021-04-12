@@ -3,7 +3,6 @@ import { useTheme } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import { FormattedMessage } from 'react-intl';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
@@ -12,7 +11,6 @@ import RestAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/RestAPIMenu';
 import SoapAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/SoapAPIMenu';
 import GraphqlAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/GraphqlAPIMenu';
 import StreamingAPIMenu from 'AppComponents/Apis/Listing/Landing/Menus/StreamingAPIMenu';
-import ServiceCatalogMenu from 'AppComponents/Apis/Listing/Landing/Menus/ServiceCatalogMenu';
 
 const useStyles = makeStyles({
     root: {
@@ -31,13 +29,12 @@ const useStyles = makeStyles({
 const APILanding = () => {
     const theme = useTheme();
     const isXsOrBelow = useMediaQuery(theme.breakpoints.down('xs'));
-    const { dividerCls, root } = useStyles();
+    const { root } = useStyles();
     const {
         graphqlIcon,
         restApiIcon,
         soapApiIcon,
         streamingApiIcon,
-        serviceCatalogApiIcon,
     } = theme.custom.landingPage.icons;
 
     return (
@@ -80,10 +77,6 @@ const APILanding = () => {
                             <SoapAPIMenu icon={soapApiIcon} />
                             <GraphqlAPIMenu icon={graphqlIcon} />
                             <StreamingAPIMenu icon={streamingApiIcon} />
-                            <Box display={{ xs: 'none', lg: 'block' }} mx={5}>
-                                <Divider className={dividerCls} light orientation='vertical' variant='inset' />
-                            </Box>
-                            <ServiceCatalogMenu icon={serviceCatalogApiIcon} />
                         </Grid>
                     </Box>
                 </Grid>
