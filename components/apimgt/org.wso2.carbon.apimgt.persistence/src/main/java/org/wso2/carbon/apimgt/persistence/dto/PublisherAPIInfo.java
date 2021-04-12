@@ -107,7 +107,7 @@ public class PublisherAPIInfo {
 
     public Date getUpdatedTime() { return updatedTime; }
 
-    public void setUpdatedTime(Date updatedTime) { this.updatedTime = updatedTime;}
+    public void setUpdatedTime(Date updatedTime) { this.updatedTime = updatedTime; }
 
     @Override
     public String toString() {
