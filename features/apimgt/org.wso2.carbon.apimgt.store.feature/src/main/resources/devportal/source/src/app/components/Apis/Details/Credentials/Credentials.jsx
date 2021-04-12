@@ -408,7 +408,7 @@ class Credentials extends React.Component {
                                 resourcePath={resourcePaths.SUBSCRIPTIONS}
                                 resourceMethod={resourceMethods.POST}
                             >
-                                <Typography variant='h5'>
+                                <Typography variant='h5' component='h2'>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'subscribe.to.application'}
@@ -498,7 +498,7 @@ class Credentials extends React.Component {
                                     */}
                         {subscribedApplications && subscribedApplications.length > 0 && (
                             <>
-                                <Typography variant='h5' className={classes.subsListTitle}>
+                                <Typography variant='h5' component='h2' className={classes.subsListTitle}>
                                     <FormattedMessage
                                         id={'Apis.Details.Credentials.Credentials.'
                                         + 'api.credentials.subscribed.apps.title'}
@@ -569,13 +569,9 @@ class Credentials extends React.Component {
         return (
             <Grid container>
                 <Grid item md={12} lg={11}>
-                    <Grid container spacing={5}>
+                    <Grid container spacing={2}>
                         <Grid item md={12}>
-                            <Typography onClick={this.handleExpandClick} variant='h4' component='h2' className={classes.titleSub}>
-                                <FormattedMessage
-                                    id='Apis.Details.Credentials.Credentials.api.credentials'
-                                    defaultMessage='Subscriptions'
-                                />
+                            <Typography onClick={this.handleExpandClick} variant='h4' component='div' className={classes.titleSub}>
                                 {applicationsAvailable.length > 0 && (
                                     <Link
                                         to={(isOnlyMutualSSL || isOnlyBasicAuth || isPrototypedAPI

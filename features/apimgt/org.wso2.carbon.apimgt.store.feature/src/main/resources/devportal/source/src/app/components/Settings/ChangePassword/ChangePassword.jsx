@@ -40,8 +40,8 @@ const useStyles = makeStyles((theme) => ({
         },
     },
     passwordChangeForm: {
-        '& span, & div, & p, & input': {
-            color: theme.palette.getContrastText(theme.palette.background.paper),
+        '& > span, & div, & p, & input': {
+            color: theme.palette.getContrastText(theme.palette.primary.main),
         },
     },
 }));
@@ -226,7 +226,7 @@ const ChangePassword = () => {
 
     const title = (
         <>
-            <Typography variant='h5'>
+            <Typography variant='h5' component='h1'>
                 <FormattedMessage
                     id='Change.Password.title'
                     defaultMessage='Change Password'
@@ -288,6 +288,7 @@ const ChangePassword = () => {
                                         root: classes.mandatoryStarText,
                                     }}
                                     required
+                                    id='current-password'
                                     autoFocus
                                     margin='dense'
                                     name='currentPassword'
@@ -305,6 +306,7 @@ const ChangePassword = () => {
                                         root: classes.mandatoryStarText,
                                     }}
                                     margin='dense'
+                                    id='new-password'
                                     name='newPassword'
                                     value={newPassword}
                                     onChange={handleChange}
@@ -324,6 +326,7 @@ const ChangePassword = () => {
                                         root: classes.mandatoryStarText,
                                     }}
                                     margin='dense'
+                                    id='repeated-new-password'
                                     name='repeatedNewPassword'
                                     value={repeatedNewPassword}
                                     onChange={handleChange}
@@ -345,6 +348,7 @@ const ChangePassword = () => {
                                             color='primary'
                                             variant='contained'
                                             onClick={handleSave}
+                                            className={classes.passwordChangeForm}
                                         >
                                             <FormattedMessage
                                                 id='Settings.ChangePasswordForm.Save.Button.text'

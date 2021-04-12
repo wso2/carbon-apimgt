@@ -759,6 +759,7 @@ function TryOutController(props) {
                                             <>
                                                 <Typography
                                                     variant='h5'
+                                                    component='h3'
                                                     color='textPrimary'
                                                     className={classes.categoryHeading}
                                                 >
