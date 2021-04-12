@@ -588,7 +588,7 @@ function TryOutController(props) {
                             ) : (
                                 (!ksGenerated && securitySchemeType === 'OAUTH') && (
                                     <Grid x={8} md={6} className={classes.tokenType} item>
-                                        <Box mb={1} alignItems='left'>
+                                        <Box mb={1} alignItems='center'>
                                             <Typography variant='body1'>
                                                 <Box display='flex'>
                                                     <WarningIcon className={classes.warningIcon} />

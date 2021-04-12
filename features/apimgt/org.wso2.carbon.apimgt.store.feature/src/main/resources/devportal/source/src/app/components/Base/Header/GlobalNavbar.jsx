@@ -40,7 +40,7 @@ function GlobalNavBar(props) {
     const { custom: { landingPage: { active: landingPageActive, activeForAnonymous } } } = theme;
     const isUserFound = AuthManager.getUser();
     return (
-        <List className={classes.listRootInline} component='nav'>
+        <List className={classes.listRootInline} component='nav' aria-label='Secondary navigation' role='navigation'>
             {landingPageActive && ((isUserFound && !activeForAnonymous) || activeForAnonymous)
                 && (
                     <Link
@@ -50,7 +50,7 @@ function GlobalNavBar(props) {
                             [classes.links]: true,
                         })}
                     >
-                        <ListItem button classes={{ root: classes.listItemRoot }}>
+                        <ListItem component='div' classes={{ root: classes.listItemRoot }}>
                             <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                                 <Icon
                                     style={{
@@ -84,7 +84,7 @@ function GlobalNavBar(props) {
                 to={(theme.custom.tagWise.active && theme.custom.tagWise.style === 'page') ? '/api-groups' : '/apis'}
                 className={classNames({ [classes.selected]: selected === 'apis', [classes.links]: true })}
             >
-                <ListItem button classes={{ root: classes.listItemRoot }}>
+                <ListItem component='div' classes={{ root: classes.listItemRoot }}>
                     <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                         <CustomIcon
                             width={iconWidth}
@@ -118,7 +118,7 @@ function GlobalNavBar(props) {
                     [classes.links]: true,
                 })}
             >
-                <ListItem button classes={{ root: classes.listItemRoot }}>
+                <ListItem component='div' classes={{ root: classes.listItemRoot }}>
                     <ListItemIcon classes={{ root: classNames({ [classes.smallIcon]: !drawerView }) }}>
                         <CustomIcon
                             width={iconWidth}

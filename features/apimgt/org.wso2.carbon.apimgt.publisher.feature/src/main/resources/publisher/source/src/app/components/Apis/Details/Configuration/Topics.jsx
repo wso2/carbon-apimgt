@@ -111,6 +111,14 @@ export default function Topics(props) {
         const { action, value } = configAction;
         const nextState = { ...state };
         switch (action) {
+            case 'enable':
+                nextState.enable = value;
+                if (!value) {
+                    nextState.signingAlgorithm = '';
+                    nextState.signatureHeader = '';
+                    nextState.secret = '';
+                }
+                break;
             case 'signingAlgorithm':
             case 'signatureHeader':
             case 'secret':
@@ -122,8 +130,9 @@ export default function Topics(props) {
         return nextState;
     }
     const initialWebsubSubscriptionConfig = api.websubSubscriptionConfiguration || {
+        enable: false,
         signingAlgorithm: '',
-        signatureHeader: 'x-hub-signature',
+        signatureHeader: '',
         secret: '',
     };
 
@@ -286,8 +295,8 @@ export default function Topics(props) {
      * @param {Object} spec The original swagger content.
      */
     function setSecurityDefScopesFromSpec(spec) {
-        if (spec.components && spec.components.securitySchemes && spec.components.securitySchemes.default) {
-            const { flows } = spec.components.securitySchemes.default;
+        if (spec.components && spec.components.securitySchemes && spec.components.securitySchemes.oauth2) {
+            const { flows } = spec.components.securitySchemes.oauth2;
             if (flows.implicit.scopes) {
                 setSecurityDefScopes(cloneDeep(flows.implicit.scopes));
             }
@@ -300,8 +309,8 @@ export default function Topics(props) {
     function setSpecScopesFromSecurityDefScopes() {
         if (asyncAPISpec.components
             && asyncAPISpec.components.securitySchemes
-            && asyncAPISpec.components.securitySchemes.default) {
-            asyncAPISpec.components.securitySchemes.default.flows.implicit.scopes = securityDefScopes;
+            && asyncAPISpec.components.securitySchemes.oauth2) {
+            asyncAPISpec.components.securitySchemes.oauth2.flows.implicit.scopes = securityDefScopes;
         }
     }
 
@@ -368,10 +377,6 @@ export default function Topics(props) {
                 if (isScopeExistsInOperation) {
                     break;
                 }
-            }
-            // Checking if the scope exists in operation and is a shared scope
-            if (!isScopeExistsInOperation && (key in sharedScopesByName)) {
-                delete securityDefScopes[key];
             }
         });
         setSecurityDefScopes(securityDefScopes);

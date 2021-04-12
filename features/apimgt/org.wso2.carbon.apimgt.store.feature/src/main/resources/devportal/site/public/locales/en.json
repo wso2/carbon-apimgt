@@ -200,6 +200,7 @@
   "Apis.Listing.ApiTableView.context": "Context",
   "Apis.Listing.ApiTableView.error.loading": "Error While Loading APIs",
   "Apis.Listing.ApiTableView.invalid.tenant.domain": "Invalid tenant domain",
+  "Apis.Listing.ApiTableView.items.per.page": "Items per page",
   "Apis.Listing.ApiTableView.name": "Name",
   "Apis.Listing.ApiTableView.provider": "Provider/Business Owner",
   "Apis.Listing.ApiTableView.provider.caption": "(Provider)",

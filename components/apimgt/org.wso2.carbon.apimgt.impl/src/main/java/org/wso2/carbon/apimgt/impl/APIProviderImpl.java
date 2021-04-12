@@ -8826,7 +8826,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
-        int totalLength = 0;
 
         String userame = userNameWithoutChange;
         Organization org = new Organization(tenantDomain);
@@ -8892,7 +8891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while searching content ", e);
         }
         result.put("apis", compoundResult);
-        result.put("length", totalLength );
+        result.put("length", compoundResult.size() );
         return result;
     }
 

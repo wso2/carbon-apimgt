@@ -534,6 +534,14 @@ class ApiTableView extends React.Component {
                 localStorage.setItem('portal.numberOfRows', numberOfRows);
                 this.getData();
             },
+            textLabels: {
+                pagination: {
+                    rowsPerPage: intl.formatMessage({
+                        id: 'Apis.Listing.ApiTableView.items.per.page',
+                        defaultMessage: 'Items per page',
+                    }),
+                },
+            },
         };
         if (gridView) {
             options.customRowRender = (_data, dataIndex, rowIndex, tableViewObj = this) => {

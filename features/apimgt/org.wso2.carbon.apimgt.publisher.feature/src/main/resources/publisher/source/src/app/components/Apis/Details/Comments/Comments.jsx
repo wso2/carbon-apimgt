@@ -100,15 +100,16 @@ class Comments extends Component {
         super(props);
         this.state = {
             expanded: true,
-            allComments: [],
+            allComments: null,
             comments: [],
             totalComments: null,
-            startCommentsToDisplay: 0,
             apiId: null,
         };
-        this.updateCommentList = this.updateCommentList.bind(this);
         this.handleExpandClick = this.handleExpandClick.bind(this);
         this.handleLoadMoreComments = this.handleLoadMoreComments.bind(this);
+        this.addComment = this.addComment.bind(this);
+        this.updateComment = this.updateComment.bind(this);
+        this.onDeleteComment = this.onDeleteComment.bind(this);
     }
 
     /**
@@ -124,18 +125,11 @@ class Comments extends Component {
         CommentsAPI.all(api.id, limit, offset)
             .then((result) => {
                 const commentList = result.body.list;
-                this.setState({ allComments: commentList, totalComments: result.body.pagination.total });
-                if (result.body.pagination.total < theme.custom.commentsLimit) {
-                    this.setState({
-                        startCommentsToDisplay: 0,
-                        comments: commentList,
-                    });
-                } else {
-                    this.setState({
-                        startCommentsToDisplay: result.body.pagination.total - theme.custom.commentsLimit,
-                        comments: commentList,
-                    });
-                }
+                this.setState({
+                    allComments: commentList,
+                    comments: commentList,
+                    totalComments: result.body.pagination.total,
+                });
             })
             .catch((error) => {
                 console.error(error);
@@ -148,26 +142,95 @@ class Comments extends Component {
     }
 
     /**
+     * Delete a comment
+     * @param {string} commentIdOfCommentToDelete id of deleted commetn
+     * @memberof Comments
+     */
+    onDeleteComment(commentIdOfCommentToDelete) {
+        const {
+            apiId, comments, totalComments,
+        } = this.state;
+
+        const remainingComments = comments.filter((item) => item.id !== commentIdOfCommentToDelete);
+        const newTotal = totalComments - 1;
+
+        if (newTotal > remainingComments.length) {
+            CommentsAPI
+                .all(apiId, 1, remainingComments.length)
+                .then((result) => {
+                    if (result.body) {
+                        this.setState({
+                            totalComments: newTotal,
+                            comments: [...remainingComments, ...result.body.list],
+                            allComments: [...remainingComments, ...result.body.list],
+                        });
+                    }
+                })
+                .catch((error) => {
+                    if (process.env.NODE_ENV !== 'production') {
+                        console.log(error);
+                    }
+                });
+        } else {
+            this.setState({
+                totalComments: newTotal,
+                comments: remainingComments,
+                allComments: remainingComments,
+            });
+        }
+    }
+
+    /**
+     * Add comment to the comment list
+     * @param {any} comment added comment
+     * @memberof Comments
+     */
+    addComment(comment) {
+        const { totalComments, allComments } = this.state;
+        const newTotal = totalComments + 1;
+
+        this.setState({
+            allComments: [comment, ...allComments],
+            totalComments: newTotal,
+            comments: [comment, ...allComments],
+        });
+    }
+
+    /**
+     * Update a specific comment in the comment list
+     * @param {any} comment updated comment
+     * @memberof Comments
+     */
+    updateComment(comment) {
+        const { comments } = this.state;
+
+        const newComments = comments.reduce((acc, cur) => {
+            let temp = cur;
+            if (cur.id === comment.id) {
+                temp = comment;
+            }
+            return [...acc, temp];
+        }, []);
+        this.setState({
+            allComments: newComments,
+            comments: newComments,
+        });
+    }
+
+    /**
      * Handles loading the previous comments
      * @memberof Comments
      */
     handleLoadMoreComments() {
-        const { totalComments, startCommentsToDisplay, allComments } = this.state;
-        const { theme } = this.props;
+        const { allComments, comments } = this.state;
+        const { theme, api: { id: apiId } } = this.props;
         const limit = theme.custom.commentsLimit;
-        const offset = totalComments - startCommentsToDisplay;
+        const offset = comments.length;
 
-        CommentsAPI.all(this.state.apiId, limit, offset)
+        CommentsAPI.all(apiId, limit, offset)
             .then((result) => {
                 const newAllCommentList = allComments.concat(result.body.list);
                 this.setState({ allComments: newAllCommentList, comments: newAllCommentList });
-                if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
-                    this.setState({ startCommentsToDisplay: 0 });
-                } else {
-                    this.setState({
-                        startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
-                    });
-                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -186,46 +249,6 @@ class Comments extends Component {
     }
 
     /**
-     * Updates the comment list, This is passed through props to child component
-     * @param {any} comments Updated comment list
-     * @memberof Comments
-     */
-    updateCommentList(comments) {
-        const { startCommentsToDisplay, totalComments } = this.state;
-        const { theme } = this.props;
-        let newStart;
-        let difference;
-        let newTotal;
-        this.setState({ allComments: comments });
-        if (totalComments < theme.custom.commentsLimit) {
-            newTotal = comments.length;
-            this.setState({ startCommentsToDisplay: 0, totalComments: newTotal, comments });
-        } else if (totalComments <= comments.length) {
-            difference = comments.length - totalComments;
-            newStart = startCommentsToDisplay + difference;
-            newTotal = comments.length;
-            this.setState({
-                startCommentsToDisplay: newStart,
-                totalComments: newTotal,
-                comments: comments.slice(newStart, newTotal),
-            });
-        } else {
-            difference = totalComments - comments.length;
-            if (startCommentsToDisplay === 0) {
-                newStart = startCommentsToDisplay;
-            } else {
-                newStart = startCommentsToDisplay - difference;
-            }
-            newTotal = comments.length;
-            this.setState({
-                startCommentsToDisplay: newStart,
-                totalComments: newTotal,
-                comments: comments.slice(newStart, newTotal),
-            });
-        }
-    }
-
-    /**
      * Render method of the component
      * @returns {React.Component} Comment html component
      * @memberof Comments
@@ -233,7 +256,7 @@ class Comments extends Component {
     render() {
         const { classes, api } = this.props;
         const {
-            comments, allComments, startCommentsToDisplay, totalComments,
+            comments, allComments, totalComments,
         } = this.state;
         return (
             <div className={classes.contentWrapper}>
@@ -247,7 +270,8 @@ class Comments extends Component {
                 <div className={classes.paper}>
                     <CommentAdd
                         api={api}
-                        commentsUpdate={this.updateCommentList}
+                        commentsUpdate={this.addComment}
+                        addComment={this.addComment}
                         allComments={allComments}
                         replyTo={null}
                         cancelButton
@@ -260,37 +284,38 @@ class Comments extends Component {
                     </Paper>
                 )}
                 {allComments && totalComments === 0
-                && (
-                    <div className={classes.genericMessageWrapper}>
-                        <InlineMessage type='info' className={classes.dialogContainer}>
-                            <Typography variant='h5' component='h3'>
-                                <FormattedMessage
-                                    id='Apis.Details.Comments.no.comments'
-                                    defaultMessage='No Comments Yet'
-                                />
-                            </Typography>
-                            <Typography component='p'>
-                                <FormattedMessage
-                                    id='Apis.Details.Comments.no.comments.content'
-                                    defaultMessage='No comments available for this API yet'
-                                />
-                            </Typography>
-                        </InlineMessage>
-                    </div>
-                )}
+                    && (
+                        <div className={classes.genericMessageWrapper}>
+                            <InlineMessage type='info' className={classes.dialogContainer}>
+                                <Typography variant='h5' component='h3'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Comments.no.comments'
+                                        defaultMessage='No Comments Yet'
+                                    />
+                                </Typography>
+                                <Typography component='p'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Comments.no.comments.content'
+                                        defaultMessage='No comments available for this API yet'
+                                    />
+                                </Typography>
+                            </InlineMessage>
+                        </div>
+                    )}
                 <Comment
                     comments={comments}
                     api={api}
-                    commentsUpdate={this.updateCommentList}
                     allComments={allComments}
+                    onDeleteComment={this.onDeleteComment}
+                    updateComment={this.updateComment}
                 />
-                {startCommentsToDisplay !== 0 && (
+                {totalComments > comments.length && (
                     <div className={classes.contentWrapper}>
                         <Grid container spacing={4} className={classes.root}>
                             <Grid item>
                                 <Typography className={classes.verticalSpace} variant='body1'>
                                     <a
-                                        className={classes.link + classes.loadMoreLink}
+                                        className={classes.link + ' ' + classes.loadMoreLink}
                                         onClick={this.handleLoadMoreComments}
                                         onKeyDown={this.handleLoadMoreComments}
                                     >
@@ -303,7 +328,7 @@ class Comments extends Component {
                             </Grid>
                             <Grid item>
                                 <Typography className={classes.verticalSpace} variant='body1'>
-                                    { '(' + (totalComments - startCommentsToDisplay) + ' of ' + totalComments + ')'}
+                                    {'(' + comments.length + ' of ' + totalComments + ')'}
                                 </Typography>
                             </Grid>
                         </Grid>

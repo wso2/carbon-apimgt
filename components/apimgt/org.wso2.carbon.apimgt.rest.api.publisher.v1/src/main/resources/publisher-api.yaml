@@ -7845,6 +7845,9 @@ components:
           type: array
           items:
             type: string
+        createdTime:
+            type: string
+            example : 2021-02-11 09:57:25
 
     Topic:
       title: Topic object
@@ -9719,6 +9722,10 @@ components:
     WebsubSubscriptionConfiguration:
       type: object
       properties:
+        enable:
+          type: boolean
+          default: false
+          description: Toggle enable WebSub subscription configuration
         secret:
           type: string
           description: Secret key to be used for subscription

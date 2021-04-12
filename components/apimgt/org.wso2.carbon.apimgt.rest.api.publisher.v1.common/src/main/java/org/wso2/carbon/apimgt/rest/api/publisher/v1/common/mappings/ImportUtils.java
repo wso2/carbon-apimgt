@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
@@ -71,7 +72,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycle;
 import org.wso2.carbon.apimgt.impl.importexport.lifecycle.LifeCycleTransition;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -91,7 +91,6 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
@@ -275,8 +274,6 @@ public class ImportUtils {
             }
 
             tenantId = APIUtil.getTenantId(RestApiCommonUtil.getLoggedInUsername());
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
 
             // Since Image, documents, sequences and WSDL are optional, exceptions are logged and ignored in
             // implementation
@@ -287,8 +284,8 @@ public class ImportUtils {
             addSOAPToREST(importedApi, validationResponse.getContent(), apiProvider);
 
             if (!isAdvertiseOnlyAPI(importedApiDTO)) {
-                addAPISequences(extractedFolderPath, importedApi, registry);
-                addAPISpecificSequences(extractedFolderPath, registry, importedApi.getId());
+                addAPISequences(extractedFolderPath, importedApi, apiProvider);
+                addAPISpecificSequences(extractedFolderPath, importedApi, apiProvider);
                 addEndpointCertificates(extractedFolderPath, importedApi, apiProvider, tenantId);
 
                 if (log.isDebugEnabled()) {
@@ -374,8 +371,6 @@ public class ImportUtils {
                     ExceptionCodes.ERROR_READING_META_DATA);
         } catch (FaultGatewaysException e) {
             throw new APIManagementException("Error while updating API: " + importedApi.getId().getApiName(), e);
-        } catch (RegistryException e) {
-            throw new APIManagementException("Error while getting governance registry for tenant: " + tenantId, e);
         } catch (APIMgtAuthorizationFailedException e) {
             throw new APIManagementException("Please enable preserveProvider property for cross tenant API Import.", e,
                     ExceptionCodes.TENANT_MISMATCH);
@@ -471,8 +466,11 @@ public class ImportUtils {
                         apiRevisionDeployment.setDisplayOnDevportal(displayOnDevportal);
                         apiRevisionDeployments.add(apiRevisionDeployment);
                     } else {
-                        log.error("Label " + deploymentName + " is not a defined gateway environment. Hence " +
-                                "skipped without deployment");
+                        throw new APIManagementException(
+                                "Label " + deploymentName + " is not a defined gateway environment. Hence "
+                                        + "skipped without deployment", ExceptionCodes
+                                .from(ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND,
+                                        String.format("label '%s'", deploymentName)));
                     }
                 }
 
@@ -1309,37 +1307,39 @@ public class ImportUtils {
      *
      * @param pathToArchive Location of the extracted folder of the API
      * @param importedApi   The imported API object
-     * @param registry      Registry
+     * @param apiProvider   API Provider
+     * @throws APIManagementException If an error occurs while adding the mediation policy
      */
-    private static void addAPISequences(String pathToArchive, API importedApi, Registry registry) throws IOException {
+    private static void addAPISequences(String pathToArchive, API importedApi, APIProvider apiProvider)
+            throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        List<Mediation> existingMediationsList = apiProvider.getAllGlobalMediationPolicies();
 
-        String regResourcePath;
+        try {
+            // Adding in-sequence, if any
+            String sequenceContent = retrieveSequenceContent(pathToArchive, false,
+                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, importedApi.getInSequence());
+            PublisherCommonUtils
+                    .addMediationPolicyFromFile(sequenceContent, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
+                            apiProvider, importedApi.getUuid(), tenantDomain, existingMediationsList, Boolean.FALSE);
 
-        //Adding in-sequence, if any
-        String sequenceContent = retrieveSequenceContent(pathToArchive, false, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
-                importedApi.getInSequence());
-        if (StringUtils.isNotEmpty(sequenceContent)) {
-            String inSequenceFileName = importedApi.getInSequence() + APIConstants.XML_EXTENSION;
-            regResourcePath = APIConstants.API_CUSTOM_INSEQUENCE_LOCATION + inSequenceFileName;
-            addSequenceToRegistry(false, registry, sequenceContent, regResourcePath);
+            // Adding out-sequence, if any
+            sequenceContent = retrieveSequenceContent(pathToArchive, false, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
+                    importedApi.getOutSequence());
+            PublisherCommonUtils
+                    .addMediationPolicyFromFile(sequenceContent, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
+                            apiProvider, importedApi.getUuid(), tenantDomain, existingMediationsList, Boolean.FALSE);
+
+            // Adding fault-sequence, if any
+            sequenceContent = retrieveSequenceContent(pathToArchive, false, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
+                    importedApi.getFaultSequence());
+            PublisherCommonUtils
+                    .addMediationPolicyFromFile(sequenceContent, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
+                            apiProvider, importedApi.getUuid(), tenantDomain, existingMediationsList, Boolean.FALSE);
+        } catch (Exception e) {
+            throw new APIManagementException(
+                    "An Error has occurred while adding mediation policy" + StringUtils.SPACE + e.getMessage(), e);
         }
-
-        sequenceContent = retrieveSequenceContent(pathToArchive, false, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
-                importedApi.getOutSequence());
-        if (StringUtils.isNotEmpty(sequenceContent)) {
-            String outSequenceFileName = importedApi.getOutSequence() + APIConstants.XML_EXTENSION;
-            regResourcePath = APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION + outSequenceFileName;
-            addSequenceToRegistry(false, registry, sequenceContent, regResourcePath);
-        }
-
-        sequenceContent = retrieveSequenceContent(pathToArchive, false, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
-                importedApi.getFaultSequence());
-        if (StringUtils.isNotEmpty(sequenceContent)) {
-            String faultSequenceFileName = importedApi.getFaultSequence() + APIConstants.XML_EXTENSION;
-            regResourcePath = APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION + faultSequenceFileName;
-            addSequenceToRegistry(false, registry, sequenceContent, regResourcePath);
-        }
-
     }
 
     public static String retrieveSequenceContent(String pathToArchive, boolean specific, String type,
@@ -1393,34 +1393,38 @@ public class ImportUtils {
      * sequence already exists, it is updated.
      *
      * @param pathToArchive Location of the extracted folder of the API
-     * @param registry      Registry
-     * @param apiIdentifier API Identifier
+     * @param importedApi   Imported API
+     * @param apiProvider   API Provider
+     * @throws APIManagementException If an error occurs while adding the mediation policy
      */
-    private static void addAPISpecificSequences(String pathToArchive, Registry registry, APIIdentifier apiIdentifier) {
-
-        String apiResourcePath = APIUtil.getAPIPath(apiIdentifier);
-        // Getting registry API base path out of apiResourcePath
-        apiResourcePath = apiResourcePath.substring(0, apiResourcePath.lastIndexOf("/"));
+    private static void addAPISpecificSequences(String pathToArchive, API importedApi, APIProvider apiProvider)
+            throws APIManagementException {
         String sequencesDirectoryPath = pathToArchive + File.separator + ImportExportConstants.SEQUENCES_RESOURCE;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        List<Mediation> existingAPISpecificMediationsList =
+                apiProvider.getAllApiSpecificMediationPolicies(importedApi.getUuid(), tenantDomain);
 
         // Add multiple custom sequences to registry for each type in/out/fault
-        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
-                ImportExportConstants.IN_SEQUENCE_PREFIX);
-        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
-                ImportExportConstants.OUT_SEQUENCE_PREFIX);
-        addCustomSequencesToRegistry(sequencesDirectoryPath, apiResourcePath, registry,
-                ImportExportConstants.FAULT_SEQUENCE_PREFIX);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, ImportExportConstants.IN_SEQUENCE_PREFIX, importedApi,
+                apiProvider, tenantDomain, existingAPISpecificMediationsList);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, ImportExportConstants.OUT_SEQUENCE_PREFIX, importedApi,
+                apiProvider, tenantDomain, existingAPISpecificMediationsList);
+        addCustomSequencesToRegistry(sequencesDirectoryPath, ImportExportConstants.FAULT_SEQUENCE_PREFIX, importedApi,
+                apiProvider, tenantDomain, existingAPISpecificMediationsList);
     }
 
     /**
-     * @param sequencesDirectoryPath Location of the sequences directory inside the extracted folder of the API
-     * @param apiResourcePath        API resource path in the registry
-     * @param registry               Registry
-     * @param type                   Sequence type (in/out/fault)
+     * @param sequencesDirectoryPath            Location of the sequences directory in the extracted folder of the API
+     * @param type                              Sequence type (in/out/fault)
+     * @param importedApi                       Imported API
+     * @param apiProvider                       API Provider
+     * @param tenantDomain                      Tenant domain of the API
+     * @param existingAPISpecificMediationsList Existing API specific mediations list
+     * @throws APIManagementException If an error occurs while adding the mediation policy
      */
-    private static void addCustomSequencesToRegistry(String sequencesDirectoryPath, String apiResourcePath,
-                                                     Registry registry, String type) {
-
+    private static void addCustomSequencesToRegistry(String sequencesDirectoryPath, String type, API importedApi,
+            APIProvider apiProvider, String tenantDomain, List<Mediation> existingAPISpecificMediationsList)
+            throws APIManagementException {
         String apiSpecificSequenceFilePath =
                 sequencesDirectoryPath + File.separator + type + ImportExportConstants.SEQUENCE_LOCATION_POSTFIX
                         + File.separator + ImportExportConstants.CUSTOM_TYPE;
@@ -1431,52 +1435,22 @@ public class ImportUtils {
                 for (File apiSpecificSequence : apiSpecificSequencesDirectoryListing) {
                     String individualSequenceLocation =
                             apiSpecificSequenceFilePath + File.separator + apiSpecificSequence.getName();
-                    // Constructing mediation resource path
-                    String mediationResourcePath = apiResourcePath + RegistryConstants.PATH_SEPARATOR + type
-                            + RegistryConstants.PATH_SEPARATOR + apiSpecificSequence.getName();
                     try {
-                        String content = retrieveSequenceContentFromLocation(individualSequenceLocation);
-                        if (StringUtils.isNotEmpty(content)) {
-                            addSequenceToRegistry(true, registry, content, mediationResourcePath);
-                        }
+                        String sequenceContent = retrieveSequenceContentFromLocation(individualSequenceLocation);
+                        PublisherCommonUtils
+                                .addMediationPolicyFromFile(sequenceContent, type, apiProvider, importedApi.getUuid(),
+                                        tenantDomain, existingAPISpecificMediationsList, Boolean.TRUE);
                     } catch (IOException e) {
                         log.error(
                                 "I/O error while writing sequence data to the registry : " + individualSequenceLocation,
                                 e);
+                    } catch (Exception e) {
+                        throw new APIManagementException(
+                                "An Error has occurred while adding mediation policy" + StringUtils.SPACE + e
+                                        .getMessage(), e);
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * This method adds the sequence files to the registry. This updates the API specific sequences if already exists.
-     *
-     * @param isAPISpecific   Whether the adding sequence is API specific
-     * @param registry        The registry instance
-     * @param sequenceContent Location of the sequence file
-     * @param regResourcePath Resource path in the registry
-     */
-    private static void addSequenceToRegistry(Boolean isAPISpecific, Registry registry, String sequenceContent,
-                                              String regResourcePath) {
-
-        try {
-            if (registry.resourceExists(regResourcePath) && !isAPISpecific) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Sequence already exists in registry path: " + regResourcePath);
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Adding Sequence to the registry path : " + regResourcePath);
-                }
-                byte[] inSeqData = sequenceContent.getBytes();
-                Resource inSeqResource = registry.newResource();
-                inSeqResource.setContent(inSeqData);
-                registry.put(regResourcePath, inSeqResource);
-            }
-        } catch (RegistryException e) {
-            //this is logged and ignored because sequences are optional
-            log.error("Failed to add sequences into the registry : " + regResourcePath, e);
         }
     }
 
@@ -1497,7 +1471,7 @@ public class ImportUtils {
 
         if (CommonUtil.checkFileExistence(wsdlPath)) {
             try (FileInputStream inputStream = new FileInputStream(wsdlPath)) {
-                String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                 String fileExtension = FilenameUtils.getExtension(wsdlPath);
                 PublisherCommonUtils.addWsdl(fileExtension, inputStream, importedApi, apiProvider, tenantDomain);
             } catch (FileNotFoundException e) {
@@ -1724,7 +1698,7 @@ public class ImportUtils {
     private static void addSOAPToREST(API importedApi, String swaggerContent, APIProvider apiProvider)
             throws APIManagementException, FaultGatewaysException {
         if (StringUtils.equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-            String tenantDomain = MultitenantUtils.getTenantDomain(importedApi.getId().getProviderName());
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             PublisherCommonUtils
                     .updateAPIBySettingGenerateSequencesFromSwagger(swaggerContent, importedApi, apiProvider,
                             tenantDomain);

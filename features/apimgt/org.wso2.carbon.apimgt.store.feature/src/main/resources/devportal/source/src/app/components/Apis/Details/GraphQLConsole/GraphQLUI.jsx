@@ -94,7 +94,7 @@ export default function GraphQLUI(props) {
         } else {
             token = 'Bearer ' + accessTokenProvider();
         }
-        return fetch((URLs.https), {
+        return fetch((URLs && URLs.https), {
             method: 'post',
             headers: {
                 Accept: 'application/json',
@@ -117,12 +117,12 @@ export default function GraphQLUI(props) {
                                 id='Apis.Details.GraphQLConsole.GraphQLUI.URLs'
                             />
                         )}
-                        value={URLs.https}
+                        value={URLs && URLs.https}
                         name='selectedURL'
                         fullWidth
                         margin='normal'
                         variant='outlined'
-                        InputProps={URLs.https}
+                        InputProps={URLs && URLs.https}
                         disabled
                     />
                 </Box>

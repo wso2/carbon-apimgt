@@ -24,11 +24,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 /**
  * Holds configs related to jwt generation.
- *
  */
 public class JWTConfigurationDto {
+
     private boolean enabled = false;
     private String jwtHeader = "X-JWT-Assertion";
     private String consumerDialectUri = "http://wso2.org/claims";
@@ -40,6 +41,23 @@ public class JWTConfigurationDto {
     private Certificate publicCert;
     private PrivateKey privateKey;
     private long ttl;
+
+    public JWTConfigurationDto(JWTConfigurationDto jwtConfigurationDto) {
+
+        this.enabled = jwtConfigurationDto.enabled;
+        this.jwtHeader = jwtConfigurationDto.jwtHeader;
+        this.consumerDialectUri = jwtConfigurationDto.consumerDialectUri;
+        this.signatureAlgorithm = jwtConfigurationDto.signatureAlgorithm;
+        this.enableUserClaims = jwtConfigurationDto.enableUserClaims;
+        this.gatewayJWTGeneratorImpl = jwtConfigurationDto.gatewayJWTGeneratorImpl;
+        this.tokenIssuerDtoMap = jwtConfigurationDto.tokenIssuerDtoMap;
+        this.jwtExcludedClaims = jwtConfigurationDto.jwtExcludedClaims;
+        this.ttl = jwtConfigurationDto.ttl;
+    }
+
+    public JWTConfigurationDto() {
+
+    }
 
     public boolean isEnabled() {
 
@@ -81,13 +99,14 @@ public class JWTConfigurationDto {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-    public void setGatewayJWTGeneratorImpl(String gatewayJWTGeneratorImpl) {
-        this.gatewayJWTGeneratorImpl = gatewayJWTGeneratorImpl;
-    }
-
     public String getGatewayJWTGeneratorImpl() {
 
         return gatewayJWTGeneratorImpl;
+    }
+
+    public void setGatewayJWTGeneratorImpl(String gatewayJWTGeneratorImpl) {
+
+        this.gatewayJWTGeneratorImpl = gatewayJWTGeneratorImpl;
     }
 
     public Map<String, TokenIssuerDto> getTokenIssuerDtoMap() {
@@ -121,27 +140,33 @@ public class JWTConfigurationDto {
         this.enableUserClaims = enableUserClaims;
     }
 
-    public void setPublicCert(Certificate publicCert) {
-        this.publicCert = publicCert;
-    }
-
     public Certificate getPublicCert() {
+
         return publicCert;
     }
 
-    public void setPrivateKey(PrivateKey privateKey) {
-        this.privateKey = privateKey;
+    public void setPublicCert(Certificate publicCert) {
+
+        this.publicCert = publicCert;
     }
 
     public PrivateKey getPrivateKey() {
+
         return privateKey;
     }
 
+    public void setPrivateKey(PrivateKey privateKey) {
+
+        this.privateKey = privateKey;
+    }
+
     public void setTtl(long ttl) {
+
         this.ttl = ttl;
     }
 
     public long getTTL() {
+
         return ttl;
     }
 

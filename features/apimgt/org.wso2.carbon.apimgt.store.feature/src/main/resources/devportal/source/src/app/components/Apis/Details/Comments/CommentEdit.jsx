@@ -248,11 +248,16 @@ class CommentEdit extends React.Component {
     }
 }
 
+CommentEdit.defaultProps = {
+    commentsUpdate: null,
+};
+
 CommentEdit.propTypes = {
     classes: PropTypes.instanceOf(Object).isRequired,
     apiId: PropTypes.string.isRequired,
     allComments: PropTypes.instanceOf(Array).isRequired,
-    commentsUpdate: PropTypes.func.isRequired,
+    // todo make commentsUpdate required once comment edit feature is supported
+    commentsUpdate: PropTypes.func,
     toggleShowEdit: PropTypes.func.isRequired,
     comment: PropTypes.instanceOf(Object).isRequired,
     intl: PropTypes.shape({
