@@ -103,7 +103,6 @@ const APICreateStreamingAPI = (props) => {
     };
     const [hideEndpoint, setHideEndpoint] = useState(!apiType || apiType === protocolKeys.WebSub);
 
-    const isWebSub = apiType === 'WEBSUB';
     /**
      *
      * Reduce the events triggered from API input fields to current state
