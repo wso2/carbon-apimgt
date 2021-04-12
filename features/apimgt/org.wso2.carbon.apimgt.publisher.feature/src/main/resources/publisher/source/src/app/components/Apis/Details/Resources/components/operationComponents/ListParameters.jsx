@@ -97,7 +97,7 @@ export default function ListParameters(props) {
                         <TableCell>
                             <FormattedMessage
                                 id='Apis.Details.Resources.components.operationComponents.ListParameter.parameter.name'
-                                defaultMessage='Name'
+                                defaultMessage='Name/Content Type'
                             />
                         </TableCell>
                         <TableCell align='left'>

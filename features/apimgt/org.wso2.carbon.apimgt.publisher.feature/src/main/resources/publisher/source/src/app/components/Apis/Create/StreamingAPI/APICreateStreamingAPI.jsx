@@ -53,6 +53,11 @@ const APICreateStreamingAPI = (props) => {
     const [isPublishButtonClicked, setIsPublishButtonClicked] = useState(false);
     const classes = useStyles();
     const [policies, setPolicies] = useState([]);
+    let { apiType } = useParams();
+    if (apiType) {
+        apiType = apiType.toUpperCase();
+    }
+    const isWebSub = (apiType === 'WEBSUB');
 
     useEffect(() => {
         API.asyncAPIPolicies().then((response) => {
@@ -62,8 +67,9 @@ const APICreateStreamingAPI = (props) => {
                     id: 'Apis.Create.Default.APICreateDefault.error.policies.not.available',
                     defaultMessage: 'Throttling policies not available. Contact your administrator',
                 }));
-            } else if (allPolicies.filter((p) => p.policyName === 'AsyncUnlimited').length > 0) {
-                // TODO: If this is a WebSub API select AsyncWHUnlimited as the policy.
+            } else if (isWebSub && allPolicies.filter((p) => p.policyName === 'AsyncWHUnlimited').length > 0) {
+                setPolicies(['AsyncWHUnlimited']);
+            } else if (!isWebSub && allPolicies.filter((p) => p.policyName === 'AsyncUnlimited').length > 0) {
                 setPolicies(['AsyncUnlimited']);
             } else {
                 setPolicies([allPolicies[0].policyName]);
@@ -95,13 +101,8 @@ const APICreateStreamingAPI = (props) => {
         SSE: 'SSE',
         WEBSUB: 'WebSub',
     };
-    let { apiType } = useParams();
-    if (apiType) {
-        apiType = apiType.toUpperCase();
-    }
     const [hideEndpoint, setHideEndpoint] = useState(!apiType || apiType === protocolKeys.WebSub);
 
-    const isWebSub = apiType === 'WEBSUB';
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -381,6 +382,8 @@ const APICreateStreamingAPI = (props) => {
                         endpointPlaceholderText='Streaming Provider'
                         appendChildrenBeforeEndpoint
                         hideEndpoint={hideEndpoint}
+                        isWebSocket={(apiType && apiType === protocolKeys.WebSocket)
+                            || apiInputs.protocol === protocolKeys.WebSocket}
                     >
                         <TextField
                             fullWidth

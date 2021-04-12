@@ -157,6 +157,17 @@ const definition = {
         });
         return tmpErrors;
     }),
+    wsUrl: Joi.string().uri({ scheme: ['ws', 'wss'] }).error((errors) => {
+        const tmpErrors = [...errors];
+        errors.forEach((err, index) => {
+            const tmpError = { ...err };
+            const errType = err.type;
+            tmpError.message = errType === 'string.uriCustomScheme' ? 'Invalid WebSocket URL'
+                : 'WebSocket URL ' + getMessage(errType);
+            tmpErrors[index] = tmpError;
+        });
+        return tmpErrors;
+    }),
     alias: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+[\]/]*$/).required()
         .error((errors) => {
             return errors.map((error) => ({ ...error, message: 'Alias ' + getMessage(error.type, 30) }));

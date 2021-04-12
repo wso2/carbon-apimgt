@@ -279,6 +279,12 @@ function AddEdit(props) {
         newConditionalGroups.push(newGroup);
         updateGroup();
     };
+    const deleteGroup = (i) => {
+        const clearedGroup = newConditionalGroups.slice(0, i).concat(
+            newConditionalGroups.slice(i + 1, newConditionalGroups.length),
+        );
+        dispatch({ field: 'conditionalGroups', value: clearedGroup });
+    };
     return (
 
         <ContentBase
@@ -430,10 +436,12 @@ function AddEdit(props) {
                                     // The API is not providing a unique key for each item.
                                     // eslint-disable-next-line react/no-array-index-key
                                     key={index}
+                                    index={index}
                                     group={group}
                                     defaultLimit={defaultLimit}
                                     updateGroup={updateGroup}
                                     hasErrors={hasErrors}
+                                    deleteGroup={deleteGroup}
                                 />
                             ))}
                         </Box>

@@ -7708,7 +7708,7 @@ public final class APIUtil {
     }
 
     public static WebsubSubscriptionConfiguration getDefaultWebsubSubscriptionConfiguration() {
-        return new WebsubSubscriptionConfiguration("", "SHA-256", "x-hub-signature");
+        return new WebsubSubscriptionConfiguration(false,"", "", "");
     }
 
     /**

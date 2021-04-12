@@ -402,6 +402,14 @@ class TableView extends React.Component {
                 localStorage.setItem('publisher.rowsPerPage', numberOfRows);
                 this.getData();
             },
+            textLabels: {
+                pagination: {
+                    rowsPerPage: intl.formatMessage({
+                        id: 'Apis.Listing.ApiTableView.items.per.page',
+                        defaultMessage: 'Items per page',
+                    }),
+                },
+            },
         };
         if (listType === 'grid') {
             options.customRowRender = (data, dataIndex, rowIndex, tableViewObj = this) => {
