@@ -746,6 +746,7 @@ class Details extends Component {
                         </Typography>
                         <div className={classes.root}>
                             <Accordion
+                                id='itest-api-details-portal-config-acc'
                                 defaultExpanded={this.state.portalConfigsExpanded}
                                 elevation={0}
                                 onChange={(e, isExpanded) => this.handleAccordionState('portalConfigsExpanded',
@@ -810,6 +811,7 @@ class Details extends Component {
                                 </AccordionDetails>
                             </Accordion>
                             <Accordion
+                                id='itest-api-details-api-config-acc'
                                 defaultExpanded={this.state.apiConfigsExpanded}
                                 elevation={0}
                                 onChange={(e, isExpanded) => this.handleAccordionState('apiConfigsExpanded',

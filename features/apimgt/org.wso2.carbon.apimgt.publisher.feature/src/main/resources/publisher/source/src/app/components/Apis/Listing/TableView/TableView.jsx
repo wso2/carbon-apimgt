@@ -244,7 +244,7 @@ class TableView extends React.Component {
         const { isAPIProduct, query } = this.props;
         if (query) {
             const composeQuery = queryString.parse(query);
-            composeQuery.limit = this.rowsPerPage;
+            composeQuery.limit = rowsPerPage;
             composeQuery.offset = page * rowsPerPage;
             return API.search(composeQuery);
         }
@@ -393,7 +393,7 @@ class TableView extends React.Component {
             selectableRows: 'none',
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
-                this.setState(numberOfRows);
+                this.setState({ rowsPerPage: numberOfRows });
                 if (page * numberOfRows > totalCount) {
                     this.page = 0;
                 } else if (totalCount - 1 === rowsPerPage * page && page !== 0) {
