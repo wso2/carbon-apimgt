@@ -706,6 +706,7 @@ function EndpointOverview(props) {
                                                     <FormControlLabel
                                                         control={(
                                                             <Checkbox
+                                                                disabled={isRestricted(['apim:api_create'], api)}
                                                                 checked={endpointCategory.prod}
                                                                 value='prod'
                                                                 color='primary'
@@ -847,6 +848,7 @@ function EndpointOverview(props) {
                                                         <FormControlLabel
                                                             control={(
                                                                 <Checkbox
+                                                                    disabled={isRestricted(['apim:api_create'], api)}
                                                                     checked={endpointCategory.sandbox}
                                                                     value='sandbox'
                                                                     color='primary'
