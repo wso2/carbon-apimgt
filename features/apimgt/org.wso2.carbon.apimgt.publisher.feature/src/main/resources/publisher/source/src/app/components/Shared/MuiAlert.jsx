@@ -1,5 +1,5 @@
 /**
- * Note: This component was taken from MUI Lab unite it's moved to core components
+ * Note: This component was taken from MUI Lab until it's moved to core components and we migrate to 5.x
  * https://github.com/mui-org/material-ui/tree/master/packages/material-ui-lab/src/Alert
  * For component documentation see https://material-ui.com/components/alert
  * `outlinedWaiting` Style added separately

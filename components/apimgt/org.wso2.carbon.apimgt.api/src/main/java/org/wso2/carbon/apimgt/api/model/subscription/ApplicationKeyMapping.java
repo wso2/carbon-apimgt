@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.api.model.subscription;
  */
 public class ApplicationKeyMapping implements CacheableEntity<String> {
 
+    private String applicationUUID;
     private String consumerKey;
     private String keyType;
     private String wfState;
@@ -83,5 +84,15 @@ public class ApplicationKeyMapping implements CacheableEntity<String> {
     public String getKeyManager() {
 
         return keyManager;
+    }
+
+    public String getApplicationUUID() {
+
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+
+        this.applicationUUID = applicationUUID;
     }
 }

@@ -710,7 +710,7 @@ class APIDefinition extends React.Component {
             <>
                 <div className={classes.topBar}>
                     <div className={classes.titleWrapper}>
-                        <Typography variant='h4'>
+                        <Typography id='itest-api-details-api-definition-head' variant='h4'>
                             {/* eslint-disable-next-line no-nested-ternary */}
                             {graphQL ? (
                                 <FormattedMessage

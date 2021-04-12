@@ -1476,6 +1476,8 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     private List<String> getScopeOfOperations(Aai20Operation operation) {
+
+
         return getScopeOfOperationsFromExtensions(operation);
     }
 
@@ -1849,7 +1851,7 @@ public class AsyncApiParser extends APIDefinition {
             if (publishOperation != null) {
                 Extension xUriMapping = publishOperation.getExtension("x-uri-mapping");
                 if (xUriMapping != null) {
-                    wsUriMapping.put(entry.getKey() + "_publish", xUriMapping.value.toString());
+                    wsUriMapping.put("PUBLISH_" + entry.getKey(), xUriMapping.value.toString());
                 }
             }
 
@@ -1857,7 +1859,7 @@ public class AsyncApiParser extends APIDefinition {
             if (subscribeOperation != null)  {
                 Extension xUriMapping = subscribeOperation.getExtension("x-uri-mapping");
                 if (xUriMapping != null) {
-                    wsUriMapping.put(entry.getKey() + "_subscribe", xUriMapping.value.toString());
+                    wsUriMapping.put("SUBSCRIBE_" + entry.getKey(), xUriMapping.value.toString());
                 }
             }
         }

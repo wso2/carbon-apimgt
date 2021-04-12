@@ -33,7 +33,6 @@ const Onboarding = (props) => {
                 container
                 direction='column'
                 justify='center'
-                spacing={5}
             >
                 <Grid item xs={12}>
                     <Box pt={isXsOrBelow ? 2 : 7} />

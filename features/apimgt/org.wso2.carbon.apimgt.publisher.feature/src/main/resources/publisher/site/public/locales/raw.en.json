@@ -177,7 +177,10 @@
     "defaultMessage": "Create a Streaming API"
   },
   "Apis.Create.StreamingAPI.APICreateStreamingAPI.api.sub.heading": {
-    "defaultMessage": "Create an API by providing a Name, a Version, a Context, Backend Endpoint(s) (optional), and Business Plans (optional)."
+    "defaultMessage": "Create an API by providing a Name, a Version, a Context and the Endpoint"
+  },
+  "Apis.Create.StreamingAPI.APICreateStreamingAPI.websub.api.sub.heading": {
+    "defaultMessage": "Create an API by providing a Name, a Version and a Context"
   },
   "Apis.Create.WSDL.ApiCreateWSDL.error.policies.not.available": {
     "defaultMessage": "Throttling policies not available. Contact your administrator"
@@ -492,9 +495,6 @@
   "Apis.Details.ApiConsole.ApiConsole.title": {
     "defaultMessage": "Try Out"
   },
-  "Apis.Details.ApiConsole.SelectAppPanel.environment": {
-    "defaultMessage": "Please select an environment"
-  },
   "Apis.Details.ApiConsole.deployments.api.gateways": {
     "defaultMessage": "API Gateways"
   },
@@ -502,7 +502,7 @@
     "defaultMessage": "Can not Try Out retired APIs!"
   },
   "Apis.Details.ApiConsole.deployments.no": {
-    "defaultMessage": "API is not deployed yet! Please deploy the API before trying out"
+    "defaultMessage": "{artifactType} is not deployed yet! Please deploy the {artifactType} before trying out"
   },
   "Apis.Details.ApiConsole.environment": {
     "defaultMessage": "Environment"
@@ -511,7 +511,7 @@
     "defaultMessage": "Generate Key"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.APIProduct.sub.heading": {
-    "defaultMessage": "Business Information of the API"
+    "defaultMessage": "Business Information of the API Product"
   },
   "Apis.Details.BusinessInformation.BusinessInformation.business.info": {
     "defaultMessage": "Business Information"
@@ -991,7 +991,7 @@
     "defaultMessage": "Public Forum"
   },
   "Apis.Details.Documents.CreateEditForm.document.create.type.sample": {
-    "defaultMessage": "Sample & SDK"
+    "defaultMessage": "Sample and SDK"
   },
   "Apis.Details.Documents.CreateEditForm.document.create.type.support.forum": {
     "defaultMessage": "Support Forum"
@@ -1737,6 +1737,18 @@
   "Apis.Details.Endpoints.Prototype.InlineEndpoints.script": {
     "defaultMessage": "Script"
   },
+  "Apis.Details.Environments\n                                                                                .deploy.vhost": {
+    "defaultMessage": "VHost"
+  },
+  "Apis.Details.Environments.Environments\n                                                                    .select.table": {
+    "defaultMessage": "Select Revision"
+  },
+  "Apis.Details.Environments.Environments\n                                                                    .select.vhost": {
+    "defaultMessage": "Select Access URL"
+  },
+  "Apis.Details.Environments.Environments\n                                                                .deploy.button": {
+    "defaultMessage": "Deploy"
+  },
   "Apis.Details.Environments.Environments.APIGateways": {
     "defaultMessage": "API Gateways"
   },
@@ -1758,9 +1770,6 @@
   "Apis.Details.Environments.Environments.create.create": {
     "defaultMessage": "Create"
   },
-  "Apis.Details.Environments.Environments.deploy.button": {
-    "defaultMessage": "Deploy"
-  },
   "Apis.Details.Environments.Environments.deploy.cancel": {
     "defaultMessage": "Cancel"
   },
@@ -1779,8 +1788,11 @@
   "Apis.Details.Environments.Environments.deployments.sub.heading": {
     "defaultMessage": "Create revisions and deploy in Gateway Environments"
   },
-  "Apis.Details.Environments.Environments.display.in.devportal": {
-    "defaultMessage": "Display in Developer Portal"
+  "Apis.Details.Environments.Environments.display.devportal": {
+    "defaultMessage": "Display Gateway Access URLs in developer portal."
+  },
+  "Apis.Details.Environments.Environments.gateway\n                                                    .deployed.revision": {
+    "defaultMessage": "Deployed Revision"
   },
   "Apis.Details.Environments.Environments.gateway.accessUrl": {
     "defaultMessage": "Gateway Access URL"
@@ -1788,8 +1800,8 @@
   "Apis.Details.Environments.Environments.gateway.action": {
     "defaultMessage": "Action"
   },
-  "Apis.Details.Environments.Environments.gateway.deployed.revision": {
-    "defaultMessage": "Deployed Revision"
+  "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": {
+    "defaultMessage": "Brief description of the new revision"
   },
   "Apis.Details.Environments.Environments.revision.create.heading": {
     "defaultMessage": "Create New Revision (From Current API)"
@@ -1848,14 +1860,11 @@
   "Apis.Details.Environments.Environments.select.rev.warning": {
     "defaultMessage": "Please delete a revision as the number of revisions have reached a maximum of {count}"
   },
-  "Apis.Details.Environments.Environments.select.table": {
-    "defaultMessage": "Select Revision"
-  },
-  "Apis.Details.Environments.Environments.select.vhost": {
-    "defaultMessage": "Select Access URL"
-  },
   "Apis.Details.Environments.Environments.undeploy.btn": {
     "defaultMessage": "Undeploy"
+  },
+  "Apis.Details.Environments.Environments.visibility.in.devportal": {
+    "defaultMessage": "Gateway URL Visibility"
   },
   "Apis.Details.Environments.deploy.vhost": {
     "defaultMessage": "VHost"
@@ -2398,7 +2407,7 @@
     "defaultMessage": "Visibility"
   },
   "Apis.Details.Properties.Properties.api.product.properties": {
-    "defaultMessage": "API Properties"
+    "defaultMessage": "API Product Properties"
   },
   "Apis.Details.Properties.Properties.api.properties": {
     "defaultMessage": "API Properties"
@@ -2537,6 +2546,9 @@
   },
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type": {
     "defaultMessage": "Select the Format of Data Type"
+  },
+  "Apis.Details.Resources.components.operationComponents.EditParameter.select.format.of.data.type.none.option": {
+    "defaultMessage": "No Data Type"
   },
   "Apis.Details.Resources.components.operationComponents.EditParameter.select.schema.data.type": {
     "defaultMessage": "Select the Schema Type"
@@ -3264,6 +3276,12 @@
   "Apis.Listing.components.ImageGenerator.ThumbnailView.design": {
     "defaultMessage": "Design"
   },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove": {
+    "defaultMessage": "Remove"
+  },
+  "Apis.Listing.components.ImageGenerator.ThumbnailView.remove.btn": {
+    "defaultMessage": "Remove"
+  },
   "Apis.Listing.components.ImageGenerator.ThumbnailView.save.btn": {
     "defaultMessage": "Save"
   },
@@ -3423,14 +3441,8 @@
   "Base.Header.headersearch.HeaderSearch.tooltip.option6": {
     "defaultMessage": "Description [ Syntax - description:xxxx ]"
   },
-  "Base.Header.headersearch.HeaderSearch.tooltip.option8": {
-    "defaultMessage": "Documentation Content [ Syntax - doc:xxxx ]"
-  },
   "Base.Header.headersearch.HeaderSearch.tooltip.title": {
     "defaultMessage": "Search Options for APIs and APIProducts"
-  },
-  "Base.Header.navbar.GlobalNavBar.APIs": {
-    "defaultMessage": "APIs"
   },
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": {
     "defaultMessage": "Service Catalog"

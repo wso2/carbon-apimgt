@@ -27,7 +27,6 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.SubscriptionPoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.KeymanagersApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ApiPoliciesApi"/>
-            <bean class="org.wso2.carbon.apimgt.internal.service.SynapseAttributesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.NotifyApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.ScopesApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.GlobalPoliciesApi"/>
