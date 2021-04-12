@@ -353,7 +353,7 @@ class LifeCycleUpdate extends Component {
                     <DialogTitle id='alert-dialog-title'>
                         <FormattedMessage
                             id='Apis.Details.LifeCycle.components'
-                            defaultMessage='Publish without deploying'
+                            defaultMessage='Publish API without deployments'
                         />
                     </DialogTitle>
                     <DialogContent>
@@ -361,16 +361,9 @@ class LifeCycleUpdate extends Component {
                             <Typography variant='subtitle1' display='block' gutterBottom>
                                 <FormattedMessage
                                     id='Apis.Details.LifeCycle.publish.content'
-                                    defaultMessage='Publish API without deployments will affect API runtime'
+                                    defaultMessage={'The API will not be available for '
+                                        + 'consumption unless it is deployed.'}
                                 />
-                            </Typography>
-                            <Typography variant='subtitle2' display='block' gutterBottom>
-                                <b>
-                                    <FormattedMessage
-                                        id='Apis.Details.LifeCycle.publish.content.detail'
-                                        defaultMessage='You need to deploy the API'
-                                    />
-                                </b>
                             </Typography>
                         </DialogContentText>
                     </DialogContent>
@@ -399,7 +392,7 @@ class LifeCycleUpdate extends Component {
                                 justify='center'
                             >
                                 <Grid item>
-                                    Deploy
+                                    Deployments
                                 </Grid>
                                 <Grid>
                                     <LaunchIcon fontSize='small' />
