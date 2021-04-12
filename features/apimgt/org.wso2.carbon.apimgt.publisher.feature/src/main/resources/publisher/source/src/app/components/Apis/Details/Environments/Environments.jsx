@@ -39,7 +39,6 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
-import { useTheme } from '@material-ui/core';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
@@ -309,8 +308,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
-    const theme = useTheme();
-    const { maxCommentLength } = theme.custom;
+    const maxCommentLength = '255';
     const intl = useIntl();
     const { api } = useContext(APIContext);
     const history = useHistory();
