@@ -462,6 +462,12 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    /**
+     * method to get the API without checking permission
+     *
+     * @param identifier APIIdentifier object
+     * @throws APIManagementException APIManagementException
+     */
     public API getAPIWithoutPermissionCheck(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
         Registry registry;
@@ -496,9 +502,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 throw new APIManagementException("User " + username + " does not have permission to view API : "
                         + api.getId().getApiName());
             }
-
             return api;
-
         } catch (RegistryException e) {
             String msg = "Failed to get API from : " + apiPath;
             throw new APIManagementException(msg, e);
@@ -821,7 +825,6 @@ public abstract class AbstractAPIManager implements APIManager {
             String msg = "Failed to get the API from registry.";
             throw new APIManagementException(msg, e);
         }
-
     }
 
     protected void endTenantFlow() {
