@@ -371,7 +371,10 @@ public class SchemaValidator extends AbstractHandler {
                     .append(requestMethod.toLowerCase()).append(APIMgtGatewayConstants.PARAM_SCHEMA);
             schema = JsonPath.read(Swagger, jsonPath.toString()).toString();
         }
-        return extractReference(schema);
+        if (!schema.equals(APIMgtGatewayConstants.EMPTY_ARRAY)) {
+            return extractReference(schema);
+        }
+        return null;
     }
 
     /**
