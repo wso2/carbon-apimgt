@@ -1991,6 +1991,12 @@ public final class APIConstants {
 
     }
 
+    public static class AccessTokenBinding {
+
+        public static final String ACCESS_TOKEN_BINDING = "AccessTokenBinding";
+        public static final String ACCESS_TOKEN_BINDING_ENABLED = ACCESS_TOKEN_BINDING + ".Enabled";
+    }
+
     public static class JwtTokenConstants {
 
         public static final String APPLICATION = "application";
