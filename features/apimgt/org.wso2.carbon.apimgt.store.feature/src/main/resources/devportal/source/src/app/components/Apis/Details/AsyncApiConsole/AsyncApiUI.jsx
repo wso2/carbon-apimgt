@@ -62,9 +62,9 @@ export default function AsyncApiUI(props) {
     } = props;
     const { api } = useContext(ApiContext);
 
-    let initialEndpoint = URLs.http;
+    let initialEndpoint = URLs && URLs.http;
     if (api.type === CONSTANTS.API_TYPES.WS) {
-        initialEndpoint = URLs.ws;
+        initialEndpoint = URLs && URLs.ws;
     }
 
     const [allTopics, setAllTopics] = useState('');
