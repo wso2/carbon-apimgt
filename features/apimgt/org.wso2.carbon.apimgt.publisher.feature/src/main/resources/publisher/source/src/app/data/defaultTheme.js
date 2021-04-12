@@ -186,5 +186,13 @@ export default {
             prefix: '[Devportal]',
             sufix: '- WSO2 APIM',
         },
+        footer: {
+            active: true,
+            footerHTML: '',
+            text: '', // Leave empty to show the default WSO2 Text. Provide custom text to display your own thing.
+            background: '#f5f5f5',
+            color: '#444',
+            height: 50,
+        },
     },
 };

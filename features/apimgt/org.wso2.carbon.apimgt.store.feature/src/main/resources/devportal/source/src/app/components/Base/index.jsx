@@ -51,6 +51,7 @@ import VerticalDivider from '../Shared/VerticalDivider';
 
 const styles = (theme) => {
     const pageMaxWidth = theme.custom.page.style === 'fluid' ? 'none' : theme.custom.page.width;
+    const footerHeight = theme.custom.footer.active ? theme.custom.footer.height: 0;
     return {
         appBar: {
             position: 'fixed',
@@ -82,7 +83,7 @@ const styles = (theme) => {
         },
         wrapper: {
             minHeight: '100%',
-            marginBottom: -50,
+            marginBottom: theme.custom.footer.active ? -1 * (theme.custom.footer.height || 50): 0,
             background: theme.palette.background.default + ' url(' + app.context + theme.custom.backgroundImage + ') repeat left top',
         },
         contentWrapper: {
@@ -91,18 +92,18 @@ const styles = (theme) => {
             overflowY: 'auto',
             overflowX: 'hidden',
             position: 'relative',
-            minHeight: 'calc(100vh - 114px)',
+            minHeight: `calc(100vh - ${64 + footerHeight}px)`,
             marginLeft: -4,
             marginTop: 64,
         },
         push: {
-            height: 50,
+            height: footerHeight || 50,
         },
         footer: {
             background: theme.custom.footer.background,
             color: theme.custom.footer.color,
             paddingLeft: theme.spacing(3),
-            height: theme.custom.footer.height || 50,
+            height: footerHeight || 50,
             alignItems: 'center',
             display: 'flex',
         },
