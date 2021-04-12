@@ -458,7 +458,9 @@ public enum ExceptionCodes implements ErrorHandler {
     SERVICE_IMPORT_FAILED_WITHOUT_OVERWRITE(900910, "Service import is failed" , 412, "Cannot update existing services " +
                                                     "when overwrite is false"),
     MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION(900911, "Missing protocol in Async API Definition", 400,
-            "Missing protocol in Async API Definition");
+            "Missing protocol in Async API Definition"),
+    UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION(900912, "Unsupported protocol specified in Async API " +
+               "Definition", 400, "Unsupported protocol specified in Async API Definition");
 
     private final long errorCode;
     private final String errorMessage;
