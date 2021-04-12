@@ -341,8 +341,23 @@ class SubscriptionTableData extends React.Component {
                                         defaultMessage='Cancel'
                                     />
                                 </Button>
-                                <Button variant="contained" disabled={(status === 'BLOCKED' || status === 'ON_HOLD' || status === 'REJECTED')} dense color='primary' onClick={() => this.handleSubscriptionTierUpdate(apiId,
-                                    subscriptionId, selectedTier, status, throttlingPolicy)}>
+                                <Button 
+                                    variant="contained" 
+                                    disabled={(
+                                        status === 'BLOCKED' ||
+                                        status === 'ON_HOLD' ||
+                                        status === 'REJECTED' ||
+                                        this.state.tiers.length === 0
+                                        )}
+                                    dense
+                                    color='primary'
+                                    onClick={() => this.handleSubscriptionTierUpdate(
+                                        apiId,
+                                        subscriptionId,
+                                        selectedTier,
+                                        status,
+                                    throttlingPolicy)}
+                                    >
                                     <FormattedMessage
                                         id='Applications.Details.SubscriptionTableData.update'
                                         defaultMessage='Update'
