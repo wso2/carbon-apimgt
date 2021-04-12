@@ -310,7 +310,7 @@ export default function ListRoles() {
                 </Grid>
             </ListAddOns>
             <AdminTable dataIDs={Object.keys(searchPermissionMappings)} multiSelect={false}>
-                <AdminTableHead headCells={headCells} />\
+                <AdminTableHead headCells={headCells} />
                 <TableBody rows={Object.entries(searchPermissionMappings).map(([role, mapping]) => {
                     return [mapping.aliases ? (
                         <Box display='inline'>
