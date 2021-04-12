@@ -192,10 +192,14 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             throws APIManagementException {
         String apiPolicyName = subscriptionPolicy.getPolicyName();
         validateQuotaPolicy(subscriptionPolicy.getDefaultQuotaPolicy(), apiPolicyName);
-        if (subscriptionPolicy.getRateLimitCount() < 0 || subscriptionPolicy.getSubscriberCount() < 0) {
+        if (subscriptionPolicy.getSubscriberCount() < 0) {
             throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
                     + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
 
+        }
+        if (subscriptionPolicy.getRateLimitCount() < -1) {
+            throw new APIManagementException("Limiting options of " + apiPolicyName + " should be an Integer greater "
+                    + "than -1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
         }
     }
 
