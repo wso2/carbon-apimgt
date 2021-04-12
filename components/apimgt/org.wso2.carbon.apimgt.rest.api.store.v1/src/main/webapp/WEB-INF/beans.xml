@@ -63,8 +63,8 @@
         </property>
         <property name="allowCredentials" value="true"/>
         <property name="allowOrigins"
-                  value="#{systemProperties['rest.api.store.allowed.origins'] != null ?
-                      systemProperties['rest.api.store.allowed.origins'].split(',') : {}}"/>
+                  value="#{systemProperties['rest.api.devportal.allowed.origins'] != null ?
+                      systemProperties['rest.api.devportal.allowed.origins'].split(',') : {}}"/>
     </bean>
 
     <!-- Out interceptors -->
