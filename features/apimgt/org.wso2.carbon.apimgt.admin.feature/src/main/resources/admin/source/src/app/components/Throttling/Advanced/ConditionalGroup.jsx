@@ -38,6 +38,8 @@ import AddEditConditionPolicy from 'AppComponents/Throttling/Advanced/AddEditCon
 import AddEditConditionPolicyIp from 'AppComponents/Throttling/Advanced/AddEditConditionPolicyIP';
 import CON_CONSTS from 'AppComponents/Throttling/Advanced/CON_CONSTS';
 import DeleteCondition from 'AppComponents/Throttling/Advanced/DeleteCondition';
+import Alert from '@material-ui/lab/Alert';
+import AlertTitle from '@material-ui/lab/AlertTitle';
 
 /**
  * Create UUID
@@ -358,6 +360,18 @@ function ConditionalGroup(props) {
                     )}
                 </ExpansionPanelSummary>
                 <ExpansionPanelDetails classes={{ root: classes.expandContentRoot }}>
+
+                    <Box marginBottom={2}>
+                        <Alert severity='warning'>
+                            <AlertTitle>Warning</AlertTitle>
+                            <FormattedMessage
+                                id='Throttling.Advanced.ConditionalGroup.alert'
+                                defaultMessage='Publishing Query Params, Header Data and JWT token isn&apos; t
+                                configured. If a policy configured with any of these conditions, it won&apos; t be
+                                applied.'
+                            />
+                        </Alert>
+                    </Box>
 
                     <Box flex='1'>
                         <Typography color='inherit' variant='subtitle2' component='div'>

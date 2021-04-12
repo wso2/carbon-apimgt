@@ -90,15 +90,19 @@ class TableView extends React.Component {
             listType: defaultApiView,
             loading: true,
             totalCount: -1,
+            rowsPerPage: 10,
         };
         this.page = 0;
-        this.rowsPerPage = localStorage.getItem('publisher.rowsPerPage') || 10;
         this.setListType = this.setListType.bind(this);
         this.updateData = this.updateData.bind(this);
     }
 
     componentDidMount() {
         this.getData();
+        const userRowsPerPage = parseInt(localStorage.getItem('publisher.rowsPerPage'), 10);
+        if (userRowsPerPage) {
+            this.setState({ rowsPerPage: userRowsPerPage });
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -235,7 +239,8 @@ class TableView extends React.Component {
     };
 
     xhrRequest = () => {
-        const { page, rowsPerPage } = this;
+        const { page } = this;
+        const { rowsPerPage } = this.state;
         const { isAPIProduct, query } = this.props;
         if (query) {
             const composeQuery = queryString.parse(query);
@@ -244,9 +249,9 @@ class TableView extends React.Component {
             return API.search(composeQuery);
         }
         if (isAPIProduct) {
-            return APIProduct.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return APIProduct.all({ limit: rowsPerPage, offset: page * rowsPerPage });
         } else {
-            return API.all({ limit: this.rowsPerPage, offset: page * rowsPerPage });
+            return API.all({ limit: rowsPerPage, offset: page * rowsPerPage });
         }
     };
 
@@ -257,7 +262,8 @@ class TableView extends React.Component {
      * @memberof Listing
      */
     updateData() {
-        const { page, rowsPerPage, count } = this;
+        const { page, count } = this;
+        const { rowsPerPage } = this.state;
         if (count - 1 === rowsPerPage * page && page !== 0) {
             this.page = page - 1;
         }
@@ -274,7 +280,9 @@ class TableView extends React.Component {
         const {
             intl, isAPIProduct, classes, query,
         } = this.props;
-        const { loading, totalCount } = this.state;
+        const {
+            loading, totalCount, rowsPerPage, apisAndApiProducts, notFound, listType,
+        } = this.state;
         const columns = [
             {
                 name: 'id',
@@ -365,10 +373,7 @@ class TableView extends React.Component {
                 },
             },
         ];
-        const { page, rowsPerPage } = this;
-        const {
-            apisAndApiProducts, notFound, listType,
-        } = this.state;
+        const { page } = this;
         const options = {
             filterType: 'dropdown',
             responsive: 'stacked',
@@ -388,7 +393,7 @@ class TableView extends React.Component {
             selectableRows: 'none',
             rowsPerPage,
             onChangeRowsPerPage: (numberOfRows) => {
-                this.rowsPerPage = numberOfRows;
+                this.setState(numberOfRows);
                 if (page * numberOfRows > totalCount) {
                     this.page = 0;
                 } else if (totalCount - 1 === rowsPerPage * page && page !== 0) {

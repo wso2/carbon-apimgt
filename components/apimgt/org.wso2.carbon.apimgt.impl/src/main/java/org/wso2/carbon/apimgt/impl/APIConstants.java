@@ -598,6 +598,7 @@ public final class APIConstants {
     public static final String GATEWAY_INTERNAL_KEY_DATA_CACHE_NAME = "gatewayInternalKeyDataCache";
     public static final String GATEWAY_INVALID_INTERNAL_KEY_CACHE_NAME = "gatewayInvalidInternalKeyCache";
     public static final String GRANT_TYPE_PASSWORD = "password";
+    public static final String ENABLE_TENANT_BASE_SIGNING = "EnableTenantBasedSigning";
 
     public static class TokenStatus {
 
@@ -2706,6 +2707,7 @@ public final class APIConstants {
         public static final String SERVER_APIKEYSIGN_KEYSTORE_KEY_ALIAS = "Security.KeyStoreName.KeyAlias";
         public static final String SERVER_APIKEYSIGN_KEYSTORE_TYPE = "Security.KeyStoreName.Type";
         public static final String SERVER_APIKEYSIGN_PRIVATE_KEY_PASSWORD = "Security.KeyStoreName.KeyPassword";
+        public static final String KEY_STORE_EXTENSION_JKS = ".jks";
     }
 
     public static class ExtensionListenerConstants {

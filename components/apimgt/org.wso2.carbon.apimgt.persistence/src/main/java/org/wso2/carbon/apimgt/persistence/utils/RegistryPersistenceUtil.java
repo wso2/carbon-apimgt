@@ -805,8 +805,14 @@ public class RegistryPersistenceUtil {
                     log.debug("API '" + api.getId().toString() + "' " + "has the property " + propertyName);
                 }
                 if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
-                    api.addProperty(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
-                            apiResource.getProperty(propertyName));
+                    String property = propertyName
+                            .substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length());
+                    int index = property.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                    if (index > 0) {
+                        api.addProperty(property.substring(0, index), apiResource.getProperty(propertyName));
+                    } else {
+                        api.addProperty(property, apiResource.getProperty(propertyName));
+                    }
                 }
             }
         }

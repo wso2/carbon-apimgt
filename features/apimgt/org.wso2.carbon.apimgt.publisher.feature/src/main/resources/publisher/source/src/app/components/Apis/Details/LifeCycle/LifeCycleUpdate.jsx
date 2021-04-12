@@ -183,6 +183,9 @@ class LifeCycleUpdate extends Component {
         const lifecycleButtons = lifecycleStates.map((item) => {
             const state = { ...item, displayName: item.event };
             if (state.event === 'Deploy as a Prototype') {
+                if (state.displayName === 'Deploy as a Prototype') {
+                    state.displayName = 'Prototype';
+                }
                 return {
                     ...state,
                     disabled: !isPrototype || (api.type !== 'WEBSUB' && api.endpointConfig == null),

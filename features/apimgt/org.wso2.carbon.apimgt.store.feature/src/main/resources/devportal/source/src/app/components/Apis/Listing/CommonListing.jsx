@@ -344,16 +344,17 @@ class CommonListing extends React.Component {
                             <CustomIcon strokeColor={strokeColorMain} width={42} height={42} icon='api' />
                         </div>
                         <div className={classes.mainTitleWrapper} id='mainTitleWrapper'>
-                            <Typography variant='h4' className={classes.mainTitle}>
+                            <Typography variant='h4' Component='h1' className={classes.mainTitle}>
                                 <FormattedMessage defaultMessage='APIs' id='Apis.Listing.Listing.apis.main' />
                             </Typography>
                         </div>
                         {this.showToggle && (
                             <div className={classes.buttonRight} id='listGridWrapper'>
                                 <IconButton
-                                    aria-label='List View'
+                                    aria-label='Change to list view'
                                     className={classes.button}
                                     onClick={() => this.setListType('list')}
+                                    disabled={listType === 'list'}
                                 >
                                     <Icon
                                         className={classNames(
@@ -365,9 +366,10 @@ class CommonListing extends React.Component {
                                     </Icon>
                                 </IconButton>
                                 <IconButton
-                                    aria-label='Grid view'
+                                    aria-label='Change to grid view'
                                     className={classes.button}
                                     onClick={() => this.setListType('grid')}
+                                    disabled={listType === 'grid'}
                                 >
                                     <Icon
                                         className={classNames(
