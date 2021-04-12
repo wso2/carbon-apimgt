@@ -669,6 +669,9 @@
   "Apis.Details.Configuration.Configuration.section.backend": {
     "defaultMessage": "Backend"
   },
+  "Apis.Details.Configuration.Configuration.section.events": {
+    "defaultMessage": "Events"
+  },
   "Apis.Details.Configuration.Configuration.section.initial.request": {
     "defaultMessage": "Initial Request"
   },
@@ -687,7 +690,7 @@
   "Apis.Details.Configuration.Resources.save": {
     "defaultMessage": "Save"
   },
-  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": {
+  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.\n                                                    product.endpoint": {
     "defaultMessage": "Please refer respective APIs for endpoint information"
   },
   "Apis.Details.Configuration.RuntimeConfiguration.no.km.error": {
@@ -2289,14 +2292,14 @@
   "Apis.Details.Operations.operation.operationName": {
     "defaultMessage": "Operation"
   },
+  "Apis.Details.Overview.\n                                                                    CustomizedStepper.Endpoint": {
+    "defaultMessage": "Endpoint"
+  },
   "Apis.Details.Overview.CustomizedStepper.Deploy": {
     "defaultMessage": "Deploy"
   },
   "Apis.Details.Overview.CustomizedStepper.Develop": {
     "defaultMessage": "Develop"
-  },
-  "Apis.Details.Overview.CustomizedStepper.Endpoint": {
-    "defaultMessage": "Endpoint"
   },
   "Apis.Details.Overview.CustomizedStepper.Test": {
     "defaultMessage": "Test"
@@ -3110,6 +3113,9 @@
   },
   "Apis.Listing.ApiTableView.context": {
     "defaultMessage": "Context"
+  },
+  "Apis.Listing.ApiTableView.items.per.page": {
+    "defaultMessage": "Items per page"
   },
   "Apis.Listing.ApiTableView.name": {
     "defaultMessage": "Name"
