@@ -290,7 +290,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
-    const { maxCommentLength } = '255';
+    const maxCommentLength = '255';
     const intl = useIntl();
     const { api } = useContext(APIContext);
     const history = useHistory();
