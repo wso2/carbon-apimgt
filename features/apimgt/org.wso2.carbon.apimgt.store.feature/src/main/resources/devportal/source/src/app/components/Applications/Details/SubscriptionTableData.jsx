@@ -250,16 +250,21 @@ class SubscriptionTableData extends React.Component {
                 <TableCell>{throttlingPolicy}</TableCell>
                 <TableCell>{status}</TableCell>
                 <TableCell>
-                    <Button
-                        color='default'
-                        onClick={this.handleRequestOpenEditMenu}
-                        startIcon={<Icon>edit</Icon>}
+                    <ScopeValidation
+                        resourcePath={resourcePaths.SINGLE_SUBSCRIPTION}
+                        resourceMethod={resourceMethods.PUT}
                     >
-                        <FormattedMessage
-                            id='Applications.Details.SubscriptionTableData.edit.text'
-                            defaultMessage='Edit'
-                        />
-                    </Button>
+                        <Button
+                            color='default'
+                            onClick={this.handleRequestOpenEditMenu}
+                            startIcon={<Icon>edit</Icon>}
+                        >
+                            <FormattedMessage
+                                id='Applications.Details.SubscriptionTableData.edit.text'
+                                defaultMessage='Edit'
+                            />
+                        </Button>
+                    </ScopeValidation>
                     <Dialog open={openMenuEdit} transition={Slide}>
                         <DialogTitle>
                             <FormattedMessage
