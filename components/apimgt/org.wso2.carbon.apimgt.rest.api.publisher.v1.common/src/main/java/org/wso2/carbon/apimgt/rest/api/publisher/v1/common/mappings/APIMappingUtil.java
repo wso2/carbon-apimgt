@@ -656,6 +656,13 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
+
+        if (api.getCreatedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
+            apiInfoDTO.setCreatedTime(dateFormat.format(createdTime));
+        }
+
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
             apiInfoDTO.setHasThumbnail(true);
         } else {

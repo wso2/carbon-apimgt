@@ -32,6 +32,7 @@ public class PublisherAPIInfo {
     private String status;
     private String type;
     private String thumbnail; // thumbnail is not required for normal ApiGet
+    private String createdTime;
 
     public String getApiName() {
         return apiName;
@@ -96,6 +97,10 @@ public class PublisherAPIInfo {
     public void setProviderName(String providerName) {
         this.providerName = providerName;
     }
+
+    public String getCreatedTime() { return createdTime; }
+
+    public void setCreatedTime(String createdTime) { this.createdTime = createdTime; }
 
     @Override
     public String toString() {
