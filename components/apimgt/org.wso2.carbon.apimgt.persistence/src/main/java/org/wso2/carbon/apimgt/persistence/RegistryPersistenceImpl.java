@@ -101,6 +101,7 @@ import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.registry.extensions.utils.APIUtils;
 import org.wso2.carbon.registry.common.ResourceData;
@@ -355,7 +356,6 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
         boolean transactionCommitted = false;
         Registry registry = null;
-        APIIdentifier apiId = null;
         boolean tenantFlowStarted = false;
         try {
             RegistryHolder holder = getRegistry(org.getName());
@@ -365,34 +365,33 @@ public class RegistryPersistenceImpl implements APIPersistence {
             GenericArtifactManager artifactManager = RegistryPersistenceUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiUUID);
+            String lcState = ((GenericArtifactImpl) apiArtifact).getLcState();
             if (apiArtifact != null) {
-                API api = RegistryPersistenceUtil.getApiForPublishing(registry, apiArtifact);
-                apiId = api.getId();
-                String apiPath = RegistryPersistenceUtil.getAPIPath(apiId);
+                String apiPath = GovernanceUtils.getArtifactPath(registry, apiUUID);
                 int prependIndex = apiPath.lastIndexOf("/api");
                 String apiSourcePath = apiPath.substring(0, prependIndex);
-                String revisionTargetPath = RegistryPersistenceUtil.getRevisionPath(apiId.getUUID(),revisionId);
+                String revisionTargetPath = RegistryPersistenceUtil.getRevisionPath(apiUUID,revisionId);
                 registry.delete(apiSourcePath);
                 registry.copy(revisionTargetPath, apiSourcePath);
                 Resource newAPIArtifact = registry.get(apiPath);
-                newAPIArtifact.setUUID(apiId.getUUID());
+                newAPIArtifact.setUUID(apiUUID);
+                newAPIArtifact.setProperty("registry.lifecycle.APILifeCycle.state", java.util.Arrays.asList((lcState)));
                 registry.put(apiPath, newAPIArtifact);
             }
             registry.commitTransaction();
             transactionCommitted = true;
             if (log.isDebugEnabled()) {
                 String logMessage =
-                        "Revision for API Name: " + apiId.getApiName() + ", API Version " + apiId.getVersion()
-                                + " restored";
+                        "Revision ID" + revisionId + " for API UUID: " + apiUUID + " restored";
                 log.debug(logMessage);
             }
-        } catch (RegistryException | APIManagementException e) {
+        } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
             } catch (RegistryException re) {
                 // Throwing an error here would mask the original exception
                 log.error("Error while rolling back the transaction for API Revision restore for API: "
-                        + apiId.getApiName(), re);
+                        + apiUUID, re);
             }
             throw new APIPersistenceException("Error while performing registry transaction operation", e);
         } finally {
@@ -406,7 +405,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             } catch (RegistryException ex) {
                 throw new APIPersistenceException(
                         "Error while rolling back the transaction for API Revision restore for API: "
-                                + apiId.getApiName(), ex);
+                                + apiUUID, ex);
             }
         }
     }
@@ -2199,6 +2198,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 Documentation documentation = RegistryPersistenceDocUtil.getDocumentation(artifact);
                 if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     String resource = documentation.getFilePath();
+
+                    if (resource == null) {
+                        return null;
+                    }
+
                     String[] resourceSplitPath =
                             resource.split(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
                     if (resourceSplitPath.length == 2) {

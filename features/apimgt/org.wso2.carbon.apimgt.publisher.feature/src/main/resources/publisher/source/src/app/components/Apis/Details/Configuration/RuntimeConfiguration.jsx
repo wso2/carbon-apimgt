@@ -293,6 +293,7 @@ export default function RuntimeConfiguration() {
     const { api, updateAPI } = useContext(APIContext);
     const history = useHistory();
     const isAsyncAPI = api.type === 'WS' || api.type === 'WEBSUB' || api.type === 'SSE';
+    const isNonWebSubAsyncAPI = api.type === 'WS' || api.type === 'SSE';
     const isWebSub = api.type === 'WEBSUB';
     const [isUpdating, setIsUpdating] = useState(false);
     const [updateComplexityList, setUpdateComplexityList] = useState(null);
@@ -454,7 +455,7 @@ export default function RuntimeConfiguration() {
     return (
         <>
             <Box pb={3}>
-                <Typography variant='h5'>
+                <Typography id='itest-api-details-runtime-config-head' variant='h5'>
                     <FormattedMessage
                         id='Apis.Details.Configuration.RuntimeConfiguration.topic.header'
                         defaultMessage='Runtime Configurations'
@@ -512,33 +513,60 @@ export default function RuntimeConfiguration() {
                                         </Box>
                                     )}
                                 </Paper>
-                                <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                                {!isWebSub && (
+                                    <ArrowForwardIcon className={classes.arrowForwardIcon} />
+                                )}
                             </Grid>
-                            { !isAsyncAPI && (
+                            { !isNonWebSubAsyncAPI && (
                                 <>
                                     <Typography className={classes.heading} variant='h6'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.Configuration.section.response'
-                                            defaultMessage='Response'
-                                        />
+                                        {!isWebSub ? (
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.Configuration.section.response'
+                                                defaultMessage='Response'
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='Apis.Details.Configuration.Configuration.section.events'
+                                                defaultMessage='Events'
+                                            />
+                                        )}
+
                                     </Typography>
                                     <Grid item xs={12} style={{ position: 'relative' }}>
                                         <Box mb={3}>
                                             <Paper className={classes.paper} elevation={0}>
                                                 {!api.isAPIProduct() && (
                                                     <Box mb={3}>
-                                                        <Flow
-                                                            api={apiConfig}
-                                                            type='OUT'
-                                                            updateMediationPolicy={updateOutMediationPolicy}
-                                                            selectedMediationPolicy={outPolicy}
-                                                            isRestricted={isRestricted(['apim:api_create'], api)}
-                                                        />
+                                                        {isWebSub ? (
+                                                            <Flow
+                                                                api={apiConfig}
+                                                                type='IN'
+                                                                updateMediationPolicy={updateInMediationPolicy}
+                                                                selectedMediationPolicy={inPolicy}
+                                                                isRestricted={isRestricted(['apim:api_create'], api)}
+                                                            />
+                                                        ) : (
+                                                            <Flow
+                                                                api={apiConfig}
+                                                                type='OUT'
+                                                                updateMediationPolicy={updateOutMediationPolicy}
+                                                                selectedMediationPolicy={outPolicy}
+                                                                isRestricted={isRestricted(['apim:api_create'], api)}
+                                                            />
+                                                        )}
                                                     </Box>
                                                 )}
-                                                <ResponseCaching api={apiConfig} configDispatcher={configDispatcher} />
+                                                {!isAsyncAPI && (
+                                                    <ResponseCaching
+                                                        api={apiConfig}
+                                                        configDispatcher={configDispatcher}
+                                                    />
+                                                )}
                                             </Paper>
-                                            <ArrowBackIcon className={classes.arrowBackIcon} />
+                                            {!isWebSub && (
+                                                <ArrowBackIcon className={classes.arrowBackIcon} />
+                                            )}
                                         </Box>
                                     </Grid>
                                 </>
@@ -567,36 +595,41 @@ export default function RuntimeConfiguration() {
                         </Grid>
                     </Grid>
                     <Grid item xs={12} md={5}>
-                        <Typography className={classes.heading} variant='h6'>
-                            <FormattedMessage
-                                id='Apis.Details.Configuration.Configuration.section.backend'
-                                defaultMessage='Backend'
-                            />
-                        </Typography>
-                        <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
-                            {!api.isAPIProduct() && (
-                                <>
-                                    {!isAsyncAPI && (
-                                        <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                        {!isWebSub && (
+                            <>
+                                <Typography className={classes.heading} variant='h6'>
+                                    <FormattedMessage
+                                        id='Apis.Details.Configuration.Configuration.section.backend'
+                                        defaultMessage='Backend'
+                                    />
+                                </Typography>
+                                <Paper className={classes.paper} style={{ height: 'calc(100% - 75px)' }} elevation={0}>
+                                    {!api.isAPIProduct() && (
+                                        <>
+                                            {!isAsyncAPI && (
+                                                <MaxBackendTps api={apiConfig} configDispatcher={configDispatcher} />
+                                            )}
+                                            { !isWebSub && (
+                                                <Endpoints api={api} />
+                                            )}
+                                        </>
                                     )}
-                                    { !isWebSub && (
-                                        <Endpoints api={api} />
-                                    )}
-                                </>
-                            )}
 
-                            {api.isAPIProduct() && (
-                                <Box alignItems='center' justifyContent='center' className={classes.info}>
-                                    <Typography variant='body1'>
-                                        <FormattedMessage
-                                            id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.
-                                            endpoint'
-                                            defaultMessage='Please refer respective APIs for endpoint information'
-                                        />
-                                    </Typography>
-                                </Box>
-                            )}
-                        </Paper>
+                                    {api.isAPIProduct() && (
+                                        <Box alignItems='center' justifyContent='center' className={classes.info}>
+                                            <Typography variant='body1'>
+                                                <FormattedMessage
+                                                    id='Apis.Details.Configuration.RuntimeConfiguration.backend.api.
+                                                    product.endpoint'
+                                                    defaultMessage='Please refer respective APIs for endpoint
+                                                    information'
+                                                />
+                                            </Typography>
+                                        </Box>
+                                    )}
+                                </Paper>
+                            </>
+                        )}
                     </Grid>
                 </Grid>
                 <Grid container>

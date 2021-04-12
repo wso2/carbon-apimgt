@@ -28,7 +28,9 @@ import { FormattedMessage, useIntl } from 'react-intl';
 
 import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Chip from '@material-ui/core/Chip';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
@@ -72,6 +74,7 @@ function VerbElement(props) {
                 '&:hover': { backgroundColor },
                 backgroundColor,
                 color: theme.palette.getContrastText(backgroundColor),
+                minWidth: theme.spacing(9),
             },
             customButton: {
                 '&:hover': { backgroundColor },
@@ -91,10 +94,17 @@ function VerbElement(props) {
         );
     } else {
         return (
-            <MenuItem dense className={classes.customMenu} onClick={onClick}>
-                <Checkbox checked={checked} />
-                {verb}
-            </MenuItem>
+            <ListItem onClick={onClick} key={verb} button>
+                <Chip className={classes.customMenu} size='small' label={verb} />
+                <ListItemSecondaryAction>
+                    <Checkbox
+                        onClick={onClick}
+                        edge='end'
+                        checked={checked}
+                        inputProps={{ 'aria-labelledby': verb }}
+                    />
+                </ListItemSecondaryAction>
+            </ListItem>
         );
     }
 }
@@ -119,7 +129,7 @@ function AddOperation(props) {
     const [labelWidth, setLabelWidth] = useState(0);
     const intl = useIntl();
 
-    function getSupporteVerbs() {
+    function getSupportedVerbs() {
         return isAsyncAPI ? SUPPORTED_VERBS[api.type] : SUPPORTED_VERBS.REST;
     }
 
@@ -221,7 +231,7 @@ function AddOperation(props) {
                                     remaining.push(verb.toUpperCase());
                                     return null;
                                 });
-                                const allSelected = getSupporteVerbs().length;
+                                const allSelected = getSupportedVerbs().length === newOperations.verbs.length;
                                 return (
                                     <>
                                         {verbElements}
@@ -250,7 +260,7 @@ function AddOperation(props) {
                                 },
                             }}
                         >
-                            {getSupporteVerbs().map((verb) => (
+                            {getSupportedVerbs().map((verb) => (
                                 <VerbElement
                                     checked={newOperations.verbs.includes(verb.toLowerCase())}
                                     value={verb.toLowerCase()}
@@ -289,9 +299,10 @@ function AddOperation(props) {
                         autoFocus
                         name='target'
                         value={newOperations.target}
-                        onChange={({ target: { name, value } }) => newOperationsDispatcher(
-                            { type: name, value: value.startsWith('/') ? value : `/${value}` },
-                        )}
+                        onChange={({ target: { name, value } }) => newOperationsDispatcher({
+                            type: name,
+                            value: api.type !== 'WEBSUB' && !value.startsWith('/') ? `/${value}` : value,
+                        })}
                         placeholder={isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern'}
                         helperText={newOperations.error || (isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern')}
                         fullWidth
