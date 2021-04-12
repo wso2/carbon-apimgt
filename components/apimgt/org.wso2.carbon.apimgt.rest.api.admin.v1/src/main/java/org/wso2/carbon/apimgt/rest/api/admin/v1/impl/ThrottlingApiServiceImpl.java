@@ -555,6 +555,8 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             } else {
                 throw new APIManagementException(ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
             }
+        } else {
+            apiProvider.deleteTierPermissions(body.getPolicyName());
         }
     }
 

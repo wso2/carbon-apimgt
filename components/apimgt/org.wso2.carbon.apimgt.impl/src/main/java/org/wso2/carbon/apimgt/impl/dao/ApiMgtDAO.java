@@ -2247,6 +2247,30 @@ public class ApiMgtDAO {
         }
     }
 
+    public void deleteThrottlingPermissions(String tierName, int tenantId) throws APIManagementException {
+        int tierPermissionId = -1;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SQLConstants.GET_THROTTLE_TIER_PERMISSION_ID_SQL)) {
+            ps.setString(1, tierName);
+            ps.setInt(2, tenantId);
+            try (ResultSet resultSet = ps.executeQuery()) {
+                if (resultSet.next()) {
+                    tierPermissionId = resultSet.getInt("THROTTLE_TIER_PERMISSIONS_ID");
+                }
+            }
+            if (tierPermissionId != -1) {
+                try (PreparedStatement preparedStatement = connection.prepareStatement(SQLConstants
+                        .DELETE_THROTTLE_TIER_PERMISSION_SQL)) {
+                    preparedStatement.setInt(1, tierPermissionId);
+                    preparedStatement.setInt(2, tenantId);
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error in deleting tier permissions: " + e.getMessage(), e);
+        }
+    }
+
     public Set<TierPermissionDTO> getThrottleTierPermissions(int tenantId) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
