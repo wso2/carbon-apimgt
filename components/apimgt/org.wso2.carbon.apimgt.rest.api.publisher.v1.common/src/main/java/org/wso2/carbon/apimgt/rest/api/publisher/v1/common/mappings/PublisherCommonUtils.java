@@ -802,7 +802,7 @@ public class PublisherCommonUtils {
             throws APIManagementException {
         if (ServiceEntry.DefinitionType.ASYNC_API.equals(definitionType)) {
             if (protocol.isEmpty()) {
-                throw new APIManagementException("A protocol should be specified in the ASync API definition",
+                throw new APIManagementException("A protocol should be specified in the Async API definition",
                         ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION);
             } else if (!APIConstants.API_TYPE_WEBSUB.equals(protocol.toUpperCase()) &&
                     !APIConstants.API_TYPE_SSE.equals(protocol.toUpperCase()) &&
