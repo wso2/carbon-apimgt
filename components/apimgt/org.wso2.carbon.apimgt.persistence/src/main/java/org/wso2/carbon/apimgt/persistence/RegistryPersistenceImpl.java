@@ -2332,6 +2332,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles,
                         contentPath, registry);
+                GenericArtifact updateDocArtifact = RegistryPersistenceDocUtil.createDocArtifactContent(docArtifact,
+                        apiProviderName, apiName, apiVersion, doc);
+                Boolean toggle = Boolean.parseBoolean(updateDocArtifact.getAttribute("toggle"));
+                updateDocArtifact.setAttribute("toggle", Boolean.toString(!toggle));
+                docArtifactManager.updateGenericArtifact(updateDocArtifact);
             } 
         } catch (APIPersistenceException | RegistryException | APIManagementException | PersistenceException
                 | UserStoreException e) {
