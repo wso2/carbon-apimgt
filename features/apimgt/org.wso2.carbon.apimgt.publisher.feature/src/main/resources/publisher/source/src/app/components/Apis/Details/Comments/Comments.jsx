@@ -100,10 +100,11 @@ class Comments extends Component {
         super(props);
         this.state = {
             expanded: true,
-            allComments: null,
+            allComments: [],
             comments: [],
-            totalComments: null,
+            totalComments: 0,
             apiId: null,
+            loading: true,
         };
         this.handleExpandClick = this.handleExpandClick.bind(this);
         this.handleLoadMoreComments = this.handleLoadMoreComments.bind(this);
@@ -129,6 +130,7 @@ class Comments extends Component {
                     allComments: commentList,
                     comments: commentList,
                     totalComments: result.body.pagination.total,
+                    loading: false,
                 });
             })
             .catch((error) => {
@@ -256,13 +258,13 @@ class Comments extends Component {
     render() {
         const { classes, api } = this.props;
         const {
-            comments, allComments, totalComments,
+            comments, allComments, totalComments, loading,
         } = this.state;
         return (
             <div className={classes.contentWrapper}>
                 <div className={classes.root}>
                     <Typography id='itest-api-details-comments-head' variant='h4' className={classes.titleSub}>
-                        {totalComments ? totalComments + (' ') : ''}
+                        {totalComments > 0 ? totalComments + (' ') : ''}
                         <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                     </Typography>
                 </div>
@@ -278,12 +280,12 @@ class Comments extends Component {
                     />
                 </div>
 
-                {!allComments.length && (
+                {loading && (
                     <Paper className={classes.paperProgress}>
                         <CircularProgress size={24} />
                     </Paper>
                 )}
-                {allComments && totalComments === 0
+                {!loading && totalComments === 0
                     && (
                         <div className={classes.genericMessageWrapper}>
                             <InlineMessage type='info' className={classes.dialogContainer}>
