@@ -382,6 +382,8 @@ const APICreateStreamingAPI = (props) => {
                         endpointPlaceholderText='Streaming Provider'
                         appendChildrenBeforeEndpoint
                         hideEndpoint={hideEndpoint}
+                        isWebSocket={(apiType && apiType === protocolKeys.WebSocket)
+                            || apiInputs.protocol === protocolKeys.WebSocket}
                     >
                         <TextField
                             fullWidth
