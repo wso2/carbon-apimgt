@@ -106,7 +106,6 @@ class Comments extends Component {
             allComments: null,
             comments: [],
             totalComments: 0,
-            startCommentsToDisplay: 0,
             apiId: null,
             showCommentAdd: false,
         };
@@ -143,18 +142,11 @@ class Comments extends Component {
                         commentList = commentList.slice(commentList.length - 3, commentList.length);
                     }
                 }
-                this.setState({ allComments: commentList, totalComments: result.body.pagination.total });
-                if (result.body.pagination.total < theme.custom.commentsLimit) {
-                    this.setState({
-                        startCommentsToDisplay: 0,
-                        comments: commentList,
-                    });
-                } else {
-                    this.setState({
-                        startCommentsToDisplay: result.body.pagination.total - theme.custom.commentsLimit,
-                        comments: commentList,
-                    });
-                }
+                this.setState({
+                    allComments: commentList,
+                    comments: commentList,
+                    totalComments: result.body.pagination.total
+                 });
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -168,7 +160,7 @@ class Comments extends Component {
      * @memberof Comments
      */
     handleLoadMoreComments() {
-        const { startCommentsToDisplay, allComments, apiId, comments } = this.state;
+        const { allComments, apiId, comments } = this.state;
         const { theme } = this.props;
         const restApi = new API();
         const limit = theme.custom.commentsLimit;
@@ -179,13 +171,6 @@ class Comments extends Component {
             .then((result) => {
                 const newAllCommentList = allComments.concat(result.body.list);
                 this.setState({ allComments: newAllCommentList, comments: newAllCommentList });
-                if (startCommentsToDisplay - theme.custom.commentsLimit <= 0) {
-                    this.setState({ startCommentsToDisplay: 0 });
-                } else {
-                    this.setState({
-                        startCommentsToDisplay: startCommentsToDisplay - theme.custom.commentsLimit,
-                    });
-                }
             })
             .catch((error) => {
                 if (process.env.NODE_ENV !== 'production') {
@@ -215,7 +200,6 @@ class Comments extends Component {
 
         this.setState({
             allComments: [comment, ...allComments],
-            startCommentsToDisplay: newTotal - commentsLimit,
             totalComments: newTotal,
             comments: [comment, ...allComments],
         });
@@ -249,7 +233,7 @@ class Comments extends Component {
      */
     onDeleteComment(commentIdOfCommentToDelete) {
         const {
-            apiId, comments, totalComments, startCommentsToDisplay,
+            apiId, comments, totalComments,
         } = this.state;
 
         const remainingComments = comments.filter((item) => item.id !== commentIdOfCommentToDelete);
@@ -275,9 +259,7 @@ class Comments extends Component {
                     }
                 });
         } else {
-            const newStart = startCommentsToDisplay <= 0 ? 0 : startCommentsToDisplay - 1;
             this.setState({
-                startCommentsToDisplay: newStart,
                 totalComments: newTotal,
                 comments: remainingComments,
                 allComments: remainingComments,
