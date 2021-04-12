@@ -188,9 +188,9 @@ export default function ListRoles() {
     };
 
     const onSearch = (searchKey) => {
-        let keys = Object.keys(permissionMappings);
-        let filteredKeys = keys.filter(key => key.toLowerCase().includes(searchKey.target.value.toLowerCase()));
-        let newPermissionMappings = {};
+        const keys = Object.keys(permissionMappings);
+        const filteredKeys = keys.filter((key) => key.toLowerCase().includes(searchKey.target.value.toLowerCase()));
+        const newPermissionMappings = {};
         for (let i = 0; i < filteredKeys.length; i++) {
             newPermissionMappings[filteredKeys[i]] = permissionMappings[filteredKeys[i]];
         }
@@ -279,7 +279,7 @@ export default function ListRoles() {
     }
     return (
         <ContentBase title='Scope Assignments' pageDescription={pageDesc}>
-            <ListAddOns 
+            <ListAddOns
                 searchActive={searchProps.active}
                 searchPlaceholder={searchProps.searchPlaceholder}
                 filterData={onSearch}
