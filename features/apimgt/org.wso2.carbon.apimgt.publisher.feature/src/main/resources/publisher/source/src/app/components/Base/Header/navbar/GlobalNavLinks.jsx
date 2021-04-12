@@ -73,7 +73,7 @@ function GlobalNavLinks(props) {
             >
                 <FormattedMessage
                     id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
-                    defaultMessage='Service Catalog'
+                    defaultMessage='Services'
                 />
             </GlobalNavLink>
             { publisherUser

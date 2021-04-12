@@ -319,7 +319,6 @@ class Details extends Component {
      * This method is a hack to update the image in the toolbar when a new image is uploaded
      * @memberof Details
      */
-    // eslint-disable-next-line react/sort-comp
     setImageUpdate() {
         this.setState((previousState) => ({
             imageUpdate: previousState.imageUpdate + 1,

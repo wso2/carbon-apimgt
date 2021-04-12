@@ -121,7 +121,7 @@ function TopMenu(props) {
     const {
         classes, data, setListType, count, isAPIProduct, listType, showToggle,
     } = props;
-    if (true || count > 0) {
+    if (count > 0) {
         return (
             <div className={classes.root}>
                 <div className={classes.mainTitleWrapper}>
