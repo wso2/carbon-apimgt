@@ -54,7 +54,7 @@ public class MonetizationInfoDTO   {
 return null;
         }
     }
-    private MonetizationPlanEnum monetizationPlan = MonetizationPlanEnum.FIXEDRATE;
+    private MonetizationPlanEnum monetizationPlan = null;
     private Map<String, String> properties = new HashMap<String, String>();
 
   /**
@@ -66,9 +66,8 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "FixedRate", required = true, value = "Flag to indicate the monetization plan")
+  @ApiModelProperty(example = "FixedRate", value = "Flag to indicate the monetization plan")
   @JsonProperty("monetizationPlan")
-  @NotNull
   public MonetizationPlanEnum getMonetizationPlan() {
     return monetizationPlan;
   }

@@ -3519,7 +3519,6 @@ components:
     MonetizationInfo:
       title: API monetization details object
       required:
-      - monetizationPlan
       - properties
       type: object
       properties:
@@ -3530,7 +3529,6 @@ components:
           enum:
           - FIXEDRATE
           - DYNAMICRATE
-          default: FIXEDRATE
         properties:
           type: object
           additionalProperties:
