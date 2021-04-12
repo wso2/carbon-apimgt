@@ -21,7 +21,6 @@ import { withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid/Grid';
-import Paper from '@material-ui/core/Paper';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import Alert from 'AppComponents/Shared/Alert';
 import InlineMessage from 'AppComponents/Shared/InlineMessage';
@@ -78,6 +77,7 @@ const styles = (theme) => ({
     paperProgress: {
         padding: theme.spacing(3),
         marginTop: theme.spacing(2),
+        textAlign: 'center',
     },
     dialogContainer: {
         width: 1000,
@@ -281,9 +281,9 @@ class Comments extends Component {
                 </div>
 
                 {loading && (
-                    <Paper className={classes.paperProgress}>
+                    <div className={classes.paperProgress}>
                         <CircularProgress size={24} />
-                    </Paper>
+                    </div>
                 )}
                 {!loading && totalComments === 0
                     && (
