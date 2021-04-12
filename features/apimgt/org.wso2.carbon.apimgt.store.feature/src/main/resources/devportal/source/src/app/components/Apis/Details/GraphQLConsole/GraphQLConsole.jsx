@@ -66,7 +66,7 @@ export default function GraphQLConsole() {
     const classes = useStyles();
     const { api } = useContext(ApiContext);
     const environmentObject = api.endpointURLs;
-    const [URLs, setURLs] = useState(environmentObject[0].URLs);
+    const [URLs, setURLs] = useState(environmentObject.length > 0 ? environmentObject[0].URLs : null);
     const [securitySchemeType, setSecurityScheme] = useState('OAUTH');
     const [notFound, setNotFound] = useState(false);
     const [username, setUsername] = useState('');

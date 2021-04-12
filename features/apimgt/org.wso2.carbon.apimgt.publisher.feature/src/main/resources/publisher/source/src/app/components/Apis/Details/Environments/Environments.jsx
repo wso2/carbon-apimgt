@@ -139,7 +139,12 @@ const useStyles = makeStyles((theme) => ({
     textShape2: {
         marginTop: 8,
         marginLeft: 115,
+        height: '18px',
         fontFamily: 'sans-serif',
+    },
+    textPadding: {
+        height: '25px',
+        paddingBottom: '2px',
     },
     textDelete: {
         marginTop: 8,
@@ -1108,7 +1113,7 @@ export default function Environments() {
                             <Grid className={classes.textShape2}>
                                 {allRevisions[revision].displayName}
                             </Grid>
-                            <Grid>
+                            <Grid className={classes.textPadding}>
                                 <Button
                                     className={classes.textShape3}
                                     onClick={() => toggleOpenConfirmRestore(

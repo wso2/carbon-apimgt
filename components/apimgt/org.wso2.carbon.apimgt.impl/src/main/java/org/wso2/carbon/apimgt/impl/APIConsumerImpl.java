@@ -3320,11 +3320,17 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             String context = null;
             ApiTypeWrapper wrapper;
             if (apiIdentifier != null) {
-                wrapper = getAPIorAPIProductByUUID(apiIdentifier.getUUID(), providerTenantDomain);
+                //The API is retrieved without visibility permission check, since the subscribers should be allowed
+                //to delete already existing subscriptions made for restricted APIs
+                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiIdentifier.getUUID(),
+                        providerTenantDomain);
                 api = wrapper.getApi();
                 context = api.getContext();
             } else if (apiProdIdentifier != null) {
-                wrapper = getAPIorAPIProductByUUID(apiProdIdentifier.getUUID(), providerTenantDomain);
+                //The API Product is retrieved without visibility permission check, since the subscribers should be
+                // allowe to delete already existing subscriptions made for restricted API Products
+                wrapper = getAPIorAPIProductByUUIDWithoutPermissionCheck(apiProdIdentifier.getUUID(),
+                        providerTenantDomain);
                 product = wrapper.getApiProduct();
                 context = product.getContext();
             }
@@ -5996,6 +6002,43 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         } catch (APIPersistenceException e) {
             String msg = "Failed to get API with uuid " + uuid;
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Used to retrieve API/API Products without performing the visibility permission checks
+     * @param uuid
+     * @param requestedTenantDomain
+     * @return
+     * @throws APIManagementException
+     */
+    private ApiTypeWrapper getAPIorAPIProductByUUIDWithoutPermissionCheck(String uuid, String requestedTenantDomain)
+            throws APIManagementException {
+        try {
+            Organization org = new Organization(requestedTenantDomain);
+            DevPortalAPI devPortalApi = apiPersistenceInstance.getDevPortalAPI(org, uuid);
+            if (devPortalApi != null) {
+                if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
+                    APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
+                    apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(), devPortalApi.getApiName(),
+                            devPortalApi.getVersion()));
+                    populateAPIProductInformation(uuid, requestedTenantDomain, org, apiProduct);
+
+                    return new ApiTypeWrapper(apiProduct);
+                } else {
+                    API api = APIMapper.INSTANCE.toApi(devPortalApi);
+                    populateAPIInformation(uuid, requestedTenantDomain, org, api);
+                    populateDefaultVersion(api);
+                    api = addTiersToAPI(api, requestedTenantDomain);
+                    return new ApiTypeWrapper(api);
+                }
+            } else {
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                throw new APIMgtResourceNotFoundException(msg);
+            }
+        } catch (APIPersistenceException | OASPersistenceException | ParseException e) {
+            String msg = "Failed to get API";
             throw new APIManagementException(msg, e);
         }
     }

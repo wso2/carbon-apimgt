@@ -530,7 +530,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
-                if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
+                if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE) || comment.getUser().equals(username)) {
                     if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
@@ -1558,6 +1558,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
                         usedProductResources.toString() + " are used by one or more API Products", log);
             }
+
+            // check user has publisher role and API is in published or deprecated state
+            String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                    .get(RestApiConstants.USER_REST_API_SCOPES);
+            if (!ArrayUtils.contains(tokenScopes, RestApiConstants.PUBLISHER_SCOPE) && (
+                    APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus()) || APIConstants.DEPRECATED
+                            .equalsIgnoreCase(api.getStatus()))) {
+                RestApiUtil.handleAuthorizationFailure(username + " cannot remove the API", log);
+            }
+
             //deletes the API
             apiProvider.deleteAPI(api);
             return Response.ok().build();
@@ -4833,7 +4843,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         } catch (APIManagementException e) {
             if (ExceptionCodes.MISSING_PROTOCOL_IN_ASYNC_API_DEFINITION.getErrorCode() == e.getErrorHandler()
                     .getErrorCode()) {
-                RestApiUtil.handleInternalServerError("Missing protocol in Async API Definition", log);
+                RestApiUtil.handleBadRequest("Missing protocol in the Service Definition", log);
+            } else if (ExceptionCodes.UNSUPPORTED_PROTOCOL_SPECIFIED_IN_ASYNC_API_DEFINITION.getErrorCode() ==
+                    e.getErrorHandler().getErrorCode()) {
+                RestApiUtil.handleBadRequest("Unsupported protocol specified in the Service Definition. Protocol " +
+                        "should be either sse or websub or ws", log);
             }
             RestApiUtil.handleInternalServerError("Error while retrieving the service key of the service " +
                     "associated with API with id " + apiId, log);

@@ -48,6 +48,7 @@ public final class RestApiConstants {
     public static final String PUBLISHER_SCOPE = "apim:api_publish";
     public static final String CREATOR_SCOPE = "apim:api_create";
     public static final String ADMIN_SCOPE = "apim:admin";
+    public static final String PUBLISHER_SCOPE = "apim:api_publish";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
 

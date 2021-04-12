@@ -516,8 +516,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
-            SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-
+            SubscribedAPI subscribedAPI = validateAndGetSubscriptionOnDelete(subscriptionId, apiConsumer);
             apiConsumer.removeSubscription(subscribedAPI);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -532,8 +531,22 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
         if (subscribedAPI == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            return null;
         }
         if (!RestAPIStoreUtils.isUserAccessAllowedForSubscription(subscribedAPI)) {
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+        }
+        return subscribedAPI;
+    }
+
+    private SubscribedAPI validateAndGetSubscriptionOnDelete(String subscriptionId, APIConsumer apiConsumer)
+            throws APIManagementException {
+        SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
+        if (subscribedAPI == null) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            return null;
+        }
+        if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(subscribedAPI.getApplication())) {
             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
         }
         return subscribedAPI;
