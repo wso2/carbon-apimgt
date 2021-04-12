@@ -549,6 +549,9 @@
   "Apis.Details.BusinessInformation.BusinessInformation.technical.owner.name.helper.text": {
     "defaultMessage": "Provide the name of the technical owner"
   },
+  "Apis.Details.Comments.Comment.load.more.replies": {
+    "defaultMessage": "Show More Replies"
+  },
   "Apis.Details.Comments.Comment.something.went.wrong": {
     "defaultMessage": "Something went wrong while deleting comment"
   },

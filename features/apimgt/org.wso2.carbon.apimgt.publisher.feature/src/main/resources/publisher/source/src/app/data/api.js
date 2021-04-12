@@ -1581,6 +1581,22 @@ class API extends Resource {
     }
 
     /**
+     * Get all replies for a particular comment
+     * @param {string} apiId api id of the api for which the comment is added
+     * @param {string} commentId id of the comment
+     * @param {string} limit number of replies to retrieve
+     * @param {string} offset the starting point of replies
+     * @returns {promise} promise
+     */
+    getAllCommentReplies(apiId, commentId, limit, offset) {
+        return this.client.then((client) => {
+            return client.apis.Comments.getRepliesOfComment({
+                commentId, apiId, limit, offset,
+            }, this._requestMetaData());
+        });
+    }
+
+    /**
      * Delete a comment belongs to a particular API
      * @param apiId api id of the api to which the comment belongs to
      * @param commentId comment id of the comment which has to be deleted

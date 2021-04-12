@@ -1297,6 +1297,12 @@
       "value": "Provide the name of the technical owner"
     }
   ],
+  "Apis.Details.Comments.Comment.load.more.replies": [
+    {
+      "type": 0,
+      "value": "Show More Replies"
+    }
+  ],
   "Apis.Details.Comments.Comment.something.went.wrong": [
     {
       "type": 0,
