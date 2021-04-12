@@ -197,11 +197,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                     + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
 
         }
-        if (subscriptionPolicy.getGraphQLMaxDepth() < 0 || subscriptionPolicy.getGraphQLMaxComplexity() < 0) {
-            throw new APIManagementException("GraphQL Limiting options of " + apiPolicyName + " should be an Integer greater "
-                    + "than 1", ExceptionCodes.from(ExceptionCodes.POSITIVE_INTEGER_VALUE, apiPolicyName));
-
-        }
     }
 
     /**
