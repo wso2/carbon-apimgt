@@ -1531,6 +1531,12 @@
       "value": "Backend"
     }
   ],
+  "Apis.Details.Configuration.Configuration.section.events": [
+    {
+      "type": 0,
+      "value": "Events"
+    }
+  ],
   "Apis.Details.Configuration.Configuration.section.initial.request": [
     {
       "type": 0,
@@ -1567,7 +1573,7 @@
       "value": "Save"
     }
   ],
-  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
+  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.\n                                                    product.endpoint": [
     {
       "type": 0,
       "value": "Please refer respective APIs for endpoint information"
@@ -4835,6 +4841,12 @@
       "value": "Operation"
     }
   ],
+  "Apis.Details.Overview.\n                                                                    CustomizedStepper.Endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint"
+    }
+  ],
   "Apis.Details.Overview.CustomizedStepper.Deploy": [
     {
       "type": 0,
@@ -4845,12 +4857,6 @@
     {
       "type": 0,
       "value": "Develop"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.Endpoint": [
-    {
-      "type": 0,
-      "value": "Endpoint"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.Test": [

@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -186,7 +187,7 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
                         LinkedHashMap<String, String> customParametersHashMap =
                                 (LinkedHashMap<String, String>) endpointSecurityProduction
-                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                                        .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         customParametersString = JSONObject.toJSONString(customParametersHashMap);
                     }
 
@@ -369,7 +370,7 @@ public class PublisherCommonUtils {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-             String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
+            String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
@@ -589,6 +590,35 @@ public class PublisherCommonUtils {
             for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
                 String propertyKey = entry.getKey().trim();
                 String propertyValue = entry.getValue();
+                if (propertyKey.contains(" ")) {
+                    return "Property names should not contain space character. Property '" + propertyKey + "' "
+                            + "contains space in it.";
+                }
+                if (Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(propertyKey.toLowerCase())) {
+                    return "Property '" + propertyKey + "' conflicts with the reserved keywords. Reserved keywords "
+                            + "are [" + Arrays.toString(APIConstants.API_SEARCH_PREFIXES) + "]";
+                }
+                // Maximum allowable characters of registry property name and value is 100 and 1000. Hence we are
+                // restricting them to be within 80 and 900.
+                if (propertyKey.length() > 80) {
+                    return "Property name can have maximum of 80 characters. Property '" + propertyKey + "' + contains "
+                            + propertyKey.length() + "characters";
+                }
+                if (propertyValue.length() > 900) {
+                    return "Property value can have maximum of 900 characters. Property '" + propertyKey + "' + "
+                            + "contains a value with " + propertyValue.length() + "characters";
+                }
+            }
+        }
+        return "";
+    }
+
+    public static String validateAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
+
+        if (additionalProperties != null) {
+            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+                String propertyKey = property.getName();
+                String propertyValue = property.getValue();
                 if (propertyKey.contains(" ")) {
                     return "Property names should not contain space character. Property '" + propertyKey + "' "
                             + "contains space in it.";
@@ -1200,7 +1230,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the thumbnail
      */
     public static void updateThumbnail(InputStream fileInputStream, String fileContentType, APIProvider apiProvider,
-            String apiId, String tenantDomain) throws APIManagementException {
+                                       String apiId, String tenantDomain) throws APIManagementException {
         ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
         apiProvider.setThumbnailToAPI(apiId, apiImage, tenantDomain);
     }
@@ -1259,7 +1289,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the documentation content
      */
     public static void addDocumentationContent(Documentation documentation, APIProvider apiProvider, String apiId,
-            String documentId, String tenantDomain, String inlineContent) throws APIManagementException {
+                                               String documentId, String tenantDomain, String inlineContent)
+            throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         content.setSourceType(DocumentationContent.ContentSourceType.valueOf(documentation.getSourceType().toString()));
         content.setTextContent(inlineContent);
@@ -1279,7 +1310,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the documentation file
      */
     public static void addDocumentationContentForFile(InputStream inputStream, String mediaType, String filename,
-            APIProvider apiProvider, String apiId, String documentId, String tenantDomain)
+                                                      APIProvider apiProvider, String apiId,
+                                                      String documentId, String tenantDomain)
             throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         ResourceFile resourceFile = new ResourceFile(inputStream, mediaType);
@@ -1485,7 +1517,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the WSDL resource
      */
     public static void addWsdl(String fileContentType, InputStream fileInputStream, API api, APIProvider apiProvider,
-            String tenantDomain) throws APIManagementException {
+                               String tenantDomain) throws APIManagementException {
         ResourceFile wsdlResource;
         if (APIConstants.APPLICATION_ZIP.equals(fileContentType) || APIConstants.APPLICATION_X_ZIP_COMPRESSED
                 .equals(fileContentType)) {
@@ -1509,7 +1541,8 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating the API
      */
     public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
-            APIProvider apiProvider, String tenantDomain) throws APIManagementException, FaultGatewaysException {
+                                                                     APIProvider apiProvider, String tenantDomain)
+            throws APIManagementException, FaultGatewaysException {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent, api.getId());
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
         updatedAPI.setSoapToRestSequences(list);
