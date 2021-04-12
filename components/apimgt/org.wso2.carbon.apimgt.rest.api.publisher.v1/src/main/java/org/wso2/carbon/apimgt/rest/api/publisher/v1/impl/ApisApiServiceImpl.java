@@ -530,7 +530,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
-                if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
+                if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE) || comment.getUser().equals(username)) {
                     if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
@@ -1558,6 +1558,16 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
                         usedProductResources.toString() + " are used by one or more API Products", log);
             }
+
+            // check user has publisher role and API is in published or deprecated state
+            String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                    .get(RestApiConstants.USER_REST_API_SCOPES);
+            if (!ArrayUtils.contains(tokenScopes, RestApiConstants.PUBLISHER_SCOPE) && (
+                    APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus()) || APIConstants.DEPRECATED
+                            .equalsIgnoreCase(api.getStatus()))) {
+                RestApiUtil.handleAuthorizationFailure(username + " cannot remove the API", log);
+            }
+
             //deletes the API
             apiProvider.deleteAPI(api);
             return Response.ok().build();
