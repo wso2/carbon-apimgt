@@ -30,6 +30,9 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -54,8 +57,10 @@ function SubscriptionConfig(props) {
     const {
         websubSubscriptionConfigDispatcher, websubSubscriptionConfiguration,
     } = props;
+
     const [isExpanded, setIsExpanded] = useState(false);
     const classes = useStyles();
+    const [enabled, setEnabled] = useState(!!websubSubscriptionConfiguration.enable);
 
     /**
      *
@@ -104,10 +109,34 @@ function SubscriptionConfig(props) {
             <ExpansionPanelDetails>
                 <Grid container direction='row' spacing={0} justify='center' alignItems='center'>
                     <Grid item xs={6}>
+                        <FormControl component='fieldset'>
+                            <FormControlLabel
+                                control={(
+                                    <Switch
+                                        checked={websubSubscriptionConfiguration.enable}
+                                        onChange={({ target: { checked } }) => {
+                                            setEnabled(checked);
+                                            websubSubscriptionConfigDispatcher({
+                                                action: 'enable',
+                                                value: checked,
+                                            });
+                                        }}
+                                        size='small'
+                                        color='primary'
+                                    />
+                                )}
+                                label='Enable'
+                                labelPlacement='start'
+                            />
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={6} />
+                    <Grid item xs={6}>
                         <TextField
                             autoFocus
                             fullWidth
                             select
+                            disabled={!enabled}
                             label={(
                                 <>
                                     <FormattedMessage
@@ -140,6 +169,7 @@ function SubscriptionConfig(props) {
                         <TextField
                             autoFocus
                             fullWidth
+                            disabled={!enabled}
                             label={(
                                 <>
                                     <FormattedMessage
@@ -186,6 +216,7 @@ function SubscriptionConfig(props) {
                                 <Button
                                     variant='contained'
                                     color='primary'
+                                    disabled={!enabled}
                                     onClick={() => websubSubscriptionConfigDispatcher({
                                         action: 'secret',
                                         value: generateSecret(),
@@ -210,6 +241,7 @@ SubscriptionConfig.propTypes = {
         signingAlgorithm: PropTypes.string.isRequired,
         signatureHeader: PropTypes.string.isRequired,
         secret: PropTypes.string.isRequired,
+        enable: PropTypes.bool.isRequired,
     }).isRequired,
 };
 
