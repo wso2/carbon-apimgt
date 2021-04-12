@@ -664,6 +664,12 @@ public class APIMappingUtil {
             apiInfoDTO.setCreatedTime(dateFormat.format(createdTime));
         }
 
+        if (api.getLastUpdated() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date lastUpdatedTime = api.getLastUpdated();
+            apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
+        }
+
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
             apiInfoDTO.setHasThumbnail(true);
         } else {

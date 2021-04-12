@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import java.util.Date;
+
 /**
  * A subset of org.wso2.carbon.apimgt.persistence.models.PublisherAPI. Minimal API information required only for
  * listing APIs in publisher which are stored in the
@@ -33,6 +35,7 @@ public class PublisherAPIInfo {
     private String type;
     private String thumbnail; // thumbnail is not required for normal ApiGet
     private String createdTime;
+    private Date updatedTime;
 
     public String getApiName() {
         return apiName;
@@ -101,6 +104,10 @@ public class PublisherAPIInfo {
     public String getCreatedTime() { return createdTime; }
 
     public void setCreatedTime(String createdTime) { this.createdTime = createdTime; }
+
+    public Date getUpdatedTime() { return updatedTime; }
+
+    public void setUpdatedTime(Date updatedTime) { this.updatedTime = updatedTime; }
 
     @Override
     public String toString() {
