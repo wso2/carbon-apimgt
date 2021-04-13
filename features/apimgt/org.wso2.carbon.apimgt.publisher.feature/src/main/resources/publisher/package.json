@@ -50,7 +50,7 @@
         "lodash.isempty": "^4.4.0",
         "material-ui-chip-input": "^1.1.0",
         "moment": "^2.22.2",
-        "mui-datatables": "^3.7.6",
+        "mui-datatables": "^3.7.7",
         "prop-types": "^15.5.10",
         "qs": "^6.4.0",
         "query-string": "6.8.2",
