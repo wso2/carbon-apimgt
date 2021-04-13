@@ -19,6 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import APIClient from 'AppData/APIClient';
+import ServiceCatalogClient from 'AppData/ServiceCatalogClient';
 import AuthManager from 'AppData/AuthManager';
 
 const resourcePath = {
@@ -68,6 +69,11 @@ const resourceMethod = {
     HEAD: 'head',
 };
 
+const client = {
+    API_CLIENT: APIClient,
+    SERVICE_CATALOG_CLIENT: ServiceCatalogClient,
+};
+
 /**
  * Show element iff user has proper scope for the view/action
  * @class ScopeValidation
@@ -83,9 +89,9 @@ export default class ScopeValidation extends React.Component {
      * @returns Boolean
      * @memberof AuthManager
      */
-    static hasScopes(currentResourcePath, currentResourceMethod) {
+    static hasScopes(currentResourcePath, currentResourceMethod, currentClient) {
         const userScopes = AuthManager.getUser().scopes;
-        const validScope = APIClient.getScopeForResource(currentResourcePath, currentResourceMethod);
+        const validScope = currentClient.getScopeForResource(currentResourcePath, currentResourceMethod);
         return validScope.then((scopes) => {
             for (const scope of scopes) {
                 if (userScopes.includes(scope)) {
@@ -111,8 +117,12 @@ export default class ScopeValidation extends React.Component {
      * @memberof ScopeValidation
      */
     componentDidMount() {
-        const { resourcePath: currentResourcePath, resourceMethod: currentResourceMethod } = this.props;
-        const hasScope = ScopeValidation.hasScopes(currentResourcePath, currentResourceMethod);
+        const {
+            resourcePath: currentResourcePath,
+            resourceMethod: currentResourceMethod,
+            client: currentClient,
+        } = this.props;
+        const hasScope = ScopeValidation.hasScopes(currentResourcePath, currentResourceMethod, currentClient);
         hasScope.then((haveScope) => {
             this.setState({ haveScope });
         });
@@ -137,6 +147,9 @@ ScopeValidation.propTypes = {
     children: PropTypes.node.isRequired,
     resourcePath: PropTypes.string.isRequired,
     resourceMethod: PropTypes.string.isRequired,
+    client: PropTypes.shape({}).isRequired,
 };
 
-export { ScopeValidation, resourceMethod, resourcePath };
+export {
+    ScopeValidation, resourceMethod, resourcePath, client,
+};

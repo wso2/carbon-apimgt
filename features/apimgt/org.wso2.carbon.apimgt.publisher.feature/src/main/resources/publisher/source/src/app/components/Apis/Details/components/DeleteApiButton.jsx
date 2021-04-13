@@ -10,7 +10,9 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import API from 'AppData/api';
-import { resourceMethod, resourcePath, ScopeValidation } from 'AppData/ScopeValidation';
+import {
+    client, resourceMethod, resourcePath, ScopeValidation,
+} from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import { FormattedMessage } from 'react-intl';
@@ -190,7 +192,11 @@ class DeleteApiButton extends React.Component {
         return (
             <>
                 {/* allowing delete based on scopes */}
-                <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={path}>
+                <ScopeValidation
+                    resourceMethod={resourceMethod.DELETE}
+                    resourcePath={path}
+                    client={client.API_CLIENT}
+                >
                     <Box
                         className={classNames({ [classes.inlineBlock]: updateData, [classes.flexBox]: !updateData })}
                     >

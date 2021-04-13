@@ -30,6 +30,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import OnboardingMenuCard from 'AppComponents/ServiceCatalog/Listing/components/OnboardingMenuCard';
 import Configurations from 'Config';
 import { getSampleServiceMeta, getSampleOpenAPI } from 'AppData/SamplePizzaShack';
+import {
+    ScopeValidation, resourceMethod, resourcePath, client,
+} from 'AppData/ScopeValidation';
 
 const useStyles = makeStyles((theme) => ({
     actionStyle: {
@@ -122,46 +125,53 @@ function Onboarding() {
                     </Button>
                 </OnboardingMenuCard>
                 {/* Deploy Sample Service */}
-                <OnboardingMenuCard
-                    iconSrc={
-                        Configurations.app.context + '/site/public/images/wso2-intg-service-icon.svg'
-                    }
-                    heading={(
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.sample.heading'
-                            defaultMessage='Add a sample'
-                        />
-                    )}
-                    subHeading={(
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.sample.heading.sub'
-                            defaultMessage='Integration Service'
-                        />
-                    )}
-                    description={(
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.sample.heading.text'
-                            defaultMessage={'Deploy the Sample Integration Service'
-                            + ' already available with WSO2 API Manager and get started in one click'}
-                        />
-                    )}
+                {/* allowing create sample service based on scopes */}
+                <ScopeValidation
+                    resourcePath={resourcePath.SERVICES}
+                    resourceMethod={resourceMethod.POST}
+                    client={client.SERVICE_CATALOG_CLIENT}
                 >
-                    <Button
-                        className={classes.actionStyle}
-                        size='large'
-                        id='itest-services-landing-deploy-sample'
-                        variant='outlined'
-                        color='primary'
-                        onClick={handleOnClick}
-                        disabled={deployStatus.inprogress}
+                    <OnboardingMenuCard
+                        iconSrc={
+                            Configurations.app.context + '/site/public/images/wso2-intg-service-icon.svg'
+                        }
+                        heading={(
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Onboarding.sample.heading'
+                                defaultMessage='Add a sample'
+                            />
+                        )}
+                        subHeading={(
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Onboarding.sample.heading.sub'
+                                defaultMessage='Integration Service'
+                            />
+                        )}
+                        description={(
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Onboarding.sample.heading.text'
+                                defaultMessage={'Deploy the Sample Integration Service'
+                                + ' already available with WSO2 API Manager and get started in one click'}
+                            />
+                        )}
                     >
-                        <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.sample.add'
-                            defaultMessage='Add Sample Service'
-                        />
-                        {deployStatus.inprogress && <CircularProgress size={15} />}
-                    </Button>
-                </OnboardingMenuCard>
+                        <Button
+                            className={classes.actionStyle}
+                            size='large'
+                            id='itest-services-landing-deploy-sample'
+                            variant='outlined'
+                            color='primary'
+                            onClick={handleOnClick}
+                            disabled={deployStatus.inprogress}
+                        >
+                            <FormattedMessage
+                                id='ServiceCatalog.Listing.Onboarding.sample.add'
+                                defaultMessage='Add Sample Service'
+                            />
+                            {deployStatus.inprogress && <CircularProgress size={15} />}
+                        </Button>
+                    </OnboardingMenuCard>
+                </ScopeValidation>
             </Grid>
         </Box>
     );
