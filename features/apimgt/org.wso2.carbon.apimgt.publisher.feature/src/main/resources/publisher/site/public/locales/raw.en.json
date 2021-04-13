@@ -3456,6 +3456,9 @@
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": {
     "defaultMessage": "Service Catalog"
   },
+  "Base.Header.navbar.GlobalNavBar.analytics": {
+    "defaultMessage": "Analytics"
+  },
   "Base.Header.navbar.GlobalNavBar.api.products": {
     "defaultMessage": "API Products"
   },
@@ -3721,7 +3724,7 @@
     "defaultMessage": "Integration Service"
   },
   "ServiceCatalog.Listing.Onboarding.learn.heading.text": {
-    "defaultMessage": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+    "defaultMessage": "Create and Deploy your first Integration Service"
   },
   "ServiceCatalog.Listing.Onboarding.learn.link": {
     "defaultMessage": "Get Started"

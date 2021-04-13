@@ -7257,6 +7257,12 @@
       "value": "Service Catalog"
     }
   ],
+  "Base.Header.navbar.GlobalNavBar.analytics": [
+    {
+      "type": 0,
+      "value": "Analytics"
+    }
+  ],
   "Base.Header.navbar.GlobalNavBar.api.products": [
     {
       "type": 0,
@@ -7808,7 +7814,7 @@
   "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
     {
       "type": 0,
-      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+      "value": "Create and Deploy your first Integration Service"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.learn.link": [

@@ -18,6 +18,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
+import LaunchIcon from '@material-ui/icons/Launch';
+import { useTheme } from '@material-ui/styles';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
 import ScopesIcon from '@material-ui/icons/VpnKey';
@@ -28,6 +30,11 @@ import GlobalNavLink from './GlobalNavLink';
 const useStyles = makeStyles((theme) => ({
     scopeIcon: {
         color: theme.palette.background.paper,
+    },
+    externalLinkIcon: {
+        marginLeft: theme.spacing(1),
+        marginTop: theme.spacing(0.5),
+        marginBottom: theme.spacing(-1),
     },
 }));
 
@@ -42,6 +49,9 @@ function GlobalNavLinks(props) {
     const publisherUser = !AuthManager.isNotPublisher();
     const classes = useStyles();
     const { selected } = props;
+    const theme = useTheme();
+    const analyticsMenuEnabled = theme.custom.leftMenuAnalytics.enable;
+    const analyticsMenuLink = theme.custom.leftMenuAnalytics.link;
     return (
         <Box mt={10}>
             <GlobalNavLink
@@ -89,6 +99,25 @@ function GlobalNavLinks(props) {
             >
                 <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
             </GlobalNavLink>
+            {analyticsMenuEnabled && (
+                <a href={analyticsMenuLink} target='_blank' rel='noreferrer'>
+                    <GlobalNavLink
+                        isExternalLink
+                        type='analytics'
+                        title='Analytics'
+                    >
+                        <div style={{ flexDirection: 'row', display: 'flex' }}>
+                            <FormattedMessage
+                                id='Base.Header.navbar.GlobalNavBar.analytics'
+                                defaultMessage='Analytics'
+                            />
+                            <div className={classes.externalLinkIcon}>
+                                <LaunchIcon style={{ fontSize: 15 }} />
+                            </div>
+                        </div>
+                    </GlobalNavLink>
+                </a>
+            )}
         </Box>
     );
 }
