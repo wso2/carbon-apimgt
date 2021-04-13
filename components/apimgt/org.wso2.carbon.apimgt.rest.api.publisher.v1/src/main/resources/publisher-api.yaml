@@ -7846,8 +7846,11 @@ components:
           items:
             type: string
         createdTime:
-            type: string
-            example : 2021-02-11 09:57:25
+          type: string
+          example : 2021-02-11 09:57:25
+        updatedTime:
+          type: string
+          example : 2021-02-11 09:57:25
 
     Topic:
       title: Topic object
