@@ -22,8 +22,8 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import { useTheme } from '@material-ui/styles';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
-import ScopesIcon from '@material-ui/icons/VpnKey';
 import { makeStyles } from '@material-ui/core/styles';
+import Divider from '@material-ui/core/Divider';
 
 import GlobalNavLink from './GlobalNavLink';
 
@@ -95,28 +95,30 @@ function GlobalNavLinks(props) {
                 type='scopes'
                 title='Scopes'
                 active={selected === 'scopes'}
-                icon={<ScopesIcon className={classes.scopeIcon} style={{ fontSize: 25 }} />}
             >
                 <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
             </GlobalNavLink>
             {analyticsMenuEnabled && (
-                <a href={analyticsMenuLink} target='_blank' rel='noreferrer'>
-                    <GlobalNavLink
-                        isExternalLink
-                        type='analytics'
-                        title='Analytics'
-                    >
-                        <div style={{ flexDirection: 'row', display: 'flex' }}>
-                            <FormattedMessage
-                                id='Base.Header.navbar.GlobalNavBar.analytics'
-                                defaultMessage='Analytics'
-                            />
-                            <div className={classes.externalLinkIcon}>
-                                <LaunchIcon style={{ fontSize: 15 }} />
+                <>
+                    <Divider />
+                    <a href={analyticsMenuLink} target='_blank' rel='noreferrer'>
+                        <GlobalNavLink
+                            isExternalLink
+                            type='analytics'
+                            title='Analytics'
+                        >
+                            <div style={{ flexDirection: 'row', display: 'flex' }}>
+                                <FormattedMessage
+                                    id='Base.Header.navbar.GlobalNavBar.analytics'
+                                    defaultMessage='Analytics'
+                                />
+                                <div className={classes.externalLinkIcon}>
+                                    <LaunchIcon style={{ fontSize: 15 }} />
+                                </div>
                             </div>
-                        </div>
-                    </GlobalNavLink>
-                </a>
+                        </GlobalNavLink>
+                    </a>
+                </>
             )}
         </Box>
     );

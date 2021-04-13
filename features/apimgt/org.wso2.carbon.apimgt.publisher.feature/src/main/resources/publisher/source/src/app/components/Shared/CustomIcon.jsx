@@ -355,8 +355,8 @@ export default function CustomIcon(props) {
     } else if (icon === 'scopes') {
         return (
             <svg
-                width='18px'
-                height='18px'
+                width={width}
+                height={height}
                 viewBox='0 0 18 18'
                 version='1.1'
                 xmlns='http://www.w3.org/2000/svg'
@@ -364,9 +364,9 @@ export default function CustomIcon(props) {
                 <title>1359ABD8-ABF3-4FE9-8AF4-014881DB78CF</title>
                 <g id='Customer-Portal' stroke='none' strokeWidth='1' fill='none' fillRule='evenodd'>
                     <g
-                        id='customer-portal-UI-kit'
+                        id='apim-scopes-icon'
                         transform='translate(-665.000000, -1898.000000)'
-                        fill='#CBCEDB'
+                        fill={strokeColor}
                         fillRule='nonzero'
                     >
                         <g id='Icon/Control/Burger' transform='translate(665.000000, 1898.000000)'>
