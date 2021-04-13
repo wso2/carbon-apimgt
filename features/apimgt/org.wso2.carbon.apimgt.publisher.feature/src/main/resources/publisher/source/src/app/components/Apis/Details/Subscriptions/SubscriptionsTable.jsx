@@ -44,7 +44,9 @@ import UserIcon from '@material-ui/icons/Person';
 
 import Alert from 'AppComponents/Shared/Alert';
 import API from 'AppData/api';
-import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
+import {
+    ScopeValidation, resourceMethod, resourcePath, client,
+} from 'AppData/ScopeValidation';
 import AuthManager from 'AppData/AuthManager';
 import Invoice from './Invoice';
 
@@ -853,6 +855,7 @@ class SubscriptionsTable extends Component {
                                 <ScopeValidation
                                     resourceMethod={resourceMethod.POST}
                                     resourcePath={resourcePath.BLOCK_SUBSCRIPTION}
+                                    client={client.API_CLIENT}
                                 >
                                     {
                                         this.getSubscriptionBlockingButtons(
