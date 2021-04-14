@@ -152,6 +152,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR, api.getAdvertiseOnlyAPIVendor());
             artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
 
@@ -283,7 +284,6 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
 
-            artifact.setAttribute(APIConstants.API_OVERVIEW_AWSAPI, Boolean.toString(api.isAWSAPI()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -674,6 +674,7 @@ public class RegistryPersistenceUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setAdvertiseOnlyAPIVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
@@ -756,7 +757,6 @@ public class RegistryPersistenceUtil {
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
-            api.setAWSAPI(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_AWSAPI)));
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);

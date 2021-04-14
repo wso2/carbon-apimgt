@@ -110,6 +110,7 @@ public class API implements Serializable {
     private boolean advertiseOnly;
     private String apiOwner;
     private String redirectURL;
+    private String vendor;
 
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
@@ -142,7 +143,6 @@ public class API implements Serializable {
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
-    private boolean isAWSAPI;
     private boolean isPublishedDefaultVersion = false;
     private List<String> keyManagers = new ArrayList<>();
     private JSONObject serviceInfo = new JSONObject();
@@ -455,6 +455,14 @@ public class API implements Serializable {
 
     public void setRedirectURL(String redirectURL) {
         this.redirectURL = redirectURL;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public API(APIIdentifier id) {
@@ -932,14 +940,6 @@ public class API implements Serializable {
 
     public boolean isPublishedDefaultVersion() {
         return isPublishedDefaultVersion;
-    }
-
-    public void setAWSAPI(boolean isAWSAPI) {
-        this.isAWSAPI = isAWSAPI;
-    }
-
-    public boolean isAWSAPI() {
-        return isAWSAPI;
     }
 
     public CORSConfiguration getCorsConfiguration() {

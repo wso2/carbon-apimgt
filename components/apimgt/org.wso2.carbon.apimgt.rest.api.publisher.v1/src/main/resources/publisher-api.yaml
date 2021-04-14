@@ -7959,9 +7959,6 @@ components:
         isDefaultVersion:
           type: boolean
           example: false
-        isAWSAPI:
-          type: boolean
-          example: false
         isRevision:
           type: boolean
           example: false
@@ -8058,7 +8055,7 @@ components:
             - PRIVATE
             - RESTRICTED
           x-otherScopes:
-            - apim:api_publish
+            - apim:api_publishAPI:
         visibleRoles:
           type: array
           description: The user roles that are able to access the API in Developer Portal
@@ -10834,6 +10831,12 @@ components:
         apiOwner:
           type: string
           example: admin
+        vendor:
+          type: string
+          default: WSO2
+          enum:
+            - WSO2
+            - AWS
     APICategory:
       title: API Category
       required:

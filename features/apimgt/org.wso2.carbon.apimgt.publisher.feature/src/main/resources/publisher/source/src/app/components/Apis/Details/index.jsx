@@ -753,7 +753,29 @@ class Details extends Component {
                                             to={pathPrefix + 'business info'}
                                             Icon={<BusinessIcon />}
                                         />
-                                        {!api.advertiseInfo.advertised && (
+                                        {!isAPIProduct && ((
+                                            api.advertiseInfo && !api.advertiseInfo.advertised
+                                        ) && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.subscriptions',
+                                                    defaultMessage: 'subscriptions',
+                                                })}
+                                                to={pathPrefix + 'subscriptions'}
+                                                Icon={<SubscriptionsIcon />}
+                                            />
+                                        ))}
+                                        {/* {api.advertiseInfo && !api.advertiseInfo.advertised && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.subscriptions',
+                                                    defaultMessage: 'subscriptions',
+                                                })}
+                                                to={pathPrefix + 'subscriptions'}
+                                                Icon={<SubscriptionsIcon />}
+                                            />
+                                        )} */}
+                                        {isAPIProduct && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.subscriptions',
@@ -808,7 +830,8 @@ class Details extends Component {
                                 </AccordianSummary>
                                 <AccordionDetails>
                                     <div>
-                                        {!api.advertiseInfo.advertised && !api.isWebSocket() && (
+                                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised
+                                            && !api.isWebSocket() && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.runtime.configs',
@@ -819,7 +842,7 @@ class Details extends Component {
                                                 Icon={<RuntimeConfigurationIcon />}
                                             />
                                         )}
-                                        {!api.advertiseInfo.advertised && api.isWebSocket() && (
+                                        {api.advertiseInfo && !api.advertiseInfo.advertised && api.isWebSocket() && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.runtime.configs',
@@ -830,10 +853,10 @@ class Details extends Component {
                                                 Icon={<RuntimeConfigurationIcon />}
                                             />
                                         )}
-                                        {!api.advertiseInfo.advertised
+                                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised
                                             && this.getLeftMenuItemForResourcesByType(api.type)}
                                         {this.getLeftMenuItemForDefinitionByType(api.type)}
-                                        {!api.advertiseInfo.advertised && !isAPIProduct
+                                        {api.advertiseInfo && !api.advertiseInfo.advertised && !isAPIProduct
                                             && api.type !== 'WEBSUB' && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
@@ -844,7 +867,7 @@ class Details extends Component {
                                                 Icon={<EndpointIcon />}
                                             />
                                         )}
-                                        {!api.advertiseInfo.advertised && !isAPIProduct && (
+                                        {api.advertiseInfo && !api.advertiseInfo.advertised && !isAPIProduct && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.left.menu.scope',
@@ -867,7 +890,8 @@ class Details extends Component {
 
                                         {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
                                             <>
-                                                {!api.advertiseInfo.advertised && (
+                                                {!isAPIProduct && api.advertiseInfo
+                                                    && !api.advertiseInfo.advertised && (
                                                     <LeftMenuItem
                                                         text={intl.formatMessage({
                                                             id: 'Apis.Details.index.monetization',
@@ -884,7 +908,7 @@ class Details extends Component {
                             </Accordion>
                         </div>
                         <Divider />
-                        {!api.advertiseInfo.advertised && (
+                        {api.advertiseInfo && !api.advertiseInfo.advertised && (
                             <>
                                 <Typography className={classes.headingText}>Deploy</Typography>
                                 <LeftMenuItem
@@ -898,7 +922,7 @@ class Details extends Component {
                                 />
                             </>
                         )}
-                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
+                        {api.advertiseInfo && !api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
                             && !api.advertiseInfo.advertised && (
                             <div>
                                 <Divider />

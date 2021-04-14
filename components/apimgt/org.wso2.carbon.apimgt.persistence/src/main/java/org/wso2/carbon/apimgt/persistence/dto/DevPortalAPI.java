@@ -39,6 +39,8 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String redirectURL;  // (originalStoreUrl)
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String subscriptionAvailability; // need to decide isSubscriptionAvailable
     private String subscriptionAvailableOrgs; // (subscriptionAvailableTenants): need to decide the value of "isSubscriptionAvailable"
     private String authorizationHeader;
@@ -58,7 +60,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String apiSecurity;
     private String visibility;
     private String visibleRoles;
-    private boolean isAWSAPI;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -170,6 +171,14 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setAdvertiseOnly(boolean advertiseOnly) {
         this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public String getSubscriptionAvailability() {
@@ -291,14 +300,6 @@ public class DevPortalAPI extends DevPortalAPIInfo {
 
     public void setSwaggerDefinition(String swaggerDefinition) {
         this.swaggerDefinition = swaggerDefinition;
-    }
-
-    public boolean isAWSAPI() {
-        return isAWSAPI;
-    }
-
-    public void setAWSAPI(boolean AWSAPI) {
-        isAWSAPI = AWSAPI;
     }
 
 

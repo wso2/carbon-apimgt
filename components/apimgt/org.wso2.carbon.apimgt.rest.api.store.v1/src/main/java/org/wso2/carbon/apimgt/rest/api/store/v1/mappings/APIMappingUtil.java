@@ -92,7 +92,6 @@ public class APIMappingUtil {
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isPublishedDefaultVersion());
-        dto.setIsAWSAPI(model.isAWSAPI());
         dto.setLifeCycleStatus(model.getStatus());
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
@@ -439,7 +438,7 @@ public class APIMappingUtil {
             apidto = fromAPItoDTO(model.getApi(), tenantDomain);
         }
 
-        if (!apidto.isIsAWSAPI()) {
+        if (!AdvertiseInfoDTO.VendorEnum.AWS.toString().equals(apidto.getAdvertiseInfo().getVendor().value())) {
             apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
         } else {
             //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
@@ -933,6 +932,9 @@ public class APIMappingUtil {
         advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
         advertiseInfoDTO.setOriginalDevPortalUrl(api.getRedirectURL());
         advertiseInfoDTO.setApiOwner(api.getApiOwner());
+        if (api.getAdvertiseOnlyAPIVendor() != null) {
+            advertiseInfoDTO.setVendor(AdvertiseInfoDTO.VendorEnum.valueOf(api.getAdvertiseOnlyAPIVendor()));
+        }
         return advertiseInfoDTO;
     }
 

@@ -59,6 +59,8 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String redirectURL;  // check ??
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String endpointConfig;
     private String subscriptionAvailability; // e.g. "CURRENT_TENANT";who is allowed for subscriptions
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
@@ -89,7 +91,6 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String lastUpdated;
     private List<SOAPToRestSequence> soapToRestSequences;
     private Map<String, String> wsUriMapping;
-    private boolean isAWSAPI;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
         return soapToRestSequences;
@@ -297,6 +298,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setAdvertiseOnly(boolean advertiseOnly) {
         this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public String getEndpointConfig() {
@@ -529,14 +538,6 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setWsUriMapping(Map<String, String> wsUriMapping) {
         this.wsUriMapping = wsUriMapping;
-    }
-
-    public boolean isAWSAPI() {
-        return isAWSAPI;
-    }
-
-    public void setAWSAPI(boolean AWSAPI) {
-        isAWSAPI = AWSAPI;
     }
 
     @Override
