@@ -765,16 +765,6 @@ class Details extends Component {
                                                 Icon={<SubscriptionsIcon />}
                                             />
                                         ))}
-                                        {/* {api.advertiseInfo && !api.advertiseInfo.advertised && (
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.subscriptions',
-                                                    defaultMessage: 'subscriptions',
-                                                })}
-                                                to={pathPrefix + 'subscriptions'}
-                                                Icon={<SubscriptionsIcon />}
-                                            />
-                                        )} */}
                                         {isAPIProduct && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
@@ -855,6 +845,7 @@ class Details extends Component {
                                         )}
                                         {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised
                                             && this.getLeftMenuItemForResourcesByType(api.type)}
+                                        {isAPIProduct && this.getLeftMenuItemForResourcesByType(api.type)}
                                         {this.getLeftMenuItemForDefinitionByType(api.type)}
                                         {api.advertiseInfo && !api.advertiseInfo.advertised && !isAPIProduct
                                             && api.type !== 'WEBSUB' && (
@@ -902,6 +893,17 @@ class Details extends Component {
                                                     />
                                                 )}
                                             </>
+                                        )}
+                                        {isAPIProduct && !api.isWebSocket()
+                                            && !isRestricted(['apim:api_publish'], api) && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.monetization',
+                                                    defaultMessage: 'monetization',
+                                                })}
+                                                to={pathPrefix + 'monetization'}
+                                                Icon={<MonetizationIcon />}
+                                            />
                                         )}
                                     </div>
                                 </AccordionDetails>
