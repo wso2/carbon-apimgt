@@ -128,6 +128,7 @@ function AddOperation(props) {
     const inputLabel = useRef(null);
     const [labelWidth, setLabelWidth] = useState(0);
     const intl = useIntl();
+    const isWebSub = api && api.type === 'WEBSUB';
 
     function getSupportedVerbs() {
         return isAsyncAPI ? SUPPORTED_VERBS[api.type] : SUPPORTED_VERBS.REST;
@@ -301,7 +302,7 @@ function AddOperation(props) {
                         value={newOperations.target}
                         onChange={({ target: { name, value } }) => newOperationsDispatcher({
                             type: name,
-                            value: api.type !== 'WEBSUB' && !value.startsWith('/') ? `/${value}` : value,
+                            value: !isWebSub && !value.startsWith('/') ? `/${value}` : value,
                         })}
                         placeholder={isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern'}
                         helperText={newOperations.error || (isAsyncAPI ? 'Enter topic name' : 'Enter URI pattern')}
