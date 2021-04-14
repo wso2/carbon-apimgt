@@ -31,12 +31,12 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -1415,9 +1415,16 @@ public class APIManagerConfiguration {
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
             }
-            OMElement jwtUserClaimsElement =omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
-            if (jwtUserClaimsElement != null ){
+            OMElement jwtUserClaimsElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
+            if (jwtUserClaimsElement != null) {
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
+            }
+            OMElement enableTenantBaseSigningElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
+            if (enableTenantBaseSigningElement != null) {
+                jwtConfigurationDto.
+                        setTenantBasedSigningEnabled(Boolean.parseBoolean(enableTenantBaseSigningElement.getText()));
             }
             OMElement gatewayJWTConfigurationElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));

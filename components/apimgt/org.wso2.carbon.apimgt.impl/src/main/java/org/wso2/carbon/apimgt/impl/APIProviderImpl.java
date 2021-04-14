@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -8825,7 +8826,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Object> result = new HashMap<String, Object>();
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
-        int totalLength = 0;
 
         String userame = userNameWithoutChange;
         Organization org = new Organization(tenantDomain);
@@ -8891,7 +8891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while searching content ", e);
         }
         result.put("apis", compoundResult);
-        result.put("length", totalLength );
+        result.put("length", compoundResult.size() );
         return result;
     }
 
@@ -9718,16 +9718,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public String generateApiKey(String apiId) throws APIManagementException {
-
-        SubscribedApiDTO apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
+        APIInfo apiInfo = apiMgtDAO.getAPIInfoByUUID(apiId);
         if (apiInfo == null) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
                     + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
+        SubscribedApiDTO subscribedApiInfo = new SubscribedApiDTO();
+        subscribedApiInfo.setName(apiInfo.getName());
+        subscribedApiInfo.setContext(apiInfo.getContext());
+        subscribedApiInfo.setPublisher(apiInfo.getProvider());
+        subscribedApiInfo.setVersion(apiInfo.getVersion());
         JwtTokenInfoDTO jwtTokenInfoDTO = new JwtTokenInfoDTO();
         jwtTokenInfoDTO.setEndUserName(username);
         jwtTokenInfoDTO.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
-        jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(apiInfo));
+        jwtTokenInfoDTO.setSubscribedApiDTOList(Arrays.asList(subscribedApiInfo));
         jwtTokenInfoDTO.setExpirationTime(60*1000);
         ApiKeyGenerator apiKeyGenerator = new InternalAPIKeyGenerator();
         return apiKeyGenerator.generateToken(jwtTokenInfoDTO);

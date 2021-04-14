@@ -931,6 +931,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             for (GovernanceArtifact artifact : governanceArtifacts) {
 
                 PublisherAPIInfo apiInfo = new PublisherAPIInfo();
+                String artifactPath = GovernanceUtils.getArtifactPath(userRegistry, artifact.getId());
+                Resource apiResource = userRegistry.get(artifactPath);
                 apiInfo.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
                 apiInfo.setId(artifact.getId());
                 apiInfo.setApiName(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME));
@@ -939,6 +941,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 apiInfo.setStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS));
                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
+                apiInfo.setCreatedTime(String.valueOf(apiResource.getCreatedTime().getTime()));
+                apiInfo.setUpdatedTime(apiResource.getLastModified());
                 publisherAPIInfoList.add(apiInfo);
 
                 // Ensure the APIs returned matches the length, there could be an additional API
@@ -1283,6 +1287,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 apiInfo.setProviderName(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
                                 apiInfo.setStatus(status);
                                 apiInfo.setThumbnail(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
+                                apiInfo.setCreatedTime(String.valueOf(resource.getCreatedTime().getTime()));
+                                apiInfo.setUpdatedTime(resource.getLastModified());
                                 //apiInfo.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
                                 apiInfo.setVersion(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
                                 publisherAPIInfoList.add(apiInfo);
@@ -2332,6 +2338,11 @@ public class RegistryPersistenceImpl implements APIPersistence {
                 }
                 RegistryPersistenceUtil.setResourcePermissions(apiProviderName, visibility, authorizedRoles,
                         contentPath, registry);
+                GenericArtifact updateDocArtifact = RegistryPersistenceDocUtil.createDocArtifactContent(docArtifact,
+                        apiProviderName, apiName, apiVersion, doc);
+                Boolean toggle = Boolean.parseBoolean(updateDocArtifact.getAttribute("toggle"));
+                updateDocArtifact.setAttribute("toggle", Boolean.toString(!toggle));
+                docArtifactManager.updateGenericArtifact(updateDocArtifact);
             } 
         } catch (APIPersistenceException | RegistryException | APIManagementException | PersistenceException
                 | UserStoreException e) {

@@ -31,4 +31,7 @@ public class APIConstants {
 
     public static final String WS_PROTOCOL_URL_PREFIX = "ws://";
     public static final String WSS_PROTOCOL_URL_PREFIX = "wss://";
+
+    public static final String EMAIL_DOMAIN_SEPARATOR = "@";
+    public static final String EMAIL_DOMAIN_SEPARATOR_REPLACEMENT = "-AT-";
 }

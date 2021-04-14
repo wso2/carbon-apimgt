@@ -1297,6 +1297,12 @@
       "value": "Provide the name of the technical owner"
     }
   ],
+  "Apis.Details.Comments.Comment.load.more.replies": [
+    {
+      "type": 0,
+      "value": "Show More Replies"
+    }
+  ],
   "Apis.Details.Comments.Comment.something.went.wrong": [
     {
       "type": 0,
@@ -1531,6 +1537,12 @@
       "value": "Backend"
     }
   ],
+  "Apis.Details.Configuration.Configuration.section.events": [
+    {
+      "type": 0,
+      "value": "Events"
+    }
+  ],
   "Apis.Details.Configuration.Configuration.section.initial.request": [
     {
       "type": 0,
@@ -1567,7 +1579,7 @@
       "value": "Save"
     }
   ],
-  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
+  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.\n                                                    product.endpoint": [
     {
       "type": 0,
       "value": "Please refer respective APIs for endpoint information"
@@ -2284,7 +2296,7 @@
   "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": [
     {
       "type": 0,
-      "value": "Error when validating the document source file name"
+      "value": "Document source file name cannot contain spaces or special characters"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.source.inline": [
@@ -4835,6 +4847,12 @@
       "value": "Operation"
     }
   ],
+  "Apis.Details.Overview.\n                                                                    CustomizedStepper.Endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint"
+    }
+  ],
   "Apis.Details.Overview.CustomizedStepper.Deploy": [
     {
       "type": 0,
@@ -4845,12 +4863,6 @@
     {
       "type": 0,
       "value": "Develop"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.Endpoint": [
-    {
-      "type": 0,
-      "value": "Endpoint"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.Test": [
@@ -6557,6 +6569,12 @@
       "value": "Context"
     }
   ],
+  "Apis.Listing.ApiTableView.items.per.page": [
+    {
+      "type": 0,
+      "value": "Items per page"
+    }
+  ],
   "Apis.Listing.ApiTableView.name": [
     {
       "type": 0,
@@ -7239,6 +7257,12 @@
       "value": "Service Catalog"
     }
   ],
+  "Base.Header.navbar.GlobalNavBar.analytics": [
+    {
+      "type": 0,
+      "value": "Analytics"
+    }
+  ],
   "Base.Header.navbar.GlobalNavBar.api.products": [
     {
       "type": 0,
@@ -7790,7 +7814,7 @@
   "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
     {
       "type": 0,
-      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+      "value": "Create and Deploy your first Integration Service"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.learn.link": [

@@ -185,8 +185,9 @@ export default function DefinitionOutdated(props) {
                                 oldValue={oldDefinition}
                                 newValue={newDefinition}
                                 splitView
-                                leftTitle='Outdated Definition'
-                                rightTitle='New Definition'
+                                disableWordDiff
+                                leftTitle='Outdated Definition from API'
+                                rightTitle='New Service Definition'
                             />
                         )}
                     </DialogContent>

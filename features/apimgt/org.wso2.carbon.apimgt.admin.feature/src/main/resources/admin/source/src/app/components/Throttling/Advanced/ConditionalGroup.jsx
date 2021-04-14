@@ -38,6 +38,7 @@ import AddEditConditionPolicy from 'AppComponents/Throttling/Advanced/AddEditCon
 import AddEditConditionPolicyIp from 'AppComponents/Throttling/Advanced/AddEditConditionPolicyIP';
 import CON_CONSTS from 'AppComponents/Throttling/Advanced/CON_CONSTS';
 import DeleteCondition from 'AppComponents/Throttling/Advanced/DeleteCondition';
+import DeleteConditionGroup from 'AppComponents/Throttling/Advanced/DeleteConditionGroup';
 import Alert from '@material-ui/lab/Alert';
 import AlertTitle from '@material-ui/lab/AlertTitle';
 
@@ -102,7 +103,7 @@ function ConditionalGroup(props) {
     const classes = useStyles();
     const [expanded, setExpanded] = React.useState(false);
     const {
-        group, updateGroup, hasErrors,
+        group, updateGroup, hasErrors, index, deleteGroup,
     } = props;
 
     const handleChange = (panel) => (event, isExpanded) => {
@@ -128,6 +129,12 @@ function ConditionalGroup(props) {
         group[e.target.name] = e.target.value;
         updateGroup();
     };
+
+    const deleteThisGroup = () => {
+        deleteGroup(index);
+        setExpanded(false);
+    };
+
     const rows = [
         {
             name: intl.formatMessage({
@@ -596,6 +603,7 @@ function ConditionalGroup(props) {
                         })}
                         variant='outlined'
                     />
+                    <DeleteConditionGroup deleteThisGroup={deleteThisGroup} />
                 </ExpansionPanelDetails>
             </ExpansionPanel>
 
