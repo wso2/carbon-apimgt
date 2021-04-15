@@ -214,7 +214,6 @@ const KeyConfiguration = (props) => {
 
         } else {
             isPreviousValueSet = !!(additionalProperties && (additionalProperties[config.name]));
-
         }
         let defaultValue = config.default;
         if (config.multiple && typeof defaultValue === 'string' && defaultValue === '') {
