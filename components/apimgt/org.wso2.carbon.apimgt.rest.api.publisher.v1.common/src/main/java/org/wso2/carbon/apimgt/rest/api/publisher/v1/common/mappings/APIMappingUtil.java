@@ -1345,7 +1345,8 @@ public class APIMappingUtil {
         Map endpointConfig = (Map) dto.getEndpointConfig();
         if (api.isEndpointSecured()) {
             endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_ENABLED, true);
-            endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+            endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
             endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
@@ -1356,7 +1357,7 @@ public class APIMappingUtil {
             }
             if (api.isEndpointAuthDigest()) {
                 endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE,
-                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
             }
             JSONObject endpointSecurityModel = new JSONObject();
             endpointSecurityModel.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityObject);

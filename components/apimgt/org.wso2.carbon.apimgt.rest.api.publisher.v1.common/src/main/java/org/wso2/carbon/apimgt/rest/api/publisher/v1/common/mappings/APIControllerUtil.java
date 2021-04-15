@@ -329,11 +329,11 @@ public class APIControllerUtil {
                             if (StringUtils.equals(type.getAsString().toLowerCase(),
                                     APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST)) {
                                 endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST);
+                                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
                             } else if (StringUtils.equals(type.getAsString().toLowerCase(),
                                     APIConstants.ENDPOINT_SECURITY_TYPE_BASIC)) {
                                 endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC);
+                                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
                             } else {
                                 // If the type is not either basic or digest, return an error
                                 throw new APIManagementException(
