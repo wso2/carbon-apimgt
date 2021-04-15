@@ -28,6 +28,10 @@ const definition = {
       ],
       cidr: 'optional'
     }),
+    name: Joi.string().max(30).regex(/^[^~!@#;:%^*()+={}|\\<>"',&$\s+]*$/).required()
+    .error((errors) => {
+        return errors.map(test);
+    }),
 };
 
 export default definition;
