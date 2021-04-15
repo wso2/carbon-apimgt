@@ -2752,7 +2752,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPIs;
     }
 
-    public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId)
+    public Set<Scope> getScopesForApplicationSubscription(String username, int applicationId, String tenantDomain)
             throws APIManagementException {
 
         Subscriber subscriber = new Subscriber(username);
@@ -2915,6 +2915,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     APIConstants.SubscriptionStatus.ON_HOLD, tenantAwareUsername);
 
             boolean isTenantFlowStarted = false;
+            tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
+                    replaceEmailDomainBack(identifier.getProviderName()));
+            tenantId = APIUtil.getTenantIdFromTenantDomain(tenantDomain);
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
             }
