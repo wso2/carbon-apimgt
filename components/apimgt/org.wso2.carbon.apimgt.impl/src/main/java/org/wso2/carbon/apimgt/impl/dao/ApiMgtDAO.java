@@ -101,7 +101,6 @@ import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -5184,10 +5183,10 @@ public class ApiMgtDAO {
         return events;
     }
 
-    public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, String oldVersion) throws APIManagementException {
+    public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, List<API> oldAPIVersions) throws APIManagementException {
 
-        String getSubscriptionDataQuery = SQLConstants.GET_SUBSCRIPTION_DATA_SQL;
-
+        String getSubscriptionDataQuery = SQLConstants.GET_SUBSCRIPTION_DATA_SQL.replaceAll("_API_VERSION_LIST_",
+                String.join(",", Collections.nCopies(oldAPIVersions.size(), "?")));
         APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
         try {
             // Retrieve all the existing subscription for the old version
@@ -5196,7 +5195,10 @@ public class ApiMgtDAO {
                 try (PreparedStatement prepStmt = connection.prepareStatement(getSubscriptionDataQuery)) {
                     prepStmt.setString(1, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
                     prepStmt.setString(2, apiIdentifier.getApiName());
-                    prepStmt.setString(3, oldVersion);
+                    int index = 3;
+                    for (API oldAPI : oldAPIVersions) {
+                        prepStmt.setString(index++, oldAPI.getId().getVersion());
+                    }
                     try (ResultSet rs = prepStmt.executeQuery()) {
                         List<SubscriptionInfo> subscriptionData = new ArrayList<SubscriptionInfo>();
                         while (rs.next() && !(APIConstants.SubscriptionStatus.ON_HOLD.equals(rs.getString("SUB_STATUS"
@@ -5204,51 +5206,54 @@ public class ApiMgtDAO {
                             int subscriptionId = rs.getInt("SUBSCRIPTION_ID");
                             String tierId = rs.getString("TIER_ID");
                             int applicationId = rs.getInt("APPLICATION_ID");
+                            String apiVersion = rs.getString("VERSION");
                             String subscriptionStatus = rs.getString("SUB_STATUS");
                             SubscriptionInfo info = new SubscriptionInfo(subscriptionId, tierId, applicationId,
-                                    subscriptionStatus);
+                                    apiVersion, subscriptionStatus);
                             subscriptionData.add(info);
                         }
-
-                        Map<Integer, Integer> subscriptionIdMap = new HashMap<Integer, Integer>();
-
-                        for (SubscriptionInfo info : subscriptionData) {
-                            try {
-                                if (!subscriptionIdMap.containsKey(info.subscriptionId)) {
-                                    String subscriptionStatus;
-                                    if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
-                                        subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
-                                    } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
-                                        subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
-                                    } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(info.subscriptionStatus)) {
-                                        subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
-                                    } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(info.subscriptionStatus)) {
-                                        subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
-                                    } else {
-                                        subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                        // To keep track of already added subscriptions (apps)
+                        List<Integer> addedApplications = new ArrayList<>();
+                        for (int i = oldAPIVersions.size() - 1; i >= 0; i--) {
+                            API oldAPI = oldAPIVersions.get(i);
+                            for (SubscriptionInfo info : subscriptionData) {
+                                try {
+                                    if (info.getApiVersion().equals(oldAPI.getId().getVersion()) &&
+                                            !addedApplications.contains(info.getApplicationId())) {
+                                        String subscriptionStatus;
+                                        if (APIConstants.SubscriptionStatus.BLOCKED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.BLOCKED;
+                                        } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.UNBLOCKED;
+                                        } else if (APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED;
+                                        } else if (APIConstants.SubscriptionStatus.REJECTED.equalsIgnoreCase(info.getSubscriptionStatus())) {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.REJECTED;
+                                        } else {
+                                            subscriptionStatus = APIConstants.SubscriptionStatus.ON_HOLD;
+                                        }
+                                        apiTypeWrapper.setTier(info.getTierId());
+                                        Application application = getLightweightApplicationById(connection,
+                                                info.getApplicationId());
+                                        int subscriptionId = addSubscription(connection, apiTypeWrapper, application,
+                                                subscriptionStatus, apiIdentifier.getProviderName());
+                                        if (subscriptionId == -1) {
+                                            String msg =
+                                                    "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
+                                                            ":v" + apiIdentifier.getVersion();
+                                            log.error(msg);
+                                            throw new APIManagementException(msg);
+                                        }
+                                        addedApplications.add(info.getApplicationId());
                                     }
-                                    apiTypeWrapper.setTier(info.tierId);
-                                    Application application = getLightweightApplicationById(connection,
-                                            info.applicationId);
-                                    int subscriptionId = addSubscription(connection, apiTypeWrapper, application,
-                                            subscriptionStatus, apiIdentifier.getProviderName());
-                                    if (subscriptionId == -1) {
-                                        String msg =
-                                                "Unable to add a new subscription for the API: " + apiIdentifier.getName() +
-                                                        ":v" + apiIdentifier.getVersion();
-                                        log.error(msg);
-                                        throw new APIManagementException(msg);
-                                    }
-                                    subscriptionIdMap.put(info.subscriptionId, subscriptionId);
+                                    // catching the exception because when copy the api without the option "require
+                                    // re-subscription"
+                                    // need to go forward rather throwing the exception
+                                } catch (SubscriptionAlreadyExistingException e) {
+                                    log.error("Error while adding subscription " + e.getMessage(), e);
+                                } catch (SubscriptionBlockedException e) {
+                                    log.info("Subscription is blocked: " + e.getMessage());
                                 }
-
-                                // catching the exception because when copy the api without the option "require
-                                // re-subscription"
-                                // need to go forward rather throwing the exception
-                            } catch (SubscriptionAlreadyExistingException e) {
-                                log.error("Error while adding subscription " + e.getMessage(), e);
-                            } catch (SubscriptionBlockedException e) {
-                                log.info("Subscription is blocked: " + e.getMessage());
                             }
                         }
                     }
@@ -17237,13 +17242,19 @@ public class ApiMgtDAO {
         private String tierId;
         private int applicationId;
         private String subscriptionStatus;
+        private String apiVersion;
 
-        public SubscriptionInfo(int subscriptionId, String tierId, int applicationId, String subscriptionStatus) {
-
+        public SubscriptionInfo(int subscriptionId, String tierId, int applicationId,
+                                String apiVersion, String subscriptionStatus) {
             this.subscriptionId = subscriptionId;
             this.tierId = tierId;
             this.applicationId = applicationId;
             this.subscriptionStatus = subscriptionStatus;
+            this.apiVersion = apiVersion;
+        }
+
+        public String getApiVersion() {
+            return apiVersion;
         }
 
         public int getSubscriptionId() {

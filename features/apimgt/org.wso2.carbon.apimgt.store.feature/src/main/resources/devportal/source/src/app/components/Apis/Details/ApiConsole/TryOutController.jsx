@@ -436,7 +436,7 @@ function TryOutController(props) {
     }
     const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
     const isPublished = api.lifeCycleStatus.toLowerCase() === 'published';
-    const showSecurityType = isPublished || (isPrototypedAPI && api.enableStore === true);
+    const showSecurityType = isPublished || isPrototypedAPI;
 
     let tokenValue = '';
     if (securitySchemeType === 'API-KEY') {
