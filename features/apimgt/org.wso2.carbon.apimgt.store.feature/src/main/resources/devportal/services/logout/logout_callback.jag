@@ -39,6 +39,10 @@
     response.addCookie(cookie);
 
     log.debug("redirecting to logout");
-    response.sendRedirect(site.context + "/logout");
+    var referrer = request.getParameter("referrer");
+    if (referrer == null) {
+        referrer = "/apis";
+    }
+    response.sendRedirect(site.context + "/logout?referrer=" + referrer);
 
 %>

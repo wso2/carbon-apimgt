@@ -10854,6 +10854,17 @@ public final class APIUtil {
         return Boolean.parseBoolean(anonymousMode);
     }
 
+    public static boolean isTenantDevportalAnonymous(String tenantDomain) throws APIManagementException {
+
+        JSONObject tenantConfig = getTenantConfig(tenantDomain);
+        if (tenantConfig.containsKey(APIConstants.ENABLE_ANONYMOUS_MODE)) {
+            Boolean anonymousEnabled = (boolean) tenantConfig.get(APIConstants.ENABLE_ANONYMOUS_MODE);
+            return anonymousEnabled;
+        } else {
+            return true;
+        }
+    }
+
     public static Map<String, EndpointSecurity> setEndpointSecurityForAPIProduct(API api) throws APIManagementException {
 
         Map<String, EndpointSecurity> endpointSecurityMap = new HashMap<>();
