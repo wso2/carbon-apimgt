@@ -749,7 +749,7 @@ class SubscriptionsTable extends Component {
                             return (
                                 <Box display='flex'>
                                     <Box pr={1}>
-                                        {subscriberClaims && claimsObject.name}
+                                        {subscriberClaims && claimsObject && claimsObject.name}
                                     </Box>
                                     <Tooltip
                                         interactive
