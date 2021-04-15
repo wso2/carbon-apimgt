@@ -8890,13 +8890,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 compoundResult.addAll(docMap.entrySet());
                 compoundResult.addAll(productDocMap.entrySet());
                 compoundResult.sort(new ContentSearchResultNameComparator());
+                result.put("length", results.getTotalCount() );
+            } else {
+                result.put("length", compoundResult.size() );
             }
 
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching content ", e);
         }
         result.put("apis", compoundResult);
-        result.put("length", compoundResult.size() );
         return result;
     }
 
