@@ -211,7 +211,6 @@ const KeyConfiguration = (props) => {
         if (config.type == 'input' && !config.multiple) {
             isPreviousValueSet = !!(additionalProperties && (additionalProperties[config.name]
                 || additionalProperties[config.name] === ''));
-
         } else {
             isPreviousValueSet = !!(additionalProperties && (additionalProperties[config.name]));
         }
