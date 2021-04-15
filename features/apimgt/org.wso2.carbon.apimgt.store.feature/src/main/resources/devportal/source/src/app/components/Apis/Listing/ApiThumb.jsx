@@ -16,7 +16,15 @@ export default function ApiThumb(props) {
             <ApiThumbClassic {...props} />
         );
     }
-    return (
-        <APIThumbPlain {...props} />
-    );
+    const { thumbnailTemplates: { variant, active } } = custom;
+    if (active && variant === 'plain') {
+        return (
+            <APIThumbPlain {...props} />
+        );
+    }
+    if (active && variant === 'text') {
+        return (
+            <ApiThumbClassic {...props} />
+        );
+    }
 }

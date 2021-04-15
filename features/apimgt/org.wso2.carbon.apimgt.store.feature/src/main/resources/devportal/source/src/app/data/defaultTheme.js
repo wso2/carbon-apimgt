@@ -122,8 +122,8 @@ const DefaultConfigurations = {
             subscription: '#ffcc80',
         },
         thumbnailTemplates: {
-            active: false,
-            variant: 'plain', // default templates available templates 'plain'.
+            active: true,
+            variant: 'text', // default templates available templates 'text'. Accepted values 'plain', 'text'
         },
         thumbnail: {
             width: 240,
@@ -134,9 +134,47 @@ const DefaultConfigurations = {
             contentBackgroundColor: 'rgba(239, 239, 239, 0.5)',
             defaultApiImage: false, // put false to render the system generated and user provided image.
             // And put a string to render a custom image
+            textShadow: '0 1px 0 #ccc,0 1px 3px rgba(0,0,0,.1), 0 10px 10px rgba(0,0,0,.1), 0 20px 20px rgba(0,0,0,.1)',
+            offset: 0.4, // Ratio between dark and light gradient, don't want a gradient make it 0
+            colorMap: { // Any hashed color code or if you remove a mapping will fallback to default
+                a: '#CC5262',
+                b: '#605F42',
+                c: '#474675',
+                d: '#F39137',
+                e: '#ffd454',
+                f: '#308BB7',
+                g: '#1B3FA3',
+                h: '#559839',
+                i: '#1A9615',
+                j: '#9C5136',
+                k: '#2B641C',
+                l: '#35A580',
+                m: '#CE7332',
+                n: '#862EF1',
+                o: '#3776F7',
+                p: '#006E9C',
+                q: '#AE726C',
+                r: '#317AD2',
+                s: '#B331D0',
+                t: '#E46E86',
+                u: '#7D257A',
+                v: '#264F7F',
+                w: '#1E5817',
+                x: '#9FA554',
+                y: '#7E2137',
+                z: '#696428',
+            },
             backgrounds: [
                 // These backgrounds are use to generate the thumbnails.
+                { prime: 0x8f6bcaff, sub: 0x4fc2f8ff },
+                { prime: 0xf47f16ff, sub: 0xcddc39ff },
+                { prime: 0xf44236ff, sub: 0xfec107ff },
                 { prime: 0x2196f3ff, sub: 0xaeea00ff },
+                { prime: 0xff9700ff, sub: 0xffeb3cff },
+                { prime: 0xff9700ff, sub: 0xfe5722ff },
+                { prime: 0xa676cdff, sub: 0x8a34a3ed },
+                { prime: 0xe2293aed, sub: 0xdf935ded },
+                { prime: 0xff7600ff, sub: 0x222222ed },
             ],
             document: {
                 icon: 'library_books',

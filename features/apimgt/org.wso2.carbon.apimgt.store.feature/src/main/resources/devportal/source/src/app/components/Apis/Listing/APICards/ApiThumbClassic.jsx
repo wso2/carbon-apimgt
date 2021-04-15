@@ -34,6 +34,7 @@ import classNames from 'classnames';
 import ImageGenerator from './ImageGenerator';
 import Api from '../../../../data/api';
 import { ApiContext } from '../../Details/ApiContext';
+import LetterGenerator from './LetterGenerator';
 
 /**
  *
@@ -184,6 +185,7 @@ class ApiThumbClassic extends React.Component {
      */
     constructor(props) {
         super(props);
+        const { theme: { custom: { thumbnail: { defaultApiImage } } } } = props;
         this.state = {
             category: MaterialIcons.categories[0].name,
             selectedIcon: null,
@@ -191,7 +193,7 @@ class ApiThumbClassic extends React.Component {
             backgroundIndex: null,
             imageObj: null,
             isHover: false,
-            imageLoaded: false,
+            imageLoaded: !!defaultApiImage, // Convert the image string to boolean value.
         };
         this.toggleMouseOver = this.toggleMouseOver.bind(this);
     }
@@ -202,11 +204,12 @@ class ApiThumbClassic extends React.Component {
      * @memberof ApiThumb
      */
     componentDidMount() {
+        const { imageLoaded } = this.state;
+        if (imageLoaded) return;
         const { api } = this.props;
         const restApi = new Api();
 
         const promisedThumbnail = restApi.getAPIThumbnail(api.id);
-
         promisedThumbnail.then((response) => {
             if (response && response.data) {
                 if (response.headers['content-type'] === 'application/json') {
@@ -273,7 +276,7 @@ class ApiThumbClassic extends React.Component {
         const {
             api, classes, theme, customWidth, customHeight, showInfo,
         } = this.props;
-        const { custom: { thumbnail, social: { showRating } } } = theme;
+        const { custom: { thumbnail, social: { showRating }, thumbnailTemplates: { variant, active } } } = theme;
         const { name, version, context } = api;
 
         let { provider } = api;
@@ -310,7 +313,13 @@ class ApiThumbClassic extends React.Component {
                 />
             );
         } else {
-            ImageView = (
+            ImageView = (variant === 'text' && active) ? (
+                <LetterGenerator
+                    width={imageWidth}
+                    height={imageHeight}
+                    artifact={api}
+                />
+            ) : (
                 <ImageGenerator
                     width={imageWidth}
                     height={imageHeight}
