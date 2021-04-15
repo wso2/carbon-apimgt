@@ -325,13 +325,6 @@ public class APIMappingUtil {
             model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
-        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
-            List<String> gatewaysList = dto.getGatewayEnvironments();
-            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
-        } else if (dto.getGatewayEnvironments() != null) {
-            //this means the provided gatewayEnvironments is "" (empty)
-            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
-        }
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
         CORSConfiguration corsConfiguration;
         if (apiCorsConfigurationDTO != null) {
@@ -1177,9 +1170,6 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
-        List<String> environmentsList = new ArrayList<String>();
-        environmentsList.addAll(model.getEnvironments());
-        dto.setGatewayEnvironments(environmentsList);
         APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
         CORSConfiguration corsConfiguration = model.getCorsConfiguration();
         if (corsConfiguration == null) {
@@ -2205,9 +2195,6 @@ public class APIMappingUtil {
             productDto.setTransport(Arrays.asList(product.getTransports().split(",")));
         }
 
-        List<String> environmentsList = new ArrayList<String>();
-        environmentsList.addAll(product.getEnvironments());
-        productDto.setGatewayEnvironments(environmentsList);
         if (product.getAdditionalProperties() != null) {
             JSONObject additionalProperties = product.getAdditionalProperties();
             List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
@@ -2394,13 +2381,6 @@ public class APIMappingUtil {
         String transports = StringUtils.join(dto.getTransport(), ',');
         product.setTransports(transports);
 
-        if (dto.getGatewayEnvironments() != null && dto.getGatewayEnvironments().size() > 0) {
-            List<String> gatewaysList = dto.getGatewayEnvironments();
-            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysList));
-        } else if (dto.getGatewayEnvironments() != null) {
-            //this means the provided gatewayEnvironments is "" (empty)
-            product.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
-        }
 
         List<APIProductResource> productResources = new ArrayList<APIProductResource>();
 
