@@ -137,6 +137,9 @@ class AuthManager {
         const currentEnv = Utils.getCurrentEnvironment().label;
         localStorage.removeItem(User.CONST.USER_EXPIRY_TIME);
         localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${currentEnv}`);
+        for (const name of Object.values(User.PROPERTIES)) {
+            localStorage.removeItem(`${User.CONST.PROPERTY_PREFIX}${name}`);
+        }
         Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, currentEnv);
         Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, currentEnv);
     }

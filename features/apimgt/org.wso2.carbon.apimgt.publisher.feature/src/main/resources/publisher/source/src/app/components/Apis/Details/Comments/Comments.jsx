@@ -100,7 +100,7 @@ class Comments extends Component {
         super(props);
         this.state = {
             expanded: true,
-            allComments: null,
+            allComments: [],
             comments: [],
             totalComments: null,
             apiId: null,
