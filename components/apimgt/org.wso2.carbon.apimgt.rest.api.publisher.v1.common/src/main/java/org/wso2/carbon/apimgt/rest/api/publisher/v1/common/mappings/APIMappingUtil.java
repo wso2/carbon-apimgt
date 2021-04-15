@@ -214,6 +214,7 @@ public class APIMappingUtil {
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
             model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
             model.setApiOwner(advertiseInfoDTO.getApiOwner());
+            model.setAdvertiseOnlyAPIVendor(dto.getAdvertiseInfo().getVendor().value());
         }
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
@@ -907,7 +908,6 @@ public class APIMappingUtil {
             dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
         }
         dto.setDescription(model.getDescription());
-
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setIsRevision(model.isRevision());
         dto.setRevisionedApiId(model.getRevisionedApiId());
@@ -920,6 +920,9 @@ public class APIMappingUtil {
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
         advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
         advertiseInfoDTO.setApiOwner(model.getApiOwner());
+        if (model.getAdvertiseOnlyAPIVendor() != null) {
+            advertiseInfoDTO.setVendor(AdvertiseInfoDTO.VendorEnum.valueOf(model.getAdvertiseOnlyAPIVendor()));
+        }
         dto.setAdvertiseInfo(advertiseInfoDTO);
 
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {

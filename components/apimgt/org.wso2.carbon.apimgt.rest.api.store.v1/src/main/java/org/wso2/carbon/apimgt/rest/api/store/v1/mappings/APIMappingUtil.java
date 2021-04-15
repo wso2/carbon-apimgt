@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.mappings;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
@@ -71,7 +75,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class APIMappingUtil {
 
@@ -446,8 +452,38 @@ public class APIMappingUtil {
         } else {
             apidto = fromAPItoDTO(model.getApi(), tenantDomain);
         }
-        apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
+
+        if (!AdvertiseInfoDTO.VendorEnum.AWS.toString().equals(apidto.getAdvertiseInfo().getVendor().value())) {
+            apidto.setEndpointURLs(fromAPIRevisionListToEndpointsList(apidto, tenantDomain));
+        } else {
+            //getting the server url from the swagger to be displayed as the endpoint url in the dev portal for aws apis
+            apidto.setEndpointURLs(setEndpointURLsForAwsAPIs(model, tenantDomain));
+        }
         return apidto;
+    }
+
+    private static List<APIEndpointURLsDTO>  setEndpointURLsForAwsAPIs(ApiTypeWrapper model, String tenantDomain) throws APIManagementException {
+        APIDTO apidto;
+        apidto = fromAPItoDTO(model.getApi(), tenantDomain);
+        JsonElement configElement = new JsonParser().parse(apidto.getApiDefinition());
+        JsonObject configObject = configElement.getAsJsonObject();  //swaggerDefinition as a json object
+        JsonArray servers = configObject.getAsJsonArray("servers");
+        JsonObject server = servers.get(0).getAsJsonObject();
+        String url = server.get("url").getAsString();
+        JsonObject variables = server.getAsJsonObject("variables");
+        JsonObject basePath = variables.getAsJsonObject("basePath");
+        String stageName = basePath.get("default").getAsString();
+        String serverUrl = url.replace("/{basePath}", stageName);
+        if (serverUrl == null) {
+            serverUrl = "Could not find server URL";
+        }
+        APIEndpointURLsDTO apiEndpointURLsDTO = new APIEndpointURLsDTO();
+        List<APIEndpointURLsDTO> endpointUrls = new ArrayList<>();
+        APIURLsDTO apiurLsDTO = new APIURLsDTO();
+        apiurLsDTO.setHttps(serverUrl);
+        apiEndpointURLsDTO.setUrLs(apiurLsDTO);
+        endpointUrls.add(apiEndpointURLsDTO);
+        return endpointUrls;
     }
 
     public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String tenantDomain)
@@ -911,6 +947,9 @@ public class APIMappingUtil {
         advertiseInfoDTO.setAdvertised(api.isAdvertiseOnly());
         advertiseInfoDTO.setOriginalDevPortalUrl(api.getRedirectURL());
         advertiseInfoDTO.setApiOwner(api.getApiOwner());
+        if (api.getAdvertiseOnlyAPIVendor() != null) {
+            advertiseInfoDTO.setVendor(AdvertiseInfoDTO.VendorEnum.valueOf(api.getAdvertiseOnlyAPIVendor()));
+        }
         return advertiseInfoDTO;
     }
 

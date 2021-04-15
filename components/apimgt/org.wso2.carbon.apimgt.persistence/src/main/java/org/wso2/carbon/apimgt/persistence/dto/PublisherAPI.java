@@ -59,6 +59,8 @@ public class PublisherAPI extends PublisherAPIInfo {
     private String redirectURL;  // check ??
     private String apiOwner;
     private boolean advertiseOnly;
+    private String vendor;
+
     private String endpointConfig;
     private String subscriptionAvailability; // e.g. "CURRENT_TENANT";who is allowed for subscriptions
     private String subscriptionAvailableOrgs; // subscriptionAvailableTenants;
@@ -296,6 +298,14 @@ public class PublisherAPI extends PublisherAPIInfo {
 
     public void setAdvertiseOnly(boolean advertiseOnly) {
         this.advertiseOnly = advertiseOnly;
+    }
+
+    public String getAdvertiseOnlyAPIVendor() {
+        return vendor;
+    }
+
+    public void setAdvertiseOnlyAPIVendor(String advertiseOnlyAPIVendor) {
+        this.vendor = advertiseOnlyAPIVendor;
     }
 
     public String getEndpointConfig() {
