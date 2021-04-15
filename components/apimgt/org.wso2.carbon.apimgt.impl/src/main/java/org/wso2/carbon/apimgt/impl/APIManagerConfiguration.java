@@ -968,6 +968,11 @@ public class APIManagerConfiguration {
                 throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
                         .getText().split(APIConstants.DELEM_COMMA));
             }
+            OMElement enablePolicyDeployElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));
+            if (enablePolicyDeployElement != null) {
+                throttleProperties.setEnablePolicyDeployment(Boolean.parseBoolean(enablePolicyDeployElement.getText()));
+            }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
@@ -1774,15 +1779,6 @@ public class APIManagerConfiguration {
             log.debug("Data Source Element is not set. Set to default Data Source");
         }
 
-        OMElement publishDirectlyToGatewayElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer
-                        .PUBLISH_DIRECTLY_TO_GW_CONFIG));
-        if (publishDirectlyToGatewayElement != null) {
-            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
-                    JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
-        } else {
-            log.debug("Publish directly to gateway is not set. Set to default true");
-        }
     }
 
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
@@ -1838,7 +1834,7 @@ public class APIManagerConfiguration {
 
         OMElement eventWaitingTimeElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EVENT_WAITING_TIME_CONFIG));
-        if (eventWaitingTimeElement!= null) {
+        if (eventWaitingTimeElement != null) {
             long eventWaitingTime = Long.valueOf(eventWaitingTimeElement.getText());
             gatewayArtifactSynchronizerProperties.setEventWaitingTime(eventWaitingTime);
         } else {
