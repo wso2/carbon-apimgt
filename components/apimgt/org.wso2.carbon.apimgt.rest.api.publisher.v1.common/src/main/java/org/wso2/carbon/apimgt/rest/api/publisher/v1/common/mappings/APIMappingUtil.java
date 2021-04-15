@@ -196,7 +196,6 @@ public class APIMappingUtil {
 
         model.setImplementation(dto.getEndpointImplementationType().toString());
         model.setType(dto.getType().toString());
-        model.setTestKey(dto.getTestKey());
         if (dto.getLifeCycleStatus() != null) {
             model.setStatus((dto.getLifeCycleStatus() != null) ? dto.getLifeCycleStatus().toUpperCase() : null);
         }
@@ -206,9 +205,7 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             model.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
-        if (dto.isEnableStore() != null) {
-            model.setEnableStore(dto.isEnableStore());
-        }
+        model.setEnableStore(true);
         if (dto.getAdvertiseInfo() != null) {
             AdvertiseInfoDTO advertiseInfoDTO = dto.getAdvertiseInfo();
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
@@ -913,8 +910,6 @@ public class APIMappingUtil {
         dto.setRevisionedApiId(model.getRevisionedApiId());
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
-        dto.setEnableStore(model.isEnableStore());
-        dto.setTestKey(model.getTestKey());
 
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
@@ -2103,8 +2098,6 @@ public class APIMappingUtil {
         productDto.setTags(tagsToReturn);
 
         productDto.setEnableSchemaValidation(product.isEnabledSchemaValidation());
-        productDto.setEnableStore(product.isEnableStore());
-        productDto.setTestKey(product.getTestKey());
 
         productDto.setIsRevision(product.isRevision());
         productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
@@ -2329,7 +2322,6 @@ public class APIMappingUtil {
         product.setContext(context);
         context = checkAndSetVersionParam(context);
         product.setContextTemplate(context);
-        product.setTestKey(dto.getTestKey());
 
         List<String> apiProductTags = dto.getTags();
         Set<String> tagsToReturn = new HashSet<>(apiProductTags);
@@ -2338,11 +2330,7 @@ public class APIMappingUtil {
         if (dto.isEnableSchemaValidation() != null) {
             product.setEnableSchemaValidation(dto.isEnableSchemaValidation());
         }
-
-        if (dto.isEnableStore() != null) {
-            product.setEnableStore(dto.isEnableStore());
-        }
-
+        product.setEnableStore(true);
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             product.setResponseCache(APIConstants.ENABLED);
         } else {

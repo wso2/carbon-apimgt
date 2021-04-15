@@ -67,8 +67,6 @@ return null;
     }
     private StateEnum state = null;
     private Boolean enableSchemaValidation = null;
-    private Boolean enableStore = null;
-    private String testKey = null;
     private Boolean isRevision = null;
     private String revisionedApiProductId = null;
     private Integer revisionId = null;
@@ -366,40 +364,6 @@ return null;
   }
   public void setEnableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
-  }
-
-  /**
-   **/
-  public APIProductDTO enableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("enableStore")
-  public Boolean isEnableStore() {
-    return enableStore;
-  }
-  public void setEnableStore(Boolean enableStore) {
-    this.enableStore = enableStore;
-  }
-
-  /**
-   **/
-  public APIProductDTO testKey(String testKey) {
-    this.testKey = testKey;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "8swdwj9080edejhj", value = "")
-  @JsonProperty("testKey")
-  public String getTestKey() {
-    return testKey;
-  }
-  public void setTestKey(String testKey) {
-    this.testKey = testKey;
   }
 
   /**
@@ -934,8 +898,6 @@ return null;
         Objects.equals(hasThumbnail, apIProduct.hasThumbnail) &&
         Objects.equals(state, apIProduct.state) &&
         Objects.equals(enableSchemaValidation, apIProduct.enableSchemaValidation) &&
-        Objects.equals(enableStore, apIProduct.enableStore) &&
-        Objects.equals(testKey, apIProduct.testKey) &&
         Objects.equals(isRevision, apIProduct.isRevision) &&
         Objects.equals(revisionedApiProductId, apIProduct.revisionedApiProductId) &&
         Objects.equals(revisionId, apIProduct.revisionId) &&
@@ -969,7 +931,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, enableStore, testKey, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
   }
 
   @Override
@@ -985,8 +947,6 @@ return null;
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    state: ").append(toIndentedString(state)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
-    sb.append("    enableStore: ").append(toIndentedString(enableStore)).append("\n");
-    sb.append("    testKey: ").append(toIndentedString(testKey)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
     sb.append("    revisionedApiProductId: ").append(toIndentedString(revisionedApiProductId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
