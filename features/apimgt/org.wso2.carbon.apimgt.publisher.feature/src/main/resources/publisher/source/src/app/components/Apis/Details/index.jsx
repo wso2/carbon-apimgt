@@ -937,7 +937,7 @@ class Details extends Component {
                             </Accordion>
                         </div>
                         <Divider />
-                        {api.advertiseInfo && !api.advertiseInfo.advertised && (
+                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised && (
                             <>
                                 <Typography className={classes.headingText}>Deploy</Typography>
                                 <LeftMenuItem
@@ -965,8 +965,8 @@ class Details extends Component {
                                 />
                             </>
                         )}
-                        {api.advertiseInfo && !api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && !api.advertiseInfo.advertised && (
+                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised && !api.isWebSocket()
+                            && !api.isGraphql() && !isAsyncAPI && (
                             <div>
                                 <Divider />
                                 <Typography className={classes.headingText}>Test</Typography>
