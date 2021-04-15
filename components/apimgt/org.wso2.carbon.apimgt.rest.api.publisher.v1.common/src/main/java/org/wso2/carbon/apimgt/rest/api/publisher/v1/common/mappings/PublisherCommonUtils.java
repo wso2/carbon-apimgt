@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -190,7 +191,7 @@ public class PublisherCommonUtils {
                             .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
                         LinkedHashMap<String, String> customParametersHashMap =
                                 (LinkedHashMap<String, String>) endpointSecurityProduction
-                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                                        .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                         customParametersString = JSONObject.toJSONString(customParametersHashMap);
                     }
 
@@ -373,7 +374,7 @@ public class PublisherCommonUtils {
                 apiToUpdate.setUriTemplates(apiDefinition.getURITemplates(newDefinition));
             }
         } else {
-             String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
+            String oldDefinition = apiProvider.getAsyncAPIDefinition(apiIdentifier.getUUID(), tenantDomain);
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
             apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
@@ -587,12 +588,12 @@ public class PublisherCommonUtils {
      * @param additionalProperties Map<String, String>  properties to validate
      * @return error message if there is an validation error with additional properties.
      */
-    public static String validateAdditionalProperties(Map<String, String> additionalProperties) {
+    public static String validateAdditionalProperties(List<APIAdditionalPropertiesDTO> additionalProperties) {
 
         if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                String propertyKey = entry.getKey().trim();
-                String propertyValue = entry.getValue();
+            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+                String propertyKey = property.getName();
+                String propertyValue = property.getValue();
                 if (propertyKey.contains(" ")) {
                     return "Property names should not contain space character. Property '" + propertyKey + "' "
                             + "contains space in it.";
@@ -1216,7 +1217,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the thumbnail
      */
     public static void updateThumbnail(InputStream fileInputStream, String fileContentType, APIProvider apiProvider,
-            String apiId, String tenantDomain) throws APIManagementException {
+                                       String apiId, String tenantDomain) throws APIManagementException {
         ResourceFile apiImage = new ResourceFile(fileInputStream, fileContentType);
         apiProvider.setThumbnailToAPI(apiId, apiImage, tenantDomain);
     }
@@ -1275,7 +1276,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the documentation content
      */
     public static void addDocumentationContent(Documentation documentation, APIProvider apiProvider, String apiId,
-            String documentId, String tenantDomain, String inlineContent) throws APIManagementException {
+                                               String documentId, String tenantDomain, String inlineContent)
+            throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         content.setSourceType(DocumentationContent.ContentSourceType.valueOf(documentation.getSourceType().toString()));
         content.setTextContent(inlineContent);
@@ -1295,7 +1297,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the documentation file
      */
     public static void addDocumentationContentForFile(InputStream inputStream, String mediaType, String filename,
-            APIProvider apiProvider, String apiId, String documentId, String tenantDomain)
+                                                      APIProvider apiProvider, String apiId,
+                                                      String documentId, String tenantDomain)
             throws APIManagementException {
         DocumentationContent content = new DocumentationContent();
         ResourceFile resourceFile = new ResourceFile(inputStream, mediaType);
@@ -1501,7 +1504,7 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while adding the WSDL resource
      */
     public static void addWsdl(String fileContentType, InputStream fileInputStream, API api, APIProvider apiProvider,
-            String tenantDomain) throws APIManagementException {
+                               String tenantDomain) throws APIManagementException {
         ResourceFile wsdlResource;
         if (APIConstants.APPLICATION_ZIP.equals(fileContentType) || APIConstants.APPLICATION_X_ZIP_COMPRESSED
                 .equals(fileContentType)) {
@@ -1525,7 +1528,8 @@ public class PublisherCommonUtils {
      * @throws FaultGatewaysException If an error occurs while updating the API
      */
     public static API updateAPIBySettingGenerateSequencesFromSwagger(String swaggerContent, API api,
-            APIProvider apiProvider, String tenantDomain) throws APIManagementException, FaultGatewaysException {
+                                                                     APIProvider apiProvider, String tenantDomain)
+            throws APIManagementException, FaultGatewaysException {
         List<SOAPToRestSequence> list = SequenceGenerator.generateSequencesFromSwagger(swaggerContent, api.getId());
         API updatedAPI = apiProvider.getAPIbyUUID(api.getUuid(), tenantDomain);
         updatedAPI.setSoapToRestSequences(list);

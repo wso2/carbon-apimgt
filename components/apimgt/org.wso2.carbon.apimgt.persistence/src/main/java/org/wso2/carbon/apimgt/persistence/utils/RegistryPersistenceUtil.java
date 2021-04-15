@@ -807,12 +807,7 @@ public class RegistryPersistenceUtil {
                 if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                     String property = propertyName
                             .substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length());
-                    int index = property.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
-                    if (index > 0) {
-                        api.addProperty(property.substring(0, index), apiResource.getProperty(propertyName));
-                    } else {
-                        api.addProperty(property, apiResource.getProperty(propertyName));
-                    }
+                    api.addProperty(property, apiResource.getProperty(propertyName));
                 }
             }
         }
