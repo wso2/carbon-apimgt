@@ -780,14 +780,26 @@ class Details extends Component {
                                             to={pathPrefix + 'business info'}
                                             Icon={<BusinessIcon />}
                                         />
-                                        <LeftMenuItem
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.subscriptions',
-                                                defaultMessage: 'subscriptions',
-                                            })}
-                                            to={pathPrefix + 'subscriptions'}
-                                            Icon={<SubscriptionsIcon />}
-                                        />
+                                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.subscriptions',
+                                                    defaultMessage: 'subscriptions',
+                                                })}
+                                                to={pathPrefix + 'subscriptions'}
+                                                Icon={<SubscriptionsIcon />}
+                                            />
+                                        )}
+                                        {isAPIProduct && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.subscriptions',
+                                                    defaultMessage: 'subscriptions',
+                                                })}
+                                                to={pathPrefix + 'subscriptions'}
+                                                Icon={<SubscriptionsIcon />}
+                                            />
+                                        )}
                                         <LeftMenuItem
                                             text={intl.formatMessage({
                                                 id: 'Apis.Details.index.documents',
