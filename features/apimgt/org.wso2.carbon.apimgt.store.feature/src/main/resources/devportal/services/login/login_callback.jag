@@ -34,11 +34,17 @@
             serverUrl = utils.getServerURL();
         }
     }
-    var isAnonymous = utils.isDevPortalAnonymous();
     var referrer = "/apis";
     var state = request.getParameter("state");
-    if (state != null && !isAnonymous) {
-        referrer = state;
+    if (state != null) {
+        var tenant = state.split("?")[1];
+        if (tenant != null) {
+            var tenantDomain = tenant.split("=")[1];
+            var isAnonymousEnabled = utils.isTenantDevportalAnonymous(tenantDomain);
+            if (isAnonymousEnabled) {
+                referrer = state;
+            }
+        }
     }
     var postLogoutRedirectURI = appUtils.getTenantBasedLogoutCallBack();
     if (postLogoutRedirectURI == null) {
