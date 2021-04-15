@@ -127,6 +127,10 @@ export default {
         leftMenuIconSize: 20,
         leftMenuIconMainSize: 52,
         leftMenuTextStyle: 'capitalize',
+        leftMenuAnalytics: {
+            enable: true, // If `false`, External link to choreo cloud analytics icon will be removed/hidden in nav bar
+            link: 'http://analytics.choreo.dev/setup',
+        },
         resourceChipColors: { // https://github.com/swagger-api/swagger-ui/blob/master/src/style/_variables.scss#L45-L52
             get: '#61affe',
             post: '#49cc90',

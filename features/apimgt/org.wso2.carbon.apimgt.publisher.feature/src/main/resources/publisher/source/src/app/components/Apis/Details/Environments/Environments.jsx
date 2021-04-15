@@ -23,6 +23,7 @@ import 'react-tagsinput/react-tagsinput.css';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import Typography from '@material-ui/core/Typography';
+import { isRestricted } from 'AppData/AuthManager';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
@@ -39,7 +40,6 @@ import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
-import { useTheme } from '@material-ui/core';
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import Configurations from 'Config';
 import Card from '@material-ui/core/Card';
@@ -139,7 +139,12 @@ const useStyles = makeStyles((theme) => ({
     textShape2: {
         marginTop: 8,
         marginLeft: 115,
+        height: '18px',
         fontFamily: 'sans-serif',
+    },
+    textPadding: {
+        height: '25px',
+        paddingBottom: '2px',
     },
     textDelete: {
         marginTop: 8,
@@ -304,8 +309,7 @@ const useStyles = makeStyles((theme) => ({
  */
 export default function Environments() {
     const classes = useStyles();
-    const theme = useTheme();
-    const { maxCommentLength } = theme.custom;
+    const maxCommentLength = '255';
     const intl = useIntl();
     const { api } = useContext(APIContext);
     const history = useHistory();
@@ -375,7 +379,9 @@ export default function Environments() {
     };
 
     const handleClickOpen = () => {
-        setOpen(true);
+        if (!isRestricted(['apim:api_create'], api)) {
+            setOpen(true);
+        }
     };
 
     const handleDeleteSelect = (event) => {
@@ -1074,6 +1080,7 @@ export default function Environments() {
                                     )}
                                     size='small'
                                     type='submit'
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     startIcon={<RestoreIcon />}
                                 >
                                     <FormattedMessage
@@ -1086,9 +1093,9 @@ export default function Environments() {
                                     onClick={() => toggleOpenConfirmDelete(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
-                                    disabled={allEnvRevision && allEnvRevision.filter(
+                                    disabled={(allEnvRevision && allEnvRevision.filter(
                                         (o1) => o1.id === allRevisions[revision].id,
-                                    ).length !== 0}
+                                    ).length !== 0) || isRestricted(['apim:api_create'], api)}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -1108,13 +1115,14 @@ export default function Environments() {
                             <Grid className={classes.textShape2}>
                                 {allRevisions[revision].displayName}
                             </Grid>
-                            <Grid>
+                            <Grid className={classes.textPadding}>
                                 <Button
                                     className={classes.textShape3}
                                     onClick={() => toggleOpenConfirmRestore(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
                                     size='small'
+                                    disabled={isRestricted(['apim:api_create'], api)}
                                     type='submit'
                                     startIcon={<RestoreIcon />}
                                 >
@@ -1128,9 +1136,9 @@ export default function Environments() {
                                     onClick={() => toggleOpenConfirmDelete(
                                         allRevisions[revision].displayName, allRevisions[revision].id,
                                     )}
-                                    disabled={allEnvRevision && allEnvRevision.filter(
+                                    disabled={(allEnvRevision && allEnvRevision.filter(
                                         (o1) => o1.id === allRevisions[revision].id,
-                                    ).length !== 0}
+                                    ).length !== 0) || isRestricted(['apim:api_create'], api)}
                                     size='small'
                                     color='#38536c'
                                     startIcon={<DeleteForeverIcon />}
@@ -1297,6 +1305,7 @@ export default function Environments() {
                 <Grid container>
                     <Button
                         onClick={toggleDeployRevisionPopup}
+                        disabled={isRestricted(['apim:api_create'], api)}
                         variant='contained'
                         color='primary'
                         size='large'
@@ -1575,7 +1584,8 @@ export default function Environments() {
                             }
                             color='primary'
                             disabled={SelectedEnvironment.length === 0
-                                || (allRevisions && allRevisions.length === revisionCount && !extraRevisionToDelete)}
+                                || (allRevisions && allRevisions.length === revisionCount && !extraRevisionToDelete)
+                                || isRestricted(['apim:api_create'], api)}
                         >
                             <FormattedMessage
                                 id='Apis.Details.Environments.Environments.deploy.deploy'
@@ -1916,7 +1926,8 @@ export default function Environments() {
                                                         <Button
                                                             className={classes.button1}
                                                             variant='outlined'
-                                                            disabled={api.isRevision}
+                                                            disabled={api.isRevision
+                                                                || isRestricted(['apim:api_create'], api)}
                                                             onClick={() => undeployRevision(
                                                                 allEnvDeployments[row.name].revision.id, row.name,
                                                             )}

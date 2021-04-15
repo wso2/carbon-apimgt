@@ -31,12 +31,12 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -968,6 +968,11 @@ public class APIManagerConfiguration {
                 throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
                         .getText().split(APIConstants.DELEM_COMMA));
             }
+            OMElement enablePolicyDeployElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));
+            if (enablePolicyDeployElement != null) {
+                throttleProperties.setEnablePolicyDeployment(Boolean.parseBoolean(enablePolicyDeployElement.getText()));
+            }
             // Check subscription spike arrest enable
             OMElement enabledSubscriptionLevelSpikeArrestElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
@@ -1415,9 +1420,16 @@ public class APIManagerConfiguration {
             if (jwtHeaderElement != null) {
                 jwtConfigurationDto.setJwtHeader(jwtHeaderElement.getText());
             }
-            OMElement jwtUserClaimsElement =omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
-            if (jwtUserClaimsElement != null ){
+            OMElement jwtUserClaimsElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_USER_CLAIMS));
+            if (jwtUserClaimsElement != null) {
                 jwtConfigurationDto.setEnableUserClaims(Boolean.parseBoolean(jwtUserClaimsElement.getText()));
+            }
+            OMElement enableTenantBaseSigningElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.ENABLE_TENANT_BASE_SIGNING));
+            if (enableTenantBaseSigningElement != null) {
+                jwtConfigurationDto.
+                        setTenantBasedSigningEnabled(Boolean.parseBoolean(enableTenantBaseSigningElement.getText()));
             }
             OMElement gatewayJWTConfigurationElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.GATEWAY_JWT_GENERATOR));
@@ -1767,15 +1779,6 @@ public class APIManagerConfiguration {
             log.debug("Data Source Element is not set. Set to default Data Source");
         }
 
-        OMElement publishDirectlyToGatewayElement = omElement
-                .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer
-                        .PUBLISH_DIRECTLY_TO_GW_CONFIG));
-        if (publishDirectlyToGatewayElement != null) {
-            gatewayArtifactSynchronizerProperties.setPublishDirectlyToGatewayEnabled(
-                    JavaUtils.isTrueExplicitly(publishDirectlyToGatewayElement.getText()));
-        } else {
-            log.debug("Publish directly to gateway is not set. Set to default true");
-        }
     }
 
     private void setRuntimeArtifactsSyncGatewayConfig (OMElement omElement){
@@ -1831,7 +1834,7 @@ public class APIManagerConfiguration {
 
         OMElement eventWaitingTimeElement = omElement
                 .getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EVENT_WAITING_TIME_CONFIG));
-        if (eventWaitingTimeElement!= null) {
+        if (eventWaitingTimeElement != null) {
             long eventWaitingTime = Long.valueOf(eventWaitingTimeElement.getText());
             gatewayArtifactSynchronizerProperties.setEventWaitingTime(eventWaitingTime);
         } else {

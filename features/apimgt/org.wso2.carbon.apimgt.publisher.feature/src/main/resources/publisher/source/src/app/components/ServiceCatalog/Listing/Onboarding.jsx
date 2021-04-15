@@ -101,8 +101,7 @@ function Onboarding() {
                     description={(
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Onboarding.learn.heading.text'
-                            defaultMessage={'Create and Deploy your first Integration'
-                    + ' Service easily using WSO2 Micro Integrator'}
+                            defaultMessage='Create and Deploy your first Integration Service'
                         />
                     )}
                 >
@@ -111,8 +110,7 @@ function Onboarding() {
                         size='large'
                         variant='outlined'
                         color='primary'
-                        // TODO: Update below link when /next doc is available
-                        href='https://apim.docs.wso2.com/en/latest/'
+                        href='https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/'
                         endIcon={<LaunchIcon style={{ fontSize: 15 }} />}
                     >
                         <FormattedMessage

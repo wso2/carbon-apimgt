@@ -388,7 +388,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 //check whether user is permitted to access the API. If the API does not exist,
                 // this will throw a APIMgtResourceNotFoundException
                 if (!org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils
-                        .isUserAccessAllowedForAPI(apiIdentifier)) {
+                        .isUserAccessAllowedForAPIByUUID(subscriptionDTO.getApiId(),tenantDomain)) {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API,
                             subscriptionDTO.getApiId(), log);
                 }
@@ -516,8 +516,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         APIConsumer apiConsumer;
         try {
             apiConsumer = RestApiCommonUtil.getConsumer(username);
-            SubscribedAPI subscribedAPI = validateAndGetSubscription(subscriptionId, apiConsumer);
-
+            SubscribedAPI subscribedAPI = validateAndGetSubscriptionOnDelete(subscriptionId, apiConsumer);
             apiConsumer.removeSubscription(subscribedAPI);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -532,8 +531,22 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
         if (subscribedAPI == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            return null;
         }
         if (!RestAPIStoreUtils.isUserAccessAllowedForSubscription(subscribedAPI)) {
+            RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+        }
+        return subscribedAPI;
+    }
+
+    private SubscribedAPI validateAndGetSubscriptionOnDelete(String subscriptionId, APIConsumer apiConsumer)
+            throws APIManagementException {
+        SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
+        if (subscribedAPI == null) {
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            return null;
+        }
+        if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(subscribedAPI.getApplication())) {
             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
         }
         return subscribedAPI;

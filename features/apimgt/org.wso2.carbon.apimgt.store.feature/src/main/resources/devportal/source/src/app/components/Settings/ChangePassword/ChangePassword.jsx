@@ -181,47 +181,56 @@ const ChangePassword = () => {
     };
 
     const handleSave = () => {
-        const restApi = new API();
-        return restApi
-            .changePassword(currentPassword, newPassword)
-            .then((res) => {
-                Alert.success(
-                    <FormattedMessage
-                        id='Change.Password.password.changed.success'
-                        defaultMessage='User password changed successfully. Please use the new password on next sign in'
-                    />
-                );
-                window.history.back();
-            })
-            .catch((error) => {
-                const errorCode = error.response.body.code;
-                switch (errorCode) {
-                    case 901450:
-                        Alert.error(
-                            <FormattedMessage
-                                id='Change.Password.password.change.disabled'
-                                defaultMessage='Password change disabled'
-                            />
-                        );
-                        break;
-                    case 901451:
-                        Alert.error(
-                            <FormattedMessage
-                                id='Change.Password.current.password.incorrect'
-                                defaultMessage='Current password is incorrect'
-                            />
-                        );
-                        break;
-                    case 901452:
-                        Alert.error(
-                            <FormattedMessage
-                                id='Change.Password.password.pattern.invalid'
-                                defaultMessage='Invalid password pattern'
-                            />
-                        );
-                        break;
-                }
-            });
+        if (repeatedNewPassword && newPassword !== repeatedNewPassword) {
+            Alert.error(
+                <FormattedMessage
+                    id='Change.Password.password.mismatch'
+                    defaultMessage={'Password doesn\'t match'}
+                />
+            );
+        } else {
+            const restApi = new API();
+            return restApi
+                .changePassword(currentPassword, newPassword)
+                .then((res) => {
+                    Alert.success(
+                        <FormattedMessage
+                            id='Change.Password.password.changed.success'
+                            defaultMessage='User password changed successfully. Please use the new password on next sign in'
+                        />
+                    );
+                    window.history.back();
+                })
+                .catch((error) => {
+                    const errorCode = error.response.body.code;
+                    switch (errorCode) {
+                        case 901450:
+                            Alert.error(
+                                <FormattedMessage
+                                    id='Change.Password.password.change.disabled'
+                                    defaultMessage='Password change disabled'
+                                />
+                            );
+                            break;
+                        case 901451:
+                            Alert.error(
+                                <FormattedMessage
+                                    id='Change.Password.current.password.incorrect'
+                                    defaultMessage='Current password is incorrect'
+                                />
+                            );
+                            break;
+                        case 901452:
+                            Alert.error(
+                                <FormattedMessage
+                                    id='Change.Password.password.pattern.invalid'
+                                    defaultMessage='Invalid password pattern'
+                                />
+                            );
+                            break;
+                    }
+                });
+        }
     };
 
     const title = (

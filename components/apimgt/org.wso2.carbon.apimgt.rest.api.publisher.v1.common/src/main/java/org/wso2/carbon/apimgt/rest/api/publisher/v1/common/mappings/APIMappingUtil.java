@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -306,10 +307,15 @@ public class APIMappingUtil {
             model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
-        Map<String, String> additionalProperties = dto.getAdditionalProperties();
+        List<APIAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                model.addProperty(entry.getKey(), entry.getValue());
+            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+                if (property.isDisplay()) {
+                    model.addProperty(property.getName() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX, property
+                            .getValue());
+                } else {
+                    model.addProperty(property.getName(), property.getValue());
+                }
             }
         }
 
@@ -354,6 +360,7 @@ public class APIMappingUtil {
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
             if (websubSubscriptionConfigurationDTO != null) {
                 websubSubscriptionConfiguration = new WebsubSubscriptionConfiguration(
+                        websubSubscriptionConfigurationDTO.isEnable(),
                         websubSubscriptionConfigurationDTO.getSecret(),
                         websubSubscriptionConfigurationDTO.getSigningAlgorithm(),
                         websubSubscriptionConfigurationDTO.getSignatureHeader());
@@ -381,7 +388,7 @@ public class APIMappingUtil {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             try {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
-                                                getTenantId(tenantDomain);
+                        getTenantId(tenantDomain);
                 serviceInfoJson = (JSONObject) parser.parse(mapper.writeValueAsString(serviceInfoDTO));
 
                 ServiceCatalogImpl serviceCatalog = new ServiceCatalogImpl();
@@ -390,7 +397,7 @@ public class APIMappingUtil {
                 if (service == null) {
                     if (log.isDebugEnabled()) {
                         log.debug("A service with key" + dto.getServiceInfo().getKey() + " referenced in the API "
-                                                        + "information is not available in the service catalog");
+                                + "information is not available in the service catalog");
                     }
                 } else {
                     serviceInfoJson.put("md5", service.getMd5());
@@ -656,10 +663,16 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
-        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-            apiInfoDTO.setHasThumbnail(true);
-        } else {
-            apiInfoDTO.setHasThumbnail(false);
+        apiInfoDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
+        if (api.getCreatedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
+            apiInfoDTO.setCreatedTime(dateFormat.format(createdTime));
+        }
+        if (api.getLastUpdated() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date lastUpdatedTime = api.getLastUpdated();
+            apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
         }
         return apiInfoDTO;
     }
@@ -961,7 +974,6 @@ public class APIMappingUtil {
                             }
                         }
 
-
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1008,9 +1020,7 @@ public class APIMappingUtil {
                 log.error("Error while decrypting client credentials for API: " + model.getId(), e);
             }
         }
-      /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
-            dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
-        }*/
+        dto.setHasThumbnail(!StringUtils.isBlank(model.getThumbnailUrl()));
         List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
         String inMedPolicyName = model.getInSequence();
         if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
@@ -1150,12 +1160,22 @@ public class APIMappingUtil {
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
-            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
+                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                } else {
+                    additionalPropertiesDTO.setName(key);
+                    additionalPropertiesDTO.setDisplay(false);
+                }
+                additionalPropertiesList.add(additionalPropertiesDTO);
             }
-            dto.setAdditionalProperties(additionalPropertiesMap);
+            dto.setAdditionalProperties(additionalPropertiesList);
         }
 
         if (model.getImplementation() != null) {
@@ -1198,6 +1218,7 @@ public class APIMappingUtil {
         if (websubSubscriptionConfiguration == null) {
             websubSubscriptionConfiguration = APIUtil.getDefaultWebsubSubscriptionConfiguration();
         }
+        websubSubscriptionConfigurationDTO.setEnable(websubSubscriptionConfiguration.isEnable());
         websubSubscriptionConfigurationDTO.setSecret(websubSubscriptionConfiguration.getSecret());
         websubSubscriptionConfigurationDTO.setSigningAlgorithm(websubSubscriptionConfiguration.getSigningAlgorithm());
         websubSubscriptionConfigurationDTO.setSignatureHeader(websubSubscriptionConfiguration.getSignatureHeader());
@@ -1259,7 +1280,6 @@ public class APIMappingUtil {
         Map<String, String> scopes = securityScheme.flows.implicit.scopes;
         Map<String, String> xScopeBindings =
                 (Map<String, String>) securityScheme.flows.implicit.getExtension("x-scopes-bindings").value;
-
 
         for (Map.Entry<String, String> aScope : scopes.entrySet()) {
             ScopeDTO scopeDTO = new ScopeDTO();
@@ -2207,14 +2227,23 @@ public class APIMappingUtil {
         productDto.setGatewayEnvironments(environmentsList);
         if (product.getAdditionalProperties() != null) {
             JSONObject additionalProperties = product.getAdditionalProperties();
-            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
+                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                } else {
+                    additionalPropertiesDTO.setName(key);
+                    additionalPropertiesDTO.setDisplay(false);
+                }
+                additionalPropertiesList.add(additionalPropertiesDTO);
             }
-            productDto.setAdditionalProperties(additionalPropertiesMap);
+            productDto.setAdditionalProperties(additionalPropertiesList);
         }
-
         if (product.getApiSecurity() != null) {
             productDto.setSecurityScheme(Arrays.asList(product.getApiSecurity().split(",")));
         }
@@ -2369,10 +2398,15 @@ public class APIMappingUtil {
                     mapSubscriptionAvailabilityFromDTOtoAPIProduct(dto.getSubscriptionAvailability()));
         }
 
-        Map<String, String> additionalProperties = dto.getAdditionalProperties();
+        List<APIAdditionalPropertiesDTO> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
-            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                product.addProperty(entry.getKey(), entry.getValue());
+            for (APIAdditionalPropertiesDTO property : additionalProperties) {
+                if (property.isDisplay()) {
+                    product.addProperty(property.getName() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX, property
+                            .getValue());
+                } else {
+                    product.addProperty(property.getName(), property.getValue());
+                }
             }
         }
         if (dto.getSubscriptionAvailableTenants() != null) {

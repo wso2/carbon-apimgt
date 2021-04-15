@@ -343,6 +343,7 @@ class Listing extends React.Component {
                                         scopeName={scopeName}
                                         scopeId={scopeId}
                                         fetchScopeData={this.fetchScopeData}
+                                        usageCount={usageCount}
                                     />
                                 </Box>
                             );
@@ -408,7 +409,12 @@ class Listing extends React.Component {
                         />
                     )}
                 >
-                    <OnboardingMenuCard to='/scopes/create' name='Scopes' iconName={scopesAddIcon} />
+                    <OnboardingMenuCard
+                        to='/scopes/create'
+                        name='Scopes'
+                        iconName={scopesAddIcon}
+                        disabled={isRestricted(['apim:shared_scope_manage'])}
+                    />
                 </Onboarding>
             );
         }

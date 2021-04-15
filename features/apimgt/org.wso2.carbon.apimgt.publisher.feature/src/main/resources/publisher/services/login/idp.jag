@@ -39,7 +39,7 @@
     }
 
     var settingsAPIUrl = appUtils.getLoopbackOrigin() + SETTINGS_REST_API_URL_SUFFIX;
-    var serviceCatalogSettingsAPIUrl = appUtils.getLoopbackOrigin() + SERVICE_CATALOG_SETTINGS_REST_API_URL_SUFFIX
+    var serviceCatalogSettingsAPIUrl = appUtils.getLoopbackOrigin() + SERVICE_CATALOG_SETTINGS_REST_API_URL_SUFFIX;
     var settingsResponse = get(settingsAPIUrl, {}, "json");
     var serviceCatalogSettingsResponse = get(serviceCatalogSettingsAPIUrl, {}, "json");
 
@@ -61,8 +61,7 @@
     var scopes = "";
     if (settingsResponse.data && serviceCatalogSettingsResponse.data) {
          scopes = settingsResponse.data.scopes.join(" ");
-         // var catalogScopes = serviceCatalogSettingsResponse.data.scopes.join(" ");
-         var catalogScopes = "service_catalog:service_view service_catalog:service_write";
+         var catalogScopes = serviceCatalogSettingsResponse.data.scopes.join(" ");
          scopes = scopes + " " + catalogScopes;
     } else {
         response.sendRedirect(errorLogin + "500");

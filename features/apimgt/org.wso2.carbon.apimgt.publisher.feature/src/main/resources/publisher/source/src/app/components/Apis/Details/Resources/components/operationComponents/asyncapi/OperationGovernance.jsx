@@ -55,13 +55,13 @@ export default function OperationGovernance(props) {
             <Grid item xs={12} md={12}>
                 <Typography gutterBottom variant='subtitle1'>
                     <FormattedMessage
-                        id='Apis.Details.Resources.components.operationComponents.OperationGovernance.title'
+                        id='Apis.Details.Topics.components.operationComponents.OperationGovernance.title'
                         defaultMessage='Operation Governance'
                     />
                     <Typography style={{ marginLeft: '10px' }} gutterBottom variant='caption'>
                         <FormattedMessage
-                            id='Apis.Details.Resources.components.operationComponents.OperationGovernance.subTitle'
-                            defaultMessage='(Security, Rate Limiting & Scopes)'
+                            id='Apis.Details.Topics.components.operationComponents.OperationGovernance.subTitle'
+                            defaultMessage='(Security & Scopes)'
                         />
                     </Typography>
                     <Divider variant='middle' />
@@ -90,7 +90,7 @@ export default function OperationGovernance(props) {
                     <Tooltip
                         title={(
                             <FormattedMessage
-                                id={'Apis.Details.Resources.components.operationComponents.OperationGovernance.Security'
+                                id={'Apis.Details.Topics.components.operationComponents.OperationGovernance.Security'
                                 + '.tooltip'}
                                 defaultMessage='This will enable/disable Application Level securities defined in the
                                 Runtime Configurations page.'
@@ -119,11 +119,11 @@ export default function OperationGovernance(props) {
                             disabled={disableUpdate}
                             fullWidth
                             label={api.scopes.length !== 0 || sharedScopes ? intl.formatMessage({
-                                id: 'Apis.Details.Resources.components.operationComponents.'
+                                id: 'Apis.Details.Topics.components.operationComponents.'
                                 + 'OperationGovernance.operation.scope.label.default',
                                 defaultMessage: 'Operation scope',
                             }) : intl.formatMessage({
-                                id: 'Apis.Details.Resources.components.operationComponents.'
+                                id: 'Apis.Details.Topics.components.operationComponents.'
                                 + 'OperationGovernance.operation.scope.label.notAvailable',
                                 defaultMessage: 'No scope available',
                             })}
@@ -134,7 +134,7 @@ export default function OperationGovernance(props) {
                             })}
                             helperText={(
                                 <FormattedMessage
-                                    id={'Apis.Details.Resources.components.operationComponents.'
+                                    id={'Apis.Details.Topics.components.operationComponents.'
                                     + 'OperationGovernance.operation.scope.helperText'}
                                     defaultMessage='Select a scope to control permissions to this operation'
                                 />
@@ -144,7 +144,7 @@ export default function OperationGovernance(props) {
                         >
                             <ListSubheader>
                                 <FormattedMessage
-                                    id={'Apis.Details.Resources.components.operationComponents.'
+                                    id={'Apis.Details.Topics.components.operationComponents.'
                                     + 'OperationGovernance.operation.scope.select.local'}
                                     defaultMessage='API Scopes'
                                 />
@@ -165,7 +165,7 @@ export default function OperationGovernance(props) {
                                 >
                                     <em>
                                         <FormattedMessage
-                                            id={'Apis.Details.Resources.components.operationComponents.'
+                                            id={'Apis.Details.Topics.components.operationComponents.'
                                         + 'OperationGovernance.operation.no.api.scope.available'}
                                             defaultMessage='No API scopes available'
                                         />
@@ -174,7 +174,7 @@ export default function OperationGovernance(props) {
                             )}
                             <ListSubheader>
                                 <FormattedMessage
-                                    id={'Apis.Details.Resources.components.operationComponents.'
+                                    id={'Apis.Details.Topics.components.operationComponents.'
                                     + 'OperationGovernance.operation.scope.select.shared'}
                                     defaultMessage='Shared Scopes'
                                 />
@@ -198,7 +198,7 @@ export default function OperationGovernance(props) {
                                 >
                                     <em>
                                         <FormattedMessage
-                                            id={'Apis.Details.Resources.components.operationComponents.'
+                                            id={'Apis.Details.Topics.components.operationComponents.'
                                         + 'OperationGovernance.operation.no.sharedpi.scope.available'}
                                             defaultMessage='No shared scopes available'
                                         />
@@ -223,7 +223,7 @@ export default function OperationGovernance(props) {
                                 variant='caption'
                             >
                                 <FormattedMessage
-                                    id={'Apis.Details.Resources.components.operationComponents.'
+                                    id={'Apis.Details.Topics.components.operationComponents.'
                                     + 'OperationGovernance.operation.scope.create.new.scope'}
                                     defaultMessage='Create New Scope'
                                 />

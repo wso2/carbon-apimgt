@@ -90,6 +90,9 @@
         <!-- This parameter specifies which implementation should be used for generating the Token. For URL safe JWT
              Token generation the implementation is provided in URLSafeJWTGenerator -->
         <!--<JWTGeneratorImpl>org.wso2.carbon.apimgt.keymgt.token.URLSafeJWTGenerator</JWTGeneratorImpl>-->
+       {% if apim.jwt.enable_tenant_based_signing is defined %}
+        <EnableTenantBasedSigning>{{apim.jwt.enable_tenant_based_signing}}</EnableTenantBasedSigning>
+        {% endif %}
         <GatewayJWTGeneration>
             <ImplClass>{{apim.jwt.gateway_generator.impl}}</ImplClass>
             <Configuration>
@@ -901,6 +904,7 @@
         <EnableJWTClaimConditions>{{apim.throttling.enable_jwt_claim_based_throttling}}</EnableJWTClaimConditions>
         <EnableQueryParamConditions>{{apim.throttling.enable_query_param_based_throttling}}</EnableQueryParamConditions>
         <SkipRedeployingPolicies>RequestPreProcessorExecutionPlan{% for policy in apim.throttling.skip_redeploying_policies %}{{ "," if loop.first }}{{policy}}{{ "," if not loop.last }}{% endfor %}</SkipRedeployingPolicies>
+        <EnablePolicyDeployment>{{apim.throttling.enable_policy_deployment}}</EnablePolicyDeployment>
     </ThrottlingConfigurations>
 
     <WorkflowConfigurations>
@@ -1249,7 +1253,7 @@
 
     {% if apim.sync_runtime_artifacts.gateway is defined %}
     <SyncRuntimeArtifactsGateway>
-        <Enable>true</Enable>
+        <Enable>{{apim.sync_runtime_artifacts.gateway.enable}}</Enable>
         {% if apim.sync_runtime_artifacts.gateway.gateway_labels is defined %}
         <GatewayLabels>
             {% for attribute in apim.sync_runtime_artifacts.gateway.gateway_labels %}
