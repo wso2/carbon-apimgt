@@ -2702,10 +2702,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Get the subscriptions from the latest api version first
         Collections.sort(sortedAPIs, comparator);
         apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), sortedAPIs);
-//        for (int i = sortedAPIs.size() - 1; i >= 0; i--) {
-//            String oldVersion = sortedAPIs.get(i).getId().getVersion();
-//            apiMgtDAO.makeKeysForwardCompatible(new ApiTypeWrapper(api), oldVersion);
-//        }
     }
 
     /**
