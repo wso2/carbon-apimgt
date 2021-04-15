@@ -98,7 +98,7 @@ function Delete(props) {
 
     return (
         <div>
-            <Button onClick={toggleOpen} disabled={isRestricted(['apim:api_create']) || usageCount > 0}>
+            <Button onClick={toggleOpen} disabled={isRestricted(['apim:shared_scope_manage']) || usageCount > 0}>
                 <Icon>delete_forever</Icon>
                 <FormattedMessage
                     id='Scopes.Delete.Delete.scope.delete'

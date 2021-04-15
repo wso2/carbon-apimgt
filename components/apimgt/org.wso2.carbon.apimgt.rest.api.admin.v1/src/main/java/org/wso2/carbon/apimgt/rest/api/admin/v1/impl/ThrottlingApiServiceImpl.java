@@ -56,6 +56,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
@@ -496,7 +497,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             apiProvider.addPolicy(subscriptionPolicy);
 
             //update policy permissions
-            updatePolicyPermissions(body);
+            updatePolicyPermissions(body, null);
 
             //retrieve the new policy and send back as the response
             SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,
@@ -536,9 +537,10 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * Update APIM with the subscription throttle policy permission
      *
      * @param body subscription throttle policy
+     * @param existingPolicy 
      * @throws APIManagementException when there are validation errors or error while updating the permissions
      */
-    private void updatePolicyPermissions(SubscriptionThrottlePolicyDTO body) throws APIManagementException {
+    private void updatePolicyPermissions(SubscriptionThrottlePolicyDTO body, SubscriptionPolicy existingPolicy) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         SubscriptionThrottlePolicyPermissionDTO policyPermissions = body.getPermissions();
         if (policyPermissions != null) {
@@ -554,6 +556,11 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 apiProvider.updateThrottleTierPermissions(body.getPolicyName(), permissionType, roles);
             } else {
                 throw new APIManagementException(ExceptionCodes.ROLES_CANNOT_BE_EMPTY);
+            }
+        } else if (policyPermissions == null && existingPolicy != null) {
+            TierPermissionDTO dto = (TierPermissionDTO) apiProvider.getThrottleTierPermission(body.getPolicyName());
+            if (dto != null && dto.getRoles() != null) {
+                apiProvider.updateThrottleTierPermissions(body.getPolicyName(), null, null);
             }
         }
     }
@@ -644,7 +651,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             apiProvider.updatePolicy(subscriptionPolicy);
 
             //update policy permissions
-            updatePolicyPermissions(body);
+            updatePolicyPermissions(body, existingPolicy);
 
             //retrieve the new policy and send back as the response
             SubscriptionPolicy newSubscriptionPolicy = apiProvider.getSubscriptionPolicy(username,

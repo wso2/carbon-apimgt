@@ -13,14 +13,21 @@ jobs:
   build-carbon:
     runs-on: ubuntu-latest
     steps:
+      - name: Run hostname
+        run: hostname
+      - name: Fix host entry
+        run: sudo echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+      - name: Show hosts
+        run: cat /etc/hosts
       - name: Checkout master
         uses: actions/checkout@v2
         with:
           fetch-depth: '10'
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 1.8
+          java-version: 8
+          distribution: 'adopt'
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
@@ -39,11 +46,19 @@ jobs:
       matrix:
         include:
           - id: 1
-            segment: apim-integration-tests-api-common, apim-integration-tests-api-change-endpoint, apim-integration-tests-api-product, apim-integration-tests-api-lifecycle, apim-integration-tests-api-lifecycle-2, apim-email-secondary-userstore-tests, apim-CORS-tests, apim-integration-tests-samples, apim-publisher-tests, apim-store-tests, apim-integration-tests-graphql, admin-rest-api-tests, rest-api-tests, apim-mediation-tests, apim-websocket-tests
+            segment: apim-integration-tests-api-common,apim-integration-tests-api-change-endpoint,apim-integration-tests-api-product,apim-integration-tests-api-lifecycle,apim-integration-tests-api-lifecycle-2,apim-CORS-tests,apim-integration-emailusername-login
           - id: 2
-            segment: apim-integration-tests-without-restarts, apim-integration-tests-without-advance-throttling, apim-integration-tests-application-sharing, apim-JWT-integration-tests, apim-urlsafe-JWT-integration-tests, apim-integration-tests-endpoint-security, apim-integration-tests-external-idp, apim-integration-emailusername-login, apim-integration-tests-workflow,apim-streaming-api-tests
+            segment: apim-email-secondary-userstore-tests,apim-integration-tests-samples,apim-publisher-tests,apim-store-tests,apim-integration-tests-graphql,admin-rest-api-tests,rest-api-tests,apim-mediation-tests,apim-streaming-api-tests,apim-integration-tests-workflow
+          - id: 3
+            segment: apim-websocket-tests,apim-integration-tests-without-restarts,apim-integration-tests-without-advance-throttling,apim-integration-tests-application-sharing,apim-JWT-integration-tests,apim-urlsafe-JWT-integration-tests,apim-integration-tests-endpoint-security,apim-integration-tests-external-idp
       fail-fast: false
     steps:
+      - name: Run hostname
+        run: hostname
+      - name: Fix host entry
+        run: sudo echo "127.0.0.1 $(hostname)" | sudo tee -a /etc/hosts
+      - name: Show hosts
+        run: cat /etc/hosts
       - name: Checkout master
         uses: actions/checkout@v2
         with:
@@ -79,11 +94,6 @@ jobs:
         run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml
         env:
           PRODUCT_APIM_TESTS: ${{ matrix.segment }}
-      - name: Publish Test Report
-        if: always()
-        uses: malinthaprasan/action-surefire-report@v1
-        with:
-          report_paths: 'product-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml'
       - name: Prepare upload testng report
         if: always()
         run: mv product-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml TEST-TestSuite_${{ matrix.id }}.xml
@@ -95,3 +105,17 @@ jobs:
           path: |
             TEST-TestSuite_${{ matrix.id }}.xml
           if-no-files-found: warn
+
+  show-report:
+    if: ${{ always() && !cancelled() }}
+    needs: build-product
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          path: reports
+      - name: Publish Test Report
+        if: always()
+        uses: scacap/action-surefire-report@v1
+        with:
+          report_paths: 'reports/**/TEST-*.xml'

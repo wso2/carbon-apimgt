@@ -82,7 +82,6 @@ import java.text.ParseException;
 import java.util.*;
 import javax.cache.Cache;
 
-import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.DEFAULT_RESOURCE_NAME;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.URL_SEPARATOR;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_ENDPOINT_NAME;
 import static org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketApiConstants.WS_SECURED_ENDPOINT_NAME;
@@ -321,7 +320,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (isJwtToken) {
                     log.debug("The token was identified as a JWT token");
 
-                    AuthenticationContext authenticationContext = new JWTValidator(new APIKeyValidator()).
+                    AuthenticationContext authenticationContext = new JWTValidator(new APIKeyValidator(), tenantDomain).
                             authenticateForWebSocket(signedJWTInfo, apiContext, version, matchingResource);
                     if (authenticationContext == null || !authenticationContext.isAuthenticated()) {
                         return false;

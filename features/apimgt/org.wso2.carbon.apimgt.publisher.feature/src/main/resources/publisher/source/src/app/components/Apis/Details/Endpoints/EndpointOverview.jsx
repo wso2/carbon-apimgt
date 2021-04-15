@@ -242,7 +242,6 @@ function EndpointOverview(props) {
             ];
         } else if (type === 'SOAP' || type === 'SOAPTOREST') {
             supportedEndpointTypes = [
-                { key: 'http', value: 'HTTP/REST Endpoint' },
                 { key: 'address', value: 'HTTP/SOAP Endpoint' },
                 { key: 'default', value: 'Dynamic Endpoints' },
                 { key: 'prototyped', value: 'Prototype Endpoint' },
@@ -707,6 +706,7 @@ function EndpointOverview(props) {
                                                     <FormControlLabel
                                                         control={(
                                                             <Checkbox
+                                                                disabled={isRestricted(['apim:api_create'], api)}
                                                                 checked={endpointCategory.prod}
                                                                 value='prod'
                                                                 color='primary'
@@ -848,6 +848,7 @@ function EndpointOverview(props) {
                                                         <FormControlLabel
                                                             control={(
                                                                 <Checkbox
+                                                                    disabled={isRestricted(['apim:api_create'], api)}
                                                                     checked={endpointCategory.sandbox}
                                                                     value='sandbox'
                                                                     color='primary'

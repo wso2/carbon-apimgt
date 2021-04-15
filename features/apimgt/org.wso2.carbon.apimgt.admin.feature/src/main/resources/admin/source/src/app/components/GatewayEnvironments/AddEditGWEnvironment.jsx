@@ -166,11 +166,11 @@ function AddEditGWEnvironment(props) {
                             defaultMessage: 'Name is Empty',
                         })
                     );
-                } else if (/[!@#$%^&*(),?"{}[\]|<>\t\n]/i.test(value)) {
+                } else if (!(/^[A-Za-z0-9_-]+$/).test(value)) {
                     error = (
                         intl.formatMessage({
                             id: 'GatewayEnvironments.AddEditGWEnvironment.form.environment.name.invalid',
-                            defaultMessage: 'Name field contains special characters',
+                            defaultMessage: 'Name must not contain special characters or spaces',
                         })
                     );
                 } else {

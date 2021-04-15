@@ -1297,6 +1297,12 @@
       "value": "Provide the name of the technical owner"
     }
   ],
+  "Apis.Details.Comments.Comment.load.more.replies": [
+    {
+      "type": 0,
+      "value": "Show More Replies"
+    }
+  ],
   "Apis.Details.Comments.Comment.something.went.wrong": [
     {
       "type": 0,
@@ -1531,6 +1537,12 @@
       "value": "Backend"
     }
   ],
+  "Apis.Details.Configuration.Configuration.section.events": [
+    {
+      "type": 0,
+      "value": "Events"
+    }
+  ],
   "Apis.Details.Configuration.Configuration.section.initial.request": [
     {
       "type": 0,
@@ -1567,7 +1579,7 @@
       "value": "Save"
     }
   ],
-  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.product.\n                                            endpoint": [
+  "Apis.Details.Configuration.RuntimeConfiguration.backend.api.\n                                                    product.endpoint": [
     {
       "type": 0,
       "value": "Please refer respective APIs for endpoint information"
@@ -2284,7 +2296,7 @@
   "Apis.Details.Documents.CreateEditForm.source.file.name.error.invalid": [
     {
       "type": 0,
-      "value": "Error when validating the document source file name"
+      "value": "Document source file name cannot contain spaces or special characters"
     }
   ],
   "Apis.Details.Documents.CreateEditForm.source.inline": [
@@ -3810,7 +3822,7 @@
   "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": [
     {
       "type": 0,
-      "value": "Brief description of the new revision"
+      "value": "Add a description to the revision"
     }
   ],
   "Apis.Details.Environments.Environments.revision.create.heading": [
@@ -4233,6 +4245,18 @@
     {
       "type": 0,
       "value": "Select a plan for the API product."
+    }
+  ],
+  "Apis.Details.LifeCycle.components": [
+    {
+      "type": 0,
+      "value": "Publish API without deployments"
+    }
+  ],
+  "Apis.Details.LifeCycle.publish.content": [
+    {
+      "type": 0,
+      "value": "The API will not be available for consumption unless it is deployed."
     }
   ],
   "Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error": [
@@ -4835,6 +4859,12 @@
       "value": "Operation"
     }
   ],
+  "Apis.Details.Overview.\n                                                                    CustomizedStepper.Endpoint": [
+    {
+      "type": 0,
+      "value": "Endpoint"
+    }
+  ],
   "Apis.Details.Overview.CustomizedStepper.Deploy": [
     {
       "type": 0,
@@ -4845,12 +4875,6 @@
     {
       "type": 0,
       "value": "Develop"
-    }
-  ],
-  "Apis.Details.Overview.CustomizedStepper.Endpoint": [
-    {
-      "type": 0,
-      "value": "Endpoint"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.Test": [
@@ -4892,7 +4916,13 @@
   "Apis.Details.Overview.CustomizedStepper.publish": [
     {
       "type": 0,
-      "value": "Published (Current API)"
+      "value": "Published"
+    }
+  ],
+  "Apis.Details.Overview.CustomizedStepper.publish.current.api": [
+    {
+      "type": 0,
+      "value": "(Current API)"
     }
   ],
   "Apis.Details.Overview.CustomizedStepper.retired": [
@@ -5452,7 +5482,7 @@
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.name": [
     {
       "type": 0,
-      "value": "Name"
+      "value": "Name/Content Type"
     }
   ],
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.spec.error": [
@@ -6259,6 +6289,72 @@
       "value": "Name"
     }
   ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.Security.tooltip": [
+    {
+      "type": 0,
+      "value": "This will enable/disable Application Level securities defined in the Runtime Configurations page."
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.api.scope.available": [
+    {
+      "type": 0,
+      "value": "No API scopes available"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.sharedpi.scope.available": [
+    {
+      "type": 0,
+      "value": "No shared scopes available"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.create.new.scope": [
+    {
+      "type": 0,
+      "value": "Create New Scope"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.helperText": [
+    {
+      "type": 0,
+      "value": "Select a scope to control permissions to this operation"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.default": [
+    {
+      "type": 0,
+      "value": "Operation scope"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.notAvailable": [
+    {
+      "type": 0,
+      "value": "No scope available"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.local": [
+    {
+      "type": 0,
+      "value": "API Scopes"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.shared": [
+    {
+      "type": 0,
+      "value": "Shared Scopes"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.subTitle": [
+    {
+      "type": 0,
+      "value": "(Security & Scopes)"
+    }
+  ],
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.title": [
+    {
+      "type": 0,
+      "value": "Operation Governance"
+    }
+  ],
   "Apis.Details.TryOutConsole.token.label": [
     {
       "type": 0,
@@ -6555,6 +6651,12 @@
     {
       "type": 0,
       "value": "Context"
+    }
+  ],
+  "Apis.Listing.ApiTableView.items.per.page": [
+    {
+      "type": 0,
+      "value": "Items per page"
     }
   ],
   "Apis.Listing.ApiTableView.name": [
@@ -7236,7 +7338,13 @@
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": [
     {
       "type": 0,
-      "value": "Service Catalog"
+      "value": "Services"
+    }
+  ],
+  "Base.Header.navbar.GlobalNavBar.analytics": [
+    {
+      "type": 0,
+      "value": "Analytics"
     }
   ],
   "Base.Header.navbar.GlobalNavBar.api.products": [
@@ -7790,7 +7898,7 @@
   "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
     {
       "type": 0,
-      "value": "Create and Deploy your first Integration Service easily using WSO2 Micro Integrator"
+      "value": "Create and Deploy your first Integration Service"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.learn.link": [

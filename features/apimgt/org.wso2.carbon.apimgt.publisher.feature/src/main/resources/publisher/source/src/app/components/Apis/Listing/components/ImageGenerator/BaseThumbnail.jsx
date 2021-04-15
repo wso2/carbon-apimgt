@@ -117,26 +117,36 @@ const BaseThumbnail = (props) => {
      */
     useEffect(() => {
         if (type !== 'DOC') {
-            const promisedThumbnail = apiType === Api.CONSTS.APIProduct
-                ? new APIProduct().getAPIProductThumbnail(id)
-                : new Api().getAPIThumbnail(id);
+            if (api.hasThumbnail !== null && api.hasThumbnail) {
+                const promisedThumbnail = apiType === Api.CONSTS.APIProduct
+                    ? new APIProduct().getAPIProductThumbnail(id)
+                    : new Api().getAPIThumbnail(id);
 
-            promisedThumbnail.then((response) => {
-                if (response && response.data) {
-                    if (response.headers['content-type'] === 'application/json') {
+                promisedThumbnail.then((response) => {
+                    if (response && response.data) {
+                        if (response.headers['content-type'] === 'application/json') {
+                            setThumbnail(null);
+                            setIconJson(response.body);
+                        } else if (response.headers['content-type'] === 'image/svg+xml') {
+                            const blob = new Blob([response.data], { type: 'image/svg+xml' });
+                            const url = windowURL.createObjectURL(blob);
+                            setThumbnail(url);
+                        } else if (response && response.data.size > 0) {
+                            const url = windowURL.createObjectURL(response.data);
+                            setThumbnail(url);
+                        }
+                    } else if (response && response.data === '') {
                         setThumbnail(null);
-                        setIconJson(response.body);
-                    } else if (response && response.data.size > 0) {
-                        const url = windowURL.createObjectURL(response.data);
-                        setThumbnail(url);
+                        setIconJson({ key: null });
                     }
-                } else if (response && response.data === '') {
-                    setThumbnail(null);
-                    setIconJson({ key: null });
-                }
-            }).finally(() => {
+                }).finally(() => {
+                    setImageLoaded(true);
+                });
+            } else {
+                setThumbnail(null);
+                setIconJson({ key: null });
                 setImageLoaded(true);
-            });
+            }
         } else {
             setImageLoaded(true);
         }

@@ -247,12 +247,14 @@ public class APIMgtDAOTest {
     }
     @Test
     public void testAddSubscription() throws Exception {
+       Application application = new Application(100);
         APIIdentifier apiIdentifier = new APIIdentifier("SUMEDHA", "API1", "V1.0.0");
         apiIdentifier.setApplicationId("APPLICATION99");
         apiIdentifier.setTier("T1");
+        apiIdentifier.setId(apiMgtDAO.getAPIID(apiIdentifier));
         API api = new API(apiIdentifier);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.addSubscription(apiTypeWrapper, 100, "UNBLOCKED", "admin");
+        apiMgtDAO.addSubscription(apiTypeWrapper, application, "UNBLOCKED", "admin");
     }
 
 
@@ -389,8 +391,7 @@ public class APIMgtDAOTest {
         api.setContext("/context1");
         api.setContextTemplate("/context1/{version}");
         api.setUUID(UUID.randomUUID().toString());
-
-        apiMgtDAO.addAPI(api, -1234);
+        api.getId().setId(apiMgtDAO.addAPI(api, -1234));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0");
     }
@@ -412,12 +413,12 @@ public class APIMgtDAOTest {
         API api = new API(apiId1);
         api.setContext("/subForward");
         api.setContextTemplate("/subForward/{version}");
-        apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID);
+        api.getId().setId(apiMgtDAO.addAPI(api, MultitenantConstants.SUPER_TENANT_ID));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-
         // Add a subscription and update state to BLOCKED
+        application.setId(applicationId);
         int subscriptionId = apiMgtDAO.addSubscription(
-                apiTypeWrapper, applicationId, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
+                apiTypeWrapper, application, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
         apiMgtDAO.updateSubscriptionStatus(subscriptionId, APIConstants.SubscriptionStatus.BLOCKED);
 
         // Add the second version of the API
@@ -425,7 +426,7 @@ public class APIMgtDAOTest {
         API api2 = new API(apiId2);
         api2.setContext("/context1");
         api2.setContextTemplate("/context1/{version}");
-        apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID);
+        api2.getId().setId(apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID));
         ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
 
         apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, apiId1.getVersion());
@@ -444,7 +445,7 @@ public class APIMgtDAOTest {
         API api3 = new API(apiId3);
         api3.setContext("/context1");
         api3.setContextTemplate("/context1/{version}");
-        apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID);
+        api3.getId().setId(apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID));
         ApiTypeWrapper apiTypeWrapper3 = new ApiTypeWrapper(api3);
 
         apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, apiId2.getVersion());
@@ -831,14 +832,16 @@ public class APIMgtDAOTest {
         api.setContext("/testCreateApplicationRegistrationEntry");
         api.setContextTemplate("/testCreateApplicationRegistrationEntry/{version}");
         api.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api, -1234);
+        int internalAPIID2 = apiMgtDAO.addAPI(api, -1234);
+        api.getId().setId(internalAPIID2);
         APIIdentifier apiId1 = new APIIdentifier("testCreateApplicationRegistrationEntry1",
                 "testCreateApplicationRegistrationEntry1", "1.0.0");
         API api1 = new API(apiId1);
         api1.setContext("/testCreateApplicationRegistrationEntry1");
         api1.setContextTemplate("/testCreateApplicationRegistrationEntry1/{version}");
         api1.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api1, -1234);
+        int apiInternalId = apiMgtDAO.addAPI(api1, -1234);
+        api1.getId().setId(apiInternalId);
         apiMgtDAO.createApplicationRegistrationEntry(applicationRegistrationWorkflowDTO, false);
         ApplicationRegistrationWorkflowDTO retrievedApplicationRegistrationWorkflowDTO = new
                 ApplicationRegistrationWorkflowDTO();
@@ -847,8 +850,8 @@ public class APIMgtDAOTest {
         apiMgtDAO.populateAppRegistrationWorkflowDTO(retrievedApplicationRegistrationWorkflowDTO);
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
         ApiTypeWrapper apiTypeWrapper1 = new ApiTypeWrapper(api1);
-        apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(), APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
-        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application.getId(),
+        apiMgtDAO.addSubscription(apiTypeWrapper, application, APIConstants.SubscriptionStatus.ON_HOLD,subscriber.getName());
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper1, application,
                 APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.isContextExist(api.getContext()));
         assertTrue(api.getContext().equals(apiMgtDAO.getAPIContext(apiId)));
@@ -905,10 +908,10 @@ public class APIMgtDAOTest {
         APIPolicy apiPolicy = (APIPolicy) getPolicyAPILevelPerUser("testCreateApplicationRegistrationEntry");
         api.setApiLevelPolicy(apiPolicy.getPolicyName());
         api.setUUID(UUID.randomUUID().toString());
-        apiMgtDAO.addAPI(api, -1234);
+        api.getId().setId(apiMgtDAO.addAPI(api, -1234));
         apiId.setTier(subscriptionPolicy.getPolicyName());
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application.getId(),
+        int subsId = apiMgtDAO.addSubscription(apiTypeWrapper, application,
                 APIConstants.SubscriptionStatus.ON_HOLD, subscriber.getName());
         assertTrue(apiMgtDAO.getApplicationsByTier(subscriptionPolicy.getPolicyName()).length > 0);
         String subStatus = apiMgtDAO.getSubscriptionStatusById(subsId);

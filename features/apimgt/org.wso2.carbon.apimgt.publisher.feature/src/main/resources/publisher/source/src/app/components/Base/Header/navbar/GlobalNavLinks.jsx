@@ -18,16 +18,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
+import LaunchIcon from '@material-ui/icons/Launch';
+import { useTheme } from '@material-ui/styles';
 import { FormattedMessage } from 'react-intl';
 import AuthManager from 'AppData/AuthManager';
-import ScopesIcon from '@material-ui/icons/VpnKey';
 import { makeStyles } from '@material-ui/core/styles';
+import Divider from '@material-ui/core/Divider';
 
 import GlobalNavLink from './GlobalNavLink';
 
 const useStyles = makeStyles((theme) => ({
     scopeIcon: {
         color: theme.palette.background.paper,
+    },
+    externalLinkIcon: {
+        marginLeft: theme.spacing(1),
+        marginTop: theme.spacing(0.5),
+        marginBottom: theme.spacing(-1),
     },
 }));
 
@@ -42,6 +49,9 @@ function GlobalNavLinks(props) {
     const publisherUser = !AuthManager.isNotPublisher();
     const classes = useStyles();
     const { selected } = props;
+    const theme = useTheme();
+    const analyticsMenuEnabled = theme.custom.leftMenuAnalytics.enable;
+    const analyticsMenuLink = theme.custom.leftMenuAnalytics.link;
     return (
         <Box mt={10}>
             <GlobalNavLink
@@ -63,7 +73,7 @@ function GlobalNavLinks(props) {
             >
                 <FormattedMessage
                     id='Base.Header.navbar.GlobalNavBar.Service.Catalog'
-                    defaultMessage='Service Catalog'
+                    defaultMessage='Services'
                 />
             </GlobalNavLink>
             { publisherUser
@@ -85,10 +95,31 @@ function GlobalNavLinks(props) {
                 type='scopes'
                 title='Scopes'
                 active={selected === 'scopes'}
-                icon={<ScopesIcon className={classes.scopeIcon} style={{ fontSize: 25 }} />}
             >
                 <FormattedMessage id='Base.Header.navbar.GlobalNavBar.scopes' defaultMessage='Scopes' />
             </GlobalNavLink>
+            {analyticsMenuEnabled && (
+                <>
+                    <Divider />
+                    <a href={analyticsMenuLink} target='_blank' rel='noreferrer'>
+                        <GlobalNavLink
+                            isExternalLink
+                            type='analytics'
+                            title='Analytics'
+                        >
+                            <div style={{ flexDirection: 'row', display: 'flex' }}>
+                                <FormattedMessage
+                                    id='Base.Header.navbar.GlobalNavBar.analytics'
+                                    defaultMessage='Analytics'
+                                />
+                                <div className={classes.externalLinkIcon}>
+                                    <LaunchIcon style={{ fontSize: 15 }} />
+                                </div>
+                            </div>
+                        </GlobalNavLink>
+                    </a>
+                </>
+            )}
         </Box>
     );
 }

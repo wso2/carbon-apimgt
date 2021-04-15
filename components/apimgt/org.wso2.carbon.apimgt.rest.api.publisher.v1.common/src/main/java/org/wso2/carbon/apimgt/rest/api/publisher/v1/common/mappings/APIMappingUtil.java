@@ -354,6 +354,7 @@ public class APIMappingUtil {
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration;
             if (websubSubscriptionConfigurationDTO != null) {
                 websubSubscriptionConfiguration = new WebsubSubscriptionConfiguration(
+                        websubSubscriptionConfigurationDTO.isEnable(),
                         websubSubscriptionConfigurationDTO.getSecret(),
                         websubSubscriptionConfigurationDTO.getSigningAlgorithm(),
                         websubSubscriptionConfigurationDTO.getSignatureHeader());
@@ -656,10 +657,16 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setLifeCycleStatus(api.getStatus());
-        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
-            apiInfoDTO.setHasThumbnail(true);
-        } else {
-            apiInfoDTO.setHasThumbnail(false);
+        apiInfoDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
+        if (api.getCreatedTime() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
+            apiInfoDTO.setCreatedTime(dateFormat.format(createdTime));
+        }
+        if (api.getLastUpdated() != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            Date lastUpdatedTime = api.getLastUpdated();
+            apiInfoDTO.setUpdatedTime(dateFormat.format(lastUpdatedTime));
         }
         return apiInfoDTO;
     }
@@ -1008,9 +1015,7 @@ public class APIMappingUtil {
                 log.error("Error while decrypting client credentials for API: " + model.getId(), e);
             }
         }
-      /*  if (!StringUtils.isBlank(model.getThumbnailUrl())) {todo
-            dto.setThumbnailUri(getThumbnailUri(model.getUUID()));
-        }*/
+        dto.setHasThumbnail(!StringUtils.isBlank(model.getThumbnailUrl()));
         List<MediationPolicyDTO> mediationPolicies = new ArrayList<>();
         String inMedPolicyName = model.getInSequence();
         if (inMedPolicyName != null && !inMedPolicyName.isEmpty()) {
@@ -1198,6 +1203,7 @@ public class APIMappingUtil {
         if (websubSubscriptionConfiguration == null) {
             websubSubscriptionConfiguration = APIUtil.getDefaultWebsubSubscriptionConfiguration();
         }
+        websubSubscriptionConfigurationDTO.setEnable(websubSubscriptionConfiguration.isEnable());
         websubSubscriptionConfigurationDTO.setSecret(websubSubscriptionConfiguration.getSecret());
         websubSubscriptionConfigurationDTO.setSigningAlgorithm(websubSubscriptionConfiguration.getSigningAlgorithm());
         websubSubscriptionConfigurationDTO.setSignatureHeader(websubSubscriptionConfiguration.getSignatureHeader());
@@ -1948,8 +1954,7 @@ public class APIMappingUtil {
             if (api.getType().equals(APIConstants.API_TYPE_WS)) {
                 Map<String, String> wsUriMappings = api.getWsUriMapping();
                 if (wsUriMappings != null) {
-                    String wsUriMapping = wsUriMappings
-                            .get(operationsDTO.getTarget() + "_" + operationsDTO.getVerb().toLowerCase());
+                    String wsUriMapping = wsUriMappings.get(operationsDTO.getVerb() + "_" + operationsDTO.getTarget());
                     if (wsUriMapping != null) {
                         operationsDTO.setUriMapping(wsUriMapping);
                     }

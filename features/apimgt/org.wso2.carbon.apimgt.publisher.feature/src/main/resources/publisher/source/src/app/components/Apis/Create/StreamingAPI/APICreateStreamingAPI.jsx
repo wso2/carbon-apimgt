@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
-import { FormattedMessage, injectIntl } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { withRouter } from 'react-router';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -32,6 +32,7 @@ import APICreateBase from 'AppComponents/Apis/Create/Components/APICreateBase';
 import Banner from 'AppComponents/Shared/Banner';
 import DefaultAPIForm from 'AppComponents/Apis/Create/Components/DefaultAPIForm';
 import { useAppContext } from 'AppComponents/Shared/AppContext';
+import AuthManager from 'AppData/AuthManager';
 
 const useStyles = makeStyles((theme) => ({
     mandatoryStar: {
@@ -42,10 +43,39 @@ const useStyles = makeStyles((theme) => ({
 
 const APICreateStreamingAPI = (props) => {
     const { history } = props;
+    const intl = useIntl();
     const { settings } = useAppContext();
     const [pageError, setPageError] = useState(null);
     const [isCreating, setIsCreating] = useState();
+    const [isPublishing, setIsPublishing] = useState(false);
+    const [isRevisioning, setIsRevisioning] = useState(false);
+    const [isDeploying, setIsDeploying] = useState(false);
+    const [isPublishButtonClicked, setIsPublishButtonClicked] = useState(false);
     const classes = useStyles();
+    const [policies, setPolicies] = useState([]);
+    let { apiType } = useParams();
+    if (apiType) {
+        apiType = apiType.toUpperCase();
+    }
+    const isWebSub = (apiType === 'WEBSUB');
+
+    useEffect(() => {
+        API.asyncAPIPolicies().then((response) => {
+            const allPolicies = response.body.list;
+            if (allPolicies.length === 0) {
+                Alert.info(intl.formatMessage({
+                    id: 'Apis.Create.Default.APICreateDefault.error.policies.not.available',
+                    defaultMessage: 'Throttling policies not available. Contact your administrator',
+                }));
+            } else if (isWebSub && allPolicies.filter((p) => p.policyName === 'AsyncWHUnlimited').length > 0) {
+                setPolicies(['AsyncWHUnlimited']);
+            } else if (!isWebSub && allPolicies.filter((p) => p.policyName === 'AsyncUnlimited').length > 0) {
+                setPolicies(['AsyncUnlimited']);
+            } else {
+                setPolicies([allPolicies[0].policyName]);
+            }
+        });
+    }, []);
 
     const protocols = [
         {
@@ -71,13 +101,8 @@ const APICreateStreamingAPI = (props) => {
         SSE: 'SSE',
         WEBSUB: 'WebSub',
     };
-    let { apiType } = useParams();
-    if (apiType) {
-        apiType = apiType.toUpperCase();
-    }
     const [hideEndpoint, setHideEndpoint] = useState(!apiType || apiType === protocolKeys.WebSub);
 
-    const isWebSub = apiType === 'WEBSUB';
     /**
      *
      * Reduce the events triggered from API input fields to current state
@@ -104,6 +129,8 @@ const APICreateStreamingAPI = (props) => {
     });
 
     const isAPICreatable = apiInputs.name && apiInputs.context && apiInputs.version && !isCreating;
+    // TODO: If WebSub API no endpoint is required. Or else check apiInputs.endpoint has a value.
+    const isPublishable = true;
 
     /**
      *
@@ -128,9 +155,13 @@ const APICreateStreamingAPI = (props) => {
         });
     }
 
+    /**
+     *
+     */
     function createAPI() {
+        setIsCreating(true);
         const {
-            name, version, context, endpoint, protocol, policies,
+            name, version, context, endpoint, protocol,
         } = apiInputs;
         const apiData = {
             name,
@@ -156,11 +187,11 @@ const APICreateStreamingAPI = (props) => {
         apiData.gatewayEnvironments = settings.environment.map((env) => env.name);
 
         const newAPI = new API(apiData);
-        newAPI
+        const promisedCreatedAPI = newAPI
             .saveStreamingAPI()
             .then((api) => {
                 Alert.info('API created successfully');
-                history.push(`/apis/${api.id}/overview`);
+                return api;
             })
             .catch((error) => {
                 if (error.response) {
@@ -169,10 +200,134 @@ const APICreateStreamingAPI = (props) => {
                     Alert.error('Something went wrong while adding the API');
                 }
                 console.error(error);
+                setIsPublishing(false); // We don't publish if something when wrong
             })
             .finally(() => {
                 setIsCreating(false);
             });
+        return promisedCreatedAPI.finally(() => setIsCreating(false));
+    }
+
+    /**
+     *
+     */
+    function createAndPublish() {
+        const streamingApi = new API();
+        setIsPublishButtonClicked(true);
+        createAPI().then((api) => {
+            setIsRevisioning(true);
+            const body = {
+                description: 'Initial Revision',
+            };
+            streamingApi.createRevision(api.id, body)
+                .then((api1) => {
+                    const revisionId = api1.body.id;
+                    Alert.info('API Revision created successfully');
+                    setIsRevisioning(false);
+                    const envList = settings.environment.map((env) => env.name);
+                    const body1 = [];
+                    const getFirstVhost = (envName) => {
+                        const env = settings.environment.find(
+                            (e) => e.name === envName && e.vhosts.length > 0,
+                        );
+                        return env && env.vhosts[0].host;
+                    };
+                    if (envList && envList.length > 0) {
+                        if (envList.includes('Default') && getFirstVhost('Default')) {
+                            body1.push({
+                                name: 'Default',
+                                displayOnDevportal: true,
+                                vhost: getFirstVhost('Default'),
+                            });
+                        } else if (getFirstVhost(envList[0])) {
+                            body1.push({
+                                name: envList[0],
+                                displayOnDevportal: true,
+                                vhost: getFirstVhost(envList[0]),
+                            });
+                        }
+                    }
+                    setIsDeploying(true);
+                    streamingApi.deployRevision(api.id, revisionId, body1)
+                        .then(() => {
+                            Alert.info('API Revision Deployed Successfully');
+                            setIsDeploying(false);
+                            // Publishing API after deploying
+                            setIsPublishing(true);
+                            api.publish()
+                                .then((response) => {
+                                    const { workflowStatus } = response.body;
+                                    if (workflowStatus === APICreateStreamingAPI.WORKFLOW_STATUS.CREATED) {
+                                        Alert.info(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.success.publishStatus',
+                                            defaultMessage: 'Lifecycle state change request has been sent',
+                                        }));
+                                    } else {
+                                        Alert.info(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.success.otherStatus',
+                                            defaultMessage: 'API updated successfully',
+                                        }));
+                                    }
+                                    history.push(`/apis/${api.id}/overview`);
+                                })
+                                .catch((error) => {
+                                    if (error.response) {
+                                        Alert.error(error.response.body.description);
+                                        setPageError(error.response.body);
+                                    } else {
+                                        Alert.error(intl.formatMessage({
+                                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.publish',
+                                            defaultMessage: 'Something went wrong while publishing the API',
+                                        }));
+                                        setPageError('Something went wrong while publishing the API');
+                                    }
+                                    console.error(error);
+                                })
+                                .finally(() => {
+                                    setIsPublishing(false);
+                                    setIsPublishButtonClicked(false);
+                                });
+                        })
+                        .catch((error) => {
+                            if (error.response) {
+                                Alert.error(error.response.body.description);
+                                setPageError(error.response.body);
+                            } else {
+                                Alert.error(intl.formatMessage({
+                                    id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.deploy.revision',
+                                    defaultMessage: 'Something went wrong while deploying the API Revision',
+                                }));
+                                setPageError('Something went wrong while deploying the API Revision');
+                            }
+                            console.error(error);
+                        })
+                        .finally(() => {
+                            setIsDeploying(false);
+                        });
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        Alert.error(error.response.body.description);
+                        setPageError(error.response.body);
+                    } else {
+                        Alert.error(intl.formatMessage({
+                            id: 'Apis.Create.Default.APICreateDefault.error.errorMessage.create.revision',
+                            defaultMessage: 'Something went wrong while creating the API Revision',
+                        }));
+                        setPageError('Something went wrong while creating the API Revision');
+                    }
+                    console.error(error);
+                })
+                .finally(() => {
+                    setIsRevisioning(false);
+                });
+        });
+    }
+
+    function createAPIOnly() {
+        createAPI().then((api) => {
+            history.push(`/apis/${api.id}/overview`);
+        });
     }
 
     const pageTitle = (
@@ -227,6 +382,8 @@ const APICreateStreamingAPI = (props) => {
                         endpointPlaceholderText='Streaming Provider'
                         appendChildrenBeforeEndpoint
                         hideEndpoint={hideEndpoint}
+                        isWebSocket={(apiType && apiType === protocolKeys.WebSocket)
+                            || apiInputs.protocol === protocolKeys.WebSocket}
                     >
                         <TextField
                             fullWidth
@@ -274,13 +431,34 @@ const APICreateStreamingAPI = (props) => {
                                 variant='contained'
                                 color='primary'
                                 disabled={!(isAPICreatable && apiInputs.isFormValid)}
-                                onClick={createAPI}
+                                onClick={createAPIOnly}
                             >
                                 Create
                                 {' '}
-                                {isCreating && <CircularProgress size={24} />}
+                                {isCreating && !isPublishButtonClicked && <CircularProgress size={24} />}
                             </Button>
                         </Grid>
+                        {!AuthManager.isNotPublisher() && (
+                            <Grid item>
+                                <Button
+                                    id='itest-id-apicreatedefault-createnpublish'
+                                    variant='contained'
+                                    color='primary'
+                                    disabled={isDeploying || isRevisioning || !isPublishable
+                                        || !isAPICreatable || !apiInputs.isFormValid}
+                                    onClick={createAndPublish}
+                                >
+                                    {(!isPublishing && !isRevisioning && !isDeploying) && 'Create & Publish'}
+                                    {(isPublishing || isRevisioning || isDeploying) && <CircularProgress size={24} />}
+                                    {isCreating && isPublishing && 'Creating API . . .'}
+                                    {!isCreating && isRevisioning && !isDeploying && 'Creating Revision . . .'}
+                                    {!isCreating && isPublishing
+                                        && !isRevisioning && !isDeploying && 'Publishing API . . .'}
+                                    {!isCreating && isPublishing
+                                        && !isRevisioning && isDeploying && 'Deploying Revision . . .'}
+                                </Button>
+                            </Grid>
+                        )}
                         <Grid item>
                             <Link to='/apis/'>
                                 <Button variant='text'>
@@ -301,4 +479,4 @@ APICreateStreamingAPI.WORKFLOW_STATUS = {
     CREATED: 'CREATED',
 };
 
-export default withRouter(injectIntl(APICreateStreamingAPI));
+export default withRouter(APICreateStreamingAPI);

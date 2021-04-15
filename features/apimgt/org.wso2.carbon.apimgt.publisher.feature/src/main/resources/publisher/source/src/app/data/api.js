@@ -18,7 +18,6 @@
 import APIClientFactory from './APIClientFactory';
 import Utils from './Utils';
 import Resource from './Resource';
-import MockResponses from './MockResponses';
 import cloneDeep from 'lodash.clonedeep';
 
 /**
@@ -1578,6 +1577,22 @@ class API extends Resource {
         });
 
         return promised_addAPIThumbnail;
+    }
+
+    /**
+     * Get all replies for a particular comment
+     * @param {string} apiId api id of the api for which the comment is added
+     * @param {string} commentId id of the comment
+     * @param {string} limit number of replies to retrieve
+     * @param {string} offset the starting point of replies
+     * @returns {promise} promise
+     */
+    getAllCommentReplies(apiId, commentId, limit, offset) {
+        return this.client.then((client) => {
+            return client.apis.Comments.getRepliesOfComment({
+                commentId, apiId, limit, offset,
+            }, this._requestMetaData());
+        });
     }
 
     /**

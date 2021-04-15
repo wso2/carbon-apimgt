@@ -24,11 +24,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.api.ApiConstants;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
@@ -45,7 +45,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.tracing.TracingSpan;
@@ -60,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.cache.Cache;
 
 /**
@@ -123,13 +121,13 @@ public class OAuthAuthenticator implements Authenticator {
         TracingSpan keyInfo = null;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
+        String tenantDomain = GatewayUtils.getTenantDomain();
         if (keyValidator == null) {
             this.keyValidator = new APIKeyValidator();
         }
 
         if (jwtValidator == null) {
-            this.jwtValidator = new JWTValidator(this.keyValidator);
+            this.jwtValidator = new JWTValidator(this.keyValidator, tenantDomain);
         }
 
         config = getApiManagerConfiguration();
@@ -147,28 +145,27 @@ public class OAuthAuthenticator implements Authenticator {
             defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
         }
 
-
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Default Version API invoked");
         }
 
-        if(removeOAuthHeadersFromOutMessage){
+        if (removeOAuthHeadersFromOutMessage) {
             //Remove authorization headers sent for authentication at the gateway and pass others to the backend
             if (StringUtils.isNotBlank(remainingAuthHeader)) {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Removing OAuth key from Authorization header");
                 }
                 headers.put(getSecurityHeader(), remainingAuthHeader);
                 remainingAuthHeader = "";
             } else {
-                if(log.isDebugEnabled()){
+                if (log.isDebugEnabled()) {
                     log.debug("Removing Authorization header from headers");
                 }
                 headers.remove(getSecurityHeader());
             }
 
         }
-        if(removeDefaultAPIHeaderFromOutMessage){
+        if (removeDefaultAPIHeaderFromOutMessage) {
             headers.remove(defaultAPIHeader);
         }
 
