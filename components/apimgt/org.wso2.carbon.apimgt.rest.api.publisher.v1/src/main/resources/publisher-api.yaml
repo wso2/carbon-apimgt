@@ -8061,7 +8061,7 @@ components:
             - PRIVATE
             - RESTRICTED
           x-otherScopes:
-            - apim:api_publishAPI:
+            - apim:api_publish
         visibleRoles:
           type: array
           description: The user roles that are able to access the API in Developer Portal
