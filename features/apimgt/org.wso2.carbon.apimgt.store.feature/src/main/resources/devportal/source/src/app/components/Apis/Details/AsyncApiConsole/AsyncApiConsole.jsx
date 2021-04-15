@@ -70,7 +70,7 @@ export default function AsyncApiConsole() {
     const [sandboxApiKey, setSandboxApiKey] = useState('');
     const [productionApiKey, setProductionApiKey] = useState('');
     const environmentObject = api.endpointURLs;
-    const [URLs, setURLs] = useState(environmentObject[0].URLs);
+    const [URLs, setURLs] = useState(environmentObject.length > 0 ? environmentObject[0].URLs : []);
     const [notFound, setNotFound] = useState(false);
 
     const user = AuthManager.getUser();

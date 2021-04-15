@@ -373,12 +373,13 @@ class APIProduct extends Resource {
      *
      * @param {String} id API Product UUID
      */
-    getDocuments(id) {
+    getDocuments(id, limit = 1000) {
         const promisedDocuments = this.client
             .then(client => {
                 return client.apis['API Product Documents'].getAPIProductDocuments(
                     {
                         apiProductId: id,
+                        limit,
                     },
                     this._requestMetaData(),
                 );

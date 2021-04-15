@@ -359,7 +359,7 @@ export default function DesignConfigurations() {
             <Container maxWidth='md'>
                 <Grid container spacing={2}>
                     <Grid item md={12}>
-                        <Typography variant='h5'>
+                        <Typography id='itest-api-details-design-config-head' variant='h5'>
                             <FormattedMessage
                                 id='Apis.Details.Configuration.Configuration.Design.topic.header'
                                 defaultMessage='Design Configurations'
@@ -458,6 +458,7 @@ export default function DesignConfigurations() {
                                         <Button
                                             disabled={
                                                 isUpdating || api.isRevision || invalidTagsExist
+                                                || isRestricted(['apim:api_create'], api)
                                                 || (apiConfig.visibility === 'RESTRICTED'
                                                     && apiConfig.visibleRoles.length === 0)
                                             }

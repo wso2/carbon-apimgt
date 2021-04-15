@@ -53,8 +53,8 @@ const styles = (theme) => ({
         },
     },
     commentAddButton: {
-        '& span.MuiButton-label': {
-            color: theme.palette.getContrastText(theme.palette.primary.main),
+        '& > span': {
+            color: theme.palette.getContrastText(theme.palette.primary.main) + '! important',
         },
     },
 });
@@ -116,9 +116,8 @@ class CommentAdd extends React.Component {
      * * */
     handleClickAddComment() {
         const {
-            api, replyTo, allComments, commentsUpdate, handleShowReply,
+            api: { id: apiId }, replyTo, handleShowReply, addComment, addReply,
         } = this.props;
-        const apiId = api.id;
         const { content } = this.state;
         const comment = {
             content: content.trim(), category: 'general',
@@ -129,14 +128,13 @@ class CommentAdd extends React.Component {
             CommentsAPI.add(apiId, comment, replyTo)
                 .then((newComment) => {
                     this.setState({ content: '' });
-                    const addedComment = newComment.body;
                     if (replyTo === null) {
-                        allComments.push(addedComment);
-                    } else {
-                        const index = allComments.findIndex(this.filterCommentToAddReply);
-                        allComments[index].replies.list.push(addedComment);
+                        if (addComment) {
+                            addComment(newComment.body);
+                        }
+                    } else if (addReply) {
+                        addReply(newComment.body);
                     }
-                    commentsUpdate(allComments);
                 })
                 .catch((error) => {
                     console.error(error);
@@ -230,7 +228,6 @@ class CommentAdd extends React.Component {
 CommentAdd.defaultProps = {
     replyTo: null,
     handleShowReply: null,
-    commentsUpdate: null,
 };
 
 CommentAdd.propTypes = {
@@ -239,8 +236,6 @@ CommentAdd.propTypes = {
     api: PropTypes.instanceOf(Object).isRequired,
     replyTo: PropTypes.string,
     handleShowReply: PropTypes.func,
-    commentsUpdate: PropTypes.func,
-    allComments: PropTypes.instanceOf(Array).isRequired,
     theme: PropTypes.shape({}).isRequired,
     intl: PropTypes.shape({
         formatMessage: PropTypes.func,

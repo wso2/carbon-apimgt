@@ -18,14 +18,25 @@
 package org.wso2.carbon.apimgt.api.model;
 
 public class WebsubSubscriptionConfiguration {
+    private boolean enable;
     private String secret;
     private String signingAlgorithm;
     private String signatureHeader;
 
-    public WebsubSubscriptionConfiguration(String secret, String signingAlgorithm, String signatureHeader) {
+    public WebsubSubscriptionConfiguration(
+            boolean enable, String secret, String signingAlgorithm, String signatureHeader) {
+        this.enable = enable;
         this.secret = secret;
         this.signingAlgorithm = signingAlgorithm;
         this.signatureHeader = signatureHeader;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 
     public String getSecret() {

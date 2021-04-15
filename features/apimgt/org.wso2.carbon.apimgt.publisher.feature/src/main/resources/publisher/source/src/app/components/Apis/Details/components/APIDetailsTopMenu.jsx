@@ -38,12 +38,14 @@ import Grid from '@material-ui/core/Grid';
 import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
+import MUIAlert from 'AppComponents/Shared/MuiAlert';
+import PublicIcon from '@material-ui/icons/Public';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
 const styles = (theme) => ({
     root: {
-        height: 70,
+        height: theme.custom.apis.topMenu.height,
         background: theme.palette.background.paper,
         borderBottom: 'solid 1px ' + theme.palette.grey.A200,
         display: 'flex',
@@ -225,12 +227,16 @@ const APIDetailsTopMenu = (props) => {
 
             <div className={classes.dateWrapper} />
             {api.isRevision && (
-                <Typography variant='subtitle2' className={classes.readOnlyStyle}>
+                <MUIAlert
+                    variant='outlined'
+                    severity='warning'
+                    icon={false}
+                >
                     <FormattedMessage
                         id='Apis.Details.components.APIDetailsTopMenu.read.only.label'
                         defaultMessage='Read only'
                     />
-                </Typography>
+                </MUIAlert>
             )}
             <div className={classes.topRevisionStyle}>
                 <TextField
@@ -257,6 +263,7 @@ const APIDetailsTopMenu = (props) => {
                             component={Link}
                             to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/' + lastIndex}
                         >
+                            <PublicIcon style={{ fontSize: 15 }} />
                             <FormattedMessage
                                 id='Apis.Details.components.APIDetailsTopMenu.current.api'
                                 defaultMessage='Current API'

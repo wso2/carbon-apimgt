@@ -20,5 +20,6 @@ import React, { useContext } from 'react';
 const AppContext = React.createContext({ });
 export const usePublisherSettings = () => useContext(AppContext).settings;
 export const useAppContext = () => useContext(AppContext);
+export const useUser = () => useContext(AppContext).user;
 export const AppContextProvider = AppContext.Provider;
 export default AppContext;

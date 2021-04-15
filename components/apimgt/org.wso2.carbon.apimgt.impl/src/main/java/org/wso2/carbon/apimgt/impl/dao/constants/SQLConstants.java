@@ -316,7 +316,8 @@ public class SQLConstants {
             "   SUBS.SUB_STATUS AS SUB_STATUS, " +
             "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
             "   SUBS.UUID AS UUID, " +
-            "   API.API_ID AS API_ID " +
+             "   API.API_ID AS API_ID," +
+             "   API.API_UUID AS API_UUID " +
             " FROM " +
             "   AM_SUBSCRIPTION SUBS," +
             "   AM_API API " +
@@ -2795,6 +2796,9 @@ public class SQLConstants {
                     "AM_GW_PUBLISHED_API_DETAILS.TENANT_DOMAIN = ?";
     public static final String UPDATE_API_STATUS = "UPDATE AM_API SET STATUS = ? WHERE API_ID = ?";
     public static final String RETRIEVE_API_STATUS_FROM_UUID = "SELECT STATUS FROM AM_API WHERE API_UUID = ?";
+    public static final String RETRIEVE_API_INFO_FROM_UUID = "SELECT API_UUID, API_PROVIDER, API_NAME, API_VERSION, " +
+            "CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, " +
+            "REVISIONS_CREATED, STATUS FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
             "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
     public static final String UPDATE_REVISION_CREATED_BY_API_SQL = "UPDATE AM_API SET REVISIONS_CREATED = ? WHERE " +

@@ -310,6 +310,18 @@
           "description" : "**Search condition**.\n  Application ID  of the subscription\n",
           "required" : false,
           "type" : "integer"
+        }, {
+          "name" : "apiUUID",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Api UUID  of the subscription\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "applicationUUID",
+          "in" : "query",
+          "description" : "**Search condition**.\n  Application UUID  of the subscription\n",
+          "required" : false,
+          "type" : "string"
         } ],
         "responses" : {
           "200" : {
@@ -1125,14 +1137,23 @@
     },
     "Subscription" : {
       "properties" : {
+        "subscriptionUUID" : {
+          "type" : "string"
+        },
         "subscriptionId" : {
           "type" : "integer"
         },
         "policyId" : {
           "type" : "string"
         },
+        "apiUUID" : {
+          "type" : "string"
+        },
         "apiId" : {
           "type" : "integer"
+        },
+        "applicationUUID" : {
+          "type" : "string"
         },
         "appId" : {
           "type" : "integer"
@@ -1184,6 +1205,9 @@
       "properties" : {
         "applicationId" : {
           "type" : "integer"
+        },
+        "applicationUUID" : {
+          "type" : "string"
         },
         "consumerKey" : {
           "type" : "string"

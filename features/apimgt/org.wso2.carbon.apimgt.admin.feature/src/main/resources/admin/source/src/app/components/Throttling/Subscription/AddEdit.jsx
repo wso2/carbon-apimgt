@@ -509,7 +509,7 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: {
+                permissions: (validRoles.length === 0) ? null : {
                     permissionType: state.permissions.permissionStatus,
                     roles: validRoles,
                 },
@@ -544,7 +544,7 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: {
+                permissions: (validRoles.length === 0) ? null : {
                     permissionType: state.permissions.permissionStatus,
                     roles: validRoles,
                 },
@@ -578,7 +578,7 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: {
+                permissions: (validRoles.length === 0) ? null : {
                     permissionType: state.permissions.permissionStatus,
                     roles: validRoles,
                 },

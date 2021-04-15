@@ -192,7 +192,7 @@ class Utils {
             // Disable the no bitwise rule as this is a `very rare` usage of bitwise logic operators
             // eslint-disable-next-line no-bitwise
             const r = Math.random() * 16 | 0; const
-            // eslint-disable-next-line no-bitwise
+                // eslint-disable-next-line no-bitwise
                 v = c === 'x' ? r : (r & (0x3 | 0x8));
             return v.toString(16);
         });
@@ -307,6 +307,42 @@ class Utils {
         } else {
             return 'rgb(' + r + ', ' + g + ', ' + b + ')';
         }
+    }
+
+    /**
+     * return R,G & B color components
+     * @param {Strinng} hex HEX color code string i:e `#AF2386`
+     * @returns {Object} colors
+     */
+    static hexToRGBHash(hex) {
+        // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        const commonHex = hex.replace(shorthandRegex, (m, r, g, b) => {
+            return r + r + g + g + b + b;
+        });
+
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(commonHex);
+        return result
+            ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16),
+            }
+            : null;
+    }
+
+    /**
+     * Return HEX hashed color code given the R,G & B color components
+     * @param {Integer} r Red
+     * @param {Integer} g Green
+     * @param {Integer} b Blue
+     * @returns {String} Hex code
+     */
+    static rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map((x) => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
     }
 
     /**
@@ -435,13 +471,11 @@ Utils.CONST = {
 
     LOGOUT_CALLBACK: '/services/auth/callback/logout',
     INTROSPECT: '/services/auth/introspect',
-    // SERVICE_CATALOG_SWAGGER_YAML: '/api/service-catalog/v1/swagger.yaml',
     SERVICE_CATALOG_SWAGGER_YAML: '/api/am/service-catalog/v0/oas.yaml',
     SWAGGER_YAML: '/api/am/publisher/v2/swagger.yaml',
     PROTOCOL: 'https://',
     API_CLIENT: 'apiClient',
     SERVICE_CATALOG_CLIENT: 'serviceCatalogClient',
-    ENABLE_SERVICE_CATALOG: true,
 };
 
 /**

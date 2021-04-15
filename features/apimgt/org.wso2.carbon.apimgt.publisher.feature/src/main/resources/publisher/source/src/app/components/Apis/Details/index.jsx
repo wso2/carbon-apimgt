@@ -44,7 +44,7 @@ import {
 import isEmpty from 'lodash/isEmpty';
 import Utils from 'AppData/Utils';
 import IconButton from '@material-ui/core/IconButton';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import ResourceNotFound from 'AppComponents/Base/Errors/ResourceNotFound';
 import AuthorizedError from 'AppComponents/Base/Errors/AuthorizedError';
 import CustomIcon from 'AppComponents/Shared/CustomIcon';
@@ -52,6 +52,7 @@ import LeftMenuItem from 'AppComponents/Shared/LeftMenuItem';
 import API from 'AppData/api';
 import APIProduct from 'AppData/APIProduct';
 import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Progress } from 'AppComponents/Shared';
 import Alert from 'AppComponents/Shared/Alert';
@@ -64,6 +65,7 @@ import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { RevisionContextProvider } from 'AppComponents/Shared/RevisionContext';
+import { PROPERTIES as UserProperties } from 'AppData/User';
 import Overview from './NewOverview/Overview';
 import DesignConfigurations from './Configuration/DesignConfigurations';
 import RuntimeConfiguration from './Configuration/RuntimeConfiguration';
@@ -96,33 +98,18 @@ const styles = (theme) => ({
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
         width: theme.custom.leftMenuWidth,
-        textAlign: 'center',
-        fontFamily: theme.typography.fontFamily,
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        top: 0,
-        overflowY: 'auto',
-        overflowX: 'hidden',
+        minHeight: 'calc(100vh - 114px)',
     },
     leftLInkMain: {
-        borderRight: 'solid 1px ' + theme.palette.background.leftMenu,
-        paddingBottom: theme.spacing(1),
-        paddingTop: theme.spacing(1),
         cursor: 'pointer',
         backgroundColor: theme.palette.background.leftMenuActive,
-        color: theme.palette.getContrastText(theme.palette.background.leftMenuActive),
-        textDecoration: 'none',
-    },
-    detailsContent: {
-        display: 'flex',
-        flex: 1,
+        textAlign: 'center',
+        height: theme.custom.apis.topMenu.height,
     },
     content: {
         display: 'flex',
-        flex: 1,
+        flexGrow: 1,
         flexDirection: 'column',
-        marginLeft: theme.custom.leftMenuWidth,
         paddingBottom: theme.spacing(3),
     },
     contentInside: {
@@ -176,6 +163,9 @@ const styles = (theme) => ({
         textAlign: 'left',
         marginLeft: '8px',
     },
+    customIcon: {
+        marginTop: (theme.custom.apis.topMenu.height - theme.custom.leftMenuIconMainSize) / 2,
+    },
 });
 
 const AccordianSummary = withStyles({
@@ -207,6 +197,7 @@ const AccordionDetails = withStyles((theme) => ({
         paddingBottom: '0',
     },
 }))(MuiAccordionDetails);
+
 
 /**
  * Base component for API specific Details page,
@@ -258,6 +249,8 @@ class Details extends Component {
             allRevisions: null,
             allEnvRevision: null,
             authorizedAPI: false,
+            portalConfigsExpanded: false,
+            apiConfigsExpanded: false,
         };
         this.setAPI = this.setAPI.bind(this);
         this.setAPIProduct = this.setAPIProduct.bind(this);
@@ -265,6 +258,7 @@ class Details extends Component {
         this.setImageUpdate = this.setImageUpdate.bind(this);
         this.getRevision = this.getRevision.bind(this);
         this.getDeployedEnv = this.getDeployedEnv.bind(this);
+        this.handleAccordionState = this.handleAccordionState.bind(this);
     }
 
     /**
@@ -276,6 +270,7 @@ class Details extends Component {
             location: { pathname },
             isAPIProduct,
         } = this.props;
+        const { user } = this.context;
         // Load API data iff request page is valid
         if (Details.isValidURL(pathname)) {
             if (isAPIProduct) {
@@ -292,6 +287,10 @@ class Details extends Component {
                     console.error('error when getting tenants ' + error);
                 });
         }
+        this.setState({
+            apiConfigsExpanded: user.getProperty(UserProperties.API_CONFIG_OPEN),
+            portalConfigsExpanded: user.getProperty(UserProperties.PORTAL_CONFIG_OPEN),
+        });
     }
 
     /**
@@ -578,6 +577,21 @@ class Details extends Component {
     }
 
     /**
+     * update ls
+     * @param {String} name event triggered
+     * @param {Boolean} isExpanded state
+     */
+    handleAccordionState(name, isExpanded) {
+        const { user } = this.context;
+        this.setState({ [name]: isExpanded });
+        if (name === 'portalConfigsExpanded') {
+            user.setProperty(UserProperties.PORTAL_CONFIG_OPEN, isExpanded);
+        } else {
+            user.setProperty(UserProperties.API_CONFIG_OPEN, isExpanded);
+        }
+    }
+
+    /**
      * This method is similar to ReactJS `setState` method, In this `updateAPI()` method, we accept partially updated
      * API object or comple API object. When updating , the provided updatedAPI object will be merged with the existing
      * API object in the state and use it as the payload in the /apis PUT operation.
@@ -694,9 +708,8 @@ class Details extends Component {
             return <Progress per={70} message='Loading API data ...' />;
         }
         const { leftMenuIconMainSize } = theme.custom;
-
         return (
-            <>
+            <Box display='flex' alignItems='stretch' flexDirection='row'>
                 <APIProvider
                     value={{
                         api,
@@ -708,248 +721,255 @@ class Details extends Component {
                         tenantList,
                     }}
                 >
-                    <RevisionContextProvider
-                        value={{
-                            allRevisions,
-                            getRevision: this.getRevision,
-                            allEnvRevision,
-                            getDeployedEnv: this.getDeployedEnv,
-                        }}
-                    >
-                        <div className={classes.LeftMenu}>
-                            <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
-                                <div className={classes.leftLInkMain}>
-                                    <CustomIcon
-                                        width={leftMenuIconMainSize}
-                                        height={leftMenuIconMainSize}
-                                        icon={isAPIProduct ? 'api-product' : 'api'}
-                                    />
-                                </div>
-                            </Link>
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.overview',
-                                    defaultMessage: 'overview',
-                                })}
-                                to={pathPrefix + 'overview'}
-                                Icon={<DashboardIcon />}
-                                head='valueOnly'
-                            />
-                            <Typography className={classes.headingText}>
-                                Develop
-                            </Typography>
-                            <div className={classes.root}>
-                                <Accordion
-                                    defaultExpanded
-                                    elevation={0}
-                                    classes={{ expanded: classes.expanded }}
-                                >
-                                    <AccordianSummary
-                                        expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
-                                    >
-                                        <Typography className={classes.leftLInkText}>
-                                            Portal Configurations
-                                        </Typography>
-                                    </AccordianSummary>
-                                    <AccordionDetails>
-                                        <div>
-                                            <LeftMenuItem
-                                                className={classes.footeremaillink}
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.design.configs',
-                                                    defaultMessage: 'Basic info',
-                                                })}
-                                                route='configuration'
-                                                to={pathPrefix + 'configuration'}
-                                                Icon={<ConfigurationIcon />}
-                                            />
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.business.info',
-                                                    defaultMessage: 'business info',
-                                                })}
-                                                to={pathPrefix + 'business info'}
-                                                Icon={<BusinessIcon />}
-                                            />
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.subscriptions',
-                                                    defaultMessage: 'subscriptions',
-                                                })}
-                                                to={pathPrefix + 'subscriptions'}
-                                                Icon={<SubscriptionsIcon />}
-                                            />
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.documents',
-                                                    defaultMessage: 'documents',
-                                                })}
-                                                to={pathPrefix + 'documents'}
-                                                Icon={<DocumentsIcon />}
-                                            />
-                                            {!isAPIProduct && (
-                                                <LeftMenuItem
-                                                    text={intl.formatMessage({
-                                                        id: 'Apis.Details.index.comments',
-                                                        defaultMessage: 'Comments',
-                                                    })}
-                                                    route='comments'
-                                                    to={pathPrefix + 'comments'}
-                                                    Icon={<CommentIcon />}
-                                                />
-                                            )}
-                                        </div>
-                                    </AccordionDetails>
-                                </Accordion>
-                                <Accordion
-                                    elevation={0}
-                                    defaultExpanded
-                                    classes={{ expanded: classes.expanded }}
-                                >
-                                    <AccordianSummary
-                                        expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
-                                    >
-                                        <Typography className={classes.leftLInkText}>
-                                            API Configurations
-                                        </Typography>
-                                        <Tooltip
-                                            title={'Changes made to API Configuration section requires a '
-                                                + 'new deployment, in order to affect in the Gateway'}
-                                            placement='bottom'
-                                        >
-                                            <IconButton color='primary' size='small' aria-label='delete'>
-                                                <HelpOutlineIcon fontSize='small' />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </AccordianSummary>
-                                    <AccordionDetails>
-                                        <div>
-                                            {!api.isWebSocket() && (
-                                                <LeftMenuItem
-                                                    text={intl.formatMessage({
-                                                        id: 'Apis.Details.index.runtime.configs',
-                                                        defaultMessage: 'Runtime',
-                                                    })}
-                                                    route='runtime-configuration'
-                                                    to={pathPrefix + 'runtime-configuration'}
-                                                    Icon={<RuntimeConfigurationIcon />}
-                                                />
-                                            )}
-                                            {api.isWebSocket() && (
-                                                <LeftMenuItem
-                                                    text={intl.formatMessage({
-                                                        id: 'Apis.Details.index.runtime.configs',
-                                                        defaultMessage: 'Runtime',
-                                                    })}
-                                                    route='runtime-configuration'
-                                                    to={pathPrefix + 'runtime-configuration-websocket'}
-                                                    Icon={<RuntimeConfigurationIcon />}
-                                                />
-                                            )}
-                                            {this.getLeftMenuItemForResourcesByType(api.type)}
-                                            {this.getLeftMenuItemForDefinitionByType(api.type)}
-                                            {!isAPIProduct && api.type !== 'WEBSUB' && (
-                                                <LeftMenuItem
-                                                    text={intl.formatMessage({
-                                                        id: 'Apis.Details.index.endpoints',
-                                                        defaultMessage: 'endpoints',
-                                                    })}
-                                                    to={pathPrefix + 'endpoints'}
-                                                    Icon={<EndpointIcon />}
-                                                />
-                                            )}
-                                            {!isAPIProduct && (
-                                                <LeftMenuItem
-                                                    text={intl.formatMessage({
-                                                        id: 'Apis.Details.index.left.menu.scope',
-                                                        defaultMessage: 'Local Scopes',
-                                                    })}
-                                                    route='scopes'
-                                                    to={pathPrefix + 'scopes'}
-                                                    Icon={<ScopesIcon />}
-                                                />
-                                            )}
-
-                                            <LeftMenuItem
-                                                text={intl.formatMessage({
-                                                    id: 'Apis.Details.index.properties',
-                                                    defaultMessage: 'properties',
-                                                })}
-                                                to={pathPrefix + 'properties'}
-                                                Icon={<PropertiesIcon />}
-                                            />
-
-                                            {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
-                                                <LeftMenuItem
-                                                    text={intl.formatMessage({
-                                                        id: 'Apis.Details.index.monetization',
-                                                        defaultMessage: 'monetization',
-                                                    })}
-                                                    to={pathPrefix + 'monetization'}
-                                                    Icon={<MonetizationIcon />}
-                                                />
-                                            )}
-                                        </div>
-                                    </AccordionDetails>
-                                </Accordion>
+                    <Box className={classes.LeftMenu}>
+                        <Link to={'/' + (isAPIProduct ? 'api-products' : 'apis') + '/'}>
+                            <div className={classes.leftLInkMain}>
+                                <CustomIcon
+                                    className={classes.customIcon}
+                                    width={leftMenuIconMainSize}
+                                    height={leftMenuIconMainSize}
+                                    icon={isAPIProduct ? 'api-products' : 'apis'}
+                                />
                             </div>
-                            <Divider />
-                            <Typography className={classes.headingText}>Deploy</Typography>
-                            <LeftMenuItem
-                                text={intl.formatMessage({
-                                    id: 'Apis.Details.index.environments',
-                                    defaultMessage: 'Deployments',
-                                })}
-                                route='deployments'
-                                to={pathPrefix + 'deployments'}
-                                Icon={<PersonPinCircleOutlinedIcon />}
-                            />
-                            {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                                && (
+                        </Link>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.overview',
+                                defaultMessage: 'overview',
+                            })}
+                            to={pathPrefix + 'overview'}
+                            Icon={<DashboardIcon />}
+                            head='valueOnly'
+                        />
+                        <Typography className={classes.headingText}>
+                            Develop
+                        </Typography>
+                        <div className={classes.root}>
+                            <Accordion
+                                id='itest-api-details-portal-config-acc'
+                                defaultExpanded={this.state.portalConfigsExpanded}
+                                elevation={0}
+                                onChange={(e, isExpanded) => this.handleAccordionState('portalConfigsExpanded',
+                                    isExpanded)}
+                                classes={{ expanded: classes.expanded }}
+                            >
+                                <AccordianSummary
+                                    expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
+                                >
+                                    <Typography className={classes.leftLInkText}>
+                                        Portal Configurations
+                                    </Typography>
+                                </AccordianSummary>
+                                <AccordionDetails>
                                     <div>
-                                        <Divider />
-                                        <Typography className={classes.headingText}>Test</Typography>
                                         <LeftMenuItem
-                                            route='test-console'
+                                            className={classes.footeremaillink}
                                             text={intl.formatMessage({
-                                                id: 'Apis.Details.index.Tryout.menu.name',
-                                                defaultMessage: 'Try Out',
+                                                id: 'Apis.Details.index.design.configs',
+                                                defaultMessage: 'Basic info',
                                             })}
-                                            to={pathPrefix + 'test-console'}
-                                            iconText='test'
+                                            route='configuration'
+                                            to={pathPrefix + 'configuration'}
+                                            Icon={<ConfigurationIcon />}
                                         />
+                                        <LeftMenuItem
+                                            text={intl.formatMessage({
+                                                id: 'Apis.Details.index.business.info',
+                                                defaultMessage: 'business info',
+                                            })}
+                                            to={pathPrefix + 'business info'}
+                                            Icon={<BusinessIcon />}
+                                        />
+                                        <LeftMenuItem
+                                            text={intl.formatMessage({
+                                                id: 'Apis.Details.index.subscriptions',
+                                                defaultMessage: 'subscriptions',
+                                            })}
+                                            to={pathPrefix + 'subscriptions'}
+                                            Icon={<SubscriptionsIcon />}
+                                        />
+                                        <LeftMenuItem
+                                            text={intl.formatMessage({
+                                                id: 'Apis.Details.index.documents',
+                                                defaultMessage: 'documents',
+                                            })}
+                                            to={pathPrefix + 'documents'}
+                                            Icon={<DocumentsIcon />}
+                                        />
+                                        {!isAPIProduct && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.comments',
+                                                    defaultMessage: 'Comments',
+                                                })}
+                                                route='comments'
+                                                to={pathPrefix + 'comments'}
+                                                Icon={<CommentIcon />}
+                                            />
+                                        )}
                                     </div>
-                                )}
-                            {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
+                                </AccordionDetails>
+                            </Accordion>
+                            <Accordion
+                                id='itest-api-details-api-config-acc'
+                                defaultExpanded={this.state.apiConfigsExpanded}
+                                elevation={0}
+                                onChange={(e, isExpanded) => this.handleAccordionState('apiConfigsExpanded',
+                                    isExpanded)}
+                                classes={{ expanded: classes.expanded }}
+                            >
+                                <AccordianSummary
+                                    expandIcon={<ExpandMoreIcon className={classes.expandIconColor} />}
+                                >
+                                    <Typography className={classes.leftLInkText}>
+                                        API Configurations
+                                    </Typography>
+                                    <Tooltip
+                                        title={'Changes made to API Configuration section requires a '
+                                            + 'new deployment, in order to affect in the Gateway'}
+                                        placement='bottom'
+                                    >
+                                        <IconButton color='primary' size='small' aria-label='delete'>
+                                            <InfoOutlinedIcon fontSize='small' />
+                                        </IconButton>
+                                    </Tooltip>
+                                </AccordianSummary>
+                                <AccordionDetails>
+                                    <div>
+                                        {!api.isWebSocket() && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.runtime.configs',
+                                                    defaultMessage: 'Runtime',
+                                                })}
+                                                route='runtime-configuration'
+                                                to={pathPrefix + 'runtime-configuration'}
+                                                Icon={<RuntimeConfigurationIcon />}
+                                            />
+                                        )}
+                                        {api.isWebSocket() && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.runtime.configs',
+                                                    defaultMessage: 'Runtime',
+                                                })}
+                                                route='runtime-configuration'
+                                                to={pathPrefix + 'runtime-configuration-websocket'}
+                                                Icon={<RuntimeConfigurationIcon />}
+                                            />
+                                        )}
+                                        {this.getLeftMenuItemForResourcesByType(api.type)}
+                                        {this.getLeftMenuItemForDefinitionByType(api.type)}
+                                        {!isAPIProduct && api.type !== 'WEBSUB' && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.endpoints',
+                                                    defaultMessage: 'endpoints',
+                                                })}
+                                                to={pathPrefix + 'endpoints'}
+                                                Icon={<EndpointIcon />}
+                                            />
+                                        )}
+                                        {!isAPIProduct && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.left.menu.scope',
+                                                    defaultMessage: 'Local Scopes',
+                                                })}
+                                                route='scopes'
+                                                to={pathPrefix + 'scopes'}
+                                                Icon={<ScopesIcon />}
+                                            />
+                                        )}
+
+                                        <LeftMenuItem
+                                            text={intl.formatMessage({
+                                                id: 'Apis.Details.index.properties',
+                                                defaultMessage: 'properties',
+                                            })}
+                                            to={pathPrefix + 'properties'}
+                                            Icon={<PropertiesIcon />}
+                                        />
+
+                                        {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.monetization',
+                                                    defaultMessage: 'monetization',
+                                                })}
+                                                to={pathPrefix + 'monetization'}
+                                                Icon={<MonetizationIcon />}
+                                            />
+                                        )}
+                                    </div>
+                                </AccordionDetails>
+                            </Accordion>
+                        </div>
+                        <Divider />
+                        <Typography className={classes.headingText}>Deploy</Typography>
+                        <LeftMenuItem
+                            text={intl.formatMessage({
+                                id: 'Apis.Details.index.environments',
+                                defaultMessage: 'Deployments',
+                            })}
+                            route='deployments'
+                            to={pathPrefix + 'deployments'}
+                            Icon={<PersonPinCircleOutlinedIcon />}
+                        />
+                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
+                            && (
                                 <div>
                                     <Divider />
-                                    <Typography className={classes.headingText}>Publish</Typography>
+                                    <Typography className={classes.headingText}>Test</Typography>
                                     <LeftMenuItem
+                                        route='test-console'
                                         text={intl.formatMessage({
-                                            id: 'Apis.Details.index.lifecycle',
-                                            defaultMessage: 'lifecycle',
+                                            id: 'Apis.Details.index.Tryout.menu.name',
+                                            defaultMessage: 'Try Out',
                                         })}
-                                        to={pathPrefix + 'lifecycle'}
-                                        Icon={<LifeCycleIcon />}
+                                        to={pathPrefix + 'test-console'}
+                                        iconText='test'
                                     />
                                 </div>
                             )}
-                            {!isAPIProduct && settingsContext.externalStoresEnabled && (
-                                <>
-                                    <Divider />
-                                    <LeftMenuItem
-                                        text={intl.formatMessage({
-                                            id: 'Apis.Details.index.external-stores',
-                                            defaultMessage: 'external dev portals',
-                                        })}
-                                        to={pathPrefix + 'external-devportals'}
-                                        Icon={<StoreIcon />}
-                                    />
-                                </>
-                            )}
-                            <Divider />
-                        </div>
-                        <div className={classes.content}>
+                        {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
+                            <div>
+                                <Divider />
+                                <Typography className={classes.headingText}>Publish</Typography>
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.lifecycle',
+                                        defaultMessage: 'lifecycle',
+                                    })}
+                                    to={pathPrefix + 'lifecycle'}
+                                    Icon={<LifeCycleIcon />}
+                                />
+                            </div>
+                        )}
+                        {!isAPIProduct && settingsContext.externalStoresEnabled && (
+                            <>
+                                <Divider />
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.external-stores',
+                                        defaultMessage: 'external dev portals',
+                                    })}
+                                    to={pathPrefix + 'external-devportals'}
+                                    Icon={<StoreIcon />}
+                                />
+                            </>
+                        )}
+                        <Divider />
+                    </Box>
+                    <Box className={classes.content}>
+                        <RevisionContextProvider
+                            value={{
+                                allRevisions,
+                                getRevision: this.getRevision,
+                                allEnvRevision,
+                                getDeployedEnv: this.getDeployedEnv,
+                            }}
+                        >
                             <APIDetailsTopMenu api={api} isAPIProduct={isAPIProduct} imageUpdate={imageUpdate} />
                             <div className={classes.contentInside}>
                                 <LastUpdatedTime lastUpdatedTime={api.lastUpdatedTime} />
@@ -1097,16 +1117,16 @@ class Details extends Component {
                                     />
                                 </Switch>
                             </div>
-                        </div>
-                    </RevisionContextProvider>
+                        </RevisionContextProvider>
+                    </Box>
                 </APIProvider>
-            </>
+            </Box>
         );
     }
 }
 
 Details.contextType = AppContext;
-// Add your path here and refer it in above <Route/> component,
+// Add your path here and refer it in above <Route /> component,
 // Paths that are not defined here will be returned with Not Found error
 // key name doesn't matter here, Use an appropriate name as the key
 Details.subPaths = {

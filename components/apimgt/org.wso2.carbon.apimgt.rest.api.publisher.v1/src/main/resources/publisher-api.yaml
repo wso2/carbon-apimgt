@@ -1663,6 +1663,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -1716,6 +1718,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -6713,6 +6717,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -6766,6 +6772,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
       security:
@@ -7837,6 +7845,12 @@ components:
           type: array
           items:
             type: string
+        createdTime:
+          type: string
+          example : 2021-02-11 09:57:25
+        updatedTime:
+          type: string
+          example : 2021-02-11 09:57:25
 
     Topic:
       title: Topic object
@@ -9711,6 +9725,10 @@ components:
     WebsubSubscriptionConfiguration:
       type: object
       properties:
+        enable:
+          type: boolean
+          default: false
+          description: Toggle enable WebSub subscription configuration
         secret:
           type: string
           description: Secret key to be used for subscription

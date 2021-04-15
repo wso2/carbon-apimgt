@@ -30,6 +30,17 @@ public class ApplicationKeyMapping implements CacheableEntity<ApplicationKeyMapp
     private String keyManager;
     private String wfState;
     private int applicationId;
+    private String applicationUUID;
+
+    public String getApplicationUUID() {
+
+        return applicationUUID;
+    }
+
+    public void setApplicationUUID(String applicationUUID) {
+
+        this.applicationUUID = applicationUUID;
+    }
 
     public String getConsumerKey() {
 
@@ -96,6 +107,7 @@ public class ApplicationKeyMapping implements CacheableEntity<ApplicationKeyMapp
                 ", keyManager='" + keyManager + '\'' +
                 ", wfState='" + wfState + '\'' +
                 ", applicationId=" + applicationId +
+                ", applicationUUID='" + applicationUUID + '\'' +
                 '}';
     }
 }

@@ -33,6 +33,8 @@ public class APIInfoDTO   {
     private String workflowStatus = null;
     private Boolean hasThumbnail = null;
     private List<String> securityScheme = new ArrayList<String>();
+    private String createdTime = null;
+    private String updatedTime = null;
 
   /**
    **/
@@ -222,6 +224,40 @@ public class APIInfoDTO   {
     this.securityScheme = securityScheme;
   }
 
+  /**
+   **/
+  public APIInfoDTO createdTime(String createdTime) {
+    this.createdTime = createdTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2021-02-11 09:57:25", value = "")
+  @JsonProperty("createdTime")
+  public String getCreatedTime() {
+    return createdTime;
+  }
+  public void setCreatedTime(String createdTime) {
+    this.createdTime = createdTime;
+  }
+
+  /**
+   **/
+  public APIInfoDTO updatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "2021-02-11 09:57:25", value = "")
+  @JsonProperty("updatedTime")
+  public String getUpdatedTime() {
+    return updatedTime;
+  }
+  public void setUpdatedTime(String updatedTime) {
+    this.updatedTime = updatedTime;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -242,12 +278,14 @@ public class APIInfoDTO   {
         Objects.equals(lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(workflowStatus, apIInfo.workflowStatus) &&
         Objects.equals(hasThumbnail, apIInfo.hasThumbnail) &&
-        Objects.equals(securityScheme, apIInfo.securityScheme);
+        Objects.equals(securityScheme, apIInfo.securityScheme) &&
+        Objects.equals(createdTime, apIInfo.createdTime) &&
+        Objects.equals(updatedTime, apIInfo.updatedTime);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme);
+    return Objects.hash(id, name, description, context, version, provider, type, lifeCycleStatus, workflowStatus, hasThumbnail, securityScheme, createdTime, updatedTime);
   }
 
   @Override
@@ -266,6 +304,8 @@ public class APIInfoDTO   {
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
+    sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("}");
     return sb.toString();
   }

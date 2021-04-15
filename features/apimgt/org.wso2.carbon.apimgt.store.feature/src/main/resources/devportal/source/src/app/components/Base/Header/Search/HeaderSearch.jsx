@@ -373,12 +373,6 @@ class HeaderSearch extends React.Component {
                                  </li>
                                  <li>
                                      <FormattedMessage
-                                         id='Base.Header.headersearch.HeaderSearch.tooltip.option8'
-                                         defaultMessage='By Documentation Content [ Syntax - doc:xxxx ]'
-                                     />
-                                 </li>
-                                 <li>
-                                     <FormattedMessage
                                          id='Base.Header.headersearch.HeaderSearch.tooltip.option12'
                                          defaultMessage='By Api Category [ Syntax - api-category:xxxx ]'
                                      />

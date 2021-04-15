@@ -28,6 +28,7 @@
   "apim.jwt.signing_algorithm": "SHA256withRSA",
   "apim.jwt.claims_extractor_impl": "org.wso2.carbon.apimgt.impl.token.ExtendedDefaultClaimsRetriever",
   "apim.jwt.gateway_generator.impl":"org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl",
+  "apim.jwt.enable_tenant_based_signing": false,
   "apim.cache.gateway_token.enable": true,
   "apim.cache.resource.enable": true,
   "apim.cache.km_token.enable": false,
@@ -112,6 +113,7 @@
   "apim.throttling.enable_jwt_claim_based_throttling": "false",
   "apim.throttling.enable_query_param_based_throttling": "false",
   "apim.throttling.jms.java_naming_factory_initial": "org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
+  "apim.throttling.enable_policy_deployment": true,
   "server.mode": "single",
   "apim.workflow.enable": "false",
   "apim.workflow.service_url": "https://localhost:9445/bpmn",
@@ -172,5 +174,6 @@
   "apim.sync_runtime_artifacts.gateway.artifact_retriever": "DBRetriever",
   "apim.sync_runtime_artifacts.gateway.deployment_retry_duration": "15000",
   "apim.sync_runtime_artifacts.gateway.data_retrieval_mode": "async",
-  "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000"
+  "apim.sync_runtime_artifacts.gateway.event_waiting_time": "5000",
+  "apim.sync_runtime_artifacts.gateway.enable": true
 }

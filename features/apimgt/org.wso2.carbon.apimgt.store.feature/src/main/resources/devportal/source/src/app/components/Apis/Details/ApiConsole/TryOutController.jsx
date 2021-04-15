@@ -456,7 +456,7 @@ function TryOutController(props) {
                             <Box mb={1}>
                                 <Typography variant='body1'>
                                     <Box display='flex' alignItems='center'>
-                                        {(selectedKMObject && selectedKMObject.enabled) && (
+                                        {(keyManagers.length > 1 && selectedKMObject && selectedKMObject.enabled) && (
                                             <FormattedMessage
                                                 id='Apis.Details.ApiConsole.TryOutController.default.km.msg.one'
                                                 defaultMessage='The Resident Key Manager is selected for try out console.'
