@@ -102,7 +102,7 @@ export default function Breadcrumb() {
     return (
         <div className={classes.root}>
             <Box display='flex' flexDirection='row' alignItems='center'>
-                <Typography color='textPrimary' variant='h6'>{selected.text}</Typography>
+                <Typography color='textPrimary' component='h1' variant='h6'>{selected.text}</Typography>
                 <VerticalDivider height={15} />
                 <Breadcrumbs separator={<NavigateNextIcon fontSize='small' />} aria-label='breadcrumb'>
                     <MUILink color='inherit' to={'/apis/' + api.id + '/overview'} component={Link}>

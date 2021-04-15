@@ -417,7 +417,7 @@ class Listing extends Component {
         const strokeColorMain = theme.palette.getContrastText(theme.custom.infoBar.background);
         const paginationEnabled = totalApps > Listing.rowsPerPage;
         return (
-            <main className={classes.content}>
+            <div className={classes.content}>
                 <div className={classes.root}>
                     <Box display='flex' flexDirection='row' justifyContent='flex-start' alignItems='center'>
                         <div className={classes.mainIconWrapper}>
@@ -623,7 +623,7 @@ class Listing extends Component {
                     )}
 
                 </Paper>
-            </main>
+            </div>
         );
     }
 }

@@ -431,6 +431,7 @@ class ApiThumbClassic extends React.Component {
                             <div className={classes.thumbRight}>
                                 <Typography
                                     variant='subtitle1'
+                                    component='div'
                                     gutterBottom
                                     align='right'
                                     className={classes.chipWrapper}
