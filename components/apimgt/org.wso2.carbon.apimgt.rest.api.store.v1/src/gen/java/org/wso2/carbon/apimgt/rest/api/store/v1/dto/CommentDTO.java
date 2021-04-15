@@ -158,7 +158,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "general", value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("category")
   public String getCategory() {
     return category;

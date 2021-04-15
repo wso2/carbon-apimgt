@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,6 +39,8 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
@@ -49,29 +52,17 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
@@ -79,6 +70,8 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.models.ExportedApplication;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.store.v1.utils.ImportUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CertificateRestApiUtils;
+import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.CertificateMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
@@ -1298,4 +1291,198 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
         return null;
     }
+    public Response applicationsApplicationIdClientCertificatesUUIDContentGet(String applicationId, String UUID, MessageContext messageContext) throws APIManagementException{
+
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String certFileName = UUID + ".crt";
+
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+
+            ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(UUID,
+                    application.getId());
+            if (clientCertificateDTO != null){
+                Object certificate =CertificateRestApiUtils.getDecodedCertificate(clientCertificateDTO.getCertificate());
+                Response.ResponseBuilder responseBuilder = Response.ok().entity(certificate);
+                responseBuilder.header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + certFileName + "\"");
+                responseBuilder.header(RestApiConstants.HEADER_CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM);
+                return responseBuilder.build();
+            }
+        } catch (APIManagementException e){
+            RestApiUtil.handleInternalServerError(
+                    "Error while retrieving the client certificate with UUID " + UUID + " for the tenant "
+                            + tenantDomain, e, log);
+        }
+
+        return null;
+    }
+    /**
+     * Delete a client Certificate
+     */
+    public Response applicationsApplicationIdClientCertificatesUUIDDelete(String UUID, String applicationId, MessageContext messageContext) throws APIManagementException{
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+
+            int responseCode = apiConsumer.deleteClientCertificate(RestApiCommonUtil.getLoggedInUsername(),application.getId(),UUID);
+
+            if (responseCode == ResponseCode.SUCCESS.getResponseCode()) {
+
+
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("The client certificate which belongs to tenant : %s represented by the "
+                            + "UUID : %s is deleted successfully", tenantDomain, UUID));
+                }
+                return Response.ok().entity("The certificate for UUID '" + UUID + "' deleted successfully.").build();
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Failed to delete the client certificate which belongs to tenant : %s "
+                            + "represented by the UUID : %s.", tenantDomain, UUID));
+                }
+                RestApiUtil.handleInternalServerError(
+                        "Error while deleting the client certificate for UUID '" + UUID + "'.", log);
+            }
+
+        }catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError(
+                    "Error while deleting the client certificate with UUID " + UUID + " for the tenant "
+                            + tenantDomain, e, log);
+        }
+        return null;
+    }
+    /**
+     * Get a client Certificate
+     */
+    public Response applicationsApplicationIdClientCertificatesUUIDGet(String UUID, String applicationId, MessageContext messageContext) throws APIManagementException{
+
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+
+        try
+        {
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            ClientCertificateDTO clientCertificateDTO = CertificateRestApiUtils.preValidateClientCertificate(UUID,application.getId());
+            CertificateInformationDTO certificateInformationDTO = certificateMgtUtils.getCertificateInfo(clientCertificateDTO.getCertificate());
+
+            if(certificateInformationDTO != null){
+                CertificateInfoDTO certificateInfoDTO = CertificateMappingUtil.fromCertificateInformationToDTO(certificateInformationDTO);
+                return Response.ok().entity(certificateInfoDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError("Certificate is empty for UUID " + UUID, log);
+            }
+
+        }catch (APIManagementException e){
+            RestApiUtil.handleInternalServerError(
+                    "Error while retrieving the client certificate with UUID " + UUID + " for the tenant "
+                            + tenantDomain, e, log);
+        }
+        return null;
+    }
+    /**
+     * Get Client Certificates by an application Id
+     *
+
+     */
+    @Override
+    public Response applicationsApplicationIdClientCertificatesGet(String applicationId, Integer limit, Integer offset, MessageContext messageContext) {
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        List<ClientCertificateDTO> certificates = new ArrayList<>();
+        String query = CertificateRestApiUtils.buildQueryString("name", null, "applicationId", applicationId);
+
+        try{
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+            Application application =apiConsumer.getApplicationByUUID(applicationId);
+            certificates = apiConsumer.searchClientCertificates(null, null, application.getId());
+
+
+            ClientCertificatesDTO certificatesDTO = CertificateRestApiUtils.getPaginatedClientCertificates(certificates, limit, offset, query, applicationId);
+
+            PaginationDTO paginationDTO = new PaginationDTO();
+            paginationDTO.setLimit(limit);
+            paginationDTO.setOffset(offset);
+            certificatesDTO.setPagination(paginationDTO);
+            return Response.status(Response.Status.OK).entity(certificatesDTO).build();
+
+
+        }
+        catch (APIManagementException e){
+            RestApiUtil.handleInternalServerError("Error while retrieving the client certificates.", e, log);
+        }
+
+        return null;
+    }
+    /**
+     * Upload  Client Certificates by an application Id
+     *
+
+     */
+    @Override
+    public Response applicationsApplicationIdClientCertificatesPost(String applicationId, InputStream certificateInputStream, Attachment certificateDetail, String name, String type, MessageContext messageContext) {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
+        String UUID = java.util.UUID.randomUUID().toString();
+        try{
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
+            ContentDisposition contentDisposition = certificateDetail.getContentDisposition();
+            String fileName = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
+            if(StringUtils.isEmpty(name) || StringUtils.isEmpty(applicationId)){
+                RestApiUtil.handleBadRequest("The name and/ or applicationId should not be empty", log);
+            }
+            if (StringUtils.isBlank(fileName)) {
+                RestApiUtil.handleBadRequest(
+                        "Certificate addition failed. Proper Certificate file should be provided", log);
+            }
+
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+
+            String base64EncodedCert = CertificateRestApiUtils.generateEncodedCertificate(certificateInputStream);
+            CertificateInformationDTO certificateInformationDTO = certificateMgtUtils.getCertificateInfo(base64EncodedCert);
+
+            int responseCode = apiConsumer.addClientCertificate(username, UUID, application.getId(), base64EncodedCert, name, certificateInformationDTO.getSerialNumber(), type);
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Add certificate operation response code : %d", responseCode));
+            }
+            if (ResponseCode.SUCCESS.getResponseCode() == responseCode) {
+                ClientCertMetadataDTO certificateDTO = new ClientCertMetadataDTO();
+                certificateDTO.setName(name);
+                certificateDTO.setApplicationId(applicationId);
+                certificateDTO.setType(type);
+                certificateDTO.setUUID(UUID);
+                URI createdCertUri = new URI(RestApiConstants.CLIENT_CERTS_BASE_PATH + "?alias=" + name);
+                return Response.created(createdCertUri).entity(certificateDTO).build();
+
+            }else if (ResponseCode.INTERNAL_SERVER_ERROR.getResponseCode() == responseCode) {
+                RestApiUtil.handleInternalServerError(
+                        "Internal server error while adding the client certificate to Application" + applicationId, log);
+            } else if (ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE.getResponseCode() == responseCode) {
+                RestApiUtil.handleResourceAlreadyExistsError(
+                        "The certificate already exists.", log);
+            } else if (ResponseCode.CERTIFICATE_EXPIRED.getResponseCode() == responseCode) {
+                RestApiUtil.handleBadRequest(
+                        "Error while adding the certificate to the Application " + applicationId + ". " + " Certificate Expired.", log);
+            }
+
+        }catch (APIManagementException e){
+            RestApiUtil.handleInternalServerError(
+                    "APIManagement exception while adding the certificate to the Application " + applicationId + " due to an internal "
+                            + "server error", e, log);
+        }
+        catch (IOException e){
+            RestApiUtil.handleInternalServerError(
+                    "IOException while generating the encoded certificate for the Application " + applicationId, e, log);
+
+        }
+        catch (URISyntaxException e){
+            RestApiUtil.handleInternalServerError(
+                    "Error while generating the resource location URI for name '" + name + "'", e, log);
+        }
+        return null;
+    }
+
 }

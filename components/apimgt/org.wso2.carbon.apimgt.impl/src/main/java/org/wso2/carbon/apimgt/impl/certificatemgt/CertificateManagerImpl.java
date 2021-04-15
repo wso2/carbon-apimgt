@@ -550,4 +550,60 @@ public class CertificateManagerImpl implements CertificateManager {
         }
         return success;
     }
+
+        /*
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            Manage Certificates Uploaded to Developer Portal
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    */
+
+    public ResponseCode addClientCertificateToStore(int applicationId, String certificate, String UUID, String name, String serialNumber, String type, int tenantId) {
+
+        ResponseCode responseCode;
+        try {
+            responseCode = certificateMgtUtils.validateCertificate(name, tenantId, certificate);
+            if (responseCode == ResponseCode.SUCCESS) {
+                if (certificateMgtDAO.IsCertificateExist(name, tenantId, applicationId, serialNumber)) {
+                    responseCode = ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
+                } else {
+                    certificateMgtDAO.addClientCertificateToApplication(certificate, applicationId, UUID, name, serialNumber, type);
+                }
+            }
+        } catch (CertificateManagementException e) {
+            log.error("Error when adding client certificate with alias " + name + " to database for the Application "
+                    + applicationId, e);
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        }
+        return responseCode;
+    }
+    public List<ClientCertificateDTO> searchClientCertificatesOfApplication(String UUID, String serialNumber, int applicationId)
+            throws APIManagementException{
+
+        try {
+            return CertificateMgtDAO.getInstance().getApplicationClientCertificates(UUID, serialNumber, applicationId);
+        } catch (CertificateManagementException e) {
+            throw new APIManagementException(
+                    "Error while retrieving client certificate information for the Application : " + applicationId, e);
+        }
+    }
+
+    public ResponseCode deleteApplicationClientCertificate(int applicationId, String UUID){
+        try {
+            boolean removeFromDB = certificateMgtDAO.deleteApplicationClientCertificate(applicationId, UUID);
+            if (removeFromDB) {
+                return ResponseCode.SUCCESS;
+            } else {
+                log.error("Failed to remove certificate with UUID " + UUID + " from the database for the Application "
+                        + applicationId+ "  No certificate changes will be affected.");
+                return ResponseCode.INTERNAL_SERVER_ERROR;
+            }
+        } catch (CertificateManagementException e) {
+            log.error(
+                    "Error while deleting certificate metadata of the UUID " + UUID + " of the Application " + applicationId,
+                    e);
+            return ResponseCode.INTERNAL_SERVER_ERROR;
+        }
+    }
 }

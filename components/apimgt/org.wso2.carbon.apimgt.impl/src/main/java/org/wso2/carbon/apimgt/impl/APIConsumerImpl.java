@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -80,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -120,6 +122,8 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPISearchResult;
@@ -231,6 +235,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private final Object tagWithAPICacheMutex = new Object();
     protected APIMRegistryService apimRegistryService;
     protected String userNameWithoutChange;
+    private CertificateManager certificateManager;
 
     public APIConsumerImpl() throws APIManagementException {
         super();
@@ -246,6 +251,7 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         recommendationEnvironment = config.getApiRecommendationEnvironment();
+        certificateManager = CertificateManagerImpl.getInstance();
     }
 
     private void readTagCacheConfigs() {
@@ -6268,5 +6274,58 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return hostsWithSchemes;
+    }
+    /**
+     * Retrieve client certificate count for a tenant Domain by tenant ID
+     *
+     */
+    public ClientCertificateDTO getClientCertificate(String UUID, String serialNumber, int applicationId)
+            throws APIManagementException {
+        List<ClientCertificateDTO> clientCertificateDTOS = certificateManager
+                .searchClientCertificatesOfApplication(UUID, null, applicationId);
+        if(clientCertificateDTOS != null && clientCertificateDTOS.size() > 0){
+            return clientCertificateDTOS.get(0);
+        }
+        return null;
+    }
+    public List<ClientCertificateDTO> searchClientCertificates(String UUID, String serialNumber, int applicationId)
+            throws APIManagementException{
+        return certificateManager.searchClientCertificatesOfApplication(UUID, serialNumber,applicationId);
+    }
+    /**
+     * Add client Certificate to the database
+     */
+    public int addClientCertificate(String userName, String UUID, int applicationId, String certificate, String name, String serialNumber, String type) throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        try {
+
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            responseCode = certificateManager.addClientCertificateToStore(applicationId, certificate, UUID, name, serialNumber, type, tenantId);
+
+        }
+        catch(UserStoreException e){
+            handleException("Error while reading tenant information, client certificate addition failed for the Application "
+                    + applicationId, e);
+        }
+        catch(NullPointerException e){
+            log.error("Null pointer exception occurred while trying to add certificate " + name);
+        }
+
+        return responseCode.getResponseCode();
+
+    }
+    @Override
+    public int deleteClientCertificate(String userName, int applicationId, String UUID){
+
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        responseCode = certificateManager.deleteApplicationClientCertificate(applicationId, UUID);
+
+        if(responseCode == ResponseCode.SUCCESS){
+            log.info("Certificate with UUID " + UUID + " successfully deleted from database");
+        }
+
+        return responseCode.getResponseCode();
     }
 }
