@@ -135,7 +135,7 @@ const AppConfiguration = (props) => {
                                 </MenuItem>
                             ))}
                         </TextField>
-                    ) : (config.type === 'select' && config.multiple === true) ? (
+                    ) : (config.type === 'select' && config.multiple === true && Array.isArray(selectedValue)) ? (
                         <>
                             <FormControl variant="outlined" className={classes.formControl} fullWidth>
                                 <InputLabel id="multi-select-label">{config.label}</InputLabel>
@@ -151,9 +151,9 @@ const AppConfiguration = (props) => {
                                     input={<Input id='multi-select-outlined' />}
                                     renderValue={selected => (
                                         <div className={classes.chips}>
-                                            {selected.map(value => (
+                                            {/* {selected.map(value => (
                                                 <Chip key={value} label={value} className={classes.chip} />
-                                            ))}
+                                            ))} */}
                                         </div>
                                     )}
                                     helperText={

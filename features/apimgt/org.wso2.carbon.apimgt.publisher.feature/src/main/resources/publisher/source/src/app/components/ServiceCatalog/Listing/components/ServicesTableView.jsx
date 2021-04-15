@@ -273,7 +273,7 @@ function ServicesTableView(props) {
                     if (tableMeta.rowData) {
                         const dataRow = serviceList[tableMeta.rowIndex];
                         const {
-                            id, serviceKey, name, definitionType, version, serviceUrl,
+                            id, serviceKey, name, definitionType, version, serviceUrl, usage,
                         } = dataRow;
                         return (
                             <>
@@ -285,6 +285,7 @@ function ServicesTableView(props) {
                                         serviceDisplayName={name}
                                         serviceVersion={version}
                                         serviceUrl={serviceUrl}
+                                        usage={usage}
                                     />
                                     <Delete
                                         serviceDisplayName={name}

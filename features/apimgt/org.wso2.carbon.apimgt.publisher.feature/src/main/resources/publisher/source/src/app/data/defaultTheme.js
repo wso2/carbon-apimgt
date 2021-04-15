@@ -162,7 +162,10 @@ export default {
             variant: 'letter', // Default template is `letter`, available templates are 'letter','image'.
         },
         footer: {
-            height: 50, // In pixels
+            height: 35, // In pixels
+            background: '#e6e6e6', // MUI grey[100]
+            text: '', // If empty will show default header text
+            color: 'gray',
         },
         globalNavBar: {
             active: '#46a3ca',
@@ -257,6 +260,9 @@ export default {
                     active: '',
                     completed: '',
                 },
+            },
+            listing: {
+                deleteButtonColor: 'none',
             },
         },
         serviceCatalog: {

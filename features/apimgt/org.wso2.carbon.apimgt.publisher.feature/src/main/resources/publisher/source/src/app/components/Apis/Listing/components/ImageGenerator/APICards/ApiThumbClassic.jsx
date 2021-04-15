@@ -23,6 +23,7 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
+import { isRestricted } from 'AppData/AuthManager';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 import { FormattedMessage, injectIntl } from 'react-intl';
@@ -293,13 +294,17 @@ class APIThumb extends Component {
                             color='primary'
                         />
                     )}
-                    <DeleteApiButton
-                        setLoading={this.setLoading}
-                        api={api}
-                        updateData={updateData}
-                        isAPIProduct={isAPIProduct}
-                    />
-                    {loading && <CircularProgress className={classes.deleteProgress} />}
+                    {!isRestricted(['apim:api_create'], api) && (
+                        <>
+                            <DeleteApiButton
+                                setLoading={this.setLoading}
+                                api={api}
+                                updateData={updateData}
+                                isAPIProduct={isAPIProduct}
+                            />
+                            {loading && <CircularProgress className={classes.deleteProgress} />}
+                        </>
+                    )}
                 </CardActions>
             </Card>
         );

@@ -15,8 +15,6 @@
  */
 package org.wso2.carbon.apimgt.gateway.internal;
 
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -63,7 +61,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 import java.io.File;
-import java.io.IOException;
 
 @Component(
         name = "org.wso2.carbon.apimgt.handlers",
@@ -88,41 +85,35 @@ public class APIHandlerServiceComponent {
         // Set private key
         ServiceReferenceHolder.getInstance().setPrivateKey();
 
-        try {
-            ConfigurationContext ctx =
-                    ConfigurationContextFactory.createConfigurationContextFromFileSystem(getClientRepoLocation(),
-                            getAxis2ClientXmlLocation());
-            ServiceReferenceHolder.getInstance().setAxis2ConfigurationContext(ctx);
-            clientPool = APIKeyValidatorClientPool.getInstance();
-            APIManagerConfiguration apiManagerConfiguration =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-            String gatewayType = apiManagerConfiguration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+        clientPool = APIKeyValidatorClientPool.getInstance();
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        boolean retrieveFromStorageEnabled =
+                apiManagerConfiguration.getGatewayArtifactSynchronizerProperties().isRetrieveFromStorageEnabled();
+        if (retrieveFromStorageEnabled) {
             GatewayStartupListener gatewayStartupListener = new GatewayStartupListener();
             bundleContext.registerService(ServerStartupObserver.class.getName(), gatewayStartupListener, null);
             bundleContext.registerService(ServerShutdownHandler.class, gatewayStartupListener, null);
             bundleContext.registerService(Axis2ConfigurationContextObserver.class, gatewayStartupListener, null);
-            if ("Synapse".equalsIgnoreCase(gatewayType)) {
-                // Register Tenant service creator to deploy tenant specific common synapse configurations
-                TenantServiceCreator listener = new TenantServiceCreator();
-                bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
-                bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
+            // Register Tenant service creator to deploy tenant specific common synapse configurations
+            TenantServiceCreator listener = new TenantServiceCreator();
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
+            bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
 
-                // Set APIM Gateway JWT Generator
+            // Set APIM Gateway JWT Generator
 
-                registration =
-                        context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
-                                new APIMgtGatewayJWTGeneratorImpl(), null);
-                registration =
-                        context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
-                                new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
-                // Start JWT revoked map cleaner.
-                RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
-                revokedJWTMapCleaner.startJWTRevokedMapCleaner();
-                ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
-                        .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
-            }
-        } catch (IOException e) {
-            log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
+            registration =
+                    context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
+                            new APIMgtGatewayJWTGeneratorImpl(), null);
+            registration =
+                    context.getBundleContext().registerService(AbstractAPIMgtGatewayJWTGenerator.class.getName(),
+                            new APIMgtGatewayUrlSafeJWTGeneratorImpl(), null);
+            // Start JWT revoked map cleaner.
+            RevokedJWTMapCleaner revokedJWTMapCleaner = new RevokedJWTMapCleaner();
+            revokedJWTMapCleaner.startJWTRevokedMapCleaner();
+            ServiceReferenceHolder.getInstance().setTracer(ServiceReferenceHolder.getInstance().getTracingService()
+                    .buildTracer(APIMgtGatewayConstants.SERVICE_NAME));
+            initializeRedisCache();
         }
         // Create caches for the super tenant
         ServerConfiguration.getInstance().overrideConfigurationProperty("Cache.ForceLocalCache", "true");
@@ -140,7 +131,6 @@ public class APIHandlerServiceComponent {
         CacheProvider.createGatewayInternalKeyCache();
         CacheProvider.createGatewayInternalKeyDataCache();
         CacheProvider.createInvalidInternalKeyCache();
-        initializeRedisCache();
     }
 
     @Deactivate
@@ -272,20 +262,6 @@ public class APIHandlerServiceComponent {
     protected String getFilePath() {
 
         return CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
-    }
-
-    protected String getAxis2ClientXmlLocation() {
-
-        String axis2ClientXml =
-                ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".clientAxis2XmlLocation");
-        return axis2ClientXml;
-    }
-
-    protected String getClientRepoLocation() {
-
-        String axis2ClientXml =
-                ServerConfiguration.getInstance().getFirstProperty("Axis2Config" + ".ClientRepositoryLocation");
-        return axis2ClientXml;
     }
 
     @Reference(

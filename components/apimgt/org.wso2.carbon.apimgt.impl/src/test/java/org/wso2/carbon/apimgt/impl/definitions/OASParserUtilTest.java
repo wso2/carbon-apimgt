@@ -356,7 +356,7 @@ public class OASParserUtilTest {
                 prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
         securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
@@ -367,7 +367,7 @@ public class OASParserUtilTest {
                 sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
         securityConfig = sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
@@ -379,7 +379,7 @@ public class OASParserUtilTest {
                 prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
         securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST,
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase(),
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
@@ -395,7 +395,7 @@ public class OASParserUtilTest {
         Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
         securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
@@ -405,7 +405,7 @@ public class OASParserUtilTest {
         Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
         securityConfig = sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
@@ -422,7 +422,7 @@ public class OASParserUtilTest {
                 prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
         securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
@@ -433,7 +433,7 @@ public class OASParserUtilTest {
                 sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
         securityConfig = sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
+        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
                 securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
         Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
     }

@@ -386,6 +386,9 @@ public class APIMgtDAOTest {
     }
     @Test
     public void testKeyForwardCompatibility() throws Exception {
+        List<API> oldApiVersionList = new ArrayList<>();
+        API apiOld = new API(new APIIdentifier("SUMEDHA", "API1", "V1.0.0"));
+        oldApiVersionList.add(apiOld);
 
         API api = new API(new APIIdentifier("SUMEDHA", "API1", "V2.0.0"));
         api.setContext("/context1");
@@ -393,11 +396,13 @@ public class APIMgtDAOTest {
         api.setUUID(UUID.randomUUID().toString());
         api.getId().setId(apiMgtDAO.addAPI(api, -1234));
         ApiTypeWrapper apiTypeWrapper = new ApiTypeWrapper(api);
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, "V1.0.0");
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper, oldApiVersionList);
     }
 
     @Test
     public void testForwardingBlockedAndProdOnlyBlockedSubscriptionsToNewAPIVersion() throws APIManagementException {
+        List<API> oldApiVersionList = new ArrayList<>();
+
         Subscriber subscriber = new Subscriber("new_sub_user1");
         subscriber.setEmail("newuser1@wso2.com");
         subscriber.setSubscribedDate(new Date());
@@ -421,15 +426,18 @@ public class APIMgtDAOTest {
                 apiTypeWrapper, application, APIConstants.SubscriptionStatus.UNBLOCKED, "sub_user1");
         apiMgtDAO.updateSubscriptionStatus(subscriptionId, APIConstants.SubscriptionStatus.BLOCKED);
 
+
         // Add the second version of the API
         APIIdentifier apiId2 = new APIIdentifier("subForwardProvider", "SubForwardTestAPI", "V2.0.0");
         API api2 = new API(apiId2);
         api2.setContext("/context1");
         api2.setContextTemplate("/context1/{version}");
         api2.getId().setId(apiMgtDAO.addAPI(api2, MultitenantConstants.SUPER_TENANT_ID));
-        ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
+        // once API v2.0.0 is added, v1.0.0 becomes an older version hence add it to oldApiVersionList
+        oldApiVersionList.add(api);
 
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, apiId1.getVersion());
+        ApiTypeWrapper apiTypeWrapper2 = new ApiTypeWrapper(api2);
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper2, oldApiVersionList);
 
         List<SubscribedAPI> subscriptionsOfAPI2 =
                 apiMgtDAO.getSubscriptionsOfAPI(apiId2.getApiName(), "V2.0.0", apiId2.getProviderName());
@@ -446,9 +454,12 @@ public class APIMgtDAOTest {
         api3.setContext("/context1");
         api3.setContextTemplate("/context1/{version}");
         api3.getId().setId(apiMgtDAO.addAPI(api3, MultitenantConstants.SUPER_TENANT_ID));
+        // Once API v2.0.0 is added, v2.0.0 becomes an older version hence add it to oldApiVersionList
+        // This needs to be sorted as latest API last.
+        oldApiVersionList.add(api2);
         ApiTypeWrapper apiTypeWrapper3 = new ApiTypeWrapper(api3);
 
-        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, apiId2.getVersion());
+        apiMgtDAO.makeKeysForwardCompatible(apiTypeWrapper3, oldApiVersionList);
 
         List<SubscribedAPI> subscriptionsOfAPI3 =
                 apiMgtDAO.getSubscriptionsOfAPI(apiId1.getApiName(), "V3.0.0", apiId1.getProviderName());

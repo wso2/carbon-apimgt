@@ -1537,12 +1537,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             String username = RestApiCommonUtil.getLoggedInUsername();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifier == null) {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                        apiId));
-            }
+            //validate if api exists
+            APIInfo apiInfo = validateAPIExistence(apiId);
+            //validate API update operation permitted based on the LC state
+            validateAPIOperationsPerLC(apiInfo.getStatus().toString());
+
             API api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             //check if the API has subscriptions
             //Todo : need to optimize this check. This method seems too costly to check if subscription exists
@@ -1556,15 +1555,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             if (!usedProductResources.isEmpty()) {
                 RestApiUtil.handleConflict("Cannot remove the API because following resource paths " +
                         usedProductResources.toString() + " are used by one or more API Products", log);
-            }
-
-            // check user has publisher role and API is in published or deprecated state
-            String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
-                    .get(RestApiConstants.USER_REST_API_SCOPES);
-            if (!ArrayUtils.contains(tokenScopes, RestApiConstants.PUBLISHER_SCOPE) && (
-                    APIConstants.PUBLISHED.equalsIgnoreCase(api.getStatus()) || APIConstants.DEPRECATED
-                            .equalsIgnoreCase(api.getStatus()))) {
-                RestApiUtil.handleAuthorizationFailure(username + " cannot remove the API", log);
             }
 
             //deletes the API

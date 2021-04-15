@@ -30,11 +30,6 @@ import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
 import { FormattedMessage } from 'react-intl';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import CONSTS from 'AppData/Constants';
@@ -46,7 +41,7 @@ import { isRestricted } from 'AppData/AuthManager';
 import API from 'AppData/api.js';
 import APIProduct from 'AppData/APIProduct';
 import DefaultVersion from './components/DefaultVersion';
-import MarkdownEditor from './components/MarkdownEditor';
+import DescriptionEditor from './components/DescriptionEditor';
 import AccessControl from './components/AccessControl';
 import StoreVisibility from './components/StoreVisibility';
 import Tags from './components/Tags';
@@ -353,7 +348,10 @@ export default function DesignConfigurations() {
         }
         setIsUpdating(false);
     }
-
+    const isDisabled = isUpdating || api.isRevision || invalidTagsExist
+    || isRestricted(['apim:api_create'], api)
+    || (apiConfig.visibility === 'RESTRICTED'
+        && apiConfig.visibleRoles.length === 0);
     return (
         <>
             <Container maxWidth='md'>
@@ -401,30 +399,12 @@ export default function DesignConfigurations() {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} md={10}>
-                                                <FormControl component='fieldset'>
-                                                    <FormLabel component='legend'>Description Type</FormLabel>
-                                                    <RadioGroup
-                                                        row
-                                                        aria-label='description-type'
-                                                        value={descriptionType}
-                                                        onChange={handleChange}
-                                                    >
-                                                        <FormControlLabel
-                                                            value={CONSTS.DESCRIPTION_TYPES.DESCRIPTION}
-                                                            control={<Radio />}
-                                                            label='Description'
-                                                        />
-                                                        <FormControlLabel
-                                                            value={CONSTS.DESCRIPTION_TYPES.OVERVIEW}
-                                                            control={<Radio />}
-                                                            label='Overview'
-                                                        />
-                                                    </RadioGroup>
-                                                </FormControl>
-                                                <MarkdownEditor
+                                                <DescriptionEditor
                                                     api={apiConfig}
+                                                    disabled={isDisabled}
                                                     updateContent={updateContent}
                                                     descriptionType={descriptionType}
+                                                    handleChange={handleChange}
                                                     overview={overview}
                                                 />
                                             </Grid>
@@ -456,11 +436,7 @@ export default function DesignConfigurations() {
                                     </Box>
                                     <Box pt={2}>
                                         <Button
-                                            disabled={
-                                                isUpdating || api.isRevision || invalidTagsExist
-                                                || (apiConfig.visibility === 'RESTRICTED'
-                                                    && apiConfig.visibleRoles.length === 0)
-                                            }
+                                            disabled={isDisabled}
                                             type='submit'
                                             variant='contained'
                                             color='primary'

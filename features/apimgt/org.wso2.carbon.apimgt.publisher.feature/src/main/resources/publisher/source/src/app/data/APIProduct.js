@@ -33,7 +33,6 @@ class APIProduct extends Resource {
             this.version = '1.0.0';
             this.context = context;
             this.isDefaultVersion = false;
-            this.gatewayEnvironments = ['Default'];
             this.transport = ['http', 'https'];
             this.visibility = 'PUBLIC';
             this.endpointConfig = {

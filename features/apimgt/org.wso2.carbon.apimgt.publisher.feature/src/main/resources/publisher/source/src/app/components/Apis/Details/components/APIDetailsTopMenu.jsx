@@ -25,6 +25,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import { isRestricted } from 'AppData/AuthManager';
 import { withStyles } from '@material-ui/core/styles';
 import { Link, useHistory } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -39,7 +40,6 @@ import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
 import MUIAlert from 'AppComponents/Shared/MuiAlert';
-import PublicIcon from '@material-ui/icons/Public';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
@@ -263,7 +263,6 @@ const APIDetailsTopMenu = (props) => {
                             component={Link}
                             to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/' + lastIndex}
                         >
-                            <PublicIcon style={{ fontSize: 15 }} />
                             <FormattedMessage
                                 id='Apis.Details.components.APIDetailsTopMenu.current.api'
                                 defaultMessage='Current API'
@@ -381,9 +380,9 @@ const APIDetailsTopMenu = (props) => {
                     </a>
                 )}
             </div>
-            {!api.isRevision
-                ? (<DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />)
-                : (<div className={classes.revisionWrapper} />)}
+            {api.isRevision || isRestricted(['apim:api_create'], api)
+                ? (<div className={classes.revisionWrapper} />)
+                : (<DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />)}
         </div>
     );
 };

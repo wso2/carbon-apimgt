@@ -322,7 +322,7 @@ class Comments extends Component {
                         )}
                     >
                         {!isOverview && (<div className={classes.root}>
-                            <Typography variant='h4' className={classes.titleSub}>
+                            <Typography variant='h4' component='h2' className={classes.titleSub}>
                                 {totalComments + (' ')}
                                 <FormattedMessage id='Apis.Details.Comments.title' defaultMessage='Comments' />
                             </Typography>

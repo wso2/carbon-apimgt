@@ -20,6 +20,7 @@ import Switch from '@material-ui/core/Switch';
 import React, { useState, useEffect } from 'react';
 import API from 'AppData/api';
 import base64url from 'base64url';
+import { isRestricted } from 'AppData/AuthManager';
 import APIProduct from 'AppData/APIProduct';
 
 /**
@@ -63,7 +64,7 @@ export default function DisplayDevportal(props) {
         <Switch
             checked={check}
             onChange={handleDisplayOnDevPortal}
-            disabled={api.isRevision}
+            disabled={api.isRevision || isRestricted(['apim:api_create'], api)}
             name={name}
         />
     );
