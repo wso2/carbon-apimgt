@@ -967,20 +967,20 @@ class Details extends Component {
                         )}
                         {api.advertiseInfo && !api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
                             && !api.advertiseInfo.advertised && (
-                                <div>
-                                    <Divider />
-                                    <Typography className={classes.headingText}>Test</Typography>
-                                    <LeftMenuItem
-                                        route='test-console'
-                                        text={intl.formatMessage({
-                                            id: 'Apis.Details.index.Tryout.menu.name',
-                                            defaultMessage: 'Try Out',
-                                        })}
-                                        to={pathPrefix + 'test-console'}
-                                        iconText='test'
-                                    />
-                                </div>
-                            )}
+                            <div>
+                                <Divider />
+                                <Typography className={classes.headingText}>Test</Typography>
+                                <LeftMenuItem
+                                    route='test-console'
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.Tryout.menu.name',
+                                        defaultMessage: 'Try Out',
+                                    })}
+                                    to={pathPrefix + 'test-console'}
+                                    iconText='test'
+                                />
+                            </div>
+                        )}
                         {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
                             <div>
                                 <Divider />
