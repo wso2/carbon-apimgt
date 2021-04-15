@@ -4097,12 +4097,6 @@
       "value": "Endpoint provided"
     }
   ],
-  "Apis.Details.LifeCycle.CheckboxLabels.gateway.environments.selected": [
-    {
-      "type": 0,
-      "value": "Gateway Environment(s) selected"
-    }
-  ],
   "Apis.Details.LifeCycle.LifeCycle.change.not.allowed": [
     {
       "type": 0,
@@ -5027,10 +5021,22 @@
       "value": "Name"
     }
   ],
+  "Apis.Details.Properties.Properties.\n                                property.name.exists": [
+    {
+      "type": 0,
+      "value": "Property name already exists"
+    }
+  ],
   "Apis.Details.Properties.Properties.\n                                show.add.property.invalid.error": [
     {
       "type": 0,
       "value": "Invalid property name"
+    }
+  ],
+  "Apis.Details.Properties.Properties.\n                            property.name.exists": [
+    {
+      "type": 0,
+      "value": "Property name already exists"
     }
   ],
   "Apis.Details.Properties.Properties.\n                    no.changes.to.save": [
@@ -5043,12 +5049,6 @@
     {
       "type": 0,
       "value": "Property name/value can not be empty"
-    }
-  ],
-  "Apis.Details.Properties.Properties.\n                    property.name.exists": [
-    {
-      "type": 0,
-      "value": "Property name already exists"
     }
   ],
   "Apis.Details.Properties.Properties.\n                    property.name.keyword.error": [
@@ -7088,13 +7088,19 @@
   "Apis.Listing.components.TopMenu.apiproduct.singular": [
     {
       "type": 0,
-      "value": "API Product"
+      "value": "API product"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproducts": [
     {
       "type": 0,
       "value": "API Products"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.apiproducts.results": [
+    {
+      "type": 0,
+      "value": "API products"
     }
   ],
   "Apis.Listing.components.TopMenu.apis": [
@@ -7124,13 +7130,19 @@
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
-      "value": "Search Results"
+      "value": "Search results"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results.singular": [
     {
       "type": 0,
-      "value": "Search Result"
+      "value": "Search result"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.unified.search": [
+    {
+      "type": 0,
+      "value": "Unified search"
     }
   ],
   "Apis.Listing.import.from.service.catalog.title": [
