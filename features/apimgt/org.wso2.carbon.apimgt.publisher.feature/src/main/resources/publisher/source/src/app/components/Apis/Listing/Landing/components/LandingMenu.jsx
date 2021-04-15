@@ -8,7 +8,10 @@ import Fade from '@material-ui/core/Fade';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
+    root: {
+        minWidth: theme.spacing(32),
+    },
     boxTransition: {
         transition: 'box-shadow 0.9s cubic-bezier(.25,.8,.25,1)',
         cursor: 'pointer',
@@ -23,7 +26,7 @@ const useStyles = makeStyles({
     overlayCloseButton: {
         float: 'right',
     },
-});
+}));
 
 const LandingMenu = (props) => {
     const {
@@ -32,7 +35,9 @@ const LandingMenu = (props) => {
     const [isHover, setIsHover] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isFadeOut, setIsFadeOut] = useState(true);
-    const { boxTransition, overlayBox, overlayCloseButton } = useStyles();
+    const {
+        boxTransition, overlayBox, overlayCloseButton, root,
+    } = useStyles();
     const onMouseOver = () => {
         setIsHover(true);
     };
@@ -42,6 +47,7 @@ const LandingMenu = (props) => {
 
     return (
         <Grid
+            className={root}
             item
             xs={12}
             sm={5}

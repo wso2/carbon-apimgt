@@ -36,6 +36,7 @@ function Listing(props) {
     const {
         classes, isAPIProduct, theme, location: { search },
     } = props;
+    // TODO: need to handle this search case separately ~tmkb
     return (
         <main className={classes.content}>
             <TableView isAPIProduct={isAPIProduct} theme={theme} query={search} />
