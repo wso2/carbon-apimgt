@@ -27,23 +27,14 @@ import List from '@material-ui/icons/List';
 import GridOn from '@material-ui/icons/GridOn';
 import { withStyles } from '@material-ui/core/styles';
 import { FormattedMessage } from 'react-intl';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 import APICreateMenu from './APICreateMenu';
 
 const styles = (theme) => ({
-    rightIcon: {
-        marginLeft: theme.spacing(1),
-    },
     button: {
         margin: theme.spacing(1),
         marginBottom: 0,
-    },
-    buttonRight: {
-        display: 'flex',
-    },
-    ListingWrapper: {
-        paddingTop: 10,
-        paddingLeft: 35,
     },
     root: {
         height: 70,
@@ -61,13 +52,6 @@ const styles = (theme) => ({
         flexGrow: 1,
         display: 'flex',
         alignItems: 'center',
-    },
-    content: {
-        flexGrow: 1,
-    },
-    createButton: {
-        color: '#000000',
-        background: '#15b8cf',
     },
 });
 
@@ -188,22 +172,16 @@ function TopMenu(props) {
                     )}
                 </div>
                 {showToggle && (
-                    <div className={classes.buttonRight}>
-                        <IconButton
-                            className={classes.button}
-                            disabled={data.length === 0}
-                            onClick={() => setListType('list')}
-                        >
-                            <List color={listType === 'list' ? 'primary' : 'default'} />
-                        </IconButton>
-                        <IconButton
-                            className={classes.button}
-                            disabled={data.length === 0}
-                            onClick={() => setListType('grid')}
-                        >
-                            <GridOn color={listType === 'grid' ? 'primary' : 'default'} />
-                        </IconButton>
-                    </div>
+                    <Box height={32} m='auto'>
+                        <ButtonGroup color='primary' aria-label='outlined primary button group'>
+                            <IconButton onClick={() => setListType('list')} aria-label='list'>
+                                <GridOn color={listType === 'list' ? 'primary' : 'disabled'} />
+                            </IconButton>
+                            <IconButton onClick={() => setListType('grid')} aria-label='grid'>
+                                <List color={listType === 'grid' ? 'primary' : 'disabled'} />
+                            </IconButton>
+                        </ButtonGroup>
+                    </Box>
                 )}
             </div>
         );

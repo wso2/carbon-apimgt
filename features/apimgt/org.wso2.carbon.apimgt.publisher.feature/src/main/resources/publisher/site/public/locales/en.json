@@ -1795,6 +1795,24 @@
       "value": "Press `Enter` after typing the origin name,to add a new origin"
     }
   ],
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.content.button": [
+    {
+      "type": 0,
+      "value": "Edit description"
+    }
+  ],
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.description.of": [
+    {
+      "type": 0,
+      "value": "Description :"
+    }
+  ],
+  "Apis.Details.Configuration.components.DescriptionEditor.update.cont.button": [
+    {
+      "type": 0,
+      "value": "Update Content"
+    }
+  ],
   "Apis.Details.Configuration.components.Endpoints.dynamic": [
     {
       "type": 0,
@@ -1865,42 +1883,6 @@
     {
       "type": 0,
       "value": "Select one or more Key Managers"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.add.content.button": [
-    {
-      "type": 0,
-      "value": "Add Content"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.cancel.button": [
-    {
-      "type": 0,
-      "value": "Cancel"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.content.button": [
-    {
-      "type": 0,
-      "value": "Edit Content"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.of": [
-    {
-      "type": 0,
-      "value": "Edit Description of"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of": [
-    {
-      "type": 0,
-      "value": "Edit Overview of"
-    }
-  ],
-  "Apis.Details.Configuration.components.MarkdownEditor.update.content.button": [
-    {
-      "type": 0,
-      "value": "Update Content"
     }
   ],
   "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": [
@@ -7088,13 +7070,19 @@
   "Apis.Listing.components.TopMenu.apiproduct.singular": [
     {
       "type": 0,
-      "value": "API Product"
+      "value": "API product"
     }
   ],
   "Apis.Listing.components.TopMenu.apiproducts": [
     {
       "type": 0,
       "value": "API Products"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.apiproducts.results": [
+    {
+      "type": 0,
+      "value": "API products"
     }
   ],
   "Apis.Listing.components.TopMenu.apis": [
@@ -7124,13 +7112,19 @@
   "Apis.Listing.components.TopMenu.search.results": [
     {
       "type": 0,
-      "value": "Search Results"
+      "value": "Search results"
     }
   ],
   "Apis.Listing.components.TopMenu.search.results.singular": [
     {
       "type": 0,
-      "value": "Search Result"
+      "value": "Search result"
+    }
+  ],
+  "Apis.Listing.components.TopMenu.unified.search": [
+    {
+      "type": 0,
+      "value": "Unified search"
     }
   ],
   "Apis.Listing.import.from.service.catalog.title": [

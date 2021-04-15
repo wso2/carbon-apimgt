@@ -798,6 +798,15 @@
   "Apis.Details.Configuration.components.CORSConfigurations.origin.helper": {
     "defaultMessage": "Press `Enter` after typing the origin name,to add a new origin"
   },
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.content.button": {
+    "defaultMessage": "Edit description"
+  },
+  "Apis.Details.Configuration.components.DescriptionEditor.edit.description.of": {
+    "defaultMessage": "Description :"
+  },
+  "Apis.Details.Configuration.components.DescriptionEditor.update.cont.button": {
+    "defaultMessage": "Update Content"
+  },
   "Apis.Details.Configuration.components.Endpoints.dynamic": {
     "defaultMessage": "Dynamic"
   },
@@ -833,24 +842,6 @@
   },
   "Apis.Details.Configuration.components.KeyManager.more.than.one.info": {
     "defaultMessage": "Select one or more Key Managers"
-  },
-  "Apis.Details.Configuration.components.MarkdownEditor.add.content.button": {
-    "defaultMessage": "Add Content"
-  },
-  "Apis.Details.Configuration.components.MarkdownEditor.cancel.button": {
-    "defaultMessage": "Cancel"
-  },
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.content.button": {
-    "defaultMessage": "Edit Content"
-  },
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.description.of": {
-    "defaultMessage": "Edit Description of"
-  },
-  "Apis.Details.Configuration.components.MarkdownEditor.edit.overview.of": {
-    "defaultMessage": "Edit Overview of"
-  },
-  "Apis.Details.Configuration.components.MarkdownEditor.update.content.button": {
-    "defaultMessage": "Update Content"
   },
   "Apis.Details.Configuration.components.MaxBackendTps.formattedMessage": {
     "defaultMessage": "Maximum backend transactions per second in integers"
@@ -3373,10 +3364,13 @@
     "defaultMessage": "API"
   },
   "Apis.Listing.components.TopMenu.apiproduct.singular": {
-    "defaultMessage": "API Product"
+    "defaultMessage": "API product"
   },
   "Apis.Listing.components.TopMenu.apiproducts": {
     "defaultMessage": "API Products"
+  },
+  "Apis.Listing.components.TopMenu.apiproducts.results": {
+    "defaultMessage": "API products"
   },
   "Apis.Listing.components.TopMenu.apis": {
     "defaultMessage": "APIs"
@@ -3391,10 +3385,13 @@
     "defaultMessage": "Total:"
   },
   "Apis.Listing.components.TopMenu.search.results": {
-    "defaultMessage": "Search Results"
+    "defaultMessage": "Search results"
   },
   "Apis.Listing.components.TopMenu.search.results.singular": {
-    "defaultMessage": "Search Result"
+    "defaultMessage": "Search result"
+  },
+  "Apis.Listing.components.TopMenu.unified.search": {
+    "defaultMessage": "Unified search"
   },
   "Apis.Listing.import.from.service.catalog.title": {
     "defaultMessage": "Import From Service Catalog"

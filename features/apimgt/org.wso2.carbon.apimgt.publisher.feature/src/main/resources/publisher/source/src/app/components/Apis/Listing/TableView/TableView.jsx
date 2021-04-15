@@ -135,7 +135,7 @@ class TableView extends React.Component {
     }
 
     getMuiTheme = () => {
-        const { listType } = this.state;
+        const { listType, totalCount } = this.state;
         const { theme } = this.props;
         let themeAdditions = {};
         let muiTheme = {
@@ -179,7 +179,7 @@ class TableView extends React.Component {
                     },
                     MuiTableBody: {
                         root: {
-                            justifyContent: 'center',
+                            justifyContent: totalCount > 4 ? 'center' : 'flex-start',
                         },
                     },
                 },
@@ -272,10 +272,11 @@ class TableView extends React.Component {
      */
     updateData() {
         const { rowsPerPage, page, totalCount } = this.state;
+        let newPage = page;
         if (totalCount - 1 === rowsPerPage * page && page !== 0) {
-            this.setState({ page: page - 1 });
+            newPage = page - 1;
         }
-        this.getData();
+        this.getData(rowsPerPage, newPage);
     }
 
     /**
@@ -419,10 +420,10 @@ class TableView extends React.Component {
                         return <DocThumb doc={artifact} />;
                     } else if (artifact.type === 'APIPRODUCT') {
                         artifact.state = 'PUBLISHED';
-                        return <ApiThumb api={artifact} isAPIProduct updateData={tableViewObj.updateData} />;
+                        return <ApiThumb api={artifact} isAPIProduct updateData={this.updateData} />;
                     } else {
                         return (
-                            <ApiThumb api={artifact} isAPIProduct={isAPIProduct} updateData={tableViewObj.updateData} />
+                            <ApiThumb api={artifact} isAPIProduct={isAPIProduct} updateData={this.updateData} />
                         );
                     }
                 }
