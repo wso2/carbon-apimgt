@@ -25,6 +25,7 @@ import Alert from 'AppComponents/Shared/Alert';
 import { FormattedMessage, injectIntl } from 'react-intl';
 import LaunchIcon from '@material-ui/icons/Launch';
 import CloudDownloadRounded from '@material-ui/icons/CloudDownloadRounded';
+import { isRestricted } from 'AppData/AuthManager';
 import { withStyles } from '@material-ui/core/styles';
 import { Link, useHistory } from 'react-router-dom';
 import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
@@ -381,9 +382,9 @@ const APIDetailsTopMenu = (props) => {
                     </a>
                 )}
             </div>
-            {!api.isRevision
-                ? (<DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />)
-                : (<div className={classes.revisionWrapper} />)}
+            {api.isRevision || isRestricted(['apim:api_create'], api)
+                ? (<div className={classes.revisionWrapper} />)
+                : (<DeleteApiButton buttonClass={classes.viewInStoreLauncher} api={api} isAPIProduct={isAPIProduct} />)}
         </div>
     );
 };
