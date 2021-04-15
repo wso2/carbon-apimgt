@@ -137,7 +137,7 @@ function EndpointOverview(props) {
         updateSwagger,
         saveAndRedirect,
     } = props;
-    const { endpointConfig, endpointSecurity } = api;
+    const { endpointConfig } = api;
     const [endpointType, setEndpointType] = useState(endpointTypes[0]);
     const [supportedEnpointTypes, setSupportedEndpointType] = useState([]);
 
@@ -160,7 +160,7 @@ function EndpointOverview(props) {
     const [typeChangeConfirmation, setTypeChangeConfirmation] = useState({ openDialog: false });
 
     const handleToggleEndpointSecurity = () => {
-        const tmpSecurityInfo = endpointSecurityInfo === null ? {
+        const tmpSecurityInfo = !endpointSecurityInfo ? {
             production: {
                 enabled: false,
                 type: null,
@@ -275,11 +275,7 @@ function EndpointOverview(props) {
         setSupportedEndpointType(supportedTypeLists);
         setEpConfig(endpointConfig);
         setEndpointType(epType);
-        if (endpointConfig.endpoint_security) {
-            setEndpointSecurityInfo(endpointConfig.endpoint_security);
-        } else {
-            setEndpointSecurityInfo(endpointSecurity);
-        }
+        setEndpointSecurityInfo(endpointConfig.endpoint_security);
     }, [props]);
 
 
