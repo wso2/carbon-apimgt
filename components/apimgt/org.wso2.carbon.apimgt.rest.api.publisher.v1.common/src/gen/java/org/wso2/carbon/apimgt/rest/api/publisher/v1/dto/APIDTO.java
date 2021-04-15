@@ -139,7 +139,7 @@ return null;
 return null;
         }
     }
-    @Scope(name = "{apim:api_publishAPI&#x3D;null}", description="", value ="")
+    @Scope(name = "{apim:api_publish&#x3D;null}", description="", value ="")
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
     @Scope(name = "apim:api_publish", description="", value ="")
     private List<String> visibleRoles = new ArrayList<String>();
