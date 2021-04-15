@@ -1394,14 +1394,15 @@ public class SQLConstants {
             "   SUB.TIER_ID AS TIER_ID," +
             "   SUB.APPLICATION_ID AS APPLICATION_ID," +
             "   SUB.SUB_STATUS AS SUB_STATUS," +
-            "   API.CONTEXT AS CONTEXT" +
+            "   API.CONTEXT AS CONTEXT," +
+            "   API.API_VERSION AS VERSION" +
             " FROM" +
             "   AM_SUBSCRIPTION SUB," +
             "   AM_API API " +
             " WHERE" +
             "   API.API_PROVIDER = ?" +
             "   AND API.API_NAME = ?" +
-            "   AND API.API_VERSION = ?" +
+            "   AND API.API_VERSION IN (_API_VERSION_LIST_)" +
             "   AND API.API_ID = SUB.API_ID";
 
     public static final String GET_APPLICATION_DATA_SQL =
