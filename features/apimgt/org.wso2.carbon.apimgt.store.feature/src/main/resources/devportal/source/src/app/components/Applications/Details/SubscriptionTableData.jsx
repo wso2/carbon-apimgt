@@ -224,10 +224,14 @@ class SubscriptionTableData extends React.Component {
             },
         } = this.props;
         const {
-            openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier,
+            openMenu, isMonetizedAPI, isDynamicUsagePolicy, openMenuEdit, selectedTier, tiers,
         } = this.state;
         let link = (
-            <Link to={'/apis/' + apiId} external>
+            <Link
+                to={tiers.length === 0 ? '' : '/apis/' + apiId}
+                style={{ cursor: tiers.length === 0 ? 'default' : '' }}
+                external
+            >
                 {apiInfo.name + ' - ' + apiInfo.version + ' '}
                 <MDIcon path={mdiOpenInNew} size='12px' />
             </Link>
@@ -235,7 +239,8 @@ class SubscriptionTableData extends React.Component {
         if (apiInfo.type === 'WEBSUB') {
             link = (
                 <Link
-                    to={'/applications/' + applicationId + '/webhooks/' + apiId}
+                    to={tiers.length === 0 ? '' : '/applications/' + applicationId + '/webhooks/' + apiId}
+                    style={{ cursor: tiers.length === 0 ? 'default' : '' }}
                 >
                     {apiInfo.name + ' - ' + apiInfo.version}
                 </Link>
@@ -254,6 +259,7 @@ class SubscriptionTableData extends React.Component {
                         color='default'
                         onClick={this.handleRequestOpenEditMenu}
                         startIcon={<Icon>edit</Icon>}
+                        disabled={tiers.length === 0}
                     >
                         <FormattedMessage
                             id='Applications.Details.SubscriptionTableData.edit.text'
@@ -382,6 +388,7 @@ class SubscriptionTableData extends React.Component {
                             color='default'
                             onClick={this.handleRequestOpen}
                             startIcon={<Icon>delete</Icon>}
+                            disabled={tiers.length === 0}
                         >
                             <FormattedMessage
                                 id='Applications.Details.SubscriptionTableData.delete.text'
@@ -415,7 +422,13 @@ class SubscriptionTableData extends React.Component {
                             </Button>
                         </DialogActions>
                     </Dialog>
-                    { isMonetizedAPI && <Invoice subscriptionId={subscriptionId} isDynamicUsagePolicy={isDynamicUsagePolicy} /> }
+                    { isMonetizedAPI && (
+                        <Invoice
+                            tiers={tiers}
+                            subscriptionId={subscriptionId}
+                            isDynamicUsagePolicy={isDynamicUsagePolicy}
+                        />
+                    ) }
                 </TableCell>
             </TableRow>
         );
