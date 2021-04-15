@@ -152,6 +152,7 @@ public class RegistryPersistenceUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT, Integer.toString(api.getCacheTimeout()));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL, api.getRedirectURL());
+            artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR, api.getAdvertiseOnlyAPIVendor());
             artifact.setAttribute(APIConstants.API_OVERVIEW_OWNER, api.getApiOwner());
             artifact.setAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY, Boolean.toString(api.isAdvertiseOnly()));
 
@@ -282,6 +283,8 @@ public class RegistryPersistenceUtil {
                                             .contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
             }
+
+
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
             log.error(msg, e);
@@ -671,6 +674,7 @@ public class RegistryPersistenceUtil {
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
+            api.setAdvertiseOnlyAPIVendor(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY_API_VENDOR));
             api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             api.setType(artifact.getAttribute(APIConstants.API_OVERVIEW_TYPE));
@@ -726,7 +730,7 @@ public class RegistryPersistenceUtil {
 
             //set selected clusters which API needs to be deployed
             String deployments = artifact.getAttribute(APIConstants.API_OVERVIEW_DEPLOYMENTS);
-            
+
             if (StringUtils.isNotBlank(monetizationInfo)) {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObj = (JSONObject) parser.parse(monetizationInfo);
@@ -753,7 +757,6 @@ public class RegistryPersistenceUtil {
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             }
-
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -1156,7 +1159,7 @@ public class RegistryPersistenceUtil {
                 org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration.class);
         return websubSubscriptionConfiguration;
     }
-    
+
     /**
      * This method used to extract environment list configured with non empty URLs.
      *

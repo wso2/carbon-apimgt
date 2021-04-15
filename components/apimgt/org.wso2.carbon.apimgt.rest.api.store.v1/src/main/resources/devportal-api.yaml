@@ -5017,6 +5017,12 @@ components:
         apiOwner:
           type: string
           example: admin
+        vendor:
+          type: string
+          default: WSO2
+          enum:
+            - WSO2
+            - AWS
     APICategory:
       title: API Category
       required:

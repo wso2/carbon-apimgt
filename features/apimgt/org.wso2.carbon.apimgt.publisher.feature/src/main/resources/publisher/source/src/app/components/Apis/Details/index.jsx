@@ -780,14 +780,26 @@ class Details extends Component {
                                             to={pathPrefix + 'business info'}
                                             Icon={<BusinessIcon />}
                                         />
-                                        <LeftMenuItem
-                                            text={intl.formatMessage({
-                                                id: 'Apis.Details.index.subscriptions',
-                                                defaultMessage: 'subscriptions',
-                                            })}
-                                            to={pathPrefix + 'subscriptions'}
-                                            Icon={<SubscriptionsIcon />}
-                                        />
+                                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.subscriptions',
+                                                    defaultMessage: 'subscriptions',
+                                                })}
+                                                to={pathPrefix + 'subscriptions'}
+                                                Icon={<SubscriptionsIcon />}
+                                            />
+                                        )}
+                                        {isAPIProduct && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.subscriptions',
+                                                    defaultMessage: 'subscriptions',
+                                                })}
+                                                to={pathPrefix + 'subscriptions'}
+                                                Icon={<SubscriptionsIcon />}
+                                            />
+                                        )}
                                         <LeftMenuItem
                                             text={intl.formatMessage({
                                                 id: 'Apis.Details.index.documents',
@@ -836,7 +848,8 @@ class Details extends Component {
                                 </AccordianSummary>
                                 <AccordionDetails>
                                     <div>
-                                        {!api.isWebSocket() && (
+                                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised
+                                            && !api.isWebSocket() && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.runtime.configs',
@@ -847,7 +860,18 @@ class Details extends Component {
                                                 Icon={<RuntimeConfigurationIcon />}
                                             />
                                         )}
-                                        {api.isWebSocket() && (
+                                        {isAPIProduct && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.runtime.configs',
+                                                    defaultMessage: 'Runtime',
+                                                })}
+                                                route='runtime-configuration'
+                                                to={pathPrefix + 'runtime-configuration'}
+                                                Icon={<RuntimeConfigurationIcon />}
+                                            />
+                                        )}
+                                        {api.advertiseInfo && !api.advertiseInfo.advertised && api.isWebSocket() && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.runtime.configs',
@@ -858,9 +882,12 @@ class Details extends Component {
                                                 Icon={<RuntimeConfigurationIcon />}
                                             />
                                         )}
-                                        {this.getLeftMenuItemForResourcesByType(api.type)}
+                                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised
+                                            && this.getLeftMenuItemForResourcesByType(api.type)}
+                                        {isAPIProduct && this.getLeftMenuItemForResourcesByType(api.type)}
                                         {this.getLeftMenuItemForDefinitionByType(api.type)}
-                                        {!isAPIProduct && api.type !== 'WEBSUB' && (
+                                        {api.advertiseInfo && !api.advertiseInfo.advertised && !isAPIProduct
+                                            && api.type !== 'WEBSUB' && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.endpoints',
@@ -870,7 +897,7 @@ class Details extends Component {
                                                 Icon={<EndpointIcon />}
                                             />
                                         )}
-                                        {!isAPIProduct && (
+                                        {api.advertiseInfo && !api.advertiseInfo.advertised && !isAPIProduct && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.left.menu.scope',
@@ -892,6 +919,22 @@ class Details extends Component {
                                         />
 
                                         {!api.isWebSocket() && !isRestricted(['apim:api_publish'], api) && (
+                                            <>
+                                                {!isAPIProduct && api.advertiseInfo
+                                                    && !api.advertiseInfo.advertised && (
+                                                    <LeftMenuItem
+                                                        text={intl.formatMessage({
+                                                            id: 'Apis.Details.index.monetization',
+                                                            defaultMessage: 'monetization',
+                                                        })}
+                                                        to={pathPrefix + 'monetization'}
+                                                        Icon={<MonetizationIcon />}
+                                                    />
+                                                )}
+                                            </>
+                                        )}
+                                        {isAPIProduct && !api.isWebSocket()
+                                            && !isRestricted(['apim:api_publish'], api) && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
                                                     id: 'Apis.Details.index.monetization',
@@ -906,32 +949,50 @@ class Details extends Component {
                             </Accordion>
                         </div>
                         <Divider />
-                        <Typography className={classes.headingText}>Deploy</Typography>
-                        <LeftMenuItem
-                            text={intl.formatMessage({
-                                id: 'Apis.Details.index.environments',
-                                defaultMessage: 'Deployments',
-                            })}
-                            route='deployments'
-                            to={pathPrefix + 'deployments'}
-                            Icon={<PersonPinCircleOutlinedIcon />}
-                        />
-                        {!api.isWebSocket() && !isAPIProduct && !api.isGraphql() && !isAsyncAPI
-                            && (
-                                <div>
-                                    <Divider />
-                                    <Typography className={classes.headingText}>Test</Typography>
-                                    <LeftMenuItem
-                                        route='test-console'
-                                        text={intl.formatMessage({
-                                            id: 'Apis.Details.index.Tryout.menu.name',
-                                            defaultMessage: 'Try Out',
-                                        })}
-                                        to={pathPrefix + 'test-console'}
-                                        iconText='test'
-                                    />
-                                </div>
-                            )}
+                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised && (
+                            <>
+                                <Typography className={classes.headingText}>Deploy</Typography>
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.environments',
+                                        defaultMessage: 'Deployments',
+                                    })}
+                                    route='deployments'
+                                    to={pathPrefix + 'deployments'}
+                                    Icon={<PersonPinCircleOutlinedIcon />}
+                                />
+                            </>
+                        )}
+                        {isAPIProduct && (
+                            <>
+                                <Typography className={classes.headingText}>Deploy</Typography>
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.environments',
+                                        defaultMessage: 'Deployments',
+                                    })}
+                                    route='deployments'
+                                    to={pathPrefix + 'deployments'}
+                                    Icon={<PersonPinCircleOutlinedIcon />}
+                                />
+                            </>
+                        )}
+                        {!isAPIProduct && api.advertiseInfo && !api.advertiseInfo.advertised && !api.isWebSocket()
+                            && !api.isGraphql() && !isAsyncAPI && (
+                            <div>
+                                <Divider />
+                                <Typography className={classes.headingText}>Test</Typography>
+                                <LeftMenuItem
+                                    route='test-console'
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.Tryout.menu.name',
+                                        defaultMessage: 'Try Out',
+                                    })}
+                                    to={pathPrefix + 'test-console'}
+                                    iconText='test'
+                                />
+                            </div>
+                        )}
                         {!isAPIProduct && !isRestricted(['apim:api_publish'], api) && (
                             <div>
                                 <Divider />

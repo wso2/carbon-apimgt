@@ -71,7 +71,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIAdditionalPropertiesD
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListExpandedDTO;
@@ -211,6 +210,7 @@ public class APIMappingUtil {
             model.setAdvertiseOnly(advertiseInfoDTO.isAdvertised());
             model.setRedirectURL(advertiseInfoDTO.getOriginalDevPortalUrl());
             model.setApiOwner(advertiseInfoDTO.getApiOwner());
+            model.setAdvertiseOnlyAPIVendor(dto.getAdvertiseInfo().getVendor().value());
         }
         if (dto.isResponseCachingEnabled() != null && dto.isResponseCachingEnabled()) {
             model.setResponseCache(APIConstants.ENABLED);
@@ -346,7 +346,6 @@ public class APIMappingUtil {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);
-        setEndpointSecurityFromApiDTOToModel(dto, model);
         setMaxTpsFromApiDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
@@ -843,19 +842,6 @@ public class APIMappingUtil {
         return context;
     }
 
-    private static void setEndpointSecurityFromApiDTOToModel(APIDTO dto, API api) {
-
-        APIEndpointSecurityDTO securityDTO = dto.getEndpointSecurity();
-        if (dto.getEndpointSecurity() != null && securityDTO.getType() != null) {
-            api.setEndpointSecured(true);
-            api.setEndpointUTUsername(securityDTO.getUsername());
-            api.setEndpointUTPassword(securityDTO.getPassword());
-            if (APIEndpointSecurityDTO.TypeEnum.DIGEST.equals(securityDTO.getType())) {
-                api.setEndpointAuthDigest(true);
-            }
-        }
-    }
-
     private static void setMaxTpsFromApiDTOToModel(APIDTO dto, API api) {
 
         APIMaxTpsDTO maxTpsDTO = dto.getMaxTps();
@@ -904,7 +890,6 @@ public class APIMappingUtil {
             dto.setLastUpdatedTime(Long.toString(model.getLastUpdated().getTime()));
         }
         dto.setDescription(model.getDescription());
-
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setIsRevision(model.isRevision());
         dto.setRevisionedApiId(model.getRevisionedApiId());
@@ -915,6 +900,9 @@ public class APIMappingUtil {
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
         advertiseInfoDTO.setOriginalDevPortalUrl(model.getRedirectURL());
         advertiseInfoDTO.setApiOwner(model.getApiOwner());
+        if (model.getAdvertiseOnlyAPIVendor() != null) {
+            advertiseInfoDTO.setVendor(AdvertiseInfoDTO.VendorEnum.valueOf(model.getAdvertiseOnlyAPIVendor()));
+        }
         dto.setAdvertiseInfo(advertiseInfoDTO);
 
         if (APIConstants.ENABLED.equals(model.getResponseCache())) {
@@ -1355,7 +1343,8 @@ public class APIMappingUtil {
         Map endpointConfig = (Map) dto.getEndpointConfig();
         if (api.isEndpointSecured()) {
             endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_ENABLED, true);
-            endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIEndpointSecurityDTO.TypeEnum.BASIC);
+            endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
             endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()));
@@ -1365,7 +1354,8 @@ public class APIMappingUtil {
                 endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
             }
             if (api.isEndpointAuthDigest()) {
-                endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE, APIEndpointSecurityDTO.TypeEnum.DIGEST);
+                endpointSecurityObject.put(APIConstants.ENDPOINT_SECURITY_TYPE,
+                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
             }
             JSONObject endpointSecurityModel = new JSONObject();
             endpointSecurityModel.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityObject);

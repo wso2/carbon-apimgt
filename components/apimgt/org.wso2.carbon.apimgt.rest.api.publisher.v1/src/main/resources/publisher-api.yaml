@@ -8063,8 +8063,6 @@ components:
           example: []
           items:
             type: string
-        endpointSecurity:
-          $ref: '#/components/schemas/APIEndpointSecurity'
         gatewayEnvironments:
           type: array
           description: |
@@ -9682,22 +9680,6 @@ components:
           type: integer
           format: int64
           example: 1000
-    APIEndpointSecurity:
-      type: object
-      properties:
-        type:
-          type: string
-          description: Accepts one of the following, basic or digest.
-          example: BASIC
-          enum:
-            - BASIC
-            - DIGEST
-        username:
-          type: string
-          example: admin
-        password:
-          type: string
-          example: password
     APIBusinessInformation:
       type: object
       properties:
@@ -10836,6 +10818,12 @@ components:
         apiOwner:
           type: string
           example: admin
+        vendor:
+          type: string
+          default: WSO2
+          enum:
+            - WSO2
+            - AWS
     APICategory:
       title: API Category
       required:

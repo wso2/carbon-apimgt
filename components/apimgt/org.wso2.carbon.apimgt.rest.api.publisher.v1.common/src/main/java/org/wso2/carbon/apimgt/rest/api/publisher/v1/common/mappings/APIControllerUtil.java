@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 
 import java.io.File;
@@ -330,11 +329,11 @@ public class APIControllerUtil {
                             if (StringUtils.equals(type.getAsString().toLowerCase(),
                                     APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST)) {
                                 endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIEndpointSecurityDTO.TypeEnum.DIGEST.toString());
+                                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
                             } else if (StringUtils.equals(type.getAsString().toLowerCase(),
                                     APIConstants.ENDPOINT_SECURITY_TYPE_BASIC)) {
                                 endpointSecurityDetails.addProperty(APIConstants.ENDPOINT_SECURITY_TYPE,
-                                        APIEndpointSecurityDTO.TypeEnum.BASIC.toString());
+                                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
                             } else {
                                 // If the type is not either basic or digest, return an error
                                 throw new APIManagementException(
