@@ -155,12 +155,6 @@ public class APIControllerUtil {
         }
         importedApiDto.setEndpointConfig(endpointConfig);
 
-        //handle gateway environments
-        if (envParams.get(ImportExportConstants.GATEWAY_ENVIRONMENTS_FIELD) != null) {
-            List<String> environments = setupGatewayEnvironments(
-                    envParams.get(ImportExportConstants.GATEWAY_ENVIRONMENTS_FIELD).getAsJsonArray());
-            importedApiDto.setGatewayEnvironments(environments);
-        }
 
         //handle mutualSSL certificates
         handleMutualSslCertificates(envParams, importedApiDto, null, importedApi.getId(), pathToArchive);

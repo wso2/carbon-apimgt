@@ -140,7 +140,6 @@ return null;
     }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
-    private List<String> gatewayEnvironments = new ArrayList<String>();
 
     @XmlType(name="ApiTypeEnum")
     @XmlEnum(String.class)
@@ -542,24 +541,6 @@ return null;
   }
 
   /**
-   * List of gateway environments the API Product is available 
-   **/
-  public APIProductDTO gatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[\"Default\"]", value = "List of gateway environments the API Product is available ")
-  @JsonProperty("gatewayEnvironments")
-  public List<String> getGatewayEnvironments() {
-    return gatewayEnvironments;
-  }
-  public void setGatewayEnvironments(List<String> gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-  }
-
-  /**
    * The API type to be used. Accepted values are API, APIPRODUCT
    **/
   public APIProductDTO apiType(ApiTypeEnum apiType) {
@@ -908,7 +889,6 @@ return null;
         Objects.equals(visibleTenants, apIProduct.visibleTenants) &&
         Objects.equals(accessControl, apIProduct.accessControl) &&
         Objects.equals(accessControlRoles, apIProduct.accessControlRoles) &&
-        Objects.equals(gatewayEnvironments, apIProduct.gatewayEnvironments) &&
         Objects.equals(apiType, apIProduct.apiType) &&
         Objects.equals(transport, apIProduct.transport) &&
         Objects.equals(tags, apIProduct.tags) &&
@@ -931,7 +911,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, gatewayEnvironments, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
+    return Objects.hash(id, name, context, description, provider, hasThumbnail, state, enableSchemaValidation, isRevision, revisionedApiProductId, revisionId, responseCachingEnabled, cacheTimeout, visibility, visibleRoles, visibleTenants, accessControl, accessControlRoles, apiType, transport, tags, policies, apiThrottlingPolicy, authorizationHeader, securityScheme, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, monetization, businessInformation, corsConfiguration, createdTime, lastUpdatedTime, apis, scopes, categories);
   }
 
   @Override
@@ -957,7 +937,6 @@ return null;
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
-    sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
