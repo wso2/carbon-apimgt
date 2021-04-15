@@ -35,13 +35,6 @@ const useStyles = makeStyles((theme) => ({
     actionStyle: {
         paddingLeft: theme.spacing(4),
         paddingRight: theme.spacing(4),
-        marginBottom: theme.spacing(1),
-    },
-    actionStyleGetStarted: {
-        paddingLeft: theme.spacing(4),
-        paddingRight: theme.spacing(4),
-        marginTop: theme.spacing(4),
-        marginBottom: theme.spacing(1),
     },
 }));
 
@@ -113,7 +106,7 @@ function Onboarding() {
                     )}
                 >
                     <Button
-                        className={classes.actionStyleGetStarted}
+                        className={classes.actionStyle}
                         size='large'
                         variant='outlined'
                         color='primary'
