@@ -31,6 +31,9 @@ const useStyles = makeStyles((theme) => ({
     drawerToggleIcon: {
         color: theme.palette.getContrastText(theme.palette.background.appBar),
     },
+    toolbarStyles: {
+        minHeight: theme.spacing(8),
+    },
 }));
 
 /**
@@ -53,7 +56,7 @@ export default function HeaderOriginal(props) {
                 position='fixed'
                 className={classes.appBar}
             >
-                <Toolbar>
+                <Toolbar className={classes.toolbarStyles}>
                     <IconButton
                         aria-label='Expand publisher landing page drawer'
                         onClick={handleDrawerToggle}

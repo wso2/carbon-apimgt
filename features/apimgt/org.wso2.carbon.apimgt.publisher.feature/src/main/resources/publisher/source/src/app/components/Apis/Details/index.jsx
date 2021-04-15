@@ -98,7 +98,7 @@ const styles = (theme) => ({
     LeftMenu: {
         backgroundColor: theme.palette.background.leftMenu,
         width: theme.custom.leftMenuWidth,
-        minHeight: 'calc(100vh - 114px)',
+        minHeight: `calc(100vh - ${64 + theme.custom.footer.height}px)`,
     },
     leftLInkMain: {
         cursor: 'pointer',

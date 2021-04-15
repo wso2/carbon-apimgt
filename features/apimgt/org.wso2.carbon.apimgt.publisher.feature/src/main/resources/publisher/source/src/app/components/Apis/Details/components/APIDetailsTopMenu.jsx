@@ -40,7 +40,6 @@ import GoTo from 'AppComponents/Apis/Details/GoTo/GoTo';
 import Tooltip from '@material-ui/core/Tooltip';
 import API from 'AppData/api';
 import MUIAlert from 'AppComponents/Shared/MuiAlert';
-import PublicIcon from '@material-ui/icons/Public';
 import DeleteApiButton from './DeleteApiButton';
 import CreateNewVersionButton from './CreateNewVersionButton';
 
@@ -264,7 +263,6 @@ const APIDetailsTopMenu = (props) => {
                             component={Link}
                             to={'/apis/' + (api.isRevision ? api.revisionedApiId : api.id) + '/' + lastIndex}
                         >
-                            <PublicIcon style={{ fontSize: 15 }} />
                             <FormattedMessage
                                 id='Apis.Details.components.APIDetailsTopMenu.current.api'
                                 defaultMessage='Current API'
