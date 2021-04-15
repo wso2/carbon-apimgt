@@ -184,7 +184,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
     }
 
     /**
-     * Validate whether the limiting options are greater than 1 or not
+     * Validate whether the limiting options are greater than 1(or 0) or not
      *
      * @param subscriptionPolicy QuotaPolicy
      */
