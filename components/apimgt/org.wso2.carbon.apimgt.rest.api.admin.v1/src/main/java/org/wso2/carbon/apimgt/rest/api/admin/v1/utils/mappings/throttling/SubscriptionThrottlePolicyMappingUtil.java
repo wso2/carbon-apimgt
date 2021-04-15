@@ -162,7 +162,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
             //if no custom attributes are set, assign an empty byte array
             subscriptionPolicy.setCustomAttributes(new JSONArray().toJSONString().getBytes());
         }
-        if (dto.getMonetization() != null &&
+        if (dto.getMonetization() != null && dto.getMonetization().getMonetizationPlan() != null &&
                 StringUtils.isNotBlank(dto.getMonetization().getMonetizationPlan().name())) {
             String tierMonetizationPlan = dto.getMonetization().getMonetizationPlan().toString();
             subscriptionPolicy.setMonetizationPlan(tierMonetizationPlan);
