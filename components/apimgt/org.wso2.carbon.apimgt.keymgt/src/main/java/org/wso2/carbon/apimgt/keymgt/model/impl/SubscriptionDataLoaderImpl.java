@@ -298,7 +298,6 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
     public API getApi(String context, String version) throws DataLoadingException {
 
         Set<String> gatewayLabels = gatewayArtifactSynchronizerProperties.getGatewayLabels();
-        List<API> apis = new ArrayList<>();
         if (gatewayLabels != null && gatewayLabels.size() > 0) {
             for (String gatewayLabel : gatewayLabels) {
                 String apisEP = APIConstants.SubscriptionValidationResources.APIS + "?context=" + context +

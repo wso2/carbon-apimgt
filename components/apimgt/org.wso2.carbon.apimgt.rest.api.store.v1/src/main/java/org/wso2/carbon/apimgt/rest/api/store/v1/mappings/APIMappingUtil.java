@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
@@ -218,12 +219,19 @@ public class APIMappingUtil {
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
-            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
+                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                    additionalPropertiesList.add(additionalPropertiesDTO);
+                }
             }
-            dto.setAdditionalProperties(additionalPropertiesMap);
+            dto.setAdditionalProperties(additionalPropertiesList);
         }
 
         dto.setWsdlUri(model.getWsdlUrl());
@@ -398,12 +406,19 @@ public class APIMappingUtil {
 
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
-            Map<String, String> additionalPropertiesMap = new HashMap<>();
+            List<APIAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
             for (Object propertyKey : additionalProperties.keySet()) {
+                APIAdditionalPropertiesDTO additionalPropertiesDTO = new APIAdditionalPropertiesDTO();
                 String key = (String) propertyKey;
-                additionalPropertiesMap.put(key, (String) additionalProperties.get(key));
+                int index = key.lastIndexOf(APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX);
+                additionalPropertiesDTO.setValue((String) additionalProperties.get(key));
+                if (index > 0) {
+                    additionalPropertiesDTO.setName(key.substring(0, index));
+                    additionalPropertiesDTO.setDisplay(true);
+                    additionalPropertiesList.add(additionalPropertiesDTO);
+                }
             }
-            dto.setAdditionalProperties(additionalPropertiesMap);
+            dto.setAdditionalProperties(additionalPropertiesList);
         }
 
         if (model.getEnvironments() != null) {

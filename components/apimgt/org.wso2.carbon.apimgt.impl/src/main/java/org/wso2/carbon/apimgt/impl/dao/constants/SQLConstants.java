@@ -589,6 +589,9 @@ public class SQLConstants {
             "   THROTTLE_TIER_PERMISSIONS_ID = ? " +
             "   AND TENANT_ID = ?";
 
+    public static final String DELETE_THROTTLE_TIER_PERMISSION_SQL = "DELETE FROM AM_THROTTLE_TIER_PERMISSIONS WHERE " +
+            "THROTTLE_TIER_PERMISSIONS_ID = ? AND TENANT_ID = ?";
+
     public static final String GET_THROTTLE_TIER_PERMISSIONS_SQL =
             " SELECT TIER,PERMISSIONS_TYPE, ROLES " +
             " FROM AM_THROTTLE_TIER_PERMISSIONS " +

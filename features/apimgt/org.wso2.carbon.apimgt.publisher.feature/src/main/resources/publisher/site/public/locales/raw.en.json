@@ -1807,7 +1807,7 @@
     "defaultMessage": "Action"
   },
   "Apis.Details.Environments.Environments.revision\n                                                    .description.deploy": {
-    "defaultMessage": "Brief description of the new revision"
+    "defaultMessage": "Add a description to the revision"
   },
   "Apis.Details.Environments.Environments.revision.create.heading": {
     "defaultMessage": "Create New Revision (From Current API)"
@@ -1991,6 +1991,12 @@
   },
   "Apis.Details.LifeCycle.Policies.select.plan.api.product": {
     "defaultMessage": "Select a plan for the API product."
+  },
+  "Apis.Details.LifeCycle.components": {
+    "defaultMessage": "Publish API without deployments"
+  },
+  "Apis.Details.LifeCycle.publish.content": {
+    "defaultMessage": "The API will not be available for consumption unless it is deployed."
   },
   "Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error": {
     "defaultMessage": "Error while adding mediation policy"
@@ -2320,7 +2326,10 @@
     "defaultMessage": "Prototyped"
   },
   "Apis.Details.Overview.CustomizedStepper.publish": {
-    "defaultMessage": "Published (Current API)"
+    "defaultMessage": "Published"
+  },
+  "Apis.Details.Overview.CustomizedStepper.publish.current.api": {
+    "defaultMessage": "(Current API)"
   },
   "Apis.Details.Overview.CustomizedStepper.retired": {
     "defaultMessage": "Retired"
@@ -2596,7 +2605,7 @@
     "defaultMessage": "No"
   },
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.name": {
-    "defaultMessage": "Name"
+    "defaultMessage": "Name/Content Type"
   },
   "Apis.Details.Resources.components.operationComponents.ListParameter.parameter.spec.error": {
     "defaultMessage": "Error in resolving the definition!"
@@ -2987,6 +2996,39 @@
   },
   "Apis.Details.Topics.components.operationComponents.ListPayloadProps.name": {
     "defaultMessage": "Name"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.Security.tooltip": {
+    "defaultMessage": "This will enable/disable Application Level securities defined in the Runtime Configurations page."
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.api.scope.available": {
+    "defaultMessage": "No API scopes available"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.no.sharedpi.scope.available": {
+    "defaultMessage": "No shared scopes available"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.create.new.scope": {
+    "defaultMessage": "Create New Scope"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.helperText": {
+    "defaultMessage": "Select a scope to control permissions to this operation"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.default": {
+    "defaultMessage": "Operation scope"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.label.notAvailable": {
+    "defaultMessage": "No scope available"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.local": {
+    "defaultMessage": "API Scopes"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.operation.scope.select.shared": {
+    "defaultMessage": "Shared Scopes"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.subTitle": {
+    "defaultMessage": "(Security & Scopes)"
+  },
+  "Apis.Details.Topics.components.operationComponents.OperationGovernance.title": {
+    "defaultMessage": "Operation Governance"
   },
   "Apis.Details.TryOutConsole.token.label": {
     "defaultMessage": "Internal API Key"
@@ -3454,7 +3496,7 @@
     "defaultMessage": "Search Options for APIs and APIProducts"
   },
   "Base.Header.navbar.GlobalNavBar.Service.Catalog": {
-    "defaultMessage": "Service Catalog"
+    "defaultMessage": "Services"
   },
   "Base.Header.navbar.GlobalNavBar.analytics": {
     "defaultMessage": "Analytics"

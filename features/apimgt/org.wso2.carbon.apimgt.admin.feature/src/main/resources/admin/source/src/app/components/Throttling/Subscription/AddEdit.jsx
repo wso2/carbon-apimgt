@@ -165,7 +165,7 @@ function AddEdit(props) {
     const { history, match: { params } } = props;
     const restApi = new API();
     const isEdit = (params.id !== null) && (params.id !== undefined);
-    const [validRoles, setValidRoles] = useState(['Internal/everyone']);
+    const [validRoles, setValidRoles] = useState([]);
     const [invalidRoles, setInvalidRoles] = useState([]);
     const [roleValidity, setRoleValidity] = useState(true);
 
@@ -194,8 +194,8 @@ function AddEdit(props) {
         customAttributes: [],
         stopOnQuotaReach: true,
         permissions: {
-            roles: ['Internal/everyone'],
-            permissionStatus: 'ALLOW',
+            roles: [],
+            permissionStatus: 'NONE',
         },
         graphQL: {
             maxComplexity: '',
@@ -255,20 +255,26 @@ function AddEdit(props) {
                     rateLimitTimeUnit: (result.body.rateLimitCount === 0) ? 'sec' : result.body.rateLimitTimeUnit,
                     billingPlan: result.body.billingPlan,
                     monetization: {
-                        monetizationPlan: result.body.monetization.monetizationPlan,
-                        fixedPrice: result.body.monetization.properties.fixedPrice,
-                        pricePerRequest: result.body.monetization.properties.pricePerRequest,
-                        currencyType: result.body.monetization.properties.currencyType,
-                        billingCycle: result.body.monetization.properties.billingCycle,
+                        monetizationPlan: (result.body.monetization !== null)
+                            ? result.body.monetization.monetizationPlan : '',
+                        fixedPrice: (result.body.monetization !== null)
+                            ? result.body.monetization.properties.fixedPrice : '',
+                        pricePerRequest: (result.body.monetization !== null)
+                            ? result.body.monetization.properties.pricePerRequest : '',
+                        currencyType: (result.body.monetization !== null)
+                            ? result.body.monetization.properties.currencyType : '',
+                        billingCycle: (result.body.monetization !== null)
+                            ? result.body.monetization.properties.billingCycle : '',
                     },
                     customAttributes: setCustomAttributes(result.body.customAttributes),
                     stopOnQuotaReach: result.body.stopOnQuotaReach,
-                    permissions: {
-                        permissionStatus: (result.body.permissions === null)
-                            ? 'ALLOW' : result.body.permissions.permissionType,
-                        roles: (result.body.permissions === null)
-                            ? ['Internal/everyone'] : validRoles,
-                    },
+                    permissions: (result.body.permissions === null || result.body.permissions === 'NONE')
+                        ? {
+                            permissionStatus: 'NONE',
+                        } : {
+                            permissionStatus: result.body.permissions.permissionType,
+                            roles: validRoles,
+                        },
                     graphQL: {
                         maxComplexity: (result.body.graphQLMaxComplexity === 0) ? '' : result.body.graphQLMaxComplexity,
                         maxDepth: (result.body.graphQLMaxDepth === 0) ? '' : result.body.graphQLMaxDepth,
@@ -301,10 +307,7 @@ function AddEdit(props) {
             },
             customAttributes: [],
             stopOnQuotaReach: true,
-            permissions: {
-                roles: ['Internal/everyone'],
-                permissionStatus: 'ALLOW',
-            },
+            permissions: null,
             graphQL: {
                 maxComplexity: '',
                 maxDepth: '',
@@ -402,15 +405,17 @@ function AddEdit(props) {
             currencyType,
             billingCycle,
         },
-        permissions: {
-            permissionStatus,
-        },
+        permissions,
         graphQL: {
             maxComplexity,
             maxDepth,
         },
         subscriberCount,
     } = state;
+    let permissionStatus = '';
+    if (permissions) {
+        permissionStatus = state.permissions.permissionStatus;
+    }
 
     const onChange = (e) => {
         dispatch({ field: e.target.name, value: e.target.value });
@@ -509,10 +514,11 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: (validRoles.length === 0) ? null : {
-                    permissionType: state.permissions.permissionStatus,
-                    roles: validRoles,
-                },
+                permissions: (state.permissions === null || state.permissions.permissionStatus === null
+                    || state.permissions.permissionStatus === 'NONE') ? null : {
+                        permissionType: state.permissions.permissionStatus,
+                        roles: validRoles,
+                    },
             };
         } else if (type === 'BANDWIDTHLIMIT') {
             subscriptionThrottlingPolicy = {
@@ -544,10 +550,11 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: (validRoles.length === 0) ? null : {
-                    permissionType: state.permissions.permissionStatus,
-                    roles: validRoles,
-                },
+                permissions: (state.permissions == null || state.permissions.permissionStatus === null
+                    || state.permissions.permissionStatus === 'NONE') ? null : {
+                        permissionType: state.permissions.permissionStatus,
+                        roles: validRoles,
+                    },
             };
         } else {
             subscriptionThrottlingPolicy = {
@@ -578,10 +585,11 @@ function AddEdit(props) {
                         billingCycle: state.monetization.billingCycle,
                     },
                 },
-                permissions: (validRoles.length === 0) ? null : {
-                    permissionType: state.permissions.permissionStatus,
-                    roles: validRoles,
-                },
+                permissions: (state.permissions === null || state.permissions.permissionStatus === null
+                    || state.permissions.permissionStatus === 'NONE') ? null : {
+                        permissionType: state.permissions.permissionStatus,
+                        roles: validRoles,
+                    },
             };
         }
 
@@ -1499,77 +1507,86 @@ function AddEdit(props) {
                     </Grid>
                     <Grid item xs={12} md={12} lg={9}>
                         <Box component='div' m={1}>
-                            <Box display='flex' flexDirection='row' alignItems='center'>
-                                <ChipInput
-                                    label='Roles'
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    variant='outlined'
-                                    value={validRoles.concat(invalidRoles)}
-                                    alwaysShowPlaceholder={false}
-                                    placeholder='Enter roles and press Enter'
-                                    blurBehavior='clear'
-                                    InputProps={{
-                                        endAdornment: !roleValidity && (
-                                            <InputAdornment position='end'>
-                                                <Error color='error' />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                    onAdd={handleRoleAddition}
-                                    error={!roleValidity}
-                                    helperText={
-                                        !roleValidity ? (
-                                            <FormattedMessage
-                                                id='Apis.Details.Scopes.Roles.Invalid'
-                                                defaultMessage='A Role is invalid'
-                                            />
-                                        ) : [
-                                            (permissionStatus === 'ALLOW'
-                                                ? (
-                                                    <FormattedMessage
-                                                        id='Throttling.Subscription.enter.permission.allowed'
-                                                        defaultMessage='This policy is "Allowed" for above roles.'
-                                                    />
-                                                )
-                                                : (
-                                                    <FormattedMessage
-                                                        id='Throttling.Subscription.enter.permission.denied'
-                                                        defaultMessage='This policy is "Denied" for above roles.'
-                                                    />
-                                                )
-                                            ),
-                                            ' ',
-                                            <FormattedMessage
-                                                id='Apis.Details.Scopes.CreateScope.roles.help'
-                                                defaultMessage='Enter a valid role and press `Enter`.'
-                                            />,
-                                        ]
-                                    }
-                                    chipRenderer={({ value }, key) => (
-                                        <Chip
-                                            key={key}
-                                            label={value}
-                                            onDelete={() => {
-                                                handleRoleDeletion(value);
+                            {
+                                (permissionStatus === 'ALLOW' || permissionStatus === 'DENY')
+                                && (
+                                    <Box display='flex' flexDirection='row' alignItems='center'>
+                                        <ChipInput
+                                            label='Roles'
+                                            InputLabelProps={{
+                                                shrink: true,
                                             }}
-                                            style={{
-                                                backgroundColor: invalidRoles.includes(value) ? red[300] : null,
-                                                margin: '8px 8px 8px 0',
-                                                float: 'left',
+                                            variant='outlined'
+                                            value={validRoles.concat(invalidRoles)}
+                                            alwaysShowPlaceholder={false}
+                                            placeholder='Enter roles and press Enter'
+                                            blurBehavior='clear'
+                                            InputProps={{
+                                                endAdornment: !roleValidity && (
+                                                    <InputAdornment position='end'>
+                                                        <Error color='error' />
+                                                    </InputAdornment>
+                                                ),
                                             }}
+                                            onAdd={handleRoleAddition}
+                                            error={!roleValidity}
+                                            helperText={
+                                                !roleValidity ? (
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Scopes.Roles.Invalid'
+                                                        defaultMessage='A Role is invalid'
+                                                    />
+                                                ) : [
+                                                    (permissionStatus === 'ALLOW'
+                                                        ? (
+                                                            <FormattedMessage
+                                                                id='Throttling.Subscription.enter.permission.allowed'
+                                                                defaultMessage='This policy is "Allowed" for above
+                                                                roles.'
+                                                            />
+                                                        )
+                                                        : (
+                                                            <FormattedMessage
+                                                                id='Throttling.Subscription.enter.permission.denied'
+                                                                defaultMessage='This policy is "Denied" for above
+                                                                roles.'
+                                                            />
+                                                        )
+                                                    ),
+                                                    ' ',
+                                                    <FormattedMessage
+                                                        id='Apis.Details.Scopes.CreateScope.roles.help'
+                                                        defaultMessage='Enter a valid role and press `Enter`.'
+                                                    />,
+                                                ]
+                                            }
+                                            chipRenderer={({ value }, key) => (
+                                                <Chip
+                                                    key={key}
+                                                    label={value}
+                                                    onDelete={() => {
+                                                        handleRoleDeletion(value);
+                                                    }}
+                                                    style={{
+                                                        backgroundColor: invalidRoles.includes(value) ? red[300] : null,
+                                                        margin: '8px 8px 8px 0',
+                                                        float: 'left',
+                                                    }}
+                                                />
+                                            )}
                                         />
-                                    )}
-                                />
-                            </Box>
+                                    </Box>
+                                )
+                            }
                             <Box flex='1' mt={3}>
                                 <RadioGroup
                                     name='permissionStatus'
                                     value={permissionStatus}
                                     onChange={onChange}
                                     className={classes.radioGroup}
+                                    defaultValue='NONE'
                                 >
+                                    <FormControlLabel value='NONE' control={<Radio />} label='None' />
                                     <FormControlLabel value='ALLOW' control={<Radio />} label='Allow' />
                                     <FormControlLabel value='DENY' control={<Radio />} label='Deny' />
                                 </RadioGroup>

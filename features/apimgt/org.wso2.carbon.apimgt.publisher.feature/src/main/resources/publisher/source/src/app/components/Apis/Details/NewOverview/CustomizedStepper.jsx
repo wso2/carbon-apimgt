@@ -230,8 +230,14 @@ export default function CustomizedStepper() {
                                     <Typography variant='h7'>
                                         <FormattedMessage
                                             id='Apis.Details.Overview.CustomizedStepper.publish'
-                                            defaultMessage=' Published (Current API)'
+                                            defaultMessage=' Published'
                                         />
+                                        <Box display='inline' pl={0.4} color='text.secondary'>
+                                            <FormattedMessage
+                                                id='Apis.Details.Overview.CustomizedStepper.publish.current.api'
+                                                defaultMessage=' (Current API)'
+                                            />
+                                        </Box>
                                     </Typography>
                                 </Grid>
                             </Box>
@@ -243,10 +249,10 @@ export default function CustomizedStepper() {
                             justify='center'
                         >
                             <Box mt={1} ml={2}>
-                                <a
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    href={devportalUrl}
+                                <Link
+                                    underline='none'
+                                    component={RouterLink}
+                                    to={devportalUrl}
                                 >
                                     <Typography variant='h7'>
                                         <FormattedMessage
@@ -254,7 +260,7 @@ export default function CustomizedStepper() {
                                             defaultMessage='View in devportal'
                                         />
                                     </Typography>
-                                </a>
+                                </Link>
                             </Box>
                             <Box ml={1} mt={1}>
                                 <a

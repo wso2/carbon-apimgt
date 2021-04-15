@@ -143,7 +143,8 @@ public class ServiceReferenceHolder {
     }
 
     public ConfigurationContext getAxis2ConfigurationContext() {
-        return axis2ConfigurationContext;
+
+        return cfgCtxService.getClientConfigContext();
     }
 
     public TracingService getTracingService() {
