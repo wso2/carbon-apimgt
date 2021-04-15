@@ -832,6 +832,17 @@ class Details extends Component {
                                                 Icon={<RuntimeConfigurationIcon />}
                                             />
                                         )}
+                                        {isAPIProduct && (
+                                            <LeftMenuItem
+                                                text={intl.formatMessage({
+                                                    id: 'Apis.Details.index.runtime.configs',
+                                                    defaultMessage: 'Runtime',
+                                                })}
+                                                route='runtime-configuration'
+                                                to={pathPrefix + 'runtime-configuration'}
+                                                Icon={<RuntimeConfigurationIcon />}
+                                            />
+                                        )}
                                         {api.advertiseInfo && !api.advertiseInfo.advertised && api.isWebSocket() && (
                                             <LeftMenuItem
                                                 text={intl.formatMessage({
@@ -911,6 +922,20 @@ class Details extends Component {
                         </div>
                         <Divider />
                         {api.advertiseInfo && !api.advertiseInfo.advertised && (
+                            <>
+                                <Typography className={classes.headingText}>Deploy</Typography>
+                                <LeftMenuItem
+                                    text={intl.formatMessage({
+                                        id: 'Apis.Details.index.environments',
+                                        defaultMessage: 'Deployments',
+                                    })}
+                                    route='deployments'
+                                    to={pathPrefix + 'deployments'}
+                                    Icon={<PersonPinCircleOutlinedIcon />}
+                                />
+                            </>
+                        )}
+                        {isAPIProduct && (
                             <>
                                 <Typography className={classes.headingText}>Deploy</Typography>
                                 <LeftMenuItem
