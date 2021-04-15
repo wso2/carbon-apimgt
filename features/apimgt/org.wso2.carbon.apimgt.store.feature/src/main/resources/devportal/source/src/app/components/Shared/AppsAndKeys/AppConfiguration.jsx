@@ -151,9 +151,9 @@ const AppConfiguration = (props) => {
                                     input={<Input id='multi-select-outlined' />}
                                     renderValue={selected => (
                                         <div className={classes.chips}>
-                                            {selected.map(value => (
+                                            {/* {selected.map(value => (
                                                 <Chip key={value} label={value} className={classes.chip} />
-                                            ))}
+                                            ))} */}
                                         </div>
                                     )}
                                     helperText={
