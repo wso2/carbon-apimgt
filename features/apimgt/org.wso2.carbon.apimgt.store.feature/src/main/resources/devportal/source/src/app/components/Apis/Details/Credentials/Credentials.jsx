@@ -347,8 +347,8 @@ class Credentials extends React.Component {
         const isOnlyBasicAuth = api.securityScheme.includes('basic_auth') && !api.securityScheme.includes('oauth2')
          && !api.securityScheme.includes('api_key');
         const isPrototypedAPI = api.lifeCycleStatus && api.lifeCycleStatus.toLowerCase() === 'prototyped';
-        const isSetAllorResidentKeyManagers = api.keyManagers.includes('all')
-            || api.keyManagers.includes('Resident Key Manager');
+        const isSetAllorResidentKeyManagers = (api.keyManagers && api.keyManagers.includes('all'))
+            || (api.keyManagers && api.keyManagers.includes('Resident Key Manager'));
         const renderCredentialInfo = () => {
             if (isPrototypedAPI) {
                 return (
