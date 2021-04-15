@@ -86,7 +86,7 @@ jobs:
       - name: Checkout Product-APIM
         uses: actions/checkout@v2
         with:
-          repository: tharikaGitHub/product-apim
+          repository: wso2/product-apim
           ref: refs/heads/master
           fetch-depth: '10'
           path: product-apim
