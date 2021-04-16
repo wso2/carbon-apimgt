@@ -28,7 +28,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import HelpOutline from '@material-ui/icons/HelpOutline';
 import { makeStyles } from '@material-ui/core/styles';
 import API from 'AppData/api';
-import { withAPI, useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
+import { useAPI } from 'AppComponents/Apis/Details/components/ApiContext';
 import { isRestricted } from 'AppData/AuthManager';
 
 const useStyles = makeStyles((theme) => ({
@@ -186,4 +186,4 @@ APICategories.defaultProps = {
     configDispatcher: PropTypes.func.isRequired,
 };
 
-export default withAPI(APICategories);
+export default APICategories;

@@ -20,6 +20,7 @@ import React, {
     useReducer,
     useContext,
     useState,
+    useMemo,
     useEffect,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
@@ -146,8 +147,60 @@ function copyAPIConfig(api) {
             accessControlAllowHeaders: [...api.corsConfiguration.accessControlAllowHeaders],
             accessControlAllowMethods: [...api.corsConfiguration.accessControlAllowMethods],
         },
-        additionalProperties: { ...api.additionalProperties },
+        additionalProperties: [...api.additionalProperties],
     };
+}
+
+/**
+     *
+     * Reduce the configuration UI related actions in to updated state
+     * @param {*} state current state
+     * @param {*} configAction dispatched configuration action
+     * @returns {Object} updated state
+     */
+function configReducer(state, configAction) {
+    const { action, value } = configAction;
+    const nextState = copyAPIConfig(state);
+    switch (action) {
+        case 'description':
+        case 'isDefaultVersion':
+        case 'authorizationHeader':
+        case 'responseCachingEnabled':
+        case 'cacheTimeout':
+        case 'enableSchemaValidation':
+        case 'visibility':
+        case 'maxTps':
+        case 'categories':
+        case 'tags':
+            nextState[action] = value;
+            return nextState;
+        case 'accessControl':
+            nextState[action] = value;
+            if (value === 'NONE') {
+                nextState.accessControlRoles = [];
+            }
+            return nextState;
+        case 'accessControlRoles':
+            return { ...copyAPIConfig(state), [action]: value };
+        case 'visibleRoles':
+            return { ...copyAPIConfig(state), [action]: value };
+        case 'github_repo':
+        case 'slack_url': {
+            const targetProperty = nextState.additionalProperties.find((property) => property.name === action);
+            if (targetProperty) {
+                targetProperty.value = value;
+            } else {
+                nextState.additionalProperties.push({
+                    name: action,
+                    value,
+                    display: true,
+                });
+            }
+            return nextState;
+        }
+        default:
+            return state;
+    }
 }
 /**
  * This component handles the basic configurations UI in the API details page
@@ -157,47 +210,6 @@ function copyAPIConfig(api) {
  * @returns
  */
 export default function DesignConfigurations() {
-    /**
-     *
-     * Reduce the configuration UI related actions in to updated state
-     * @param {*} state current state
-     * @param {*} configAction dispatched configuration action
-     * @returns {Object} updated state
-     */
-    function configReducer(state, configAction) {
-        const { action, value } = configAction;
-        const nextState = copyAPIConfig(state);
-        switch (action) {
-            case 'description':
-            case 'isDefaultVersion':
-            case 'authorizationHeader':
-            case 'responseCachingEnabled':
-            case 'cacheTimeout':
-            case 'enableSchemaValidation':
-            case 'visibility':
-            case 'maxTps':
-            case 'categories':
-            case 'tags':
-                nextState[action] = value;
-                return nextState;
-            case 'accessControl':
-                nextState[action] = value;
-                if (value === 'NONE') {
-                    nextState.accessControlRoles = [];
-                }
-                return nextState;
-            case 'accessControlRoles':
-                return { ...copyAPIConfig(state), [action]: value };
-            case 'visibleRoles':
-                return { ...copyAPIConfig(state), [action]: value };
-            case 'github_repo':
-            case 'slack_url':
-                nextState.additionalProperties[action] = value;
-                return nextState;
-            default:
-                return state;
-        }
-    }
     const { api, updateAPI } = useContext(APIContext);
     const [isUpdating, setIsUpdating] = useState(false);
     const [apiConfig, configDispatcher] = useReducer(configReducer, copyAPIConfig(api));
@@ -205,7 +217,11 @@ export default function DesignConfigurations() {
     const [descriptionType, setDescriptionType] = useState('');
     const [overview, setOverview] = useState('');
     const [overviewDocument, setOverviewDocument] = useState(null);
-
+    const [slackURLProperty, githubURLProperty] = useMemo(() => [
+        apiConfig.additionalProperties.find((prop) => prop.name === 'slack_url'),
+        apiConfig.additionalProperties.find((prop) => prop.name === 'github_repo'),
+    ],
+    apiConfig.additionalProperties);
     const invalidTagsExist = apiConfig.tags.find((tag) => {
         return (/([~!@#;%^&*+=|\\<>"'/,])/.test(tag));
     });
@@ -427,7 +443,11 @@ export default function DesignConfigurations() {
                                         />
                                     </Box>
                                     <Box py={1}>
-                                        <Social api={apiConfig} configDispatcher={configDispatcher} />
+                                        <Social
+                                            slackURL={slackURLProperty && slackURLProperty.value}
+                                            githubURL={githubURLProperty && githubURLProperty.value}
+                                            configDispatcher={configDispatcher}
+                                        />
                                     </Box>
                                     <Box py={1}>
                                         {api.apiType !== API.CONSTS.APIProduct && (

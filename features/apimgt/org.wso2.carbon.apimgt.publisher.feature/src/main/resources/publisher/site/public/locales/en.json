@@ -4235,6 +4235,12 @@
       "value": "The API will not be available for consumption unless it is deployed."
     }
   ],
+  "Apis.Details.LifeCycle.publish.content.info.deployments": [
+    {
+      "type": 0,
+      "value": "Deployments"
+    }
+  ],
   "Apis.Details.MediationPolicies.Edit.AddMediationPolicy.error": [
     {
       "type": 0,
@@ -4317,6 +4323,12 @@
     {
       "type": 0,
       "value": "Mediation policy added successfully"
+    }
+  ],
+  "Apis.Details.MediationPolicies.EditMediationPolicy.download": [
+    {
+      "type": 0,
+      "value": "Download"
     }
   ],
   "Apis.Details.MediationPolicies.Mediation": [

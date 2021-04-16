@@ -674,7 +674,7 @@ function Overview() {
                             </Box>
                             <Box mt={1} ml={1}>
                                 {api.additionalProperties
-                                    .filter(({ display }) => display)
+                                    .filter(({ name, display }) => display && !['slack_url', 'github_repo'].includes(name))
                                     .map(({ name, value }) => {
                                         return (
                                             <Typography variant='body2'>

@@ -129,6 +129,13 @@ const useStyles = makeStyles((theme) => ({
         height: 15,
         borderRadius: '50%',
     },
+    pageLinks: {
+        display: 'flex',
+    },
+    disabledLink: {
+        pointerEvents: 'none',
+        color: theme.palette.text.primary,
+    },
 }));
 
 /**
@@ -364,7 +371,13 @@ export default function CustomizedStepper() {
                 );
         }
     }
-
+    const isTestLinkDisabled = api.lifeCycleStatus === 'RETIERD' || !deploymentsAvailable
+    || !isEndpointAvailable
+    || !isTierAvailable
+    || (api.type !== 'HTTP' && api.type !== 'SOAP');
+    const isDeployLinkDisabled = (((api.type !== 'WEBSUB' && !isEndpointAvailable))
+    || !isTierAvailable
+    || api.workflowStatus === 'CREATED');
     return (
         <div id='itest-overview-api-flow' className={classes.root}>
             <Stepper alternativeLabel activeStep={activeStep} connector={<ColorlibConnector />}>
@@ -421,6 +434,7 @@ export default function CustomizedStepper() {
                                                     <Grid item>
                                                         <Link
                                                             underline='none'
+                                                            className={classes.pageLinks}
                                                             component={RouterLink}
                                                             to={'/apis/' + api.id + '/endpoints'}
                                                         >
@@ -431,16 +445,12 @@ export default function CustomizedStepper() {
                                                                     defaultMessage=' Endpoint'
                                                                 />
                                                             </Typography>
-                                                        </Link>
-                                                    </Grid>
-                                                </Box>
-                                                <Box ml={1} mb={1}>
-                                                    <Grid item>
-                                                        <Link to={'/apis/' + api.id + '/endpoints'}>
-                                                            <LinkIcon
-                                                                color='primary'
-                                                                fontSize='small'
-                                                            />
+                                                            <Box ml={1}>
+                                                                <LinkIcon
+                                                                    color='primary'
+                                                                    fontSize='small'
+                                                                />
+                                                            </Box>
                                                         </Link>
                                                     </Grid>
                                                 </Box>
@@ -466,6 +476,7 @@ export default function CustomizedStepper() {
                                                     <Link
                                                         underline='none'
                                                         component={RouterLink}
+                                                        className={classes.pageLinks}
                                                         to={'/apis/' + api.id + '/subscriptions'}
                                                     >
                                                         <Typography variant='h7'>
@@ -474,19 +485,15 @@ export default function CustomizedStepper() {
                                                                 defaultMessage=' Business Plan'
                                                             />
                                                         </Typography>
+                                                        <Box ml={1}>
+                                                            <LinkIcon
+                                                                color='primary'
+                                                                fontSize='small'
+                                                            />
+                                                        </Box>
                                                     </Link>
                                                 </Grid>
                                             </Box>
-                                            <Grid item>
-                                                <Link to={'/apis/' + api.id + '/subscriptions'}>
-                                                    <Box ml={1}>
-                                                        <LinkIcon
-                                                            color='primary'
-                                                            fontSize='small'
-                                                        />
-                                                    </Box>
-                                                </Link>
-                                            </Grid>
                                         </Grid>
                                     </Box>
                                 </div>
@@ -515,6 +522,9 @@ export default function CustomizedStepper() {
                                             <Grid item>
                                                 <Link
                                                     underline='none'
+                                                    className={clsx(classes.pageLinks, {
+                                                        [classes.disabledLink]: isDeployLinkDisabled,
+                                                    })}
                                                     component={RouterLink}
                                                     to={'/apis/' + api.id + '/deployments'}
                                                 >
@@ -524,31 +534,15 @@ export default function CustomizedStepper() {
                                                             defaultMessage=' Deploy'
                                                         />
                                                     </Typography>
-                                                </Link>
-                                            </Grid>
-                                        </Box>
-                                        <Grid item>
-                                            {(((api.type !== 'WEBSUB' && !isEndpointAvailable))
-                                            || !isTierAvailable
-                                            || api.workflowStatus === 'CREATED')
-                                                ? (
                                                     <Box ml={1}>
                                                         <LinkIcon
                                                             color='default'
                                                             fontSize='small'
                                                         />
                                                     </Box>
-                                                ) : (
-                                                    <Link to={'/apis/' + api.id + '/deployments'}>
-                                                        <Box ml={1}>
-                                                            <LinkIcon
-                                                                color='primary'
-                                                                fontSize='small'
-                                                            />
-                                                        </Box>
-                                                    </Link>
-                                                )}
-                                        </Grid>
+                                                </Link>
+                                            </Grid>
+                                        </Box>
                                     </Grid>
                                 </Tooltip>
                             )}
@@ -567,6 +561,9 @@ export default function CustomizedStepper() {
                                         <Box ml={1} mb={1}>
                                             <Grid item>
                                                 <Link
+                                                    className={clsx(classes.pageLinks, {
+                                                        [classes.disabledLink]: isTestLinkDisabled,
+                                                    })}
                                                     underline='none'
                                                     component={RouterLink}
                                                     to={'/apis/' + api.id + '/test-console'}
@@ -577,32 +574,15 @@ export default function CustomizedStepper() {
                                                             defaultMessage=' Test'
                                                         />
                                                     </Typography>
-                                                </Link>
-                                            </Grid>
-                                        </Box>
-                                        <Grid item>
-                                            {api.lifeCycleStatus === 'RETIERD' || !deploymentsAvailable
-                                            || !isEndpointAvailable
-                                            || !isTierAvailable
-                                            || (api.type !== 'HTTP' && api.type !== 'SOAP')
-                                                ? (
                                                     <Box ml={1}>
                                                         <LinkIcon
                                                             color='default'
                                                             fontSize='small'
                                                         />
                                                     </Box>
-                                                ) : (
-                                                    <Link to={'/apis/' + api.id + '/test-console'}>
-                                                        <Box ml={1}>
-                                                            <LinkIcon
-                                                                color='primary'
-                                                                fontSize='small'
-                                                            />
-                                                        </Box>
-                                                    </Link>
-                                                )}
-                                        </Grid>
+                                                </Link>
+                                            </Grid>
+                                        </Box>
                                     </Grid>
                                 </Tooltip>
                             )}
