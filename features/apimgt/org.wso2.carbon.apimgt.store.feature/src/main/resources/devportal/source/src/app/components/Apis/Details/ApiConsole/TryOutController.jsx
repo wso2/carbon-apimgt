@@ -841,7 +841,7 @@ function TryOutController(props) {
                         </Box>
                     </Grid>
                 )}
-            {isPrototypedAPI
+            {(isPrototypedAPI && !api.enableStore)
                     && (
                         <Box display='flex' justifyContent='center' className={classes.gatewayEnvironment}>
                             <Grid xs={12} md={6} item>
