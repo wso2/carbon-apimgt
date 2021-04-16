@@ -30,9 +30,7 @@ import { injectIntl, FormattedMessage } from 'react-intl';
 import Typography from '@material-ui/core/Typography';
 import API from 'AppData/api';
 import { CircularProgress } from '@material-ui/core';
-import {
-    ScopeValidation, resourceMethod, resourcePath, client,
-} from 'AppData/ScopeValidation';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
 import LaunchIcon from '@material-ui/icons/Launch';
@@ -320,7 +318,6 @@ class LifeCycleUpdate extends Component {
                     <ScopeValidation
                         resourcePath={resourcePath.API_CHANGE_LC}
                         resourceMethod={resourceMethod.POST}
-                        client={client.API_CLIENT}
                     >
                         <div className={classes.buttonsWrapper}>
                             {!isWorkflowPending

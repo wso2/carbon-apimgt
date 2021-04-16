@@ -25,9 +25,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import { FormattedMessage } from 'react-intl';
 
-import {
-    client, resourceMethod, resourcePath, ScopeValidation,
-} from 'AppData/ScopeValidation';
+import { resourceMethod, resourcePath, ScopeValidation } from 'AppData/ScopeValidation';
 import VerticalDivider from 'AppComponents/Shared/VerticalDivider';
 
 const styles = (theme) => ({
@@ -86,7 +84,6 @@ function CreateNewVersionButton(props) {
             <ScopeValidation
                 resourceMethod={resourceMethod.POST}
                 resourcePath={resourcePath.API_COPY}
-                client={client.API_CLIENT}
             >
                 <div className={classes.createNewVersionWrapper}>
                     <VerticalDivider height={70} />
