@@ -289,27 +289,37 @@ export default function Topics(props) {
     const onMarkAsDelete = useCallback(onOperationSelectM, [setSelectedOperation]);
 
     /**
+     *
+     * @param {*} spec
+     */
+    function verifySecurityScheme(spec) {
+        /* eslint-disable no-param-reassign */
+        spec.components = spec.components || {};
+        spec.components.securitySchemes = spec.components.securitySchemes || {};
+        spec.components.securitySchemes.oauth2 = spec.components.securitySchemes.oauth2 || { type: 'oauth2' };
+        spec.components.securitySchemes.oauth2.flows = spec.components.securitySchemes.oauth2.flows || {};
+        spec.components.securitySchemes.oauth2.flows.implicit = spec.components.securitySchemes.oauth2.flows.implicit
+            || {};
+        spec.components.securitySchemes.oauth2.flows.implicit.scopes = spec.components.securitySchemes.oauth2.flows
+            .implicit.scopes || {};
+        /* eslint-enable no-param-reassign */
+    }
+
+    /**
      * This method sets the securityDefinitionScopes from the spec
      * @param {Object} spec The original swagger content.
      */
     function setSecurityDefScopesFromSpec(spec) {
-        if (spec.components && spec.components.securitySchemes && spec.components.securitySchemes.oauth2) {
-            const { flows } = spec.components.securitySchemes.oauth2;
-            if (flows.implicit.scopes) {
-                setSecurityDefScopes(cloneDeep(flows.implicit.scopes));
-            }
-        }
+        verifySecurityScheme(spec);
+        setSecurityDefScopes(cloneDeep(spec.components.securitySchemes.oauth2.flows.implicit.scopes));
     }
 
     /**
      * This method sets the scopes of the spec from the securityDefinitionScopes
      */
     function setSpecScopesFromSecurityDefScopes() {
-        if (asyncAPISpec.components
-            && asyncAPISpec.components.securitySchemes
-            && asyncAPISpec.components.securitySchemes.oauth2) {
-            asyncAPISpec.components.securitySchemes.oauth2.flows.implicit.scopes = securityDefScopes;
-        }
+        verifySecurityScheme(asyncAPISpec);
+        asyncAPISpec.components.securitySchemes.oauth2.flows.implicit.scopes = securityDefScopes;
     }
 
     /**

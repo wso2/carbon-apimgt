@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
+import io.apicurio.datamodels.core.models.Extension;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1263,9 +1264,12 @@ public class APIMappingUtil {
             return scopeDTOS;
         }
         Map<String, String> scopes = securityScheme.flows.implicit.scopes;
-        Map<String, String> xScopeBindings =
-                (Map<String, String>) securityScheme.flows.implicit.getExtension("x-scopes-bindings").value;
 
+        Map<String, String> scopeBindings = new HashMap<>();
+        Extension xScopesBindings = securityScheme.flows.implicit.getExtension("x-scopes-bindings");
+        if (xScopesBindings != null) {
+            scopeBindings = (Map<String, String>) xScopesBindings.value;
+        }
 
         for (Map.Entry<String, String> aScope : scopes.entrySet()) {
             ScopeDTO scopeDTO = new ScopeDTO();
@@ -1273,7 +1277,7 @@ public class APIMappingUtil {
             scopeDTO.setDisplayName(aScope.getKey());
             scopeDTO.setDescription(aScope.getValue());
 
-            String roles = xScopeBindings.get(aScope.getKey());
+            String roles = scopeBindings.get(aScope.getKey());
             if (roles == null || roles.isEmpty()) {
                 scopeDTO.setBindings(Collections.emptyList());
             } else {
