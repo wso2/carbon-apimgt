@@ -143,11 +143,15 @@ export default class ScopeValidation extends React.Component {
     }
 }
 
+ScopeValidation.defaultProps = {
+    client: client.API_CLIENT,
+};
+
 ScopeValidation.propTypes = {
     children: PropTypes.node.isRequired,
     resourcePath: PropTypes.string.isRequired,
     resourceMethod: PropTypes.string.isRequired,
-    client: PropTypes.shape({}).isRequired,
+    client: PropTypes.shape({}),
 };
 
 export {

@@ -28,9 +28,7 @@ import ApiContext from 'AppComponents/Apis/Details/components/ApiContext';
 import { injectIntl } from 'react-intl';
 import API from 'AppData/api';
 import { CircularProgress } from '@material-ui/core';
-import {
-    ScopeValidation, resourceMethod, resourcePath, client,
-} from 'AppData/ScopeValidation';
+import { ScopeValidation, resourceMethod, resourcePath } from 'AppData/ScopeValidation';
 import Alert from 'AppComponents/Shared/Alert';
 import Banner from 'AppComponents/Shared/Banner';
 import PublishWithoutDeploy from 'AppComponents/Apis/Details/LifeCycle/Components/PublishWithoutDeploy';
@@ -311,7 +309,6 @@ class LifeCycleUpdate extends Component {
                     <ScopeValidation
                         resourcePath={resourcePath.API_CHANGE_LC}
                         resourceMethod={resourceMethod.POST}
-                        client={client.API_CLIENT}
                     >
                         <div className={classes.buttonsWrapper}>
                             {!isWorkflowPending
