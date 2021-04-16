@@ -114,8 +114,6 @@ export default function Topics(props) {
             case 'enable':
                 nextState.enable = value;
                 if (!value) {
-                    nextState.signingAlgorithm = '';
-                    nextState.signatureHeader = '';
                     nextState.secret = '';
                 }
                 break;
