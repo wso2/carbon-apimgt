@@ -462,56 +462,6 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    /**
-     * method to get the API without checking permission
-     *
-     * @param identifier APIIdentifier object
-     * @throws APIManagementException APIManagementException
-     */
-    public API getAPIWithoutPermissionCheck(APIIdentifier identifier) throws APIManagementException {
-        String apiPath = APIUtil.getAPIPath(identifier);
-        Registry registry;
-        try {
-            String apiTenantDomain = getTenantDomain(identifier);
-            int apiTenantId = getTenantManager()
-                    .getTenantId(apiTenantDomain);
-
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-                registry = getRegistryService().getGovernanceUserRegistry(
-                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
-            } else {
-                registry = getSystemRegistry(identifier);
-            }
-            GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registry,
-                    APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-
-            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
-            APIUtil.updateAPIProductDependencies(api, registry);
-
-            //check for API visibility
-            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
-                return api;
-            }
-            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
-                throw new APIManagementException("User " + username + " does not have permission to view API : "
-                        + api.getId().getApiName());
-            }
-            return api;
-        } catch (RegistryException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            String msg = "Failed to get API from : " + apiPath;
-            throw new APIManagementException(msg, e);
-        }
-    }
-
     protected String getTenantAwareUsername(String username) {
         return MultitenantUtils.getTenantAwareUsername(username);
     }
