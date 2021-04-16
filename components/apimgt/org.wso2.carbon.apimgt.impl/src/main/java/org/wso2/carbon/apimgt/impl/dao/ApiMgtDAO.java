@@ -5185,6 +5185,10 @@ public class ApiMgtDAO {
 
     public void makeKeysForwardCompatible(ApiTypeWrapper apiTypeWrapper, List<API> oldAPIVersions) throws APIManagementException {
 
+        //if there are no previous versions, there is no need to copy subscriptions
+        if (oldAPIVersions == null || oldAPIVersions.isEmpty()) {
+            return;
+        }
         String getSubscriptionDataQuery = SQLConstants.GET_SUBSCRIPTION_DATA_SQL.replaceAll("_API_VERSION_LIST_",
                 String.join(",", Collections.nCopies(oldAPIVersions.size(), "?")));
         APIIdentifier apiIdentifier = apiTypeWrapper.getApi().getId();
