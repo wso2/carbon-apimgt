@@ -101,13 +101,29 @@ function Onboarding() {
                     description={(
                         <FormattedMessage
                             id='ServiceCatalog.Listing.Onboarding.learn.heading.text'
-                            defaultMessage='Create and Deploy your first Integration Service'
+                            defaultMessage={'Create and Deploy your first Integration Service with WSO2 Micro'
+                            + ' Integrator or Streaming Integrator'}
                         />
                     )}
                 >
+                    &nbsp;&nbsp;
                     <Button
                         className={classes.actionStyle}
-                        size='large'
+                        size='small'
+                        variant='outlined'
+                        color='primary'
+                        href='https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/'
+                        endIcon={<LaunchIcon style={{ fontSize: 15 }} />}
+                    >
+                        <FormattedMessage
+                            id='ServiceCatalog.Listing.Onboarding.learn.link.micro.integrator'
+                            defaultMessage='Micro Integrator'
+                        />
+                    </Button>
+                    &nbsp;&nbsp;
+                    <Button
+                        className={classes.actionStyle}
+                        size='small'
                         variant='outlined'
                         color='primary'
                         href='https://apim.docs.wso2.com/en/4.0.0/design/create-api/create-an-api-using-a-service/'
@@ -116,10 +132,11 @@ function Onboarding() {
                         endIcon={<LaunchIcon style={{ fontSize: 15 }} />}
                     >
                         <FormattedMessage
-                            id='ServiceCatalog.Listing.Onboarding.learn.link'
-                            defaultMessage='Get Started'
+                            id='ServiceCatalog.Listing.Onboarding.learn.link.streaming.integrator'
+                            defaultMessage='Streaming Integrator'
                         />
                     </Button>
+                    &nbsp;&nbsp;
                 </OnboardingMenuCard>
                 {/* Deploy Sample Service */}
                 <OnboardingMenuCard

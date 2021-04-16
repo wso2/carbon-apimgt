@@ -3766,10 +3766,13 @@
     "defaultMessage": "Integration Service"
   },
   "ServiceCatalog.Listing.Onboarding.learn.heading.text": {
-    "defaultMessage": "Create and Deploy your first Integration Service"
+    "defaultMessage": "Create and Deploy your first Integration Service with WSO2 Micro Integrator or Streaming Integrator"
   },
-  "ServiceCatalog.Listing.Onboarding.learn.link": {
-    "defaultMessage": "Get Started"
+  "ServiceCatalog.Listing.Onboarding.learn.link.micro.integrator": {
+    "defaultMessage": "Micro Integrator"
+  },
+  "ServiceCatalog.Listing.Onboarding.learn.link.streaming.integrator": {
+    "defaultMessage": "Streaming Integrator"
   },
   "ServiceCatalog.Listing.Onboarding.sample.add": {
     "defaultMessage": "Add Sample Service"

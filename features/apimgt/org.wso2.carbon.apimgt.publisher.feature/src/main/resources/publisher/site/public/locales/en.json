@@ -7898,13 +7898,19 @@
   "ServiceCatalog.Listing.Onboarding.learn.heading.text": [
     {
       "type": 0,
-      "value": "Create and Deploy your first Integration Service"
+      "value": "Create and Deploy your first Integration Service with WSO2 Micro Integrator or Streaming Integrator"
     }
   ],
-  "ServiceCatalog.Listing.Onboarding.learn.link": [
+  "ServiceCatalog.Listing.Onboarding.learn.link.micro.integrator": [
     {
       "type": 0,
-      "value": "Get Started"
+      "value": "Micro Integrator"
+    }
+  ],
+  "ServiceCatalog.Listing.Onboarding.learn.link.streaming.integrator": [
+    {
+      "type": 0,
+      "value": "Streaming Integrator"
     }
   ],
   "ServiceCatalog.Listing.Onboarding.sample.add": [
